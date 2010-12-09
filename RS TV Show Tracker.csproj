@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BB7EC6E2-7334-4017-94DF-E0F0C370FDAC}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RoliSoft.TVShowTracker</RootNamespace>
+    <AssemblyName>RSTVShowTracker</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>tv.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CookComputing.XmlRpcV2">
+      <HintPath>.\CookComputing.XmlRpcV2.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>.\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Windows.Shell">
+      <HintPath>.\Microsoft.Windows.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack">
+      <HintPath>.\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell">
+      <HintPath>.\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>.\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\SQLite.NET\bin\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="Transitionals">
+      <HintPath>.\Transitionals.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="BackgroundTasks.cs" />
+    <Compile Include="DownloadLinkSearch.cs" />
+    <Compile Include="DownloadLinksPage.xaml.cs">
+      <DependentUpon>DownloadLinksPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FileSearch.cs" />
+    <Compile Include="GuidesPage.xaml.cs">
+      <DependentUpon>GuidesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\WebClientExt.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Parsers\Downloads\BinSearch.cs" />
+    <Compile Include="Parsers\Downloads\BitHUmen.cs" />
+    <Compile Include="Parsers\Downloads\FileList.cs" />
+    <Compile Include="Parsers\Downloads\NCore.cs" />
+    <Compile Include="Parsers\Downloads\ReleaseLog.cs" />
+    <Compile Include="Parsers\Downloads\SceneReleases.cs" />
+    <Compile Include="Parsers\Downloads\TvStore.cs" />
+    <Compile Include="ProcessMonitor.cs" />
+    <Compile Include="ShowNames.cs" />
+    <Compile Include="Parsers\Downloads\TvTorrents.cs" />
+    <Compile Include="Parsers\Downloads\TvTorrentsRo.cs" />
+    <Compile Include="Parsers\Downloads\DownloadSearchEngine.cs" />
+    <Compile Include="Parsers\Downloads\ThePirateBay.cs" />
+    <Compile Include="Parsers\Guides\EPGuides.cs" />
+    <Compile Include="Parsers\Guides\TVDB.cs" />
+    <Compile Include="Parsers\Guides\Guide.cs" />
+    <Compile Include="Parsers\Guides\TVRage.cs" />
+    <Compile Include="Parsers\OnlineVideos\SideReel.cs" />
+    <Compile Include="Parsers\OnlineVideos\iPlayer.cs" />
+    <Compile Include="Parsers\OnlineVideos\Hulu.cs" />
+    <Compile Include="Parsers\OnlineVideos\OnlineVideoSearchEngine.cs" />
+    <Compile Include="Parsers\Recommendations\TasteKid.cs" />
+    <Compile Include="Parsers\Recommendations\RSTVShowRecommendation.cs" />
+    <Compile Include="Parsers\Recommendations\RecommendationEngine.cs" />
+    <Compile Include="Parsers\Subtitles\Addic7ed.cs" />
+    <Compile Include="Parsers\Subtitles\Subscene.cs" />
+    <Compile Include="Parsers\Subtitles\Hosszupuska.cs" />
+    <Compile Include="Parsers\Subtitles\OpenSubtitles.cs" />
+    <Compile Include="Parsers\Subtitles\SubtitleSearchEngine.cs" />
+    <Compile Include="RecommendationsPage.xaml.cs">
+      <DependentUpon>RecommendationsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StatisticsPage.xaml.cs">
+      <DependentUpon>StatisticsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SubtitleSearch.cs" />
+    <Compile Include="SubtitlesPage.xaml.cs">
+      <DependentUpon>SubtitlesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Update.cs" />
+    <Compile Include="Utils.cs" />
+    <Page Include="DownloadLinksPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="GuidesPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Database.cs" />
+    <Compile Include="Helpers\Interop\ErrorCodes.cs" />
+    <Compile Include="Helpers\GlassHelper.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="OverviewPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RecommendationsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="StatisticsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SubtitlesPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Helpers\Interop\NativeMethods.cs" />
+    <Compile Include="OverviewPage.xaml.cs">
+      <DependentUpon>OverviewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\bbc.png" />
+    <Resource Include="Images\defapp.png" />
+    <Resource Include="Images\epg.png" />
+    <Resource Include="Images\eye.png" />
+    <Resource Include="Images\eye_grey.png" />
+    <Resource Include="Images\filehoster.png" />
+    <Resource Include="Images\google.png" />
+    <Resource Include="Images\guides.png" />
+    <Resource Include="Images\heart.png" />
+    <Resource Include="Images\hulu.png" />
+    <Resource Include="Images\imdb.png" />
+    <Resource Include="Images\monitor.png" />
+    <Resource Include="Images\overview.png" />
+    <Resource Include="Images\page.png" />
+    <Resource Include="Images\play.png" />
+    <Resource Include="Images\recommendations.png" />
+    <Resource Include="Images\sad.png" />
+    <Resource Include="Images\settings.png" />
+    <Resource Include="Images\sidereel.png" />
+    <Resource Include="Images\smiley.png" />
+    <Resource Include="Images\smile_sad_48.png" />
+    <Resource Include="Images\statistics.png" />
+    <Resource Include="Images\subtitles.png" />
+    <Resource Include="Images\tag.png" />
+    <Resource Include="Images\torrent.png" />
+    <Resource Include="Images\torrents.png" />
+    <Resource Include="Images\usenet.png" />
+    <Resource Include="Images\wikipedia.png" />
+    <Resource Include="Images\youtube.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\tv.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\information.png" />
+    <Resource Include="Images\television-image.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\case.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cd.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="tv.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
