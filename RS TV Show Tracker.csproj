@@ -303,6 +303,17 @@
   <ItemGroup>
     <Resource Include="tv.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\question.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\new.png" />
+    <Resource Include="Images\plus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\minimize.png" />
+    <Resource Include="Images\refresh.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

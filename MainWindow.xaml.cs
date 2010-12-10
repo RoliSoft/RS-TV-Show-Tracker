@@ -2,13 +2,14 @@
 {
     using System;
     using System.Diagnostics;
-    using System.Drawing;
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
-
-    using WinForms = System.Windows.Forms;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
+
+    using Drawing  = System.Drawing;
+    using WinForms = System.Windows.Forms;
 
     using Microsoft.Windows.Shell;
 
@@ -50,8 +51,56 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WindowSourceInitialized(object sender, EventArgs e)
         {
-            WindowChrome.SetWindowChrome(this, new WindowChrome());
-            GlassHelper.ExtendGlassFrame(this, new Thickness(-1));
+            if (GlassHelper.IsCompositionEnabled)
+            {
+                WindowChrome.SetWindowChrome(this, new WindowChrome());
+            }
+
+            GlassHelper.ExtendGlassFrameComplete(this);
+
+            if (!GlassHelper.IsCompositionEnabled)
+            {
+                Background         = new SolidColorBrush(Color.FromArgb(Drawing.SystemColors.ControlDark.A, Drawing.SystemColors.ControlDark.R, Drawing.SystemColors.ControlDark.G, Drawing.SystemColors.ControlDark.B));
+                mainBorder.Padding = logoMenu.Margin = new Thickness(0);
+                logoMenu.Width     = SystemParameters.PrimaryScreenWidth;
+                logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// This method is called from GlassHelper.cs when a DWMCOMPOSITIONCHANGED message is received.
+        /// </summary>
+        public void AeroChanged()
+        {
+            Dispatcher.Invoke((Func<bool>)delegate
+                {
+                    if (GlassHelper.IsCompositionEnabled)
+                    {
+                        WindowChrome.SetWindowChrome(this, new WindowChrome());
+                        GlassHelper.ExtendGlassFrameComplete(this);
+
+                        mainBorder.Padding = new Thickness(5);
+                        logoMenu.Margin    = new Thickness(6, -1, 0, 0);
+                        logoMenu.Width     = 157;
+                        logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        // I couldn't figure out how to remove the WindowChrome from the window,
+                        // so we'll just restart the application for that. (TODO)
+                        Restart();
+                    }
+                    return true;
+                });
+        }
+
+        /// <summary>
+        /// Restarts the application. Microsoft forgot to implement <c>Application.Restart()</c> for WPF...
+        /// </summary>
+        public void Restart()
+        {
+            Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location);
+            Application.Current.Shutdown();
         }
 
         /// <summary>
@@ -161,38 +210,46 @@
             NotifyIcon = new WinForms.NotifyIcon
                 {
                     Text        = "RS TV Show Tracker",
-                    Icon        = new Icon(Application.GetResourceStream(new Uri("pack://application:,,,/RSTVShowTracker;component/tv.ico")).Stream),
+                    Icon        = new Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/RSTVShowTracker;component/tv.ico")).Stream),
                     Visible     = true,
                     ContextMenu = menu
                 };
 
             var showMenu    = new WinForms.MenuItem { Text = "Hide" };
-            showMenu.Click += (s, r) =>
-                {
-                    if (Visibility == Visibility.Visible)
-                    {
-                        showMenu.Text = "Show";
-                        Hide();
-                    }
-                    else
-                    {
-                        showMenu.Text = "Hide";
-                        Show();
-                        Activate();
-                    }
-                };
+            showMenu.Click += ShowMenuClick;
             
             var exitMenu    = new WinForms.MenuItem { Text = "Exit" };
             exitMenu.Click += (s, r) =>
                 {
                     NotifyIcon.Visible = false;
-                    Process.GetCurrentProcess().Kill();
+                    Application.Current.Shutdown();
+                    //Process.GetCurrentProcess().Kill(); // this would be more *aggressive* I guess
                 };
 
             menu.MenuItems.Add(showMenu);
             menu.MenuItems.Add(exitMenu);
 
             NotifyIcon.DoubleClick += (s, e) => showMenu.PerformClick();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the showMenu control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void ShowMenuClick(object sender, EventArgs e)
+        {
+            if (Visibility == Visibility.Visible)
+            {
+                NotifyIcon.ContextMenu.MenuItems[0].Text = "Show";
+                Hide();
+            }
+            else if (NotifyIcon.Visible)
+            {
+                NotifyIcon.ContextMenu.MenuItems[0].Text = "Hide";
+                Show();
+                Activate();
+            }
         }
 
         /// <summary>
@@ -246,8 +303,7 @@
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
-
-            NotifyIcon.ContextMenu.MenuItems[0].PerformClick();
+            ShowMenuClick(null, null);
         }
 
         /// <summary>
@@ -264,5 +320,77 @@
                 _statusThread.Abort();
             }
         }
+
+        /// <summary>
+        /// Handles the MouseEnter event of the logo control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseEventArgs"/> instance containing the event data.</param>
+        private void LogoMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            logo.Background = (Brush)FindResource("HeadGradientHover");
+        }
+
+        /// <summary>
+        /// Handles the MouseLeave event of the logo control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseEventArgs"/> instance containing the event data.</param>
+        private void LogoMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            logo.Background = (Brush)FindResource("HeadGradient" + (logoMenuItem.IsSubmenuOpen ? "Hover" : string.Empty));
+        }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the logo control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void LogoMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            logoMenuItem.IsSubmenuOpen = true;
+        }
+
+        /// <summary>
+        /// Handles the SubmenuClosed event of the logoMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void LogoMenuItemSubmenuClosed(object sender, RoutedEventArgs e)
+        {
+            logo.Background = (Brush)FindResource("HeadGradient");
+        }
+
+        #region Main menu
+        /// <summary>
+        /// Handles the Click event of the UpdateDatabase control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void UpdateDatabaseClick(object sender, RoutedEventArgs e)
+        {
+            activeSettingsPage.UpdateDatabaseButtonClick(null, null);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the MinimizeToTray control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void MinimizeToTrayClick(object sender, RoutedEventArgs e)
+        {
+            ShowMenuClick(null, null);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the OpenHelpPage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void OpenHelpPageClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://lab.rolisoft.net/tvshowtracker/help.html");
+        }
+        #endregion
     }
 }

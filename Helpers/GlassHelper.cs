@@ -69,7 +69,7 @@ namespace RoliSoft.TVShowTracker.Helpers
             {
                 // The hook into the HWND's WndProc has the original margin cached.
                 // Don't want to support dynamically adjusting that unless there's a need.
-                throw new InvalidOperationException("Multiple calls to this function for the same Window are not supported.");
+                //throw new InvalidOperationException("Multiple calls to this function for the same Window are not supported.");
             }
 
             return _ExtendGlassFrameInternal(window, margin);
@@ -134,7 +134,13 @@ namespace RoliSoft.TVShowTracker.Helpers
                     {
                         _ExtendGlassFrameInternal(window, margin);
                         handled = false;
+
+                        if (MainWindow.Active != null)
+                        {
+                            MainWindow.Active.AeroChanged();
+                        }
                     }
+
                     return IntPtr.Zero;
                 };
 
