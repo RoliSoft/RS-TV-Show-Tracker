@@ -35,11 +35,11 @@
                 // try to get the file name from Content-Disposition
                 if (ResponseHeaders["Content-Disposition"] != null)
                 {
-                    var m = Regex.Match(ResponseHeaders["Content-Disposition"], @"filename=[""']?([^""'$]+)", RegexOptions.IgnoreCase);
+                    var m = Regex.Match(ResponseHeaders["Content-Disposition"], @"filename=[""']?([^$]+)", RegexOptions.IgnoreCase);
 
                     if (m.Success)
                     {
-                        return m.Groups[1].Value;
+                        return m.Groups[1].Value.TrimEnd(new[] { ' ', '\'', '"' });
                     }
                 }
 
