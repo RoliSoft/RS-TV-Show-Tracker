@@ -1,4 +1,6 @@
 
+#ignore my database
+TVShows.db3
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
