@@ -389,7 +389,17 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void OpenHelpPageClick(object sender, RoutedEventArgs e)
         {
-            Process.Start("http://lab.rolisoft.net/tvshowtracker/help.html");
+            Utils.Run("http://lab.rolisoft.net/tvshowtracker/help.html");
+        }
+
+        /// <summary>
+        /// Handles the Click event of the AboutSoftware control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AboutSoftwareClick(object sender, RoutedEventArgs e)
+        {
+            new AboutWindow().Show();
         }
         #endregion
     }
