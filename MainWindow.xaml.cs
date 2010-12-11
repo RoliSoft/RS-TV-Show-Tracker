@@ -122,7 +122,7 @@
         public void SetLastUpdated()
         {
             var last = 0d;
-            double.TryParse(Database.Setting("lastupdate"), out last);
+            double.TryParse(Database.Setting("last update"), out last);
             var ts = DateTime.Now - Utils.DateTimeFromUnix(last);
 
             Dispatcher.Invoke((Func<bool>)delegate

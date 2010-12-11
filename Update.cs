@@ -180,7 +180,7 @@
             // set last updated and vacuum database
             try
             {
-                Database.Setting("lastupdate", Utils.DateTimeToUnix(DateTime.Now).ToString());
+                Database.Setting("last update", Utils.DateTimeToUnix(DateTime.Now).ToString());
                 Database.Execute("vacuum");
             }
             catch (Exception ex)

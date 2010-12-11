@@ -1,8 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
@@ -38,6 +40,12 @@
         /// </summary>
         /// <value>The download links list view item collection.</value>
         public ObservableCollection<LinkItem> DownloadLinksListViewItemCollection { get; set; }
+
+        private List<string> _trackers, _qualities;
+        private List<LinkItem> _results;
+
+        private ListSortDirection _lastSortDirection;
+        private GridViewColumnHeader _lastClickedHeader;
 
         /// <summary>
         /// Extended class of the original Link class to handle the context menu items.
@@ -192,6 +200,21 @@
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
             }
 
+            if (_trackers == null)
+            {
+                _trackers = Database.XmlSetting("Tracker Order").Split(',').ToList();
+                _trackers.AddRange(typeof(DownloadSearchEngine)
+                                   .GetDerivedTypes()
+                                   .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
+                                   .Where(engine => _trackers.IndexOf(engine.Name) == -1)
+                                   .Select(engine => engine.Name));
+            }
+
+            if (_qualities == null)
+            {
+                _qualities = Database.XmlSetting("Torrent Quality Order").Split(',').ToList();
+            }
+
             var cm  = listView.ContextMenu;
             var tdl = Database.XmlSetting("Torrent Downloader");
 
@@ -262,6 +285,7 @@
                 return;
             }
 
+            _results = new List<LinkItem>();
             DownloadLinksListViewItemCollection.Clear();
 
             textBox.IsEnabled    = false;
@@ -287,7 +311,16 @@
                 {
                     if (links != null)
                     {
-                        DownloadLinksListViewItemCollection.AddRange(links.Select(link => new LinkItem(link)));
+                        lock (_results)
+                        {
+                            _results.AddRange(links.Select(link => new LinkItem(link)));
+                        }
+
+                        DownloadLinksListViewItemCollection.Clear();
+                        DownloadLinksListViewItemCollection.AddRange(_results
+                                                                     .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
+                                                                     .ThenBy(link => _trackers.IndexOf(link.Site))
+                                                                     .ToList());
                     }
 
                     return true;
@@ -315,6 +348,73 @@
 
                     return true;
                 });
+        }
+
+        /// <summary>
+        /// Handles the Click event of the listView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ListViewSortClick(object sender, RoutedEventArgs e)
+        {
+            var header = e.OriginalSource as GridViewColumnHeader;
+            if (header == null || header.Role == GridViewColumnHeaderRole.Padding || _results == null || _results.Count == 0)
+            {
+                return;
+            }
+
+            var direction = header != _lastClickedHeader
+                            ? ListSortDirection.Ascending
+                            : _lastSortDirection == ListSortDirection.Ascending
+                                ? ListSortDirection.Descending
+                                : ListSortDirection.Ascending;
+
+            var links = new List<LinkItem>(_results);
+
+            if (header.Content.ToString() == "Site")
+            {
+                if (direction == ListSortDirection.Ascending)
+                {
+                    links = links
+                            .OrderBy(link => _trackers.IndexOf(link.Site))
+                            .ThenBy(link => _qualities.IndexOf(link.Quality.ToString()))
+                            .ToList();
+                }
+                else
+                {
+                    links = links
+                            .OrderByDescending(link => _trackers.IndexOf(link.Site))
+                            .ThenBy(link => _qualities.IndexOf(link.Quality.ToString()))
+                            .ToList();
+                }
+            }
+            else if (header.Content.ToString() == "Quality")
+            {
+                if (direction == ListSortDirection.Ascending)
+                {
+                    links = links
+                            .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => _trackers.IndexOf(link.Site))
+                            .ToList();
+                }
+                else
+                {
+                    links = links
+                            .OrderByDescending(link => _qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => _trackers.IndexOf(link.Site))
+                            .ToList();
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            _lastClickedHeader = header;
+            _lastSortDirection = direction;
+
+            DownloadLinksListViewItemCollection.Clear();
+            DownloadLinksListViewItemCollection.AddRange(links);
         }
 
         #region Open page

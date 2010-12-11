@@ -43,7 +43,7 @@
         static Database()
         {
             Connection  = new SQLiteConnection(@"Data Source=C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3");
-            XmlSettings = XDocument.Load(@"D:\Roli\Dev\RS TV Show Tracker\WpfApplication1\Settings.xml");
+            XmlSettings = XDocument.Load(@"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.xml");
             Cache       = new Dictionary<string, dynamic>();
             DataChange  = DateTime.Now;
 
@@ -295,15 +295,15 @@
 
             try
             {
-                var value = XmlSettings.Elements("settings").Elements("setting").Where(x => x.Attribute("key").Value == key).First().Attribute("value").Value;
-
-                Cache[key] = value;
-
-                return value;
+                return Cache[key] = XmlSettings
+                                    .Descendants("setting")
+                                    .Single(node => node.Attribute("key").Value == key)
+                                    .Attribute("value")
+                                    .Value;
             }
             catch
             {
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -314,8 +314,11 @@
         /// <param name="value">The value.</param>
         public static void XmlSetting(string key, string value)
         {
-            Cache[key] = value;
-            XmlSettings.Elements("settings").Elements("setting").Where(x => x.Attribute("key").Value == key).First().Attribute("value").Value = value;
+            Cache[key] = XmlSettings
+                         .Descendants("setting")
+                         .Single(node => node.Attribute("key").Value == key)
+                         .Attribute("value")
+                         .Value = value;
         }
 
         /// <summary>

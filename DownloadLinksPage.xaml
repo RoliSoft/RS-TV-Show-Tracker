@@ -8,7 +8,7 @@
         </Grid.RowDefinitions>
         <TextBox Grid.Row="0" Height="23" Margin="0,0,80,0" Name="textBox" VerticalAlignment="Top" />
         <Button Grid.Row="0" Content="Search" Height="23" Margin="0" HorizontalAlignment="Right" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
-        <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="ListViewMouseDoubleClick">
+        <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="ListViewMouseDoubleClick" GridViewColumnHeader.Click="ListViewSortClick">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Width="30">
@@ -20,7 +20,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="100">
-                        <GridViewColumnHeader Content="Site" />
+                        <GridViewColumnHeader Content="Site" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock FontWeight="Normal" Text="{Binding Site}" TextTrimming="CharacterEllipsis" Width="100" Margin="-7,0" TextAlignment="Center" />
@@ -44,7 +44,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="80">
-                        <GridViewColumnHeader Content="Quality" />
+                        <GridViewColumnHeader Content="Quality" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock FontWeight="Normal" Text="{Binding Quality}" Width="80" Margin="-7,0" TextAlignment="Center" />
