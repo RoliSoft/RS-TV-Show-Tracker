@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Occurs when a subtitle search is done.
@@ -25,6 +24,12 @@
         /// </summary>
         /// <value>The name.</value>
         public abstract string Name { get; }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public abstract string Icon { get; }
 
         /// <summary>
         /// Occurs when a subtitle search is done.

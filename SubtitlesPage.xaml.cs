@@ -9,6 +9,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
+    using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
 
@@ -25,6 +26,14 @@
         /// </summary>
         /// <value>The subtitles list view item collection.</value>
         public ObservableCollection<SubtitleSearchEngine.Subtitle> SubtitlesListViewItemCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the search engines active in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public List<SubtitleSearchEngine> SearchEngines { get; set; }
+
+        private List<string> _excludes, _langExcl;
 
         /// <summary>
         /// Gets or sets the active search.
@@ -79,6 +88,172 @@
                 SubtitlesListViewItemCollection = new ObservableCollection<SubtitleSearchEngine.Subtitle>();
                 listView.ItemsSource            = SubtitlesListViewItemCollection;
             }
+
+            if (SearchEngines == null)
+            {
+                SearchEngines = typeof(SubtitleSearchEngine)
+                                .GetDerivedTypes()
+                                .Select(type => Activator.CreateInstance(type) as SubtitleSearchEngine)
+                                .ToList();
+            }
+
+            if (_excludes == null)
+            {
+                _excludes = Database.XmlSetting("Subtitle Site Exclusions").Split(',').ToList();
+            }
+
+            if (_langExcl == null)
+            {
+                _langExcl = Database.XmlSetting("Subtitle Language Exclusions").Split(',').ToList();
+            }
+
+            if (availableEngines.Items.Count == 0)
+            {
+                foreach (var engine in SearchEngines)
+                {
+                    var mi = new MenuItem
+                    {
+                        Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                        IsCheckable      = true,
+                        IsChecked        = !_excludes.Contains(engine.Name),
+                        StaysOpenOnClick = true,
+                        Tag              = engine.Name
+                    };
+
+                    (mi.Header as StackPanel).Children.Add(new Image
+                        {
+                            Source = new BitmapImage(new Uri(engine.Icon), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
+                            Width  = 16,
+                            Height = 16
+                        });
+                    (mi.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = engine.Name,
+                            Padding = new Thickness(5, 0, 0, 0)
+                        });
+
+                    mi.Checked   += SearchEngineMenuItemChecked;
+                    mi.Unchecked += SearchEngineMenuItemUnchecked;
+
+                    availableEngines.Items.Add(mi);
+                }
+            }
+
+            if (languages.Items.Count == 0)
+            {
+                var langs = new Dictionary<string, string>
+                    {
+                        {"English",   "flag-en"},
+                        {"Hungarian", "flag-hu"},
+                        {"Romanian",  "flag-ro"},
+                        {"Unknown",   "unknown"}
+                    };
+
+                foreach (var lang in langs)
+                {
+                    var mi = new MenuItem
+                    {
+                        Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                        IsCheckable      = true,
+                        IsChecked        = !_langExcl.Contains(lang.Key),
+                        StaysOpenOnClick = true,
+                        Tag              = lang.Key
+                    };
+
+                    (mi.Header as StackPanel).Children.Add(new Image
+                        {
+                            Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/" + lang.Value + ".png", UriKind.Relative)),
+                            Width = 16,
+                            Height = 16
+                        });
+                    (mi.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = lang.Key,
+                            Padding = new Thickness(5, 0, 0, 0)
+                        });
+
+                    mi.Checked   += LanguageMenuItemChecked;
+                    mi.Unchecked += LanguageMenuItemUnchecked;
+
+                    languages.Items.Add(mi);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the SearchEngineMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchEngineMenuItemChecked(object sender, RoutedEventArgs e)
+        {
+            if (_excludes.Contains((sender as MenuItem).Tag as string))
+            {
+                _excludes.Remove((sender as MenuItem).Tag as string);
+
+                SaveExclusions();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the SearchEngineMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchEngineMenuItemUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_excludes.Contains((sender as MenuItem).Tag as string))
+            {
+                _excludes.Add((sender as MenuItem).Tag as string);
+
+                SaveExclusions();
+            }
+        }
+
+        /// <summary>
+        /// Saves the exclusions to the XML settings file.
+        /// </summary>
+        public void SaveExclusions()
+        {
+            Database.XmlSetting("Subtitle Site Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the LanguageMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void LanguageMenuItemChecked(object sender, RoutedEventArgs e)
+        {
+            if (_langExcl.Contains((sender as MenuItem).Tag as string))
+            {
+                _langExcl.Remove((sender as MenuItem).Tag as string);
+
+                SaveLanguageExclusions();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the LanguageMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void LanguageMenuItemUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_langExcl.Contains((sender as MenuItem).Tag as string))
+            {
+                _langExcl.Add((sender as MenuItem).Tag as string);
+
+                SaveLanguageExclusions();
+            }
+        }
+
+        /// <summary>
+        /// Saves the exclusions to the XML settings file.
+        /// </summary>
+        public void SaveLanguageExclusions()
+        {
+            Database.XmlSetting("Subtitle Language Exclusions", _langExcl.Aggregate(string.Empty, (current, lang) => current + (lang + ",")).Trim(','));
         }
 
         /// <summary>
@@ -124,7 +299,10 @@
             textBox.IsEnabled    = false;
             searchButton.Content = "Cancel";
 
-            ActiveSearch                                = new SubtitleSearch();
+            ActiveSearch = new SubtitleSearch(SearchEngines
+                                              .Where(engine => !_excludes.Contains(engine.Name))
+                                              .Select(engine => engine.GetType()));
+
             ActiveSearch.SubtitleSearchDone            += SubtitleSearchDone;
             ActiveSearch.SubtitleSearchProgressChanged += SubtitleSearchProgressChanged;
             
@@ -144,7 +322,7 @@
                 {
                     if (subtitles != null)
                     {
-                        SubtitlesListViewItemCollection.AddRange(subtitles.Where(sub => sub.Language != SubtitleSearchEngine.Subtitle.Languages.Unknown));
+                        SubtitlesListViewItemCollection.AddRange(subtitles.Where(sub => !_langExcl.Contains(sub.Language.ToString())));
                     }
 
                     return true;

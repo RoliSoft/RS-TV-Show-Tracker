@@ -331,7 +331,7 @@
         /// </summary>
         public void SaveExclusions()
         {
-            Database.XmlSetting("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).TrimEnd(','));
+            Database.XmlSetting("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
         }
 
         /// <summary>

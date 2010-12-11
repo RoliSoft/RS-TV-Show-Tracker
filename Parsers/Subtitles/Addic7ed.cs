@@ -23,6 +23,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://www.addic7ed.com/favicon.ico";
+            }
+        }
+
+        /// <summary>
         /// Searches for subtitles on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
