@@ -41,7 +41,13 @@
         /// <value>The download links list view item collection.</value>
         public ObservableCollection<LinkItem> DownloadLinksListViewItemCollection { get; set; }
 
-        private List<string> _trackers, _qualities;
+        /// <summary>
+        /// Gets or sets the search engines active in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public List<DownloadSearchEngine> SearchEngines { get; set; }
+
+        private List<string> _trackers, _qualities, _excludes;
         private List<LinkItem> _results;
 
         private ListSortDirection _lastSortDirection;
@@ -200,12 +206,18 @@
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
             }
 
+            if (SearchEngines == null)
+            {
+                SearchEngines = typeof(DownloadSearchEngine)
+                                .GetDerivedTypes()
+                                .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
+                                .ToList();
+            }
+
             if (_trackers == null)
             {
                 _trackers = Database.XmlSetting("Tracker Order").Split(',').ToList();
-                _trackers.AddRange(typeof(DownloadSearchEngine)
-                                   .GetDerivedTypes()
-                                   .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
+                _trackers.AddRange(SearchEngines
                                    .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                    .Select(engine => engine.Name));
             }
@@ -213,6 +225,43 @@
             if (_qualities == null)
             {
                 _qualities = Database.XmlSetting("Torrent Quality Order").Split(',').ToList();
+            }
+
+            if (_excludes == null)
+            {
+                _excludes = Database.XmlSetting("Tracker Exclusions").Split(',').ToList();
+            }
+
+            if (availableEngines.Items.Count == 0)
+            {
+                foreach (var engine in SearchEngines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
+                {
+                    var mi = new MenuItem
+                        {
+                            Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                            IsCheckable      = true,
+                            IsChecked        = !_excludes.Contains(engine.Name),
+                            StaysOpenOnClick = true,
+                            Tag              = engine.Name
+                        };
+
+                    (mi.Header as StackPanel).Children.Add(new Image
+                        {
+                            Source = new BitmapImage(new Uri(engine.Icon), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
+                            Width = 16,
+                            Height = 16
+                        });
+                    (mi.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = engine.Name,
+                            Padding = new Thickness(5, 0, 0, 0)
+                        });
+
+                    mi.Checked   += SearchEngineMenuItemChecked;
+                    mi.Unchecked += SearchEngineMenuItemUnchecked;
+
+                    availableEngines.Items.Add(mi);
+                }
             }
 
             var cm  = listView.ContextMenu;
@@ -245,6 +294,44 @@
             {
                 cm.Items.RemoveAt(3);
             }
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the SearchEngineMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchEngineMenuItemChecked(object sender, RoutedEventArgs e)
+        {
+            if (_excludes.Contains((sender as MenuItem).Tag as string))
+            {
+                _excludes.Remove((sender as MenuItem).Tag as string);
+
+                SaveExclusions();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the SearchEngineMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchEngineMenuItemUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_excludes.Contains((sender as MenuItem).Tag as string))
+            {
+                _excludes.Add((sender as MenuItem).Tag as string);
+
+                SaveExclusions();
+            }
+        }
+
+        /// <summary>
+        /// Saves the exclusions to the XML settings file.
+        /// </summary>
+        public void SaveExclusions()
+        {
+            Database.XmlSetting("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).TrimEnd(','));
         }
 
         /// <summary>
@@ -291,7 +378,10 @@
             textBox.IsEnabled    = false;
             searchButton.Content = "Cancel";
 
-            ActiveSearch                                = new DownloadSearch();
+            ActiveSearch = new DownloadSearch(SearchEngines
+                                              .Where(engine => !_excludes.Contains(engine.Name))
+                                              .Select(engine => engine.GetType()));
+
             ActiveSearch.DownloadSearchDone            += DownloadSearchDone;
             ActiveSearch.DownloadSearchProgressChanged += DownloadSearchProgressChanged;
             

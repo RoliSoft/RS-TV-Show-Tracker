@@ -319,6 +319,8 @@
                          .Single(node => node.Attribute("key").Value == key)
                          .Attribute("value")
                          .Value = value;
+
+            SaveXml();
         }
 
         /// <summary>
@@ -326,7 +328,7 @@
         /// </summary>
         public static void SaveXml()
         {
-            File.WriteAllText(@"D:\Roli\Dev\RS TV Show Tracker\WpfApplication1\Settings.xml", "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n" + XmlSettings);
+            File.WriteAllText(@"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.xml", "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n" + XmlSettings);
         }
     }
 }

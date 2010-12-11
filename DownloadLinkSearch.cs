@@ -52,11 +52,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitleSearch"/> class.
         /// </summary>
-        public DownloadSearch()
+        /// <param name="engines">The engines to use for searching.</param>
+        public DownloadSearch(IEnumerable<Type> engines = null)
         {
-            SearchEngines = new List<DownloadSearchEngine>(
-                typeof(DownloadSearchEngine).GetDerivedTypes()
-                                            .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine));
+            if (engines == null)
+            {
+                engines = typeof(DownloadSearchEngine).GetDerivedTypes();
+            }
+
+            SearchEngines = engines.Select(type => Activator.CreateInstance(type) as DownloadSearchEngine).ToList();
 
             foreach (var engine in SearchEngines)
             {

@@ -28,6 +28,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://tvstore.me/pic/favicon.ico";
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the site requires cookies to authenticate.
         /// </summary>
         /// <value><c>true</c> if requires cookies; otherwise, <c>false</c>.</value>
