@@ -618,7 +618,7 @@
                             <Image Source="/RSTVShowTracker;component/Images/refresh.png" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Activate beta features">
+                    <MenuItem Header="Activate beta features" Click="ActivateBetaFeaturesClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/new.png" />
                         </MenuItem.Icon>
