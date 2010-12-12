@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.Windows;
 
     using RoliSoft.TVShowTracker.Helpers;
@@ -30,7 +31,11 @@
                 GlassHelper.SetWindowThemeAttribute(this, false, false);
             }
 
-            info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss") + "\r\nv" + Signature.Version + "\r\n∅";
+            site.Content = string.Format(site.Content.ToString(), DateTime.Now.Year);
+
+            info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss")
+                        + "\r\nv" + Signature.Version + (Signature.IsDebug ? "-debug" : string.Empty)
+                        + "\r\n∅";
         }
 
         /// <summary>

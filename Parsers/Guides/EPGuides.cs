@@ -25,6 +25,25 @@
 (?:<a.*?>(?:<img.*?></a>\s*<a.*?>)?)?(?<title>[^<$]+) # title
 ", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
+        private readonly string _defaultDb;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EPGuides"/> class.
+        /// </summary>
+        public EPGuides()
+        {
+            _defaultDb = "tv.com";
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EPGuides"/> class.
+        /// </summary>
+        /// <param name="site">The site which to use through EPGuides.</param>
+        public EPGuides(string site)
+        {
+            _defaultDb = site;
+        }
+
         /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
@@ -33,13 +52,13 @@
         /// <exception cref="Exception">Failed to extract the listing. Maybe the EPGuides.com regex is out of date.</exception>
         public override TVShow GetData(string id)
         {
-            var db = "tvrage.com";
+            var db = _defaultDb;
 
             if (id.Contains('\0'))
             {
                 var tmp = id.Split('\0');
-                id      = tmp[0];
-                db      = tmp[1];
+                     id = tmp[0];
+                     db = tmp[1];
             }
 
             var listing = Utils.GetURL(id, "list=" + db, autoDetectEncoding: true);

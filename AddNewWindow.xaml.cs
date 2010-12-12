@@ -1,0 +1,273 @@
+﻿namespace RoliSoft.TVShowTracker
+{
+    using System;
+    using System.Data.SQLite;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+
+    using Microsoft.WindowsAPICodePack.Dialogs;
+    using Microsoft.WindowsAPICodePack.Shell;
+
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+
+    /// <summary>
+    /// Interaction logic for AddNewWindow.xaml
+    /// </summary>
+    public partial class AddNewWindow : GlassWindow
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ActivateBetaWindow"/> class.
+        /// </summary>
+        public AddNewWindow()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Handles the Loaded event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+            if (AeroGlassCompositionEnabled)
+            {
+                SetAeroGlassTransparency();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the searchButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchButtonClick(object sender, RoutedEventArgs e)
+        {
+            textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = false;
+            progressBar.Visibility = Visibility.Visible;
+
+            new Task(() =>
+                {
+                    string show = string.Empty, grabber = string.Empty;
+
+                    Dispatcher.Invoke((Func<bool>)delegate
+                        {
+                            show    = textBox.Text;
+                            grabber = (comboBox.SelectedValue as ComboBoxItem).Content.ToString();
+                            return true;
+                        });
+
+                    var res = false;
+
+                    try
+                    {
+                        res = Add(show, grabber);
+                    }
+                    catch (Exception ex)
+                    {
+                        new TaskDialog
+                            {
+                                Icon                = TaskDialogStandardIcon.Error,
+                                Caption             = "Couldn't add TV show",
+                                InstructionText     = show.ToUppercaseFirst(),
+                                Text                = "Couldn't add the specified TV show to the database due to an unexpected error.",
+                                DetailsExpandedText = ex.Message,
+                                Cancelable          = true
+                            }.Show();
+                    }
+
+                    Dispatcher.Invoke((Func<bool>)delegate
+                        {
+                            textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = true;
+                            progressBar.Visibility = Visibility.Collapsed;
+
+                            if (res)
+                            {
+                                textBox.Text = string.Empty;
+                            }
+                            return true;
+                        });
+                }).Start();
+        }
+
+        /// <summary>
+        /// Searches for the TV show and inserts it into the database.
+        /// </summary>
+        /// <param name="show">The show name.</param>
+        /// <param name="grabber">The grabber name.</param>
+        /// <returns>
+        ///     <c>true</c> if the show was added successfully; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="Exception"><c>Exception</c>.</exception>
+        private bool Add(string show, string grabber)
+        {
+            Guide guide;
+            switch(grabber)
+            {
+                default:
+                case "TVRage":
+                    guide = new TVRage();
+                    break;
+
+                case "The TVDB":
+                    guide = new TVDB();
+                    break;
+
+                case "EPGuides - TVRage":
+                    guide = new EPGuides("tvrage.com");
+                    break;
+
+                case "EPGuides - TV.com":
+                    guide = new EPGuides("tv.com");
+                    break;
+            }
+
+            // get ID on guide
+            string id;
+            try
+            {
+                id = guide.GetID(show);
+
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    throw new Exception();
+                }
+            }
+            catch
+            {
+                new TaskDialog
+                    {
+                        Icon                = TaskDialogStandardIcon.Error,
+                        Caption             = "Couldn't find TV show",
+                        InstructionText     = show.ToUppercaseFirst(),
+                        Text                = "Couldn't find the specified TV show on this database.",
+                        DetailsExpandedText = "If this is a popular TV show, then you maybe just misspelled it or didn't enter the full official name.\r\nIf this is a rare or foreign TV show, try using another database.",
+                        Cancelable          = true
+                    }.Show();
+                return false;
+            }
+
+            // get data from guide
+            Guide.TVShow tv;
+            try
+            {
+                tv = guide.GetData(id);
+
+                if (tv.Episodes.Count == 0)
+                {
+                    throw new Exception("There aren't any episodes associated to this TV show on this database.");
+                }
+            }
+            catch (Exception ex)
+            {
+                new TaskDialog
+                    {
+                        Icon                = TaskDialogStandardIcon.Error,
+                        Caption             = "Couldn't grab TV show",
+                        InstructionText     = show.ToUppercaseFirst(),
+                        Text                = "Couldn't download the episode listing and associated informations due to an unexpected error.",
+                        DetailsExpandedText = ex.Message,
+                        Cancelable          = true
+                    }.Show();
+                return false;
+            }
+
+            // try to see if duplicate
+            if (!string.IsNullOrWhiteSpace(Database.GetShowID(tv.Title)))
+            {
+                new TaskDialog
+                    {
+                        Icon                = TaskDialogStandardIcon.Error,
+                        Caption             = "Duplicate entry",
+                        InstructionText     = tv.Title,
+                        Text                = "This TV show is already on your list.",
+                        Cancelable          = true
+                    }.Show();
+                return false;
+            }
+
+            // insert into tvshows and let the autoincrementing field assign a showid
+            Database.Execute("update tvshows set rowid = rowid + 1");
+            Database.Execute("insert into tvshows values (1, null, ?)", tv.Title);
+
+            // then get that showid
+            var showid = Database.GetShowID(tv.Title);
+
+            // insert showdata fields
+            Database.ShowData(showid, "genre",   tv.Genre);
+            Database.ShowData(showid, "actors",  tv.Actors);
+            Database.ShowData(showid, "descr",   tv.Description);
+            Database.ShowData(showid, "cover",   tv.Cover);
+            Database.ShowData(showid, "airing",  tv.Airing.ToString());
+            Database.ShowData(showid, "airtime", tv.AirTime);
+            Database.ShowData(showid, "airday",  tv.AirDay);
+            Database.ShowData(showid, "network", tv.Network);
+            Database.ShowData(showid, "runtime", tv.Runtime.ToString());
+
+            // create transaction
+            SQLiteTransaction tr;
+            try
+            {
+                tr = Database.Connection.BeginTransaction();
+            }
+            catch (Exception ex)
+            {
+                new TaskDialog
+                    {
+                        Icon                = TaskDialogStandardIcon.Error,
+                        Caption             = "Couldn't create transaction",
+                        InstructionText     = tv.Title,
+                        Text                = "Couldn't create transaction on the database to insert the episodes. The TV show is added to the list, however, there aren't any episodes associated to it. Run an update to add the episodes.",
+                        DetailsExpandedText = ex.Message,
+                        Cancelable          = true
+                    }.Show();
+                return false;
+            }
+
+            // insert episodes
+            foreach (var ep in tv.Episodes)
+            {
+                try
+                {
+                    Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
+                                                  ep.Number + (ep.Season * 1000) + (int.Parse(showid) * 100 * 1000),
+                                                  showid,
+                                                  ep.Season,
+                                                  ep.Number,
+                                                  tv.AirTime == String.Empty || ep.AirDate == Utils.UnixEpoch
+                                                   ? Utils.DateTimeToUnix(ep.AirDate)
+                                                   : Utils.DateTimeToUnix(DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone()),
+                                                  ep.Title,
+                                                  ep.Summary,
+                                                  ep.Picture);
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            // commit the changes
+            tr.Commit();
+
+            // mark all aired episodes as seen
+            Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and airdate < ? and airdate != 0", showid, Utils.DateTimeToUnix(DateTime.Now));
+
+            // fire data change event
+            MainWindow.Active.DataChanged();
+
+            // show this on another thread so the control enabler can run
+            new Task(() => new TaskDialog
+                {
+                    Icon            = TaskDialogStandardIcon.Information,
+                    Caption         = "Added successfully",
+                    InstructionText = tv.Title,
+                    Text            = "The TV show has been successfully added to your list!",
+                    Cancelable      = true
+                }.Show()).Start();
+
+            return true;
+        }
+    }
+}

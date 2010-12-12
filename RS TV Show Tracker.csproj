@@ -108,6 +108,9 @@
       <DependentUpon>ActivateBetaWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="BackgroundTasks.cs" />
+    <Compile Include="AddNewWindow.xaml.cs">
+      <DependentUpon>AddNewWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DownloadLinkSearch.cs" />
     <Compile Include="DownloadLinksPage.xaml.cs">
       <DependentUpon>DownloadLinksPage.xaml</DependentUpon>
@@ -171,6 +174,10 @@
     <Page Include="ActivateBetaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddNewWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="DownloadLinksPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -262,7 +269,6 @@
     <Resource Include="Images\overview.png" />
     <Resource Include="Images\page.png" />
     <Resource Include="Images\play.png" />
-    <Resource Include="Images\recommendations.png" />
     <Resource Include="Images\sad.png" />
     <Resource Include="Images\settings.png" />
     <Resource Include="Images\sidereel.png" />

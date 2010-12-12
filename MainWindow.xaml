@@ -608,7 +608,7 @@
 
             <Menu Name="logoMenu" IsMainMenu="True" Margin="6,-1,0,0" Padding="0" Width="157" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <MenuItem Header="Main menu" Name="logoMenuItem" SubmenuClosed="LogoMenuItemSubmenuClosed">
-                    <MenuItem Header="Add new TV show">
+                    <MenuItem Header="Add new TV show" Click="AddNewTVShowClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/plus.png" />
                         </MenuItem.Icon>
@@ -740,7 +740,7 @@
                 <TabItem Name="recommendationsTab" Style="{StaticResource MainTabItem}">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/RSTVShowTracker;component/Images/recommendations.png" Margin="0,-3,5,0" Height="16" Width="16"></Image>
+                            <Image Source="/RSTVShowTracker;component/Images/information.png" Margin="0,-3,5,0" Height="16" Width="16"></Image>
                             <TextBlock Style="{StaticResource TabItemText}" Text="Recommendations">
                                 <TextBlock.Effect>
                                     <DropShadowEffect Color="Black" Direction="0" ShadowDepth="0" BlurRadius="5" />

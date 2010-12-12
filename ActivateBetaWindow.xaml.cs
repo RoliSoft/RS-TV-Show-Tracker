@@ -4,10 +4,12 @@
     using System.Windows;
     using System.Windows.Media.Effects;
 
+    using Microsoft.WindowsAPICodePack.Shell;
+
     /// <summary>
     /// Interaction logic for ActivateBetaWindow.xaml
     /// </summary>
-    public partial class ActivateBetaWindow : Window
+    public partial class ActivateBetaWindow : GlassWindow
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ActivateBetaWindow"/> class.
@@ -30,6 +32,10 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            if (AeroGlassCompositionEnabled)
+            {
+                SetAeroGlassTransparency();
+            }
         }
 
         /// <summary>

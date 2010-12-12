@@ -1,20 +1,33 @@
-﻿<Window x:Class="RoliSoft.TVShowTracker.ActivateBetaWindow"
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.ActivateBetaWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  TextOptions.TextFormattingMode="Display"
-        Title="Activate beta features" Height="169" Width="528" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/new.png" Loaded="WindowLoaded">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
+        Title="Activate beta features" Height="204" Width="538" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/new.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
-        <TextBlock Name="descr" TextWrapping="Wrap" TextAlignment="Justify" Margin="0" Padding="10">
-            This software contains experimental features which are not enabled by default. You can activate these features by applying as a beta tester and entering the received key here. To see the full list of experimental features available in this application and to get a beta key to unlock them, go to http://lab.rolisoft.net/tvshowtracker/beta.html and follow the instructions. If you encounter a bug please report it on the site where you got your key from.
-        </TextBlock>
+        <TabControl Margin="10,10" Name="tabControl">
+            <TabControl.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </TabControl.Effect>
+            <TabItem Header="Activate a beta feature" Name="tabItem1">
+                <Grid>
+                    <TextBlock Name="descr" TextWrapping="Wrap" TextAlignment="Justify" Margin="0" Padding="8">
+                       This software contains experimental features which are not enabled by default. You can activate these features by applying as a beta tester and entering the received key here. To see the full list of experimental features available in this application and to get a beta key to unlock them, go to http://lab.rolisoft.net/tvshowtracker/beta.html and follow the instructions. If you encounter a bug please report it on the site where you got your key from.
+                    </TextBlock>
 
-        <Label Name="feature" Content="" FontSize="24" Margin="0,25,0,0" HorizontalContentAlignment="Center" Visibility="Collapsed">
-            <Label.Effect>
-                <DropShadowEffect Color="YellowGreen" ShadowDepth="0" BlurRadius="5" />
-            </Label.Effect>
-        </Label>
+                    <Label Name="feature" Content="" FontSize="24" Margin="0,25,0,0" HorizontalContentAlignment="Center" Visibility="Collapsed">
+                        <Label.Effect>
+                            <DropShadowEffect Color="YellowGreen" ShadowDepth="0" BlurRadius="5" />
+                        </Label.Effect>
+                    </Label>
 
-        <Label Content="Key:" FontSize="18" Margin="4,88,0,0" />
-        <TextBox Height="28" HorizontalAlignment="Left" Margin="47,94,0,0" Name="textBox" VerticalAlignment="Top" Width="370" Text="" FontFamily="Consolas" FontSize="18" TextChanged="TextBoxTextChanged" />
-        <Button Content="Activate" IsEnabled="False" Height="23" HorizontalAlignment="Left" Margin="423,96,0,0" Name="button" VerticalAlignment="Top" Width="75" />
+                    <Label Content="Key:" FontSize="18" Margin="2,88,0,0" />
+                    <TextBox Height="28" HorizontalAlignment="Left" Margin="45,94,0,0" Name="textBox" VerticalAlignment="Top" Width="370" Text="" FontFamily="Consolas" FontSize="18" TextChanged="TextBoxTextChanged" />
+                    <Button Content="Activate" IsEnabled="False" Height="23" HorizontalAlignment="Left" Margin="423,96,0,0" Name="button" VerticalAlignment="Top" Width="75" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="List of beta features" Name="tabItem2">
+                <Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
-</Window>
+</Shell:GlassWindow>
