@@ -38,12 +38,11 @@
         /// </summary>
         public void UpdateDone()
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     MainWindow.Active.SetLastUpdated();
                     MainWindow.Active.SetHeaderProgress(-1);
-                    return true;
-                });
+                }));
         }
 
         /// <summary>
@@ -53,12 +52,11 @@
         {
             if (fatalToWholeUpdate)
             {
-                Dispatcher.Invoke((Func<bool>)delegate
+                Dispatcher.Invoke((Action)(() =>
                     {
                         MainWindow.Active.lastUpdatedLabel.Content = "update failed";
                         MainWindow.Active.SetHeaderProgress(-1);
-                        return true;
-                    });
+                    }));
             }
         }
 
@@ -67,12 +65,11 @@
         /// </summary>
         public void UpdateProgressChanged(string show, double percentage)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     MainWindow.Active.lastUpdatedLabel.Content = "updating " + show + " (" + percentage.ToString("0.00") + "%)";
                     MainWindow.Active.SetHeaderProgress(percentage);
-                    return true;
-                });
+                }));
         }
     }
 }

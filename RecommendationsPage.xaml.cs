@@ -36,7 +36,7 @@
         /// <param name="activity">if set to <c>true</c> an animating spinner will be displayed.</param>
         public void SetStatus(string message, bool activity = false)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     statusLabel.Content = message;
 
@@ -52,8 +52,7 @@
                         statusThrobber.Visibility = Visibility.Hidden;
                         statusLabel.Padding = new Thickness(7, 0, 7, 0);
                     }
-                    return true;
-                });
+                }));
         }
 
         /// <summary>
@@ -156,7 +155,7 @@
         /// <param name="shows">The recommended shows.</param>
         public void RecommendationDone(List<RecommendationEngine.RecommendedShow> shows)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     // unfortunately there's no AddRange() for ObservableCollection<T> :(
                     foreach (var show in shows)
@@ -172,8 +171,7 @@
                     {
                         SetStatus("Unfortunately the selected service couldn't recommend you anything.");
                     }
-                    return true;
-                });
+                }));
         }
         #endregion
 

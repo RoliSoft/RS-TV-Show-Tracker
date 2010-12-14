@@ -72,7 +72,7 @@
         /// </summary>
         public void AeroChanged()
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     if (GlassHelper.IsCompositionEnabled)
                     {
@@ -90,8 +90,7 @@
                         // so we'll just restart the application for that. (TODO)
                         Restart();
                     }
-                    return true;
-                });
+                }));
         }
 
         /// <summary>
@@ -125,11 +124,10 @@
             double.TryParse(Database.Setting("last update"), out last);
             var ts = DateTime.Now - Utils.DateTimeFromUnix(last);
 
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     lastUpdatedLabel.Content = "last updated " + ts.ToRelativeTime() + " ago";
-                    return true;
-                });
+                }));
 
             /*if (_statusThread != null && _statusThread.IsAlive)
             {
@@ -262,7 +260,7 @@
 
             if (invokeRefresh)
             {
-                Dispatcher.Invoke((Func<bool>)delegate
+                Dispatcher.Invoke((Action)(() =>
                     {
                         var tc = tabControl.SelectedContent;
 
@@ -275,9 +273,7 @@
                                 rf.Invoke(tc, new object[] { });
                             }
                         }
-
-                        return true;
-                    });
+                    }));
             }
         }
 

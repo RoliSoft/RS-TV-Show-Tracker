@@ -51,11 +51,10 @@
                 {
                     string show = string.Empty, grabber = string.Empty;
 
-                    Dispatcher.Invoke((Func<bool>)delegate
+                    Dispatcher.Invoke((Action)delegate
                         {
                             show    = textBox.Text;
                             grabber = (comboBox.SelectedValue as ComboBoxItem).Content.ToString();
-                            return true;
                         });
 
                     var res = false;
@@ -77,7 +76,7 @@
                             }.Show();
                     }
 
-                    Dispatcher.Invoke((Func<bool>)delegate
+                    Dispatcher.Invoke((Action)(() =>
                         {
                             textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = true;
                             progressBar.Visibility = Visibility.Collapsed;
@@ -86,8 +85,7 @@
                             {
                                 textBox.Text = string.Empty;
                             }
-                            return true;
-                        });
+                        }));
                 }).Start();
         }
 

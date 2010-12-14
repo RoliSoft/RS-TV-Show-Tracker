@@ -167,24 +167,23 @@
         /// <param name="activity">if set to <c>true</c> an animating spinner will be displayed.</param>
         public void SetStatus(string message, bool activity = false)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
-            {
-                statusLabel.Content = message;
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    statusLabel.Content = message;
 
-                if (activity)
-                {
-                    statusLabel.Padding = new Thickness(24, 0, 24, 0);
-                    statusThrobber.Visibility = Visibility.Visible;
-                    ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
-                }
-                else
-                {
-                    ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
-                    statusThrobber.Visibility = Visibility.Hidden;
-                    statusLabel.Padding = new Thickness(7, 0, 7, 0);
-                }
-                return true;
-            });
+                    if (activity)
+                    {
+                        statusLabel.Padding = new Thickness(24, 0, 24, 0);
+                        statusThrobber.Visibility = Visibility.Visible;
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
+                    }
+                    else
+                    {
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
+                        statusThrobber.Visibility = Visibility.Hidden;
+                        statusLabel.Padding = new Thickness(7, 0, 7, 0);
+                    }
+                }));
         }
 
         [DllImport("shell32.dll", EntryPoint = "ExtractIconEx")]
@@ -340,20 +339,18 @@
         /// <param name="query">The query.</param>
         public void Search(string query)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
-            {
-                // cancel if one is running
-                if (searchButton.Content.ToString() == "Cancel")
+            Dispatcher.Invoke((Action)(() =>
                 {
-                    ActiveSearch.CancelAsync();
-                    DownloadSearchDone();
-                }
+                    // cancel if one is running
+                    if (searchButton.Content.ToString() == "Cancel")
+                    {
+                        ActiveSearch.CancelAsync();
+                        DownloadSearchDone();
+                    }
 
-                textBox.Text = query;
-                SearchButtonClick(null, null);
-
-                return true;
-            });
+                    textBox.Text = query;
+                    SearchButtonClick(null, null);
+                }));
         }
 
         /// <summary>
@@ -397,9 +394,9 @@
         {
             SetStatus("Searching for download links on " + (string.Join(", ", remaining)) + "...", true);
 
-            Dispatcher.Invoke((Func<bool>)delegate
-                {
-                    if (links != null)
+            if (links != null)
+            {
+                Dispatcher.Invoke((Action)(() =>
                     {
                         lock (_results)
                         {
@@ -411,10 +408,8 @@
                                                                      .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
                                                                      .ThenBy(link => _trackers.IndexOf(link.Site))
                                                                      .ToList());
-                    }
-
-                    return true;
-                });
+                    }));
+            }
         }
 
         /// <summary>
@@ -422,7 +417,7 @@
         /// </summary>
         private void DownloadSearchDone()
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     textBox.IsEnabled    = true;
                     searchButton.Content = "Search";
@@ -435,9 +430,7 @@
                     {
                         SetStatus("Couldn't find any download links.");
                     }
-
-                    return true;
-                });
+                }));
         }
 
         /// <summary>

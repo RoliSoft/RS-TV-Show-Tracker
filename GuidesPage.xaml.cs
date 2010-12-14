@@ -84,24 +84,23 @@
         /// <param name="activity">if set to <c>true</c> an animating spinner will be displayed.</param>
         public void SetStatus(string message, bool activity = false)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
-            {
-                statusLabel.Content = message;
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    statusLabel.Content = message;
 
-                if (activity)
-                {
-                    statusLabel.Padding = new Thickness(24, 0, 24, 0);
-                    statusThrobber.Visibility = Visibility.Visible;
-                    ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
-                }
-                else
-                {
-                    ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
-                    statusThrobber.Visibility = Visibility.Hidden;
-                    statusLabel.Padding = new Thickness(7, 0, 7, 0);
-                }
-                return true;
-            });
+                    if (activity)
+                    {
+                        statusLabel.Padding = new Thickness(24, 0, 24, 0);
+                        statusThrobber.Visibility = Visibility.Visible;
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
+                    }
+                    else
+                    {
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
+                        statusThrobber.Visibility = Visibility.Hidden;
+                        statusLabel.Padding = new Thickness(7, 0, 7, 0);
+                    }
+                }));
         }
 
         /// <summary>

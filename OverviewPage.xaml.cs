@@ -89,7 +89,7 @@
         /// <param name="activity">if set to <c>true</c> an animating spinner will be displayed.</param>
         public void SetStatus(string message, bool activity = false)
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     statusLabel.Content = message;
 
@@ -105,8 +105,7 @@
                         statusThrobber.Visibility = Visibility.Hidden;
                         statusLabel.Padding = new Thickness(7, 0, 7, 0);
                     }
-                    return true;
-                });
+                }));
         }
 
         /// <summary>
@@ -114,7 +113,7 @@
         /// </summary>
         public void ResetStatus()
         {
-            Dispatcher.Invoke((Func<bool>)delegate
+            Dispatcher.Invoke((Action)(() =>
                 {
                     var eps = 0;
 
@@ -138,8 +137,7 @@
                     {
                         SetStatus(Utils.FormatNumber(eps, "new episode") + "!");
                     }
-                    return true;
-                });
+                }));
         }
 
         /// <summary>

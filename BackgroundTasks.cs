@@ -59,11 +59,7 @@
 
             if ((DateTime.Now - Utils.DateTimeFromUnix(last)).TotalHours > 10)
             {
-                MainWindow.Active.Dispatcher.Invoke((Func<bool>)delegate
-                    {
-                        MainWindow.Active.activeSettingsPage.UpdateDatabaseButtonClick(null, null);
-                        return true;
-                    });
+                MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.activeSettingsPage.UpdateDatabaseButtonClick(null, null)));
             }
         }
     }
