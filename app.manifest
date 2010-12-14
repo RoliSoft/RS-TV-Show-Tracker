@@ -1,16 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<asmv1:assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <assemblyIdentity version="1.0.0.0" name="MyApplication.app"/>
-  <dependency>
-    <dependentAssembly>
-      <assemblyIdentity
-          type="win32"
-          name="Microsoft.Windows.Common-Controls"
-          version="6.0.0.0"
-          processorArchitecture="*"
-          publicKeyToken="6595b64144ccf1df"
-          language="*"
-        />
-    </dependentAssembly>
-  </dependency>
-</asmv1:assembly>
+﻿<?xml version="1.0" encoding="utf-8"?><asmv1:assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><assemblyIdentity version="1.0.0.0" name="MyApplication.app"/><dependency><dependentAssembly><assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/></dependentAssembly></dependency></asmv1:assembly>
+<!--
+
+
+
+
+
+____/\\\\\\\\\______________________/\\\\\\________________/\\\\\\\\\\\__________________________/\\\\\________________        
+ __/\\\///////\\\___________________\////\\\______________/\\\/////////\\\______________________/\\\///_________________       
+  _\/\\\_____\/\\\______________________\/\\\______/\\\___\//\\\______\///______________________/\\\___________/\\\______      
+   _\/\\\\\\\\\\\/_________/\\\\\________\/\\\_____\///_____\////\\\______________/\\\\\______/\\\\\\\\\_____/\\\\\\\\\\\_     
+    _\/\\\//////\\\_______/\\\///\\\______\/\\\______/\\\_______\////\\\_________/\\\///\\\___\////\\\//_____\////\\\////__    
+     _\/\\\____\//\\\_____/\\\__\//\\\_____\/\\\_____\/\\\__________\////\\\_____/\\\__\//\\\_____\/\\\__________\/\\\______   
+      _\/\\\_____\//\\\___\//\\\__/\\\______\/\\\_____\/\\\___/\\\______\//\\\___\//\\\__/\\\______\/\\\__________\/\\\_/\\__  
+       _\/\\\______\//\\\___\///\\\\\/_____/\\\\\\\\\__\/\\\__\///\\\\\\\\\\\/_____\///\\\\\/_______\/\\\__________\//\\\\\___ 
+        _\///________\///______\/////______\/////////___\///_____\///////////_________\/////_________\///____________\/////____
+
+        May I ask why the fuck are you reading the embedded manifest of this application? You must be really bored...
+
+
+
+
+-->
