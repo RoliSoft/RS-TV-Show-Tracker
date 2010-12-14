@@ -193,6 +193,7 @@
             var showid = Database.GetShowID(tv.Title);
 
             // insert showdata fields
+            Database.ShowData(showid, "grabber", guide.GetType().Name);
             Database.ShowData(showid, "genre",   tv.Genre);
             Database.ShowData(showid, "actors",  tv.Actors);
             Database.ShowData(showid, "descr",   tv.Description);

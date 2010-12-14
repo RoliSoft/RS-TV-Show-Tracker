@@ -19,7 +19,7 @@
         {
             var g = Utils.Google(String.Format("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/", name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase)));
 
-            if (g != string.Empty)
+            if (!string.IsNullOrWhiteSpace(g))
             {
                 return g;
             }

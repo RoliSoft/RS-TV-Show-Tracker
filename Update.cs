@@ -146,7 +146,7 @@
                                                       r["showid"],
                                                       ep.Season,
                                                       ep.Number,
-                                                      tv.AirTime == String.Empty || ep.AirDate == Utils.UnixEpoch
+                                                      string.IsNullOrWhiteSpace(tv.AirTime) || ep.AirDate == Utils.UnixEpoch
                                                        ? Utils.DateTimeToUnix(ep.AirDate)
                                                        : Utils.DateTimeToUnix(DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone()),
                                                       ep.Title,

@@ -169,9 +169,12 @@
 
             foreach (var show in shows)
             {
-                var showid = show["title"].Split("||".ToCharArray()).Last();
-                show["title"] = Regex.Replace(show["title"].Split("||".ToCharArray()).First(), @"(?=[SE][0-9]{3})([SE])0", "$1");
-                var count = Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + Utils.DateTimeToUnix(DateTime.Now) + " and airdate != 0").First()["count"];
+                var title = show["title"].Split(new[] { "||" }, StringSplitOptions.None);
+
+                show["title"] = Regex.Replace(title[0], @"(?=[SE][0-9]{3})([SE])0", "$1");
+
+                var showid = title[1];
+                var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + Utils.DateTimeToUnix(DateTime.Now) + " and airdate != 0")[0]["count"];
 
                 if (count == "1")
                 {
@@ -184,8 +187,9 @@
 
                 if (show["next"] != String.Empty)
                 {
-                    show["next"] = Regex.Replace(show["next"].Split("||".ToCharArray()).First(), @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " +
-                                   Utils.DateTimeFromUnix(double.Parse(show["next"].Split("||".ToCharArray()).Last())).NextAir();
+                    var next = show["next"].Split(new[] { "||" }, StringSplitOptions.None);
+                    show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " +
+                                   Utils.DateTimeFromUnix(double.Parse(next[1])).NextAir();
                 }
                 else if (bool.Parse(show["airing"]))
                 {

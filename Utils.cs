@@ -456,7 +456,7 @@
         {
             var uid = Database.Setting("uid");
 
-            if (uid == String.Empty)
+            if (string.IsNullOrWhiteSpace(uid))
             {
                 uid = Guid.NewGuid().ToString();
                 Database.Setting("uid", uid);

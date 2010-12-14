@@ -50,7 +50,7 @@
                 adid = Database.ShowData(dbid, "Addic7ed.ID");
             }
 
-            if (adid == string.Empty)
+            if (string.IsNullOrWhiteSpace(adid))
             {
                 adid = Regex.Match(Utils.Bing(show[0] + " site:addic7ed.com/serie/"), @"/serie/([^/$]+)").Groups[1].Value;
 

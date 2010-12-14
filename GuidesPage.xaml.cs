@@ -5,13 +5,11 @@
     using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
 
     /// <summary>

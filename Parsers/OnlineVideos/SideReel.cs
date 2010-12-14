@@ -19,7 +19,7 @@
         {
             var g = Utils.Google(String.Format("intitle:\"{0}\" intitle:\"online links for\" site:sidereel.com", name));
 
-            if (g == String.Empty)
+            if (string.IsNullOrWhiteSpace(g))
             {
                 g = Utils.Google(String.Format("intitle:{0} intitle:\"online links for\" site:sidereel.com", name));
             }
@@ -28,7 +28,7 @@
 
             var urln = Regex.Match(g, @"sidereel\.com/([^/]+)", RegexOptions.IgnoreCase);
 
-            if (g == String.Empty || !urln.Success)
+            if (!string.IsNullOrWhiteSpace(g) && urln.Success)
             {
                 return g;
             }

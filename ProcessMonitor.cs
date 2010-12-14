@@ -76,7 +76,7 @@
                     {
                         var ep = ShowNames.ExtractEpisode(file.ToString(), 1);
 
-                        if (ep != string.Empty)
+                        if (!string.IsNullOrWhiteSpace(ep))
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {
