@@ -8,7 +8,7 @@
     /// <summary>
     /// Interaction logic for StatisticsPage.xaml
     /// </summary>
-    public partial class StatisticsPage : UserControl
+    public partial class StatisticsPage : UserControl, IRefreshable
     {
         /// <summary>
         /// Gets or sets the date when this control was loaded.

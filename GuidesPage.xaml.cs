@@ -15,7 +15,7 @@
     /// <summary>
     /// Interaction logic for GuidesPage.xaml
     /// </summary>
-    public partial class GuidesPage : UserControl
+    public partial class GuidesPage : UserControl, IRefreshable
     {
         /// <summary>
         /// Gets or sets the date when this control was loaded.

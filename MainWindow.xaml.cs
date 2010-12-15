@@ -262,16 +262,9 @@
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
-                        var tc = tabControl.SelectedContent;
-
-                        if (tc != null && tc is UserControl)
+                        if (tabControl.SelectedContent is IRefreshable)
                         {
-                            var rf = tc.GetType().GetMethod("Refresh");
-
-                            if (rf != null)
-                            {
-                                rf.Invoke(tc, new object[] { });
-                            }
+                            (tabControl.SelectedContent as IRefreshable).Refresh();
                         }
                     }));
             }

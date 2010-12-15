@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-
+/*
 namespace RoliSoft.TVShowTracker.Properties {
     
     
@@ -24,3 +24,4 @@ namespace RoliSoft.TVShowTracker.Properties {
         }
     }
 }
+*/

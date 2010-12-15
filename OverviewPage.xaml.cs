@@ -18,7 +18,7 @@
     /// <summary>
     /// Interaction logic for OverviewPage.xaml
     /// </summary>
-    public partial class OverviewPage : UserControl
+    public partial class OverviewPage : UserControl, IRefreshable
     {
         /// <summary>
         /// Gets or sets the date when this control was loaded.

@@ -125,6 +125,7 @@
     <Compile Include="Helpers\WebClientExt.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="IRefreshable.cs" />
     <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Parsers\Downloads\BinSearch.cs" />
     <Compile Include="Parsers\Downloads\BitHUmen.cs" />
