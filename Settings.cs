@@ -10,7 +10,11 @@
     /// </summary>
     public static class Settings
     {
-        private static readonly Dictionary<string, string> Keys;
+        /// <summary>
+        /// Gets or sets the key-value container.
+        /// </summary>
+        /// <value>The key-value container.</value>
+        public static Dictionary<string, string> Keys { get; set; }
 
         /// <summary>
         /// Initializes the <see cref="Database"/> class.

@@ -17,12 +17,6 @@
         public static SQLiteConnection Connection { get; set; }
 
         /// <summary>
-        /// Gets or sets the cache container.
-        /// </summary>
-        /// <value>The cache container.</value>
-        public static Dictionary<string, dynamic> Cache { get; set; }
-
-        /// <summary>
         /// Gets or sets the date when the data was last changed. This field is used for caching purposes, and it's not automatically updated by <c>Execute()</c>.
         /// </summary>
         /// <value>The date of last change.</value>
@@ -33,9 +27,8 @@
         /// </summary>
         static Database()
         {
-            Connection  = new SQLiteConnection(@"Data Source=C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3");
-            Cache       = new Dictionary<string, dynamic>();
-            DataChange  = DateTime.Now;
+            Connection = new SQLiteConnection(@"Data Source=C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3");
+            DataChange = DateTime.Now;
 
             Connection.Open();
         }
@@ -46,7 +39,7 @@
         /// <param name="sql">The SQL query.</param>
         /// <param name="args">The arguments in the SQL query.</param>
         /// <returns>List of dictionary of key-value.</returns>
-        public static DictList Query(string sql, params dynamic[] args)
+        public static DictList Query(string sql, params object[] args)
         {
             using (var cmd = new SQLiteCommand(sql, Connection))
             {
@@ -88,7 +81,7 @@
         /// <param name="sql">The SQL statement.</param>
         /// <param name="args">The arguments in the SQL statement.</param>
         /// <returns>Number of changed rows.</returns>
-        public static int Execute(string sql, params dynamic[] args)
+        public static int Execute(string sql, params object[] args)
         {
             using (var cmd = new SQLiteCommand(sql, Connection))
             {
@@ -114,7 +107,7 @@
         /// <param name="sql">The SQL statement.</param>
         /// <param name="args">The arguments in the SQL statement.</param>
         /// <returns>Number of changed rows.</returns>
-        public static int ExecuteOnTransaction(SQLiteTransaction transaction, string sql, params dynamic[] args)
+        public static int ExecuteOnTransaction(SQLiteTransaction transaction, string sql, params object[] args)
         {
             using(var cmd = new SQLiteCommand(sql, Connection, transaction))
             {
@@ -140,11 +133,6 @@
         /// <returns>Stored value or empty string.</returns>
         public static string Setting(string key)
         {
-            if (Cache.ContainsKey(key))
-            {
-                return Cache[key];
-            }
-
             using (var cmd = new SQLiteCommand("select value from settings where key = ?", Connection))
             {
                 cmd.Parameters.Add(new SQLiteParameter { Value = key });
@@ -153,14 +141,9 @@
                 {
                     using (var dr = cmd.ExecuteReader())
                     {
-                        if (dr.Read())
-                        {
-                            Cache[key] = dr["value"].ToString();
-
-                            return dr["value"].ToString();
-                        }
-
-                        return String.Empty;
+                        return dr.Read()
+                               ? dr["value"].ToString()
+                               : string.Empty;
                     }
                 }
             }
@@ -183,12 +166,9 @@
                 {
                     using (var dr = cmd.ExecuteReader())
                     {
-                        if (dr.Read())
-                        {
-                            return dr["value"].ToString();
-                        }
-
-                        return String.Empty;
+                        return dr.Read()
+                               ? dr["value"].ToString()
+                               : string.Empty;
                     }
                 }
             }
@@ -202,8 +182,6 @@
         /// <returns></returns>
         public static int Setting(string key, string value)
         {
-            Cache[key] = value;
-
             using (var cmd = new SQLiteCommand("insert into settings values (?, ?)", Connection))
             {
                 cmd.Parameters.Add(new SQLiteParameter { Value = key   });
