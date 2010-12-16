@@ -98,12 +98,12 @@
 
             if (_excludes == null)
             {
-                _excludes = Database.XmlSetting("Subtitle Site Exclusions").Split(',').ToList();
+                _excludes = Settings.Get("Subtitle Site Exclusions").Split(',').ToList();
             }
 
             if (_langExcl == null)
             {
-                _langExcl = Database.XmlSetting("Subtitle Language Exclusions").Split(',').ToList();
+                _langExcl = Settings.Get("Subtitle Language Exclusions").Split(',').ToList();
             }
 
             if (availableEngines.Items.Count == 0)
@@ -214,7 +214,7 @@
         /// </summary>
         public void SaveExclusions()
         {
-            Database.XmlSetting("Subtitle Site Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+            Settings.Set("Subtitle Site Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
         }
 
         /// <summary>
@@ -252,7 +252,7 @@
         /// </summary>
         public void SaveLanguageExclusions()
         {
-            Database.XmlSetting("Subtitle Language Exclusions", _langExcl.Aggregate(string.Empty, (current, lang) => current + (lang + ",")).Trim(','));
+            Settings.Set("Subtitle Language Exclusions", _langExcl.Aggregate(string.Empty, (current, lang) => current + (lang + ",")).Trim(','));
         }
 
         /// <summary>

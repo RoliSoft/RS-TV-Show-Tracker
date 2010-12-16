@@ -3,9 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.IO;
-    using System.Linq;
-    using System.Xml.Linq;
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
 
     /// <summary>
@@ -18,12 +15,6 @@
         /// </summary>
         /// <value>The active connection.</value>
         public static SQLiteConnection Connection { get; set; }
-
-        /// <summary>
-        /// Gets or sets the XML document in which the settings are stored.
-        /// </summary>
-        /// <value>The XML settings document.</value>
-        public static XDocument XmlSettings { get; set; }
 
         /// <summary>
         /// Gets or sets the cache container.
@@ -43,7 +34,6 @@
         static Database()
         {
             Connection  = new SQLiteConnection(@"Data Source=C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3");
-            XmlSettings = XDocument.Load(@"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.xml");
             Cache       = new Dictionary<string, dynamic>();
             DataChange  = DateTime.Now;
 
@@ -279,56 +269,6 @@
             return episodeid.Count != 0
                    ? episodeid[0]["episodeid"]
                    : string.Empty;
-        }
-
-        /// <summary>
-        /// Retrieves the key from the XML settings.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <returns>Stored value or empty string.</returns>
-        public static string XmlSetting(string key)
-        {
-            if(Cache.ContainsKey(key))
-            {
-                return Cache[key];
-            }
-
-            try
-            {
-                return Cache[key] = XmlSettings
-                                    .Descendants("setting")
-                                    .Single(node => node.Attribute("key").Value == key)
-                                    .Attribute("value")
-                                    .Value;
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Stores the key and value into the XML settings.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        public static void XmlSetting(string key, string value)
-        {
-            Cache[key] = XmlSettings
-                         .Descendants("setting")
-                         .Single(node => node.Attribute("key").Value == key)
-                         .Attribute("value")
-                         .Value = value;
-
-            SaveXml();
-        }
-
-        /// <summary>
-        /// Saves the XML settings into the file.
-        /// </summary>
-        public static void SaveXml()
-        {
-            File.WriteAllText(@"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.xml", "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n" + XmlSettings);
         }
     }
 }

@@ -215,7 +215,7 @@
 
             if (_trackers == null)
             {
-                _trackers = Database.XmlSetting("Tracker Order").Split(',').ToList();
+                _trackers = Settings.Get("Tracker Order").Split(',').ToList();
                 _trackers.AddRange(SearchEngines
                                    .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                    .Select(engine => engine.Name));
@@ -223,12 +223,12 @@
 
             if (_qualities == null)
             {
-                _qualities = Database.XmlSetting("Torrent Quality Order").Split(',').ToList();
+                _qualities = Settings.Get("Torrent Quality Order").Split(',').ToList();
             }
 
             if (_excludes == null)
             {
-                _excludes = Database.XmlSetting("Tracker Exclusions").Split(',').ToList();
+                _excludes = Settings.Get("Tracker Exclusions").Split(',').ToList();
             }
 
             if (availableEngines.Items.Count == 0)
@@ -264,7 +264,7 @@
             }
 
             var cm  = listView.ContextMenu;
-            var tdl = Database.XmlSetting("Torrent Downloader");
+            var tdl = Settings.Get("Torrent Downloader");
 
             if (!string.IsNullOrWhiteSpace(tdl))
             {
@@ -330,7 +330,7 @@
         /// </summary>
         public void SaveExclusions()
         {
-            Database.XmlSetting("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+            Settings.Set("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
         }
 
         /// <summary>
@@ -532,7 +532,7 @@
             var wc  = new WebClientExt();
             var tmp = Utils.GetRandomFileName("torrent");
 
-            var cookies = Database.XmlSetting(link.Site + " Cookies");
+            var cookies = Settings.Get(link.Site + " Cookies");
             if (!string.IsNullOrWhiteSpace(cookies))
             {
                 wc.Headers[HttpRequestHeader.Cookie] = cookies;
@@ -624,7 +624,7 @@
                     break;
 
                 case "SendToTorrent":
-                    Utils.Run(Database.XmlSetting("Torrent Downloader"), token[0]);
+                    Utils.Run(Settings.Get("Torrent Downloader"), token[0]);
 
                     SetStatus("File sent to " + DefaultTorrent + " successfully.");
                     break;

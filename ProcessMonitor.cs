@@ -55,12 +55,12 @@
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(Database.XmlSetting("Processes to Monitor")))
+            if (string.IsNullOrWhiteSpace(Settings.Get("Processes to Monitor")))
             {
                 return;
             }
 
-            var procs = Database.XmlSetting("Processes to Monitor").Trim(',').Split(',');
+            var procs = Settings.Get("Processes to Monitor").Trim(',').Split(',');
             var files = GetHandleList(procs);
             var shows = Database.Query("select showid, name from tvshows order by rowid asc");
 

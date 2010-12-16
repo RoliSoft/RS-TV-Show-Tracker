@@ -344,7 +344,7 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var path = Database.XmlSetting("Download Path");
+            var path = Settings.Get("Download Path");
             var show = GetSelectedShow();
 
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);

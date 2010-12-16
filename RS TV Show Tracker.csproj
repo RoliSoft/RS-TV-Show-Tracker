@@ -114,6 +114,7 @@
     <Compile Include="AddNewWindow.xaml.cs">
       <DependentUpon>AddNewWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="DownloadLinkSearch.cs" />
     <Compile Include="DownloadLinksPage.xaml.cs">
       <DependentUpon>DownloadLinksPage.xaml</DependentUpon>

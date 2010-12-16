@@ -69,7 +69,7 @@
 
                 if (engine.RequiresCookies)
                 {
-                    engine.Cookies = Database.XmlSetting(engine.Name + " Cookies");
+                    engine.Cookies = Settings.Get(engine.Name + " Cookies");
 
                     // if requires cookies and no cookies were provided, ignore the engine
                     if (string.IsNullOrWhiteSpace(engine.Cookies))

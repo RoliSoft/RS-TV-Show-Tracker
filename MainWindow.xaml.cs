@@ -282,6 +282,7 @@
             {
                 activeOverviewPage.ListViewKeyUp(sender, e);
             }
+            Settings.Set("asd", "fuckme");
         }
 
         /// <summary>
