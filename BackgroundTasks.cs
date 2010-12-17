@@ -1,7 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Threading;
+    using System.Timers;
 
     /// <summary>
     /// Periodically runs tasks asynchronously in the background.
@@ -9,17 +9,18 @@
     public static class BackgroundTasks
     {
         /// <summary>
-        /// Gets or sets the task thread.
+        /// Gets or sets the task timer.
         /// </summary>
-        /// <value>The task thread.</value>
-        public static Thread TaskThread { get; set; }
+        /// <value>The task timer.</value>
+        public static Timer TaskTimer { get; set; }
 
         /// <summary>
         /// Initializes the <see cref="BackgroundTasks"/> class.
         /// </summary>
         static BackgroundTasks()
         {
-            TaskThread = new Thread(Tasks);
+            TaskTimer = new Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+            TaskTimer.Elapsed += Tasks;
         }
 
         /// <summary>
@@ -27,26 +28,18 @@
         /// </summary>
         public static void Start()
         {
-            if (TaskThread.IsAlive)
-            {
-                TaskThread.Abort();
-            }
-
-            TaskThread.Start();
+            TaskTimer.Start();
         }
 
         /// <summary>
         /// The tasks which will run periodically.
         /// </summary>
-        private static void Tasks()
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
+        private static void Tasks(object sender, ElapsedEventArgs e)
         {
-            while (true)
-            {
-                try { CheckUpdate(); } catch { }
-                try { ProcessMonitor.CheckOpenFiles(); } catch { }
-
-                Thread.Sleep(TimeSpan.FromMinutes(5));
-            }
+            try { CheckUpdate(); } catch { }
+            try { ProcessMonitor.CheckOpenFiles(); } catch { }
         }
 
         /// <summary>

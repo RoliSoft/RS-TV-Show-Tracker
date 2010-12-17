@@ -4,7 +4,6 @@
     using System.Diagnostics;
     using System.Threading;
     using System.Windows;
-    using System.Windows.Controls;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
@@ -15,6 +14,7 @@
 
     using RoliSoft.TVShowTracker.Helpers;
 
+    using Timer = System.Timers;
     using Application = System.Windows.Application;
 
     /// <summary>
@@ -34,7 +34,7 @@
         /// <value>The notify icon.</value>
         public static WinForms.NotifyIcon NotifyIcon { get; set; }
 
-        private Thread _statusThread;
+        private Timer.Timer _statusTimer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -118,8 +118,18 @@
         /// <summary>
         /// Sets the status to the last updated time.
         /// </summary>
-        public void SetLastUpdated()
+        public void SetLastUpdated(object sender = null, Timer.ElapsedEventArgs e = null)
         {
+            if (_statusTimer == null)
+            {
+                _statusTimer = new Timer.Timer();
+                _statusTimer.Elapsed += SetLastUpdated;
+            }
+            else
+            {
+                _statusTimer.Stop();
+            }
+
             var last = 0d;
             double.TryParse(Database.Setting("last update"), out last);
             var ts = DateTime.Now - Utils.DateTimeFromUnix(last);
@@ -129,37 +139,20 @@
                     lastUpdatedLabel.Content = "last updated " + ts.ToRelativeTime() + " ago";
                 }));
 
-            /*if (_statusThread != null && _statusThread.IsAlive)
-            {
-                _statusThread.Abort();
-            }*/
-
             if (ts.TotalMinutes < 1) // if under a minute, update by seconds
             {
-                _statusThread = new Thread(() =>
-                    {
-                        Thread.Sleep(TimeSpan.FromSeconds(1));
-                        SetLastUpdated();
-                    });
+                _statusTimer.Interval = TimeSpan.FromSeconds(1).TotalMilliseconds;
             }
             else if (ts.TotalHours < 1) // if under an hour, update by minutes
             {
-                _statusThread = new Thread(() =>
-                    {
-                        Thread.Sleep(TimeSpan.FromMinutes(1));
-                        SetLastUpdated();
-                    });
+                _statusTimer.Interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
             }
             else // if more than an hour, update by hours
             {
-                _statusThread = new Thread(() =>
-                    {
-                        Thread.Sleep(TimeSpan.FromHours(1));
-                        SetLastUpdated();
-                    });
+                _statusTimer.Interval = TimeSpan.FromHours(1).TotalMilliseconds;
             }
 
-            _statusThread.Start();
+            _statusTimer.Start();
         }
 
         /// <summary>
@@ -282,7 +275,6 @@
             {
                 activeOverviewPage.ListViewKeyUp(sender, e);
             }
-            Settings.Set("asd", "fuckme");
         }
 
         /// <summary>
@@ -294,21 +286,6 @@
         {
             e.Cancel = true;
             ShowMenuClick(null, null);
-        }
-
-        /// <summary>
-        /// Handles the Closed event of the Window control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void WindowClosed(object sender, EventArgs e)
-        {
-            BackgroundTasks.TaskThread.Abort();
-
-            if (_statusThread != null)
-            {
-                _statusThread.Abort();
-            }
         }
 
         /// <summary>
