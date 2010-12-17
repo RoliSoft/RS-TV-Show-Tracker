@@ -2,20 +2,18 @@
 {
     using System;
     using System.Diagnostics;
-    using System.Threading;
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
-    using Drawing  = System.Drawing;
-    using WinForms = System.Windows.Forms;
+    using Drawing     = System.Drawing;
+    using WinForms    = System.Windows.Forms;
+    using Timer       = System.Timers;
+    using Application = System.Windows.Application;
 
     using Microsoft.Windows.Shell;
 
     using RoliSoft.TVShowTracker.Helpers;
-
-    using Timer = System.Timers;
-    using Application = System.Windows.Application;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -334,9 +332,15 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void UpdateDatabaseClick(object sender, RoutedEventArgs e)
+        public void UpdateDatabaseClick(object sender = null, RoutedEventArgs e = null)
         {
-            activeSettingsPage.UpdateDatabaseButtonClick(null, null);
+            var update = new Updater();
+
+            update.UpdateProgressChanged += UpdateProgressChanged;
+            update.UpdateDone            += UpdateDone;
+            update.UpdateError           += UpdateError;
+
+            update.UpdateAsync();
         }
 
         /// <summary>
@@ -370,6 +374,16 @@
         }
 
         /// <summary>
+        /// Handles the Click event of the ConfigureSoftware control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ConfigureSoftwareClick(object sender, RoutedEventArgs e)
+        {
+            new SettingsWindow().ShowDialog();
+        }
+
+        /// <summary>
         /// Handles the Click event of the ActivateBetaFeatures control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -387,6 +401,47 @@
         private void AddNewTVShowClick(object sender, RoutedEventArgs e)
         {
             new AddNewWindow().ShowDialog();
+        }
+        #endregion
+
+        #region Update
+        /// <summary>
+        /// Called when the update is done.
+        /// </summary>
+        public void UpdateDone()
+        {
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    SetLastUpdated();
+                    SetHeaderProgress(-1);
+                }));
+        }
+
+        /// <summary>
+        /// Called when the update has encountered an error.
+        /// </summary>
+        public void UpdateError(string message, Exception exception, bool fatalToShow, bool fatalToWholeUpdate)
+        {
+            if (fatalToWholeUpdate)
+            {
+                Dispatcher.Invoke((Action)(() =>
+                    {
+                        lastUpdatedLabel.Content = "update failed";
+                        SetHeaderProgress(-1);
+                    }));
+            }
+        }
+
+        /// <summary>
+        /// Called when the progress has changed on the update.
+        /// </summary>
+        public void UpdateProgressChanged(string show, double percentage)
+        {
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    lastUpdatedLabel.Content = "updating " + show + " (" + percentage.ToString("0.00") + "%)";
+                    SetHeaderProgress(percentage);
+                }));
         }
         #endregion
     }

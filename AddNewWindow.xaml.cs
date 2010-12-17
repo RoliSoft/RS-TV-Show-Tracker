@@ -44,6 +44,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchButtonClick(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(textBox.Text)) return;
+
             textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = false;
             progressBar.Visibility = Visibility.Visible;
 
@@ -98,7 +100,7 @@
         ///     <c>true</c> if the show was added successfully; otherwise, <c>false</c>.
         /// </returns>
         /// <exception cref="Exception"><c>Exception</c>.</exception>
-        private bool Add(string show, string grabber)
+        public static bool Add(string show, string grabber)
         {
             Guide guide;
             switch(grabber)

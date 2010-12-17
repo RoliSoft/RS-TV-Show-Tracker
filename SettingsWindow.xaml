@@ -1,0 +1,49 @@
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
+        Title="Settings" Height="395" Width="615" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+    <Grid>
+        <TabControl Margin="10,10" Name="tabControl">
+            <TabControl.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </TabControl.Effect>
+            <TabItem Header="General" Name="generalTabItem">
+                <Grid Name="generalGrid">
+                    <Label Content="Download Path:" FontWeight="Bold" Margin="6,3,0,0"  HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <TextBox HorizontalAlignment="Left" Margin="11,26,0,0" Name="dlPathTextBox" VerticalAlignment="Top" Width="470" TextChanged="DlPathTextBoxTextChanged" />
+                    <Button Content="Browse" HorizontalAlignment="Left" Margin="487,26,0,0" Name="dlPathBrowseButton" VerticalAlignment="Top" Width="75" Click="DlPathBrowseButtonClick" />
+                    <TextBlock Margin="12,52,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        Point to the directory where you download your TV shows. The "Play episode" feature will search this directory recursively for a matching video files.
+                    </TextBlock>
+                    <Separator HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,89,0,0" />
+
+                    <Label Content="Alternative Torrent Downloader Path:" FontWeight="Bold" Margin="6,92,0,0"  HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <TextBox HorizontalAlignment="Left" Margin="11,115,0,0" Name="torrentPathTextBox" VerticalAlignment="Top" Width="470" TextChanged="TorrentPathTextBoxTextChanged" />
+                    <Button Content="Browse" HorizontalAlignment="Left" Margin="487,115,0,0" Name="torrentPathBrowseButton" VerticalAlignment="Top" Width="75" Click="TorrentPathBrowseButtonClick" />
+                    <TextBlock Margin="12,141,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        If you want to open torrent files with an application other than the default association for .torrent files, point to the executable file here. You DON'T have to put here anything if you want to use the default.
+                    </TextBlock>
+                    <Separator HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,178,0,0" />
+                    
+                    <Label Content="Processes to Monitor:" FontWeight="Bold" HorizontalAlignment="Left" Margin="6,181,0,0" VerticalAlignment="Top" />
+                    <TextBox HorizontalAlignment="Left" Margin="11,204,0,0" Name="processTextBox" VerticalAlignment="Top" Width="542" TextChanged="ProcessTextBoxTextChanged" />
+                    <TextBlock HorizontalAlignment="Left" Margin="12,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top">
+                        Enter the file name (not the path) of the video player you're using to watch TV shows. If you're using more than one, enter each name separated by a comma.<LineBreak />
+                        The application will monitor the open file handles of these processes and automatically mark a TV show as seen if you're watching it for more than 10 minutes.<LineBreak />
+                        For example: kmplayer.exe,wmplayer.exe
+                    </TextBlock>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Sorting" Name="sortingTabItem">
+                <Grid Name="sortingGrid">
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Cookies" Name="cookiesTabItem">
+                <Grid Name="cookiesGrid">
+                    
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Shell:GlassWindow>

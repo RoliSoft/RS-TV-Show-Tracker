@@ -52,7 +52,7 @@
 
             if ((DateTime.Now - Utils.DateTimeFromUnix(last)).TotalHours > 10)
             {
-                MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.activeSettingsPage.UpdateDatabaseButtonClick(null, null)));
+                MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.UpdateDatabaseClick()));
             }
         }
     }
