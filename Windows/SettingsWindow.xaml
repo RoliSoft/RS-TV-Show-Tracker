@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
-        Title="Settings" Height="395" Width="615" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Settings" Height="395" Width="615" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize" Closing="GlassWindowClosing">
     <Grid>
         <TabControl Margin="10,10" Name="tabControl">
             <TabControl.Effect>
@@ -34,14 +34,68 @@
                     </TextBlock>
                 </Grid>
             </TabItem>
-            <TabItem Header="Sorting" Name="sortingTabItem">
-                <Grid Name="sortingGrid">
-
-                </Grid>
-            </TabItem>
-            <TabItem Header="Cookies" Name="cookiesTabItem">
-                <Grid Name="cookiesGrid">
+            
+            <TabItem Header="Downloads" Name="downloadsTabItem">
+                <Grid Name="downloadsGrid">
+                    <ListView Name="listView" Height="232" VerticalAlignment="Top" SelectionChanged="ListViewSelectionChanged">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn>
+                                    <GridViewColumnHeader />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Name="Enabled" Tag="{Binding Site}" IsChecked="{Binding Enabled}" Checked="EnabledChecked" Unchecked="EnabledUnchecked" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Site" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding Icon}" Height="16" Width="16" />
+                                                <TextBlock Text="{Binding Site}" Padding="5,0,0,0" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Type" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Type}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Private" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding RequiresCookies}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Assembly" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Assembly}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                     
+                    <Label Name="engineTitle" Content="Engine title" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,230,0,0" />
+                    <Label Content="Cookies:" Name="cookiesLabel" FontWeight="Bold" HorizontalAlignment="Left" Margin="6,261,0,0" VerticalAlignment="Top" />
+                    <TextBox HorizontalAlignment="Stretch" Margin="11,284,11,0" Name="cookiesTextBox" VerticalAlignment="Top" TextChanged="CookiesTextBoxTextChanged" />
+                    <Button HorizontalAlignment="Left" Margin="521,237,0,0" Name="moveUpButton" VerticalAlignment="Top" Click="MoveUpButtonClick">
+                        <Image Source="/RSTVShowTracker;component/Images/up.png" Height="16" Width="16" Margin="1,0,0,0" />
+                    </Button>
+                    <Button HorizontalAlignment="Left" Margin="546,237,0,0" Name="moveDownButton" VerticalAlignment="Top" Click="MoveDownButtonClick">
+                        <Image Source="/RSTVShowTracker;component/Images/down.png" Height="16" Width="16" Margin="1,0,0,0" />
+                    </Button>
                 </Grid>
             </TabItem>
         </TabControl>

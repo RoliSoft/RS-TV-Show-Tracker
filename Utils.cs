@@ -23,6 +23,42 @@
     public static class Utils
     {
         /// <summary>
+        /// Extension method to <c>List&lt;T&gt;</c> to move an item.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">The list.</param>
+        /// <param name="old">The old index.</param>
+        /// <param name="idx">The new index.</param>
+        public static void Move<T>(this List<T> list, int old, int idx)
+        {
+            var tmp = list[idx];
+            list[idx] = list[old];
+            list[old] = tmp;
+        }
+
+        /// <summary>
+        /// Moves the specified item up in the list.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">The list.</param>
+        /// <param name="item">The item's index.</param>
+        public static void MoveUp<T>(this List<T> list, int item)
+        {
+            Move(list, item, item - 1);
+        }
+
+        /// <summary>
+        /// Moves the specified item down in the list.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">The list.</param>
+        /// <param name="item">The item's index.</param>
+        public static void MoveDown<T>(this List<T> list, int item)
+        {
+            Move(list, item, item + 1);
+        }
+
+        /// <summary>
         /// Gets the Unix epoch date. (1970-01-01 00:00:00)
         /// </summary>
         /// <value>The Unix epoch.</value>

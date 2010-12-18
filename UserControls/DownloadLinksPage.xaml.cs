@@ -204,63 +204,7 @@
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
             }
 
-            if (SearchEngines == null)
-            {
-                SearchEngines = typeof(DownloadSearchEngine)
-                                .GetDerivedTypes()
-                                .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
-                                .ToList();
-            }
-
-            if (_trackers == null)
-            {
-                _trackers = Settings.Get("Tracker Order").Split(',').ToList();
-                _trackers.AddRange(SearchEngines
-                                   .Where(engine => _trackers.IndexOf(engine.Name) == -1)
-                                   .Select(engine => engine.Name));
-            }
-
-            if (_qualities == null)
-            {
-                _qualities = Enum.GetNames(typeof(DownloadSearchEngine.Link.Qualities)).Reverse().ToList();
-            }
-
-            if (_excludes == null)
-            {
-                _excludes = Settings.Get("Tracker Exclusions").Split(',').ToList();
-            }
-
-            if (availableEngines.Items.Count == 0)
-            {
-                foreach (var engine in SearchEngines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
-                {
-                    var mi = new MenuItem
-                        {
-                            Header           = new StackPanel { Orientation = Orientation.Horizontal },
-                            IsCheckable      = true,
-                            IsChecked        = !_excludes.Contains(engine.Name),
-                            StaysOpenOnClick = true,
-                            Tag              = engine.Name
-                        };
-
-                    (mi.Header as StackPanel).Children.Add(new Image
-                        {
-                            Source = new BitmapImage(new Uri(engine.Icon), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
-                            Width = 16,
-                            Height = 16
-                        });
-                    (mi.Header as StackPanel).Children.Add(new Label
-                        {
-                            Content = engine.Name,
-                            Padding = new Thickness(5, 0, 0, 0)
-                        });
-
-                    mi.Checked   += SearchEngineMenuItemChecked;
-                    mi.Unchecked += SearchEngineMenuItemUnchecked;
-
-                    availableEngines.Items.Add(mi);
-                }
-            }
+            LoadEngines();
 
             var cm  = listView.ContextMenu;
             var tdl = Settings.Get("Torrent Downloader");
@@ -291,6 +235,73 @@
             else
             {
                 cm.Items.RemoveAt(3);
+            }
+        }
+
+        /// <summary>
+        /// Loads the engines.
+        /// </summary>
+        /// <param name="reload">if set to <c>true</c> it will reload all variables; otherwise, it will just load the variables which are null.</param>
+        public void LoadEngines(bool reload = false)
+        {
+            if (reload || SearchEngines == null)
+            {
+                SearchEngines = typeof(DownloadSearchEngine)
+                                .GetDerivedTypes()
+                                .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
+                                .ToList();
+            }
+
+            if (reload || _trackers == null)
+            {
+                _trackers = Settings.Get("Tracker Order").Split(',').ToList();
+                _trackers.AddRange(SearchEngines
+                                   .Where(engine => _trackers.IndexOf(engine.Name) == -1)
+                                   .Select(engine => engine.Name));
+            }
+
+            if (reload || _qualities == null)
+            {
+                _qualities = Enum.GetNames(typeof(DownloadSearchEngine.Link.Qualities)).Reverse().ToList();
+            }
+
+            if (reload || _excludes == null)
+            {
+                _excludes = Settings.Get("Tracker Exclusions").Split(',').ToList();
+            }
+
+            if (reload || availableEngines.Items.Count == 0)
+            {
+                availableEngines.Items.Clear();
+
+                foreach (var engine in SearchEngines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
+                {
+                    var mi = new MenuItem
+                        {
+                            Header = new StackPanel { Orientation = Orientation.Horizontal },
+                            IsCheckable = true,
+                            IsChecked = !_excludes.Contains(engine.Name),
+                            StaysOpenOnClick = true,
+                            Tag = engine.Name
+                        };
+
+                    (mi.Header as StackPanel).Children.Add(new Image
+                        {
+                            Source = new BitmapImage(new Uri(engine.Icon), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
+                            Width = 16,
+                            Height = 16
+                        });
+                    (mi.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = engine.Name,
+                            Padding = new Thickness(5, 0, 0, 0)
+                        });
+
+                    mi.Checked   += SearchEngineMenuItemChecked;
+                    mi.Unchecked += SearchEngineMenuItemUnchecked;
+
+                    availableEngines.Items.Add(mi);
+                }
             }
         }
 
