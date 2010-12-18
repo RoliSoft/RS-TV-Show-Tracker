@@ -213,25 +213,25 @@
                 /// </summary>
                 HDTV_720p,
                 /// <summary>
-                /// A 1280x720 high-definition video ripped from a Blu-Ray disc.
-                /// </summary>
-                BluRay_720p,
-                /// <summary>
                 /// A 1280x720 high-definition video downloaded from a legal source; usually iTunes.
                 /// </summary>
                 WebDL_720p,
+                /// <summary>
+                /// A 1280x720 high-definition video ripped from a Blu-Ray disc.
+                /// </summary>
+                BluRay_720p,
                 /// <summary>
                 /// A 1920x1080 high-definition video captured from DVB.
                 /// </summary>
                 HDTV_1080,
                 /// <summary>
-                /// A 1920x1080 high-definition video ripped from a Blu-Ray disc.
-                /// </summary>
-                BluRay_1080,
-                /// <summary>
                 /// A 1920x1080 high-definition video downloaded from a legal source; usually iTunes.
                 /// </summary>
-                WebDL_1080
+                WebDL_1080,
+                /// <summary>
+                /// A 1920x1080 high-definition video ripped from a Blu-Ray disc.
+                /// </summary>
+                BluRay_1080
             }
         }
     }

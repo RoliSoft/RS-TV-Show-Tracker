@@ -222,7 +222,7 @@
 
             if (_qualities == null)
             {
-                _qualities = Settings.Get("Torrent Quality Order").Split(',').ToList();
+                _qualities = Enum.GetNames(typeof(DownloadSearchEngine.Link.Qualities)).Reverse().ToList();
             }
 
             if (_excludes == null)

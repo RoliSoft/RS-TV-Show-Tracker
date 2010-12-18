@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
@@ -89,10 +90,7 @@
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
             query      = ShowNames.Normalize(query);
 
-            foreach (var engine in SearchEngines)
-            {
-                engine.SearchAsync(query);
-            }
+            SearchEngines.ForEach(engine => engine.SearchAsync(query));
         }
 
         /// <summary>
@@ -100,10 +98,7 @@
         /// </summary>
         public void CancelAsync()
         {
-            foreach (var engine in SearchEngines)
-            {
-                engine.CancelAsync();
-            }
+            new Task(() => SearchEngines.ForEach(engine => engine.CancelAsync())).Start();
         }
 
         /// <summary>
