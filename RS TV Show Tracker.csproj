@@ -104,30 +104,30 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AboutWindow.xaml.cs">
+    <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ActivateBetaWindow.xaml.cs">
+    <Compile Include="Windows\ActivateBetaWindow.xaml.cs">
       <DependentUpon>ActivateBetaWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="BackgroundTasks.cs" />
-    <Compile Include="AddNewWindow.xaml.cs">
+    <Compile Include="Windows\AddNewWindow.xaml.cs">
       <DependentUpon>AddNewWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="DownloadLinkSearch.cs" />
-    <Compile Include="DownloadLinksPage.xaml.cs">
+    <Compile Include="UserControls\DownloadLinksPage.xaml.cs">
       <DependentUpon>DownloadLinksPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="FileSearch.cs" />
-    <Compile Include="GuidesPage.xaml.cs">
+    <Compile Include="UserControls\GuidesPage.xaml.cs">
       <DependentUpon>GuidesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\WebClientExt.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="IRefreshable.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
+    <Compile Include="Properties\ObfuscationSettings.cs" />
     <Compile Include="Parsers\Downloads\BinSearch.cs" />
     <Compile Include="Parsers\Downloads\BitHUmen.cs" />
     <Compile Include="Parsers\Downloads\FileList.cs" />
@@ -136,7 +136,7 @@
     <Compile Include="Parsers\Downloads\SceneReleases.cs" />
     <Compile Include="Parsers\Downloads\TvStore.cs" />
     <Compile Include="ProcessMonitor.cs" />
-    <Compile Include="SettingsWindow.xaml.cs">
+    <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ShowNames.cs" />
@@ -160,36 +160,36 @@
     <Compile Include="Parsers\Subtitles\Hosszupuska.cs" />
     <Compile Include="Parsers\Subtitles\OpenSubtitles.cs" />
     <Compile Include="Parsers\Subtitles\SubtitleSearchEngine.cs" />
-    <Compile Include="RecommendationsPage.xaml.cs">
+    <Compile Include="UserControls\RecommendationsPage.xaml.cs">
       <DependentUpon>RecommendationsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Signature.cs" />
-    <Compile Include="StatisticsPage.xaml.cs">
+    <Compile Include="UserControls\StatisticsPage.xaml.cs">
       <DependentUpon>StatisticsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SubtitleSearch.cs" />
-    <Compile Include="SubtitlesPage.xaml.cs">
+    <Compile Include="UserControls\SubtitlesPage.xaml.cs">
       <DependentUpon>SubtitlesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Update.cs" />
     <Compile Include="Utils.cs" />
-    <Page Include="AboutWindow.xaml">
+    <Page Include="Windows\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ActivateBetaWindow.xaml">
+    <Page Include="Windows\ActivateBetaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AddNewWindow.xaml">
+    <Page Include="Windows\AddNewWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DownloadLinksPage.xaml">
+    <Page Include="UserControls\DownloadLinksPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="GuidesPage.xaml">
+    <Page Include="UserControls\GuidesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -208,30 +208,30 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="OverviewPage.xaml">
+    <Page Include="UserControls\OverviewPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="RecommendationsPage.xaml">
+    <Page Include="UserControls\RecommendationsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SettingsWindow.xaml">
+    <Page Include="Windows\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="StatisticsPage.xaml">
+    <Page Include="UserControls\StatisticsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SubtitlesPage.xaml">
+    <Page Include="UserControls\SubtitlesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\Interop\NativeMethods.cs" />
-    <Compile Include="OverviewPage.xaml.cs">
+    <Compile Include="UserControls\OverviewPage.xaml.cs">
       <DependentUpon>OverviewPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
