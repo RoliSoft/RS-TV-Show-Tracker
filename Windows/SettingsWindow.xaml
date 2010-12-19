@@ -20,7 +20,6 @@
                                 <TextBlock TextWrapping="Wrap" Margin="0,5">
                                     Point to the directory where you download your TV shows. The "Play episode" feature will search this directory recursively for a matching video files.
                                 </TextBlock>
-                                <Separator />
                             </StackPanel>
 
                             <StackPanel Margin="10,3,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
@@ -32,7 +31,6 @@
                                 <TextBlock TextWrapping="Wrap" Margin="0,5">
                                     If you want to open torrent files with an application other than the default association for .torrent files, point to the executable file here. You DON'T have to put here anything if you want to use the default.
                                 </TextBlock>
-                                <Separator />
                             </StackPanel>
 
                             <StackPanel Margin="10,3,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
@@ -43,7 +41,6 @@
                                     The application will monitor the open file handles of these processes and automatically mark a TV show as seen if you're watching it for more than 10 minutes.<LineBreak />
                                     For example: kmplayer.exe,wmplayer.exe
                                 </TextBlock>
-                                <Separator />
                             </StackPanel>
 
                             <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">

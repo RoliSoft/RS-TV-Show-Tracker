@@ -8,7 +8,9 @@
     using System.Windows.Media.Animation;
 
     using Drawing     = System.Drawing;
-    using WinForms    = System.Windows.Forms;
+    using NotifyIcon  = System.Windows.Forms.NotifyIcon;
+    using ContextMenu = System.Windows.Forms.ContextMenu;
+    using WinMenuItem = System.Windows.Forms.MenuItem;
     using Timer       = System.Timers.Timer;
     using Application = System.Windows.Application;
 
@@ -29,7 +31,7 @@
         /// Gets or sets the notify icon.
         /// </summary>
         /// <value>The notify icon.</value>
-        public static WinForms.NotifyIcon NotifyIcon { get; set; }
+        public static NotifyIcon NotifyIcon { get; set; }
 
         private Timer _statusTimer;
 
@@ -215,9 +217,9 @@
         /// </summary>
         private void LoadNotifyIcon()
         {
-            var menu = new WinForms.ContextMenu();
+            var menu = new ContextMenu();
 
-            NotifyIcon = new WinForms.NotifyIcon
+            NotifyIcon = new NotifyIcon
                 {
                     Text        = "RS TV Show Tracker",
                     Icon        = new Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/RSTVShowTracker;component/tv.ico")).Stream),
@@ -225,10 +227,10 @@
                     ContextMenu = menu
                 };
 
-            var showMenu    = new WinForms.MenuItem { Text = "Hide" };
+            var showMenu    = new WinMenuItem { Text = "Hide" };
             showMenu.Click += ShowMenuClick;
             
-            var exitMenu    = new WinForms.MenuItem { Text = "Exit" };
+            var exitMenu    = new WinMenuItem { Text = "Exit" };
             exitMenu.Click += (s, r) =>
                 {
                     NotifyIcon.Visible = false;

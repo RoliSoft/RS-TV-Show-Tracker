@@ -32,8 +32,7 @@
             site.Content = string.Format(site.Content.ToString(), DateTime.Now.Year);
 
             info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss")
-                        + "\r\nv" + Signature.Version + (Signature.IsDebug ? "-debug" : string.Empty)
-                        + "\r\n∅";
+                        + "\r\nv" + Signature.Version + (Signature.IsDebug ? "-debug" : string.Empty);
         }
 
         /// <summary>
