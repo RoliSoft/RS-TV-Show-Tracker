@@ -2,13 +2,14 @@
 {
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
     using Drawing     = System.Drawing;
     using WinForms    = System.Windows.Forms;
-    using Timer       = System.Timers;
+    using Timer       = System.Timers.Timer;
     using Application = System.Windows.Application;
 
     using Microsoft.Windows.Shell;
@@ -32,7 +33,7 @@
         /// <value>The notify icon.</value>
         public static WinForms.NotifyIcon NotifyIcon { get; set; }
 
-        private Timer.Timer _statusTimer;
+        private Timer _statusTimer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -111,16 +112,35 @@
             BackgroundTasks.Start();
             SetLastUpdated();
             LoadNotifyIcon();
+
+            if (Environment.GetCommandLineArgs().Contains("-hide"))
+            {
+                // hiding the window when it isn't even visible is a tricky thing :]
+                // we wait for the next event, until then we make it inactive and -999px off the screen
+
+                var top = Top;
+                Top = -999;
+                ShowInTaskbar = ShowActivated = false;
+
+                ContentRendered += (s, r) =>
+                    {
+                        ShowMenuClick(s, r);
+                        ShowInTaskbar = ShowActivated = true;
+
+                        var t = new Timer { Interval = 1000, AutoReset = false, Enabled = true };
+                        t.Elapsed += (d, y) => Dispatcher.Invoke((Action)(() => { Top = top; }));
+                    };
+            }
         }
 
         /// <summary>
         /// Sets the status to the last updated time.
         /// </summary>
-        public void SetLastUpdated(object sender = null, Timer.ElapsedEventArgs e = null)
+        public void SetLastUpdated(object sender = null, System.Timers.ElapsedEventArgs e = null)
         {
             if (_statusTimer == null)
             {
-                _statusTimer = new Timer.Timer();
+                _statusTimer = new Timer();
                 _statusTimer.Elapsed += SetLastUpdated;
             }
             else

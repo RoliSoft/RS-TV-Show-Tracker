@@ -8,31 +8,54 @@
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
             <TabItem Header="General" Name="generalTabItem">
-                <Grid Name="generalGrid">
-                    <Label Content="Download Path:" FontWeight="Bold" Margin="6,3,0,0"  HorizontalAlignment="Left" VerticalAlignment="Top" />
-                    <TextBox HorizontalAlignment="Left" Margin="11,26,0,0" Name="dlPathTextBox" VerticalAlignment="Top" Width="470" TextChanged="DlPathTextBoxTextChanged" />
-                    <Button Content="Browse" HorizontalAlignment="Left" Margin="487,26,0,0" Name="dlPathBrowseButton" VerticalAlignment="Top" Width="75" Click="DlPathBrowseButtonClick" />
-                    <TextBlock Margin="12,52,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top">
-                        Point to the directory where you download your TV shows. The "Play episode" feature will search this directory recursively for a matching video files.
-                    </TextBlock>
-                    <Separator HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,89,0,0" />
+                <ScrollViewer Name="generalScrollViewer">
+                    <Grid Name="generalGrid">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <Label Content="Download Path:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Name="dlPathTextBox" TextChanged="DlPathTextBoxTextChanged" Margin="0,0,5,0" Width="462" />
+                                    <Button Content="Browse" Name="dlPathBrowseButton" Width="75" Click="DlPathBrowseButtonClick" />
+                                </StackPanel>
+                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                    Point to the directory where you download your TV shows. The "Play episode" feature will search this directory recursively for a matching video files.
+                                </TextBlock>
+                                <Separator />
+                            </StackPanel>
 
-                    <Label Content="Alternative Torrent Downloader Path:" FontWeight="Bold" Margin="6,92,0,0"  HorizontalAlignment="Left" VerticalAlignment="Top" />
-                    <TextBox HorizontalAlignment="Left" Margin="11,115,0,0" Name="torrentPathTextBox" VerticalAlignment="Top" Width="470" TextChanged="TorrentPathTextBoxTextChanged" />
-                    <Button Content="Browse" HorizontalAlignment="Left" Margin="487,115,0,0" Name="torrentPathBrowseButton" VerticalAlignment="Top" Width="75" Click="TorrentPathBrowseButtonClick" />
-                    <TextBlock Margin="12,141,0,0" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top">
-                        If you want to open torrent files with an application other than the default association for .torrent files, point to the executable file here. You DON'T have to put here anything if you want to use the default.
-                    </TextBlock>
-                    <Separator HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,178,0,0" />
-                    
-                    <Label Content="Processes to Monitor:" FontWeight="Bold" HorizontalAlignment="Left" Margin="6,181,0,0" VerticalAlignment="Top" />
-                    <TextBox HorizontalAlignment="Left" Margin="11,204,0,0" Name="processTextBox" VerticalAlignment="Top" Width="542" TextChanged="ProcessTextBoxTextChanged" />
-                    <TextBlock HorizontalAlignment="Left" Margin="12,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top">
-                        Enter the file name (not the path) of the video player you're using to watch TV shows. If you're using more than one, enter each name separated by a comma.<LineBreak />
-                        The application will monitor the open file handles of these processes and automatically mark a TV show as seen if you're watching it for more than 10 minutes.<LineBreak />
-                        For example: kmplayer.exe,wmplayer.exe
-                    </TextBlock>
-                </Grid>
+                            <StackPanel Margin="10,3,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <Label Content="Alternative Torrent Downloader Path:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Name="torrentPathTextBox" TextChanged="TorrentPathTextBoxTextChanged" Margin="0,0,5,0" Width="462" />
+                                    <Button Content="Browse" Name="torrentPathBrowseButton" Width="75" Click="TorrentPathBrowseButtonClick" />
+                                </StackPanel>
+                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                    If you want to open torrent files with an application other than the default association for .torrent files, point to the executable file here. You DON'T have to put here anything if you want to use the default.
+                                </TextBlock>
+                                <Separator />
+                            </StackPanel>
+
+                            <StackPanel Margin="10,3,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <Label Content="Processes to Monitor:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                                <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
+                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                    Enter the file name (not the path) of the video player you're using to watch TV shows. If you're using more than one, enter each name separated by a comma.<LineBreak />
+                                    The application will monitor the open file handles of these processes and automatically mark a TV show as seen if you're watching it for more than 10 minutes.<LineBreak />
+                                    For example: kmplayer.exe,wmplayer.exe
+                                </TextBlock>
+                                <Separator />
+                            </StackPanel>
+
+                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <CheckBox Content=" Start at system startup" Name="startAtStartup" Checked="StartAtStartupChecked" Unchecked="StartAtStartupUnchecked" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                                <TextBlock TextWrapping="Wrap" Margin="0">
+                                    If you check this, the software will start automatically with the system, it will update itself and alert you if there are any new episodes from the TV shows you're watching.
+                                    While running in the background, it will also mark any TV shows you decide to watch.
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
             
             <TabItem Header="Downloads" Name="downloadsTabItem">

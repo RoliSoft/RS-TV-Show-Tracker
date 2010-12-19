@@ -1,5 +1,4 @@
-﻿
-namespace RoliSoft.TVShowTracker.Helpers.Interop
+﻿namespace RoliSoft.TVShowTracker.Helpers.Interop
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

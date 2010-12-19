@@ -16,3 +16,5 @@
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Parsers.Recommendations.RecommendationEngine.RecommendedShow: renaming", Exclude = true, ApplyToMembers = true)]
 
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.StatisticsPage.StatisticsListViewItem: renaming", Exclude = true, ApplyToMembers = true)]
+
+[assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.SettingsWindow.DownloadsListViewItem: renaming", Exclude = true, ApplyToMembers = true)]

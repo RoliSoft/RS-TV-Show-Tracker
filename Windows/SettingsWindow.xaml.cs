@@ -5,14 +5,17 @@
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Windows;
     using System.Windows.Forms;
 
+    using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Shell;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using CheckBox = System.Windows.Controls.CheckBox;
+    using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
     /// <summary>
     /// Interaction logic for SettingsWindow.xaml
@@ -67,6 +70,11 @@
             dlPathTextBox.Text      = Settings.Get("Download Path");
             torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
             processTextBox.Text     = Settings.Get("Processes to Monitor");
+
+            using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+            {
+                startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
+            }
             
             // downloads
 
@@ -177,6 +185,32 @@
         private void ProcessTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             Settings.Set("Processes to Monitor", processTextBox.Text);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the startAtStartup control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void StartAtStartupChecked(object sender, RoutedEventArgs e)
+        {
+            using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+            {
+                rk.SetValue("RS TV Show Tracker", "\"" + Assembly.GetExecutingAssembly().Location + "\" -hide");
+            }
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the startAtStartup control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void StartAtStartupUnchecked(object sender, RoutedEventArgs e)
+        {
+            using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+            {
+                rk.DeleteValue("RS TVShow Tracker", false);
+            }
         }
         #endregion
 
