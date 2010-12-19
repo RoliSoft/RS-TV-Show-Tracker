@@ -123,9 +123,7 @@
     <Compile Include="UserControls\GuidesPage.xaml.cs">
       <DependentUpon>GuidesPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\WebClientExt.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="SmarterWebClient.cs" />
     <Compile Include="IRefreshable.cs" />
     <Compile Include="Properties\ObfuscationSettings.cs" />
     <Compile Include="Parsers\Downloads\BinSearch.cs" />
@@ -202,8 +200,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Database.cs" />
-    <Compile Include="Helpers\Interop\ErrorCodes.cs" />
-    <Compile Include="Helpers\GlassHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -230,7 +226,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\Interop\NativeMethods.cs" />
     <Compile Include="UserControls\OverviewPage.xaml.cs">
       <DependentUpon>OverviewPage.xaml</DependentUpon>
     </Compile>

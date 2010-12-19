@@ -20,7 +20,7 @@
     /// <summary>
     /// Provides various little utility functions.
     /// </summary>
-    public static class Utils
+    public static partial class Utils
     {
         /// <summary>
         /// Extension method to <c>List&lt;T&gt;</c> to move an item.

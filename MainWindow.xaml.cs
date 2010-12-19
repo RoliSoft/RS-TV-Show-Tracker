@@ -14,8 +14,6 @@
 
     using Microsoft.Windows.Shell;
 
-    using RoliSoft.TVShowTracker.Helpers;
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -50,46 +48,49 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WindowSourceInitialized(object sender, EventArgs e)
         {
-            if (GlassHelper.IsCompositionEnabled)
+            if (SystemParameters2.Current.IsGlassEnabled)
             {
-                WindowChrome.SetWindowChrome(this, new WindowChrome());
+                WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
+                Background = Brushes.Transparent;
             }
-
-            GlassHelper.ExtendGlassFrameComplete(this);
-
-            if (!GlassHelper.IsCompositionEnabled)
+            else
             {
                 Background         = new SolidColorBrush(Color.FromArgb(Drawing.SystemColors.ControlDark.A, Drawing.SystemColors.ControlDark.R, Drawing.SystemColors.ControlDark.G, Drawing.SystemColors.ControlDark.B));
                 mainBorder.Padding = logoMenu.Margin = new Thickness(0);
                 logoMenu.Width     = SystemParameters.PrimaryScreenWidth;
                 logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Collapsed;
             }
+
+            SystemParameters2.Current.PropertyChanged += AeroChanged;
         }
 
         /// <summary>
-        /// This method is called from GlassHelper.cs when a DWMCOMPOSITIONCHANGED message is received.
+        /// This method is called when a system parameter from <c>SystemParameters2</c> is changed.
         /// </summary>
-        public void AeroChanged()
+        public void AeroChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Dispatcher.Invoke((Action)(() =>
-                {
-                    if (GlassHelper.IsCompositionEnabled)
+            if (e.PropertyName == "IsGlassEnabled")
+            {
+                Dispatcher.Invoke((Action)(() =>
                     {
-                        WindowChrome.SetWindowChrome(this, new WindowChrome());
-                        GlassHelper.ExtendGlassFrameComplete(this);
+                        if (SystemParameters2.Current.IsGlassEnabled)
+                        {
+                            WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
+                            Background = Brushes.Transparent;
 
-                        mainBorder.Padding = new Thickness(5);
-                        logoMenu.Margin    = new Thickness(6, -1, 0, 0);
-                        logoMenu.Width     = 157;
-                        logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        // I couldn't figure out how to remove the WindowChrome from the window,
-                        // so we'll just restart the application for that. (TODO)
-                        Restart();
-                    }
-                }));
+                            mainBorder.Padding = new Thickness(5);
+                            logoMenu.Margin    = new Thickness(6, -1, 0, 0);
+                            logoMenu.Width     = 157;
+                            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            // I couldn't figure out how to remove the WindowChrome from the window,
+                            // so we'll just restart the application for that. (TODO)
+                            Restart();
+                        }
+                    }));
+            }
         }
 
         /// <summary>

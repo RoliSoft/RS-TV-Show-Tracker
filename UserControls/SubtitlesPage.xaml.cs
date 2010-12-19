@@ -13,7 +13,6 @@
 
     using Microsoft.Win32;
 
-    using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
@@ -362,7 +361,7 @@
             var uri = new Uri(sub.URL);
             SetStatus("Sending request to " + uri.DnsSafeHost.Replace("www.", string.Empty) + "...", true);
 
-            var wc  = new WebClientExt();
+            var wc  = new Utils.SmarterWebClient();
             var tmp = Utils.GetRandomFileName();
 
             wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
@@ -379,7 +378,7 @@
         /// <param name="e">The <see cref="System.ComponentModel.AsyncCompletedEventArgs"/> instance containing the event data.</param>
         private void WebClientDownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
-            var web   = sender as WebClientExt;
+            var web   = sender as Utils.SmarterWebClient;
             var token = e.UserState as string[];
             var file  = web.FileName;
 

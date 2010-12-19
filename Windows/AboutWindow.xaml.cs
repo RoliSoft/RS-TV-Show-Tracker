@@ -3,9 +3,7 @@
     using System;
 
     using Microsoft.WindowsAPICodePack.Shell;
-
-    using RoliSoft.TVShowTracker.Helpers;
-
+    
     /// <summary>
     /// Interaction logic for AboutWindow.xaml
     /// </summary>
