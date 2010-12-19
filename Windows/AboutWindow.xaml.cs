@@ -1,14 +1,15 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Windows;
+
+    using Microsoft.WindowsAPICodePack.Shell;
 
     using RoliSoft.TVShowTracker.Helpers;
 
     /// <summary>
     /// Interaction logic for AboutWindow.xaml
     /// </summary>
-    public partial class AboutWindow : Window
+    public partial class AboutWindow : GlassWindow
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AboutWindow"/> class.
@@ -25,10 +26,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void GlassWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (GlassHelper.IsCompositionEnabled)
+            if (AeroGlassCompositionEnabled)
             {
-                GlassHelper.ExtendGlassFrameComplete(this);
-                GlassHelper.SetWindowThemeAttribute(this, false, false);
+                SetAeroGlassTransparency();
             }
 
             site.Content = string.Format(site.Content.ToString(), DateTime.Now.Year);
