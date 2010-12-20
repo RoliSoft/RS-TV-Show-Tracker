@@ -36,7 +36,7 @@
 
             foreach (var process in processes)
             {
-                sb.AppendLine(Utils.RunAndRead("handle.exe", "-accepteula -p " + process));
+                sb.AppendLine(Utils.RunAndRead(Path.Combine(Signature.FullPath, "handle.exe"), "-accepteula -p " + process));
             }
 
             return Regex.Matches(sb.ToString(), @"(?:D|\-)\)\s+(.+)(?:\r|$)")
@@ -50,7 +50,7 @@
         /// </summary>
         public static void CheckOpenFiles()
         {
-            if (!File.Exists("handle.exe"))
+            if (!File.Exists(Path.Combine(Signature.FullPath, "handle.exe")))
             {
                 return;
             }

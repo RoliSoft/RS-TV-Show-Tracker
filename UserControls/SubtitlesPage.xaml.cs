@@ -325,6 +325,8 @@
         /// </summary>
         private void SubtitleSearchDone()
         {
+            ActiveSearch = null;
+            
             Dispatcher.Invoke((Action)(() =>
                 {
                     textBox.IsEnabled    = true;

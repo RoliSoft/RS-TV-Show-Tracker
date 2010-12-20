@@ -426,6 +426,8 @@
         /// </summary>
         private void DownloadSearchDone()
         {
+            ActiveSearch = null;
+
             Dispatcher.Invoke((Action)(() =>
                 {
                     textBox.IsEnabled    = true;

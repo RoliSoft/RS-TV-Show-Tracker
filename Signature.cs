@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// Contains informations about the assembly.
@@ -42,6 +43,14 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this assembly is obfuscated.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this assembly is obfuscated; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsObfuscated { get; private set; }
+
+        /// <summary>
         /// Gets the full path to the executing assembly.
         /// </summary>
         /// <value>The full path.</value>
@@ -65,9 +74,10 @@
         {
             var ver = Assembly.GetExecutingAssembly().GetName().Version;
 
-            Version     = ver.Major + "." + ver.MajorRevision + "." + ver.Build.ToString("0000") + "." + ver.Revision.ToString("00000");
-            CompileTime = new DateTime(2000, 1, 1, 1, 0, 0).AddDays(ver.Build).AddSeconds(ver.Revision * 2);
-            FullPath    = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\";
+            Version      = ver.Major + "." + ver.MajorRevision + "." + ver.Build.ToString("0000") + "." + ver.Revision.ToString("00000");
+            CompileTime  = new DateTime(2000, 1, 1, 1, 0, 0).AddDays(ver.Build).AddSeconds(ver.Revision * 2);
+            IsObfuscated = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(SuppressIldasmAttribute), false).Length == 1;
+            FullPath     = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar;
         }
     }
 }
