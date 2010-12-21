@@ -30,17 +30,17 @@
         /// <summary>
         /// Occurs when a subtitle search is done on all engines.
         /// </summary>
-        public event SubtitleSearchDone SubtitleSearchDone;
+        public event EventHandler<EventArgs> SubtitleSearchDone;
 
         /// <summary>
         /// Occurs when a subtitle search progress has changed.
         /// </summary>
-        public event SubtitleSearchProgressChanged SubtitleSearchProgressChanged;
+        public event EventHandler<EventArgs<List<SubtitleSearchEngine.Subtitle>, double, List<string>>> SubtitleSearchProgressChanged;
 
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
         /// </summary>
-        public event SubtitleSearchError SubtitleSearchError;
+        public event EventHandler<EventArgs<string, string>> SubtitleSearchError;
 
         /// <summary>
         /// Gets or sets the search engines.
@@ -93,39 +93,32 @@
         /// <summary>
         /// Called when a subtitle search is done.
         /// </summary>
-        /// <param name="name">The name of the engine.</param>
-        /// <param name="subtitles">The found subtitles.</param>
-        private void SingleSubtitleSearchDone(string name, List<SubtitleSearchEngine.Subtitle> subtitles)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;&gt;"/> instance containing the event data.</param>
+        private void SingleSubtitleSearchDone(object sender, EventArgs<List<SubtitleSearchEngine.Subtitle>> e)
         {
-            _remaining.Remove(name);
+            _remaining.Remove((sender as SubtitleSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
-            if (SubtitleSearchProgressChanged != null)
-            {
-                SubtitleSearchProgressChanged(subtitles, percentage, _remaining);
-            }
+            SubtitleSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
 
-            if (_remaining.Count == 0 && SubtitleSearchDone != null)
+            if (_remaining.Count == 0)
             {
-                SubtitleSearchDone();
+                SubtitleSearchDone.Fire(this);
             }
         }
 
         /// <summary>
         /// Called when a subtitle search has encountered an error.
         /// </summary>
-        /// <param name="name">The name of the engine.</param>
-        /// <param name="message">The error message.</param>
-        /// <param name="detailed">The detailed error message.</param>
-        private void SingleSubtitleSearchError(string name, string message, string detailed = null)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
+        private void SingleSubtitleSearchError(object sender, EventArgs<string, string> e)
         {
-            _remaining.Remove(name);
+            _remaining.Remove((sender as SubtitleSearchEngine).Name);
 
-            if (SubtitleSearchError != null)
-            {
-                SubtitleSearchError(message, detailed);
-            }
+            SubtitleSearchError.Fire(this, e.First, e.Second);
         }
     }
 }

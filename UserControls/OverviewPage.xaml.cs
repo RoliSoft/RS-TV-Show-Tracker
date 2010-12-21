@@ -389,46 +389,43 @@
         /// <summary>
         /// Called when the online search is done.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="url">The URL.</param>
-        public static void OnlineSearchDone(string name, string url)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
+        public static void OnlineSearchDone(object sender, EventArgs<string, string> e)
         {
-            Utils.Run(url);
+            Utils.Run(e.Second);
         }
 
         /// <summary>
         /// Called when the online search has encountered an error.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="message">The message.</param>
-        /// <param name="linkTitle">The link title.</param>
-        /// <param name="linkUrl">The link URL.</param>
-        /// <param name="detailed">The detailed error message.</param>
-        public static void OnlineSearchError(string name, string message, string linkTitle = null, string linkUrl = null, string detailed = null)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String,System.Tuple&lt;System.String,System.String,System.String&gt;&gt;"/> instance containing the event data.</param>
+        public static void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
             var td = new TaskDialog
-            {
-                Icon            = TaskDialogStandardIcon.Error,
-                Caption         = "No videos found",
-                InstructionText = name,
-                Text            = message,
-                Cancelable      = true,
-                StandardButtons = TaskDialogStandardButtons.Ok
-            };
+                {
+                    Icon            = TaskDialogStandardIcon.Error,
+                    Caption         = "No videos found",
+                    InstructionText = e.First,
+                    Text            = e.Second,
+                    Cancelable      = true,
+                    StandardButtons = TaskDialogStandardButtons.Ok
+                };
 
-            if (!string.IsNullOrWhiteSpace(detailed))
+            if (!string.IsNullOrWhiteSpace(e.Third.Item3))
             {
-                td.DetailsExpandedText = detailed;
+                td.DetailsExpandedText = e.Third.Item3;
             }
 
-            if (!string.IsNullOrEmpty(linkTitle))
+            if (!string.IsNullOrEmpty(e.Third.Item1))
             {
-                var fd = new TaskDialogCommandLink { Text = linkTitle };
-                fd.Click += (sender, e) =>
-                {
-                    td.Close();
-                    Utils.Run(linkUrl);
-                };
+                var fd = new TaskDialogCommandLink { Text = e.Third.Item1 };
+                fd.Click += (s, r) =>
+                    {
+                        td.Close();
+                        Utils.Run(e.Third.Item2);
+                    };
 
                 td.Controls.Add(fd);
             }
@@ -455,16 +452,16 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on Hulu...", true);
 
             var os = new Hulu();
-
-            os.OnlineSearchDone += (name, url) =>
+            
+            os.OnlineSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OnlineSearchDone(name, url);
+                    OnlineSearchDone(sender2, e2);
                 };
-            os.OnlineSearchError += (name, message, linkTitle, linkUrl, detailed) =>
+            os.OnlineSearchError += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OnlineSearchError(name, message, linkTitle, linkUrl, detailed);
+                    OnlineSearchError(sender2, e2);
                 };
 
             os.SearchAsync(show[0], show[1], title);
@@ -484,16 +481,16 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on iPlayer...", true);
 
             var os = new BBCiPlayer();
-
-            os.OnlineSearchDone += (name, url) =>
+            
+            os.OnlineSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OnlineSearchDone(name, url);
+                    OnlineSearchDone(sender2, e2);
                 };
-            os.OnlineSearchError += (name, message, linkTitle, linkUrl, detailed) =>
+            os.OnlineSearchError += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OnlineSearchError(name, message, linkTitle, linkUrl, detailed);
+                    OnlineSearchError(sender2, e2);
                 };
 
             os.SearchAsync(show[0], show[1]);
@@ -513,16 +510,16 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on SideReel...", true);
 
             var os = new SideReel();
-
-            os.OnlineSearchDone += (name, url) =>
+            
+            os.OnlineSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OnlineSearchDone(name, url);
+                    OnlineSearchDone(sender2, e2);
                 };
-            os.OnlineSearchError += (name, message, linkTitle, linkUrl, detailed) =>
+            os.OnlineSearchError += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OnlineSearchError(name, message, linkTitle, linkUrl, detailed);
+                    OnlineSearchError(sender2, e2);
                 };
 
             os.SearchAsync(show[0], show[1]);

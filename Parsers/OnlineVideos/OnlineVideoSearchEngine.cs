@@ -4,16 +4,6 @@
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Occurs when an online search is done.
-    /// </summary>
-    public delegate void OnlineSearchDone(string name, string url);
-
-    /// <summary>
-    /// Occurs when an online search has encountered an error.
-    /// </summary>
-    public delegate void OnlineSearchError(string name, string message, string linkTitle = null, string linkUrl = null, string detailed = null);
-
-    /// <summary>
     /// Provides methods to search for episodes on online services.
     /// </summary>
     public abstract class OnlineVideoSearchEngine
@@ -21,12 +11,12 @@
         /// <summary>
         /// Occurs when an online search is done.
         /// </summary>
-        public event OnlineSearchDone OnlineSearchDone;
+        public event EventHandler<EventArgs<string, string>> OnlineSearchDone;
 
         /// <summary>
         /// Occurs when an online search has encountered an error.
         /// </summary>
-        public event OnlineSearchError OnlineSearchError;
+        public event EventHandler<EventArgs<string, string, Tuple<string, string, string>>> OnlineSearchError;
 
         /// <summary>
         /// Searches for videos on the service.
@@ -50,15 +40,15 @@
                     try
                     {
                         var url = Search(name, episode, extra);
-                        OnlineSearchDone(name + " " + episode, url);
+                        OnlineSearchDone.Fire(this, name + " " + episode, url);
                     }
                     catch (OnlineVideoNotFoundException ex)
                     {
-                        OnlineSearchError(name + " " + episode, ex.Message, ex.LinkTitle, ex.LinkUrl);
+                        OnlineSearchError.Fire(this, name + " " + episode, ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkUrl, null));
                     }
                     catch (Exception ex)
                     {
-                        OnlineSearchError(name + " " + episode, "There was an error while searching for the video on this service.", detailed: ex.Message);
+                        OnlineSearchError.Fire(this, name + " " + episode, "There was an error while searching for the video on this service.", new Tuple<string, string, string>(null, null, ex.Message));
                     }
                 }).Start();
         }

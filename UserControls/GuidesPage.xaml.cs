@@ -410,15 +410,15 @@
 
             var os = new Hulu();
 
-            os.OnlineSearchDone += (name, url) =>
+            os.OnlineSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OverviewPage.OnlineSearchDone(name, url);
+                    OverviewPage.OnlineSearchDone(sender2, e2);
                 };
-            os.OnlineSearchError += (name, message, linkTitle, linkUrl, detailed) =>
+            os.OnlineSearchError += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OverviewPage.OnlineSearchError(name, message, linkTitle, linkUrl, detailed);
+                    OverviewPage.OnlineSearchError(sender2, e2);
                 };
 
             os.SearchAsync(show[0], show[1], title);
@@ -438,16 +438,16 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on iPlayer...", true);
 
             var os = new BBCiPlayer();
-
-            os.OnlineSearchDone += (name, url) =>
+            
+            os.OnlineSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OverviewPage.OnlineSearchDone(name, url);
+                    OverviewPage.OnlineSearchDone(sender2, e2);
                 };
-            os.OnlineSearchError += (name, message, linkTitle, linkUrl, detailed) =>
+            os.OnlineSearchError += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OverviewPage.OnlineSearchError(name, message, linkTitle, linkUrl, detailed);
+                    OverviewPage.OnlineSearchError(sender2, e2);
                 };
 
             os.SearchAsync(show[0], show[1]);
@@ -467,16 +467,16 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on SideReel...", true);
 
             var os = new SideReel();
-
-            os.OnlineSearchDone += (name, url) =>
+            
+            os.OnlineSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OverviewPage.OnlineSearchDone(name, url);
+                    OverviewPage.OnlineSearchDone(sender2, e2);
                 };
-            os.OnlineSearchError += (name, message, linkTitle, linkUrl, detailed) =>
+            os.OnlineSearchError += (sender2, e2) =>
                 {
                     ResetStatus();
-                    OverviewPage.OnlineSearchError(name, message, linkTitle, linkUrl, detailed);
+                    OverviewPage.OnlineSearchError(sender2, e2);
                 };
 
             os.SearchAsync(show[0], show[1]);

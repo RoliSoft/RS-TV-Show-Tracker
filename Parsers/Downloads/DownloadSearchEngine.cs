@@ -5,16 +5,6 @@
     using System.Threading;
 
     /// <summary>
-    /// Occurs when a download link search is done.
-    /// </summary>
-    public delegate void DownloadSearchDone(string name, List<DownloadSearchEngine.Link> links);
-
-    /// <summary>
-    /// Occurs when a download link search has encountered an error.
-    /// </summary>
-    public delegate void DownloadSearchError(string name, string message, string detailed = null);
-
-    /// <summary>
     /// Represents a download link search engine.
     /// </summary>
     public abstract class DownloadSearchEngine
@@ -52,12 +42,12 @@
         /// <summary>
         /// Occurs when a download link search is done.
         /// </summary>
-        public event DownloadSearchDone DownloadSearchDone;
+        public event EventHandler<EventArgs<List<Link>>> DownloadSearchDone;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
         /// </summary>
-        public event DownloadSearchError DownloadSearchError;
+        public event EventHandler<EventArgs<string, string>> DownloadSearchError;
 
         /// <summary>
         /// Searches for download links on the service.
@@ -84,7 +74,7 @@
                     try
                     {
                         var list = Search(query);
-                        DownloadSearchDone(Name, list);
+                        DownloadSearchDone.Fire(this, list);
                     }
                     catch (Exception ex)
                     {
@@ -93,7 +83,7 @@
                             return;
                         }
 
-                        DownloadSearchError(Name, "There was an error while searching for download links.", ex.Message);
+                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
                     }
                 });
             _job.Start();

@@ -8,21 +8,6 @@
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
-    /// Occurs when a download link search is done on all engines.
-    /// </summary>
-    public delegate void DownloadSearchDone();
-
-    /// <summary>
-    /// Occurs when a download link search progress has changed.
-    /// </summary>
-    public delegate void DownloadSearchProgressChanged(List<DownloadSearchEngine.Link> links, double percentage, List<string> remaining);
-
-    /// <summary>
-    /// Occurs when a download link search has encountered an error.
-    /// </summary>
-    public delegate void DownloadSearchError(string message, string detailed = null);
-
-    /// <summary>
     /// Provides methods for searching download links on multiple provides asynchronously.
     /// </summary>
     public class DownloadSearch
@@ -30,17 +15,17 @@
         /// <summary>
         /// Occurs when a download link search is done on all engines.
         /// </summary>
-        public event DownloadSearchDone DownloadSearchDone;
+        public event EventHandler<EventArgs> DownloadSearchDone;
 
         /// <summary>
         /// Occurs when a download link search progress has changed.
         /// </summary>
-        public event DownloadSearchProgressChanged DownloadSearchProgressChanged;
+        public event EventHandler<EventArgs<List<DownloadSearchEngine.Link>, double, List<string>>> DownloadSearchProgressChanged;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
         /// </summary>
-        public event DownloadSearchError DownloadSearchError;
+        public event EventHandler<EventArgs<string, string>> DownloadSearchError;
 
         /// <summary>
         /// Gets or sets the search engines.
@@ -104,39 +89,32 @@
         /// <summary>
         /// Called when a download link search is done.
         /// </summary>
-        /// <param name="name">The name of the engine.</param>
-        /// <param name="links">The found links.</param>
-        private void SingleDownloadSearchDone(string name, List<DownloadSearchEngine.Link> links)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;&gt;"/> instance containing the event data.</param>
+        private void SingleDownloadSearchDone(object sender, EventArgs<List<DownloadSearchEngine.Link>> e)
         {
-            _remaining.Remove(name);
+            _remaining.Remove((sender as DownloadSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
-            if (DownloadSearchProgressChanged != null)
-            {
-                DownloadSearchProgressChanged(links, percentage, _remaining);
-            }
+            DownloadSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
 
-            if (_remaining.Count == 0 && DownloadSearchDone != null)
+            if (_remaining.Count == 0)
             {
-                DownloadSearchDone();
+                DownloadSearchDone.Fire(this);
             }
         }
 
         /// <summary>
         /// Called when a download link search has encountered an error.
         /// </summary>
-        /// <param name="name">The name of the engine.</param>
-        /// <param name="message">The error message.</param>
-        /// <param name="detailed">The detailed error message.</param>
-        private void SingleDownloadSearchError(string name, string message, string detailed = null)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
+        private void SingleDownloadSearchError(object sender, EventArgs<string, string> e)
         {
-            _remaining.Remove(name);
+            _remaining.Remove((sender as DownloadSearchEngine).Name);
 
-            if (DownloadSearchError != null)
-            {
-                DownloadSearchError(message, detailed);
-            }
+            DownloadSearchError.Fire(this, e.First, e.Second);
         }
     }
 }

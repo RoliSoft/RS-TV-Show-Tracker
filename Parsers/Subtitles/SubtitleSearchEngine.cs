@@ -5,16 +5,6 @@
     using System.Threading;
 
     /// <summary>
-    /// Occurs when a subtitle search is done.
-    /// </summary>
-    public delegate void SubtitleSearchDone(string name, List<SubtitleSearchEngine.Subtitle> subtitles);
-
-    /// <summary>
-    /// Occurs when a subtitle search has encountered an error.
-    /// </summary>
-    public delegate void SubtitleSearchError(string name, string message, string detailed = null);
-
-    /// <summary>
     /// Represents a subtitle search engine.
     /// </summary>
     public abstract class SubtitleSearchEngine
@@ -34,12 +24,12 @@
         /// <summary>
         /// Occurs when a subtitle search is done.
         /// </summary>
-        public event SubtitleSearchDone SubtitleSearchDone;
+        public event EventHandler<EventArgs<List<Subtitle>>> SubtitleSearchDone;
 
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
         /// </summary>
-        public event SubtitleSearchError SubtitleSearchError;
+        public event EventHandler<EventArgs<string, string>> SubtitleSearchError;
 
         /// <summary>
         /// Searches for subtitles on the service.
@@ -66,7 +56,7 @@
                     try
                     {
                         var list = Search(query);
-                        SubtitleSearchDone(Name, list);
+                        SubtitleSearchDone.Fire(this, list);
                     }
                     catch (Exception ex)
                     {
@@ -75,7 +65,7 @@
                             return;
                         }
 
-                        SubtitleSearchError(Name, "There was an error while searching for subtitles.", ex.Message);
+                        SubtitleSearchError.Fire(this, "There was an error while searching for subtitles.", ex.Message);
                     }
                 });
             _job.Start();

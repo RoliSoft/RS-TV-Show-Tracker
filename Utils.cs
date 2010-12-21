@@ -23,6 +23,70 @@
     public static partial class Utils
     {
         /// <summary>
+        /// Extension method to <c>EventHandler&lt;EventArgs&gt;</c> to fire an event.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <param name="sender">The sender.</param>
+        public static void Fire(this EventHandler<EventArgs> handler, object sender)
+        {
+            if (handler != null)
+            {
+                handler(sender, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T&gt;&gt;</c> to fire an event.
+        /// </summary>
+        /// <typeparam name="T">The type of the data.</typeparam>
+        /// <param name="handler">The handler.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="data">The data.</param>
+        public static void Fire<T>(this EventHandler<EventArgs<T>> handler, object sender, T data)
+        {
+            if (handler != null)
+            {
+                handler(sender, new EventArgs<T>(data));
+            }
+        }
+
+        /// <summary>
+        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T1, T2&gt;&gt;</c> to fire an event.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first data.</typeparam>
+        /// <typeparam name="T2">The type of the second data.</typeparam>
+        /// <param name="handler">The handler.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="first">The first data.</param>
+        /// <param name="second">The second data.</param>
+        public static void Fire<T1, T2>(this EventHandler<EventArgs<T1, T2>> handler, object sender, T1 first, T2 second)
+        {
+            if (handler != null)
+            {
+                handler(sender, new EventArgs<T1, T2>(first, second));
+            }
+        }
+
+        /// <summary>
+        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T1, T2, T3&gt;&gt;</c> to fire an event.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first data.</typeparam>
+        /// <typeparam name="T2">The type of the second data.</typeparam>
+        /// <typeparam name="T3">The type of the third data.</typeparam>
+        /// <param name="handler">The handler.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="first">The first data.</param>
+        /// <param name="second">The second data.</param>
+        /// <param name="third">The third data.</param>
+        public static void Fire<T1, T2, T3>(this EventHandler<EventArgs<T1, T2, T3>> handler, object sender, T1 first, T2 second, T3 third)
+        {
+            if (handler != null)
+            {
+                handler(sender, new EventArgs<T1, T2, T3>(first, second, third));
+            }
+        }
+
+        /// <summary>
         /// Extension method to <c>List&lt;T&gt;</c> to move an item.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -78,6 +142,8 @@
         /// <returns>Relative date.</returns>
         public static string NextAir(this DateTime nextdate, bool detailed = false)
         {
+            var cal = CultureInfo.InvariantCulture.Calendar;
+
             if (DateTime.Now.Year == nextdate.Year)
             {
                 if (DateTime.Now.ToShortDateString() == nextdate.ToShortDateString())
@@ -95,27 +161,27 @@
                     return "Yesterday at " + nextdate.ToString("h:mm tt");
                 }
 
-                if (CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday) == CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                if (cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
                 {
                     return (detailed ? "This " : string.Empty) + nextdate.DayOfWeek + " at " + nextdate.ToString("h:mm tt");
                 }
 
-                if (CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.Now.AddDays(7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                if (cal.GetWeekOfYear(DateTime.Now.AddDays(7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
                 {
                     return "Next " + nextdate.DayOfWeek + " at " + nextdate.ToString("h:mm tt");
                 }
 
-                if (CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.Now.AddDays(-7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                if (cal.GetWeekOfYear(DateTime.Now.AddDays(-7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
                 {
                     return "Last " + nextdate.DayOfWeek + " at " + nextdate.ToString("h:mm tt");
                 }
 
-                var weeks = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
                 return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until air" : String.Empty);
             }
             else
             {
-                var weeks = (CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
                 return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until air" : String.Empty);
             }
         }

@@ -5,16 +5,6 @@
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Occurs when a recommendation request is processed.
-    /// </summary>
-    public delegate void RecommendationDone(List<RecommendationEngine.RecommendedShow> shows);
-
-    /// <summary>
-    /// Occurs when a recommendation engine has encountered an error.
-    /// </summary>
-    public delegate void RecommendationError(string message, string detailed = null);
-
-    /// <summary>
     /// Represents a recommendation engine.
     /// </summary>
     public abstract class RecommendationEngine
@@ -22,12 +12,12 @@
         /// <summary>
         /// Occurs when a recommendation request is processed.
         /// </summary>
-        public RecommendationDone RecommendationDone;
+        public EventHandler<EventArgs<List<RecommendedShow>>> RecommendationDone;
 
         /// <summary>
         /// Occurs when a recommendation engine has encountered an error.
         /// </summary>
-        public RecommendationError RecommendationError;
+        public EventHandler<EventArgs<string, string>> RecommendationError;
 
         /// <summary>
         /// Represents a recommended TV show.
@@ -63,11 +53,11 @@
                     try
                     {
                         var list = GetList(shows);
-                        RecommendationDone(list);
+                        RecommendationDone.Fire(this, list);
                     }
                     catch (Exception ex)
                     {
-                        RecommendationError("There was an error while getting the recommendations. Try again later.", ex.Message);
+                        RecommendationError.Fire(this, "There was an error while getting the recommendations. Try again later.", ex.Message);
                     }
                 }).Start();
         }

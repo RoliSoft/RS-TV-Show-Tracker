@@ -310,20 +310,24 @@
         /// <summary>
         /// Called when a subtitle search progress has changed.
         /// </summary>
-        private void SubtitleSearchProgressChanged(List<SubtitleSearchEngine.Subtitle> subtitles, double percentage, List<string> remaining)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
+        private void SubtitleSearchProgressChanged(object sender, EventArgs<List<SubtitleSearchEngine.Subtitle>, double, List<string>> e)
         {
-            SetStatus("Searching for subtitles on " + (string.Join(", ", remaining)) + "...", true);
+            SetStatus("Searching for subtitles on " + (string.Join(", ", e.Third)) + "...", true);
 
-            if (subtitles != null)
+            if (e.First != null)
             {
-                Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(subtitles.Where(sub => !_langExcl.Contains(sub.Language.ToString())))));
+                Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(e.First.Where(sub => !_langExcl.Contains(sub.Language.ToString())))));
             }
         }
 
         /// <summary>
         /// Called when a subtitle search is done on all engines.
         /// </summary>
-        private void SubtitleSearchDone()
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void SubtitleSearchDone(object sender = null, EventArgs e = null)
         {
             ActiveSearch = null;
             

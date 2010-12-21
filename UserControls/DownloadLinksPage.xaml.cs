@@ -18,6 +18,7 @@
 
     using Microsoft.Win32;
 
+    using RoliSoft.TVShowTracker;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using Image = System.Windows.Controls.Image;
@@ -399,17 +400,19 @@
         /// <summary>
         /// Called when a download link search progress has changed.
         /// </summary>
-        private void DownloadSearchProgressChanged(List<DownloadSearchEngine.Link> links, double percentage, List<string> remaining)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
+        private void DownloadSearchProgressChanged(object sender, EventArgs<List<DownloadSearchEngine.Link>, double, List<string>> e)
         {
-            SetStatus("Searching for download links on " + (string.Join(", ", remaining)) + "...", true);
+            SetStatus("Searching for download links on " + (string.Join(", ", e.Third)) + "...", true);
 
-            if (links != null)
+            if (e.First != null)
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
                         lock (_results)
                         {
-                            _results.AddRange(links.Select(link => new LinkItem(link)));
+                            _results.AddRange(e.First.Select(link => new LinkItem(link)));
                         }
 
                         DownloadLinksListViewItemCollection.Clear();
@@ -424,7 +427,9 @@
         /// <summary>
         /// Called when a download link search is done on all engines.
         /// </summary>
-        private void DownloadSearchDone()
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void DownloadSearchDone(object sender = null, EventArgs e = null)
         {
             ActiveSearch = null;
 

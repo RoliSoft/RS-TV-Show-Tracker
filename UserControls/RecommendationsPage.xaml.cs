@@ -142,30 +142,31 @@
         /// <summary>
         /// Called when the recommendation engine has encountered an error.
         /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="detailed">The detailed error message.</param>
-        public void RecommendationError(string message, string detailed = null)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
+        public void RecommendationError(object sender, EventArgs<string, string> e)
         {
-            SetStatus(message);
+            SetStatus(e.First);
         }
 
         /// <summary>
         /// Called when a recommendation request is processed.
         /// </summary>
-        /// <param name="shows">The recommended shows.</param>
-        public void RecommendationDone(List<RecommendationEngine.RecommendedShow> shows)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Recommendations.RecommendationEngine.RecommendedShow&gt;&gt;"/> instance containing the event data.</param>
+        public void RecommendationDone(object sender, EventArgs<List<RecommendationEngine.RecommendedShow>> e)
         {
             Dispatcher.Invoke((Action)(() =>
                 {
-                    // unfortunately there's no AddRange() for ObservableCollection<T> :(
-                    foreach (var show in shows)
+                    if (e.Data.Count != 0)
                     {
-                        RecommendationsListViewItemCollection.Add(show);
-                    }
+                        // unfortunately there's no AddRange() for ObservableCollection<T> :(
+                        foreach (var show in e.Data)
+                        {
+                            RecommendationsListViewItemCollection.Add(show);
+                        }
 
-                    if (shows.Count != 0)
-                    {
-                        SetStatus("There are " + shows.Count + " shows on the list which you might like.");
+                        SetStatus("There are " + e.Data.Count + " shows on the list which you might like.");
                     }
                     else
                     {
