@@ -431,7 +431,9 @@
         /// <summary>
         /// Called when the update is done.
         /// </summary>
-        public void UpdateDone()
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void UpdateDone(object sender, EventArgs e)
         {
             Dispatcher.Invoke((Action)(() =>
                 {
@@ -443,9 +445,11 @@
         /// <summary>
         /// Called when the update has encountered an error.
         /// </summary>
-        public void UpdateError(string message, Exception exception, bool fatalToShow, bool fatalToWholeUpdate)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.Exception,System.Boolean,System.Boolean&gt;"/> instance containing the event data.</param>
+        public void UpdateError(object sender, EventArgs<string, Exception, bool, bool> e)
         {
-            if (fatalToWholeUpdate)
+            if (e.Fourth) // fatal to whole update
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
@@ -458,12 +462,12 @@
         /// <summary>
         /// Called when the progress has changed on the update.
         /// </summary>
-        public void UpdateProgressChanged(string show, double percentage)
+        public void UpdateProgressChanged(object sender, EventArgs<string, double> e)
         {
             Dispatcher.Invoke((Action)(() =>
                 {
-                    lastUpdatedLabel.Content = "updating " + show + " (" + percentage.ToString("0.00") + "%)";
-                    SetHeaderProgress(percentage);
+                    lastUpdatedLabel.Content = "updating " + e.First + " (" + e.Second.ToString("0.00") + "%)";
+                    SetHeaderProgress(e.Second);
                 }));
         }
         #endregion

@@ -29,17 +29,17 @@
         /// <summary>
         /// Occurs when the update is done.
         /// </summary>
-        public event UpdateDone UpdateDone;
+        public event EventHandler<EventArgs> UpdateDone;
 
         /// <summary>
         /// Occurs when the update has encountered an error.
         /// </summary>
-        public event UpdateError UpdateError;
+        public event EventHandler<EventArgs<string, Exception, bool, bool>> UpdateError;
 
         /// <summary>
         /// Occurs when the progress has changed on the update.
         /// </summary>
-        public event UpdateProgressChanged UpdateProgressChanged;
+        public event EventHandler<EventArgs<string, double>> UpdateProgressChanged;
 
         /// <summary>
         /// Does the update.
@@ -54,10 +54,7 @@
             }
             catch (Exception ex)
             {
-                if (UpdateError != null)
-                {
-                    UpdateError("Could not begin SQLite transaction.", ex, false, true);
-                }
+                UpdateError.Fire(this, "Could not begin SQLite transaction.", ex, false, true);
                 return;
             }
 
@@ -68,10 +65,7 @@
             foreach (var r in shows)
             {
                 // fire event
-                if (UpdateProgressChanged != null)
-                {
-                    UpdateProgressChanged(r["name"], ++i / shows.Count * 100);
-                }
+                UpdateProgressChanged.Fire(this, r["name"], ++i / shows.Count * 100);
 
                 // get guide
                 Guide guide;
@@ -83,10 +77,7 @@
                 }
                 catch (Exception ex)
                 {
-                    if (UpdateError != null)
-                    {
-                        UpdateError("Could not get guide object for '" + r["name"] + "'", ex, true, false);
-                    }
+                    UpdateError.Fire(this, "Could not get guide object for '" + r["name"] + "'", ex, true, false);
                     continue;
                 }
 
@@ -103,10 +94,7 @@
                 }
                 catch (Exception ex)
                 {
-                    if (UpdateError != null)
-                    {
-                        UpdateError("Could not get guide ID for '" + r["name"] + "'", ex, true, false);
-                    }
+                    UpdateError.Fire(this, "Could not get guide ID for '" + r["name"] + "'", ex, true, false);
                     continue;
                 }
 
@@ -118,10 +106,7 @@
                 }
                 catch (Exception ex)
                 {
-                    if (UpdateError != null)
-                    {
-                        UpdateError("Could not get guide data for '" + r["name"] + "'", ex, true, false);
-                    }
+                    UpdateError.Fire(this, "Could not get guide data for '" + r["name"] + "'", ex, true, false);
                     continue;
                 }
 
@@ -155,10 +140,7 @@
                     }
                     catch (Exception ex)
                     {
-                        if (UpdateError != null)
-                        {
-                            UpdateError(string.Format("Could not insert '{0} S{1:00}E{2:00}' into database.", r["name"], ep.Season, ep.Number), ex, false, false);
-                        }
+                        UpdateError.Fire(this, string.Format("Could not insert '{0} S{1:00}E{2:00}' into database.", r["name"], ep.Season, ep.Number), ex, false, false);
                     }
                 }
             }
@@ -170,10 +152,7 @@
             }
             catch (Exception ex)
             {
-                if (UpdateError != null)
-                {
-                    UpdateError("Could not commit changes to database.", ex, false, true);
-                }
+                    UpdateError.Fire(this, "Could not commit changes to database.", ex, false, true);
                 return;
             }
 
@@ -185,20 +164,14 @@
             }
             catch (Exception ex)
             {
-                if (UpdateError != null)
-                {
-                    UpdateError("Could not vacuum the database.", ex, false, false);
-                }
+                UpdateError.Fire(this, "Could not vacuum the database.", ex, false, false);
             }
 
             // fire data change event
             MainWindow.Active.DataChanged();
 
             // fire event
-            if (UpdateDone != null)
-            {
-                UpdateDone();
-            }
+            UpdateDone.Fire(this);
         }
 
         /// <summary>
@@ -214,10 +187,7 @@
                     }
                     catch (Exception ex)
                     {
-                        if (UpdateError != null)
-                        {
-                            UpdateError("The update function has quit with an exception.", ex, false, true);
-                        }
+                        UpdateError.Fire(this, "The update function has quit with an exception.", ex, false, true);
                     }
                 }).Start();
         }

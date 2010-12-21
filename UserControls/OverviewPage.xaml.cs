@@ -231,10 +231,10 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 
             var finder = new FileSearch(path, show[0], show[1]);
-            finder.FileSearchDone += (name, files) =>
+            finder.FileSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();
-                    PlayEpisodeFileSearchDone(name, files);
+                    PlayEpisodeFileSearchDone(sender2, e2);
                 };
             finder.BeginSearch();
         }
@@ -242,25 +242,27 @@
         /// <summary>
         /// Event handler for <c>FileSearch.FileSearchDone</c>.
         /// </summary>
-        /// <param name="name">The name of the show.</param>
-        /// <param name="files">The files.</param>
-        public static void PlayEpisodeFileSearchDone(string name, List<string> files)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public static void PlayEpisodeFileSearchDone(object sender, EventArgs e)
         {
-            switch (files.Count)
+            var fs = sender as FileSearch;
+
+            switch (fs.Files.Count)
             {
                 case 0:
                     new TaskDialog
                         {
                             Icon            = TaskDialogStandardIcon.Error,
                             Caption         = "No files found",
-                            InstructionText = name,
+                            InstructionText = fs.ShowQuery,
                             Text            = "No files were found for this episode.",
                             Cancelable      = true
                         }.Show();
                     break;
 
                 case 1:
-                    Utils.Run(files.First());
+                    Utils.Run(fs.Files[0]);
                     break;
 
                 default:
@@ -269,17 +271,17 @@
                             {
                                 Icon            = TaskDialogStandardIcon.Information,
                                 Caption         = "Multiple files found",
-                                InstructionText = name,
+                                InstructionText = fs.ShowQuery,
                                 Text            = "Multiple files were found for this episode:",
                                 Cancelable      = true,
                                 StandardButtons = TaskDialogStandardButtons.Cancel
                             };
 
-                        foreach (var file in files)
+                        foreach (var file in fs.Files)
                         {
                             var tmp   = file;
                             var fd    = new TaskDialogCommandLink { Text = new FileInfo(file).Name };
-                            fd.Click += (sender, e) =>
+                            fd.Click += (s, r) =>
                                 {
                                     td.Close();
                                     Utils.Run(tmp);

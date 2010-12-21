@@ -350,11 +350,11 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 
             var finder = new FileSearch(path, show[0], show[1]);
-            finder.FileSearchDone += (name, files) =>
-            {
-                ResetStatus();
-                OverviewPage.PlayEpisodeFileSearchDone(name, files);
-            };
+            finder.FileSearchDone += (sender2, e2) =>
+                {
+                    ResetStatus();
+                    OverviewPage.PlayEpisodeFileSearchDone(sender2, e2);
+                };
             finder.BeginSearch();
         }
         #endregion

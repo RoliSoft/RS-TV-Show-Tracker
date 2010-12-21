@@ -94,4 +94,53 @@
             Third  = third;
         }
     }
+
+    /// <summary>
+    /// Generic <c>EventArgs</c> class accepting 4 arguments to further simplify event creation.
+    /// </summary>
+    /// <typeparam name="T1">The type of the first data.</typeparam>
+    /// <typeparam name="T2">The type of the second data.</typeparam>
+    /// <typeparam name="T3">The type of the third data.</typeparam>
+    /// <typeparam name="T4">The type of the fourth data.</typeparam>
+    public class EventArgs<T1, T2, T3, T4> : EventArgs
+    {
+        /// <summary>
+        /// Gets or sets the first data of type T.
+        /// </summary>
+        /// <value>The data.</value>
+        public T1 First { get; set; }
+
+        /// <summary>
+        /// Gets or sets the second data of type T.
+        /// </summary>
+        /// <value>The data.</value>
+        public T2 Second { get; set; }
+
+        /// <summary>
+        /// Gets or sets the third data of type T.
+        /// </summary>
+        /// <value>The data.</value>
+        public T3 Third { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fourth data of type T.
+        /// </summary>
+        /// <value>The data.</value>
+        public T4 Fourth { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventArgs&lt;T&gt;"/> class.
+        /// </summary>
+        /// <param name="first">The first data.</param>
+        /// <param name="second">The second data.</param>
+        /// <param name="third">The third data.</param>
+        /// <param name="fourth">The fourth data.</param>
+        public EventArgs(T1 first, T2 second, T3 third, T4 fourth)
+        {
+            First  = first;
+            Second = second;
+            Third  = third;
+            Fourth = fourth;
+        }
+    }
 }

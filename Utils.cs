@@ -87,6 +87,27 @@
         }
 
         /// <summary>
+        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T1, T2, T3, T4&gt;&gt;</c> to fire an event.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first data.</typeparam>
+        /// <typeparam name="T2">The type of the second data.</typeparam>
+        /// <typeparam name="T3">The type of the third data.</typeparam>
+        /// <typeparam name="T4">The type of the fourth data.</typeparam>
+        /// <param name="handler">The handler.</param>
+        /// <param name="sender">The sender.</param>
+        /// <param name="first">The first data.</param>
+        /// <param name="second">The second data.</param>
+        /// <param name="third">The third data.</param>
+        /// <param name="fourth">The fourth data.</param>
+        public static void Fire<T1, T2, T3, T4>(this EventHandler<EventArgs<T1, T2, T3, T4>> handler, object sender, T1 first, T2 second, T3 third, T4 fourth)
+        {
+            if (handler != null)
+            {
+                handler(sender, new EventArgs<T1, T2, T3, T4>(first, second, third, fourth));
+            }
+        }
+
+        /// <summary>
         /// Extension method to <c>List&lt;T&gt;</c> to move an item.
         /// </summary>
         /// <typeparam name="T"></typeparam>

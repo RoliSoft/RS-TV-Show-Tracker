@@ -8,21 +8,6 @@
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
-    /// Occurs when a subtitle search is done on all engines.
-    /// </summary>
-    public delegate void SubtitleSearchDone();
-
-    /// <summary>
-    /// Occurs when a subtitle search progress has changed.
-    /// </summary>
-    public delegate void SubtitleSearchProgressChanged(List<SubtitleSearchEngine.Subtitle> subtitles, double percentage, List<string> remaining);
-
-    /// <summary>
-    /// Occurs when a subtitle search has encountered an error.
-    /// </summary>
-    public delegate void SubtitleSearchError(string message, string detailed = null);
-
-    /// <summary>
     /// Provides methods for searching subtitles on multiple provides asynchronously.
     /// </summary>
     public class SubtitleSearch

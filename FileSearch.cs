@@ -1,15 +1,11 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-
-    /// <summary>
-    /// Occurs when a file search is done.
-    /// </summary>
-    public delegate void FileSearchDone(string name, List<string> files);
 
     /// <summary>
     /// Provides file search for finding the episodes on the disk.
@@ -19,7 +15,7 @@
         /// <summary>
         /// Occurs when a file search is done.
         /// </summary>
-        public event FileSearchDone FileSearchDone;
+        public event EventHandler<EventArgs> FileSearchDone;
 
         /// <summary>
         /// Gets the path where the search begins.
@@ -85,7 +81,7 @@
             ScanDirectoryForFile(StartPath);
 
             // fire event
-            FileSearchDone(ShowQuery, Files);
+            FileSearchDone.Fire(this);
         }
 
         /// <summary>
