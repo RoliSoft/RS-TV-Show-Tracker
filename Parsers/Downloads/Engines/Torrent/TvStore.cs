@@ -13,6 +13,7 @@
     /// <summary>
     /// Provides support for scraping tvstore.me.
     /// </summary>
+    [Parser("RoliSoft", "2009-12-12 6:01 PM")]
     public class TvStore : DownloadSearchEngine
     {
         /// <summary>
@@ -76,7 +77,7 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var gyors = Utils.GetURL("http://tvstore.me/torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.ReplaceEpisode(query, 1))).Replace('=', '_') + "&now=" + Utils.DateTimeToUnix(DateTime.Now), cookies: Cookies);
+            var gyors = Utils.GetURL("http://tvstore.me/torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.ReplaceEpisode(query, 1))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
             var arr   = gyors.Split('\\');
 
             if (arr[0] == "0")

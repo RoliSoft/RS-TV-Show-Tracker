@@ -259,10 +259,20 @@
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="source">The time zone of the specified date.</param>
-        /// <returns></returns>
+        /// <returns>DateTime in local timezone.</returns>
         public static DateTime ToLocalTimeZone(this DateTime date, string source = "Central Standard Time")
         {
             return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local);
+        }
+
+        /// <summary>
+        /// Extension method to DateTime to convert it into an Unix timestamp.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <returns>Converted Unix timestamp.</returns>
+        public static double ToUnixTimestamp(this DateTime date)
+        {
+            return Math.Floor((date - Utils.UnixEpoch).TotalSeconds);
         }
         #endregion
 
@@ -354,6 +364,18 @@
 
             var ret = value.Where(unit => unit.Value != 0).Aggregate(String.Empty, (current, unit) => current + (Utils.FormatNumber((int)unit.Value, unit.Key) + ", "));
             return Regex.Replace(ret.TrimEnd(", ".ToCharArray()), "(.+), ", "$1 and ");
+        }
+        #endregion
+
+        #region Double
+        /// <summary>
+        /// Extension method to double to convert the Unix timestamp into a DateTime object.
+        /// </summary>
+        /// <param name="timestamp">The Unix timestamp.</param>
+        /// <returns>Converted DateTime object.</returns>
+        public static DateTime GetUnixTimestamp(this double timestamp)
+        {
+            return Utils.UnixEpoch.AddSeconds(timestamp);
         }
         #endregion
 

@@ -8,6 +8,7 @@
     /// <summary>
     /// Provides support for scraping The Pirate Bay.
     /// </summary>
+    [Parser("RoliSoft", "2009-12-09 2:34 AM")]
     public class ThePirateBay : DownloadSearchEngine
     {
         /// <summary>

@@ -153,7 +153,7 @@
 
             var last = 0d;
             double.TryParse(Database.Setting("last update"), out last);
-            var ts = DateTime.Now - Utils.DateTimeFromUnix(last);
+            var ts = DateTime.Now - last.GetUnixTimestamp();
 
             Dispatcher.Invoke((Action)(() =>
                 {

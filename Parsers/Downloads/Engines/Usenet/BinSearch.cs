@@ -12,6 +12,7 @@
     /// <summary>
     /// Provides support for scraping BinSearch.
     /// </summary>
+    [Parser("RoliSoft", "2009-12-09 4:21 AM")]
     public class BinSearch : DownloadSearchEngine
     {
         /// <summary>

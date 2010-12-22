@@ -30,26 +30,6 @@
         }
 
         /// <summary>
-        /// Converts an Unix timestamp into a DateTime object.
-        /// </summary>
-        /// <param name="timestamp">The Unix timestamp.</param>
-        /// <returns>Converted DateTime object.</returns>
-        public static DateTime DateTimeFromUnix(double timestamp)
-        {
-            return UnixEpoch.AddSeconds(timestamp);
-        }
-
-        /// <summary>
-        /// Converts a DateTime object into an Unix timestamp.
-        /// </summary>
-        /// <param name="date">The date.</param>
-        /// <returns>Converted Unix timestamp.</returns>
-        public static double DateTimeToUnix(DateTime date)
-        {
-            return Math.Floor((date - UnixEpoch).TotalSeconds);
-        }
-
-        /// <summary>
         /// Appends a unit to a number and makes it plural if the number is not 1.
         /// </summary>
         /// <param name="number">The number.</param>

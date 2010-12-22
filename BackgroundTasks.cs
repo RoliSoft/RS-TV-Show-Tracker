@@ -50,7 +50,7 @@
             var last = 0d;
             double.TryParse(Database.Setting("last update"), out last);
 
-            if ((DateTime.Now - Utils.DateTimeFromUnix(last)).TotalHours > 10)
+            if ((DateTime.Now - last.GetUnixTimestamp()).TotalHours > 10)
             {
                 MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.UpdateDatabaseClick()));
             }

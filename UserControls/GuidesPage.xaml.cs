@@ -289,14 +289,14 @@
 
             try
             {
-                var last = Database.Query("select name, airdate from episodes where showid = ? and airdate < ? and airdate != 0 order by (season * 1000 + episode) desc limit 1", id, Utils.DateTimeToUnix(DateTime.Now));
-                var next = Database.Query("select name, airdate from episodes where showid = ? and airdate > ? order by (season * 1000 + episode) asc limit 1", id, Utils.DateTimeToUnix(DateTime.Now));
+                var last = Database.Query("select name, airdate from episodes where showid = ? and airdate < ? and airdate != 0 order by (season * 1000 + episode) desc limit 1", id, DateTime.Now.ToUnixTimestamp());
+                var next = Database.Query("select name, airdate from episodes where showid = ? and airdate > ? order by (season * 1000 + episode) asc limit 1", id, DateTime.Now.ToUnixTimestamp());
 
                 showGeneralLast.Text = last.Count != 0 ? last[0]["name"] : string.Empty;
                 showGeneralNext.Text = next.Count != 0 ? next[0]["name"] : string.Empty;
 
-                showGeneralLastDate.Text = last.Count != 0 ? Utils.DateTimeFromUnix(double.Parse(last[0]["airdate"])).ToRelativeDate(true) : "no data available";
-                showGeneralNextDate.Text = next.Count != 0 ? Utils.DateTimeFromUnix(double.Parse(next[0]["airdate"])).ToRelativeDate(true) : airing ? "no data available" : "this show has ended";
+                showGeneralLastDate.Text = last.Count != 0 ? double.Parse(last[0]["airdate"]).GetUnixTimestamp().ToRelativeDate(true) : "no data available";
+                showGeneralNextDate.Text = next.Count != 0 ? double.Parse(next[0]["airdate"]).GetUnixTimestamp().ToRelativeDate(true) : airing ? "no data available" : "this show has ended";
             }
             catch
             {
@@ -321,7 +321,7 @@
                         Id      = show["id"],
                         Episode = Regex.Replace(show["notation"], @"(?=[SE][0-9]{3})([SE])0", "$1"),
                         AirDate = show["airdate"] != "0"
-                                  ? Utils.DateTimeFromUnix(double.Parse(show["airdate"])).ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (Utils.DateTimeFromUnix(double.Parse(show["airdate"])) > DateTime.Now ? "*" : string.Empty)
+                                  ? double.Parse(show["airdate"]).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (double.Parse(show["airdate"]).GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
                                   : "Unaired episode",
                         Title   = show["name"],
                         Summary = show["descr"],

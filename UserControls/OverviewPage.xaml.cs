@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
@@ -13,7 +12,6 @@
 
     using Microsoft.WindowsAPICodePack.Dialogs;
 
-    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
     /// <summary>
@@ -44,6 +42,7 @@
             public string TitleColor { get; set; }
             public string NextColor { get; set; }
             public string MarkAsSeenVisible { get; set; }
+            public string PlayNextVisible { get; set; }
         }
 
         /// <summary>
@@ -164,7 +163,7 @@
 
             OverviewListViewItemCollection.Clear();
 
-            var shows = Database.Query("select name, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || showid from episodes where tvshows.showid = episodes.showid and airdate < " + Utils.DateTimeToUnix(DateTime.Now) + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as title, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + Utils.DateTimeToUnix(DateTime.Now) + " order by (season * 1000 + episode) asc limit 1) as next, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
+            var shows = Database.Query("select name, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || showid from episodes where tvshows.showid = episodes.showid and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as title, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + DateTime.Now.ToUnixTimestamp() + " order by (season * 1000 + episode) asc limit 1) as next, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
 
             NewHelp.Visibility = shows.Count != 0 ? Visibility.Collapsed : Visibility.Visible;
 
@@ -175,13 +174,13 @@
                 show["title"] = Regex.Replace(title[0], @"(?=[SE][0-9]{3})([SE])0", "$1");
 
                 var showid = title[1];
-                var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + Utils.DateTimeToUnix(DateTime.Now) + " and airdate != 0")[0]["count"];
+                var count  = int.Parse(Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"]);
 
-                if (count == "1")
+                if (count == 1)
                 {
                     show["title"] += " · NEW EPISODE!";
                 }
-                else if (count != "0")
+                else if (count >= 2)
                 {
                     show["title"] += " · " + count + " NEW EPISODES!";
                 }
@@ -190,9 +189,9 @@
                 {
                     var next = show["next"].Split(new[] { "||" }, StringSplitOptions.None);
                     show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " +
-                                   Utils.DateTimeFromUnix(double.Parse(next[1])).ToRelativeDate();
+                                   double.Parse(next[1]).GetUnixTimestamp().ToRelativeDate();
                 }
-                else if (bool.Parse(show["airing"]))
+                else if (show["airing"] == "True")
                 {
                     show["next"] = "No data available";
                 }
@@ -206,9 +205,10 @@
                         Name              = show["name"],
                         Title             = show["title"],
                         Next              = show["next"],
-                        TitleColor        = count != "0" ? "Red" : "White",
+                        TitleColor        = count != 0 ? "Red" : "White",
                         NextColor         = show["next"].StartsWith("S") ? "White" : "#50FFFFFF",
-                        MarkAsSeenVisible = count != "0" ? "Visible" : "Collapsed"
+                        MarkAsSeenVisible = count != 0 ? "Visible" : "Collapsed",
+                        PlayNextVisible   = count >= 2 ? "Visible" : "Collapsed"
                     });
             }
 
@@ -232,6 +232,32 @@
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 
             var finder = new FileSearch(path, show[0], show[1]);
+            finder.FileSearchDone += (sender2, e2) =>
+                {
+                    ResetStatus();
+                    PlayEpisodeFileSearchDone(sender2, e2);
+                };
+            finder.BeginSearch();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the PlayNextEpisode control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void PlayNextEpisodeClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+
+            var path    = Settings.Get("Download Path");
+            var show    = GetSelectedShow();
+            var showid  = Database.GetShowID(show[0]);
+            var dbep    = Database.Query("select season, episode from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
+            var episode = "S" + int.Parse(dbep["season"]).ToString("00") + "E" + int.Parse(dbep["episode"]).ToString("00");
+
+            SetStatus("Searching for " + show[0] + " " + episode + " on the disk...", true);
+
+            var finder = new FileSearch(path, show[0], episode);
             finder.FileSearchDone += (sender2, e2) =>
                 {
                     ResetStatus();

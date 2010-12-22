@@ -7,6 +7,7 @@
     /// <summary>
     /// Provides support for scraping nCore.
     /// </summary>
+    [Parser("RoliSoft", "2009-12-09 4:41 PM")]
     public class NCore : DownloadSearchEngine
     {
         /// <summary>

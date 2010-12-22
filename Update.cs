@@ -133,8 +133,8 @@
                                                       ep.Season,
                                                       ep.Number,
                                                       string.IsNullOrWhiteSpace(tv.AirTime) || ep.AirDate == Utils.UnixEpoch
-                                                       ? Utils.DateTimeToUnix(ep.AirDate)
-                                                       : Utils.DateTimeToUnix(DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone()),
+                                                       ? ep.AirDate.ToUnixTimestamp()
+                                                       : DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                       ep.Title,
                                                       ep.Summary,
                                                       ep.Picture);
@@ -160,7 +160,7 @@
             // set last updated and vacuum database
             try
             {
-                Database.Setting("last update", Utils.DateTimeToUnix(DateTime.Now).ToString());
+                Database.Setting("last update", DateTime.Now.ToUnixTimestamp().ToString());
                 Database.Execute("vacuum");
             }
             catch (Exception ex)

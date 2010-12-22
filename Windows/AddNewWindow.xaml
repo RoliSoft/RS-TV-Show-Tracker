@@ -9,10 +9,10 @@
             </TabControl.Effect>
             <TabItem Header="Add a TV show" Name="tabItem1">
                 <Grid Name="addGrid">
-                    <Label Content="Title:" FontSize="18" Margin="6,1,0,0" />
+                    <Label Content="Title:" FontSize="18" Margin="6,1,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <TextBox Height="28" HorizontalAlignment="Left" Margin="95,6,0,0" Name="textBox" VerticalAlignment="Top" Width="393" Text="" FontFamily="Consolas" FontSize="18" />
-                    <Label Content="Database:" FontSize="18" Margin="5,37,0,0" />
-                    <ComboBox HorizontalAlignment="Left" Margin="95,40,0,0" Name="comboBox" VerticalAlignment="Top" Width="393" FontSize="18">
+                    <Label Content="Database:" FontSize="18" Margin="5,37,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <ComboBox Margin="95,40,0,0" Name="comboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="393" FontSize="18">
                         <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
                         <ComboBoxItem Content="TVRage" Margin="10,0" Selector.IsSelected="True" />
                         <ComboBoxItem Content="The TVDB" Margin="10,0" />
@@ -24,6 +24,7 @@
                     </ComboBox>
                     <Button Content="Search" Height="23" HorizontalAlignment="Left" Margin="413,77,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
                     <ProgressBar Height="15" HorizontalAlignment="Right" Margin="0,-26,-5,0" Name="progressBar" VerticalAlignment="Top" Width="75" Visibility="Collapsed" IsIndeterminate="True" />
+                    <CheckBox Content="Mark all aired episodes as seen" FontSize="15" HorizontalAlignment="Left" Margin="11,81,0,0" Name="markCheckBox" IsChecked="True" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
         </TabControl>

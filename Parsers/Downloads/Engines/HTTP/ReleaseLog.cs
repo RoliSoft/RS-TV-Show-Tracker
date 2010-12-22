@@ -11,6 +11,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
+    [Parser("RoliSoft", "2009-12-09 4:56 AM")]
     public class ReleaseLog : DownloadSearchEngine
     {
         /// <summary>

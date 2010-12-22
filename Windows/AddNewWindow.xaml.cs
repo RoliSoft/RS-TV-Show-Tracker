@@ -47,24 +47,26 @@
         {
             if (string.IsNullOrWhiteSpace(textBox.Text)) return;
 
-            textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = false;
+            textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = markCheckBox.IsEnabled = false;
             progressBar.Visibility = Visibility.Visible;
 
             new Task(() =>
                 {
                     string show = string.Empty, grabber = string.Empty;
+                    var mark = true;
 
                     Dispatcher.Invoke((Action)delegate
                         {
                             show    = textBox.Text;
                             grabber = (comboBox.SelectedValue as ComboBoxItem).Content.ToString();
+                            mark    = markCheckBox.IsChecked ?? mark;
                         });
 
                     var res = false;
 
                     try
                     {
-                        res = Add(show, grabber);
+                        res = Add(show, grabber, mark);
                     }
                     catch (Exception ex)
                     {
@@ -81,7 +83,7 @@
 
                     Dispatcher.Invoke((Action)(() =>
                         {
-                            textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = true;
+                            textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = markCheckBox.IsEnabled = true;
                             progressBar.Visibility = Visibility.Collapsed;
 
                             if (res)
@@ -97,11 +99,12 @@
         /// </summary>
         /// <param name="show">The show name.</param>
         /// <param name="grabber">The grabber name.</param>
+        /// <param name="markAsSeen">if set to <c>true</c> all aired episodes will be marked as seen.</param>
         /// <returns>
-        ///     <c>true</c> if the show was added successfully; otherwise, <c>false</c>.
+        /// 	<c>true</c> if the show was added successfully; otherwise, <c>false</c>.
         /// </returns>
         /// <exception cref="Exception"><c>Exception</c>.</exception>
-        public static bool Add(string show, string grabber)
+        public static bool Add(string show, string grabber, bool markAsSeen)
         {
             Guide guide;
             switch(grabber)
@@ -238,8 +241,8 @@
                                                   ep.Season,
                                                   ep.Number,
                                                   tv.AirTime == String.Empty || ep.AirDate == Utils.UnixEpoch
-                                                   ? Utils.DateTimeToUnix(ep.AirDate)
-                                                   : Utils.DateTimeToUnix(DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone()),
+                                                   ? ep.AirDate.ToUnixTimestamp()
+                                                   : DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                   ep.Title,
                                                   ep.Summary,
                                                   ep.Picture);
@@ -254,7 +257,10 @@
             tr.Commit();
 
             // mark all aired episodes as seen
-            Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and airdate < ? and airdate != 0", showid, Utils.DateTimeToUnix(DateTime.Now));
+            if (markAsSeen)
+            {
+                Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and airdate < ? and airdate != 0", showid, DateTime.Now.ToUnixTimestamp());
+            }
 
             // fire data change event
             MainWindow.Active.DataChanged();

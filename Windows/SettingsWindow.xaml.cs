@@ -12,6 +12,7 @@
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Shell;
 
+    using RoliSoft.TVShowTracker.Parsers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using CheckBox = System.Windows.Controls.CheckBox;
@@ -39,6 +40,8 @@
             public string Site { get; set; }
             public string Type { get; set; }
             public string RequiresCookies { get; set; }
+            public string Developer { get; set; }
+            public string Revision { get; set; }
             public string Assembly { get; set; }
         }
 
@@ -102,7 +105,9 @@
                         Site            = engine.Name,
                         Type            = engine.Type.ToString(),
                         RequiresCookies = engine.RequiresCookies ? "Yes" : "No",
-                        Assembly        = engine.GetType().Assembly.FullName.Split(new[] { ", Culture=" }, StringSplitOptions.None).First()
+                        Developer       = engine.GetAttribute<ParserAttribute>().Developer,
+                        Revision        = engine.GetAttribute<ParserAttribute>().Revision.ToString("yyyy-MM-dd HH:mm"),
+                        Assembly        = engine.GetType().Assembly.GetName().Name
                     });
             }
 

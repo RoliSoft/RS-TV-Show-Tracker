@@ -109,6 +109,7 @@
     <Compile Include="Parsers\Downloads\Link.cs" />
     <Compile Include="Parsers\Guides\TVShow.cs" />
     <Compile Include="Parsers\OnlineVideos\OnlineVideoNotFoundException.cs" />
+    <Compile Include="Parsers\Parser.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
@@ -265,8 +266,6 @@
     <Resource Include="Images\bbc.png" />
     <Resource Include="Images\defapp.png" />
     <Resource Include="Images\epg.png" />
-    <Resource Include="Images\eye.png" />
-    <Resource Include="Images\eye_grey.png" />
     <Resource Include="Images\filehoster.png" />
     <Resource Include="Images\google.png" />
     <Resource Include="Images\guides.png" />
@@ -361,6 +360,12 @@
   <ItemGroup>
     <Resource Include="Images\down.png" />
     <Resource Include="Images\up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\next.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\eye.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
