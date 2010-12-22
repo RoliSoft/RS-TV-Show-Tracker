@@ -39,7 +39,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found subtitles.</returns>
-        public override List<Subtitle> Search(string query)
+        public override IEnumerable<Subtitle> Search(string query)
         {
             var show = ShowNames.Split(query);
             var dbid = Database.GetShowID(show[0]);
@@ -81,7 +81,7 @@
                                + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty),
                     Language = ParseLanguage(node.SelectSingleNode("../../td[3]").InnerText.Replace("&nbsp;", string.Empty).Trim()),
                     URL      = "http://www.addic7ed.com" + node.GetAttributeValue("href", string.Empty)
-                }).ToList();
+                });
         }
 
         /// <summary>

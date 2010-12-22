@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using RoliSoft.TVShowTracker.Helpers;
+
     /// <summary>
     /// Provides support for guessing episode list using download links.
     /// </summary>

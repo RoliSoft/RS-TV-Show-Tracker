@@ -13,6 +13,7 @@
 
     using Microsoft.Win32;
 
+    using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>

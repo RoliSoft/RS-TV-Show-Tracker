@@ -68,7 +68,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public override List<Link> Search(string query)
+        public override IEnumerable<Link> Search(string query)
         {
             var html  = Utils.GetHTML("http://www.binsearch.info/index.php?q=" + Uri.EscapeUriString(query) + "&m=&max=25&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=200&maxsize=&font=&postdate=");
             var links = html.DocumentNode.SelectNodes("//td/span[@class='s']");
@@ -87,7 +87,7 @@
                        Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
                        Type         = Types.Usenet,
                        IsLinkDirect = false
-                   }).ToList();
+                   });
         }
     }
 }

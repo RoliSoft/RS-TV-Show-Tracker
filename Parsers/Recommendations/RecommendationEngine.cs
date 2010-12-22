@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -24,20 +25,20 @@
         /// </summary>
         /// <param name="shows">The currently watched shows.</param>
         /// <returns>Recommended shows list.</returns>
-        public abstract List<RecommendedShow> GetList(List<string> shows);
+        public abstract IEnumerable<RecommendedShow> GetList(IEnumerable<string> shows);
 
         /// <summary>
         /// Gets the list of recommended TV show from the engine asynchronously.
         /// </summary>
         /// <param name="shows">The currently watched shows.</param>
-        public void GetListAsync(List<string> shows)
+        public void GetListAsync(IEnumerable<string> shows)
         {
             new Task(() =>
                 {
                     try
                     {
                         var list = GetList(shows);
-                        RecommendationDone.Fire(this, list);
+                        RecommendationDone.Fire(this, list.ToList());
                     }
                     catch (Exception ex)
                     {

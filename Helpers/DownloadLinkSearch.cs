@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker
+﻿namespace RoliSoft.TVShowTracker.Helpers
 {
     using System;
     using System.Collections.Generic;
@@ -76,28 +76,23 @@
             query = ShowNames.Normalize(query);
 
             // start in parallel
-            var tasks = SearchEngines.Select(engine => Task<List<Link>>.Factory.StartNew(() =>
+            var tasks = SearchEngines.Select(engine => Task<IEnumerable<Link>>.Factory.StartNew(() =>
                 {
-                    try   { return engine.Search(query); }
-                    catch { return null; }
+                    try { return engine.Search(query); }
+                    catch (Exception ex)
+                    {
+                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
+                        return null;
+                    }
                 })).ToArray();
 
             // wait all
             Task.WaitAll(tasks);
 
             // collect and return
-            foreach (var task in tasks)
-            {
-                if (!task.IsCompleted || task.Result == null)
-                {
-                    continue;
-                }
-
-                foreach (var link in task.Result)
-                {
-                    yield return link;
-                }
-            }
+            return tasks
+                   .Where(task => task.IsCompleted && task.Result != null)
+                   .SelectMany(task => task.Result);
         }
 
         /// <summary>
@@ -125,13 +120,13 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;&gt;"/> instance containing the event data.</param>
-        private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
+        private void SingleDownloadSearchDone(object sender, EventArgs<IEnumerable<Link>> e)
         {
             _remaining.Remove((sender as DownloadSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
-            DownloadSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
+            DownloadSearchProgressChanged.Fire(this, e.Data.ToList(), percentage, _remaining);
 
             if (_remaining.Count == 0)
             {

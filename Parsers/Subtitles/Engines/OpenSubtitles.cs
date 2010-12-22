@@ -41,7 +41,7 @@
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found subtitles.</returns>
         /// <exception cref="Exception">XML-RPC failed.</exception>
-        public override List<Subtitle> Search(string query)
+        public override IEnumerable<Subtitle> Search(string query)
         {
             var svc   = XmlRpcProxyGen.Create<IOpenSubtitles>();
             var login = svc.LogIn(string.Empty, string.Empty, "en", "RS TV Show Tracker 1.0");
@@ -71,8 +71,7 @@
                        Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty),
                        Language = Addic7ed.ParseLanguage(data["LanguageName"].ToString()),
                        URL      = data["ZipDownloadLink"].ToString()
-                   })
-                   .ToList();
+                   });
         }
 
         /// <summary>

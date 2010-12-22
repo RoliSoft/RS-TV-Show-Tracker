@@ -24,7 +24,7 @@
         /// <summary>
         /// Occurs when a subtitle search is done.
         /// </summary>
-        public event EventHandler<EventArgs<List<Subtitle>>> SubtitleSearchDone;
+        public event EventHandler<EventArgs<IEnumerable<Subtitle>>> SubtitleSearchDone;
 
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
@@ -36,7 +36,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found subtitles.</returns>
-        public abstract List<Subtitle> Search(string query);
+        public abstract IEnumerable<Subtitle> Search(string query);
 
         private Thread _job;
 
@@ -58,13 +58,12 @@
                         var list = Search(query);
                         SubtitleSearchDone.Fire(this, list);
                     }
+                    catch (ThreadAbortException ex)
+                    {
+                        return;
+                    }
                     catch (Exception ex)
                     {
-                        if (ex is ThreadAbortException)
-                        {
-                            return;
-                        }
-
                         SubtitleSearchError.Fire(this, "There was an error while searching for subtitles.", ex.Message);
                     }
                 });

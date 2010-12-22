@@ -63,7 +63,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public override List<Link> Search(string query)
+        public override IEnumerable<Link> Search(string query)
         {
             var html  = Utils.GetHTML("http://ncore.cc/torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies);
             var links = html.DocumentNode.SelectNodes("//a[starts-with(@onclick, 'torrent(')]");
@@ -81,7 +81,7 @@
                        Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
                        Type    = Types.Torrent
-                   }).ToList();
+                   });
         }
     }
 }

@@ -18,6 +18,7 @@
 
     using Microsoft.Win32;
 
+    using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using Image = System.Windows.Controls.Image;
@@ -419,18 +420,17 @@
 
             if (e.First != null)
             {
+                lock (_results)
+                {
+                    _results.AddRange(e.First.Select(link => new LinkItem(link)));
+                }
+
                 Dispatcher.Invoke((Action)(() =>
                     {
-                        lock (_results)
-                        {
-                            _results.AddRange(e.First.Select(link => new LinkItem(link)));
-                        }
-
                         DownloadLinksListViewItemCollection.Clear();
                         DownloadLinksListViewItemCollection.AddRange(_results
                                                                      .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
-                                                                     .ThenBy(link => _trackers.IndexOf(link.Site))
-                                                                     .ToList());
+                                                                     .ThenBy(link => _trackers.IndexOf(link.Site)));
                     }));
             }
         }

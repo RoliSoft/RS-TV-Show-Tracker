@@ -75,17 +75,16 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public override List<Link> Search(string query)
+        public override IEnumerable<Link> Search(string query)
         {
             var gyors = Utils.GetURL("http://tvstore.me/torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.ReplaceEpisode(query, 1))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
             var arr   = gyors.Split('\\');
 
             if (arr[0] == "0")
             {
-                return null;
+                yield break;
             }
 
-            var list = new List<Link>();
             var idx  = 3;
 
             for (;idx <= (arr.Length - 10);)
@@ -113,10 +112,8 @@
 
                 idx += 18;
 
-                list.Add(link);
+                yield return link;
             }
-
-            return list;
         }
 
         /// <summary>

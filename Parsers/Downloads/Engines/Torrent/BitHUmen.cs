@@ -64,7 +64,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public override List<Link> Search(string query)
+        public override IEnumerable<Link> Search(string query)
         {
             var html  = Utils.GetHTML("http://bithumen.be/browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
             var links = html.DocumentNode.SelectNodes("//table[@id='torrenttable']/tr/td[2]/a[1]/b");
@@ -82,7 +82,7 @@
                        Size    = node.SelectSingleNode("../../../td[6]/u").InnerHtml.Replace("<br>", " "),
                        Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
                        Type    = Types.Torrent
-                   }).ToList();
+                   });
         }
     }
 }

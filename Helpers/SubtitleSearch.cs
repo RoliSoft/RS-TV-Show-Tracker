@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker
+﻿namespace RoliSoft.TVShowTracker.Helpers
 {
     using System;
     using System.Collections.Generic;
@@ -56,6 +56,35 @@
         }
 
         /// <summary>
+        /// Searches for subtitles on multiple services. The search is made in parallel, but this method is blocking.
+        /// </summary>
+        /// <param name="query">The name of the release to search for.</param>
+        public IEnumerable<Subtitle> Search(string query)
+        {
+            _remaining = SearchEngines.Select(engine => engine.Name).ToList();
+            query = ShowNames.Normalize(query);
+
+            // start in parallel
+            var tasks = SearchEngines.Select(engine => Task<IEnumerable<Subtitle>>.Factory.StartNew(() =>
+                {
+                    try { return engine.Search(query); }
+                    catch (Exception ex)
+                    {
+                        SubtitleSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
+                        return null;
+                    }
+                })).ToArray();
+
+            // wait all
+            Task.WaitAll(tasks);
+
+            // collect and return
+            return tasks
+                   .Where(task => task.IsCompleted && task.Result != null)
+                   .SelectMany(task => task.Result);
+        }
+
+        /// <summary>
         /// Searches for subtitles on multiple services asynchronously.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -80,13 +109,13 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;&gt;"/> instance containing the event data.</param>
-        private void SingleSubtitleSearchDone(object sender, EventArgs<List<Subtitle>> e)
+        private void SingleSubtitleSearchDone(object sender, EventArgs<IEnumerable<Subtitle>> e)
         {
             _remaining.Remove((sender as SubtitleSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
-            SubtitleSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
+            SubtitleSearchProgressChanged.Fire(this, e.Data.ToList(), percentage, _remaining);
 
             if (_remaining.Count == 0)
             {

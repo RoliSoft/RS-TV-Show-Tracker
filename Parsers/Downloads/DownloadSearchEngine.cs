@@ -42,7 +42,7 @@
         /// <summary>
         /// Occurs when a download link search is done.
         /// </summary>
-        public event EventHandler<EventArgs<List<Link>>> DownloadSearchDone;
+        public event EventHandler<EventArgs<IEnumerable<Link>>> DownloadSearchDone;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
@@ -54,7 +54,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public abstract List<Link> Search(string query);
+        public abstract IEnumerable<Link> Search(string query);
 
         private Thread _job;
 
@@ -76,13 +76,12 @@
                         var list = Search(query);
                         DownloadSearchDone.Fire(this, list);
                     }
+                    catch (ThreadAbortException ex)
+                    {
+                        return;
+                    }
                     catch (Exception ex)
                     {
-                        if (ex is ThreadAbortException)
-                        {
-                            return;
-                        }
-
                         DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
                     }
                 });

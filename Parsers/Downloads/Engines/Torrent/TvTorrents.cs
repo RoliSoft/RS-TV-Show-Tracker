@@ -64,7 +64,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public override List<Link> Search(string query)
+        public override IEnumerable<Link> Search(string query)
         {
             var show  = ShowNames.Split(query)[0];
             var html  = Utils.GetHTML("http://tvtorrents.com/loggedin/search.do?search=" + Uri.EscapeUriString(show), cookies: Cookies);
@@ -88,7 +88,7 @@
                        Size    = node.SelectSingleNode("../td[5]").GetAttributeValue("title", string.Empty).Replace("Torrent is ", String.Empty).Replace("b", "B"),
                        Quality = node.SelectSingleNode("a").InnerText.Contains("(720p .mkv)") ? Qualities.HDTV720p : node.SelectSingleNode("a").InnerText.Contains(" .mkv)") ? Qualities.HRx264 : Qualities.HDTVXviD,
                        Type    = Types.Torrent
-                   }).ToList();
+                   });
         }
     }
 }

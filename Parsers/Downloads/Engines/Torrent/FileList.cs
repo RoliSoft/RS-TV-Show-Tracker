@@ -63,7 +63,7 @@
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
-        public override List<Link> Search(string query)
+        public override IEnumerable<Link> Search(string query)
         {
             var html  = Utils.GetHTML("http://filelist.ro/browse.php?cat=14&searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
             var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
@@ -81,7 +81,7 @@
                        Size    = node.SelectSingleNode("../../../td[7]").InnerHtml.Replace("<br>", " "),
                        Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
                        Type    = Types.Torrent
-                   }).ToList();
+                   });
         }
     }
 }
