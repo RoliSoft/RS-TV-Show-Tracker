@@ -278,11 +278,11 @@
 
         #region TimeSpan
         /// <summary>
-        /// Extension method to TimeSpan to convert its value to a relative string.
+        /// Extension method to TimeSpan to convert its value to a relative string containing only one unit.
         /// </summary>
         /// <param name="ts">The time span.</param>
-        /// <returns>Relative time.</returns>
-        public static string ToRelativeTime(this TimeSpan ts)
+        /// <returns>Short relative time.</returns>
+        public static string ToShortRelativeTime(this TimeSpan ts)
         {
             if (ts.Days >= 365)
             {
@@ -306,11 +306,11 @@
         }
 
         /// <summary>
-        /// Extension method to TimeSpan to convert its value into a user friendly representation.
+        /// Extension method to TimeSpan to convert its value to a relative string containing all applicable units.
         /// </summary>
         /// <param name="ts">The time span.</param>
-        /// <returns>User friendly total time.</returns>
-        public static string ToTotalTime(this TimeSpan ts)
+        /// <returns>Full relative time.</returns>
+        public static string ToFullRelativeTime(this TimeSpan ts)
         {
             var time = ts.TotalSeconds;
             var value = new Dictionary<string, double>
@@ -362,7 +362,10 @@
 
             value["second"] = Math.Floor(time);
 
-            var ret = value.Where(unit => unit.Value != 0).Aggregate(String.Empty, (current, unit) => current + (Utils.FormatNumber((int)unit.Value, unit.Key) + ", "));
+            var ret = value
+                      .Where(unit => unit.Value != 0)
+                      .Aggregate(String.Empty, (current, unit) => current + (Utils.FormatNumber((int)unit.Value, unit.Key) + ", "));
+
             return Regex.Replace(ret.TrimEnd(", ".ToCharArray()), "(.+), ", "$1 and ");
         }
         #endregion

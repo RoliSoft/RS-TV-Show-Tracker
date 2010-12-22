@@ -95,7 +95,7 @@
             /// Gets or sets the date when the episode was first aired.
             /// </summary>
             /// <value>The air date.</value>
-            public DateTime AirDate { get; set; }
+            public DateTime Airdate { get; set; }
 
             /// <summary>
             /// Gets or sets the title of the episode.

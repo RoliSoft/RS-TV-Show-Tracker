@@ -56,7 +56,7 @@
                     {
                         Season  = sn,
                         Number  = int.Parse(ep.GetValue("EpisodeNumber")),
-                        AirDate = DateTime.TryParse(ep.GetValue("FirstAired"), out dt)
+                        Airdate = DateTime.TryParse(ep.GetValue("FirstAired"), out dt)
                                   ? dt
                                   : Utils.UnixEpoch,
                         Title   = ep.GetValue("EpisodeName"),

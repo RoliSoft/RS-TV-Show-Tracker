@@ -67,6 +67,40 @@
         }
 
         /// <summary>
+        /// Searches for download links on multiple services. The search is made in parallel, but this method is blocking.
+        /// </summary>
+        /// <param name="query">The name of the release to search for.</param>
+        public IEnumerable<Link> Search(string query)
+        {
+            _remaining = SearchEngines.Select(engine => engine.Name).ToList();
+            query = ShowNames.Normalize(query);
+
+            // start in parallel
+            var tasks = SearchEngines.Select(engine => Task<List<Link>>.Factory.StartNew(() =>
+                {
+                    try   { return engine.Search(query); }
+                    catch { return null; }
+                })).ToArray();
+
+            // wait all
+            Task.WaitAll(tasks);
+
+            // collect and return
+            foreach (var task in tasks)
+            {
+                if (!task.IsCompleted || task.Result == null)
+                {
+                    continue;
+                }
+
+                foreach (var link in task.Result)
+                {
+                    yield return link;
+                }
+            }
+        }
+
+        /// <summary>
         /// Searches for download links on multiple services asynchronously.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>

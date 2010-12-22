@@ -74,9 +74,9 @@
                                            || Regex.IsMatch(file.Directory.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase))) // or in the directory name?
                         && Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4)$", RegexOptions.IgnoreCase)) // is it a known video file extension?
                     {
-                        var ep = ShowNames.ExtractEpisode(file.ToString(), 1);
+                        var ep = ShowNames.ExtractEpisode(file.ToString());
 
-                        if (!string.IsNullOrWhiteSpace(ep))
+                        if (ep != null)
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {
@@ -92,8 +92,7 @@
 
                                 try
                                 {
-                                    var eptmp = ep.Split('x'); // we'll split the 1x01 into { 1, 01 } then parse both to int
-                                    var epid  = Database.GetEpisodeID(show["showid"], int.Parse(eptmp[0]), int.Parse(eptmp[1]));
+                                    var epid  = Database.GetEpisodeID(show["showid"], ep.Season, ep.Episode);
 
                                     if (Database.Query("select * from tracking where showid = ? and episodeid = ?", show["showid"], epid).Count == 0)
                                     {

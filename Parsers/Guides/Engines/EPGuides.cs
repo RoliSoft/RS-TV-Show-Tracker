@@ -68,7 +68,6 @@
                     Episodes = new List<TVShow.Episode>()
                 };
 
-
             var mc = _infoRegex.Matches(listing);
 
             foreach (Match m in mc)
@@ -111,7 +110,7 @@
                     {
                         Season  = int.Parse(m.Groups["season"].Value.Trim()),
                         Number  = int.Parse(m.Groups["episode"].Value.Trim()),
-                        AirDate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
+                        Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
                                 ? dt
                                 : Utils.UnixEpoch,
                         Title   = HtmlEntity.DeEntitize(m.Groups["title"].Value)

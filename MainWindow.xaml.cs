@@ -157,7 +157,7 @@
 
             Dispatcher.Invoke((Action)(() =>
                 {
-                    lastUpdatedLabel.Content = "last updated " + ts.ToRelativeTime() + " ago";
+                    lastUpdatedLabel.Content = "last updated " + ts.ToShortRelativeTime() + " ago";
                 }));
 
             if (ts.TotalMinutes < 1) // if under a minute, update by seconds

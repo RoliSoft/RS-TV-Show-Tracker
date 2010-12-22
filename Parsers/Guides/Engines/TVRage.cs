@@ -52,7 +52,7 @@
                     {
                         Season  = sn,
                         Number  = int.Parse(ep.GetValue("seasonnum")),
-                        AirDate = DateTime.TryParse(ep.GetValue("airdate"), out dt)
+                        Airdate = DateTime.TryParse(ep.GetValue("airdate"), out dt)
                                   ? dt
                                   : Utils.UnixEpoch,
                         Title   = ep.GetValue("title"),

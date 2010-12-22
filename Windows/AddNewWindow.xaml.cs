@@ -240,9 +240,9 @@
                                                   showid,
                                                   ep.Season,
                                                   ep.Number,
-                                                  tv.AirTime == String.Empty || ep.AirDate == Utils.UnixEpoch
-                                                   ? ep.AirDate.ToUnixTimestamp()
-                                                   : DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
+                                                  tv.AirTime == String.Empty || ep.Airdate == Utils.UnixEpoch
+                                                   ? ep.Airdate.ToUnixTimestamp()
+                                                   : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                   ep.Title,
                                                   ep.Summary,
                                                   ep.Picture);

@@ -97,12 +97,11 @@
         }
 
         /// <summary>
-        /// Extracts the episode number into the specified format.
+        /// Extracts the episode number.
         /// </summary>
         /// <param name="name">The show name with episode.</param>
-        /// <param name="format">The format: 0 for S00E00; 1 for 0x00.</param>
         /// <returns>Episode in specified format.</returns>
-        public static string ExtractEpisode(string name, int format)
+        public static ShowEpisode ExtractEpisode(string name)
         {
             var m = Regex.Match(name, @"(
                                           # S01E01, S01E01-02, S01E01-E02, S01E01E02
@@ -114,16 +113,42 @@
 
             if (m.Success)
             {
+                return new ShowEpisode 
+                    {
+                        Season  = int.Parse(m.Groups["s"].Value),
+                        Episode = int.Parse(m.Groups["e"].Value)
+                    };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Extracts the episode number into the specified format.
+        /// </summary>
+        /// <param name="name">The show name with episode.</param>
+        /// <param name="format">The format: 0 for S00E00; 1 for 0x00.</param>
+        /// <returns>Episode in specified format.</returns>
+        public static string ExtractEpisode(string name, int format)
+        {
+            var ep = ExtractEpisode(name);
+
+            if (ep != null)
+            {
                 switch (format)
                 {
-                    case 0:
-                        return "S" + int.Parse(m.Groups["s"].Value).ToString("00") + "E" + int.Parse(m.Groups["e"].Value).ToString("00");
+                    default:
+                        return "S" + ep.Season.ToString("00") + "E" + ep.Episode.ToString("00");
                     case 1:
-                        return int.Parse(m.Groups["s"].Value).ToString("0") + "x" + int.Parse(m.Groups["e"].Value).ToString("00");
+                        return ep.Season.ToString("0") + "x" + ep.Episode.ToString("00");
                 }
             }
-
-            return string.Empty;
+            else
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -140,5 +165,23 @@
                    : Split(query)[0])
                      + " " + ExtractEpisode(query, format);
         }
+    }
+
+    /// <summary>
+    /// Represents an episode.
+    /// </summary>
+    public class ShowEpisode
+    {
+        /// <summary>
+        /// Gets or sets the season of the episode.
+        /// </summary>
+        /// <value>The season.</value>
+        public int Season { get; set; }
+
+        /// <summary>
+        /// Gets or sets the episode number.
+        /// </summary>
+        /// <value>The episode.</value>
+        public int Episode { get; set; }
     }
 }

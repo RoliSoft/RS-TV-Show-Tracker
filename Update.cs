@@ -132,9 +132,9 @@
                                                       r["showid"],
                                                       ep.Season,
                                                       ep.Number,
-                                                      string.IsNullOrWhiteSpace(tv.AirTime) || ep.AirDate == Utils.UnixEpoch
-                                                       ? ep.AirDate.ToUnixTimestamp()
-                                                       : DateTime.Parse(ep.AirDate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
+                                                      string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch
+                                                       ? ep.Airdate.ToUnixTimestamp()
+                                                       : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                       ep.Title,
                                                       ep.Summary,
                                                       ep.Picture);

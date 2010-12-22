@@ -102,7 +102,7 @@ Tvshows
                         Name       = show["name"],
                         Runtime    = show["runtime"] + " minutes",
                         Episodes   = int.Parse(show["count"]).ToString("#,###"),
-                        TimeWasted = TimeSpan.FromMinutes(double.Parse(show["runtime"]) * double.Parse(show["count"])).ToTotalTime()
+                        TimeWasted = TimeSpan.FromMinutes(double.Parse(show["runtime"]) * double.Parse(show["count"])).ToFullRelativeTime()
                     });
             }
 
@@ -110,7 +110,7 @@ Tvshows
                 {
                     Name       = "— Total of " + Utils.FormatNumber(shows.Count, "TV show") + " —",
                     Episodes   = episodes.ToString("#,###"),
-                    TimeWasted = minutes.ToTotalTime()
+                    TimeWasted = minutes.ToFullRelativeTime()
                 });
         }
         
