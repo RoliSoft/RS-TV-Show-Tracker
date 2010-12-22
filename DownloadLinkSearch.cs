@@ -20,7 +20,7 @@
         /// <summary>
         /// Occurs when a download link search progress has changed.
         /// </summary>
-        public event EventHandler<EventArgs<List<DownloadSearchEngine.Link>, double, List<string>>> DownloadSearchProgressChanged;
+        public event EventHandler<EventArgs<List<Link>, double, List<string>>> DownloadSearchProgressChanged;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
@@ -91,7 +91,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;&gt;"/> instance containing the event data.</param>
-        private void SingleDownloadSearchDone(object sender, EventArgs<List<DownloadSearchEngine.Link>> e)
+        private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
         {
             _remaining.Remove((sender as DownloadSearchEngine).Name);
 

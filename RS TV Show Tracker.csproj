@@ -105,6 +105,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="EventArgs.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Parsers\Downloads\Link.cs" />
+    <Compile Include="Parsers\Guides\TVShow.cs" />
+    <Compile Include="Parsers\OnlineVideos\OnlineVideoNotFoundException.cs" />
+    <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
+    <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
@@ -127,37 +133,37 @@
     <Compile Include="SmarterWebClient.cs" />
     <Compile Include="IRefreshable.cs" />
     <Compile Include="Properties\ObfuscationSettings.cs" />
-    <Compile Include="Parsers\Downloads\BinSearch.cs" />
-    <Compile Include="Parsers\Downloads\BitHUmen.cs" />
-    <Compile Include="Parsers\Downloads\FileList.cs" />
-    <Compile Include="Parsers\Downloads\NCore.cs" />
-    <Compile Include="Parsers\Downloads\ReleaseLog.cs" />
-    <Compile Include="Parsers\Downloads\SceneReleases.cs" />
-    <Compile Include="Parsers\Downloads\TvStore.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Usenet\BinSearch.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\BitHUmen.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\FileList.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\NCore.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseLog.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\SceneReleases.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TvStore.cs" />
     <Compile Include="ProcessMonitor.cs" />
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ShowNames.cs" />
-    <Compile Include="Parsers\Downloads\TvTorrents.cs" />
-    <Compile Include="Parsers\Downloads\TvTorrentsRo.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TvTorrents.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TvTorrentsRo.cs" />
     <Compile Include="Parsers\Downloads\DownloadSearchEngine.cs" />
-    <Compile Include="Parsers\Downloads\ThePirateBay.cs" />
-    <Compile Include="Parsers\Guides\EPGuides.cs" />
-    <Compile Include="Parsers\Guides\TVDB.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\ThePirateBay.cs" />
+    <Compile Include="Parsers\Guides\Engines\EPGuides.cs" />
+    <Compile Include="Parsers\Guides\Engines\TVDB.cs" />
     <Compile Include="Parsers\Guides\Guide.cs" />
-    <Compile Include="Parsers\Guides\TVRage.cs" />
-    <Compile Include="Parsers\OnlineVideos\SideReel.cs" />
-    <Compile Include="Parsers\OnlineVideos\iPlayer.cs" />
-    <Compile Include="Parsers\OnlineVideos\Hulu.cs" />
+    <Compile Include="Parsers\Guides\Engines\TVRage.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\SideReel.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\iPlayer.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\Hulu.cs" />
     <Compile Include="Parsers\OnlineVideos\OnlineVideoSearchEngine.cs" />
-    <Compile Include="Parsers\Recommendations\TasteKid.cs" />
-    <Compile Include="Parsers\Recommendations\RSTVShowRecommendation.cs" />
+    <Compile Include="Parsers\Recommendations\Engines\TasteKid.cs" />
+    <Compile Include="Parsers\Recommendations\Engines\RSTVShowRecommendation.cs" />
     <Compile Include="Parsers\Recommendations\RecommendationEngine.cs" />
-    <Compile Include="Parsers\Subtitles\Addic7ed.cs" />
-    <Compile Include="Parsers\Subtitles\Subscene.cs" />
-    <Compile Include="Parsers\Subtitles\Hosszupuska.cs" />
-    <Compile Include="Parsers\Subtitles\OpenSubtitles.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\Addic7ed.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\Subscene.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\Hosszupuska.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\OpenSubtitles.cs" />
     <Compile Include="Parsers\Subtitles\SubtitleSearchEngine.cs" />
     <Compile Include="UserControls\RecommendationsPage.xaml.cs">
       <DependentUpon>RecommendationsPage.xaml</DependentUpon>

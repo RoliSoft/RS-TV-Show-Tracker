@@ -1,15 +1,14 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using HtmlAgilityPack;
+    using System.Text;
 
     /// <summary>
-    /// Provides support for scraping ReleaseLog.
+    /// Provides support for scraping bitHUmen.
     /// </summary>
-    public class ReleaseLog : DownloadSearchEngine
+    public class BitHUmen : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -19,7 +18,7 @@
         {
             get
             {
-                return "ReleaseLog";
+                return "bitHUmen";
             }
         }
 
@@ -31,7 +30,7 @@
         {
             get
             {
-                return "http://www.rlslog.net/wp-content/favicon.ico";
+                return "http://bithumen.be/favicon.ico";
             }
         }
 
@@ -43,7 +42,7 @@
         {
             get
             {
-                return false;
+                return true;
             }
         }
 
@@ -55,7 +54,7 @@
         {
             get
             {
-                return Types.Http;
+                return Types.Torrent;
             }
         }
 
@@ -66,8 +65,8 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://www.rlslog.net/?s=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//h3[starts-with(@id, 'post-')]/a");
+            var html  = Utils.GetHTML("http://bithumen.be/browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
+            var links = html.DocumentNode.SelectNodes("//table[@id='torrenttable']/tr/td[2]/a[1]/b");
 
             if (links == null)
             {
@@ -76,13 +75,12 @@
 
             return links.Select(node => new Link
                    {
-                       Site         = Name,
-                       Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
-                       URL          = node.GetAttributeValue("href", string.Empty),
-                       Size         = "N/A",
-                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
-                       Type         = Types.Http,
-                       IsLinkDirect = false
+                       Site    = Name,
+                       Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
+                       URL     = "http://bithumen.be/" + node.SelectSingleNode("../../a[starts-with(@title, 'Let')]").GetAttributeValue("href", string.Empty),
+                       Size    = node.SelectSingleNode("../../../td[6]/u").InnerHtml.Replace("<br>", " "),
+                       Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
+                       Type    = Types.Torrent
                    }).ToList();
         }
     }

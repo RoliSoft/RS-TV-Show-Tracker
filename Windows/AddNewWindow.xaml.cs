@@ -10,6 +10,7 @@
     using Microsoft.WindowsAPICodePack.Shell;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
 
     /// <summary>
     /// Interaction logic for AddNewWindow.xaml
@@ -149,7 +150,7 @@
             }
 
             // get data from guide
-            Guide.TVShow tv;
+            TVShow tv;
             try
             {
                 tv = guide.GetData(id);

@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles
+﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles.Engines
 {
     using System;
     using System.Collections.Generic;
@@ -89,10 +89,10 @@
         /// </summary>
         /// <param name="language">The language.</param>
         /// <returns>Strongly-typed language of the subtitle.</returns>
-        public static Subtitle.Languages ParseLanguage(string language)
+        public static Languages ParseLanguage(string language)
         {
             language = Regex.Replace(language, @"\s?\(.+\)", string.Empty);
-            var detected = Subtitle.Languages.Unknown;
+            var detected = Languages.Unknown;
             Enum.TryParse(language, out detected);
             return detected;
         }

@@ -1,14 +1,17 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.HTTP
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
+
+    using HtmlAgilityPack;
+
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
-    /// Provides support for scraping freshon.tv.
+    /// Provides support for scraping ReleaseLog.
     /// </summary>
-    public class TvTorrentsRo : DownloadSearchEngine
+    public class ReleaseLog : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -18,7 +21,7 @@
         {
             get
             {
-                return "Tv Torrents Ro";
+                return "ReleaseLog";
             }
         }
 
@@ -30,7 +33,7 @@
         {
             get
             {
-                return "http://static.freshon.tv/favicon.ico";
+                return "http://www.rlslog.net/wp-content/favicon.ico";
             }
         }
 
@@ -42,7 +45,7 @@
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -54,7 +57,7 @@
         {
             get
             {
-                return Types.Torrent;
+                return Types.HTTP;
             }
         }
 
@@ -65,8 +68,8 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://freshon.tv/browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
-            var links = html.DocumentNode.SelectNodes("//table/tr/td/div[1]/a");
+            var html  = Utils.GetHTML("http://www.rlslog.net/?s=" + Uri.EscapeUriString(query));
+            var links = html.DocumentNode.SelectNodes("//h3[starts-with(@id, 'post-')]/a");
 
             if (links == null)
             {
@@ -75,12 +78,13 @@
 
             return links.Select(node => new Link
                    {
-                       Site    = Name,
-                       Release = node.GetAttributeValue("title", string.Empty),
-                       URL     = "http://freshon.tv/download.php?id=" + Regex.Replace(node.GetAttributeValue("href", string.Empty), "[^0-9]+", string.Empty) + "&type=torrent",
-                       Size    = node.SelectSingleNode("../../../td[@class='table_size']").InnerHtml.Trim().Replace("<br>", " "),
-                       Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
-                       Type    = Types.Torrent
+                       Site         = Name,
+                       Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
+                       URL          = node.GetAttributeValue("href", string.Empty),
+                       Size         = "N/A",
+                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
+                       Type         = Types.HTTP,
+                       IsLinkDirect = false
                    }).ToList();
         }
     }

@@ -14,6 +14,7 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
     /// <summary>
     /// Interaction logic for OverviewPage.xaml
@@ -189,7 +190,7 @@
                 {
                     var next = show["next"].Split(new[] { "||" }, StringSplitOptions.None);
                     show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " +
-                                   Utils.DateTimeFromUnix(double.Parse(next[1])).NextAir();
+                                   Utils.DateTimeFromUnix(double.Parse(next[1])).ToRelativeDate();
                 }
                 else if (bool.Parse(show["airing"]))
                 {

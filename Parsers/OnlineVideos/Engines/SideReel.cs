@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos
+﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines
 {
     using System;
     using System.Text.RegularExpressions;

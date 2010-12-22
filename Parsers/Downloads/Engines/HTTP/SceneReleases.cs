@@ -1,16 +1,17 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.HTTP
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
+
     /// <summary>
-    /// Provides support for scraping BinSearch.
+    /// Provides support for scraping SceneReleases.
     /// </summary>
-    public class BinSearch : DownloadSearchEngine
+    public class SceneReleases : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -20,7 +21,7 @@
         {
             get
             {
-                return "BinSearch";
+                return "SceneReleases";
             }
         }
 
@@ -32,7 +33,7 @@
         {
             get
             {
-                return "http://www.binsearch.info/favicon.ico";
+                return "http://scenereleases.info/favicon.ico";
             }
         }
 
@@ -56,7 +57,7 @@
         {
             get
             {
-                return Types.Usenet;
+                return Types.HTTP;
             }
         }
 
@@ -67,8 +68,8 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://www.binsearch.info/index.php?q=" + Uri.EscapeUriString(query) + "&m=&max=25&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=200&maxsize=&font=&postdate=");
-            var links = html.DocumentNode.SelectNodes("//td/span[@class='s']");
+            var html  = Utils.GetHTML("http://scenereleases.info/?s=" + Uri.EscapeUriString(query));
+            var links = html.DocumentNode.SelectNodes("//h3/a");
 
             if (links == null)
             {
@@ -78,11 +79,11 @@
             return links.Select(node => new Link
                    {
                        Site         = Name,
-                       Release      = HtmlEntity.DeEntitize(node.InnerText),
-                       URL          = "http://www.binsearch.info" + HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']/a").GetAttributeValue("href", string.Empty)),
-                       Size         = Regex.Match(HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']").InnerText), @"size: ([^,<]+)").Groups[1].Value,
-                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
-                       Type         = Types.Usenet,
+                       Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
+                       URL          = node.GetAttributeValue("href", string.Empty),
+                       Size         = "N/A",
+                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
+                       Type         = Types.HTTP,
                        IsLinkDirect = false
                    }).ToList();
         }

@@ -62,7 +62,7 @@
                         <GridViewColumnHeader Content="Quality" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Quality}" Width="80" Margin="-7,0" TextAlignment="Center" />
+                                <TextBlock FontWeight="Normal" Text="{Binding QualityText}" Width="80" Margin="-7,0" TextAlignment="Center" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

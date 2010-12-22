@@ -1,14 +1,14 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
+    using System.Text.RegularExpressions;
 
     /// <summary>
-    /// Provides support for scraping bitHUmen.
+    /// Provides support for scraping freshon.tv.
     /// </summary>
-    public class BitHUmen : DownloadSearchEngine
+    public class TvTorrentsRo : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -18,7 +18,7 @@
         {
             get
             {
-                return "bitHUmen";
+                return "Tv Torrents Ro";
             }
         }
 
@@ -30,7 +30,7 @@
         {
             get
             {
-                return "http://bithumen.be/favicon.ico";
+                return "http://static.freshon.tv/favicon.ico";
             }
         }
 
@@ -65,8 +65,8 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://bithumen.be/browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
-            var links = html.DocumentNode.SelectNodes("//table[@id='torrenttable']/tr/td[2]/a[1]/b");
+            var html  = Utils.GetHTML("http://freshon.tv/browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var links = html.DocumentNode.SelectNodes("//table/tr/td/div[1]/a");
 
             if (links == null)
             {
@@ -76,10 +76,10 @@
             return links.Select(node => new Link
                    {
                        Site    = Name,
-                       Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
-                       URL     = "http://bithumen.be/" + node.SelectSingleNode("../../a[starts-with(@title, 'Let')]").GetAttributeValue("href", string.Empty),
-                       Size    = node.SelectSingleNode("../../../td[6]/u").InnerHtml.Replace("<br>", " "),
-                       Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
+                       Release = node.GetAttributeValue("title", string.Empty),
+                       URL     = "http://freshon.tv/download.php?id=" + Regex.Replace(node.GetAttributeValue("href", string.Empty), "[^0-9]+", string.Empty) + "&type=torrent",
+                       Size    = node.SelectSingleNode("../../../td[@class='table_size']").InnerHtml.Trim().Replace("<br>", " "),
+                       Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
                        Type    = Types.Torrent
                    }).ToList();
         }

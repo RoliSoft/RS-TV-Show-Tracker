@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles
+﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles.Engines
 {
     using System;
     using System.Collections.Generic;
@@ -64,18 +64,18 @@
         /// </summary>
         /// <param name="language">The language.</param>
         /// <returns>Strongly-typed language of the subtitle.</returns>
-        public static Subtitle.Languages ParseLanguage(string language)
+        public static Languages ParseLanguage(string language)
         {
             switch(language)
             {
                 case "flags/1.gif":
-                    return Subtitle.Languages.Hungarian;
+                    return Languages.Hungarian;
 
                 case "flags/2.gif":
-                    return Subtitle.Languages.English;
+                    return Languages.English;
 
                 default:
-                    return Subtitle.Languages.Unknown;
+                    return Languages.Unknown;
             }
         }
     }

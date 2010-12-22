@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Recommendations
+﻿namespace RoliSoft.TVShowTracker.Parsers.Recommendations.Engines
 {
     using System;
     using System.Collections.Generic;
@@ -10,19 +10,16 @@
     /// </summary>
     public class RSTVShowRecommendation : RecommendationEngine
     {
-        private readonly string _key, _uuid;
         private readonly int _type;
+        private readonly string _key  = "S2qNfbCFCWoQ8RoL1S0FTbjbW",
+                                _uuid = Utils.GetUID();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RSTVShowRecommendation"/> class.
         /// </summary>
-        /// <param name="key">The API key.</param>
-        /// <param name="uuid">The unique ID of the user.</param>
         /// <param name="type">The type of the algorithm to use.</param>
-        public RSTVShowRecommendation(string key, string uuid, int type)
+        public RSTVShowRecommendation(int type)
         {
-            _key  = key;
-            _uuid = uuid;
             _type = type;
         }
 

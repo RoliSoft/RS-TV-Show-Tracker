@@ -20,7 +20,7 @@
         /// <summary>
         /// Occurs when a subtitle search progress has changed.
         /// </summary>
-        public event EventHandler<EventArgs<List<SubtitleSearchEngine.Subtitle>, double, List<string>>> SubtitleSearchProgressChanged;
+        public event EventHandler<EventArgs<List<Subtitle>, double, List<string>>> SubtitleSearchProgressChanged;
 
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
@@ -80,7 +80,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;&gt;"/> instance containing the event data.</param>
-        private void SingleSubtitleSearchDone(object sender, EventArgs<List<SubtitleSearchEngine.Subtitle>> e)
+        private void SingleSubtitleSearchDone(object sender, EventArgs<List<Subtitle>> e)
         {
             _remaining.Remove((sender as SubtitleSearchEngine).Name);
 

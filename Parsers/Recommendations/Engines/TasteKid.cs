@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Recommendations
+﻿namespace RoliSoft.TVShowTracker.Parsers.Recommendations.Engines
 {
     using System;
     using System.Collections.Generic;

@@ -24,7 +24,7 @@
         /// Gets or sets the subtitles list view item collection.
         /// </summary>
         /// <value>The subtitles list view item collection.</value>
-        public ObservableCollection<SubtitleSearchEngine.Subtitle> SubtitlesListViewItemCollection { get; set; }
+        public ObservableCollection<Subtitle> SubtitlesListViewItemCollection { get; set; }
 
         /// <summary>
         /// Gets or sets the search engines active in this application.
@@ -83,7 +83,7 @@
         {
             if (SubtitlesListViewItemCollection == null)
             {
-                SubtitlesListViewItemCollection = new ObservableCollection<SubtitleSearchEngine.Subtitle>();
+                SubtitlesListViewItemCollection = new ObservableCollection<Subtitle>();
                 listView.ItemsSource            = SubtitlesListViewItemCollection;
             }
 
@@ -312,7 +312,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
-        private void SubtitleSearchProgressChanged(object sender, EventArgs<List<SubtitleSearchEngine.Subtitle>, double, List<string>> e)
+        private void SubtitleSearchProgressChanged(object sender, EventArgs<List<Subtitle>, double, List<string>> e)
         {
             SetStatus("Searching for subtitles on " + (string.Join(", ", e.Third)) + "...", true);
 
@@ -356,7 +356,7 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var sub = (SubtitleSearchEngine.Subtitle)listView.SelectedValue;
+            var sub = (Subtitle)listView.SelectedValue;
 
             if (!sub.IsLinkDirect)
             {

@@ -1,13 +1,18 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Usenet
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
+
+    using HtmlAgilityPack;
+
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
-    /// Provides support for scraping nCore.
+    /// Provides support for scraping BinSearch.
     /// </summary>
-    public class NCore : DownloadSearchEngine
+    public class BinSearch : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -17,7 +22,7 @@
         {
             get
             {
-                return "nCore";
+                return "BinSearch";
             }
         }
 
@@ -29,7 +34,7 @@
         {
             get
             {
-                return "http://static.ncore.cc/styles/ncore.ico";
+                return "http://www.binsearch.info/favicon.ico";
             }
         }
 
@@ -41,7 +46,7 @@
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -53,7 +58,7 @@
         {
             get
             {
-                return Types.Torrent;
+                return Types.Usenet;
             }
         }
 
@@ -64,8 +69,8 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://ncore.cc/torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies);
-            var links = html.DocumentNode.SelectNodes("//a[starts-with(@onclick, 'torrent(')]");
+            var html  = Utils.GetHTML("http://www.binsearch.info/index.php?q=" + Uri.EscapeUriString(query) + "&m=&max=25&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=200&maxsize=&font=&postdate=");
+            var links = html.DocumentNode.SelectNodes("//td/span[@class='s']");
 
             if (links == null)
             {
@@ -74,12 +79,13 @@
 
             return links.Select(node => new Link
                    {
-                       Site    = Name,
-                       Release = node.GetAttributeValue("title", string.Empty),
-                       URL     = "http://ncore.cc/" + node.SelectSingleNode("../../../../../..//div[@class='letoltve_txt']/a").GetAttributeValue("href", string.Empty),
-                       Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
-                       Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
-                       Type    = Types.Torrent
+                       Site         = Name,
+                       Release      = HtmlEntity.DeEntitize(node.InnerText),
+                       URL          = "http://www.binsearch.info" + HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']/a").GetAttributeValue("href", string.Empty)),
+                       Size         = Regex.Match(HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']").InnerText), @"size: ([^,<]+)").Groups[1].Value,
+                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
+                       Type         = Types.Usenet,
+                       IsLinkDirect = false
                    }).ToList();
         }
     }

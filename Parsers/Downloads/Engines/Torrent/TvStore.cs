@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
@@ -123,44 +123,44 @@
         /// </summary>
         /// <param name="release">The release name.</param>
         /// <returns>Extracted quality or Unknown.</returns>
-        public static Link.Qualities ParseQuality(string release)
+        public static Qualities ParseQuality(string release)
         {
             var q = Regex.Match(release, @"\[(?:(?:PROPER|REPACK)(?:\s\-)?)?\s*(.*?)\s\-").Groups[1].Value;
 
             if (IsMatch("Blu-ray-1080p", q))
             {
-                return Link.Qualities.BluRay_1080;
+                return Qualities.BluRay1080p;
             }
             if (IsMatch("HDTV-1080(p|i)", q))
             {
-                return Link.Qualities.HDTV_1080;
+                return Qualities.HDTV1080i;
             }
             if (IsMatch("Web-Dl-720p", q))
             {
-                return Link.Qualities.WebDL_720p;
+                return Qualities.WebDL720p;
             }
             if (IsMatch("Blu-ray-720p", q))
             {
-                return Link.Qualities.BluRay_720p;
+                return Qualities.BluRay720p;
             }
             if (IsMatch("HDTV-720p", q))
             {
-                return Link.Qualities.HDTV_720p;
+                return Qualities.HDTV720p;
             }
             if (IsMatch("HR-HDTV", q))
             {
-                return Link.Qualities.HR_x264;
+                return Qualities.HRx264;
             }
             if (IsMatch("TvRip", q))
             {
-                return Link.Qualities.TVRip;
+                return Qualities.TVRip;
             }
             if (IsMatch("(PDTV|DVDSRC|Rip$)", q))
             {
-                return Link.Qualities.HDTV_XviD;
+                return Qualities.HDTVXviD;
             }
 
-            return Link.Qualities.Unknown;
+            return Qualities.Unknown;
         }
 
         /// <summary>

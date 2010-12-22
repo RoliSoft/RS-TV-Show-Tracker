@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
@@ -89,45 +89,45 @@
         /// </summary>
         /// <param name="release">The release name.</param>
         /// <returns>Extracted quality or Unknown.</returns>
-        public static Link.Qualities ParseQuality(string release)
+        public static Qualities ParseQuality(string release)
         {
             if (IsMatch(release, @"\.1080(i|p)\.", @"\.WEB[_\-]?DL\."))
             {
-                return Link.Qualities.WebDL_1080;
+                return Qualities.WebDL1080p;
             }
             if (IsMatch(release, @"\.1080(i|p)\.", @"\.BluRay\."))
             {
-                return Link.Qualities.BluRay_1080;
+                return Qualities.BluRay1080p;
             }
             if (IsMatch(release, @"\.1080(i|p)\.", @"\.HDTV\."))
             {
-                return Link.Qualities.HDTV_1080;
+                return Qualities.HDTV1080i;
             }
             if (IsMatch(release, @"\.720p\.", @"\.WEB[_\-]?DL\."))
             {
-                return Link.Qualities.WebDL_720p;
+                return Qualities.WebDL720p;
             }
             if (IsMatch(release, @"\.720p\.", @"\.BluRay\."))
             {
-                return Link.Qualities.BluRay_720p;
+                return Qualities.BluRay720p;
             }
             if (IsMatch(release, @"\.720p\.", @"\.HDTV\."))
             {
-                return Link.Qualities.HDTV_720p;
+                return Qualities.HDTV720p;
             }
             if (IsMatch(release, @"\.((HR|HiRes|High[_\-]?Resolution)\.|x264\-|H264)"))
             {
-                return Link.Qualities.HR_x264;
+                return Qualities.HRx264;
             }
             if (IsMatch(release, @"\.(HDTV|PDTV|DVBRip|DVDRip)\."))
             {
-                return Link.Qualities.HDTV_XviD;
+                return Qualities.HDTVXviD;
             }
             if (IsMatch(release, @"\.TVRip\."))
             {
-                return Link.Qualities.TVRip;
+                return Qualities.TVRip;
             }
-            return Link.Qualities.Unknown;
+            return Qualities.Unknown;
         }
 
         /// <summary>

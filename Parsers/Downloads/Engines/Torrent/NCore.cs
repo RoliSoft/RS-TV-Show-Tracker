@@ -1,13 +1,13 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
-    /// Provides support for scraping FileList.ro.
+    /// Provides support for scraping nCore.
     /// </summary>
-    public class FileList : DownloadSearchEngine
+    public class NCore : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -17,7 +17,7 @@
         {
             get
             {
-                return "FileList";
+                return "nCore";
             }
         }
 
@@ -29,7 +29,7 @@
         {
             get
             {
-                return "http://filelist.ro/favicon.ico";
+                return "http://static.ncore.cc/styles/ncore.ico";
             }
         }
 
@@ -64,9 +64,9 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://filelist.ro/browse.php?cat=14&searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
-            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
-            
+            var html  = Utils.GetHTML("http://ncore.cc/torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies);
+            var links = html.DocumentNode.SelectNodes("//a[starts-with(@onclick, 'torrent(')]");
+
             if (links == null)
             {
                 return null;
@@ -75,10 +75,10 @@
             return links.Select(node => new Link
                    {
                        Site    = Name,
-                       Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
-                       URL     = "http://filelist.ro/" + node.SelectSingleNode("../../../td[3]/a").GetAttributeValue("href", string.Empty),
-                       Size    = node.SelectSingleNode("../../../td[7]").InnerHtml.Replace("<br>", " "),
-                       Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
+                       Release = node.GetAttributeValue("title", string.Empty),
+                       URL     = "http://ncore.cc/" + node.SelectSingleNode("../../../../../..//div[@class='letoltve_txt']/a").GetAttributeValue("href", string.Empty),
+                       Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
+                       Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
                        Type    = Types.Torrent
                    }).ToList();
         }

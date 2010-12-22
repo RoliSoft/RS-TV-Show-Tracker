@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles
+﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles.Engines
 {
     using System;
     using System.Collections.Generic;

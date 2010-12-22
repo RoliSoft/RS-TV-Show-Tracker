@@ -9,6 +9,7 @@
     using System.Windows.Media.Animation;
 
     using RoliSoft.TVShowTracker.Parsers.Recommendations;
+    using RoliSoft.TVShowTracker.Parsers.Recommendations.Engines;
 
     /// <summary>
     /// Interaction logic for RecommendationsPage.xaml
@@ -19,7 +20,7 @@
         /// Gets or sets the recommendations list view item collection.
         /// </summary>
         /// <value>The recommendations list view item collection.</value>
-        public ObservableCollection<RecommendationEngine.RecommendedShow> RecommendationsListViewItemCollection { get; set; }
+        public ObservableCollection<RecommendedShow> RecommendationsListViewItemCollection { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RecommendationsPage"/> class.
@@ -72,7 +73,7 @@
         {
             if (RecommendationsListViewItemCollection == null)
             {
-                RecommendationsListViewItemCollection = new ObservableCollection<RecommendationEngine.RecommendedShow>();
+                RecommendationsListViewItemCollection = new ObservableCollection<RecommendedShow>();
                 listView.ItemsSource                  = RecommendationsListViewItemCollection;
             }
 
@@ -116,7 +117,7 @@
             {
                 case 0:
                 case 1:
-                    rec = new RSTVShowRecommendation("S2qNfbCFCWoQ8RoL1S0FTbjbW", Utils.GetUID(), comboBox.SelectedIndex);
+                    rec = new RSTVShowRecommendation(comboBox.SelectedIndex);
                     SetStatus("Downloading recommendations from lab.rolisoft.net/tv...", true);
                     break;
 
@@ -154,7 +155,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Recommendations.RecommendationEngine.RecommendedShow&gt;&gt;"/> instance containing the event data.</param>
-        public void RecommendationDone(object sender, EventArgs<List<RecommendationEngine.RecommendedShow>> e)
+        public void RecommendationDone(object sender, EventArgs<List<RecommendedShow>> e)
         {
             Dispatcher.Invoke((Action)(() =>
                 {
@@ -185,7 +186,7 @@
         private void ViewImdbClick(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
-            Utils.Run(((RecommendationEngine.RecommendedShow)listView.SelectedValue).Imdb);
+            Utils.Run(((RecommendedShow)listView.SelectedValue).Imdb);
         }
 
         /// <summary>
@@ -196,7 +197,7 @@
         private void ViewWikipediaClick(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
-            Utils.Run(((RecommendationEngine.RecommendedShow)listView.SelectedValue).Wikipedia);
+            Utils.Run(((RecommendedShow)listView.SelectedValue).Wikipedia);
         }
 
         /// <summary>
@@ -207,7 +208,7 @@
         private void ViewEpguidesClick(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
-            Utils.Run(((RecommendationEngine.RecommendedShow)listView.SelectedValue).Epguides);
+            Utils.Run(((RecommendedShow)listView.SelectedValue).Epguides);
         }
 
         /// <summary>
@@ -218,7 +219,7 @@
         private void SearchYouTubeClick(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
-            Utils.Run("http://www.youtube.com/results?search_query=" + Uri.EscapeUriString(((RecommendationEngine.RecommendedShow)listView.SelectedValue).Name) + "+promo");
+            Utils.Run("http://www.youtube.com/results?search_query=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name) + "+promo");
         }
         #endregion
     }

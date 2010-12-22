@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
 
     /// <summary>
     /// Occurs when the update is done.
@@ -99,7 +100,7 @@
                 }
 
                 // get data from guide
-                Guide.TVShow tv;
+                TVShow tv;
                 try
                 {
                     tv = guide.GetData(id);

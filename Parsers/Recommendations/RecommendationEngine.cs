@@ -20,22 +20,6 @@
         public EventHandler<EventArgs<string, string>> RecommendationError;
 
         /// <summary>
-        /// Represents a recommended TV show.
-        /// </summary>
-        public class RecommendedShow
-        {
-            public string Name { get; set; }
-            public string Tagline { get; set; }
-            public string Score { get; set; }
-            public string Runtime { get; set; }
-            public string Episodes { get; set; }
-            public string Genre { get; set; }
-            public string Wikipedia { get; set; }
-            public string Epguides { get; set; }
-            public string Imdb { get; set; }
-        }
-
-        /// <summary>
         /// Gets the list of recommended TV show from the engine.
         /// </summary>
         /// <param name="shows">The currently watched shows.</param>

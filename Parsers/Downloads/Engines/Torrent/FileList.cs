@@ -1,15 +1,13 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    using HtmlAgilityPack;
-
     /// <summary>
-    /// Provides support for scraping SceneReleases.
+    /// Provides support for scraping FileList.ro.
     /// </summary>
-    public class SceneReleases : DownloadSearchEngine
+    public class FileList : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -19,7 +17,7 @@
         {
             get
             {
-                return "SceneReleases";
+                return "FileList";
             }
         }
 
@@ -31,7 +29,7 @@
         {
             get
             {
-                return "http://scenereleases.info/favicon.ico";
+                return "http://filelist.ro/favicon.ico";
             }
         }
 
@@ -43,7 +41,7 @@
         {
             get
             {
-                return false;
+                return true;
             }
         }
 
@@ -55,7 +53,7 @@
         {
             get
             {
-                return Types.Http;
+                return Types.Torrent;
             }
         }
 
@@ -66,9 +64,9 @@
         /// <returns>List of found download links.</returns>
         public override List<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://scenereleases.info/?s=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//h3/a");
-
+            var html  = Utils.GetHTML("http://filelist.ro/browse.php?cat=14&searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
+            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
+            
             if (links == null)
             {
                 return null;
@@ -76,13 +74,12 @@
 
             return links.Select(node => new Link
                    {
-                       Site         = Name,
-                       Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
-                       URL          = node.GetAttributeValue("href", string.Empty),
-                       Size         = "N/A",
-                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
-                       Type         = Types.Http,
-                       IsLinkDirect = false
+                       Site    = Name,
+                       Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
+                       URL     = "http://filelist.ro/" + node.SelectSingleNode("../../../td[3]/a").GetAttributeValue("href", string.Empty),
+                       Size    = node.SelectSingleNode("../../../td[7]").InnerHtml.Replace("<br>", " "),
+                       Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
+                       Type    = Types.Torrent
                    }).ToList();
         }
     }

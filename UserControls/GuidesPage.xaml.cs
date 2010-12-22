@@ -11,6 +11,7 @@
     using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
     /// <summary>
     /// Interaction logic for GuidesPage.xaml
@@ -294,8 +295,8 @@
                 showGeneralLast.Text = last.Count != 0 ? last[0]["name"] : string.Empty;
                 showGeneralNext.Text = next.Count != 0 ? next[0]["name"] : string.Empty;
 
-                showGeneralLastDate.Text = last.Count != 0 ? Utils.DateTimeFromUnix(double.Parse(last[0]["airdate"])).NextAir(true) : "no data available";
-                showGeneralNextDate.Text = next.Count != 0 ? Utils.DateTimeFromUnix(double.Parse(next[0]["airdate"])).NextAir(true) : airing ? "no data available" : "this show has ended";
+                showGeneralLastDate.Text = last.Count != 0 ? Utils.DateTimeFromUnix(double.Parse(last[0]["airdate"])).ToRelativeDate(true) : "no data available";
+                showGeneralNextDate.Text = next.Count != 0 ? Utils.DateTimeFromUnix(double.Parse(next[0]["airdate"])).ToRelativeDate(true) : airing ? "no data available" : "this show has ended";
             }
             catch
             {

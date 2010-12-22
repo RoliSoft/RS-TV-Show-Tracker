@@ -18,7 +18,6 @@
 
     using Microsoft.Win32;
 
-    using RoliSoft.TVShowTracker;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using Image = System.Windows.Controls.Image;
@@ -55,13 +54,13 @@
         /// <summary>
         /// Extended class of the original Link class to handle the context menu items.
         /// </summary>
-        public class LinkItem : DownloadSearchEngine.Link
+        public class LinkItem : Link
         {
             /// <summary>
             /// Initializes a new instance of the <see cref="LinkItem"/> class.
             /// </summary>
             /// <param name="link">The link.</param>
-            public LinkItem(DownloadSearchEngine.Link link)
+            public LinkItem(Link link)
             {
                 // unfortunately .NET doesn't support upcasting, so we need to do it the hard way
 
@@ -84,15 +83,27 @@
                 {
                     switch(Type)
                     {
-                        case DownloadSearchEngine.Types.Torrent:
+                        case Types.Torrent:
                             return "/RSTVShowTracker;component/Images/torrent.png";
 
-                        case DownloadSearchEngine.Types.Usenet:
+                        case Types.Usenet:
                             return "/RSTVShowTracker;component/Images/usenet.png";
 
                         default:
                             return "/RSTVShowTracker;component/Images/filehoster.png";
                     }
+                }
+            }
+
+            /// <summary>
+            /// Gets the friendly name of the link quality.
+            /// </summary>
+            /// <value>The quality's friendly name.</value>
+            public string QualityText
+            {
+                get
+                {
+                    return Quality.GetAttribute<DescriptionAttribute>().Description;
                 }
             }
 
@@ -104,7 +115,7 @@
             {
                 get
                 {
-                    return Type == DownloadSearchEngine.Types.Http || !IsLinkDirect ? "Visible" : "Collapsed";
+                    return Type == Types.HTTP || !IsLinkDirect ? "Visible" : "Collapsed";
                 }
             }
 
@@ -116,7 +127,7 @@
             {
                 get
                 {
-                    return Type != DownloadSearchEngine.Types.Http && IsLinkDirect ? "Visible" : "Collapsed";
+                    return Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
                 }
             }
 
@@ -128,7 +139,7 @@
             {
                 get
                 {
-                    return Type != DownloadSearchEngine.Types.Http && IsLinkDirect ? "Visible" : "Collapsed";
+                    return Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
                 }
             }
 
@@ -140,7 +151,7 @@
             {
                 get
                 {
-                    return Type == DownloadSearchEngine.Types.Torrent && IsLinkDirect && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
+                    return Type == Types.Torrent && IsLinkDirect && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
                 }
             }
         }
@@ -262,7 +273,7 @@
 
             if (reload || _qualities == null)
             {
-                _qualities = Enum.GetNames(typeof(DownloadSearchEngine.Link.Qualities)).Reverse().ToList();
+                _qualities = Enum.GetNames(typeof(Qualities)).Reverse().ToList();
             }
 
             if (reload || _excludes == null)
@@ -402,7 +413,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
-        private void DownloadSearchProgressChanged(object sender, EventArgs<List<DownloadSearchEngine.Link>, double, List<string>> e)
+        private void DownloadSearchProgressChanged(object sender, EventArgs<List<Link>, double, List<string>> e)
         {
             SetStatus("Searching for download links on " + (string.Join(", ", e.Third)) + "...", true);
 

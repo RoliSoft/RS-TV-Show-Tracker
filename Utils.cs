@@ -1,17 +1,12 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Diagnostics;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Net;
-    using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
-    using System.Xml.Linq;
 
     using HtmlAgilityPack;
 
@@ -23,127 +18,6 @@
     public static partial class Utils
     {
         /// <summary>
-        /// Extension method to <c>EventHandler&lt;EventArgs&gt;</c> to fire an event.
-        /// </summary>
-        /// <param name="handler">The handler.</param>
-        /// <param name="sender">The sender.</param>
-        public static void Fire(this EventHandler<EventArgs> handler, object sender)
-        {
-            if (handler != null)
-            {
-                handler(sender, EventArgs.Empty);
-            }
-        }
-
-        /// <summary>
-        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T&gt;&gt;</c> to fire an event.
-        /// </summary>
-        /// <typeparam name="T">The type of the data.</typeparam>
-        /// <param name="handler">The handler.</param>
-        /// <param name="sender">The sender.</param>
-        /// <param name="data">The data.</param>
-        public static void Fire<T>(this EventHandler<EventArgs<T>> handler, object sender, T data)
-        {
-            if (handler != null)
-            {
-                handler(sender, new EventArgs<T>(data));
-            }
-        }
-
-        /// <summary>
-        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T1, T2&gt;&gt;</c> to fire an event.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first data.</typeparam>
-        /// <typeparam name="T2">The type of the second data.</typeparam>
-        /// <param name="handler">The handler.</param>
-        /// <param name="sender">The sender.</param>
-        /// <param name="first">The first data.</param>
-        /// <param name="second">The second data.</param>
-        public static void Fire<T1, T2>(this EventHandler<EventArgs<T1, T2>> handler, object sender, T1 first, T2 second)
-        {
-            if (handler != null)
-            {
-                handler(sender, new EventArgs<T1, T2>(first, second));
-            }
-        }
-
-        /// <summary>
-        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T1, T2, T3&gt;&gt;</c> to fire an event.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first data.</typeparam>
-        /// <typeparam name="T2">The type of the second data.</typeparam>
-        /// <typeparam name="T3">The type of the third data.</typeparam>
-        /// <param name="handler">The handler.</param>
-        /// <param name="sender">The sender.</param>
-        /// <param name="first">The first data.</param>
-        /// <param name="second">The second data.</param>
-        /// <param name="third">The third data.</param>
-        public static void Fire<T1, T2, T3>(this EventHandler<EventArgs<T1, T2, T3>> handler, object sender, T1 first, T2 second, T3 third)
-        {
-            if (handler != null)
-            {
-                handler(sender, new EventArgs<T1, T2, T3>(first, second, third));
-            }
-        }
-
-        /// <summary>
-        /// Extension method to <c>EventHandler&lt;EventArgs&lt;T1, T2, T3, T4&gt;&gt;</c> to fire an event.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first data.</typeparam>
-        /// <typeparam name="T2">The type of the second data.</typeparam>
-        /// <typeparam name="T3">The type of the third data.</typeparam>
-        /// <typeparam name="T4">The type of the fourth data.</typeparam>
-        /// <param name="handler">The handler.</param>
-        /// <param name="sender">The sender.</param>
-        /// <param name="first">The first data.</param>
-        /// <param name="second">The second data.</param>
-        /// <param name="third">The third data.</param>
-        /// <param name="fourth">The fourth data.</param>
-        public static void Fire<T1, T2, T3, T4>(this EventHandler<EventArgs<T1, T2, T3, T4>> handler, object sender, T1 first, T2 second, T3 third, T4 fourth)
-        {
-            if (handler != null)
-            {
-                handler(sender, new EventArgs<T1, T2, T3, T4>(first, second, third, fourth));
-            }
-        }
-
-        /// <summary>
-        /// Extension method to <c>List&lt;T&gt;</c> to move an item.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list">The list.</param>
-        /// <param name="old">The old index.</param>
-        /// <param name="idx">The new index.</param>
-        public static void Move<T>(this List<T> list, int old, int idx)
-        {
-            var tmp = list[idx];
-            list[idx] = list[old];
-            list[old] = tmp;
-        }
-
-        /// <summary>
-        /// Moves the specified item up in the list.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list">The list.</param>
-        /// <param name="item">The item's index.</param>
-        public static void MoveUp<T>(this List<T> list, int item)
-        {
-            Move(list, item, item - 1);
-        }
-
-        /// <summary>
-        /// Moves the specified item down in the list.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list">The list.</param>
-        /// <param name="item">The item's index.</param>
-        public static void MoveDown<T>(this List<T> list, int item)
-        {
-            Move(list, item, item + 1);
-        }
-
-        /// <summary>
         /// Gets the Unix epoch date. (1970-01-01 00:00:00)
         /// </summary>
         /// <value>The Unix epoch.</value>
@@ -152,58 +26,6 @@
             get
             {
                 return new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            }
-        }
-
-        /// <summary>
-        /// Extension method to DateTime to translate the next air date into a relative date.
-        /// </summary>
-        /// <param name="nextdate">The next air.</param>
-        /// <param name="detailed">if set to <c>true</c> a more descriptive text will be returned.</param>
-        /// <returns>Relative date.</returns>
-        public static string NextAir(this DateTime nextdate, bool detailed = false)
-        {
-            var cal = CultureInfo.InvariantCulture.Calendar;
-
-            if (DateTime.Now.Year == nextdate.Year)
-            {
-                if (DateTime.Now.ToShortDateString() == nextdate.ToShortDateString())
-                {
-                    return "Today at " + nextdate.ToString("h:mm tt");
-                }
-
-                if (DateTime.Now.AddDays(1).ToShortDateString() == nextdate.ToShortDateString())
-                {
-                    return "Tomorrow at " + nextdate.ToString("h:mm tt");
-                }
-
-                if (DateTime.Now.AddDays(-1).ToShortDateString() == nextdate.ToShortDateString())
-                {
-                    return "Yesterday at " + nextdate.ToString("h:mm tt");
-                }
-
-                if (cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
-                {
-                    return (detailed ? "This " : string.Empty) + nextdate.DayOfWeek + " at " + nextdate.ToString("h:mm tt");
-                }
-
-                if (cal.GetWeekOfYear(DateTime.Now.AddDays(7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
-                {
-                    return "Next " + nextdate.DayOfWeek + " at " + nextdate.ToString("h:mm tt");
-                }
-
-                if (cal.GetWeekOfYear(DateTime.Now.AddDays(-7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
-                {
-                    return "Last " + nextdate.DayOfWeek + " at " + nextdate.ToString("h:mm tt");
-                }
-
-                var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until air" : String.Empty);
-            }
-            else
-            {
-                var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until air" : String.Empty);
             }
         }
 
@@ -228,106 +50,6 @@
         }
 
         /// <summary>
-        /// Extension method to DateTime to convert the date to local time zone.
-        /// </summary>
-        /// <param name="date">The date.</param>
-        /// <param name="source">The time zone of the specified date.</param>
-        /// <returns></returns>
-        public static DateTime ToLocalTimeZone(this DateTime date, string source = "Central Standard Time")
-        {
-            return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local);
-        }
-
-        /// <summary>
-        /// Extension method to TimeSpan to convert its value to a relative string.
-        /// </summary>
-        /// <param name="ts">The time span.</param>
-        /// <returns>Relative time.</returns>
-        public static string ToRelativeTime(this TimeSpan ts)
-        {
-            if (ts.Days >= 365)
-            {
-                return FormatNumber(ts.Days / 365, "year");
-            }
-            if (ts.Days >= 7)
-            {
-                return FormatNumber(ts.Days / 7, "week");
-            }
-            if (ts.Days >= 1)
-            {
-                return FormatNumber(ts.Days, "day");
-            }
-            if (ts.Hours >= 1)
-            {
-                return FormatNumber(ts.Hours, "hour");
-            }
-            return ts.Minutes >= 1
-                   ? FormatNumber(ts.Minutes, "minute")
-                   : FormatNumber(ts.Seconds, "second");
-        }
-
-        /// <summary>
-        /// Extension method to TimeSpan to convert its value into a user friendly representation.
-        /// </summary>
-        /// <param name="ts">The time span.</param>
-        /// <returns>User friendly total time.</returns>
-        public static string ToTotalTime(this TimeSpan ts)
-        {
-            var time  = ts.TotalSeconds;
-            var value = new Dictionary<string, double>
-                {
-                    { "year",   0 },
-                    { "month",  0 },
-                    { "week",   0 },
-                    { "day",    0 },
-                    { "hour",   0 },
-                    { "minute", 0 },
-                    { "second", 0 }
-                };
-
-            if (time >= 31556926)
-            {
-                value["year"] = Math.Floor(time / 31556926);
-                time %= 31556926;
-            }
-
-            if (time >= 2592000)
-            {
-                value["month"] = Math.Floor(time / 2592000);
-                time %= 2592000;
-            }
-
-            if (time >= 604800)
-            {
-                value["week"] = Math.Floor(time / 604800);
-                time %= 604800;
-            }
-
-            if (time >= 86400)
-            {
-                value["day"] = Math.Floor(time / 86400);
-                time %= 86400;
-            }
-
-            if (time >= 3600)
-            {
-                value["hour"] = Math.Floor(time / 3600);
-                time %= 3600;
-            }
-
-            if (time >= 60)
-            {
-                value["minute"] = Math.Floor(time / 60);
-                time %= 60;
-            }
-
-            value["second"] = Math.Floor(time);
-
-            var ret = value.Where(unit => unit.Value != 0).Aggregate(String.Empty, (current, unit) => current + (FormatNumber((int)unit.Value, unit.Key) + ", "));
-            return Regex.Replace(ret.TrimEnd(", ".ToCharArray()), "(.+), ", "$1 and ");
-        }
-
-        /// <summary>
         /// Appends a unit to a number and makes it plural if the number is not 1.
         /// </summary>
         /// <param name="number">The number.</param>
@@ -336,34 +58,6 @@
         public static string FormatNumber(int number, string unit)
         {
             return number + " " + unit + (number != 1 ? "s" : string.Empty);
-        }
-
-        /// <summary>
-        /// Extension method to string to uppercase the first letter.
-        /// </summary>
-        /// <param name="s">The string.</param>
-        /// <returns>String with uppercased first letter.</returns>
-        public static string ToUppercaseFirst(this string s)
-        {
-            return char.ToUpper(s[0]) + s.Substring(1);
-        }
-
-        /// <summary>
-        /// Extension method to XContainer to get the value of a tag or null if it doesn't exist.
-        /// </summary>
-        /// <param name="doc">The document.</param>
-        /// <param name="name">The name of the tag.</param>
-        /// <returns>Value or null.</returns>
-        public static string GetValue<T>(this T doc, string name) where T : XContainer
-        {
-            try
-            {
-                return doc.Descendants(name).First().Value.Trim();
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -586,30 +280,6 @@
             }
 
             return uid;
-        }
-
-        /// <summary>
-        /// Extension method to Type to get the derived classes of a class.
-        /// </summary>
-        /// <param name="baseClass">The base class.</param>
-        /// <returns>List of derived classes.</returns>
-        public static IEnumerable<Type> GetDerivedTypes(this Type baseClass)
-        {
-            return Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsClass && type.IsSubclassOf(baseClass));
-        }
-
-        /// <summary>
-        /// Extension method to ObservableCollection to add support for AddRange.
-        /// </summary>
-        /// <typeparam name="T">Type of the collection items.</typeparam>
-        /// <param name="oc">The observable collection.</param>
-        /// <param name="collection">The collection to insert.</param>
-        public static void AddRange<T>(this ObservableCollection<T> oc, IEnumerable<T> collection)
-        {
-            foreach (var item in collection)
-            {
-                oc.Add(item);
-            }
         }
 
         /// <summary>
