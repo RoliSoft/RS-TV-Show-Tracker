@@ -32,7 +32,7 @@
                     AirTime     = info.GetValue("Airs_Time"),
                     AirDay      = info.GetValue("Airs_DayOfWeek"),
                     Network     = info.GetValue("Network"),
-                    Runtime     = int.Parse(info.GetValue("Runtime")),
+                    Runtime     = info.GetValue("Runtime").ToInteger(),
                     Episodes    = new List<TVShow.Episode>()
                 };
 
@@ -47,7 +47,7 @@
             string pic;
             foreach (var ep in info.Descendants("Episode"))
             {
-                if ((sn = int.Parse(ep.GetValue("SeasonNumber"))) == 0)
+                if ((sn = ep.GetValue("SeasonNumber").ToInteger()) == 0)
                 {
                     continue;
                 }
@@ -55,7 +55,7 @@
                 show.Episodes.Add(new TVShow.Episode
                     {
                         Season  = sn,
-                        Number  = int.Parse(ep.GetValue("EpisodeNumber")),
+                        Number  = ep.GetValue("EpisodeNumber").ToInteger(),
                         Airdate = DateTime.TryParse(ep.GetValue("FirstAired"), out dt)
                                   ? dt
                                   : Utils.UnixEpoch,

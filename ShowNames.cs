@@ -116,8 +116,8 @@
             {
                 return new ShowEpisode 
                     {
-                        Season  = int.Parse(m.Groups["s"].Value),
-                        Episode = int.Parse(m.Groups["e"].Value)
+                        Season  = m.Groups["s"].Value.ToInteger(),
+                        Episode = m.Groups["e"].Value.ToInteger()
                     };
             }
             else

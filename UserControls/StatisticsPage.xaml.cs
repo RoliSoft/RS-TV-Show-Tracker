@@ -94,15 +94,15 @@ Tvshows
              */
             foreach (var show in shows)
             {
-                episodes += int.Parse(show["count"]);
-                minutes  += TimeSpan.FromMinutes(double.Parse(show["runtime"]) * double.Parse(show["count"]));
+                episodes += show["count"].ToInteger();
+                minutes  += TimeSpan.FromMinutes(show["runtime"].ToDouble() * show["count"].ToDouble());
 
                 StatisticsListViewItemCollection.Add(new StatisticsListViewItem
                     {
                         Name       = show["name"],
                         Runtime    = show["runtime"] + " minutes",
-                        Episodes   = int.Parse(show["count"]).ToString("#,###"),
-                        TimeWasted = TimeSpan.FromMinutes(double.Parse(show["runtime"]) * double.Parse(show["count"])).ToFullRelativeTime()
+                        Episodes   = show["count"].ToInteger().ToString("#,###"),
+                        TimeWasted = TimeSpan.FromMinutes(show["runtime"].ToDouble() * show["count"].ToDouble()).ToFullRelativeTime()
                     });
             }
 

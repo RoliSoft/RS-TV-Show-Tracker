@@ -236,7 +236,7 @@
                 try
                 {
                     Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
-                                                  ep.Number + (ep.Season * 1000) + (int.Parse(showid) * 100 * 1000),
+                                                  ep.Number + (ep.Season * 1000) + (showid.ToInteger() * 100 * 1000),
                                                   showid,
                                                   ep.Season,
                                                   ep.Number,

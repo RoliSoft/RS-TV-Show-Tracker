@@ -125,7 +125,7 @@
                         }
                         else if (show.Title.EndsWith(" NEW EPISODES!"))
                         {
-                            eps += int.Parse(Regex.Match(show.Title, " · ([0-9]*) NEW EPISODES!").Groups[1].Value);
+                            eps += Regex.Match(show.Title, " · ([0-9]*) NEW EPISODES!").Groups[1].Value.ToInteger();
                         }
                     }
 
@@ -174,7 +174,7 @@
                 show["title"] = Regex.Replace(title[0], @"(?=[SE][0-9]{3})([SE])0", "$1");
 
                 var showid = title[1];
-                var count  = int.Parse(Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"]);
+                var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"].ToInteger();
 
                 if (count == 1)
                 {
@@ -189,7 +189,7 @@
                 {
                     var next = show["next"].Split(new[] { "||" }, StringSplitOptions.None);
                     show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " +
-                                   double.Parse(next[1]).GetUnixTimestamp().ToRelativeDate();
+                                   next[1].ToDouble().GetUnixTimestamp().ToRelativeDate();
                 }
                 else if (show["airing"] == "True")
                 {
@@ -253,7 +253,7 @@
             var show    = GetSelectedShow();
             var showid  = Database.GetShowID(show[0]);
             var dbep    = Database.Query("select season, episode from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
-            var episode = "S" + int.Parse(dbep["season"]).ToString("00") + "E" + int.Parse(dbep["episode"]).ToString("00");
+            var episode = "S" + dbep["season"].ToInteger().ToString("00") + "E" + dbep["episode"].ToInteger().ToString("00");
 
             SetStatus("Searching for " + show[0] + " " + episode + " on the disk...", true);
 
@@ -583,7 +583,7 @@
             if (listView.SelectedIndex != -1 && e.Key == Key.Up && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
                 var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var rowid  = int.Parse(Database.Query("select rowid from tvshows where name = ?", sel.Name).First()["rowid"]);
+                var rowid  = Database.Query("select rowid from tvshows where name = ?", sel.Name).First()["rowid"].ToInteger();
                 var listid = listView.SelectedIndex;
 
                 if (rowid == 1)
@@ -607,7 +607,7 @@
             if (listView.SelectedIndex != -1 && e.Key == Key.Down && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
                 var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var rowid  = int.Parse(Database.Query("select rowid from tvshows where name = ?", sel.Name).First()["rowid"]);
+                var rowid  = Database.Query("select rowid from tvshows where name = ?", sel.Name).First()["rowid"].ToInteger();
                 var listid = listView.SelectedIndex;
 
                 if (rowid == OverviewListViewItemCollection.Count)

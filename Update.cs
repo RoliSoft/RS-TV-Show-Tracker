@@ -128,7 +128,7 @@
                     try
                     {
                         Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
-                                                      ep.Number + (ep.Season * 1000) + (int.Parse(r["showid"]) * 100 * 1000),
+                                                      ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000),
                                                       r["showid"],
                                                       ep.Season,
                                                       ep.Number,

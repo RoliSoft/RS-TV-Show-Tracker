@@ -32,7 +32,7 @@
                     AirTime     = info.GetValue("airtime"),
                     AirDay      = info.GetValue("airday"),
                     Network     = info.GetValue("network"),
-                    Runtime     = int.Parse(info.GetValue("runtime")),
+                    Runtime     = info.GetValue("runtime").ToInteger(),
                     Episodes    = new List<TVShow.Episode>()
                 };
 
@@ -46,12 +46,12 @@
             int sn;
             foreach (var ep in list.Descendants("episode"))
             {
-                try { sn = int.Parse(ep.Parent.Attribute("no").Value); } catch { continue; }
+                try { sn = ep.Parent.Attribute("no").Value.ToInteger(); } catch { continue; }
 
                 show.Episodes.Add(new TVShow.Episode
                     {
                         Season  = sn,
-                        Number  = int.Parse(ep.GetValue("seasonnum")),
+                        Number  = ep.GetValue("seasonnum").ToInteger(),
                         Airdate = DateTime.TryParse(ep.GetValue("airdate"), out dt)
                                   ? dt
                                   : Utils.UnixEpoch,

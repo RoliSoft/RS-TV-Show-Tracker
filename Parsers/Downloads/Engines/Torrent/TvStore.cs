@@ -90,7 +90,7 @@
             for (;idx <= (arr.Length - 10);)
             {
                 var link = new Link { Site = Name };
-                var name = GetShowForID(int.Parse(arr[idx].Trim()));
+                var name = GetShowForID(arr[idx].Trim().ToInteger());
 
                 idx++;
 
@@ -183,7 +183,7 @@
             var matches = Regex.Matches(browse, @"catse\[(?<id>\d+)\]\s*=\s*'(?<name>[^']+)';");
 
             ShowIDs = matches.Cast<Match>()
-                     .ToDictionary(match => int.Parse(match.Groups["id"].Value),
+                     .ToDictionary(match => match.Groups["id"].Value.ToInteger(),
                                    match => match.Groups["name"].Value);
 
             using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TvStore-IDs")))

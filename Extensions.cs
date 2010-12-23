@@ -392,6 +392,26 @@
         {
             return char.ToUpper(s[0]) + s.Substring(1);
         }
+
+        /// <summary>
+        /// Extension method to string to convert it to an Int32.
+        /// </summary>
+        /// <param name="s">The string.</param>
+        /// <returns>Int32 value of the string.</returns>
+        public static int ToInteger(this string s)
+        {
+            return int.Parse(s);
+        }
+
+        /// <summary>
+        /// Extension method to string to convert it to a double.
+        /// </summary>
+        /// <param name="s">The string.</param>
+        /// <returns>Double value of the string.</returns>
+        public static double ToDouble(this string s)
+        {
+            return double.Parse(s);
+        }
         #endregion
 
         #region XContainer

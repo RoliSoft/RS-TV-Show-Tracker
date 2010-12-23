@@ -84,7 +84,7 @@
 
                 if (m.Groups["runtime"].Success)
                 {
-                    show.Runtime = int.Parse(m.Groups["runtime"].Value.Trim());
+                    show.Runtime = m.Groups["runtime"].Value.Trim().ToInteger();
                     show.Runtime = show.Runtime == 30
                                    ? 20
                                    : show.Runtime == 50 || show.Runtime == 60
@@ -108,8 +108,8 @@
             {
                 show.Episodes.Add(new TVShow.Episode
                     {
-                        Season  = int.Parse(m.Groups["season"].Value.Trim()),
-                        Number  = int.Parse(m.Groups["episode"].Value.Trim()),
+                        Season  = m.Groups["season"].Value.Trim().ToInteger(),
+                        Number  = m.Groups["episode"].Value.Trim().ToInteger(),
                         Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
                                 ? dt
                                 : Utils.UnixEpoch,

@@ -68,7 +68,7 @@
                         Season  = s,
                         Number  = e,
                         Title   = "Season " + s + ", Episode " + e,
-                        Airdate = new DateTime(DateTime.Now.Year - (snr - s), (int)Math.Ceiling(e / 10d), int.Parse((e / 10d).ToString("0.0").Split('.').Last()) + 1, 0, 0, 0, 0) // I take the guesswork waaay too far...
+                        Airdate = new DateTime(DateTime.Now.Year - (snr - s), (int)Math.Ceiling(e / 10d), (e / 10d).ToString("0.0").Split('.').Last().ToInteger() + 1, 0, 0, 0, 0) // I take the guesswork waaay too far...
                     });
                 }
             }

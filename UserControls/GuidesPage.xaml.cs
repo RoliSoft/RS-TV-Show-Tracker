@@ -295,8 +295,8 @@
                 showGeneralLast.Text = last.Count != 0 ? last[0]["name"] : string.Empty;
                 showGeneralNext.Text = next.Count != 0 ? next[0]["name"] : string.Empty;
 
-                showGeneralLastDate.Text = last.Count != 0 ? double.Parse(last[0]["airdate"]).GetUnixTimestamp().ToRelativeDate(true) : "no data available";
-                showGeneralNextDate.Text = next.Count != 0 ? double.Parse(next[0]["airdate"]).GetUnixTimestamp().ToRelativeDate(true) : airing ? "no data available" : "this show has ended";
+                showGeneralLastDate.Text = last.Count != 0 ? last[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true) : "no data available";
+                showGeneralNextDate.Text = next.Count != 0 ? next[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true) : airing ? "no data available" : "this show has ended";
             }
             catch
             {
@@ -321,7 +321,7 @@
                         Id      = show["id"],
                         Episode = Regex.Replace(show["notation"], @"(?=[SE][0-9]{3})([SE])0", "$1"),
                         AirDate = show["airdate"] != "0"
-                                  ? double.Parse(show["airdate"]).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (double.Parse(show["airdate"]).GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
+                                  ? show["airdate"].ToDouble().GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show["airdate"].ToDouble().GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
                                   : "Unaired episode",
                         Title   = show["name"],
                         Summary = show["descr"],

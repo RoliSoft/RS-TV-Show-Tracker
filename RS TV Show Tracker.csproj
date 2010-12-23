@@ -114,6 +114,7 @@
     <Compile Include="Parsers\ParserAttribute.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
+    <Compile Include="Remote.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>

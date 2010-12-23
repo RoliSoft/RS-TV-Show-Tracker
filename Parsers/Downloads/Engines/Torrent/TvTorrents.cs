@@ -83,7 +83,7 @@
                    .Select(node => new Link
                    {
                        Site    = Name,
-                       Release = Regex.Replace(node.InnerText, @"\b([0-9]{1,2})x([0-9]{1,2})\b", new MatchEvaluator(me => "S" + int.Parse(me.Groups[1].Value).ToString("00") + "E" + int.Parse(me.Groups[2].Value).ToString("00")), RegexOptions.IgnoreCase),
+                       Release = Regex.Replace(node.InnerText, @"\b([0-9]{1,2})x([0-9]{1,2})\b", new MatchEvaluator(me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00")), RegexOptions.IgnoreCase),
                        URL     = "http://torrent.tvtorrents.com/FetchTorrentServlet?info_hash=" + node.SelectSingleNode("a").GetAttributeValue("href", string.Empty).Split('=').Last() + "&digest=" + digest + "&hash=" + hash,
                        Size    = node.SelectSingleNode("../td[5]").GetAttributeValue("title", string.Empty).Replace("Torrent is ", String.Empty).Replace("b", "B"),
                        Quality = node.SelectSingleNode("a").InnerText.Contains("(720p .mkv)") ? Qualities.HDTV720p : node.SelectSingleNode("a").InnerText.Contains(" .mkv)") ? Qualities.HRx264 : Qualities.HDTVXviD,
