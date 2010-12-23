@@ -249,7 +249,7 @@
         /// Gets the unique user identifier or generates one if absent.
         /// </summary>
         /// <returns>Unique ID.</returns>
-        public static string GetUID()
+        public static string GetUUID()
         {
             var uid = Database.Setting("uid");
 

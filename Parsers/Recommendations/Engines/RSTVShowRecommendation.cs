@@ -12,7 +12,7 @@
     {
         private readonly int _type;
         private readonly string _key  = "S2qNfbCFCWoQ8RoL1S0FTbjbW",
-                                _uuid = Utils.GetUID();
+                                _uuid = Utils.GetUUID();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RSTVShowRecommendation"/> class.

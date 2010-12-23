@@ -1,5 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
+    using System.Diagnostics;
     using System.Dynamic;
     using System.Linq;
 
@@ -37,8 +39,35 @@
         /// </returns>
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            var r  = Utils.GetURL("http://localhost/update/", "json&func=" + binder.Name + (args.Count() != 0 ? "&args[]=" + string.Join("&args[]=", args) : string.Empty));
-            result = JsonConvert.DeserializeObject<ExpandoObject>(r);
+            dynamic obj;
+            var sw = Stopwatch.StartNew();
+
+            try
+            {
+                var r = Utils.GetURL("http://localhost/update/",
+                    "json"
+                  + "&software=" + Uri.EscapeUriString("RS TV Show Tracker")
+                  + "&version=" + Uri.EscapeUriString(Signature.Version)
+                  + "&uuid=" + Uri.EscapeUriString(Utils.GetUUID())
+                  + "&func=" + Uri.EscapeUriString(binder.Name)
+                  + (args.Count() != 0
+                     ? "&args[]=" + string.Join("&args[]=", args.Select(arg => Uri.EscapeUriString(arg.ToString())))
+                     : string.Empty)
+                );
+
+                obj = JsonConvert.DeserializeObject(r);
+                obj.Success = obj.Error == null;
+            }
+            catch (Exception ex)
+            {
+                obj = new ExpandoObject();
+                obj.Success = false;
+                obj.Error = ex.Message;
+            }
+
+            sw.Stop();
+            obj.Time = sw.Elapsed.TotalSeconds;
+            result = obj;
             return true;
         }
     }

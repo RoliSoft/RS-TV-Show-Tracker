@@ -38,6 +38,7 @@
         /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
         private static void Tasks(object sender, ElapsedEventArgs e)
         {
+            try { MainWindow.Active.CheckForUpdate(); } catch { }
             try { CheckUpdate(); } catch { }
             try { ProcessMonitor.CheckOpenFiles(); } catch { }
         }

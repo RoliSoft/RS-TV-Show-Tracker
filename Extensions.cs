@@ -133,6 +133,18 @@
                    ? (T)attrs.First()
                    : default(T);
         }
+
+        /// <summary>
+        /// Casts the specified object to the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to cast to.</typeparam>
+        /// <param name="obj">The object which will be casted..</param>
+        /// <returns>Object casted to type T.</returns>
+        public static T Convert<T>(this object obj)
+        {
+            // should be Cast<>() but then it'd override System.Linq.Enumerable.Cast<>() 
+            return (T)obj;
+        }
         #endregion
 
         #region Type
@@ -391,6 +403,27 @@
         public static string ToUppercaseFirst(this string s)
         {
             return char.ToUpper(s[0]) + s.Substring(1);
+        }
+
+        /// <summary>
+        /// Extension method to string to alias the <c>string.Format()</c> method.
+        /// </summary>
+        /// <param name="format">The string to be formatted.</param>
+        /// <param name="args">The arguments present in the string.</param>
+        /// <returns>Formatted string.</returns>
+        public static string FormatWith(this string format, params object[] args)
+        {
+            return string.Format(format, args);
+        }
+
+        /// <summary>
+        /// Extension method to string to determine whether the specified string is null, empty or whitespace.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns><c>true</c> if string is null, empty or whitespace; otherwise, <c>false</c>.</returns>
+        public static bool IsNullOrWhiteSpace(this string value)
+        {
+            return string.IsNullOrWhiteSpace(value);
         }
 
         /// <summary>

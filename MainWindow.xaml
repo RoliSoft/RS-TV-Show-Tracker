@@ -19,6 +19,14 @@
             <GradientStop Color="DarkOrange" Offset="0.7"/>
             <GradientStop Color="OrangeRed" Offset="0"/>
         </LinearGradientBrush>
+        <LinearGradientBrush x:Key="UpdateGradient" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#7DFF8C00" Offset="0.7"/>
+            <GradientStop Color="#7DFFFF00" Offset="0"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="UpdateGradientHover" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#FFFF8C00" Offset="0.7"/>
+            <GradientStop Color="#FFFFFF00" Offset="0"/>
+        </LinearGradientBrush>
 
         <!-- tab control animation -->
         <DataTemplate x:Key="TabTemplate">
@@ -604,9 +612,9 @@
     <Border BorderThickness="1" Name="mainBorder" CornerRadius="6" Padding="5">
         <Grid>
             
-            <!-- logo -->
+            <!-- logo menu -->
 
-            <Menu Name="logoMenu" IsMainMenu="True" Margin="6,-1,0,0" Padding="0" Width="157" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Menu Name="logoMenu" IsMainMenu="True" Margin="7,-1,0,0" Padding="0" Width="157" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <MenuItem Header="Main menu" Name="logoMenuItem" SubmenuClosed="LogoMenuItemSubmenuClosed">
                     <MenuItem Header="Add new TV show" Click="AddNewTVShowClick">
                         <MenuItem.Icon>
@@ -645,7 +653,10 @@
                     </MenuItem>
                 </MenuItem>
             </Menu>
-            <Border Name="logo" Cursor="Hand" Shell:WindowChrome.IsHitTestVisibleInChrome="True" Margin="5,-5,0,0" Padding="0" Width="160" MaxWidth="160" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="1,0,1,1" BorderBrush="Gray" CornerRadius="0,0,4,4" Background="{StaticResource HeadGradient}" MouseLeftButtonUp="LogoMouseLeftButtonUp" MouseEnter="LogoMouseEnter" MouseLeave="LogoMouseLeave">
+            
+            <!-- logo -->
+            
+            <Border Name="logo" Cursor="Hand" Shell:WindowChrome.IsHitTestVisibleInChrome="True" Margin="5,-5,0,0" Padding="0" Width="160" MaxWidth="160" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="1,0,1,1" BorderBrush="DimGray" CornerRadius="0,0,4,4" Background="{StaticResource HeadGradient}" MouseLeftButtonUp="LogoMouseLeftButtonUp" MouseEnter="LogoMouseEnter" MouseLeave="LogoMouseLeave">
                 <Grid>
                     <Rectangle Fill="{StaticResource HeadGradientBusy}" Width="0" HorizontalAlignment="Left" Name="progressRectangle" Opacity="0" Margin="0" />
                     <Image Source="/RSTVShowTracker;component/Images/tv.png" Height="16" Width="16" HorizontalAlignment="Left" Margin="8,-3,0,0"></Image>
@@ -661,9 +672,33 @@
                     <DropShadowEffect BlurRadius="5" Color="Black" Direction="0" ShadowDepth="0" />
                 </Label.Effect>
             </Label>
+            
+            <!-- update -->
+
+            <Border Name="updateOuter" Margin="0,-5,106,0" Shell:WindowChrome.IsHitTestVisibleInChrome="True" HorizontalAlignment="Right" VerticalAlignment="Top" BorderThickness="1,0,1,1" BorderBrush="#7DFFFFFF" CornerRadius="0,0,4,4" MouseLeftButtonUp="UpdateMouseLeftButtonUp" MouseEnter="UpdateMouseEnter" MouseLeave="UpdateMouseLeave" Visibility="Collapsed">
+                <Border Name="update" Cursor="Hand" BorderThickness="1,0,1,1" BorderBrush="DimGray" CornerRadius="0,0,4,4" Background="{StaticResource UpdateGradient}">
+                    <Border.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/RSTVShowTracker;component/Images/new.png" Height="16" Width="16" VerticalAlignment="Top" Margin="0,3,5,0" />
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Name="updateToolTipTitle" FontWeight="Bold" Margin="0,3,0,3" />
+                                <TextBlock Name="updateToolTipText" Margin="0,0,0,3" TextWrapping="Wrap" />
+                                <TextBlock FontStyle="Italic" Text="Click to initiate update." TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border.ToolTip>
+                    <Grid>
+                        <Label FontSize="11" HorizontalAlignment="Left" Foreground="White" Content="New version available!" Padding="6,2" Height="18">
+                            <Label.Effect>
+                                <DropShadowEffect BlurRadius="5" Color="Gray" Direction="316" ShadowDepth="0" />
+                            </Label.Effect>
+                        </Label>
+                    </Grid>
+                </Border>
+            </Border>
 
             <!-- tabs -->
-
+            
             <TabControl Name="tabControl" ContentTemplate="{StaticResource TabTemplate}" Background="#82000000" BorderBrush="Transparent" Margin="0,25,0,6" BorderThickness="0">
                 
                 <!-- overview -->

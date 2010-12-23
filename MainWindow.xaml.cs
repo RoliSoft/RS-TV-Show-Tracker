@@ -2,8 +2,11 @@
 {
     using System;
     using System.Diagnostics;
+    using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Controls;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
@@ -134,6 +137,8 @@
                         t.Elapsed += (d, y) => Dispatcher.Invoke((Action)(() => { Top = top; }));
                     };
             }
+
+            new Task(CheckForUpdate).Start();
         }
 
         /// <summary>
@@ -285,6 +290,23 @@
         }
 
         /// <summary>
+        /// Checks for software update.
+        /// </summary>
+        public void CheckForUpdate()
+        {
+            var upd = REST.Instance.CheckForUpdate();
+            if ((bool)upd.Success && (bool)upd.New)
+            {
+                Dispatcher.Invoke((Action)(() =>
+                    {
+                        updateOuter.Visibility  = Visibility.Visible;
+                        updateToolTipTitle.Text = "Version {0} is available!".FormatWith((string)upd.Version);
+                        updateToolTipText.Text  = (string)upd.Description;
+                    }));
+            }
+        }
+
+        /// <summary>
         /// Handles the KeyUp event of the Window control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -316,7 +338,8 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseEventArgs"/> instance containing the event data.</param>
         private void LogoMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            logo.Background = (Brush)FindResource("HeadGradientHover");
+            logo.Background  = (Brush)FindResource("HeadGradientHover");
+            logo.BorderBrush = Brushes.Gray;
         }
 
         /// <summary>
@@ -326,7 +349,8 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseEventArgs"/> instance containing the event data.</param>
         private void LogoMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            logo.Background = (Brush)FindResource("HeadGradient" + (logoMenuItem.IsSubmenuOpen ? "Hover" : string.Empty));
+            logo.Background  = (Brush)FindResource("HeadGradient" + (logoMenuItem.IsSubmenuOpen ? "Hover" : string.Empty));
+            logo.BorderBrush = logoMenuItem.IsSubmenuOpen ? Brushes.Gray : Brushes.DimGray;
         }
 
         /// <summary>
@@ -346,7 +370,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void LogoMenuItemSubmenuClosed(object sender, RoutedEventArgs e)
         {
-            logo.Background = (Brush)FindResource("HeadGradient");
+            logo.Background  = (Brush)FindResource("HeadGradient");
+            logo.BorderBrush = Brushes.DimGray;
         }
 
         #region Main menu
@@ -469,6 +494,39 @@
                     lastUpdatedLabel.Content = "updating " + e.First + " (" + e.Second.ToString("0.00") + "%)";
                     SetHeaderProgress(e.Second);
                 }));
+        }
+        #endregion
+
+        #region Software update
+        /// <summary>
+        /// Handles the MouseEnter event of the Update control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseEventArgs"/> instance containing the event data.</param>
+        private void UpdateMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            update.Background = (Brush)FindResource("UpdateGradientHover");
+        }
+
+        /// <summary>
+        /// Handles the MouseLeave event of the Update control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseEventArgs"/> instance containing the event data.</param>
+        private void UpdateMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            update.Background = (Brush)FindResource("UpdateGradient");
+        }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the Update control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void UpdateMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Utils.Run(Path.Combine(Signature.FullPath, "update.exe"));
+            NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
         }
         #endregion
     }
