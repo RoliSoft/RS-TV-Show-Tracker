@@ -251,6 +251,11 @@
         /// <returns>Unique ID.</returns>
         public static string GetUUID()
         {
+            if (string.IsNullOrWhiteSpace(Signature.FullPath))
+            {
+                return string.Empty;
+            }
+
             var uid = Database.Setting("uid");
 
             if (string.IsNullOrWhiteSpace(uid))

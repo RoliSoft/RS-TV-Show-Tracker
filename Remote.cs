@@ -44,7 +44,7 @@
 
             try
             {
-                var r = Utils.GetURL("http://localhost/update/",
+                var r = Utils.GetURL("http://lab.rolisoft.net/api/",
                     "json"
                   + "&software=" + Uri.EscapeUriString("RS TV Show Tracker")
                   + "&version=" + Uri.EscapeUriString(Signature.Version)

@@ -27,6 +27,11 @@
         /// </summary>
         static Database()
         {
+            if (string.IsNullOrWhiteSpace(Signature.FullPath))
+            {
+                return;
+            }
+
             Connection = new SQLiteConnection(@"Data Source=C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3");
             DataChange = DateTime.Now;
 

@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
     using System.Runtime.CompilerServices;
@@ -77,7 +78,18 @@
             Version      = ver.Major + "." + ver.MajorRevision + "." + ver.Build.ToString("0000") + "." + ver.Revision.ToString("00000");
             CompileTime  = new DateTime(2000, 1, 1, 1, 0, 0).AddDays(ver.Build).AddSeconds(ver.Revision * 2);
             IsObfuscated = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(SuppressIldasmAttribute), false).Length == 1;
-            FullPath     = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar;
+            try { FullPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; } catch (ArgumentException) { }
+        }
+
+        /// <summary>
+        /// Gets the numbers. This is an easter egg. ;)
+        /// </summary>
+        public static IEnumerable<int> GetNumbers()
+        {
+            for (var x = 1; x != 6; x++)
+            {
+                yield return (int)(60 + 4.25 * Math.Pow(x * x, 2) + 91.75 * x * x - 29.375 * x * Math.Pow(x, 2) - 0.22499999 * x * Math.Pow(x, 2) * Math.Pow(x, 2) - 122.4 * x);
+            }
         }
     }
 }

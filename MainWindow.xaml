@@ -8,16 +8,16 @@
         
         <!-- head gradient -->
         <LinearGradientBrush x:Key="HeadGradient" EndPoint="0,1" StartPoint="0,0">
-            <GradientStop Color="DarkRed" Offset="0.7"/>
-            <GradientStop Color="Red" Offset="0"/>
+            <GradientStop Color="Maroon" Offset="0.8"/>
+            <GradientStop Color="Red" Offset="0.1"/>
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="HeadGradientBusy" EndPoint="0,1" StartPoint="0,0">
-            <GradientStop Color="DarkBlue" Offset="0.7"/>
-            <GradientStop Color="Blue" Offset="0"/>
+            <GradientStop Color="DarkBlue" Offset="0.8"/>
+            <GradientStop Color="Blue" Offset="0.1"/>
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="HeadGradientHover" EndPoint="0,1" StartPoint="0,0">
-            <GradientStop Color="DarkOrange" Offset="0.7"/>
-            <GradientStop Color="OrangeRed" Offset="0"/>
+            <GradientStop Color="DarkOrange" Offset="0.8"/>
+            <GradientStop Color="Yellow" Offset="0.1"/>
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="UpdateGradient" EndPoint="0,1" StartPoint="0,0">
             <GradientStop Color="#7DFF8C00" Offset="0.7"/>
