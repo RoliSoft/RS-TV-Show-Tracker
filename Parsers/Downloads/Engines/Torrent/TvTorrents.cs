@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping tvtorrents.com.
     /// </summary>
-    [Parser("RoliSoft", "2009-12-09 2:48 AM")]
+    [Parser("RoliSoft", "2010-12-09 2:48 AM")]
     public class TvTorrents : DownloadSearchEngine
     {
         /// <summary>

@@ -159,6 +159,29 @@
         }
         #endregion
 
+        #region Attribute
+        /// <summary>
+        /// Extension method to Attribute to get all the classes on which it is present.
+        /// </summary>
+        /// <param name="attr">The attribute.</param>
+        /// <returns>List of marked classes.</returns>
+        public static IEnumerable<Type> GetWithAttribute(this Type attr)
+        {
+            return Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsClass && type.GetCustomAttributes(attr, false).Count() != 0);
+        }
+
+        /// <summary>
+        /// Extension method to Attribute to get all the classes on which it is present.
+        /// </summary>
+        /// <param name="attr">The attribute.</param>
+        /// <param name="filter">The filter method.</param>
+        /// <returns>List of marked classes.</returns>
+        public static IEnumerable<Type> GetWithAttribute<T>(this Type attr, Func<T, bool> filter) where T : Attribute
+        {
+            return Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsClass && type.GetCustomAttributes(attr, false).Count() != 0 && filter((T)type.GetCustomAttributes(attr, false).First()));
+        }
+        #endregion
+
         #region List<T>
         /// <summary>
         /// Extension method to <c>List&lt;T&gt;</c> to move an item.
@@ -257,12 +280,12 @@
                 }
 
                 var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until air" : String.Empty);
+                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until aires" : String.Empty);
             }
             else
             {
                 var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until air" : String.Empty);
+                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until aires" : String.Empty);
             }
         }
 

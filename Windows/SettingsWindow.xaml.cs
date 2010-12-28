@@ -106,7 +106,7 @@
                         Type            = engine.Type.ToString(),
                         RequiresCookies = engine.RequiresCookies ? "Yes" : "No",
                         Developer       = engine.GetAttribute<ParserAttribute>().Developer,
-                        Revision        = engine.GetAttribute<ParserAttribute>().Revision.ToString("yyyy-MM-dd HH:mm"),
+                        Revision        = engine.GetAttribute<ParserAttribute>().Revision.ToRelativeDate(),
                         Assembly        = engine.GetType().Assembly.GetName().Name
                     });
             }

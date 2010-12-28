@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping tvstore.me.
     /// </summary>
-    [Parser("RoliSoft", "2009-12-12 6:01 PM")]
+    [Parser("RoliSoft", "2010-12-12 6:01 PM")]
     public class TvStore : DownloadSearchEngine
     {
         /// <summary>
