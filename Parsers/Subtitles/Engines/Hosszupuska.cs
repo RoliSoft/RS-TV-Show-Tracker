@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -47,16 +46,19 @@
 
             if (subs == null)
             {
-                return null;
+                yield break;
             }
 
-            return subs.Select(node => new Subtitle
-                   {
-                       Site     = Name,
-                       Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty),
-                       Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty)),
-                       URL      = "http://hosszupuskasub.com/" + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty)
-                   });
+            foreach (var node in subs)
+            {
+                yield return new Subtitle
+                    {
+                        Site     = Name,
+                        Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty),
+                        Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty)),
+                        URL      = "http://hosszupuskasub.com/" + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty)
+                    };
+            }
         }
 
         /// <summary>

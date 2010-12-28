@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
 
     /// <summary>
@@ -42,7 +43,7 @@
         /// <summary>
         /// Occurs when a download link search is done.
         /// </summary>
-        public event EventHandler<EventArgs<IEnumerable<Link>>> DownloadSearchDone;
+        public event EventHandler<EventArgs<List<Link>>> DownloadSearchDone;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
@@ -74,9 +75,9 @@
                     try
                     {
                         var list = Search(query);
-                        DownloadSearchDone.Fire(this, list);
+                        DownloadSearchDone.Fire(this, list.ToList());
                     }
-                    catch (ThreadAbortException ex)
+                    catch (ThreadAbortException)
                     {
                         return;
                     }

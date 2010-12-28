@@ -78,7 +78,7 @@
             // start in parallel
             var tasks = SearchEngines.Select(engine => Task<IEnumerable<Link>>.Factory.StartNew(() =>
                 {
-                    try { return engine.Search(query); }
+                    try { return engine.Search(query).ToList(); }
                     catch (Exception ex)
                     {
                         DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
@@ -120,13 +120,13 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;&gt;"/> instance containing the event data.</param>
-        private void SingleDownloadSearchDone(object sender, EventArgs<IEnumerable<Link>> e)
+        private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
         {
             _remaining.Remove((sender as DownloadSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
-            DownloadSearchProgressChanged.Fire(this, e.Data.ToList(), percentage, _remaining);
+            DownloadSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
 
             if (_remaining.Count == 0)
             {

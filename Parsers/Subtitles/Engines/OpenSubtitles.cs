@@ -46,32 +46,33 @@
             var svc   = XmlRpcProxyGen.Create<IOpenSubtitles>();
             var login = svc.LogIn(string.Empty, string.Empty, "en", "RS TV Show Tracker 1.0");
 
-            if (login["status"].ToString() == "401 Unauthorized")
+            if (login["status"].ToString() == "401 Unauthorized" || login["status"].ToString() == "407 Download limit reached")
             {
-                throw new Exception("Login unauthorized.");
-            }
-            if (login["status"].ToString() == "407 Download limit reached")
-            {
-                throw new Exception("Download limit reached.");
+                yield break;
             }
 
             var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query } });
 
             if (ReferenceEquals(search["data"].GetType(), typeof(bool)))
             {
-                return null;
+                yield break;
             }
 
-            return (search["data"] as object[])
-                   .Cast<XmlRpcStruct>()
-                   .Where(data => ShowNames.IsMatch(query, data["SubFileName"].ToString()))
-                   .Select(data => new Subtitle
-                   {
-                       Site     = Name,
-                       Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty),
-                       Language = Addic7ed.ParseLanguage(data["LanguageName"].ToString()),
-                       URL      = data["ZipDownloadLink"].ToString()
-                   });
+            foreach (XmlRpcStruct data in search["data"] as object[])
+            {
+                if (!ShowNames.IsMatch(query, data["SubFileName"].ToString()))
+                {
+                    continue;
+                }
+
+                yield return new Subtitle
+                    {
+                        Site     = Name,
+                        Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty),
+                        Language = Addic7ed.ParseLanguage(data["LanguageName"].ToString()),
+                        URL      = data["ZipDownloadLink"].ToString()
+                    };
+            }
         }
 
         /// <summary>

@@ -72,23 +72,30 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
             var hash    = Regex.Match(html.DocumentNode.InnerHtml, "hash='(.*?)';").Groups[1].Value;
             var digest  = Regex.Match(html.DocumentNode.InnerHtml, "digest='(.*?)';").Groups[1].Value;
             var episode = ShowNames.ExtractEpisode(query, 1);
+            
+            foreach (var node in links)
+            {
+                if(!string.IsNullOrWhiteSpace(episode) && !node.SelectSingleNode("a").InnerText.StartsWith(episode))
+                {
+                    continue;
+                }
 
-            return links.Where(node => !(!string.IsNullOrWhiteSpace(episode) && !node.SelectSingleNode("a").InnerText.StartsWith(episode)))
-                   .Select(node => new Link
-                   {
-                       Site    = Name,
-                       Release = Regex.Replace(node.InnerText, @"\b([0-9]{1,2})x([0-9]{1,2})\b", new MatchEvaluator(me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00")), RegexOptions.IgnoreCase),
-                       URL     = "http://torrent.tvtorrents.com/FetchTorrentServlet?info_hash=" + node.SelectSingleNode("a").GetAttributeValue("href", string.Empty).Split('=').Last() + "&digest=" + digest + "&hash=" + hash,
-                       Size    = node.SelectSingleNode("../td[5]").GetAttributeValue("title", string.Empty).Replace("Torrent is ", String.Empty).Replace("b", "B"),
-                       Quality = node.SelectSingleNode("a").InnerText.Contains("(720p .mkv)") ? Qualities.HDTV720p : node.SelectSingleNode("a").InnerText.Contains(" .mkv)") ? Qualities.HRx264 : Qualities.HDTVXviD,
-                       Type    = Types.Torrent
-                   });
+                yield return new Link
+                    {
+                        Site    = Name,
+                        Release = Regex.Replace(node.InnerText, @"\b([0-9]{1,2})x([0-9]{1,2})\b", new MatchEvaluator(me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00")), RegexOptions.IgnoreCase),
+                        URL     = "http://torrent.tvtorrents.com/FetchTorrentServlet?info_hash=" + node.SelectSingleNode("a").GetAttributeValue("href", string.Empty).Split('=').Last() + "&digest=" + digest + "&hash=" + hash,
+                        Size    = node.SelectSingleNode("../td[5]").GetAttributeValue("title", string.Empty).Replace("Torrent is ", String.Empty).Replace("b", "B"),
+                        Quality = node.SelectSingleNode("a").InnerText.Contains("(720p .mkv)") ? Qualities.HDTV720p : node.SelectSingleNode("a").InnerText.Contains(" .mkv)") ? Qualities.HRx264 : Qualities.HDTVXviD,
+                        Type    = Types.Torrent
+                   };
+            }
         }
     }
 }

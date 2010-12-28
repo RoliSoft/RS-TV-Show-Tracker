@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
 
     /// <summary>
@@ -65,23 +64,26 @@
 
             if (subs == null)
             {
-                return null;
+                yield break;
             }
 
             var head = Regex.Split(html.DocumentNode.SelectSingleNode("//div[@id='container']//tr[1]/td[1]/div/span").InnerText.Trim(), @" \- ");
 
-            return subs.Select(node => new Subtitle
-                {
-                    Site     = Name,
-                    Release  = head[0] + " " + head[1] + " - "
-                               + node.SelectSingleNode("../../../tr/td[contains(text(),'Version')]").InnerText.Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
-                               + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]")    != null ? "/HD"          : string.Empty)
-                               + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null ? " - corrected" : string.Empty)
-                               + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]")    != null ? " - HI"        : string.Empty)
-                               + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty),
-                    Language = ParseLanguage(node.SelectSingleNode("../../td[3]").InnerText.Replace("&nbsp;", string.Empty).Trim()),
-                    URL      = "http://www.addic7ed.com" + node.GetAttributeValue("href", string.Empty)
-                });
+            foreach (var node in subs)
+            {
+                yield return new Subtitle
+                    {
+                        Site     = Name,
+                        Release  = head[0] + " " + head[1] + " - "
+                                   + node.SelectSingleNode("../../../tr/td[contains(text(),'Version')]").InnerText.Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
+                                   + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
+                                   + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null ? " - corrected" : string.Empty)
+                                   + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]") != null ? " - HI" : string.Empty)
+                                   + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty),
+                        Language = ParseLanguage(node.SelectSingleNode("../../td[3]").InnerText.Replace("&nbsp;", string.Empty).Trim()),
+                        URL      = "http://www.addic7ed.com" + node.GetAttributeValue("href", string.Empty)
+                    };
+            }
         }
 
         /// <summary>

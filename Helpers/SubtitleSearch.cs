@@ -109,13 +109,13 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;&gt;"/> instance containing the event data.</param>
-        private void SingleSubtitleSearchDone(object sender, EventArgs<IEnumerable<Subtitle>> e)
+        private void SingleSubtitleSearchDone(object sender, EventArgs<List<Subtitle>> e)
         {
             _remaining.Remove((sender as SubtitleSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
-            SubtitleSearchProgressChanged.Fire(this, e.Data.ToList(), percentage, _remaining);
+            SubtitleSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
 
             if (_remaining.Count == 0)
             {

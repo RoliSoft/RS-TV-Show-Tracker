@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
 
     /// <summary>
@@ -71,18 +70,21 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
-            return links.Select(node => new Link
-                   {
-                       Site    = Name,
-                       Release = node.GetAttributeValue("title", string.Empty),
-                       URL     = "http://freshon.tv/download.php?id=" + Regex.Replace(node.GetAttributeValue("href", string.Empty), "[^0-9]+", string.Empty) + "&type=torrent",
-                       Size    = node.SelectSingleNode("../../../td[@class='table_size']").InnerHtml.Trim().Replace("<br>", " "),
-                       Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
-                       Type    = Types.Torrent
-                   });
+            foreach (var node in links)
+            {
+                yield return new Link
+                    {
+                        Site    = Name,
+                        Release = node.GetAttributeValue("title", string.Empty),
+                        URL     = "http://freshon.tv/download.php?id=" + Regex.Replace(node.GetAttributeValue("href", string.Empty), "[^0-9]+", string.Empty) + "&type=torrent",
+                        Size    = node.SelectSingleNode("../../../td[@class='table_size']").InnerHtml.Trim().Replace("<br>", " "),
+                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
+                        Type    = Types.Torrent
+                    };
+            }
         }
     }
 }

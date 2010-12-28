@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
 
     /// <summary>
@@ -24,7 +25,7 @@
         /// <summary>
         /// Occurs when a subtitle search is done.
         /// </summary>
-        public event EventHandler<EventArgs<IEnumerable<Subtitle>>> SubtitleSearchDone;
+        public event EventHandler<EventArgs<List<Subtitle>>> SubtitleSearchDone;
 
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
@@ -56,9 +57,9 @@
                     try
                     {
                         var list = Search(query);
-                        SubtitleSearchDone.Fire(this, list);
+                        SubtitleSearchDone.Fire(this, list.ToList());
                     }
-                    catch (ThreadAbortException ex)
+                    catch (ThreadAbortException)
                     {
                         return;
                     }

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using HtmlAgilityPack;
 
@@ -74,19 +73,22 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
-            return links.Select(node => new Link
-                   {
-                       Site         = Name,
-                       Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
-                       URL          = node.GetAttributeValue("href", string.Empty),
-                       Size         = "N/A",
-                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
-                       Type         = Types.HTTP,
-                       IsLinkDirect = false
-                   });
+            foreach(var node in links)
+            {
+                yield return new Link
+                    {
+                        Site         = Name,
+                        Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
+                        URL          = node.GetAttributeValue("href", string.Empty),
+                        Size         = "N/A",
+                        Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
+                        Type         = Types.HTTP,
+                        IsLinkDirect = false
+                    };
+            }
         }
     }
 }

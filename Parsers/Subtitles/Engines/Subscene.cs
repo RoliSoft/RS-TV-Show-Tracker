@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Provides support for scraping Subscene.
@@ -42,21 +41,28 @@
         {
             var html = Utils.GetHTML("http://subscene.com/s.aspx?q=" + Uri.EscapeUriString(query));
             var subs = html.DocumentNode.SelectNodes("//a[@class='a1']");
-
+            
             if (subs == null)
             {
-                return null;
+                yield break;
             }
 
-            return subs.Where(node => ShowNames.IsMatch(query, node.SelectSingleNode("span[2]").InnerText.Trim()))
-                   .Select(node => new Subtitle
+            foreach (var node in subs)
+            {
+                if(!ShowNames.IsMatch(query, node.SelectSingleNode("span[2]").InnerText.Trim()))
+                {
+                    continue;
+                }
+
+                yield return new Subtitle
                    {
                        Site         = Name,
                        Release      = node.SelectSingleNode("span[2]").InnerText.Trim(),
                        Language     = Addic7ed.ParseLanguage(node.SelectSingleNode("span[1]").InnerText.Trim()),
                        URL          = "http://subscene.com" + node.GetAttributeValue("href", string.Empty),
                        IsLinkDirect = false
-                   });
+                   };
+            }
         }
     }
 }

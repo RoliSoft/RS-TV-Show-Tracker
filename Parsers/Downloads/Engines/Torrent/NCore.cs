@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Provides support for scraping nCore.
@@ -70,18 +69,21 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
-            return links.Select(node => new Link
-                   {
-                       Site    = Name,
-                       Release = node.GetAttributeValue("title", string.Empty),
-                       URL     = "http://ncore.cc/" + node.SelectSingleNode("../../../../../..//div[@class='letoltve_txt']/a").GetAttributeValue("href", string.Empty),
-                       Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
-                       Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
-                       Type    = Types.Torrent
-                   });
+            foreach (var node in links)
+            {
+                yield return new Link
+                    {
+                        Site    = Name,
+                        Release = node.GetAttributeValue("title", string.Empty),
+                        URL     = "http://ncore.cc/" + node.SelectSingleNode("../../../../../..//div[@class='letoltve_txt']/a").GetAttributeValue("href", string.Empty),
+                        Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
+                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
+                        Type    = Types.Torrent
+                    };
+            }
         }
     }
 }

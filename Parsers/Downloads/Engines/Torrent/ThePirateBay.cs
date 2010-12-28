@@ -71,18 +71,21 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
-            return links.Select(node => new Link
-                   {
-                       Site    = Name,
-                       Release = node.InnerText,
-                       URL     = node.SelectSingleNode("../../a[1]").GetAttributeValue("href", string.Empty),
-                       Size    = Regex.Match(node.SelectSingleNode("../../font").InnerText, "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty),
-                       Quality = ParseQuality(node.InnerText.Replace(' ', '.')),
-                       Type    = Types.Torrent
-                   });
+            foreach (var node in links)
+            {
+                yield return new Link
+                    {
+                        Site    = Name,
+                        Release = node.InnerText,
+                        URL     = node.SelectSingleNode("../../a[1]").GetAttributeValue("href", string.Empty),
+                        Size    = Regex.Match(node.SelectSingleNode("../../font").InnerText, "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty),
+                        Quality = ParseQuality(node.InnerText.Replace(' ', '.')),
+                        Type    = Types.Torrent
+                    };
+            }
         }
 
         /// <summary>

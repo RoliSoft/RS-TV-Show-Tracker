@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
@@ -75,19 +74,22 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
-            return links.Select(node => new Link
-                   {
-                       Site         = Name,
-                       Release      = HtmlEntity.DeEntitize(node.InnerText),
-                       URL          = "http://www.binsearch.info" + HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']/a").GetAttributeValue("href", string.Empty)),
-                       Size         = Regex.Match(HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']").InnerText), @"size: ([^,<]+)").Groups[1].Value,
-                       Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
-                       Type         = Types.Usenet,
-                       IsLinkDirect = false
-                   });
+            foreach (var node in links)
+            {
+                yield return new Link
+                    {
+                        Site         = Name,
+                        Release      = HtmlEntity.DeEntitize(node.InnerText),
+                        URL          = "http://www.binsearch.info" + HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']/a").GetAttributeValue("href", string.Empty)),
+                        Size         = Regex.Match(HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']").InnerText), @"size: ([^,<]+)").Groups[1].Value,
+                        Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
+                        Type         = Types.Usenet,
+                        IsLinkDirect = false
+                    };
+            }
         }
     }
 }

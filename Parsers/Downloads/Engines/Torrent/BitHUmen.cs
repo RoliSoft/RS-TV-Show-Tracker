@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
 
     /// <summary>
@@ -71,18 +70,21 @@
 
             if (links == null)
             {
-                return null;
+                yield break;
             }
 
-            return links.Select(node => new Link
-                   {
-                       Site    = Name,
-                       Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
-                       URL     = "http://bithumen.be/" + node.SelectSingleNode("../../a[starts-with(@title, 'Let')]").GetAttributeValue("href", string.Empty),
-                       Size    = node.SelectSingleNode("../../../td[6]/u").InnerHtml.Replace("<br>", " "),
-                       Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
-                       Type    = Types.Torrent
-                   });
+            foreach (var node in links)
+            {
+                yield return new Link
+                    {
+                        Site    = Name,
+                        Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
+                        URL     = "http://bithumen.be/" + node.SelectSingleNode("../../a[starts-with(@title, 'Let')]").GetAttributeValue("href", string.Empty),
+                        Size    = node.SelectSingleNode("../../../td[6]/u").InnerHtml.Replace("<br>", " "),
+                        Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
+                        Type    = Types.Torrent
+                    };
+            }
         }
     }
 }
