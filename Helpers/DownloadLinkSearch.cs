@@ -53,7 +53,7 @@
                 engine.DownloadSearchDone  += SingleDownloadSearchDone;
                 engine.DownloadSearchError += SingleDownloadSearchError;
 
-                if (engine.RequiresCookies)
+                if (engine.Private)
                 {
                     engine.Cookies = Settings.Get(engine.Name + " Cookies");
 

@@ -17,16 +17,22 @@
         public abstract string Name { get; }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public abstract string Site { get; }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
         public abstract string Icon { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the site requires cookies to authenticate.
+        /// Gets a value indicating whether the site requires authentication.
         /// </summary>
-        /// <value><c>true</c> if requires cookies; otherwise, <c>false</c>.</value>
-        public abstract bool RequiresCookies { get; }
+        /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>
+        public abstract bool Private { get; }
 
         /// <summary>
         /// Gets or sets the cookies used to access the site.

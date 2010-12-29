@@ -44,7 +44,7 @@
                     }
                     catch (OnlineVideoNotFoundException ex)
                     {
-                        OnlineSearchError.Fire(this, name + " " + episode, ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkUrl, null));
+                        OnlineSearchError.Fire(this, name + " " + episode, ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkURL, null));
                     }
                     catch (Exception ex)
                     {

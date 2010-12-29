@@ -21,19 +21,19 @@
         /// Gets the path where the search begins.
         /// </summary>
         /// <value>The start path.</value>
-        public string StartPath { get; private set; }
+        public string StartPath { get; internal set; }
 
         /// <summary>
         /// Gets the name of the show and the episode number.
         /// </summary>
         /// <value>The name of the show and the episode number.</value>
-        public string ShowQuery { get; private set; }
+        public string ShowQuery { get; internal set; }
 
         /// <summary>
         /// Gets the search thread.
         /// </summary>
         /// <value>The search thread.</value>
-        public Task SearchThread { get; private set; }
+        public Task SearchThread { get; internal set; }
 
         /// <summary>
         /// Gets or sets the files found by this class.

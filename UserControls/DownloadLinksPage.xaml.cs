@@ -290,17 +290,17 @@
                 {
                     var mi = new MenuItem
                         {
-                            Header = new StackPanel { Orientation = Orientation.Horizontal },
-                            IsCheckable = true,
-                            IsChecked = !_excludes.Contains(engine.Name),
+                            Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                            IsCheckable      = true,
+                            IsChecked        = !_excludes.Contains(engine.Name),
                             StaysOpenOnClick = true,
-                            Tag = engine.Name
+                            Tag              = engine.Name
                         };
 
                     (mi.Header as StackPanel).Children.Add(new Image
                         {
                             Source = new BitmapImage(new Uri(engine.Icon), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
-                            Width = 16,
+                            Width  = 16,
                             Height = 16
                         });
                     (mi.Header as StackPanel).Children.Add(new Label

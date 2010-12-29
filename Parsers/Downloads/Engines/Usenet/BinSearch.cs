@@ -27,6 +27,18 @@
         }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://binsearch.info/";
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
@@ -39,10 +51,10 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether the site requires cookies to authenticate.
+        /// Gets a value indicating whether the site requires authentication.
         /// </summary>
-        /// <value><c>true</c> if requires cookies; otherwise, <c>false</c>.</value>
-        public override bool RequiresCookies
+        /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>
+        public override bool Private
         {
             get
             {

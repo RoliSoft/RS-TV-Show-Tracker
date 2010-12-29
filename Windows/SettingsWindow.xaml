@@ -125,7 +125,10 @@
                     
                     <Label Name="engineTitle" Content="Engine title" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,230,0,0" />
                     <Label Content="Cookies:" Name="cookiesLabel" FontWeight="Bold" HorizontalAlignment="Left" Margin="6,261,0,0" VerticalAlignment="Top" />
-                    <TextBox HorizontalAlignment="Stretch" Margin="11,284,11,0" Name="cookiesTextBox" VerticalAlignment="Top" TextChanged="CookiesTextBoxTextChanged" />
+                    <StackPanel Orientation="Horizontal" Margin="11,284,11,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBox Name="cookiesTextBox" TextChanged="CookiesTextBoxTextChanged" Margin="0,0,5,0" Width="465" />
+                        <Button Content="Grab cookies" Name="grabCookiesButton" Width="85" Click="GrabCookiesButtonClick" />
+                    </StackPanel>
                     <Button HorizontalAlignment="Left" Margin="521,237,0,0" Name="moveUpButton" VerticalAlignment="Top" Click="MoveUpButtonClick">
                         <Image Source="/RSTVShowTracker;component/Images/up.png" Height="16" Width="16" Margin="1,0,0,0" />
                     </Button>

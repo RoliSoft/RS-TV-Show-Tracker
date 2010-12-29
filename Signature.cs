@@ -15,13 +15,13 @@
         /// Gets the version number of the executing assembly.
         /// </summary>
         /// <value>The software version.</value>
-        public static string Version { get; private set; }
+        public static string Version { get; internal set; }
 
         /// <summary>
         /// Gets the date and time when the executing assembly was compiled.
         /// </summary>
         /// <value>The compile time.</value>
-        public static DateTime CompileTime { get; private set; }
+        public static DateTime CompileTime { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the executed assembly was compiled from Visual Studio under the Debug configuration.
@@ -49,13 +49,13 @@
         /// <value>
         /// 	<c>true</c> if this assembly is obfuscated; otherwise, <c>false</c>.
         /// </value>
-        public static bool IsObfuscated { get; private set; }
+        public static bool IsObfuscated { get; internal set; }
 
         /// <summary>
         /// Gets the full path to the executing assembly.
         /// </summary>
         /// <value>The full path.</value>
-        public static string FullPath { get; private set; }
+        public static string FullPath { get; internal set; }
 
         /// <summary>
         /// This number is used for various purposes where a non-random unique number is required.

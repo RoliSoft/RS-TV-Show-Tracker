@@ -1,0 +1,26 @@
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.CookieCatcherWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
+        Title="Browser" Height="600" Width="800" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/page.png" Loaded="WindowLoaded">
+    <Grid>
+        <TextBox Name="urlTextBox" Margin="10" Padding="16,0,0,1" VerticalAlignment="Top" IsReadOnly="True">
+            <TextBox.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </TextBox.Effect>
+        </TextBox>
+        <Image Height="16" HorizontalAlignment="Left" Name="favicon" Stretch="Fill" VerticalAlignment="Top" Width="16" Margin="12,12,0,0" />
+        <Border Margin="10,40,10,55" Name="border">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </Border.Effect>
+            <WindowsFormsHost Name="winFormsHost" />
+        </Border>
+        <TextBlock TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="10,0,140,10" Height="35" TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="Grayscale" Foreground="White">
+            <TextBlock.Effect>
+                <DropShadowEffect BlurRadius="5" Color="Black" Direction="0" ShadowDepth="0" />
+            </TextBlock.Effect>
+            Enter your username and password in the page above, check any "Remember me" or "Unsecure login" options, uncheck any "Log me out" or "Secure login" options, then click on the login button. After you've signed in, click "Grab cookies".
+        </TextBlock>
+        <Button Name="grabButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Grab cookies" Padding="10,5" FontSize="16" Margin="10" Click="GrabButtonClick" />
+    </Grid>
+</Shell:GlassWindow>

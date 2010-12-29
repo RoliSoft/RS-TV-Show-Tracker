@@ -96,9 +96,11 @@
     <Reference Include="Transitionals">
       <HintPath>.\Transitionals.dll</HintPath>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -145,6 +147,9 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\SceneReleases.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TvStore.cs" />
     <Compile Include="ProcessMonitor.cs" />
+    <Compile Include="Windows\CookieCatcherWindow.xaml.cs">
+      <DependentUpon>CookieCatcherWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -222,6 +227,10 @@
     <Page Include="UserControls\RecommendationsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\CookieCatcherWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\SettingsWindow.xaml">
       <SubType>Designer</SubType>

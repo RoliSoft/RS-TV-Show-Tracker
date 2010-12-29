@@ -104,7 +104,7 @@
                         Icon            = engine.Icon,
                         Site            = engine.Name,
                         Type            = engine.Type.ToString(),
-                        RequiresCookies = engine.RequiresCookies ? "Yes" : "No",
+                        RequiresCookies = engine.Private ? "Yes" : "No",
                         Developer       = engine.GetAttribute<ParserAttribute>().Developer,
                         Revision        = engine.GetAttribute<ParserAttribute>().Revision.ToRelativeDate(),
                         Assembly        = engine.GetType().Assembly.GetName().Name
@@ -232,14 +232,14 @@
 
             engineTitle.Content = sel.Site;
 
-            if (engine.RequiresCookies)
+            if (engine.Private)
             {
-                cookiesLabel.IsEnabled = cookiesTextBox.IsEnabled = true;
+                cookiesLabel.IsEnabled = cookiesTextBox.IsEnabled = grabCookiesButton.IsEnabled = true;
                 cookiesTextBox.Text = Settings.Get(engine.Name + " Cookies");
             }
             else
             {
-                cookiesLabel.IsEnabled = cookiesTextBox.IsEnabled = false;
+                cookiesLabel.IsEnabled = cookiesTextBox.IsEnabled = grabCookiesButton.IsEnabled = false;
                 cookiesTextBox.Text = "not required";
             }
         }
@@ -254,7 +254,7 @@
             var sel    = listView.SelectedItem as DownloadsListViewItem;
             var engine = _engines.Single(en => en.Name == sel.Site);
 
-            if (engine.RequiresCookies && !string.IsNullOrWhiteSpace(cookiesTextBox.Text))
+            if (engine.Private && !string.IsNullOrWhiteSpace(cookiesTextBox.Text))
             {
                 Settings.Set(engine.Name + " Cookies", cookiesTextBox.Text.Trim());
             }
@@ -336,6 +336,22 @@
         public void SaveOrder()
         {
             Settings.Set("Tracker Order", _trackers.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+        }
+
+        /// <summary>
+        /// Handles the Click event of the grabCookiesButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void GrabCookiesButtonClick(object sender, RoutedEventArgs e)
+        {
+            var sel    = listView.SelectedItem as DownloadsListViewItem;
+            var engine = _engines.Single(en => en.Name == sel.Site);
+
+            if (engine.Private && new CookieCatcherWindow(engine).ShowDialog() == true) // yes, == true, because ShowDialog() returns Nullable<bool> not bool directly
+            {
+                cookiesTextBox.Text = Settings.Get(engine.Name + " Cookies");
+            }
         }
         #endregion
 

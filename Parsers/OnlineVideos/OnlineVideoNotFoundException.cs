@@ -11,13 +11,13 @@
         /// Gets the link title.
         /// </summary>
         /// <value>The link title.</value>
-        public string LinkTitle { get; private set; }
+        public string LinkTitle { get; internal set; }
 
         /// <summary>
         /// Gets the link URL.
         /// </summary>
         /// <value>The link URL.</value>
-        public string LinkUrl { get; private set; }
+        public string LinkURL { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OnlineVideoNotFoundException"/> class.
@@ -28,7 +28,7 @@
         public OnlineVideoNotFoundException(string message, string linkTitle = null, string linkUrl = null) : base(message)
         {
             LinkTitle = linkTitle;
-            LinkUrl = linkUrl;
+            LinkURL   = linkUrl;
         }
     }
 }
