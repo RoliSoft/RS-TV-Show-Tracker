@@ -9,6 +9,8 @@
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
+
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
     using ContextMenu = System.Windows.Forms.ContextMenu;

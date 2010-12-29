@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Provides support for scraping nCore.
@@ -58,6 +59,18 @@
         }
 
         /// <summary>
+        /// Gets the names of the required cookies for the authentication.
+        /// </summary>
+        /// <value>The required cookies for authentication.</value>
+        public override string[] RequiredCookies
+        {
+            get
+            {
+                return new[] { "nick", "pass", "nyelv", "stilus" };
+            }
+        }
+
+        /// <summary>
         /// Gets the type of the link.
         /// </summary>
         /// <value>The type of the link.</value>
@@ -90,7 +103,7 @@
                     {
                         Site    = Name,
                         Release = node.GetAttributeValue("title", string.Empty),
-                        URL     = "http://ncore.cc/" + node.SelectSingleNode("../../../../../..//div[@class='letoltve_txt']/a").GetAttributeValue("href", string.Empty),
+                        URL     = "http://ncore.cc/torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href", string.Empty), @"id=(\d+)").Groups[1].Value,
                         Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
                         Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
                         Type    = Types.Torrent

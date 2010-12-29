@@ -59,6 +59,18 @@
         }
 
         /// <summary>
+        /// Gets the names of the required cookies for the authentication.
+        /// </summary>
+        /// <value>The required cookies for authentication.</value>
+        public override string[] RequiredCookies
+        {
+            get
+            {
+                return new[] { "uid", "pass", "rid" };
+            }
+        }
+
+        /// <summary>
         /// Gets the type of the link.
         /// </summary>
         /// <value>The type of the link.</value>

@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AddNewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
-        Title="Add new TV show" Height="186" Width="531" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/plus.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Add new TV show" Height="186" Width="531" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/plus.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,10" Name="tabControl">
             <TabControl.Effect>

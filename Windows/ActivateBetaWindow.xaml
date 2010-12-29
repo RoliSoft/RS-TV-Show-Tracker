@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.ActivateBetaWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
-        Title="Activate beta features" Height="204" Width="538" WindowStartupLocation="CenterScreen" ShowInTaskbar="False" Icon="/RSTVShowTracker;component/Images/new.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Activate beta features" Height="204" Width="538" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/new.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,10" Name="tabControl">
             <TabControl.Effect>

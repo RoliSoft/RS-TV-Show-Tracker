@@ -1,8 +1,12 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Media.Imaging;
+
+    using Microsoft.WindowsAPICodePack.Dialogs;
 
     using WebBrowser = System.Windows.Forms.WebBrowser;
 
@@ -80,7 +84,32 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void GrabButtonClick(object sender, RoutedEventArgs e)
         {
-            Settings.Set(Engine.Name + " Cookies", _webBrowser.Document.Cookie.Trim());
+            var cookies = _webBrowser.Document.Cookie ?? string.Empty;
+
+            if (Engine.RequiredCookies != null && Engine.RequiredCookies.Length != 0 && !Engine.RequiredCookies.All(req => Regex.IsMatch(cookies, @"(?:^|[\s;]){0}=".FormatWith(req), RegexOptions.IgnoreCase)))
+            {
+                var td = new TaskDialog
+                    {
+                        Icon            = TaskDialogStandardIcon.Error,
+                        Caption         = "Required cookies not found",
+                        InstructionText = Engine.Name,
+                        Text            = "Couldn't catch the required cookies for authentication.\r\nYou need to manually extract the following cookies from your browser:\r\n\r\n-> " + string.Join("\r\n-> ", Engine.RequiredCookies) + "\r\n\r\nAnd enter them in this way:\r\n\r\n" + string.Join("=VALUE; ", Engine.RequiredCookies) + "=VALUE",
+                        Cancelable      = true,
+                        StandardButtons = TaskDialogStandardButtons.Ok
+                    };
+
+                var fd = new TaskDialogCommandLink { Text = "How to extract cookies manually" };
+                fd.Click += (s, r) =>
+                    {
+                        td.Close();
+                        Utils.Run("http://lab.rolisoft.net/tvshowtracker/extract-cookies.html");
+                    };
+
+                td.Controls.Add(fd);
+                td.Show();
+            }
+
+            Settings.Set(Engine.Name + " Cookies", cookies);
             DialogResult = true;
         }
     }

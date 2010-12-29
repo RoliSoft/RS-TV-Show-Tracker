@@ -38,7 +38,13 @@
         /// Gets or sets the cookies used to access the site.
         /// </summary>
         /// <value>The cookies in the same format in which <c>alert(document.cookie)</c> returns in a browser.</value>
-        public string Cookies { get; set; }
+        public virtual string Cookies { get; set; }
+
+        /// <summary>
+        /// Gets the names of the required cookies for the authentication.
+        /// </summary>
+        /// <value>The required cookies for authentication.</value>
+        public virtual string[] RequiredCookies { get; internal set; }
 
         /// <summary>
         /// Gets the type of the link.
