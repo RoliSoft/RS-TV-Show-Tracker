@@ -8,9 +8,9 @@ using System.Windows;
 [assembly: AssemblyTitle("RS TV Show Tracker")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("RoliSoft")]
 [assembly: AssemblyProduct("RS TV Show Tracker")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyCopyright("Copyright © RoliSoft 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
