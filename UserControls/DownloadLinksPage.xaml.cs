@@ -17,6 +17,7 @@
     using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
+    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -51,6 +52,8 @@
 
         private ListSortDirection _lastSortDirection;
         private GridViewColumnHeader _lastClickedHeader;
+
+        private volatile bool _searching;
 
         /// <summary>
         /// Extended class of the original Link class to handle the context menu items.
@@ -364,7 +367,7 @@
             Dispatcher.Invoke((Action)(() =>
                 {
                     // cancel if one is running
-                    if (searchButton.Content.ToString() == "Cancel")
+                    if (_searching)
                     {
                         ActiveSearch.CancelAsync();
                         DownloadSearchDone();
@@ -384,7 +387,7 @@
         {
             if (string.IsNullOrWhiteSpace(textBox.Text)) return;
 
-            if (searchButton.Content.ToString() == "Cancel")
+            if (_searching)
             {
                 ActiveSearch.CancelAsync();
                 DownloadSearchDone();
@@ -394,19 +397,24 @@
             _results = new List<LinkItem>();
             DownloadLinksListViewItemCollection.Clear();
 
-            textBox.IsEnabled    = false;
+            textBox.IsEnabled = false;
             searchButton.Content = "Cancel";
 
             ActiveSearch = new DownloadSearch(SearchEngines
                                               .Where(engine => !_excludes.Contains(engine.Name))
                                               .Select(engine => engine.GetType()));
 
-            ActiveSearch.DownloadSearchDone            += DownloadSearchDone;
+            ActiveSearch.DownloadSearchDone += DownloadSearchDone;
             ActiveSearch.DownloadSearchProgressChanged += DownloadSearchProgressChanged;
-            
+
             SetStatus("Searching for download links on " + (string.Join(", ", ActiveSearch.SearchEngines.Select(engine => engine.Name).ToArray())) + "...", true);
 
+            _searching = true;
+
             ActiveSearch.SearchAsync(textBox.Text);
+
+            TaskbarManager.Instance.SetProgressValue(0, 100);
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
         }
 
         /// <summary>
@@ -416,7 +424,13 @@
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
         private void DownloadSearchProgressChanged(object sender, EventArgs<List<Link>, double, List<string>> e)
         {
+            if (!_searching)
+            {
+                return;
+            }
+
             SetStatus("Searching for download links on " + (string.Join(", ", e.Third)) + "...", true);
+            TaskbarManager.Instance.SetProgressValue((int)e.Second, 100);
 
             if (e.First != null)
             {
@@ -442,7 +456,15 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void DownloadSearchDone(object sender = null, EventArgs e = null)
         {
+            if (!_searching)
+            {
+                return;
+            }
+
+            _searching   = false;
             ActiveSearch = null;
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
 
             Dispatcher.Invoke((Action)(() =>
                 {
@@ -551,6 +573,8 @@
         {
             if (listView.SelectedIndex == -1) return;
 
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+
             var link = (LinkItem)listView.SelectedValue;
 
             var uri = new Uri(link.URL);
@@ -617,6 +641,8 @@
             var web   = sender as Utils.SmarterWebClient;
             var token = e.UserState as string[];
             var file  = web.FileName;
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
 
             switch (token[1])
             {

@@ -7,6 +7,7 @@
     using System.Windows.Media.Imaging;
 
     using Microsoft.WindowsAPICodePack.Dialogs;
+    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using WebBrowser = System.Windows.Forms.WebBrowser;
 
@@ -60,6 +61,8 @@
             winFormsHost.Child = _webBrowser;
 
             _webBrowser.Navigate(Engine.Site);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -69,6 +72,8 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WebBrowserDocumentCompleted(object sender, EventArgs e)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
             if (urlTextBox.Text != _webBrowser.Url.ToString())
             {
                 favicon.Source = new BitmapImage(new Uri("http://www.google.com/s2/favicons?domain={0}".FormatWith(_webBrowser.Url.DnsSafeHost)));

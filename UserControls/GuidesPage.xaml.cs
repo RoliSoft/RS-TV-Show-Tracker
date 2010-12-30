@@ -10,6 +10,8 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
+    using Microsoft.WindowsAPICodePack.Taskbar;
+
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
@@ -357,6 +359,8 @@
                     OverviewPage.PlayEpisodeFileSearchDone(sender2, e2);
                 };
             finder.BeginSearch();
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
         #endregion
 
@@ -423,6 +427,8 @@
                 };
 
             os.SearchAsync(show[0], show[1], title);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -452,6 +458,8 @@
                 };
 
             os.SearchAsync(show[0], show[1]);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -481,6 +489,8 @@
                 };
 
             os.SearchAsync(show[0], show[1]);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>

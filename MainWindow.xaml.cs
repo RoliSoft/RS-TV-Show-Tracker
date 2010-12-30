@@ -9,7 +9,9 @@
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
+    using Microsoft.Windows.Shell;
+
+    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
@@ -17,8 +19,6 @@
     using WinMenuItem = System.Windows.Forms.MenuItem;
     using Timer       = System.Timers.Timer;
     using Application = System.Windows.Application;
-
-    using Microsoft.Windows.Shell;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -461,6 +461,8 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         public void UpdateDone(object sender, EventArgs e)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
             Dispatcher.Invoke((Action)(() =>
                 {
                     SetLastUpdated();
@@ -477,6 +479,8 @@
         {
             if (e.Fourth) // fatal to whole update
             {
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
                 Dispatcher.Invoke((Action)(() =>
                     {
                         lastUpdatedLabel.Content = "update failed";
@@ -490,6 +494,9 @@
         /// </summary>
         public void UpdateProgressChanged(object sender, EventArgs<string, double> e)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+            TaskbarManager.Instance.SetProgressValue((int)e.Second, 100);
+
             Dispatcher.Invoke((Action)(() =>
                 {
                     lastUpdatedLabel.Content = "updating " + e.First + " (" + e.Second.ToString("0.00") + "%)";

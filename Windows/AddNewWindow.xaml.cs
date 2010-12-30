@@ -8,6 +8,7 @@
 
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Shell;
+    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
@@ -52,6 +53,8 @@
 
             new Task(() =>
                 {
+                    TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+
                     string show = string.Empty, grabber = string.Empty;
                     var mark = true;
 
@@ -80,6 +83,8 @@
                                 Cancelable          = true
                             }.Show();
                     }
+
+                    TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
 
                     Dispatcher.Invoke((Action)(() =>
                         {

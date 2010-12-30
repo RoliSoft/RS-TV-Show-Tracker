@@ -8,6 +8,8 @@
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
 
+    using Microsoft.WindowsAPICodePack.Taskbar;
+
     using RoliSoft.TVShowTracker.Parsers.Recommendations;
     using RoliSoft.TVShowTracker.Parsers.Recommendations.Engines;
 
@@ -136,6 +138,8 @@
             rec.RecommendationError += RecommendationError;
 
             rec.GetListAsync(Database.Query("select name from tvshows").Select(r => r["name"]).ToList());
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
         #endregion
 
@@ -148,6 +152,8 @@
         public void RecommendationError(object sender, EventArgs<string, string> e)
         {
             SetStatus(e.First);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
         }
 
         /// <summary>
@@ -174,6 +180,8 @@
                         SetStatus("Unfortunately the selected service couldn't recommend you anything.");
                     }
                 }));
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
         }
         #endregion
 

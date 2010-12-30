@@ -12,6 +12,7 @@
     using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
+    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
@@ -34,6 +35,8 @@
         public List<SubtitleSearchEngine> SearchEngines { get; set; }
 
         private List<string> _excludes, _langExcl;
+
+        private volatile bool _searching;
 
         /// <summary>
         /// Gets or sets the active search.
@@ -264,7 +267,7 @@
             Dispatcher.Invoke((Action)(() =>
                 {
                     // cancel if one is running
-                    if (searchButton.Content.ToString() == "Cancel")
+                    if (_searching)
                     {
                         ActiveSearch.CancelAsync();
                         SubtitleSearchDone();
@@ -284,7 +287,7 @@
         {
             if (string.IsNullOrWhiteSpace(textBox.Text)) return;
 
-            if (searchButton.Content.ToString() == "Cancel")
+            if (_searching)
             {
                 ActiveSearch.CancelAsync();
                 SubtitleSearchDone();
@@ -305,7 +308,12 @@
             
             SetStatus("Searching for subtitles on " + (string.Join(", ", ActiveSearch.SearchEngines.Select(engine => engine.Name).ToArray())) + "...", true);
 
+            _searching = true;
+
             ActiveSearch.SearchAsync(textBox.Text);
+
+            TaskbarManager.Instance.SetProgressValue(0, 100);
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
         }
 
         /// <summary>
@@ -315,7 +323,13 @@
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
         private void SubtitleSearchProgressChanged(object sender, EventArgs<List<Subtitle>, double, List<string>> e)
         {
+            if (!_searching)
+            {
+                return;
+            }
+
             SetStatus("Searching for subtitles on " + (string.Join(", ", e.Third)) + "...", true);
+            TaskbarManager.Instance.SetProgressValue((int)e.Second, 100);
 
             if (e.First != null)
             {
@@ -330,8 +344,16 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void SubtitleSearchDone(object sender = null, EventArgs e = null)
         {
+            if (!_searching)
+            {
+                return;
+            }
+
+            _searching   = false;
             ActiveSearch = null;
-            
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
             Dispatcher.Invoke((Action)(() =>
                 {
                     textBox.IsEnabled    = true;
@@ -365,6 +387,8 @@
                 return;
             }
 
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+
             var uri = new Uri(sub.URL);
             SetStatus("Sending request to " + uri.DnsSafeHost.Replace("www.", string.Empty) + "...", true);
 
@@ -389,6 +413,8 @@
             var token = e.UserState as string[];
             var file  = web.FileName;
 
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            
             var sfd = new SaveFileDialog
                 {
                     CheckPathExists = true,

@@ -11,6 +11,7 @@
     using System.Windows.Media.Animation;
 
     using Microsoft.WindowsAPICodePack.Dialogs;
+    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
@@ -234,10 +235,13 @@
             var finder = new FileSearch(path, show[0], show[1]);
             finder.FileSearchDone += (sender2, e2) =>
                 {
+                    TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
                     ResetStatus();
                     PlayEpisodeFileSearchDone(sender2, e2);
                 };
             finder.BeginSearch();
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -264,6 +268,8 @@
                     PlayEpisodeFileSearchDone(sender2, e2);
                 };
             finder.BeginSearch();
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -273,6 +279,8 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         public static void PlayEpisodeFileSearchDone(object sender, EventArgs e)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
             var fs = sender as FileSearch;
 
             switch (fs.Files.Count)
@@ -422,6 +430,8 @@
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
         public static void OnlineSearchDone(object sender, EventArgs<string, string> e)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
             Utils.Run(e.Second);
         }
 
@@ -432,6 +442,8 @@
         /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String,System.Tuple&lt;System.String,System.String,System.String&gt;&gt;"/> instance containing the event data.</param>
         public static void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+
             var td = new TaskDialog
                 {
                     Icon            = TaskDialogStandardIcon.Error,
@@ -494,6 +506,8 @@
                 };
 
             os.SearchAsync(show[0], show[1], title);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -523,6 +537,8 @@
                 };
 
             os.SearchAsync(show[0], show[1]);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -552,6 +568,8 @@
                 };
 
             os.SearchAsync(show[0], show[1]);
+
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -630,15 +648,7 @@
 
             if (e.Key == Key.N && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
-                throw new NotImplementedException();
-                /*var addnew = new AddShowWindow();
-                var result = addnew.ShowDialog();
-
-                if (result.HasValue && result.Value)
-                {
-                    LoadOverviewListView();
-                    LoadGuideComboBox();
-                }*/
+                new AddNewWindow().ShowDialog();
             }
 
             // remove
