@@ -25,7 +25,7 @@
         /// <summary>
         /// Occurs when a download link search has encountered an error.
         /// </summary>
-        public event EventHandler<EventArgs<string, string>> DownloadSearchError;
+        public event EventHandler<EventArgs<string, Exception>> DownloadSearchError;
 
         /// <summary>
         /// Gets or sets the search engines.
@@ -81,7 +81,7 @@
                     try { return engine.Search(query).ToList(); }
                     catch (Exception ex)
                     {
-                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
+                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
                         return null;
                     }
                 })).ToArray();
@@ -119,7 +119,7 @@
         /// Called when a download link search is done.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Downloads.DownloadSearchEngine.Link&gt;&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
         {
             _remaining.Remove((sender as DownloadSearchEngine).Name);
@@ -138,12 +138,17 @@
         /// Called when a download link search has encountered an error.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
-        private void SingleDownloadSearchError(object sender, EventArgs<string, string> e)
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void SingleDownloadSearchError(object sender, EventArgs<string, Exception> e)
         {
             _remaining.Remove((sender as DownloadSearchEngine).Name);
 
             DownloadSearchError.Fire(this, e.First, e.Second);
+
+            if (_remaining.Count == 0)
+            {
+                DownloadSearchDone.Fire(this);
+            }
         }
     }
 }

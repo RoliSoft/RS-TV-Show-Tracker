@@ -60,7 +60,7 @@
         /// <summary>
         /// Occurs when a download link search has encountered an error.
         /// </summary>
-        public event EventHandler<EventArgs<string, string>> DownloadSearchError;
+        public event EventHandler<EventArgs<string, Exception>> DownloadSearchError;
 
         /// <summary>
         /// Searches for download links on the service.
@@ -95,7 +95,7 @@
                     }
                     catch (Exception ex)
                     {
-                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
+                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
                     }
                 });
             _job.Start();

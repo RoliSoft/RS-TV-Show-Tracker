@@ -124,6 +124,10 @@
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Remote.cs" />
+    <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
+    <Compile Include="UserControls\ListViews\LinkItem.cs" />
+    <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />
+    <Compile Include="UserControls\ListViews\StatisticsListViewItem.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
@@ -157,6 +161,7 @@
     <Compile Include="Windows\CookieCatcherWindow.xaml.cs">
       <DependentUpon>CookieCatcherWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ListViews\DownloadsListViewItem.cs" />
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>

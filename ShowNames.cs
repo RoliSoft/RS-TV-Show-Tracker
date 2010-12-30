@@ -179,8 +179,6 @@
         /// <returns>
         /// true if the specified objects are equal; otherwise, false.
         /// </returns>
-        /// <param name="x">The first object of type <paramref name="T"/> to compare.</param>
-        /// <param name="y">The second object of type <paramref name="T"/> to compare.</param>
         public bool Equals(string x, string y)
         {
             return ShowNames.Normalize(x).ToUpper().Replace(" ", string.Empty) == ShowNames.Normalize(y).ToUpper().Replace(" ", string.Empty);

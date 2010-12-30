@@ -14,7 +14,7 @@
         /// <param name="name">The name of the show.</param>
         /// <param name="episode">The episode number.</param>
         /// <param name="extra">This field is not used here.</param>
-        /// <exception cref="OnlineVideoSearchEngine.OnlineVideoNotFoundException">No video was found.</exception>
+        /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
             var g = Utils.Google(String.Format("intitle:\"{0}\" intitle:\"online links for\" site:sidereel.com", name));

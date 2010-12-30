@@ -113,7 +113,7 @@
                                 <GridViewColumnHeader Content="Air date" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding AirDate}" FontWeight="Normal" Width="130" Margin="-7,0" TextAlignment="Center" />
+                                        <TextBlock Text="{Binding Airdate}" FontWeight="Normal" Width="130" Margin="-7,0" TextAlignment="Center" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

@@ -23,17 +23,6 @@
         public ObservableCollection<StatisticsListViewItem> StatisticsListViewItemCollection { get; set; }
 
         /// <summary>
-        /// Represents a TV show on the statistics list view.
-        /// </summary>
-        public class StatisticsListViewItem
-        {
-            public string Name { get; set; }
-            public string Runtime { get; set; }
-            public string Episodes { get; set; }
-            public string TimeWasted { get; set; }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="StatisticsPage"/> class.
         /// </summary>
         public StatisticsPage()

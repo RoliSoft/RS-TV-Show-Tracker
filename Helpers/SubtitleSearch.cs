@@ -25,7 +25,7 @@
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
         /// </summary>
-        public event EventHandler<EventArgs<string, string>> SubtitleSearchError;
+        public event EventHandler<EventArgs<string, Exception>> SubtitleSearchError;
 
         /// <summary>
         /// Gets or sets the search engines.
@@ -70,7 +70,7 @@
                     try { return engine.Search(query); }
                     catch (Exception ex)
                     {
-                        SubtitleSearchError.Fire(this, "There was an error while searching for download links.", ex.Message);
+                        SubtitleSearchError.Fire(this, "There was an error while searching for download links.", ex);
                         return null;
                     }
                 })).ToArray();
@@ -108,7 +108,7 @@
         /// Called when a subtitle search is done.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleSubtitleSearchDone(object sender, EventArgs<List<Subtitle>> e)
         {
             _remaining.Remove((sender as SubtitleSearchEngine).Name);
@@ -127,12 +127,17 @@
         /// Called when a subtitle search has encountered an error.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
-        private void SingleSubtitleSearchError(object sender, EventArgs<string, string> e)
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void SingleSubtitleSearchError(object sender, EventArgs<string, Exception> e)
         {
             _remaining.Remove((sender as SubtitleSearchEngine).Name);
 
             SubtitleSearchError.Fire(this, e.First, e.Second);
+
+            if (_remaining.Count == 0)
+            {
+                SubtitleSearchDone.Fire(this);
+            }
         }
     }
 }

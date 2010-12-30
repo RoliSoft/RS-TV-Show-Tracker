@@ -474,7 +474,7 @@
         /// Called when the update has encountered an error.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.Exception,System.Boolean,System.Boolean&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void UpdateError(object sender, EventArgs<string, Exception, bool, bool> e)
         {
             if (e.Fourth) // fatal to whole update

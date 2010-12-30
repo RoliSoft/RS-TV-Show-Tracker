@@ -305,6 +305,7 @@
 
             ActiveSearch.SubtitleSearchDone            += SubtitleSearchDone;
             ActiveSearch.SubtitleSearchProgressChanged += SubtitleSearchProgressChanged;
+            ActiveSearch.SubtitleSearchError           += SubtitleSearchError;
             
             SetStatus("Searching for subtitles on " + (string.Join(", ", ActiveSearch.SearchEngines.Select(engine => engine.Name).ToArray())) + "...", true);
 
@@ -320,7 +321,7 @@
         /// Called when a subtitle search progress has changed.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Subtitles.SubtitleSearchEngine.Subtitle&gt;,System.Double,System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SubtitleSearchProgressChanged(object sender, EventArgs<List<Subtitle>, double, List<string>> e)
         {
             if (!_searching)
@@ -368,6 +369,16 @@
                         SetStatus("Couldn't find any subtitles.");
                     }
                 }));
+        }
+
+        /// <summary>
+        /// Called when the subtitle search has encountered an unexpected error.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        public void SubtitleSearchError(object sender, EventArgs<string, Exception> e)
+        {
+
         }
 
         /// <summary>

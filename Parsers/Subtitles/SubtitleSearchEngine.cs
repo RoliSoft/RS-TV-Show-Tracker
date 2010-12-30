@@ -30,7 +30,7 @@
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
         /// </summary>
-        public event EventHandler<EventArgs<string, string>> SubtitleSearchError;
+        public event EventHandler<EventArgs<string, Exception>> SubtitleSearchError;
 
         /// <summary>
         /// Searches for subtitles on the service.
@@ -65,7 +65,7 @@
                     }
                     catch (Exception ex)
                     {
-                        SubtitleSearchError.Fire(this, "There was an error while searching for subtitles.", ex.Message);
+                        SubtitleSearchError.Fire(this, "There was an error while searching for subtitles.", ex);
                     }
                 });
             _job.Start();

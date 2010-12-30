@@ -16,7 +16,7 @@
         /// <param name="name">The name of the show.</param>
         /// <param name="episode">The episode number.</param>
         /// <param name="extra">The title of the episode.</param>
-        /// <exception cref="OnlineVideoSearchEngine.OnlineVideoNotFoundException">No video was found.</exception>
+        /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
             var g = Utils.Google(String.Format("\"{0}\" \"{1}\" \"{2}\" site:hulu.com/watch/", ShowNames.Normalize(name), extra as string, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Season $1 Ep. $2", RegexOptions.IgnoreCase)));

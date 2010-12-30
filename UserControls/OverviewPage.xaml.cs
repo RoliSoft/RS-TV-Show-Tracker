@@ -33,20 +33,6 @@
         public ObservableCollection<OverviewListViewItem> OverviewListViewItemCollection { get; set; }
 
         /// <summary>
-        /// Represents a TV show on the overview list view.
-        /// </summary>
-        public class OverviewListViewItem
-        {
-            public string Name { get; set; }
-            public string Title { get; set; }
-            public string Next { get; set; }
-            public string TitleColor { get; set; }
-            public string NextColor { get; set; }
-            public string MarkAsSeenVisible { get; set; }
-            public string PlayNextVisible { get; set; }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="OverviewPage"/> class.
         /// </summary>
         public OverviewPage()
@@ -427,7 +413,7 @@
         /// Called when the online search is done.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public static void OnlineSearchDone(object sender, EventArgs<string, string> e)
         {
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
@@ -439,7 +425,7 @@
         /// Called when the online search has encountered an error.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String,System.Tuple&lt;System.String,System.String,System.String&gt;&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public static void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
             TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);

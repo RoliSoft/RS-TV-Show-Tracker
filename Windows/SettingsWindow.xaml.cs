@@ -15,7 +15,7 @@
     using RoliSoft.TVShowTracker.Parsers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
-    using CheckBox = System.Windows.Controls.CheckBox;
+    using CheckBox       = System.Windows.Controls.CheckBox;
     using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
     /// <summary>
@@ -29,21 +29,6 @@
         /// </summary>
         /// <value>The downloads list view item collection.</value>
         public ObservableCollection<DownloadsListViewItem> DownloadsListViewItemCollection { get; set; }
-
-        /// <summary>
-        /// Represents a download search engine on the list view.
-        /// </summary>
-        public class DownloadsListViewItem
-        {
-            public bool Enabled { get; set; }
-            public string Icon { get; set; }
-            public string Site { get; set; }
-            public string Type { get; set; }
-            public string RequiresCookies { get; set; }
-            public string Developer { get; set; }
-            public string Revision { get; set; }
-            public string Assembly { get; set; }
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsWindow"/> class.

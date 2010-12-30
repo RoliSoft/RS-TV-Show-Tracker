@@ -12,7 +12,6 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
     /// <summary>
@@ -32,44 +31,6 @@
         /// <value>The guide list view item collection.</value>
         public ObservableCollection<GuideListViewItem> GuideListViewItemCollection { get; set; }
         
-        /// <summary>
-        /// Represents a TV show episode on the list view.
-        /// </summary>
-        public class GuideListViewItem
-        {
-            public bool SeenIt { get; set; }
-            public string Id { get; set; }
-            public string Episode { get; set; }
-            public string AirDate { get; set; }
-            public string Title { get; set; }
-            public string Summary { get; set; }
-            public string Picture { get; set; }
-
-            public bool ShowTooltip
-            {
-                get
-                {
-                    return !string.IsNullOrWhiteSpace(Summary) || !string.IsNullOrWhiteSpace(Picture);
-                }
-            }
-
-            public string ShowSummary
-            {
-                get
-                {
-                    return string.IsNullOrWhiteSpace(Summary) ? "Hidden" : "Visible";
-                }
-            }
-
-            public string ShowPicture
-            {
-                get
-                {
-                    return string.IsNullOrWhiteSpace(Picture) ? "Hidden" : "Visible";
-                }
-            }
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="GuidesPage"/> class.
         /// </summary>
@@ -322,7 +283,7 @@
                         SeenIt  = show["seenit"] != String.Empty,
                         Id      = show["id"],
                         Episode = Regex.Replace(show["notation"], @"(?=[SE][0-9]{3})([SE])0", "$1"),
-                        AirDate = show["airdate"] != "0"
+                        Airdate = show["airdate"] != "0"
                                   ? show["airdate"].ToDouble().GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show["airdate"].ToDouble().GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
                                   : "Unaired episode",
                         Title   = show["name"],

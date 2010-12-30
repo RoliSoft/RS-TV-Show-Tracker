@@ -14,7 +14,7 @@
         /// <param name="name">The name of the show.</param>
         /// <param name="episode">The episode number.</param>
         /// <param name="extra">This field is not used here.</param>
-        /// <exception cref="OnlineVideoSearchEngine.OnlineVideoNotFoundException">No video was found.</exception>
+        /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
             var g = Utils.Google(String.Format("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/", name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase)));

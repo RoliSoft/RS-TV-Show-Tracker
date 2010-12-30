@@ -148,7 +148,7 @@
         /// Called when the recommendation engine has encountered an error.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.String,System.String&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="string"/> instance containing the event data.</param>
         public void RecommendationError(object sender, EventArgs<string, string> e)
         {
             SetStatus(e.First);
@@ -160,7 +160,7 @@
         /// Called when a recommendation request is processed.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;RoliSoft.TVShowTracker.Parsers.Recommendations.RecommendationEngine.RecommendedShow&gt;&gt;"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void RecommendationDone(object sender, EventArgs<List<RecommendedShow>> e)
         {
             Dispatcher.Invoke((Action)(() =>
