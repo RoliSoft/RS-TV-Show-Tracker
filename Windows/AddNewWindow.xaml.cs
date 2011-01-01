@@ -53,7 +53,7 @@
 
             new Task(() =>
                 {
-                    TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+                    Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
 
                     string show = string.Empty, grabber = string.Empty;
                     var mark = true;
@@ -84,7 +84,7 @@
                             }.Show();
                     }
 
-                    TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+                    Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
                     Dispatcher.Invoke((Action)(() =>
                         {

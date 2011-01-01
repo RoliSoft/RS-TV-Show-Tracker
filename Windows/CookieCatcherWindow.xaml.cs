@@ -62,7 +62,7 @@
 
             _webBrowser.Navigate(Engine.Site);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WebBrowserDocumentCompleted(object sender, EventArgs e)
         {
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             if (urlTextBox.Text != _webBrowser.Url.ToString())
             {

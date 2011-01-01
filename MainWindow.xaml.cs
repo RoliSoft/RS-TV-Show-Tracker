@@ -461,7 +461,7 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         public void UpdateDone(object sender, EventArgs e)
         {
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             Dispatcher.Invoke((Action)(() =>
                 {
@@ -479,7 +479,7 @@
         {
             if (e.Fourth) // fatal to whole update
             {
-                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
                 Dispatcher.Invoke((Action)(() =>
                     {
@@ -494,8 +494,7 @@
         /// </summary>
         public void UpdateProgressChanged(object sender, EventArgs<string, double> e)
         {
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
-            TaskbarManager.Instance.SetProgressValue((int)e.Second, 100);
+            Utils.Win7Taskbar((int)e.Second, TaskbarProgressBarState.Normal);
 
             Dispatcher.Invoke((Action)(() =>
                 {

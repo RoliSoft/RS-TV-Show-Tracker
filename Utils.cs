@@ -10,6 +10,8 @@
 
     using HtmlAgilityPack;
 
+    using Microsoft.WindowsAPICodePack.Taskbar;
+
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -304,6 +306,32 @@
             }
 
             return size;
+        }
+
+        /// <summary>
+        /// Sets the application's progress bar state and/or progress on the Windows 7 taskbar.
+        /// </summary>
+        /// <param name="progress">The progress of the progress bar from 1 to 100.</param>
+        /// <param name="state">The state of the progress bar behind the icon.</param>
+        public static void Win7Taskbar(int? progress = null, TaskbarProgressBarState? state = null)
+        {
+            MainWindow.Active.Dispatcher.Invoke((Action)(() =>
+                {
+                    if (!MainWindow.Active.IsVisible)
+                    {
+                        return;
+                    }
+
+                    if (state.HasValue)
+                    {
+                        TaskbarManager.Instance.SetProgressState(state.Value, MainWindow.Active);
+                    }
+
+                    if (progress.HasValue)
+                    {
+                        TaskbarManager.Instance.SetProgressValue(progress.Value, 100, MainWindow.Active);
+                    }
+                }));
         }
     }
 }

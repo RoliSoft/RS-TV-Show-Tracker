@@ -221,13 +221,13 @@
             var finder = new FileSearch(path, show[0], show[1]);
             finder.FileSearchDone += (sender2, e2) =>
                 {
-                    TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+                    Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                     ResetStatus();
                     PlayEpisodeFileSearchDone(sender2, e2);
                 };
             finder.BeginSearch();
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@
                 };
             finder.BeginSearch();
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         public static void PlayEpisodeFileSearchDone(object sender, EventArgs e)
         {
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             var fs = sender as FileSearch;
 
@@ -416,7 +416,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public static void OnlineSearchDone(object sender, EventArgs<string, string> e)
         {
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             Utils.Run(e.Second);
         }
@@ -428,7 +428,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public static void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             var td = new TaskDialog
                 {
@@ -493,7 +493,7 @@
 
             os.SearchAsync(show[0], show[1], title);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -524,7 +524,7 @@
 
             os.SearchAsync(show[0], show[1]);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -555,7 +555,7 @@
 
             os.SearchAsync(show[0], show[1]);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>

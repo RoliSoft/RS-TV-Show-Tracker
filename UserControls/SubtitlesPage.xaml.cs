@@ -313,8 +313,7 @@
 
             ActiveSearch.SearchAsync(textBox.Text);
 
-            TaskbarManager.Instance.SetProgressValue(0, 100);
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+            Utils.Win7Taskbar(0, TaskbarProgressBarState.Normal);
         }
 
         /// <summary>
@@ -330,7 +329,7 @@
             }
 
             SetStatus("Searching for subtitles on " + (string.Join(", ", e.Third)) + "...", true);
-            TaskbarManager.Instance.SetProgressValue((int)e.Second, 100);
+            Utils.Win7Taskbar((int)e.Second);
 
             if (e.First != null)
             {
@@ -353,7 +352,7 @@
             _searching   = false;
             ActiveSearch = null;
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             Dispatcher.Invoke((Action)(() =>
                 {
@@ -398,7 +397,7 @@
                 return;
             }
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
 
             var uri = new Uri(sub.URL);
             SetStatus("Sending request to " + uri.DnsSafeHost.Replace("www.", string.Empty) + "...", true);
@@ -424,7 +423,7 @@
             var token = e.UserState as string[];
             var file  = web.FileName;
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
             
             var sfd = new SaveFileDialog
                 {

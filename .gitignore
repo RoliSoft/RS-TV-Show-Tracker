@@ -1,6 +1,7 @@
 
-#ignore my database
+#ignore my database and settings
 TVShows.db3
+Settings.json
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio

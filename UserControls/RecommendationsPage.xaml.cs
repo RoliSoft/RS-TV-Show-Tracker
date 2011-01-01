@@ -139,7 +139,7 @@
 
             rec.GetListAsync(Database.Query("select name from tvshows").Select(r => r["name"]).ToList());
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
         #endregion
 
@@ -153,7 +153,7 @@
         {
             SetStatus(e.First);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@
                     }
                 }));
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
         }
         #endregion
 

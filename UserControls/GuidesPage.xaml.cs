@@ -321,7 +321,7 @@
                 };
             finder.BeginSearch();
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
         #endregion
 
@@ -389,7 +389,7 @@
 
             os.SearchAsync(show[0], show[1], title);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -420,7 +420,7 @@
 
             os.SearchAsync(show[0], show[1]);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
@@ -451,7 +451,7 @@
 
             os.SearchAsync(show[0], show[1]);
 
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
 
         /// <summary>
