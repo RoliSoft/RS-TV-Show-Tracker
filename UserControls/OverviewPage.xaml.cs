@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
 
     /// <summary>
@@ -300,8 +302,25 @@
 
                         foreach (var file in fs.Files)
                         {
-                            var tmp   = file;
-                            var fd    = new TaskDialogCommandLink { Text = new FileInfo(file).Name };
+                            var tmp     = file;
+                            var fi      = new FileInfo(file);
+                            var quality = ThePirateBay.ParseQuality(file);
+                            var instr   = string.Empty;
+
+                            if (quality != Parsers.Downloads.Qualities.Unknown)
+                            {
+                                instr = quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
+                            }
+
+                            instr += Utils.GetFileSize(fi.Length)
+                                   + Environment.NewLine
+                                   + fi.DirectoryName;
+
+                            var fd = new TaskDialogCommandLink
+                                {
+                                    Text        = fi.Name,
+                                    Instruction = instr
+                                };
                             fd.Click += (s, r) =>
                                 {
                                     td.Close();

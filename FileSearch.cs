@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using System.Windows;
 
     /// <summary>
     /// Provides file search for finding the episodes on the disk.
@@ -96,6 +97,7 @@
                 var fi = new FileInfo(file);
                 if (_titleParts.All(part => Regex.IsMatch(fi.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
                     && Regex.IsMatch(fi.Name, @"\.(avi|mkv|mp4)$", RegexOptions.IgnoreCase) // is it a known video file extension?
+                    && !Regex.IsMatch(fi.Name, @"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase) // is it not a sample?
                     && _episodeRegexes.Any(ep => fi.Name.ToUpper().Contains(ep)) // is it the episode we want?
                     && !Files.Contains(file)) // and not in the array already?
                 {
@@ -112,9 +114,13 @@
                     foreach (var file in Directory.GetFiles(dir))
                     {
                         if(Regex.IsMatch(file, @"\.(avi|mkv|mp4)$", RegexOptions.IgnoreCase) // is it a video?
-                           && !file.ToUpper().Contains(".SAMPLE.") // and not sample?
+                           && !Regex.IsMatch(file, @"[\\\.\-\s]sample[\.\-\s]", RegexOptions.IgnoreCase) // and not sample?
                            && !Files.Contains(file)) // and not in the array already?
                         {
+                            if (!Regex.IsMatch(file, @"[\.\-\s\\]sample[\.\-\s]", RegexOptions.IgnoreCase))
+                            {
+                                MessageBox.Show(file);
+                            }
                             Files.Add(file);
                         }
                     }
