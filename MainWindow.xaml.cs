@@ -47,6 +47,7 @@
             InitializeComponent();
         }
 
+        #region Window events
         /// <summary>
         /// Handles the SourceInitialized event of the Window control.
         /// </summary>
@@ -68,44 +69,6 @@
             }
 
             SystemParameters2.Current.PropertyChanged += AeroChanged;
-        }
-
-        /// <summary>
-        /// This method is called when a system parameter from <c>SystemParameters2</c> is changed.
-        /// </summary>
-        public void AeroChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "IsGlassEnabled")
-            {
-                Dispatcher.Invoke((Action)(() =>
-                    {
-                        if (SystemParameters2.Current.IsGlassEnabled)
-                        {
-                            WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
-                            Background = Brushes.Transparent;
-
-                            mainBorder.Padding = new Thickness(5);
-                            logoMenu.Margin    = new Thickness(6, -1, 0, 0);
-                            logoMenu.Width     = 157;
-                            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
-                        }
-                        else
-                        {
-                            // I couldn't figure out how to remove the WindowChrome from the window,
-                            // so we'll just restart the application for that. (TODO)
-                            Restart();
-                        }
-                    }));
-            }
-        }
-
-        /// <summary>
-        /// Restarts the application. Microsoft forgot to implement <c>Application.Restart()</c> for WPF...
-        /// </summary>
-        public void Restart()
-        {
-            Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location);
-            Application.Current.Shutdown();
         }
 
         /// <summary>
@@ -142,6 +105,149 @@
             new Task(CheckForUpdate).Start();
         }
 
+        /// <summary>
+        /// This method is called when a system parameter from <c>SystemParameters2</c> is changed.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
+        public void AeroChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsGlassEnabled")
+            {
+                Dispatcher.Invoke((Action)(() =>
+                    {
+                        if (SystemParameters2.Current.IsGlassEnabled)
+                        {
+                            WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
+                            Background = Brushes.Transparent;
+
+                            mainBorder.Padding = new Thickness(5);
+                            logoMenu.Margin    = new Thickness(6, -1, 0, 0);
+                            logoMenu.Width     = 157;
+                            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            // I couldn't figure out how to remove the WindowChrome from the window,
+                            // so we'll just restart the application for that. (TODO)
+                            Restart();
+                        }
+                    }));
+            }
+        }
+
+        /// <summary>
+        /// Handles the KeyUp event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
+        private void WindowKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            // if the overview page is selected, send any keys to the listview
+            if (tabControl.SelectedIndex == 0)
+            {
+                activeOverviewPage.ListViewKeyUp(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Closing event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            ShowMenuClick(null, null);
+        }
+        #endregion
+
+        #region Miscellaneous
+        /// <summary>
+        /// Called when data is changed in the database.
+        /// </summary>
+        /// <param name="invokeRefresh">if set to <c>true</c> it will try to invoke the <c>Refresh()</c> method of the active user control.</param>
+        public void DataChanged(bool invokeRefresh = true)
+        {
+            Database.DataChange = DateTime.Now;
+
+            if (invokeRefresh)
+            {
+                Dispatcher.Invoke((Action)(() =>
+                    {
+                        if (tabControl.SelectedContent is IRefreshable)
+                        {
+                            (tabControl.SelectedContent as IRefreshable).Refresh();
+                        }
+                    }));
+            }
+        }
+
+        /// <summary>
+        /// Restarts the application. Microsoft forgot to implement <c>Application.Restart()</c> for WPF...
+        /// </summary>
+        public void Restart()
+        {
+            Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location);
+            Application.Current.Shutdown();
+        }
+        #endregion
+
+        #region Notify icon
+        /// <summary>
+        /// Loads the notify icon.
+        /// </summary>
+        private void LoadNotifyIcon()
+        {
+            var menu = new ContextMenu();
+
+            NotifyIcon = new NotifyIcon
+                {
+                    Text        = "RS TV Show Tracker",
+                    Icon        = new Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/RSTVShowTracker;component/tv.ico")).Stream),
+                    Visible     = true,
+                    ContextMenu = menu
+                };
+
+            var showMenu    = new WinMenuItem { Text = "Hide" };
+            showMenu.Click += ShowMenuClick;
+            
+            var exitMenu    = new WinMenuItem { Text = "Exit" };
+            exitMenu.Click += (s, r) =>
+                {
+                    NotifyIcon.Visible = false;
+                    //Application.Current.Shutdown();
+                    Process.GetCurrentProcess().Kill(); // this would be more *aggressive* I guess
+                };
+
+            menu.MenuItems.Add(showMenu);
+            menu.MenuItems.Add(exitMenu);
+
+            NotifyIcon.DoubleClick += (s, e) => showMenu.PerformClick();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the showMenu control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void ShowMenuClick(object sender, EventArgs e)
+        {
+            if (Visibility == Visibility.Visible)
+            {
+                NotifyIcon.ContextMenu.MenuItems[0].Text = "Show";
+                Hide();
+            }
+            else if (NotifyIcon.Visible)
+            {
+                NotifyIcon.ContextMenu.MenuItems[0].Text = "Hide";
+                Show();
+                Activate();
+            }
+        }
+        #endregion
+
+        #region Logo
         /// <summary>
         /// Sets the status to the last updated time.
         /// </summary>
@@ -219,120 +325,6 @@
         }
 
         /// <summary>
-        /// Loads the notify icon.
-        /// </summary>
-        private void LoadNotifyIcon()
-        {
-            var menu = new ContextMenu();
-
-            NotifyIcon = new NotifyIcon
-                {
-                    Text        = "RS TV Show Tracker",
-                    Icon        = new Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/RSTVShowTracker;component/tv.ico")).Stream),
-                    Visible     = true,
-                    ContextMenu = menu
-                };
-
-            var showMenu    = new WinMenuItem { Text = "Hide" };
-            showMenu.Click += ShowMenuClick;
-            
-            var exitMenu    = new WinMenuItem { Text = "Exit" };
-            exitMenu.Click += (s, r) =>
-                {
-                    NotifyIcon.Visible = false;
-                    //Application.Current.Shutdown();
-                    Process.GetCurrentProcess().Kill(); // this would be more *aggressive* I guess
-                };
-
-            menu.MenuItems.Add(showMenu);
-            menu.MenuItems.Add(exitMenu);
-
-            NotifyIcon.DoubleClick += (s, e) => showMenu.PerformClick();
-        }
-
-        /// <summary>
-        /// Handles the Click event of the showMenu control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        public void ShowMenuClick(object sender, EventArgs e)
-        {
-            if (Visibility == Visibility.Visible)
-            {
-                NotifyIcon.ContextMenu.MenuItems[0].Text = "Show";
-                Hide();
-            }
-            else if (NotifyIcon.Visible)
-            {
-                NotifyIcon.ContextMenu.MenuItems[0].Text = "Hide";
-                Show();
-                Activate();
-            }
-        }
-
-        /// <summary>
-        /// Called when data is changed in the database.
-        /// </summary>
-        /// <param name="invokeRefresh">if set to <c>true</c> it will try to invoke the <c>Refresh()</c> method of the active user control.</param>
-        public void DataChanged(bool invokeRefresh = true)
-        {
-            Database.DataChange = DateTime.Now;
-
-            if (invokeRefresh)
-            {
-                Dispatcher.Invoke((Action)(() =>
-                    {
-                        if (tabControl.SelectedContent is IRefreshable)
-                        {
-                            (tabControl.SelectedContent as IRefreshable).Refresh();
-                        }
-                    }));
-            }
-        }
-
-        /// <summary>
-        /// Checks for software update.
-        /// </summary>
-        public void CheckForUpdate()
-        {
-            var upd = REST.Instance.CheckForUpdate();
-            if ((bool)upd.Success && (bool)upd.New)
-            {
-                Dispatcher.Invoke((Action)(() =>
-                    {
-                        updateOuter.Visibility  = Visibility.Visible;
-                        updateToolTipTitle.Text = "Version {0} is available!".FormatWith((string)upd.Version);
-                        updateToolTipText.Text  = (string)upd.Description;
-                    }));
-            }
-        }
-
-        /// <summary>
-        /// Handles the KeyUp event of the Window control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
-        private void WindowKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            // if the overview page is selected, send any keys to the listview
-            if (tabControl.SelectedIndex == 0)
-            {
-                activeOverviewPage.ListViewKeyUp(sender, e);
-            }
-        }
-
-        /// <summary>
-        /// Handles the Closing event of the Window control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            e.Cancel = true;
-            ShowMenuClick(null, null);
-        }
-
-        /// <summary>
         /// Handles the MouseEnter event of the logo control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -374,6 +366,7 @@
             logo.Background  = (Brush)FindResource("HeadGradient");
             logo.BorderBrush = Brushes.DimGray;
         }
+        #endregion
 
         #region Main menu
         /// <summary>
@@ -453,7 +446,7 @@
         }
         #endregion
 
-        #region Update
+        #region Database update
         /// <summary>
         /// Called when the update is done.
         /// </summary>
@@ -505,6 +498,23 @@
         #endregion
 
         #region Software update
+        /// <summary>
+        /// Checks for software update.
+        /// </summary>
+        public void CheckForUpdate()
+        {
+            var upd = REST.Instance.CheckForUpdate();
+            if ((bool)upd.Success && (bool)upd.New)
+            {
+                Dispatcher.Invoke((Action)(() =>
+                    {
+                        updateOuter.Visibility  = Visibility.Visible;
+                        updateToolTipTitle.Text = "Version {0} is available!".FormatWith((string)upd.Version);
+                        updateToolTipText.Text  = (string)upd.Description;
+                    }));
+            }
+        }
+
         /// <summary>
         /// Handles the MouseEnter event of the Update control.
         /// </summary>
