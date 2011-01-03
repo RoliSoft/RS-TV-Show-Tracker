@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
+    using System.IO;
+
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
 
     /// <summary>
@@ -22,6 +24,8 @@
         /// <value>The date of last change.</value>
         public static DateTime DataChange { get; set; }
 
+        private static readonly string _dbFile;
+
         /// <summary>
         /// Initializes the <see cref="Database"/> class.
         /// </summary>
@@ -32,10 +36,30 @@
                 return;
             }
 
-            Connection = new SQLiteConnection(@"Data Source=C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3");
-            DataChange = DateTime.Now;
+            _dbFile = Path.Combine(Signature.FullPath, "TVShows.db3");
 
+            // hackity-hack :)
+            if (Environment.MachineName == "ROLISOFT-PC" && File.Exists(Path.Combine(Signature.FullPath, ".hack")))
+            {
+                _dbFile = @"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3";
+            }
+
+            var exists = File.Exists(_dbFile);
+
+            Connection = new SQLiteConnection("Data Source=" + _dbFile);
+            DataChange = DateTime.Now;
+            
             Connection.Open();
+
+            if (!exists)
+            {
+                var tables = Properties.Resources.TVShows_SQL.Split(new[]{ "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var table in tables)
+                {
+                    Execute(table);
+                }
+            }
         }
 
         /// <summary>

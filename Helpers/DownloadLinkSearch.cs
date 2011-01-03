@@ -46,6 +46,8 @@
                 engines = typeof(DownloadSearchEngine).GetDerivedTypes();
             }
 
+            var remove = new List<DownloadSearchEngine>();
+
             SearchEngines = engines.Select(type => Activator.CreateInstance(type) as DownloadSearchEngine).ToList();
 
             foreach (var engine in SearchEngines)
@@ -60,9 +62,15 @@
                     // if requires cookies and no cookies were provided, ignore the engine
                     if (string.IsNullOrWhiteSpace(engine.Cookies))
                     {
-                        SearchEngines.Remove(engine);
+                        remove.Add(engine);
                     }
                 }
+            }
+
+            // now remove them. if we remove it directly in the previous loop, an exception will be thrown that the enumeration was modified
+            foreach (var engine in remove)
+            {
+                SearchEngines.Remove(engine);
             }
         }
 

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Windows;
@@ -10,6 +11,7 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
+    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
@@ -171,7 +173,19 @@
             showGeneral.Visibility = Visibility.Hidden;
             GuideListViewItemCollection.Clear();
 
-            var id = Database.Query("select showid from tvshows where name = ? limit 1", comboBox.SelectedValue.ToString())[0]["showid"];
+            var sel = comboBox.SelectedValue;
+            if (sel == null)
+            {
+                return;
+            }
+
+            var qid = Database.Query("select showid from tvshows where name = ? limit 1", sel.ToString());
+            if (qid.Count == 0)
+            {
+                return;
+            }
+
+            var id = qid[0]["showid"];
 
             // fill up general informations
 
@@ -310,6 +324,19 @@
 
             var path = Settings.Get("Download Path");
             var show = GetSelectedShow();
+            
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            {
+                new TaskDialog
+                    {
+                        Icon            = TaskDialogStandardIcon.Error,
+                        Caption         = "Search path not configured",
+                        InstructionText = "Search path not configured",
+                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
+                        Cancelable      = true
+                    }.Show();
+                return;
+            }
 
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 

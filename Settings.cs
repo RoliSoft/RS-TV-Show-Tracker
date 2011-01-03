@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
@@ -16,15 +17,30 @@
         /// <value>The key-value container.</value>
         public static Dictionary<string, string> Keys { get; set; }
 
+        private static readonly string _jsFile;
+
         /// <summary>
         /// Initializes the <see cref="Database"/> class.
         /// </summary>
         static Settings()
         {
+            if (string.IsNullOrWhiteSpace(Signature.FullPath))
+            {
+                return;
+            }
+
+            _jsFile = Path.Combine(Signature.FullPath, "Settings.json");
+
+            // hackity-hack :)
+            if (Environment.MachineName == "ROLISOFT-PC" && File.Exists(Path.Combine(Signature.FullPath, ".hack")))
+            {
+                _jsFile = @"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.json";
+            }
+
             try
             {
                 Keys = JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                    File.ReadAllText(@"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.json")
+                    File.ReadAllText(_jsFile)
                 );
             }
             catch
@@ -63,7 +79,7 @@
         public static void Save()
         {
             File.WriteAllText(
-                @"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.json",
+                _jsFile,
                 JsonConvert.SerializeObject(Keys, Formatting.Indented)
             );
         }

@@ -218,6 +218,19 @@
             var path = Settings.Get("Download Path");
             var show = GetSelectedShow();
 
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            {
+                new TaskDialog
+                    {
+                        Icon            = TaskDialogStandardIcon.Error,
+                        Caption         = "Search path not configured",
+                        InstructionText = "Search path not configured",
+                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
+                        Cancelable      = true
+                    }.Show();
+                return;
+            }
+
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 
             var finder = new FileSearch(path, show[0], show[1]);

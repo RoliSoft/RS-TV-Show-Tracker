@@ -121,6 +121,7 @@
 
             if (!string.IsNullOrWhiteSpace(tdl))
             {
+                ((MenuItem)cm.Items[3]).Visibility = Visibility.Visible;
                 DefaultTorrent = FileVersionInfo.GetVersionInfo(tdl).ProductName;
                 ((MenuItem)cm.Items[3]).Header = "Send to " + DefaultTorrent;
 
@@ -144,7 +145,7 @@
             }
             else
             {
-                cm.Items.RemoveAt(3);
+                ((MenuItem)cm.Items[3]).Visibility = Visibility.Collapsed;
             }
         }
 

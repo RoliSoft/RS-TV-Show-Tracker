@@ -269,13 +269,15 @@
             }
 
             var last = 0d;
-            double.TryParse(Database.Setting("last update"), out last);
+            if (!double.TryParse(Database.Setting("last update"), out last))
+            {
+                Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = string.Empty; }));
+                return;
+            }
+
             var ts = DateTime.Now - last.GetUnixTimestamp();
 
-            Dispatcher.Invoke((Action)(() =>
-                {
-                    lastUpdatedLabel.Content = "last updated " + ts.ToShortRelativeTime() + " ago";
-                }));
+            Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = "last updated " + ts.ToShortRelativeTime() + " ago"; }));
 
             if (ts.TotalMinutes < 1) // if under a minute, update by seconds
             {
@@ -579,8 +581,7 @@
 
                 if (mc.Count != 0)
                 {
-                    var m = mc[mc.Count - 1];
-                    loc = "in file {0} at line {1}".FormatWith(m.Groups["file"].Value, m.Groups["ln"].Value);
+                    loc = "in file {0} at line {1}".FormatWith(mc[0].Groups["file"].Value, mc[0].Groups["ln"].Value);
                 }
 
                 var td = new TaskDialog

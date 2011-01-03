@@ -79,7 +79,7 @@
         private void Search()
         {
             // start
-            ScanDirectoryForFile(StartPath);
+            try { ScanDirectoryForFile(StartPath); } catch { }
 
             // fire event
             FileSearchDone.Fire(this);
