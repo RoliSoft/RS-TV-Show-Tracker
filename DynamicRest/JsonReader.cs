@@ -1,15 +1,20 @@
 // JsonReader.cs
+// Source: https://github.com/NikhilK/dynamicrest/tree/9fae9d32c6ffb13081744afda019cce625311f1e/DynamicRest
+// Developer: http://www.nikhilk.net/CSharp-Dynamic-Programming-JSON.aspx
 //
+// Comments for public methods were added by me, but there are no other modifications to the code.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace DynamicRest {
+namespace RoliSoft.TVShowTracker.DynamicJson {
 
+    /// <summary>
+    /// Provides support for parsing JSON into dynamic objects.
+    /// </summary>
     public sealed class JsonReader {
 
         internal static readonly long MinDateTimeTicks = (new DateTime(1970, 1, 1, 0, 0, 0)).Ticks;
@@ -17,10 +22,18 @@ namespace DynamicRest {
 
         private TextReader _reader;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonReader"/> class.
+        /// </summary>
+        /// <param name="jsonText">The json text.</param>
         public JsonReader(string jsonText)
             : this(new StringReader(jsonText)) {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonReader"/> class.
+        /// </summary>
+        /// <param name="reader">The text reader containing the json.</param>
         public JsonReader(TextReader reader) {
             _reader = reader;
         }
@@ -278,6 +291,10 @@ namespace DynamicRest {
             }
         }
 
+        /// <summary>
+        /// Parses the specified JSON text into dynamic objects.
+        /// </summary>
+        /// <returns>Dynamic object.</returns>
         public object ReadValue() {
             object value = null;
             bool allowNull = false;

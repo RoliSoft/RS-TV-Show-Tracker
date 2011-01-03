@@ -5,7 +5,7 @@
     using System.Dynamic;
     using System.Linq;
 
-    using DynamicRest;
+    using RoliSoft.TVShowTracker.DynamicJson;
 
     /// <summary>
     /// Provides a fun way to communicate with lab.rolisoft.net/api by harnessing the power of dynamic.
