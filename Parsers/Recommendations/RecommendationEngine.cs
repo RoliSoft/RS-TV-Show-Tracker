@@ -18,7 +18,7 @@
         /// <summary>
         /// Occurs when a recommendation engine has encountered an error.
         /// </summary>
-        public EventHandler<EventArgs<string, string>> RecommendationError;
+        public EventHandler<EventArgs<string, Exception>> RecommendationError;
 
         /// <summary>
         /// Gets the list of recommended TV show from the engine.
@@ -42,7 +42,7 @@
                     }
                     catch (Exception ex)
                     {
-                        RecommendationError.Fire(this, "There was an error while getting the recommendations. Try again later.", ex.Message);
+                        RecommendationError.Fire(this, "There was an error while getting the recommendations. Try again later.", ex);
                     }
                 }).Start();
         }

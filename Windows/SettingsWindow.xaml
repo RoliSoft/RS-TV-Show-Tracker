@@ -43,11 +43,21 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <StackPanel Margin="10,3,10,5" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                                 <CheckBox Content=" Start at system startup" Name="startAtStartup" Checked="StartAtStartupChecked" Unchecked="StartAtStartupUnchecked" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
                                 <TextBlock TextWrapping="Wrap" Margin="0">
                                     If you check this, the software will start automatically with the system, it will update itself and alert you if there are any new episodes from the TV shows you're watching.
                                     While running in the background, it will also mark any TV shows you decide to watch.
+                                </TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <CheckBox Content=" Show unhandled errors" Name="showUnhandledErrors" Checked="ShowUnhandledErrorsChecked"  Unchecked="ShowUnhandledErrorsUnchecked"  FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                                <TextBlock TextWrapping="Wrap" Margin="0">
+                                    If you check this, the software will show any unhandled exceptions along with their stacktrace.
+                                    Only check it if you're a software developer, otherwise the displayed text will be gibberish to you.
+                                    If you leave it unchecked, every unhandled exception will be silently reported to lab.rolisoft.net.
+                                    These reports only contain the exception and they don't contain other variables from the method, so no data will be reported which can be used to identify you in any way.
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>

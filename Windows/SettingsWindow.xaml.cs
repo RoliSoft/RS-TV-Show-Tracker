@@ -63,6 +63,8 @@
             {
                 startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
             }
+
+            showUnhandledErrors.IsChecked = Settings.Get("Show Unhandled Errors") == "True";
             
             // downloads
 
@@ -201,6 +203,27 @@
             {
                 rk.DeleteValue("RS TVShow Tracker", false);
             }
+        }
+
+
+        /// <summary>
+        /// Handles the Checked event of the showUnhandledErrors control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ShowUnhandledErrorsChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Show Unhandled Errors", "True");
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the showUnhandledErrors control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ShowUnhandledErrorsUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Show Unhandled Errors", "False");
         }
         #endregion
 

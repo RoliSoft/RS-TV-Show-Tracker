@@ -557,11 +557,10 @@
         /// Handles the unexpected exception.
         /// </summary>
         /// <param name="ex">The exception.</param>
-        public static void HandleUnexpectedException(Exception ex)
+        public void HandleUnexpectedException(Exception ex)
         {
-            var silent = false;
-            var submit = false;
-            var sb     = new StringBuilder();
+            var show = Settings.Get("Show Unhandled Errors") == "True";
+            var sb   = new StringBuilder();
 
         parseException:
             sb.AppendLine(ex.GetType() + ": " + ex.Message);
@@ -573,7 +572,7 @@
                 goto parseException;
             }
 
-            if (!silent)
+            if (show)
             {
                 var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs):line (?<ln>[0-9]+)");
                 var loc = "at a location where it was not expected";
@@ -589,7 +588,7 @@
                         Icon                  = TaskDialogStandardIcon.Error,
                         Caption               = "An unexpected error occurred",
                         InstructionText       = "An unexpected error occurred",
-                        Text                  = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString(), loc),
+                        Text                  = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), loc),
                         DetailsExpandedText   = sb.ToString(),
                         DetailsExpandedLabel  = "Hide stacktrace",
                         DetailsCollapsedLabel = "Show stacktrace",
@@ -597,7 +596,7 @@
                         StandardButtons       = TaskDialogStandardButtons.None
                     };
 
-                if ((bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
+                if ((bool)Dispatcher.Invoke((Func<bool>)(() => IsVisible)))
                 {
                     td.Opened  += (s, r) => Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
                     td.Closing += (s, r) => Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
@@ -607,16 +606,29 @@
                 fd.Click += (s, r) =>
                     {
                         td.Close();
-                        //
+                        ReportException(sb.ToString());
                     };
 
-                var ig = new TaskDialogCommandLink{ Text = "Ignore exception" };
+                var ig = new TaskDialogCommandLink { Text = "Ignore exception" };
                 ig.Click += (s, r) => td.Close();
-                
+
                 td.Controls.Add(fd);
                 td.Controls.Add(ig);
                 td.Show();
             }
+            else
+            {
+                ReportException(sb.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Reports the parsed exception silently and asynchronously to lab.rolisoft.net.
+        /// </summary>
+        /// <param name="ex">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
+        private void ReportException(string ex)
+        {
+            new Task(() => { try { REST.Instance.ReportError(Convert.ToBase64String(Encoding.UTF8.GetBytes(ex))); } catch { } }).Start();
         }
         #endregion
     }

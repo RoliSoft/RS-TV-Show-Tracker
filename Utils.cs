@@ -174,6 +174,7 @@
                 req.ContentLength = encoding != null
                                     ? encoding.GetByteCount(postData)
                                     : Encoding.ASCII.GetByteCount(postData);
+                req.AllowWriteStreamBuffering = true;
             }
 
             if (!string.IsNullOrWhiteSpace(cookies))

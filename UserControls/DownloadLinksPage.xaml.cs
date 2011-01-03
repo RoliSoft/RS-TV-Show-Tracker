@@ -384,7 +384,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void DownloadSearchError(object sender, EventArgs<string, Exception> e)
         {
-
+            MainWindow.Active.HandleUnexpectedException(e.Second);
         }
 
         /// <summary>

@@ -149,11 +149,13 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="string"/> instance containing the event data.</param>
-        public void RecommendationError(object sender, EventArgs<string, string> e)
+        public void RecommendationError(object sender, EventArgs<string, Exception> e)
         {
             SetStatus(e.First);
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+
+            MainWindow.Active.HandleUnexpectedException(e.Second);
         }
 
         /// <summary>

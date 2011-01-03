@@ -5,7 +5,7 @@
     using System.Dynamic;
     using System.Linq;
 
-    using Newtonsoft.Json;
+    using DynamicRest;
 
     /// <summary>
     /// Provides a fun way to communicate with lab.rolisoft.net/api by harnessing the power of dynamic.
@@ -44,7 +44,7 @@
 
             try
             {
-                var r = Utils.GetURL("http://lab.rolisoft.net/api/",
+                var r = Utils.GetURL("http://localhost/update/",
                     "json"
                   + "&software=" + Uri.EscapeUriString("RS TV Show Tracker")
                   + "&version=" + Uri.EscapeUriString(Signature.Version)
@@ -55,7 +55,7 @@
                      : string.Empty)
                 );
 
-                obj = JsonConvert.DeserializeObject(r);
+                obj = new JsonReader(r).ReadValue();
                 obj.Success = obj.Error == null;
             }
             catch (Exception ex)
