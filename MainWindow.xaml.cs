@@ -4,13 +4,15 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
     using Microsoft.Windows.Shell;
-
+    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using Drawing     = System.Drawing;
@@ -45,6 +47,9 @@
         public MainWindow()
         {
             InitializeComponent();
+
+            Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception);
         }
 
         #region Window events
@@ -544,6 +549,74 @@
         {
             Utils.Run(Path.Combine(Signature.FullPath, "update.exe"));
             NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+        }
+        #endregion
+
+        #region Exceptions
+        /// <summary>
+        /// Handles the unexpected exception.
+        /// </summary>
+        /// <param name="ex">The exception.</param>
+        public static void HandleUnexpectedException(Exception ex)
+        {
+            var silent = false;
+            var submit = false;
+            var sb     = new StringBuilder();
+
+        parseException:
+            sb.AppendLine(ex.GetType() + ": " + ex.Message);
+            sb.AppendLine(ex.StackTrace);
+
+            if (ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+                goto parseException;
+            }
+
+            if (!silent)
+            {
+                var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs):line (?<ln>[0-9]+)");
+                var loc = "at a location where it was not expected";
+
+                if (mc.Count != 0)
+                {
+                    var m = mc[mc.Count - 1];
+                    loc = "in file {0} at line {1}".FormatWith(m.Groups["file"].Value, m.Groups["ln"].Value);
+                }
+
+                var td = new TaskDialog
+                    {
+                        Icon                  = TaskDialogStandardIcon.Error,
+                        Caption               = "An unexpected error occurred",
+                        InstructionText       = "An unexpected error occurred",
+                        Text                  = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString(), loc),
+                        DetailsExpandedText   = sb.ToString(),
+                        DetailsExpandedLabel  = "Hide stacktrace",
+                        DetailsCollapsedLabel = "Show stacktrace",
+                        Cancelable            = true,
+                        StandardButtons       = TaskDialogStandardButtons.None
+                    };
+
+                if ((bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
+                {
+                    td.Opened  += (s, r) => Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
+                    td.Closing += (s, r) => Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                }
+
+                var fd = new TaskDialogCommandLink { Text = "Submit bug report" };
+                fd.Click += (s, r) =>
+                    {
+                        td.Close();
+                        //
+                    };
+
+                var ig = new TaskDialogCommandLink{ Text = "Ignore exception" };
+                ig.Click += (s, r) => td.Close();
+                
+                td.Controls.Add(fd);
+                td.Controls.Add(ig);
+                td.Show();
+            }
         }
         #endregion
     }
