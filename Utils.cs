@@ -169,11 +169,8 @@
 
             if (!string.IsNullOrWhiteSpace(postData))
             {
-                req.Method        = "POST";
-                req.ContentType   = "application/x-www-form-urlencoded";
-                req.ContentLength = encoding != null
-                                    ? encoding.GetByteCount(postData)
-                                    : Encoding.ASCII.GetByteCount(postData);
+                req.Method                    = "POST";
+                req.ContentType               = "application/x-www-form-urlencoded";
                 req.AllowWriteStreamBuffering = true;
             }
 
@@ -192,9 +189,10 @@
 
             if (!string.IsNullOrWhiteSpace(postData))
             {
-                using (var sw = new StreamWriter(req.GetRequestStream(), encoding ?? Encoding.ASCII) { AutoFlush = true })
+                using (var sw = new StreamWriter(req.GetRequestStream(), encoding ?? Encoding.ASCII))
                 {
                     sw.Write(postData);
+                    sw.Flush();
                 }
             }
 

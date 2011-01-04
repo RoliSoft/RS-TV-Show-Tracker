@@ -646,6 +646,11 @@
                             <Image Source="/RSTVShowTracker;component/Images/question.png" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Send feedback" Click="SendFeedbackClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/smiley.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="About the software" Click="AboutSoftwareClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/information.png" />

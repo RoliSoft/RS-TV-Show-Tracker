@@ -1,0 +1,66 @@
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SendFeedbackWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
+        Title="Send feedback" Height="416" Width="615" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/smiley.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+    <Grid>
+        <TabControl Margin="10,10" Name="tabControl">
+            <TabControl.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </TabControl.Effect>
+            <TabItem Header="Send feedback" Name="tabItem1">
+                <Grid>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <Label Content="Feedback Type" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Height="16" Name="ideaRadioButton" Margin="0,0,10,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/RSTVShowTracker;component/Images/light-bulb.png" Height="16" Width="16" />
+                                        <TextBlock Text="Idea/suggestion" Margin="3,0,0,0" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Height="16" Name="bugRadioButton" Margin="0,0,10,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/RSTVShowTracker;component/Images/bug.png" Height="16" Width="16" Margin="2,0,0,0" />
+                                        <TextBlock Text="Bug report" Margin="3,0,0,0" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Height="16" Name="otherRadioButton">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/RSTVShowTracker;component/Images/smiley.png" Height="16" Width="16" Margin="2,0,0,0" />
+                                        <TextBlock Text="Other" Margin="3,0,0,0" />
+                                    </StackPanel>
+                                </RadioButton>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Contact Informations" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,5,0,5" />
+                                <Label Content="both fields are optional, but required if you want an answer" Foreground="Gray" Padding="0" Margin="4,8,0,5" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Vertical" Margin="0,0,3,0">
+                                    <Label Content="Name:" HorizontalAlignment="Right" Padding="3" />
+                                    <Label Content="Email:" HorizontalAlignment="Right" Padding="3" />
+                                </StackPanel>
+                                <StackPanel Orientation="Vertical" Width="513">
+                                    <TextBox Name="nameTextBox" />
+                                    <TextBox Name="emailTextBox" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Message" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,5,0,5" />
+                                <Label Content="please use english or hungarian" Foreground="Gray" Padding="0" Margin="4,8,0,5" />
+                            </StackPanel>
+                            <TextBox Name="messageTextBox" Height="150" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible" AcceptsReturn="True" />
+
+                            <Button Name="submitButton" Content="Send" HorizontalAlignment="Right" Margin="0,10,0,0" Width="57" Click="SendButtonClick" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <ProgressBar Height="15" HorizontalAlignment="Right" Margin="0,-26,-5,0" Name="progressBar" VerticalAlignment="Top" Width="75" Visibility="Collapsed" IsIndeterminate="True" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Shell:GlassWindow>

@@ -50,11 +50,10 @@
 
             textBox.IsEnabled = comboBox.IsEnabled = searchButton.IsEnabled = markCheckBox.IsEnabled = false;
             progressBar.Visibility = Visibility.Visible;
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
 
             new Task(() =>
                 {
-                    Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-
                     string show = string.Empty, grabber = string.Empty;
                     var mark = true;
 
