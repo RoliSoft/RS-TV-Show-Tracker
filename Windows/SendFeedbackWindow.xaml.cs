@@ -84,7 +84,7 @@
 
             new Task(() => { try
                 {
-                    REST.Instance.SendFeedback(type, name, email, Convert.ToBase64String(Encoding.UTF8.GetBytes(message)));
+                    REST.SecureInstance.SendFeedback(type, name, email, message);
 
                     Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                     Dispatcher.Invoke((Action)(() =>

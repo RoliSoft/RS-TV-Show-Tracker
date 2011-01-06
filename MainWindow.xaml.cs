@@ -639,7 +639,7 @@
         /// <param name="ex">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
         private void ReportException(string ex)
         {
-            new Task(() => { try { REST.Instance.ReportError(Convert.ToBase64String(Encoding.UTF8.GetBytes(ex))); } catch { } }).Start();
+            new Task(() => { try { REST.SecureInstance.ReportError(ex); } catch { } }).Start();
         }
         #endregion
     }

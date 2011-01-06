@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -138,12 +139,13 @@
         /// <param name="encoding">The encoding.</param>
         /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
+        /// <param name="headers">The additional headers to send.</param>
         /// <returns>Remote page's parsed content.</returns>
-        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null)
+        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, Dictionary<string, string> headers = null)
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(
-                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent)
+                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, headers)
             );
 
             return doc;
@@ -158,15 +160,16 @@
         /// <param name="encoding">The encoding.</param>
         /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
+        /// <param name="headers">The additional headers to send.</param>
         /// <returns>Remote page's content.</returns>
-        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null)
+        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, Dictionary<string, string> headers = null)
         {
             ServicePointManager.Expect100Continue = false;
 
             var req       = (HttpWebRequest)WebRequest.Create(url);
             req.Timeout   = 10000;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
-
+            
             if (!string.IsNullOrWhiteSpace(postData))
             {
                 req.Method                    = "POST";
@@ -184,6 +187,14 @@
                                    .Select(cookie => cookie.Split('=')))
                 {
                     req.CookieContainer.Add(new Cookie(kv[0], kv[1], "/", new Uri(url).Host));
+                }
+            }
+
+            if (headers != null && headers.Count != 0)
+            {
+                foreach (var header in headers)
+                {
+                    req.Headers[header.Key] = header.Value;
                 }
             }
 
