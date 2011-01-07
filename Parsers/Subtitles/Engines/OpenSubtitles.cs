@@ -52,7 +52,7 @@
 
             var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query } });
 
-            if (ReferenceEquals(search["data"].GetType(), typeof(bool)))
+            if (search["data"] is bool)
             {
                 yield break;
             }

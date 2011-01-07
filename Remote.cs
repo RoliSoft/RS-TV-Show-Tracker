@@ -33,11 +33,12 @@
             {
                 _algo = new RijndaelManaged
                     {
-                        KeySize = 128, // 192 or 256 won't work, because PHP sucks at everything.
-                        Mode    = CipherMode.CBC,
-                        Key     = Encoding.ASCII.GetBytes("!rHkw@778rcrC5=+"),
-                        IV      = Encoding.ASCII.GetBytes("0+R7L$O%Eq8Zieuo"),
-                        Padding = PaddingMode.Zeros
+                        KeySize   = 256,
+                        BlockSize = 256,
+                        Mode      = CipherMode.CBC,
+                        Key       = Encoding.ASCII.GetBytes("!rHkw@778rcrC5=+!rHkw@778rcrC5=+"),
+                        IV        = Encoding.ASCII.GetBytes("0+R7L$O%Eq8Zieuo0+R7L$O%Eq8Zieuo"),
+                        Padding   = PaddingMode.Zeros
                     };
             }
         }

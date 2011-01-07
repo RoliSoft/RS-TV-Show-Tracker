@@ -377,6 +377,18 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void SubtitleSearchError(object sender, EventArgs<string, Exception> e)
         {
+            if (e.Second is WebException || e.Second is CookComputing.XmlRpc.XmlRpcException)
+            {
+                // Exceptions such as
+                // - The operation has timed out
+                // - The remote server returned an error: (503) Server Unavailable.
+                // - Unable to connect to the remote server
+                // - Service Not Available (seen in XML-RPC, usually when OpenSubtitles is on vacation)
+                // indicate that the server is either unreachable or is under heavy load,
+                // and these problems are not parsing bugs, so they will be ignored.
+                return;
+            }
+
             MainWindow.Active.HandleUnexpectedException(e.Second);
         }
 
