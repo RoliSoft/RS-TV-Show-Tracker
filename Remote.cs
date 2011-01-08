@@ -4,11 +4,10 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Dynamic;
-    using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
 
-    using RoliSoft.TVShowTracker.DynamicJson;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Provides a fun way to communicate with lab.rolisoft.net/api by harnessing the power of dynamic.
@@ -83,15 +82,7 @@
 
             try
             {
-                var jsw = new JsonWriter();
-                jsw.StartObjectScope();
-                jsw.WriteName("func");
-                jsw.WriteValue(binder.Name);
-                jsw.WriteName("args");
-                jsw.WriteValue(args);
-                jsw.EndScope();
-
-                var post = jsw.Json;
+                var post = JsonConvert.SerializeObject(new { func = binder.Name, args });
 
                 if (_secure)
                 {
@@ -105,15 +96,15 @@
                     userAgent: "RS TV Show Tracker/" + Signature.Version,
                     headers:   new Dictionary<string, string> { { "X-UUID", Utils.GetUUID() } }
                 );
-
+                
                 if (_secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
                     resp = Encoding.UTF8.GetString(_algo.CreateDecryptor().TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
                 }
 
-                obj = new JsonReader(resp).ReadValue();
-                obj.Success = !(obj.GetDynamicMemberNames() as IEnumerable<string>).Contains("Error");
+                obj = JsonConvert.DeserializeObject<DynamicDictionary>(resp);
+                obj.Success = obj.ContainsKey("Error");
             }
             catch (Exception ex)
             {

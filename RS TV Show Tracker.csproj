@@ -115,10 +115,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DynamicRest\JsonArray.cs" />
-    <Compile Include="DynamicRest\JsonObject.cs" />
-    <Compile Include="DynamicRest\JsonReader.cs" />
-    <Compile Include="DynamicRest\JsonWriter.cs" />
+    <Compile Include="DynamicDictionary.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Parsers\Downloads\Link.cs" />
