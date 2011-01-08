@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Dynamic;
+    using System.Numerics;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -35,8 +36,7 @@
                         KeySize   = 256,
                         BlockSize = 256,
                         Mode      = CipherMode.CBC,
-                        Key       = Encoding.ASCII.GetBytes("!rHkw@778rcrC5=+!rHkw@778rcrC5=+"),
-                        IV        = Encoding.ASCII.GetBytes("0+R7L$O%Eq8Zieuo0+R7L$O%Eq8Zieuo"),
+                        IV        = Encoding.ASCII.GetBytes("0+R7L$O%Eq8Zieuo!rHkw@778rcrC5=+"),
                         Padding   = PaddingMode.Zeros
                     };
             }
@@ -82,16 +82,18 @@
 
             try
             {
+                var key = _secure ? InitiateKeyExchange() : null;
+
                 var post = JsonConvert.SerializeObject(new { func = binder.Name, args });
 
                 if (_secure)
                 {
                     var tmp = Encoding.UTF8.GetBytes(post);
-                    post = Convert.ToBase64String(_algo.CreateEncryptor().TransformFinalBlock(tmp, 0, tmp.Length));
+                    post = Convert.ToBase64String(_algo.CreateEncryptor(key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
                 }
 
                 var resp = Utils.GetURL(
-                    url:       "http://localhost/update/",
+                    url:       "http://lab.rolisoft.net/api/",
                     postData:  post,
                     userAgent: "RS TV Show Tracker/" + Signature.Version,
                     headers:   new Dictionary<string, string> { { "X-UUID", Utils.GetUUID() } }
@@ -100,7 +102,7 @@
                 if (_secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
-                    resp = Encoding.UTF8.GetString(_algo.CreateDecryptor().TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
+                    resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
                 }
 
                 obj = JsonConvert.DeserializeObject<DynamicDictionary>(resp);
@@ -117,6 +119,31 @@
             obj.Time = sw.Elapsed.TotalSeconds;
             result = obj;
             return true;
+        }
+
+        /// <summary>
+        /// Initiates a Diffie-Hellman key exchange with the remote server.
+        /// </summary>
+        /// <returns>Mutual private key.</returns>
+        public byte[] InitiateKeyExchange()
+        {
+            var rnd = new Random();
+            var bob = new Dictionary<char, BigInteger>();
+            
+            var p = BigInteger.Parse("183682834604905165125374810562602240615039986742318115450988359927262634871970663686082391591571623296491813572206401878197607636471172058124265110443906080939593540162506781839597172463988741080705606095776622355713840538525653792028784953754106620637366292156337482013251106492137087709430744178761665741403");
+            var g = BigInteger.Parse("61227611534968388375124936854200746871679995580772705150329453309087544957323554562027463863857207765497271190735467292732535878823724019374755036814635360313197846720835593946532390821329580360235202031925540785237946846175217930676261651251368873545788764052112494004417035497379029236476914726253888580467");
+
+            bob['x'] = (BigInteger)rnd.Next(int.MaxValue) * (BigInteger)rnd.Next(int.MaxValue) + 2;
+            bob['a'] = BigInteger.ModPow(g, bob['x'], p);
+
+            var alice = Instance.ExchangeKeys(Convert.ToBase64String(Encoding.ASCII.GetBytes(bob['a'].ToString())));
+
+            bob['b'] = BigInteger.Parse(Encoding.ASCII.GetString(Convert.FromBase64String(alice.PublicKey)));
+            bob['k'] = BigInteger.ModPow(bob['b'], bob['x'], p);
+
+            var key = new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID())).ComputeHash(Encoding.ASCII.GetBytes(bob['k'].ToString()));
+
+            return key;
         }
     }
 }
