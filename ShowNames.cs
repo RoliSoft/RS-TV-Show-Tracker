@@ -1,6 +1,5 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -18,6 +17,7 @@
                 { "House, M.D.", "House" },
                 { "Battlestar Galactica (2003)", "Battlestar Galactica" },
                 { "Supernatural (2005)", "Supernatural" },
+                { "Tosh.0", "Tosh.0" },
                 { "The Universe", "The Universe" },
                 { "The Simpsons", "The Simpsons" } // this is NOT an unnecessary item. without this, the regex would run and the "The " would be removed.
             };
