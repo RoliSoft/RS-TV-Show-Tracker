@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
         Title="Add new TV show" Height="186" Width="531" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/plus.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
-        <TabControl Margin="10,10" Name="tabControl">
+        <TabControl Margin="10,10" Name="tabControl" FocusVisualStyle="{x:Null}">
             <TabControl.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
-            <TabItem Header="Add a TV show" Name="tabItem1">
+            <TabItem Header="Add a TV show" Name="tabItem1" KeyboardNavigation.IsTabStop="False">
                 <Grid Name="addGrid">
                     <Label Content="Title:" FontSize="18" Margin="6,1,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                    <TextBox Height="28" HorizontalAlignment="Left" Margin="95,6,0,0" Name="textBox" VerticalAlignment="Top" Width="393" Text="" FontFamily="Consolas" FontSize="18" />
+                    <TextBox Height="28" HorizontalAlignment="Left" Margin="95,6,0,0" Name="textBox" VerticalAlignment="Top" Width="393" Text="" FontFamily="Consolas" FontSize="18" KeyUp="TextBoxKeyUp" />
                     <Label Content="Database:" FontSize="18" Margin="5,37,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <ComboBox Margin="95,40,0,0" Name="comboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="393" FontSize="18">
                         <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
@@ -22,9 +22,9 @@
                         <!--<ComboBoxItem Content="Experimental Features" IsEnabled="False" />
                         <ComboBoxItem Content="Generate list based on download links" Margin="10,0" />-->
                     </ComboBox>
+                    <CheckBox Content="Mark all aired episodes as seen" FontSize="15" HorizontalAlignment="Left" Margin="11,81,0,0" Name="markCheckBox" IsChecked="True" VerticalAlignment="Top" />
                     <Button Content="Search" Height="23" HorizontalAlignment="Left" Margin="413,77,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
                     <ProgressBar Height="15" HorizontalAlignment="Right" Margin="0,-26,-5,0" Name="progressBar" VerticalAlignment="Top" Width="75" Visibility="Collapsed" IsIndeterminate="True" />
-                    <CheckBox Content="Mark all aired episodes as seen" FontSize="15" HorizontalAlignment="Left" Margin="11,81,0,0" Name="markCheckBox" IsChecked="True" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
         </TabControl>

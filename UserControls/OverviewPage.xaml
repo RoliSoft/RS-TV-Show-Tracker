@@ -40,40 +40,20 @@
             </ListView.View>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Play episode" Click="PlayEpisodeClick">
+                    <MenuItem Header="Play latest episode" Click="PlayEpisodeClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/play.png" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Play next unseen" Click="PlayNextEpisodeClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.PlayNextVisible}">
+                    <MenuItem Header="Mark latest as seen" Click="SeenClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.MarkAsSeenVisible}">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/eye.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Play next unseen episode" Click="PlayNextEpisodeClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.PlayNextVisible}">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/next.png" />
                         </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Mark episode">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/tag.png" />
-                        </MenuItem.Icon>
-                        <MenuItem Header="Seen" Click="SeenClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.MarkAsSeenVisible}">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/eye.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Favorite">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/heart.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Good">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/smiley.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Bad">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/sad.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
                     </MenuItem>
                     <MenuItem Header="View episode list" Click="EpisodeListClick">
                         <MenuItem.Icon>

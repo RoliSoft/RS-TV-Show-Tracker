@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
         Title="Send feedback" Height="416" Width="615" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/smiley.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
-        <TabControl Margin="10,10" Name="tabControl">
+        <TabControl Margin="10,10" Name="tabControl" FocusVisualStyle="{x:Null}">
             <TabControl.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
-            <TabItem Header="Send feedback" Name="tabItem1">
+            <TabItem Header="Send feedback" Name="tabItem1" KeyboardNavigation.IsTabStop="False">
                 <Grid>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
