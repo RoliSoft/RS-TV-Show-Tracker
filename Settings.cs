@@ -3,8 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Provides access to the default JSON settings file.
@@ -15,7 +17,7 @@
         /// Gets or sets the key-value container.
         /// </summary>
         /// <value>The key-value container.</value>
-        public static Dictionary<string, string> Keys { get; set; }
+        public static Dictionary<string, object> Keys { get; set; }
 
         private static readonly string _jsFile;
 
@@ -39,16 +41,16 @@
 
             try
             {
-                Keys = JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                Keys = JsonConvert.DeserializeObject<Dictionary<string, object>>(
                     File.ReadAllText(_jsFile)
                 );
             }
             catch
             {
-                Keys = new Dictionary<string, string>();
+                Keys = new Dictionary<string, object>();
             }
         }
-        
+
         /// <summary>
         /// Retrieves the key from the XML settings.
         /// </summary>
@@ -56,10 +58,58 @@
         /// <returns>Stored value or empty string.</returns>
         public static string Get(string key)
         {
-            string value;
+            return Get<string>(key);
+        }
+
+        /// <summary>
+        /// Retrieves the key from the XML settings casting it to type <c>T</c>.
+        /// </summary>
+        /// <typeparam name="T">The type in which to return the setting's value.</typeparam>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value to return if key was not found.</param>
+        /// <returns>Stored value or default type value.</returns>
+        public static T Get<T>(string key, T defaultValue = default(T))
+        {
+            object value;
             return Keys.TryGetValue(key, out value)
-                   ? value
-                   : string.Empty;
+                   ? (T)value
+                   : defaultValue;
+        }
+
+        /// <summary>
+        /// Retrieves the list from the XML settings.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns>Stored value or list with 0 items.</returns>
+        public static string[] GetList(string key)
+        {
+            return GetList<string>(key);
+        }
+
+        /// <summary>
+        /// Retrieves the list from the XML settings casting it to type <c>T[]</c>.
+        /// </summary>
+        /// <typeparam name="T">The list type.</typeparam>
+        /// <param name="key">The key.</param>
+        /// <returns>Stored value or list with 0 items.</returns>
+        public static T[] GetList<T>(string key)
+        {
+            // This is tricky, because the object reference is returned from the array for
+            // the specified key, so when ToList() or similar functions are called later in the
+            // code, the object will change in the Keys dictionary too! This makes the type of
+            // the array dynamic and hilarity ensues: we'll have to detect the type and
+            // cast it back to T[] every. fucking. time.
+
+            object value;
+            return Keys.TryGetValue(key, out value)
+                   ? value is T[]
+                     ? (T[])value
+                     : value is List<T>
+                       ? ((List<T>)value).ToArray()
+                       : value is JArray
+                         ? ((JArray)value).Values<T>().ToArray()
+                         : null
+                   : new T[0];
         }
 
         /// <summary>
@@ -67,7 +117,7 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void Set(string key, string value)
+        public static void Set<T>(string key, T value)
         {
             Keys[key] = value;
             Save();

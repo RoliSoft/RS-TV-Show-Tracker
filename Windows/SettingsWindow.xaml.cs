@@ -57,14 +57,14 @@
 
             dlPathTextBox.Text      = Settings.Get("Download Path");
             torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
-            processTextBox.Text     = Settings.Get("Processes to Monitor");
+            processTextBox.Text     = string.Join(",", Settings.GetList("Processes to Monitor"));
 
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
                 startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
             }
 
-            showUnhandledErrors.IsChecked = Settings.Get("Show Unhandled Errors") == "True";
+            showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
             
             // downloads
 
@@ -76,12 +76,12 @@
                        .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
                        .ToList();
 
-            _trackers = Settings.Get("Tracker Order").Split(',').ToList();
+            _trackers = Settings.GetList("Tracker Order").ToList();
             _trackers.AddRange(_engines
                                .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                .Select(engine => engine.Name));
 
-            _excludes = Settings.Get("Tracker Exclusions").Split(',').ToList();
+            _excludes = Settings.GetList("Tracker Exclusions").ToList();
 
             foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
             {
@@ -176,7 +176,7 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void ProcessTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            Settings.Set("Processes to Monitor", processTextBox.Text);
+            Settings.Set("Processes to Monitor", processTextBox.Text.Trim(',').Split(','));
         }
 
         /// <summary>
@@ -213,7 +213,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ShowUnhandledErrorsChecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Show Unhandled Errors", "True");
+            Settings.Set("Show Unhandled Errors", true);
         }
 
         /// <summary>
@@ -223,7 +223,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ShowUnhandledErrorsUnchecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Show Unhandled Errors", "False");
+            Settings.Set("Show Unhandled Errors", false);
         }
         #endregion
 
@@ -303,7 +303,7 @@
         /// </summary>
         public void SaveExclusions()
         {
-            Settings.Set("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+            Settings.Set("Tracker Exclusions", _excludes);
         }
 
         /// <summary>
@@ -343,7 +343,7 @@
         /// </summary>
         public void SaveOrder()
         {
-            Settings.Set("Tracker Order", _trackers.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+            Settings.Set("Tracker Order", _trackers);
         }
 
         /// <summary>

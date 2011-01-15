@@ -165,7 +165,7 @@
 
             if (reload || _trackers == null)
             {
-                _trackers = Settings.Get("Tracker Order").Split(',').ToList();
+                _trackers = Settings.GetList("Tracker Order").ToList();
                 _trackers.AddRange(SearchEngines
                                    .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                    .Select(engine => engine.Name));
@@ -178,7 +178,7 @@
 
             if (reload || _excludes == null)
             {
-                _excludes = Settings.Get("Tracker Exclusions").Split(',').ToList();
+                _excludes = Settings.GetList("Tracker Exclusions").ToList();
             }
 
             if (reload || availableEngines.Items.Count == 0)
@@ -251,7 +251,7 @@
         /// </summary>
         public void SaveExclusions()
         {
-            Settings.Set("Tracker Exclusions", _excludes.Aggregate(string.Empty, (current, engine) => current + (engine + ",")).Trim(','));
+            Settings.Set("Tracker Exclusions", _excludes);
         }
 
         /// <summary>

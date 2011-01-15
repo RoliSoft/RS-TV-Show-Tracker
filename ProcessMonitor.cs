@@ -55,12 +55,13 @@
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(Settings.Get("Processes to Monitor")))
+            var procs = Settings.GetList("Processes to Monitor");
+
+            if (procs == null || procs.Length == 0)
             {
                 return;
             }
 
-            var procs = Settings.Get("Processes to Monitor").Trim(',').Split(',');
             var files = GetHandleList(procs);
             var shows = Database.Query("select showid, name from tvshows order by rowid asc");
 

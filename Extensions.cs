@@ -133,18 +133,6 @@
                    ? (T)attrs.First()
                    : default(T);
         }
-
-        /// <summary>
-        /// Casts the specified object to the specified type.
-        /// </summary>
-        /// <typeparam name="T">The type to cast to.</typeparam>
-        /// <param name="obj">The object which will be casted..</param>
-        /// <returns>Object casted to type T.</returns>
-        public static T Convert<T>(this object obj)
-        {
-            // should be Cast<>() but then it'd override System.Linq.Enumerable.Cast<>() 
-            return (T)obj;
-        }
         #endregion
 
         #region Type

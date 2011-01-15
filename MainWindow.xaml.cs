@@ -571,7 +571,7 @@
         /// <param name="ex">The exception.</param>
         public void HandleUnexpectedException(Exception ex)
         {
-            var show = Settings.Get("Show Unhandled Errors") == "True";
+            var show = Settings.Get<bool>("Show Unhandled Errors");
             var sb   = new StringBuilder();
 
         parseException:
