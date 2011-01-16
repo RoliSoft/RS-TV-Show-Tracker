@@ -135,12 +135,20 @@
                     guide = new TVDB();
                     break;
 
+                case "System.Windows.Controls.StackPanel":
+                    guide = new TVcom();
+                    break;
+
                 case "EPGuides - TVRage":
                     guide = new EPGuides("tvrage.com");
                     break;
 
                 case "EPGuides - TV.com":
                     guide = new EPGuides("tv.com");
+                    break;
+
+                case "Generate list based on download links":
+                    guide = new Guess();
                     break;
             }
 

@@ -9,6 +9,8 @@
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
+    using HtmlAgilityPack;
+
     /// <summary>
     /// Provides extension methods for various third party classes.
     /// </summary>
@@ -468,6 +470,33 @@
         public static string GetValue<T>(this T doc, string name) where T : XContainer
         {
             try   { return doc.Descendants(name).First().Value.Trim(); }
+            catch { return null; }
+        }
+        #endregion
+
+        #region HtmlNode
+        /// <summary>
+        /// Extension method to HtmlNode to get the value of a tag or null if it doesn't exist.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <param name="xpath">The xpath to the tag.</param>
+        /// <returns>Value or null.</returns>
+        public static string GetValue(this HtmlNode doc, string xpath)
+        {
+            try   { return doc.SelectSingleNode(xpath).InnerText; }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Extension method to HtmlNode to get the attribute of a tag or null if it doesn't exist.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <param name="xpath">The xpath to the tag.</param>
+        /// <param name="attribute">The name of the attribute.</param>
+        /// <returns>Value or null.</returns>
+        public static string GetValue(this HtmlNode doc, string xpath, string attribute)
+        {
+            try   { return doc.SelectSingleNode(xpath).GetAttributeValue(attribute, string.Empty); }
             catch { return null; }
         }
         #endregion

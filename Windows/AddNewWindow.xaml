@@ -16,11 +16,17 @@
                         <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
                         <ComboBoxItem Content="TVRage" Margin="10,0" Selector.IsSelected="True" />
                         <ComboBoxItem Content="The TVDB" Margin="10,0" />
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="TV.com " Padding="0" />
+                                <Label Content="beta" Foreground="#50000000" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
                         <ComboBoxItem Content="Episode Listing Only" IsEnabled="False" />
                         <ComboBoxItem Content="EPGuides - TVRage" Margin="10,0" />
                         <ComboBoxItem Content="EPGuides - TV.com" Margin="10,0" />
-                        <!--<ComboBoxItem Content="Experimental Features" IsEnabled="False" />
-                        <ComboBoxItem Content="Generate list based on download links" Margin="10,0" />-->
+                        <ComboBoxItem Content="Experimental Features" IsEnabled="False" />
+                        <ComboBoxItem Content="Generate list based on download links" Margin="10,0" />
                     </ComboBox>
                     <CheckBox Content="Mark all aired episodes as seen" FontSize="15" HorizontalAlignment="Left" Margin="11,81,0,0" Name="markCheckBox" IsChecked="True" VerticalAlignment="Top" />
                     <Button Content="Search" Height="23" HorizontalAlignment="Left" Margin="413,77,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
