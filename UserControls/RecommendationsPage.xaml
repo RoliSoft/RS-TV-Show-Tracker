@@ -21,13 +21,31 @@
                         <GridViewColumnHeader Content="Show name" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Grid MaxWidth="450">
+                                <Grid MaxWidth="450" ToolTipOpening="ShowNameToolTipOpening" ToolTipService.InitialShowDelay="1000" ToolTipService.BetweenShowDelay="1000" ToolTipService.ShowDuration="600000">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition MinWidth="20" Width="*" />
                                         <ColumnDefinition Width="300" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock FontWeight="Bold" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock FontWeight="Light" Text="{Binding Tagline}" ToolTip="{Binding Tagline}" TextTrimming="CharacterEllipsis" Grid.Column="2" Padding="5,0,0,0" />
+                                    <TextBlock FontWeight="Light" Text="{Binding Tagline}" TextTrimming="CharacterEllipsis" Grid.Column="2" Padding="5,0,0,0" />
+                                    <Grid.ToolTip>
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding Picture}" MaxHeight="80" MaxWidth="128" VerticalAlignment="Top" Margin="0,3,5,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="0,3,0,3" />
+                                                    <TextBlock Text="{Binding Info}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" VerticalAlignment="Top" Margin="0,3,5,0" />
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock FontWeight="Bold" Margin="0,3,0,3">Summary:</TextBlock>
+                                                    <TextBlock Text="{Binding Description}" Width="400" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid.ToolTip>
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

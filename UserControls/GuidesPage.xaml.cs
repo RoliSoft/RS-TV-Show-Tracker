@@ -305,10 +305,6 @@
                         Picture = show["pic"]
                     });
             }
-
-            //var guide = Database.Query("select guide from tvshows where name = ?", comboBox.SelectedValue.ToString())[0];
-            //var name = Guide.ToString(guide["guide"]);
-            //epgSourceLogo.Text = (name != String.Empty ? "© " : String.Empty) + name;
         }
         #endregion
 

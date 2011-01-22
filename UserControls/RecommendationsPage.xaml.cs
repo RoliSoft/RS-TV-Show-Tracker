@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Globalization;
     using System.Linq;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
@@ -230,6 +232,90 @@
         {
             if (listView.SelectedIndex == -1) return;
             Utils.Run("http://www.youtube.com/results?search_query=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name) + "+promo");
+        }
+        #endregion
+
+        #region Other events
+        /// <summary>
+        /// Handles the ToolTipOpening event of the ShowName control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.ToolTipEventArgs"/> instance containing the event data.</param>
+        private void ShowNameToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+            string show;
+            RecommendedShow item;
+
+            try
+            {
+                show = ((sender as Grid).Children[0] as TextBlock).Text;
+                item = RecommendationsListViewItemCollection.Where(rec => rec.Name == show).First();
+            }
+            catch
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.Description))
+            {
+                return;
+            }
+
+            var info = REST.Instance.GetShowInfo(show);
+
+            try
+            {
+                item.Name        = (string)info.Title;
+                item.Description = (string)info.Description;
+                item.Picture     = (string)info.Cover;
+
+                if (!string.IsNullOrWhiteSpace((string)info.Genre))
+                {
+                    item.Info = info.Genre + " show; ";
+                }
+
+                if (!string.IsNullOrWhiteSpace((string)info.Runtime))
+                {
+                    item.Info += info.Runtime + " minutes";
+                }
+
+                if (!string.IsNullOrWhiteSpace(item.Info))
+                {
+                    item.Info += Environment.NewLine;
+                }
+
+                var airs = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace((string)info.Airday))
+                {
+                    airs += " " + (string)info.Airday;
+                }
+
+                if (!string.IsNullOrWhiteSpace((string)info.Airtime))
+                {
+                    airs += " at " + (string)info.Airtime;
+                }
+
+                if (!string.IsNullOrWhiteSpace((string)info.Network))
+                {
+                    airs += " on " + (string)info.Network;
+                }
+
+                if (!string.IsNullOrWhiteSpace(airs))
+                {
+                    item.Info += "Airs" + airs + Environment.NewLine;
+                }
+
+                if (!string.IsNullOrWhiteSpace((string)info.Started))
+                {
+                    item.Info += "First episode aired on " + double.Parse((string)info.Started).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + Environment.NewLine;
+                }
+
+                item.Info += (bool)info.Airing
+                             ? "Returning Series"
+                             : "Canceled/Ended";
+            }
+            catch { }
         }
         #endregion
     }

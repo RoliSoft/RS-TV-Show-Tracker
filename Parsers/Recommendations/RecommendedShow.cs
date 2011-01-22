@@ -5,6 +5,10 @@
     /// </summary>
     public class RecommendedShow
     {
+        /*
+         * ListView
+         */
+
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
@@ -58,5 +62,27 @@
         /// </summary>
         /// <value>The IMDb page.</value>
         public string Imdb { get; set; }
+
+        /*
+         * ToolTip
+         */
+
+        /// <summary>
+        /// Gets or sets the description. This is only set when the tooltip opens.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the info. This is only set when the tooltip opens.
+        /// </summary>
+        /// <value>The info.</value>
+        public string Info { get; set; }
+
+        /// <summary>
+        /// Gets or sets the picture. This is only set when the tooltip opens.
+        /// </summary>
+        /// <value>The picture.</value>
+        public string Picture { get; set; }
     }
 }
