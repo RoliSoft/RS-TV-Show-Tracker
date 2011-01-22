@@ -528,6 +528,7 @@
                         updateOuter.Visibility  = Visibility.Visible;
                         updateToolTipTitle.Text = "Version {0} is available!".FormatWith((string)upd.Version);
                         updateToolTipText.Text  = (string)upd.Description;
+                        update.Tag              = (string)upd.URL;
                     }));
             }
         }
@@ -559,7 +560,7 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
         private void UpdateMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            Utils.Run(Path.Combine(Signature.FullPath, "update.exe"));
+            Utils.Run(update.Tag as string);
             NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
         }
         #endregion

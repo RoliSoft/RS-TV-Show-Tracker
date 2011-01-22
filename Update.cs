@@ -194,8 +194,14 @@
                 case "TVDB":
                     return new TVDB();
 
+                case "TVcom":
+                    return new TVcom();
+
                 case "EPGuides":
                     return new EPGuides();
+
+                case "Guess":
+                    return new Guess();
 
                 default:
                     throw new NotSupportedException();
