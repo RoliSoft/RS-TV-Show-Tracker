@@ -18,6 +18,7 @@
                 { "Battlestar Galactica (2003)", "Battlestar Galactica" },
                 { "Supernatural (2005)", "Supernatural" },
                 { "Tosh.0", "Tosh.0" },
+                { "Sci-Fi Science: Physics of the Impossible", "Sci Fi Science" },
                 { "The Universe", "The Universe" },
                 { "The Simpsons", "The Simpsons" } // this is NOT an unnecessary item. without this, the regex would run and the "The " would be removed.
             };

@@ -51,6 +51,16 @@
                                 </TextBlock>
                             </StackPanel>
 
+                            <StackPanel Margin="10,3,10,5" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <CheckBox Content=" Convert times to your local timezone" Name="convertTimezone" Checked="ConvertTimezoneChecked" Unchecked="ConvertTimezoneUnchecked" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                                <TextBlock TextWrapping="Wrap" Margin="0,0,0,5" Name="currentTimezone" />
+                                <TextBlock TextWrapping="Wrap" Margin="0">
+                                    If you check this, the software will automatically convert the dates and times from the database to your local timezone.<LineBreak />
+                                    If the timezone difference is really huge, for example you live in Europe, without this timezone correction, the application will incorrectly notify you a day before an episode is aired.<LineBreak />
+                                    <Bold>After changing this option, do a database update to apply the timezone correction to the dates!</Bold>
+                                </TextBlock>
+                            </StackPanel>
+
                             <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                                 <CheckBox Content=" Show unhandled errors" Name="showUnhandledErrors" Checked="ShowUnhandledErrorsChecked"  Unchecked="ShowUnhandledErrorsUnchecked"  FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
                                 <TextBlock TextWrapping="Wrap" Margin="0">

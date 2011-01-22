@@ -281,13 +281,21 @@
 
         /// <summary>
         /// Extension method to DateTime to convert the date to local time zone.
+        /// If the "Convert Timezone" setting is false, the function won't convert.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="source">The time zone of the specified date.</param>
         /// <returns>DateTime in local timezone.</returns>
         public static DateTime ToLocalTimeZone(this DateTime date, string source = "Central Standard Time")
         {
-            return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local);
+            if (Settings.Get("Convert Timezone", true))
+            {
+                return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local);
+            }
+            else
+            {
+                return date;
+            }
         }
 
         /// <summary>

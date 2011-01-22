@@ -63,12 +63,12 @@
                 for (var e = 1; e <= enr; e++)
                 {
                     show.Episodes.Add(new TVShow.Episode
-                    {
-                        Season  = s,
-                        Number  = e,
-                        Title   = "Season " + s + ", Episode " + e,
-                        Airdate = new DateTime(DateTime.Now.Year - (snr - s), 1, 1, 0, 0, 0, 0) // I take the guesswork waaay too far...
-                    });
+                        {
+                            Season  = s,
+                            Number  = e,
+                            Title   = "Season " + s + ", Episode " + e,
+                            Airdate = new DateTime(DateTime.Now.Year - (snr - s), 1, 1, 0, 0, 0, 0)
+                        });
                 }
             }
 

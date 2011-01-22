@@ -64,6 +64,10 @@
                 startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
             }
 
+            convertTimezone.IsChecked = Settings.Get("Convert Timezone", true);
+            currentTimezone.Text      = "Your current timezone is " + TimeZoneInfo.Local.DisplayName + ".\r\n"
+                                      + "Your difference from Central Standard Time is {0} hours.".FormatWith(TimeZoneInfo.Local.BaseUtcOffset.Add(TimeSpan.FromHours(TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time").BaseUtcOffset.TotalHours * -1)).TotalHours);
+
             showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
             
             // downloads
@@ -205,6 +209,25 @@
             }
         }
 
+        /// <summary>
+        /// Handles the Checked event of the convertTimezone control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ConvertTimezoneChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Convert Timezone", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the convertTimezone control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ConvertTimezoneUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Convert Timezone", false);
+        }
 
         /// <summary>
         /// Handles the Checked event of the showUnhandledErrors control.

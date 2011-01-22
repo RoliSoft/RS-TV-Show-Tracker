@@ -8,21 +8,6 @@
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
 
     /// <summary>
-    /// Occurs when the update is done.
-    /// </summary>
-    public delegate void UpdateDone();
-
-    /// <summary>
-    /// Occurs when the update has encountered an error.
-    /// </summary>
-    public delegate void UpdateError(string message, Exception exception, bool fatalToShow, bool fatalToWholeUpdate);
-
-    /// <summary>
-    /// Occurs when the progress has changed on the update.
-    /// </summary>
-    public delegate void UpdateProgressChanged(string show, double percentage);
-
-    /// <summary>
     /// Provides methods to keep the database up-to-date.
     /// </summary>
     public class Updater
