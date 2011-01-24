@@ -226,7 +226,6 @@
             // insert showdata fields
             Database.ShowData(showid, "grabber", guide.GetType().Name);
             Database.ShowData(showid, "genre",   tv.Genre);
-            Database.ShowData(showid, "actors",  tv.Actors);
             Database.ShowData(showid, "descr",   tv.Description);
             Database.ShowData(showid, "cover",   tv.Cover);
             Database.ShowData(showid, "airing",  tv.Airing.ToString());
@@ -289,6 +288,9 @@
 
             // fire data change event
             MainWindow.Active.DataChanged();
+
+            // asynchronously update lab.rolisoft.net's cache
+            Updater.UpdateRemoteCache(new Tuple<string, string>(guide.GetType().Name, id), tv);
 
             // show this on another thread so the control enabler can run
             new Task(() => new TaskDialog

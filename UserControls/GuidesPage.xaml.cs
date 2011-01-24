@@ -105,6 +105,11 @@
             {
                 Refresh();
             }
+
+            if (comboBox.SelectedIndex == -1)
+            {
+                emptyPageImage.Visibility = emptyPageMessage.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -150,6 +155,7 @@
             // the dropdown's background is transparent and if it opens while the guide listview
             // is populated, then you won't be able to read the show names due to the mess
 
+            emptyPageImage.Visibility = emptyPageMessage.Visibility = Visibility.Collapsed;
             tabControl.Visibility = statusLabel.Visibility = Visibility.Hidden;
         }
 
@@ -170,6 +176,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            emptyPageImage.Visibility = emptyPageMessage.Visibility = Visibility.Collapsed;
+
             showGeneral.Visibility = Visibility.Hidden;
             GuideListViewItemCollection.Clear();
 
@@ -197,20 +205,6 @@
                       : new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative);
             showGeneralCover.Source = new BitmapImage(pic, new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
             
-            /*
-            var tvdb = Database.ShowData(id, "TVDB.id");
-            if (string.IsNullOrWhiteSpace(tvdb))
-            {
-                try
-                {
-                    tvdb = new TVDB().GetID(comboBox.SelectedValue.ToString());
-                    Database.ShowData(id, "TVDB.id", tvdb);
-                } catch { }
-            }
-            showGeneralCover.Source = string.IsNullOrWhiteSpace(tvdb)
-                                      ? new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative))
-                                      : new BitmapImage(new Uri(Utils.Coralify("http://thetvdb.com/banners/_cache/posters/" + tvdb + "-1.jpg")), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
-            */
             showGeneralName.Text = comboBox.SelectedValue.ToString();
 
             showGeneralSub.Text = string.Empty;
@@ -226,36 +220,31 @@
                 showGeneralSub.Text += runtime + " minutes";
             }
 
-            showGeneralSub2.Text = "Airs";
+            var airs = string.Empty;
             string airday;
             if ((airday = Database.ShowData(id, "airday")) != string.Empty)
             {
-                showGeneralSub2.Text += " " + airday;
+                airs += " " + airday;
             }
 
             string airtime;
             if ((airtime = Database.ShowData(id, "airtime")) != string.Empty)
             {
-                showGeneralSub2.Text += " at " + airtime;
+                airs += " at " + airtime;
             }
 
             string network;
             if ((network = Database.ShowData(id, "network")) != string.Empty)
             {
-                showGeneralSub2.Text += " on " + network;
+                airs += " on " + network;
             }
 
-            if ((airday + airtime + network) == string.Empty)
+            if ((airday + airtime + network) != string.Empty)
             {
-                showGeneralSub2.Text = string.Empty;
+                showGeneralSub.Text += Environment.NewLine + "Airs" + airs;
             }
 
-            showGeneralActors.Text = string.Empty;
-            string actors;
-            if ((actors = Database.ShowData(id, "actors")) != string.Empty)
-            {
-                showGeneralActors.Text = actors;
-            }
+            showGeneralSub.Text += Environment.NewLine + "Episode listing provided by " + Database.ShowData(id, "grabber");
 
             showGeneralDescr.Text = string.Empty;
             string descr;

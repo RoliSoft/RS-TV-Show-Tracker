@@ -21,12 +21,6 @@
         public string Genre { get; set; }
 
         /// <summary>
-        /// Gets or sets the actors of the show, comma separated.
-        /// </summary>
-        /// <value>The actors.</value>
-        public string Actors { get; set; }
-
-        /// <summary>
         /// Gets or sets the description of the show.
         /// </summary>
         /// <value>The description.</value>

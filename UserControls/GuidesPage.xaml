@@ -50,6 +50,9 @@
         </Grid.RowDefinitions>
         <ComboBox Grid.Row="0" Height="23" Margin="0,0,0,0" Name="comboBox" VerticalAlignment="Top" Background="Transparent" Foreground="White" FontWeight="Bold" SelectionChanged="ComboBoxSelectionChanged" DropDownOpened="ComboBoxDropDownOpened" DropDownClosed="ComboBoxDropDownClosed" />
 
+        <Image Name="emptyPageImage" Source="/RSTVShowTracker;component/Images/arrow-090.png" Margin="10,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"  Height="32" Width="32" />
+        <TextBlock Name="emptyPageMessage" FontFamily="Calibri" FontSize="16" Margin="50,35,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" Text="Select a show from the menu above to view its information and episode listing." />
+        
         <TabControl Grid.Row="0" Name="tabControl" ContentTemplate="{StaticResource TabTemplate}" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0">
 
             <!-- general tab -->
@@ -63,11 +66,7 @@
                     <Image Source="/RSTVShowTracker;component/Images/case.png" Height="300" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10,0,0" />
                     <TextBlock Name="showGeneralName" FontFamily="Calibri" FontWeight="Bold" FontSize="29" Margin="270,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
                     <TextBlock Name="showGeneralSub" FontWeight="Bold" Margin="270,80,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
-                    <TextBlock Name="showGeneralSub2" FontWeight="Bold" Margin="270,95,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
-                    <ScrollViewer Margin="270,120,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" Width="580" Height="32">
-                        <TextBlock Name="showGeneralActors" TextWrapping="Wrap" Foreground="White" />
-                    </ScrollViewer>
-                    <ScrollViewer Margin="270,161,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" Width="580" Height="63">
+                    <ScrollViewer Margin="270,132,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" Width="580" Height="93">
                         <TextBlock Name="showGeneralDescr" TextWrapping="Wrap" Foreground="White" />
                     </ScrollViewer>
                     <TextBlock Text="Last episode:" FontWeight="Bold" Margin="276,233,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Calibri" FontSize="20" Foreground="White" />

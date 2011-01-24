@@ -25,7 +25,6 @@
                 {
                     Title       = info.GetValue("SeriesName"),
                     Genre       = info.GetValue("Genre").Trim('|').Replace("|", ", "),
-                    Actors      = info.GetValue("Actors").Trim('|').Replace("|", ", "),
                     Description = info.GetValue("Overview"),
                     Cover       = "http://thetvdb.com/banners/_cache/" + info.GetValue("poster"),
                     Airing      = !Regex.IsMatch(info.GetValue("Status"), "(Canceled|Ended)"),

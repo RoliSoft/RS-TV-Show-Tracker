@@ -67,7 +67,7 @@
         {
             get
             {
-                return string.IsNullOrWhiteSpace(Summary) ? "Hidden" : "Visible";
+                return string.IsNullOrWhiteSpace(Summary) ? "Collapsed" : "Visible";
             }
         }
 
@@ -79,7 +79,7 @@
         {
             get
             {
-                return string.IsNullOrWhiteSpace(Picture) ? "Hidden" : "Visible";
+                return string.IsNullOrWhiteSpace(Picture) ? "Collapsed" : "Visible";
             }
         }
     }

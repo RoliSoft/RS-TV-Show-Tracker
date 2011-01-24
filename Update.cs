@@ -7,7 +7,6 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Windows;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
@@ -103,7 +102,6 @@
 
                 // update showdata fields
                 Database.ShowData(r["showid"], "genre",   tv.Genre);
-                Database.ShowData(r["showid"], "actors",  tv.Actors);
                 Database.ShowData(r["showid"], "descr",   tv.Description);
                 Database.ShowData(r["showid"], "cover",   tv.Cover);
                 Database.ShowData(r["showid"], "airing",  tv.Airing.ToString());
@@ -221,8 +219,13 @@
         /// </summary>
         /// <param name="guide">The guide name and show ID on it.</param>
         /// <param name="tv">The TV show.</param>
-        private static void UpdateRemoteCache(Tuple<string, string> guide, TVShow tv)
+        public static void UpdateRemoteCache(Tuple<string, string> guide, TVShow tv)
         {
+            if (guide.Item1 == "Guess")
+            {
+                return;
+            }
+
             new Thread(() => { try
             {
                 var info = new
