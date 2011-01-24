@@ -31,7 +31,7 @@
                                     <Grid.ToolTip>
                                         <StackPanel Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="{Binding Picture}" MaxHeight="80" MaxWidth="128" VerticalAlignment="Top" Margin="0,3,5,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                <Image Source="{Binding Picture}" MaxHeight="92" MaxWidth="150" VerticalAlignment="Top" Margin="0,3,5,0" RenderOptions.BitmapScalingMode="HighQuality" />
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="0,3,0,3" />
                                                     <TextBlock Text="{Binding Info}" />
@@ -41,8 +41,13 @@
                                                 <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" VerticalAlignment="Top" Margin="0,3,5,0" />
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBlock FontWeight="Bold" Margin="0,3,0,3">Summary:</TextBlock>
-                                                    <TextBlock Text="{Binding Description}" Width="400" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Description}" Width="400" TextWrapping="Wrap" MaxHeight="195" />
                                                 </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="/RSTVShowTracker;component/Images/next.png" Height="16" Width="16" VerticalAlignment="Top" Margin="0,3,5,0" />
+                                                <TextBlock Margin="0,3,0,3">Information provided by </TextBlock>
+                                                <TextBlock Text="{Binding InfoSource}" FontWeight="Bold" Margin="0,3,0,3" />
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid.ToolTip>

@@ -84,5 +84,11 @@
         /// </summary>
         /// <value>The picture.</value>
         public string Picture { get; set; }
+
+        /// <summary>
+        /// Gets or sets the information source. This is only set when the tooltip opens.
+        /// </summary>
+        /// <value>The information source.</value>
+        public string InfoSource { get; set; }
     }
 }

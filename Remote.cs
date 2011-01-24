@@ -20,6 +20,7 @@
 
         private readonly bool _secure;
         private readonly SymmetricAlgorithm _algo;
+        private byte[] _key;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="REST"/> class.
@@ -82,14 +83,17 @@
 
             try
             {
-                var key = _secure ? InitiateKeyExchange() : null;
+                if (_secure && _key == null)
+                {
+                    _key = InitiateKeyExchange();
+                }
 
                 var post = JsonConvert.SerializeObject(new { func = binder.Name, args });
 
                 if (_secure)
                 {
                     var tmp = Encoding.UTF8.GetBytes(post);
-                    post = Convert.ToBase64String(_algo.CreateEncryptor(key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
+                    post = Convert.ToBase64String(_algo.CreateEncryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
                 }
 
                 var resp = Utils.GetURL(
@@ -102,7 +106,7 @@
                 if (_secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
-                    resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
+                    resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
                 }
 
                 obj = JsonConvert.DeserializeObject<DynamicDictionary>(resp);

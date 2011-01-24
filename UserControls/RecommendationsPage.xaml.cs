@@ -5,7 +5,6 @@
     using System.Collections.ObjectModel;
     using System.Globalization;
     using System.Linq;
-    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
@@ -268,13 +267,19 @@
                 item.Name        = (string)info.Title;
                 item.Description = (string)info.Description;
                 item.Picture     = (string)info.Cover;
+                item.InfoSource  = (string)info.Source;
 
-                if (!string.IsNullOrWhiteSpace((string)info.Genre))
+                if (info.Genre != null && info.Genre.Count != 0)
                 {
-                    item.Info = info.Genre + " show; ";
+                    foreach (var genre in info.Genre)
+                    {
+                        item.Info += genre.Value + ", ";
+                    }
+
+                    item.Info = item.Info.TrimEnd(", ".ToCharArray()) + " show; ";
                 }
 
-                if (!string.IsNullOrWhiteSpace((string)info.Runtime))
+                if (info.Runtime != null && info.Runtime != 0)
                 {
                     item.Info += info.Runtime + " minutes";
                 }
@@ -284,16 +289,21 @@
                     item.Info += Environment.NewLine;
                 }
 
-                var airs = string.Empty;
-
-                if (!string.IsNullOrWhiteSpace((string)info.Airday))
+                if (info.Seasons != null && info.Episodes != null && info.Seasons != 0 && info.Episodes != 0)
                 {
-                    airs += " " + (string)info.Airday;
+                    item.Info += Utils.FormatNumber((int)info.Episodes, "episode") + " in " + Utils.FormatNumber((int)info.Seasons, "season") + "." + Environment.NewLine;
                 }
 
-                if (!string.IsNullOrWhiteSpace((string)info.Airtime))
+                var airs = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace((string)info.AirDay))
                 {
-                    airs += " at " + (string)info.Airtime;
+                    airs += " " + (string)info.AirDay;
+                }
+
+                if (!string.IsNullOrWhiteSpace((string)info.AirTime))
+                {
+                    airs += " at " + (string)info.AirTime;
                 }
 
                 if (!string.IsNullOrWhiteSpace((string)info.Network))
@@ -306,9 +316,9 @@
                     item.Info += "Airs" + airs + Environment.NewLine;
                 }
 
-                if (!string.IsNullOrWhiteSpace((string)info.Started))
+                if (info.Started != null && info.Started != 0)
                 {
-                    item.Info += "First episode aired on " + double.Parse((string)info.Started).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + Environment.NewLine;
+                    item.Info += "Started on " + ((double)info.Started).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + Environment.NewLine;
                 }
 
                 item.Info += (bool)info.Airing

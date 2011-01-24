@@ -2,7 +2,12 @@
 {
     using System;
     using System.Data.SQLite;
+    using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
+    using System.Windows;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
@@ -112,7 +117,7 @@
                 {
                     try
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
+                        /*Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
                                                       ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000),
                                                       r["showid"],
                                                       ep.Season,
@@ -122,13 +127,16 @@
                                                        : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                       ep.Title,
                                                       ep.Summary,
-                                                      ep.Picture);
+                                                      ep.Picture);*/
                     }
                     catch (Exception ex)
                     {
                         UpdateError.Fire(this, string.Format("Could not insert '{0} S{1:00}E{2:00}' into database.", r["name"], ep.Season, ep.Number), ex, false, false);
                     }
                 }
+
+                // asynchronously update lab.rolisoft.net's cache
+                UpdateRemoteCache(new Tuple<string, string>(gname, id), tv);
             }
 
             // commit the changes
@@ -206,6 +214,40 @@
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        /// <summary>
+        /// Sends metadata information about the TV show into lab.rolisoft.net cache.
+        /// </summary>
+        /// <param name="guide">The guide name and show ID on it.</param>
+        /// <param name="tv">The TV show.</param>
+        private static void UpdateRemoteCache(Tuple<string, string> guide, TVShow tv)
+        {
+            new Thread(() => { try
+            {
+                var info = new
+                    {
+                        tv.Title,
+                        tv.Description,
+                        Genre = (tv.Genre ?? string.Empty).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries),
+                        tv.Cover,
+                        Started = (long)tv.Episodes[0].Airdate.ToUnixTimestamp(),
+                        tv.Airing,
+                        tv.AirTime,
+                        tv.AirDay,
+                        tv.Network,
+                        tv.Runtime,
+                        Seasons  = tv.Episodes.Last().Season,
+                        Episodes = tv.Episodes.Count,
+                        Source   = guide.Item1,
+                        SourceID = guide.Item2
+                    };
+                var hash = BitConverter.ToString(new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID() + "\0" + Signature.Version)).ComputeHash(Encoding.UTF8.GetBytes(
+                    info.Title + info.Description + string.Join(string.Empty, info.Genre) + info.Cover + info.Started + (info.Airing ? "true" : "false") + info.AirTime + info.AirDay + info.Network + info.Runtime + info.Seasons + info.Episodes + info.Source + info.SourceID
+                ))).ToLower().Replace("-", string.Empty);
+                
+                REST.Instance.SetShowInfo(info, hash);
+            } catch { } }).Start();
         }
     }
 }
