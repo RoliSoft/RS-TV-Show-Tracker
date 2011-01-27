@@ -36,10 +36,6 @@
                    .Select(item => new RecommendedShow
                    {
                        Name      = item.Value,
-                       Tagline   = item.Attribute("tagline") != null ? item.Attribute("tagline").Value : item.Attribute("plot") != null ? item.Attribute("plot").Value : String.Empty,
-                       Runtime   = item.Attribute("runtime").Value + " minutes",
-                       Episodes  = "~" + item.Attribute("episodes").Value,
-                       Genre     = item.Attribute("genre").Value,
                        Score     = item.Attribute("score").Value,
                        Wikipedia = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " TV Series site:en.wikipedia.org"),
                        Epguides  = item.Attribute("epguides").Value,

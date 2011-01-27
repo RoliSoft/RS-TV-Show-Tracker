@@ -24,11 +24,6 @@
                    .Select(item => new RecommendedShow
                    {
                        Name      = item.Descendants("name").First().Value,
-                       Tagline   = item.Descendants("wTeaser").First().Value,
-                       Runtime   = "N/A",
-                       Episodes  = "N/A",
-                       Genre     = "N/A",
-                       Score     = "N/A",
                        Wikipedia = item.Descendants("wUrl").First().Value,
                        // since TasteKid doesn't give us EPGuides and IMDb, we need to improvise :)
                        Epguides  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"Titles & Air Dates Guide\" site:epguides.com"),

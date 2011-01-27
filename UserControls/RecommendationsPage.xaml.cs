@@ -5,6 +5,8 @@
     using System.Collections.ObjectModel;
     using System.Globalization;
     using System.Linq;
+    using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
@@ -166,25 +168,121 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void RecommendationDone(object sender, EventArgs<List<RecommendedShow>> e)
         {
-            Dispatcher.Invoke((Action)(() =>
-                {
-                    if (e.Data.Count != 0)
+            if (e.Data.Count != 0)
+            {
+                var shows = new List<string>();
+
+                Dispatcher.Invoke((Action)(() =>
                     {
-                        // unfortunately there's no AddRange() for ObservableCollection<T> :(
                         foreach (var show in e.Data)
                         {
                             RecommendationsListViewItemCollection.Add(show);
+                            shows.Add(show.Name);
                         }
+                    }));
+
+                SetStatus("Downloading data for " + Utils.FormatNumber(e.Data.Count, "show") + " from lab.rolisoft.net...", true);
+
+                new Thread(() =>
+                    {
+                        var infos = REST.Instance.GetMultipleShowInfo(shows);
+
+                        Dispatcher.Invoke((Action)(() =>
+                            {
+                                foreach (var show in RecommendationsListViewItemCollection)
+                                {
+                                    try
+                                    {
+                                        if (infos[show.Name].Error != null)
+                                        {
+                                            continue;
+                                        }
+
+                                        show.Tagline     = Regex.Replace((string)infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
+                                        show.Description = (string)infos[show.Name].Description;
+                                        show.Picture     = (string)infos[show.Name].Cover;
+                                        show.InfoSource  = (string)infos[show.Name].Source;
+
+                                        if (infos[show.Name].Genre != null && infos[show.Name].Genre.Count != 0)
+                                        {
+                                            foreach (var genre in infos[show.Name].Genre)
+                                            {
+                                                show.Genre += genre.Value + ", ";
+                                            }
+
+                                            show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
+                                            show.Info  = show.Genre + " show; ";
+                                        }
+
+                                        if (infos[show.Name].Runtime != null && (int)infos[show.Name].Runtime != 0)
+                                        {
+                                            show.Info   += infos[show.Name].Runtime + " minutes";
+                                            show.Runtime = infos[show.Name].Runtime.ToString();
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace(show.Info))
+                                        {
+                                            show.Info += Environment.NewLine;
+                                        }
+
+                                        if (infos[show.Name].Seasons != null && infos[show.Name].Episodes != null && (int)infos[show.Name].Seasons != 0 && (int)infos[show.Name].Episodes != 0)
+                                        {
+                                            show.Info    += Utils.FormatNumber((int)infos[show.Name].Episodes, "episode") + " in " + Utils.FormatNumber((int)infos[show.Name].Seasons, "season") + "." + Environment.NewLine;
+                                            show.Episodes = infos[show.Name].Episodes.ToString();
+                                        }
+
+                                        var airs = string.Empty;
+
+                                        if (!string.IsNullOrWhiteSpace((string)infos[show.Name].AirDay))
+                                        {
+                                            airs += " " + (string)infos[show.Name].AirDay;
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace((string)infos[show.Name].AirTime))
+                                        {
+                                            airs += " at " + (string)infos[show.Name].AirTime;
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace((string)infos[show.Name].Network))
+                                        {
+                                            airs += " on " + (string)infos[show.Name].Network;
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace(airs))
+                                        {
+                                            show.Info += "Airs" + airs + Environment.NewLine;
+                                        }
+
+                                        if (infos[show.Name].Started != null && (int)infos[show.Name].Started != 0)
+                                        {
+                                            show.Info += "Started on " + ((double)infos[show.Name].Started).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + Environment.NewLine;
+                                        }
+
+                                        if (infos[show.Name].Airing != null)
+                                        {
+                                            show.Info += (bool)infos[show.Name].Airing
+                                                         ? "Returning Series"
+                                                         : "Canceled/Ended";
+                                        }
+
+                                        show.Name = (string)infos[show.Name].Title;
+                                    }
+                                    catch { }
+                                }
+
+                                listView.ItemsSource = null;
+                                listView.ItemsSource = RecommendationsListViewItemCollection;
+                            }));
 
                         SetStatus("There are " + e.Data.Count + " shows on the list which you might like.");
-                    }
-                    else
-                    {
-                        SetStatus("Unfortunately the selected service couldn't recommend you anything.");
-                    }
-                }));
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                        Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                    }).Start();
+            }
+            else
+            {
+                SetStatus("Unfortunately the selected service couldn't recommend you anything.");
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            }
         }
         #endregion
 
@@ -231,101 +329,6 @@
         {
             if (listView.SelectedIndex == -1) return;
             Utils.Run("http://www.youtube.com/results?search_query=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name) + "+promo");
-        }
-        #endregion
-
-        #region Other events
-        /// <summary>
-        /// Handles the ToolTipOpening event of the ShowName control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.ToolTipEventArgs"/> instance containing the event data.</param>
-        private void ShowNameToolTipOpening(object sender, ToolTipEventArgs e)
-        {
-            string show;
-            RecommendedShow item;
-
-            try
-            {
-                show = ((sender as Grid).Children[0] as TextBlock).Text;
-                item = RecommendationsListViewItemCollection.Where(rec => rec.Name == show).First();
-            }
-            catch
-            {
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(item.Description))
-            {
-                return;
-            }
-
-            var info = REST.Instance.GetShowInfo(show);
-
-            try
-            {
-                item.Name        = (string)info.Title;
-                item.Description = (string)info.Description;
-                item.Picture     = (string)info.Cover;
-                item.InfoSource  = (string)info.Source;
-
-                if (info.Genre != null && info.Genre.Count != 0)
-                {
-                    foreach (var genre in info.Genre)
-                    {
-                        item.Info += genre.Value + ", ";
-                    }
-
-                    item.Info = item.Info.TrimEnd(", ".ToCharArray()) + " show; ";
-                }
-
-                if (info.Runtime != null && info.Runtime != 0)
-                {
-                    item.Info += info.Runtime + " minutes";
-                }
-
-                if (!string.IsNullOrWhiteSpace(item.Info))
-                {
-                    item.Info += Environment.NewLine;
-                }
-
-                if (info.Seasons != null && info.Episodes != null && info.Seasons != 0 && info.Episodes != 0)
-                {
-                    item.Info += Utils.FormatNumber((int)info.Episodes, "episode") + " in " + Utils.FormatNumber((int)info.Seasons, "season") + "." + Environment.NewLine;
-                }
-
-                var airs = string.Empty;
-
-                if (!string.IsNullOrWhiteSpace((string)info.AirDay))
-                {
-                    airs += " " + (string)info.AirDay;
-                }
-
-                if (!string.IsNullOrWhiteSpace((string)info.AirTime))
-                {
-                    airs += " at " + (string)info.AirTime;
-                }
-
-                if (!string.IsNullOrWhiteSpace((string)info.Network))
-                {
-                    airs += " on " + (string)info.Network;
-                }
-
-                if (!string.IsNullOrWhiteSpace(airs))
-                {
-                    item.Info += "Airs" + airs + Environment.NewLine;
-                }
-
-                if (info.Started != null && info.Started != 0)
-                {
-                    item.Info += "Started on " + ((double)info.Started).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + Environment.NewLine;
-                }
-
-                item.Info += (bool)info.Airing
-                             ? "Returning Series"
-                             : "Canceled/Ended";
-            }
-            catch { }
         }
         #endregion
     }

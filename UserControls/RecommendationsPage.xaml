@@ -17,17 +17,15 @@
         <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Width="450">
+                    <GridViewColumn Width="550">
                         <GridViewColumnHeader Content="Show name" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Grid MaxWidth="450" ToolTipOpening="ShowNameToolTipOpening" ToolTipService.InitialShowDelay="1000" ToolTipService.BetweenShowDelay="1000" ToolTipService.ShowDuration="600000">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition MinWidth="20" Width="*" />
-                                        <ColumnDefinition Width="300" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock FontWeight="Bold" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock FontWeight="Light" Text="{Binding Tagline}" TextTrimming="CharacterEllipsis" Grid.Column="2" Padding="5,0,0,0" />
+                                <Grid MaxWidth="550" ToolTipService.ShowDuration="600000">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock FontWeight="Bold" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock FontWeight="Light" Text="{Binding Tagline}" TextTrimming="CharacterEllipsis" Padding="5,0,0,0" />
+                                    </StackPanel>
                                     <Grid.ToolTip>
                                         <StackPanel Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal">
@@ -55,11 +53,11 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="200">
+                    <GridViewColumn Width="100">
                         <GridViewColumnHeader Content="Genre" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Light" Text="{Binding Genre}" ToolTip="{Binding Genre}" Width="200" Margin="-7,0" TextTrimming="CharacterEllipsis" />
+                                <TextBlock FontWeight="Light" Text="{Binding Genre}" ToolTip="{Binding Genre}" Width="100" Margin="-7,0" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
