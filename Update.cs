@@ -116,7 +116,7 @@
                 {
                     try
                     {
-                        /*Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
+                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
                                                       ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000),
                                                       r["showid"],
                                                       ep.Season,
@@ -126,7 +126,7 @@
                                                        : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                       ep.Title,
                                                       ep.Summary,
-                                                      ep.Picture);*/
+                                                      ep.Picture);
                     }
                     catch (Exception ex)
                     {

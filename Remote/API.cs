@@ -71,7 +71,7 @@
                     DoKeyExchange();
                 }
 
-                var post = JsonConvert.SerializeObject(new Request(func, args));
+                var post = Utils.EscapeUTF8(JsonConvert.SerializeObject(new Request(func, args)));
 
                 if (secure)
                 {
@@ -80,10 +80,10 @@
                 }
 
                 var resp = Utils.GetURL(
-                    url: "http://lab.rolisoft.net/api/",
-                    postData: post,
+                    url:       "http://lab.rolisoft.net/api/",
+                    postData:  post,
                     userAgent: "RS TV Show Tracker/" + Signature.Version,
-                    headers: new Dictionary<string, string> { { "X-UUID", Utils.GetUUID() } }
+                    headers:   new Dictionary<string, string> { { "X-UUID", Utils.GetUUID() } }
                 );
 
                 if (secure)
@@ -191,9 +191,9 @@
         /// <param name="name">The name of the show.</param>
         /// <param name="filter">The name of the fields to return or <c>null</c> for all available.</param>
         /// <returns>Informations about the show.</returns>
-        public static ShowInfo GetShowInfo(string name, IEnumerable<string> filter = null)
+        public static RemoteShowInfo GetShowInfo(string name, IEnumerable<string> filter = null)
         {
-            return InvokeRemoteMethod<ShowInfo>("GetShowInfo", name, filter);
+            return InvokeRemoteMethod<RemoteShowInfo>("GetShowInfo", name, filter);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@
         /// <param name="info">The show object.</param>
         /// <param name="hash">The checksum of the object.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SetShowInfo(ShowInfo info, string hash)
+        public static General SetShowInfo(object info, string hash)
         {
             return InvokeRemoteMethod<General>("SetShowInfo", info, hash);
         }

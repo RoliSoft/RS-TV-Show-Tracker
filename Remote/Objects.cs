@@ -216,7 +216,28 @@
     /// <summary>
     /// Represents a show information.
     /// </summary>
-    public class ShowInfo : IRemoteObject
+    public class ShowInfo
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public IEnumerable<string> Genre { get; set; }
+        public string Cover { get; set; }
+        public long Started { get; set; }
+        public bool Airing { get; set; }
+        public string AirTime { get; set; }
+        public string AirDay { get; set; }
+        public string Network { get; set; }
+        public int Runtime { get; set; }
+        public int Seasons { get; set; }
+        public int Episodes { get; set; }
+        public string Source { get; set; }
+        public string SourceID { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a received show information.
+    /// </summary>
+    public class RemoteShowInfo : ShowInfo, IRemoteObject
     {
         #region Implementation of IRemoteObject
         /// <summary>
@@ -238,27 +259,13 @@
         public string Error { get; set; }
         #endregion
 
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public IEnumerable<string> Genre { get; set; }
-        public string Cover { get; set; }
-        public long Started { get; set; }
-        public bool Airing { get; set; }
-        public string AirTime { get; set; }
-        public string AirDay { get; set; }
-        public string Network { get; set; }
-        public int Runtime { get; set; }
-        public int Seasons { get; set; }
-        public int Episodes { get; set; }
-        public string Source { get; set; }
-        public string SourceID { get; set; }
         public long LastUpdated { get; set; }
     }
 
     /// <summary>
     /// Represents a dictionary of show informations.
     /// </summary>
-    public class MultipleShowInfo : Dictionary<string, ShowInfo>, IRemoteObject
+    public class MultipleShowInfo : Dictionary<string, RemoteShowInfo>, IRemoteObject
     {
         #region Implementation of IRemoteObject
         /// <summary>

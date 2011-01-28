@@ -11,6 +11,9 @@
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.DownloadsListViewItem: renaming", Exclude = true, ApplyToMembers = true)]
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.LinkItem: renaming", Exclude = true, ApplyToMembers = true)]
 
+//[assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Parsers.Guides.TVShow: renaming", Exclude = true, ApplyToMembers = true)]
+//[assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Parsers.Guides.TVShow.Episode: renaming", Exclude = true, ApplyToMembers = true)]
+
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Parsers.Downloads.Link: renaming", Exclude = true, ApplyToMembers = true)]
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Parsers.Downloads.Qualities: renaming", Exclude = true, ApplyToMembers = true)]
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Parsers.Downloads.Types: renaming", Exclude = true, ApplyToMembers = true)]

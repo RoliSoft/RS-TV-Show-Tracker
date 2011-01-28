@@ -200,7 +200,7 @@
 
             if (!string.IsNullOrWhiteSpace(postData))
             {
-                using (var sw = new StreamWriter(req.GetRequestStream(), encoding ?? Encoding.ASCII))
+                using (var sw = new StreamWriter(req.GetRequestStream(), Encoding.ASCII))
                 {
                     sw.Write(postData);
                     sw.Flush();
@@ -316,6 +316,16 @@
             }
 
             return size;
+        }
+
+        /// <summary>
+        /// Replaces UTF-8 characters with \uXXXX format.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns>Pure ASCII text.</returns>
+        public static string EscapeUTF8(string text)
+        {
+            return Regex.Replace(text, @"[^\u0000-\u007F]", new MatchEvaluator(m => string.Format(@"\u{0:x4}", (int)m.Value[0])));
         }
 
         /// <summary>
