@@ -199,7 +199,7 @@
                                             continue;
                                         }
 
-                                        show.Tagline     = Regex.Replace(infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
+                                        show.Tagline     = infos[show.Name].Tagline ?? Regex.Replace(infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
                                         show.Description = infos[show.Name].Description;
                                         show.Picture     = infos[show.Name].Cover;
                                         show.InfoSource  = infos[show.Name].Source;
