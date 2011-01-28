@@ -3,6 +3,8 @@
 [assembly: Obfuscation(Feature = "code control flow obfuscation", Exclude = false)]
 //[assembly: Obfuscation(Feature = "rename symbol names with printable characters", Exclude = false)]
 
+[assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Remote.Objects.*: renaming", Exclude = true, ApplyToMembers = true)]
+
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.OverviewListViewItem: renaming", Exclude = true, ApplyToMembers = true)]
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.GuideListViewItem: renaming", Exclude = true, ApplyToMembers = true)]
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.StatisticsListViewItem: renaming", Exclude = true, ApplyToMembers = true)]

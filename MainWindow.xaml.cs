@@ -15,6 +15,8 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.Remote;
+
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
     using ContextMenu = System.Windows.Forms.ContextMenu;
@@ -520,15 +522,15 @@
         /// </summary>
         public void CheckForUpdate()
         {
-            var upd = REST.Instance.CheckForUpdate();
-            if ((bool)upd.Success && (bool)upd.New)
+            var upd = API.CheckForUpdate();
+            if (upd.Success && upd.New)
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
                         updateOuter.Visibility  = Visibility.Visible;
-                        updateToolTipTitle.Text = "Version {0} is available!".FormatWith((string)upd.Version);
-                        updateToolTipText.Text  = (string)upd.Description;
-                        update.Tag              = (string)upd.URL;
+                        updateToolTipTitle.Text = "Version {0} is available!".FormatWith(upd.Version);
+                        updateToolTipText.Text  = upd.Description;
+                        update.Tag              = upd.URL;
                     }));
             }
         }
@@ -640,7 +642,7 @@
         /// <param name="ex">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
         private void ReportException(string ex)
         {
-            new Task(() => { try { REST.SecureInstance.ReportError(ex); } catch { } }).Start();
+            new Task(() => { try { API.ReportError(ex); } catch { } }).Start();
         }
         #endregion
     }

@@ -15,6 +15,7 @@
 
     using RoliSoft.TVShowTracker.Parsers.Recommendations;
     using RoliSoft.TVShowTracker.Parsers.Recommendations.Engines;
+    using RoliSoft.TVShowTracker.Remote;
 
     /// <summary>
     /// Interaction logic for RecommendationsPage.xaml
@@ -185,7 +186,7 @@
 
                 new Thread(() =>
                     {
-                        var infos = REST.Instance.GetMultipleShowInfo(shows);
+                        var infos = API.GetMultipleShowInfo(shows);
 
                         Dispatcher.Invoke((Action)(() =>
                             {
@@ -198,23 +199,23 @@
                                             continue;
                                         }
 
-                                        show.Tagline     = Regex.Replace((string)infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
-                                        show.Description = (string)infos[show.Name].Description;
-                                        show.Picture     = (string)infos[show.Name].Cover;
-                                        show.InfoSource  = (string)infos[show.Name].Source;
+                                        show.Tagline     = Regex.Replace(infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
+                                        show.Description = infos[show.Name].Description;
+                                        show.Picture     = infos[show.Name].Cover;
+                                        show.InfoSource  = infos[show.Name].Source;
 
-                                        if (infos[show.Name].Genre != null && infos[show.Name].Genre.Count != 0)
+                                        if (infos[show.Name].Genre != null && infos[show.Name].Genre.Count() != 0)
                                         {
                                             foreach (var genre in infos[show.Name].Genre)
                                             {
-                                                show.Genre += genre.Value + ", ";
+                                                show.Genre += genre + ", ";
                                             }
 
                                             show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
                                             show.Info  = show.Genre + " show; ";
                                         }
 
-                                        if (infos[show.Name].Runtime != null && (int)infos[show.Name].Runtime != 0)
+                                        if (infos[show.Name].Runtime != 0)
                                         {
                                             show.Info   += infos[show.Name].Runtime + " minutes";
                                             show.Runtime = infos[show.Name].Runtime.ToString();
@@ -225,27 +226,27 @@
                                             show.Info += Environment.NewLine;
                                         }
 
-                                        if (infos[show.Name].Seasons != null && infos[show.Name].Episodes != null && (int)infos[show.Name].Seasons != 0 && (int)infos[show.Name].Episodes != 0)
+                                        if (infos[show.Name].Seasons != 0 && infos[show.Name].Episodes != 0)
                                         {
-                                            show.Info    += Utils.FormatNumber((int)infos[show.Name].Episodes, "episode") + " in " + Utils.FormatNumber((int)infos[show.Name].Seasons, "season") + "." + Environment.NewLine;
+                                            show.Info    += Utils.FormatNumber(infos[show.Name].Episodes, "episode") + " in " + Utils.FormatNumber(infos[show.Name].Seasons, "season") + "." + Environment.NewLine;
                                             show.Episodes = infos[show.Name].Episodes.ToString();
                                         }
 
                                         var airs = string.Empty;
 
-                                        if (!string.IsNullOrWhiteSpace((string)infos[show.Name].AirDay))
+                                        if (!string.IsNullOrWhiteSpace(infos[show.Name].AirDay))
                                         {
-                                            airs += " " + (string)infos[show.Name].AirDay;
+                                            airs += " " + infos[show.Name].AirDay;
                                         }
 
-                                        if (!string.IsNullOrWhiteSpace((string)infos[show.Name].AirTime))
+                                        if (!string.IsNullOrWhiteSpace(infos[show.Name].AirTime))
                                         {
-                                            airs += " at " + (string)infos[show.Name].AirTime;
+                                            airs += " at " + infos[show.Name].AirTime;
                                         }
 
-                                        if (!string.IsNullOrWhiteSpace((string)infos[show.Name].Network))
+                                        if (!string.IsNullOrWhiteSpace(infos[show.Name].Network))
                                         {
-                                            airs += " on " + (string)infos[show.Name].Network;
+                                            airs += " on " + infos[show.Name].Network;
                                         }
 
                                         if (!string.IsNullOrWhiteSpace(airs))
@@ -253,19 +254,16 @@
                                             show.Info += "Airs" + airs + Environment.NewLine;
                                         }
 
-                                        if (infos[show.Name].Started != null && (int)infos[show.Name].Started != 0)
+                                        if (infos[show.Name].Started != 0)
                                         {
                                             show.Info += "Started on " + ((double)infos[show.Name].Started).GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + Environment.NewLine;
                                         }
 
-                                        if (infos[show.Name].Airing != null)
-                                        {
-                                            show.Info += (bool)infos[show.Name].Airing
-                                                         ? "Returning Series"
-                                                         : "Canceled/Ended";
-                                        }
+                                        show.Info += infos[show.Name].Airing
+                                                     ? "Returning Series"
+                                                     : "Canceled/Ended";
 
-                                        show.Name = (string)infos[show.Name].Title;
+                                        show.Name = infos[show.Name].Title;
                                     }
                                     catch { }
                                 }

@@ -9,6 +9,8 @@
     using Microsoft.WindowsAPICodePack.Shell;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.Remote;
+
     /// <summary>
     /// Interaction logic for SendFeedbackWindow.xaml
     /// </summary>
@@ -84,7 +86,7 @@
 
             new Task(() => { try
                 {
-                    REST.SecureInstance.SendFeedback(type, name, email, message);
+                    API.SendFeedback(type, name, email, message);
 
                     Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                     Dispatcher.Invoke((Action)(() =>

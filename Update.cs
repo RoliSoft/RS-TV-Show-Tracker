@@ -10,6 +10,7 @@
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
+    using RoliSoft.TVShowTracker.Remote;
 
     /// <summary>
     /// Provides methods to keep the database up-to-date.
@@ -228,28 +229,29 @@
 
             new Thread(() => { try
             {
-                var info = new
+                var info = new Remote.Objects.ShowInfo
                     {
-                        tv.Title,
-                        tv.Description,
-                        Genre = (tv.Genre ?? string.Empty).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries),
-                        tv.Cover,
-                        Started = (long)tv.Episodes[0].Airdate.ToUnixTimestamp(),
-                        tv.Airing,
-                        tv.AirTime,
-                        tv.AirDay,
-                        tv.Network,
-                        tv.Runtime,
-                        Seasons  = tv.Episodes.Last().Season,
-                        Episodes = tv.Episodes.Count,
-                        Source   = guide.Item1,
-                        SourceID = guide.Item2
+                        Title       = tv.Title,
+                        Description = tv.Description,
+                        Genre       = (tv.Genre ?? string.Empty).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries),
+                        Cover       = tv.Cover,
+                        Started     = (long)tv.Episodes[0].Airdate.ToUnixTimestamp(),
+                        Airing      = tv.Airing,
+                        AirTime     = tv.AirTime,
+                        AirDay      = tv.AirDay,
+                        Network     = tv.Network,
+                        Runtime     = tv.Runtime,
+                        Seasons     = tv.Episodes.Last().Season,
+                        Episodes    = tv.Episodes.Count,
+                        Source      = guide.Item1,
+                        SourceID    = guide.Item2
                     };
+
                 var hash = BitConverter.ToString(new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID() + "\0" + Signature.Version)).ComputeHash(Encoding.UTF8.GetBytes(
                     info.Title + info.Description + string.Join(string.Empty, info.Genre) + info.Cover + info.Started + (info.Airing ? "true" : "false") + info.AirTime + info.AirDay + info.Network + info.Runtime + info.Seasons + info.Episodes + info.Source + info.SourceID
                 ))).ToLower().Replace("-", string.Empty);
                 
-                REST.Instance.SetShowInfo(info, hash);
+                API.SetShowInfo(info, hash);
             } catch { } }).Start();
         }
     }

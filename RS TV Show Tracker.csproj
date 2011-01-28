@@ -127,7 +127,8 @@
     <Compile Include="Parsers\ParserAttribute.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
-    <Compile Include="Remote.cs" />
+    <Compile Include="Remote\API.cs" />
+    <Compile Include="Remote\Objects.cs" />
     <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
     <Compile Include="UserControls\ListViews\LinkItem.cs" />
     <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />
