@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping tvstore.me.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-12 6:01 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:32 PM")]
     public class TvStore : DownloadSearchEngine
     {
         /// <summary>
@@ -101,7 +101,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var gyors = Utils.GetURL("http://tvstore.me/torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.ReplaceEpisode(query, 1))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
+            var gyors = Utils.GetURL(Site + "torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.ReplaceEpisode(query, 1))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
             var arr   = gyors.Split('\\');
 
             if (arr[0] == "0")
@@ -118,7 +118,7 @@
 
                 idx++;
 
-                link.URL = "http://tvstore.me/torrent/download.php?id=" + arr[idx].Trim();
+                link.URL = Site + "torrent/download.php?id=" + arr[idx].Trim();
 
                 idx++;
 
@@ -203,7 +203,7 @@
         /// </summary>
         public void GetIDs()
         {
-            var browse  = Utils.GetURL("http://tvstore.me/torrent/browse.php", cookies: Cookies);
+            var browse  = Utils.GetURL(Site + "torrent/browse.php", cookies: Cookies);
             var matches = Regex.Matches(browse, @"catse\[(?<id>\d+)\]\s*=\s*'(?<name>[^']+)';");
 
             ShowIDs = matches.Cast<Match>()

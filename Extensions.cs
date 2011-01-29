@@ -489,9 +489,33 @@
         /// <param name="doc">The document.</param>
         /// <param name="xpath">The xpath to the tag.</param>
         /// <returns>Value or null.</returns>
-        public static string GetValue(this HtmlNode doc, string xpath)
+        public static string GetTextValue(this HtmlNode doc, string xpath)
         {
             try   { return doc.SelectSingleNode(xpath).InnerText; }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Extension method to HtmlNode to get the value of a tag or null if it doesn't exist.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <param name="xpath">The xpath to the tag.</param>
+        /// <returns>Value or null.</returns>
+        public static string GetHtmlValue(this HtmlNode doc, string xpath)
+        {
+            try   { return doc.SelectSingleNode(xpath).InnerHtml; }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Extension method to HtmlNode to get the attribute of a tag or null if it doesn't exist.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <param name="attribute">The name of the attribute.</param>
+        /// <returns>Value or null.</returns>
+        public static string GetAttributeValue(this HtmlNode doc, string attribute)
+        {
+            try   { return doc.GetAttributeValue(attribute, string.Empty); }
             catch { return null; }
         }
 
@@ -502,7 +526,7 @@
         /// <param name="xpath">The xpath to the tag.</param>
         /// <param name="attribute">The name of the attribute.</param>
         /// <returns>Value or null.</returns>
-        public static string GetValue(this HtmlNode doc, string xpath, string attribute)
+        public static string GetNodeAttributeValue(this HtmlNode doc, string xpath, string attribute)
         {
             try   { return doc.SelectSingleNode(xpath).GetAttributeValue(attribute, string.Empty); }
             catch { return null; }

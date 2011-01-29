@@ -7,7 +7,7 @@
     /// <summary>
     /// Provides support for scraping nCore.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 4:41 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:48 PM")]
     public class NCore : DownloadSearchEngine
     {
         /// <summary>
@@ -89,7 +89,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://ncore.cc/torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies);
+            var html  = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies);
             var links = html.DocumentNode.SelectNodes("//a[starts-with(@onclick, 'torrent(')]");
 
             if (links == null)
@@ -102,10 +102,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.GetAttributeValue("title", string.Empty),
-                        URL     = "http://ncore.cc/torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href", string.Empty), @"id=(\d+)").Groups[1].Value,
-                        Size    = node.SelectSingleNode("../../../../div[@class='box_meret2']/text()").InnerText.Trim(),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
+                        Release = node.GetAttributeValue("title"),
+                        URL     = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value,
+                        Size    = node.GetTextValue("../../../../div[@class='box_meret2']/text()").Trim(),
+                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title")),
                         Type    = Types.Torrent
                     };
             }

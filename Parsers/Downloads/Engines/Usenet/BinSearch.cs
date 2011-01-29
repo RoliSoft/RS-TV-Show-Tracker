@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping BinSearch.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 4:21 AM")]
+    [Parser("RoliSoft", "2011-01-29 9:48 PM")]
     public class BinSearch : DownloadSearchEngine
     {
         /// <summary>
@@ -81,7 +81,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://www.binsearch.info/index.php?q=" + Uri.EscapeUriString(query) + "&m=&max=25&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=200&maxsize=&font=&postdate=");
+            var html  = Utils.GetHTML(Site + "index.php?q=" + Uri.EscapeUriString(query) + "&m=&max=25&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=200&maxsize=&font=&postdate=");
             var links = html.DocumentNode.SelectNodes("//td/span[@class='s']");
 
             if (links == null)
@@ -95,8 +95,8 @@
                     {
                         Site         = Name,
                         Release      = HtmlEntity.DeEntitize(node.InnerText),
-                        URL          = "http://www.binsearch.info" + HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']/a").GetAttributeValue("href", string.Empty)),
-                        Size         = Regex.Match(HtmlEntity.DeEntitize(node.SelectSingleNode("../span[@class='d']").InnerText), @"size: ([^,<]+)").Groups[1].Value,
+                        URL          = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href")),
+                        Size         = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value,
                         Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
                         Type         = Types.Usenet,
                         IsLinkDirect = false

@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 4:56 AM")]
+    [Parser("RoliSoft", "2011-01-29 9:50 PM")]
     public class ReleaseLog : DownloadSearchEngine
     {
         /// <summary>
@@ -80,7 +80,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://www.rlslog.net/?s=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "?s=" + Uri.EscapeUriString(query));
             var links = html.DocumentNode.SelectNodes("//h3[starts-with(@id, 'post-')]/a");
 
             if (links == null)
@@ -94,7 +94,7 @@
                     {
                         Site         = Name,
                         Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
-                        URL          = node.GetAttributeValue("href", string.Empty),
+                        URL          = node.GetAttributeValue("href"),
                         Size         = "N/A",
                         Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
                         Type         = Types.HTTP,

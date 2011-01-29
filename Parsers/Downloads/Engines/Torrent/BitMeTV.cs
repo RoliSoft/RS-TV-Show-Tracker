@@ -4,10 +4,10 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// Provides support for scraping FileList.ro.
+    /// Provides support for scraping BitMeTV.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:45 PM")]
-    public class FileList : DownloadSearchEngine
+    [Parser("RoliSoft", "2011-01-29 8:34 PM")]
+    public class BitMeTV : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -17,7 +17,7 @@
         {
             get
             {
-                return "FileList";
+                return "BitMeTV";
             }
         }
 
@@ -29,7 +29,7 @@
         {
             get
             {
-                return "http://filelist.ro/";
+                return "http://www.bitmetv.org/";
             }
         }
 
@@ -41,7 +41,7 @@
         {
             get
             {
-                return "http://filelist.ro/favicon.ico";
+                return "http://www.bitmetv.org/favicon.ico";
             }
         }
 
@@ -88,9 +88,9 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "browse.php?cat=14&searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
-            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
-            
+            var html  = Utils.GetHTML("http://www.bitmetv.org/browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var links = html.DocumentNode.SelectNodes("//table/tr/td/a[starts-with(@href, 'details.php')]");
+
             if (links == null)
             {
                 yield break;
@@ -101,10 +101,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText,
-                        URL     = Site + node.GetNodeAttributeValue("../../../td[3]/a", "href"),
-                        Size    = node.GetHtmlValue("../../../td[7]").Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText),
+                        Release = node.GetAttributeValue("title"),
+                        URL     = Site + node.GetNodeAttributeValue("../td[1]/a", "href"),
+                        Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " "),
+                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title")),
                         Type    = Types.Torrent
                     };
             }

@@ -7,7 +7,7 @@
     /// <summary>
     /// Provides support for scraping bitHUmen.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 5:03 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:40 PM")]
     public class BitHUmen : DownloadSearchEngine
     {
         /// <summary>
@@ -89,7 +89,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://bithumen.be/browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html  = Utils.GetHTML(Site + "browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
             var links = html.DocumentNode.SelectNodes("//table[@id='torrenttable']/tr/td[2]/a[1]/b");
 
             if (links == null)
@@ -102,10 +102,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText,
-                        URL     = "http://bithumen.be/" + node.SelectSingleNode("../../a[starts-with(@title, 'Let')]").GetAttributeValue("href", string.Empty),
-                        Size    = node.SelectSingleNode("../../../td[6]/u").InnerHtml.Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.ParentNode.GetAttributeValue("title", string.Empty) != string.Empty ? node.ParentNode.GetAttributeValue("title", string.Empty) : node.InnerText),
+                        Release = node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText,
+                        URL     = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href"),
+                        Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " "),
+                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText),
                         Type    = Types.Torrent
                     };
             }

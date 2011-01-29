@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping tvtorrents.com.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 2:48 AM")]
+    [Parser("RoliSoft", "2011-01-29 9:26 PM")]
     public class TvTorrents : DownloadSearchEngine
     {
         /// <summary>
@@ -91,7 +91,7 @@
         public override IEnumerable<Link> Search(string query)
         {
             var show  = ShowNames.Split(query)[0];
-            var html  = Utils.GetHTML("http://tvtorrents.com/loggedin/search.do?search=" + Uri.EscapeUriString(show), cookies: Cookies);
+            var html  = Utils.GetHTML(Site + "loggedin/search.do?search=" + Uri.EscapeUriString(show), cookies: Cookies);
             var links = html.DocumentNode.SelectNodes("//table[2]/tr/td[3]");
 
             if (links == null)
@@ -114,9 +114,9 @@
                     {
                         Site    = Name,
                         Release = Regex.Replace(node.InnerText, @"\b([0-9]{1,2})x([0-9]{1,2})\b", new MatchEvaluator(me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00")), RegexOptions.IgnoreCase),
-                        URL     = "http://torrent.tvtorrents.com/FetchTorrentServlet?info_hash=" + node.SelectSingleNode("a").GetAttributeValue("href", string.Empty).Split('=').Last() + "&digest=" + digest + "&hash=" + hash,
-                        Size    = node.SelectSingleNode("../td[5]").GetAttributeValue("title", string.Empty).Replace("Torrent is ", String.Empty).Replace("b", "B"),
-                        Quality = node.SelectSingleNode("a").InnerText.Contains("(720p .mkv)") ? Qualities.HDTV720p : node.SelectSingleNode("a").InnerText.Contains(" .mkv)") ? Qualities.HRx264 : Qualities.HDTVXviD,
+                        URL     = "http://torrent.tvtorrents.com/FetchTorrentServlet?info_hash=" + node.GetNodeAttributeValue("a", "href").Split('=').Last() + "&digest=" + digest + "&hash=" + hash,
+                        Size    = node.GetNodeAttributeValue("../td[5]", "title").Replace("Torrent is ", string.Empty).Replace("b", "B"),
+                        Quality = node.GetTextValue("a").Contains("(720p .mkv)") ? Qualities.HDTV720p : node.GetTextValue("a").Contains(" .mkv)") ? Qualities.HRx264 : Qualities.HDTVXviD,
                         Type    = Types.Torrent
                    };
             }

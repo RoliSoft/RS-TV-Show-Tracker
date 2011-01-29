@@ -7,7 +7,7 @@
     /// <summary>
     /// Provides support for scraping freshon.tv.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 2:21 AM")]
+    [Parser("RoliSoft", "2011-01-29 9:21 PM")]
     public class TvTorrentsRo : DownloadSearchEngine
     {
         /// <summary>
@@ -89,7 +89,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://freshon.tv/browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var html  = Utils.GetHTML(Site + "browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
             var links = html.DocumentNode.SelectNodes("//table/tr/td/div[1]/a");
 
             if (links == null)
@@ -102,10 +102,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.GetAttributeValue("title", string.Empty),
-                        URL     = "http://freshon.tv/download.php?id=" + Regex.Replace(node.GetAttributeValue("href", string.Empty), "[^0-9]+", string.Empty) + "&type=torrent",
-                        Size    = node.SelectSingleNode("../../../td[@class='table_size']").InnerHtml.Trim().Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title", string.Empty)),
+                        Release = node.GetAttributeValue("title"),
+                        URL     = Site + "download.php?id=" + Regex.Replace(node.GetAttributeValue("href"), "[^0-9]+", string.Empty) + "&type=torrent",
+                        Size    = node.GetHtmlValue("../../../td[@class='table_size']").Trim().Replace("<br>", " "),
+                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title")),
                         Type    = Types.Torrent
                     };
             }

@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping The Pirate Bay.
     /// </summary>
-    [Parser("RoliSoft", "2010-12-09 2:34 AM")]
+    [Parser("RoliSoft", "2011-01-29 9:46 PM")]
     public class ThePirateBay : DownloadSearchEngine
     {
         /// <summary>
@@ -78,7 +78,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://thepiratebay.org/search/" + Uri.EscapeUriString(query) + "/0/7/0");
+            var html  = Utils.GetHTML(Site + "search/" + Uri.EscapeUriString(query) + "/0/7/0");
             var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/div/a");
 
             if (links == null)
@@ -92,8 +92,8 @@
                     {
                         Site    = Name,
                         Release = node.InnerText,
-                        URL     = node.SelectSingleNode("../../a[1]").GetAttributeValue("href", string.Empty),
-                        Size    = Regex.Match(node.SelectSingleNode("../../font").InnerText, "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty),
+                        URL     = node.GetNodeAttributeValue("../../a[1]", "href"),
+                        Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty),
                         Quality = ParseQuality(node.InnerText.Replace(' ', '.')),
                         Type    = Types.Torrent
                     };
