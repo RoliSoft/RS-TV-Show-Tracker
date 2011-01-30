@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
 
+    using HtmlAgilityPack;
+
     /// <summary>
     /// Provides support for scraping BitMeTV.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 8:34 PM")]
+    [Parser("RoliSoft", "2011-01-30 5:58 AM")]
     public class BitMeTV : DownloadSearchEngine
     {
         /// <summary>
@@ -101,10 +103,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.GetAttributeValue("title"),
+                        Release = HtmlEntity.DeEntitize(node.GetAttributeValue("title")),
                         URL     = Site + node.GetNodeAttributeValue("../td[1]/a", "href"),
                         Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title")),
+                        Quality = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.GetAttributeValue("title")).Replace((char)160, '.').Replace((char)32, '.')),
                         Type    = Types.Torrent
                     };
             }
