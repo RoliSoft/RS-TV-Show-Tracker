@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Collections.Generic;
     using System.Reflection;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
@@ -419,11 +420,11 @@
         /// <summary>
         /// Extension method to string to uppercase the first letter.
         /// </summary>
-        /// <param name="s">The string.</param>
+        /// <param name="value">The string.</param>
         /// <returns>String with uppercased first letter.</returns>
-        public static string ToUppercaseFirst(this string s)
+        public static string ToUppercaseFirst(this string value)
         {
-            return char.ToUpper(s[0]) + s.Substring(1);
+            return char.ToUpper(value[0]) + value.Substring(1);
         }
 
         /// <summary>
@@ -435,6 +436,29 @@
         public static string FormatWith(this string format, params object[] args)
         {
             return string.Format(format, args);
+        }
+
+        /// <summary>
+        /// Extension method to string to cut it if it's longer then the specified length.
+        /// </summary>
+        /// <param name="value">The string to be cut.</param>
+        /// <param name="len">The maximum length of the string.</param>
+        /// <returns>Resized string.</returns>
+        public static string CutIfLonger(this string value, int len)
+        {
+            return value.Length <= len
+                   ? value
+                   : value.Substring(0, len - 1) + "…";
+        }
+
+        /// <summary>
+        /// Extension method to string to remove any accents from a string.
+        /// </summary>
+        /// <param name="value">The string to be transliterated.</param>
+        /// <returns>ASCII string.</returns>
+        public static string Transliterate(this string value)
+        {
+            return new string(value.Normalize(NormalizationForm.FormD).Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray()).Normalize(NormalizationForm.FormC);
         }
 
         /// <summary>
@@ -450,21 +474,21 @@
         /// <summary>
         /// Extension method to string to convert it to an Int32.
         /// </summary>
-        /// <param name="s">The string.</param>
+        /// <param name="value">The string.</param>
         /// <returns>Int32 value of the string.</returns>
-        public static int ToInteger(this string s)
+        public static int ToInteger(this string value)
         {
-            return int.Parse(s);
+            return int.Parse(value);
         }
 
         /// <summary>
         /// Extension method to string to convert it to a double.
         /// </summary>
-        /// <param name="s">The string.</param>
+        /// <param name="value">The string.</param>
         /// <returns>Double value of the string.</returns>
-        public static double ToDouble(this string s)
+        public static double ToDouble(this string value)
         {
-            return double.Parse(s);
+            return double.Parse(value);
         }
         #endregion
 

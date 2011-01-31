@@ -5,9 +5,12 @@
 
     using CookComputing.XmlRpc;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for the OpenSubtitles XML-RPC API.
     /// </summary>
+    [TestFixture]
     public class OpenSubtitles : SubtitleSearchEngine
     {
         /// <summary>

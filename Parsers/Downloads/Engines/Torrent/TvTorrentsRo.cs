@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping freshon.tv.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:21 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:21 PM"), TestFixture]
     public class TvTorrentsRo : DownloadSearchEngine
     {
         /// <summary>

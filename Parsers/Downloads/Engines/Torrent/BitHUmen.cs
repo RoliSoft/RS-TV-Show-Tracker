@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Text;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping bitHUmen.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:40 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:40 PM"), TestFixture]
     public class BitHUmen : DownloadSearchEngine
     {
         /// <summary>
@@ -102,10 +104,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText,
+                        Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText,
                         URL     = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href"),
                         Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText),
+                        Quality = ThePirateBay.ParseQuality(node.GetNodeAttributeValue("../", "title") ?? node.InnerText),
                         Type    = Types.Torrent
                     };
             }

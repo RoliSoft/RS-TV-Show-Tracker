@@ -4,9 +4,12 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping Addic7ed.
     /// </summary>
+    [TestFixture]
     public class Addic7ed : SubtitleSearchEngine
     {
         /// <summary>

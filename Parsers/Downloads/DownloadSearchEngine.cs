@@ -2,8 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
+
+    using NUnit.Framework;
 
     /// <summary>
     /// Represents a download link search engine.
@@ -111,6 +114,35 @@
                 _job.Abort();
                 _job = null;
             }
+        }
+
+        /// <summary>
+        /// Tests the parser by searching for "House" on the tracker.
+        /// </summary>
+        [Test]
+        public void TestSearch()
+        {
+            if (Private)
+            {
+                Cookies = Settings.Get(Name + " Cookies");
+
+                if (string.IsNullOrWhiteSpace(Cookies))
+                {
+                    Assert.Inconclusive("Cookies are required to test a private site.");
+                }
+            }
+
+            var list = Search("House").ToList();
+
+            Assert.Greater(list.Count, 0);
+
+#if DEBUG
+            Debug.WriteLine("┌────────────────────────────────────────────────────┬────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
+            Debug.WriteLine("│ Release name                                       │ Size       │ Quality    │ URL                                                          │");
+            Debug.WriteLine("├────────────────────────────────────────────────────┼────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
+            list.ForEach(item => Debug.WriteLine("│ {0,-50} │ {1,-10} │ {2,-10} │ {3,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Size.CutIfLonger(10), item.Quality, item.URL.CutIfLonger(60))));
+            Debug.WriteLine("└────────────────────────────────────────────────────┴────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
+#endif
         }
     }
 }

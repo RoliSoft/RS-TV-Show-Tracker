@@ -6,12 +6,14 @@
 
     using HtmlAgilityPack;
 
+    using NUnit.Framework;
+
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
     /// Provides support for scraping BinSearch.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:48 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:48 PM"), TestFixture]
     public class BinSearch : DownloadSearchEngine
     {
         /// <summary>

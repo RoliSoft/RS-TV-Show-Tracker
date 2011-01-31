@@ -10,10 +10,12 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping tvstore.me.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:32 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:32 PM"), TestFixture]
     public class TvStore : DownloadSearchEngine
     {
         /// <summary>

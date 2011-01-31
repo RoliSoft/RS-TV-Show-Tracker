@@ -2,8 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
+
+    using NUnit.Framework;
 
     /// <summary>
     /// Represents a subtitle search engine.
@@ -81,6 +84,25 @@
                 _job.Abort();
                 _job = null;
             }
+        }
+
+        /// <summary>
+        /// Tests the parser by searching for "House S07E01" on the site.
+        /// </summary>
+        [Test]
+        public void TestSearch()
+        {
+            var list = Search("House S07E01").ToList();
+
+            Assert.Greater(list.Count, 0);
+
+#if DEBUG
+            Debug.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
+            Debug.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");
+            Debug.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
+            list.ForEach(item => Debug.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), item.URL.CutIfLonger(60))));
+            Debug.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
+#endif
         }
     }
 }

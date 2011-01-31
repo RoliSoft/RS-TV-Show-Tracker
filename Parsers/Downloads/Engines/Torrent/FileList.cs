@@ -3,10 +3,12 @@
     using System;
     using System.Collections.Generic;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping FileList.ro.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:45 PM")]
+    [Parser("RoliSoft", "2011-01-30 5:35 PM"), TestFixture]
     public class FileList : DownloadSearchEngine
     {
         /// <summary>
@@ -88,7 +90,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "browse.php?cat=14&searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
+            var html  = Utils.GetHTML(Site + "browse.php?searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
             var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
             
             if (links == null)
@@ -101,10 +103,10 @@
                 yield return new Link
                     {
                         Site    = Name,
-                        Release = node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText,
+                        Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText,
                         URL     = Site + node.GetNodeAttributeValue("../../../td[3]/a", "href"),
                         Size    = node.GetHtmlValue("../../../td[7]").Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("../title") != string.Empty ? node.GetAttributeValue("../title") : node.InnerText),
+                        Quality = ThePirateBay.ParseQuality(node.GetNodeAttributeValue("../", "title") ?? node.InnerText),
                         Type    = Types.Torrent
                     };
             }

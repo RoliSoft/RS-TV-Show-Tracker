@@ -5,9 +5,12 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping Hosszupuska Sub.
     /// </summary>
+    [TestFixture]
     public class Hosszupuska : SubtitleSearchEngine
     {
         /// <summary>

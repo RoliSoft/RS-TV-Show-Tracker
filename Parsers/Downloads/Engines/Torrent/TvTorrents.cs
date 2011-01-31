@@ -5,10 +5,12 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping tvtorrents.com.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:26 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:26 PM"), TestFixture]
     public class TvTorrents : DownloadSearchEngine
     {
         /// <summary>

@@ -2,12 +2,15 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using System.Text.RegularExpressions;
+
+    using NUnit.Framework;
 
     /// <summary>
     /// Provides support for scraping nCore.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:48 PM")]
+    [Parser("RoliSoft", "2011-01-31 4:45 PM"), TestFixture]
     public class NCore : DownloadSearchEngine
     {
         /// <summary>
@@ -89,7 +92,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies);
+            var html  = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Uri.EscapeUriString(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies, Encoding.GetEncoding("iso-8859-2"));
             var links = html.DocumentNode.SelectNodes("//a[starts-with(@onclick, 'torrent(')]");
 
             if (links == null)

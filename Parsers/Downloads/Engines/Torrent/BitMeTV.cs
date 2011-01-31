@@ -5,10 +5,12 @@
 
     using HtmlAgilityPack;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping BitMeTV.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-30 5:58 AM")]
+    [Parser("RoliSoft", "2011-01-30 5:58 AM"), TestFixture]
     public class BitMeTV : DownloadSearchEngine
     {
         /// <summary>
@@ -106,7 +108,7 @@
                         Release = HtmlEntity.DeEntitize(node.GetAttributeValue("title")),
                         URL     = Site + node.GetNodeAttributeValue("../td[1]/a", "href"),
                         Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.GetAttributeValue("title")).Replace((char)160, '.').Replace((char)32, '.')),
+                        Quality = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.GetAttributeValue("title"))),
                         Type    = Types.Torrent
                     };
             }

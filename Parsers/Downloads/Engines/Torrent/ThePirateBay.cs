@@ -5,10 +5,12 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping The Pirate Bay.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:46 PM")]
+    [Parser("RoliSoft", "2011-01-29 9:46 PM"), TestFixture]
     public class ThePirateBay : DownloadSearchEngine
     {
         /// <summary>
@@ -94,7 +96,7 @@
                         Release = node.InnerText,
                         URL     = node.GetNodeAttributeValue("../../a[1]", "href"),
                         Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty),
-                        Quality = ParseQuality(node.InnerText.Replace(' ', '.')),
+                        Quality = ParseQuality(node.InnerText),
                         Type    = Types.Torrent
                     };
             }
@@ -107,6 +109,8 @@
         /// <returns>Extracted quality or Unknown.</returns>
         public static Qualities ParseQuality(string release)
         {
+            release = release.Replace((char)160, '.').Replace((char)32, '.');
+
             if (IsMatch(release, @"\.1080(i|p)\.", @"\.WEB[_\-]?DL\."))
             {
                 return Qualities.WebDL1080p;
@@ -143,6 +147,7 @@
             {
                 return Qualities.TVRip;
             }
+
             return Qualities.Unknown;
         }
 

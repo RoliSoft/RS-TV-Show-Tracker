@@ -3,9 +3,12 @@
     using System;
     using System.Collections.Generic;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping Subscene.
     /// </summary>
+    [TestFixture]
     public class Subscene : SubtitleSearchEngine
     {
         /// <summary>
