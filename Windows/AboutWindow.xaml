@@ -12,7 +12,7 @@
                 <DropShadowEffect ShadowDepth="0" Color="YellowGreen" BlurRadius="10" />
             </Label.Effect>
         </Label>
-        <Label Name="site" Content="© {0} RoliSoft – lab.rolisoft.net" FontFamily="Cambria" FontSize="18" Foreground="White" Cursor="Hand" Margin="70,25,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
+        <Label Name="site" FontFamily="Cambria" FontSize="18" Foreground="White" Cursor="Hand" Margin="70,25,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
             <Label.Effect>
                 <DropShadowEffect ShadowDepth="0" Color="YellowGreen" BlurRadius="10" />
             </Label.Effect>

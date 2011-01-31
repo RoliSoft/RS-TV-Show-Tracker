@@ -22,14 +22,20 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void GlassWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
+        private unsafe void GlassWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
             if (AeroGlassCompositionEnabled)
             {
                 SetAeroGlassTransparency();
             }
 
-            site.Content = string.Format(site.Content.ToString(), DateTime.Now.Year);
+            var α = 2.9555336418361426e16m.ಠ_ಠ();
+            var β = 3.2651535392374867e16m.ಠ_ಠ();
+            var γ = new string((char*)&α, (int)(α%2), (int)(α%6));
+            var δ = new string((char*)&β, (int)(β%1), (int)(β%17));
+            var ε = γ + δ;
+
+            site.Content = "© " + DateTime.Now.Year + " " + ε + " – lab." + ε.ToLower() + ".net";
 
             info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss")
                       + "\r\nv" + Signature.Version + (Signature.IsDebug ? "-debug" : string.Empty) + (Signature.IsObfuscated ? "-public" : string.Empty);
