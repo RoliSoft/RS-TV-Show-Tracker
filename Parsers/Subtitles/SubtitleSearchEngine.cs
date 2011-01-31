@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
 
@@ -94,15 +93,13 @@
         {
             var list = Search("House S07E01").ToList();
 
-            Assert.Greater(list.Count, 0);
+            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for a popular show.");
 
-#if DEBUG
-            Debug.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
-            Debug.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");
-            Debug.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
-            list.ForEach(item => Debug.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), item.URL.CutIfLonger(60))));
-            Debug.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
-#endif
+            Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");
+            Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
+            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), item.URL.CutIfLonger(60))));
+            Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
         }
     }
 }

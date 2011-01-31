@@ -131,6 +131,7 @@
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Remote\API.cs" />
     <Compile Include="Remote\Objects.cs" />
+    <Compile Include="Remote\Tests.cs" />
     <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
     <Compile Include="UserControls\ListViews\LinkItem.cs" />
     <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />

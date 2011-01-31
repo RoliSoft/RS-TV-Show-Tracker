@@ -5,6 +5,8 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Represents a recommendation engine.
     /// </summary>
@@ -45,6 +47,23 @@
                         RecommendationError.Fire(this, "There was an error while getting the recommendations. Try again later.", ex);
                     }
                 }).Start();
+        }
+
+        /// <summary>
+        /// Tests the recommendation engine by requesting recommendations for "House, M.D.", "Chuck" and "Fringe".
+        /// </summary>
+        [Test]
+        public void TestRecommendation()
+        {
+            var list = GetList(new[] { "House, M.D.", "Chuck", "Fringe" }).ToList();
+
+            Assert.Greater(list.Count, 0);
+
+            Console.WriteLine("┌────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Recommended show                                   │");
+            Console.WriteLine("├────────────────────────────────────────────────────┤");
+            list.ForEach(item => Console.WriteLine("│ {0,-50} │".FormatWith(item.Name.Transliterate().CutIfLonger(50))));
+            Console.WriteLine("└────────────────────────────────────────────────────┘");
         }
     }
 }

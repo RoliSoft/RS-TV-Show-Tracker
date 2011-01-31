@@ -7,9 +7,12 @@
 
     using HtmlAgilityPack;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping EPGuides pages.
     /// </summary>
+    [TestFixture]
     public class EPGuides : Guide
     {
         private readonly Regex _infoRegex = new Regex(@"

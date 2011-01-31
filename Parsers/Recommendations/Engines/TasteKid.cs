@@ -5,9 +5,12 @@
     using System.Linq;
     using System.Xml.Linq;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for TasteKid's TV show recommendation service.
     /// </summary>
+    [TestFixture]
     public class TasteKid : RecommendationEngine
     {
         /// <summary>

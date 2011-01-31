@@ -6,9 +6,12 @@
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for the TVRage XML API.
     /// </summary>
+    [TestFixture]
     public class TVRage : Guide
     {
         private const string Key = "d3fGaRW6adgVgvVNMLa4";

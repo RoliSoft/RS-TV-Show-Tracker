@@ -5,9 +5,12 @@
     using System.Linq;
     using System.Xml.Linq;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for the service located at http://lab.rolisoft.net/tv/
     /// </summary>
+    [TestFixture(0)]
     public class RSTVShowRecommendation : RecommendationEngine
     {
         private readonly int _type;

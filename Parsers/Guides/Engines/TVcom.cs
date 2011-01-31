@@ -8,9 +8,12 @@
 
     using HtmlAgilityPack;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for scraping TV.com pages.
     /// </summary>
+    [TestFixture]
     public class TVcom : Guide
     {
         /// <summary>

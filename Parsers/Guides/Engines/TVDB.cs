@@ -6,9 +6,12 @@
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Provides support for the TVDB XML API.
     /// </summary>
+    [TestFixture]
     public class TVDB : Guide
     {
         private const string Key = "AB576C5FF150A8EE";
@@ -26,7 +29,7 @@
                     Title       = info.GetValue("SeriesName"),
                     Genre       = info.GetValue("Genre").Trim('|').Replace("|", ", "),
                     Description = info.GetValue("Overview"),
-                    Cover       = "http://thetvdb.com/banners/_cache/" + info.GetValue("poster"),
+                    Cover       = info.GetValue("poster"),
                     Airing      = !Regex.IsMatch(info.GetValue("Status"), "(Canceled|Ended)"),
                     AirTime     = info.GetValue("Airs_Time"),
                     AirDay      = info.GetValue("Airs_DayOfWeek"),
@@ -34,6 +37,11 @@
                     Runtime     = info.GetValue("Runtime").ToInteger(),
                     Episodes    = new List<TVShow.Episode>()
                 };
+
+            if (!string.IsNullOrWhiteSpace(show.Cover))
+            {
+                show.Cover = "http://thetvdb.com/banners/_cache/" + show.Cover;
+            }
 
             show.Runtime = show.Runtime == 30
                            ? 20
@@ -60,7 +68,7 @@
                                   : Utils.UnixEpoch,
                         Title   = ep.GetValue("EpisodeName"),
                         Summary = ep.GetValue("Overview"),
-                        Picture = (pic = ep.GetValue("filename")) != null
+                        Picture = !string.IsNullOrWhiteSpace(pic = ep.GetValue("filename"))
                                   ? "http://thetvdb.com/banners/_cache/" + pic
                                   : null
                     });
