@@ -170,7 +170,6 @@
     <Compile Include="Windows\CookieCatcherWindow.xaml.cs">
       <DependentUpon>CookieCatcherWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\ListViews\AboutWindowExt.cs" />
     <Compile Include="Windows\SendFeedbackWindow.xaml.cs">
       <DependentUpon>SendFeedbackWindow.xaml</DependentUpon>
     </Compile>

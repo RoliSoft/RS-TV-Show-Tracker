@@ -29,8 +29,8 @@
                 SetAeroGlassTransparency();
             }
 
-            var α = 2.9555336418361426e16m.ಠ_ಠ();
-            var β = 3.2651535392374867e16m.ಠ_ಠ();
+            var α = (UInt64)2.9555336418361426e16m;
+            var β = (UInt64)3.2651535392374867e16m;
             var γ = new string((char*)&α, (int)(α%2), (int)(α%6));
             var δ = new string((char*)&β, (int)(β%1), (int)(β%17));
             var ε = γ + δ;
