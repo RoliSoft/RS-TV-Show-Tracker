@@ -7,7 +7,6 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Windows;
-    using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Media.Animation;
 
@@ -20,7 +19,7 @@
     /// <summary>
     /// Interaction logic for OverviewPage.xaml
     /// </summary>
-    public partial class OverviewPage : UserControl, IRefreshable
+    public partial class OverviewPage : IRefreshable
     {
         /// <summary>
         /// Gets or sets the date when this control was loaded.
@@ -397,7 +396,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void ListViewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
 
@@ -610,7 +609,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
-        public void ListViewKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        public void ListViewKeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
 

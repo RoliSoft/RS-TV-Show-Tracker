@@ -1,12 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Text;
     using System.Threading.Tasks;
     using System.Windows;
 
     using Microsoft.WindowsAPICodePack.Dialogs;
-    using Microsoft.WindowsAPICodePack.Shell;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Remote;
@@ -14,7 +12,7 @@
     /// <summary>
     /// Interaction logic for SendFeedbackWindow.xaml
     /// </summary>
-    public partial class SendFeedbackWindow : GlassWindow
+    public partial class SendFeedbackWindow
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SendFeedbackWindow"/> class.
@@ -69,9 +67,9 @@
             var name    = nameTextBox.Text;
             var email   = emailTextBox.Text;
             var message = messageTextBox.Text;
-            var type    = ideaRadioButton.IsChecked.Value
+            var type    = ideaRadioButton.IsChecked.HasValue && ideaRadioButton.IsChecked.Value
                           ? "idea"
-                          : bugRadioButton.IsChecked.Value
+                          : bugRadioButton.IsChecked.HasValue && bugRadioButton.IsChecked.Value
                             ? "bug"
                             : "other";
 

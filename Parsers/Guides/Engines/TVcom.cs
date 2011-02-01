@@ -67,9 +67,10 @@
                 return show;
             }
 
-            DateTime dt;
             foreach (var episode in episodes.Reverse())
             {
+                DateTime dt;
+
                 var meta   = episode.GetTextValue(".//div[@class='meta']");
                 var season = Regex.Match(meta, "Season ([0-9]+)");
                 var epnr   = Regex.Match(meta, "Episode ([0-9]+)");

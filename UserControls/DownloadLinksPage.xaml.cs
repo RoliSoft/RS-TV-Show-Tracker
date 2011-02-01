@@ -27,7 +27,7 @@
     /// <summary>
     /// Interaction logic for DownloadLinksPage.xaml
     /// </summary>
-    public partial class DownloadLinksPage : UserControl
+    public partial class DownloadLinksPage
     {
         /// <summary>
         /// Gets or sets the name of the specified torrent downloader.
@@ -420,43 +420,44 @@
 
             var links = new List<LinkItem>(_results);
 
-            if (header.Content.ToString() == "Site")
+            switch (header.Content.ToString())
             {
-                if (direction == ListSortDirection.Ascending)
-                {
-                    links = links
-                            .OrderBy(link => _trackers.IndexOf(link.Site))
-                            .ThenBy(link => _qualities.IndexOf(link.Quality.ToString()))
+                case "Site":
+                    if (direction == ListSortDirection.Ascending)
+                    {
+                        links = links
+                            .OrderBy(link => this._trackers.IndexOf(link.Site))
+                            .ThenBy(link => this._qualities.IndexOf(link.Quality.ToString()))
                             .ToList();
-                }
-                else
-                {
-                    links = links
-                            .OrderByDescending(link => _trackers.IndexOf(link.Site))
-                            .ThenBy(link => _qualities.IndexOf(link.Quality.ToString()))
+                    }
+                    else
+                    {
+                        links = links
+                            .OrderByDescending(link => this._trackers.IndexOf(link.Site))
+                            .ThenBy(link => this._qualities.IndexOf(link.Quality.ToString()))
                             .ToList();
-                }
-            }
-            else if (header.Content.ToString() == "Quality")
-            {
-                if (direction == ListSortDirection.Ascending)
-                {
-                    links = links
-                            .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
-                            .ThenBy(link => _trackers.IndexOf(link.Site))
+                    }
+                    break;
+
+                case "Quality":
+                    if (direction == ListSortDirection.Ascending)
+                    {
+                        links = links
+                            .OrderBy(link => this._qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => this._trackers.IndexOf(link.Site))
                             .ToList();
-                }
-                else
-                {
-                    links = links
-                            .OrderByDescending(link => _qualities.IndexOf(link.Quality.ToString()))
-                            .ThenBy(link => _trackers.IndexOf(link.Site))
+                    }
+                    else
+                    {
+                        links = links
+                            .OrderByDescending(link => this._qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => this._trackers.IndexOf(link.Site))
                             .ToList();
-                }
-            }
-            else
-            {
-                return;
+                    }
+                    break;
+
+                default:
+                    return;
             }
 
             _lastClickedHeader = header;
@@ -553,7 +554,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.ComponentModel.AsyncCompletedEventArgs"/> instance containing the event data.</param>
-        private void WebClientDownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        private void WebClientDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             var web   = sender as Utils.SmarterWebClient;
             var token = e.UserState as string[];

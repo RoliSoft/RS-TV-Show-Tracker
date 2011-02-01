@@ -140,9 +140,6 @@
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\ActivateBetaWindow.xaml.cs">
-      <DependentUpon>ActivateBetaWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="BackgroundTasks.cs" />
     <Compile Include="Windows\AddNewWindow.xaml.cs">
       <DependentUpon>AddNewWindow.xaml</DependentUpon>
@@ -212,10 +209,6 @@
     <Compile Include="Update.cs" />
     <Compile Include="Utils.cs" />
     <Page Include="Windows\AboutWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Windows\ActivateBetaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

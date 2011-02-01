@@ -45,10 +45,11 @@
                              ? 40
                              : show.Runtime;
 
-            DateTime dt;
-            int sn;
             foreach (var ep in list.Descendants("episode"))
             {
+                DateTime dt;
+                int sn;
+
                 try { sn = ep.Parent.Attribute("no").Value.ToInteger(); } catch { continue; }
 
                 show.Episodes.Add(new TVShow.Episode

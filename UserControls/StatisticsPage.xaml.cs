@@ -3,12 +3,11 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Windows;
-    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for StatisticsPage.xaml
     /// </summary>
-    public partial class StatisticsPage : UserControl, IRefreshable
+    public partial class StatisticsPage : IRefreshable
     {
         /// <summary>
         /// Gets or sets the date when this control was loaded.

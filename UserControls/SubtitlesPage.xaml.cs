@@ -20,7 +20,7 @@
     /// <summary>
     /// Interaction logic for SubtitlesPage.xaml
     /// </summary>
-    public partial class SubtitlesPage : UserControl
+    public partial class SubtitlesPage
     {
         /// <summary>
         /// Gets or sets the subtitles list view item collection.

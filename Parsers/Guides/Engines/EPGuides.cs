@@ -106,9 +106,10 @@
                 throw new Exception("Failed to extract the listing. Maybe the EPGuides.com regex is out of date.");
             }
 
-            DateTime dt;
             foreach(Match m in mc)
             {
+                DateTime dt;
+
                 show.Episodes.Add(new TVShow.Episode
                     {
                         Season  = m.Groups["season"].Value.Trim().ToInteger(),

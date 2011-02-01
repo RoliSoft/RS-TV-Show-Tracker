@@ -49,11 +49,12 @@
                              ? 40
                              : show.Runtime;
 
-            DateTime dt;
-            int sn;
-            string pic;
             foreach (var ep in info.Descendants("Episode"))
             {
+                DateTime dt;
+                int sn;
+                string pic;
+
                 if ((sn = ep.GetValue("SeasonNumber").ToInteger()) == 0)
                 {
                     continue;

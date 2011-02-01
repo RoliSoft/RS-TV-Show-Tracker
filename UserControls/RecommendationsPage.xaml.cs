@@ -20,7 +20,7 @@
     /// <summary>
     /// Interaction logic for RecommendationsPage.xaml
     /// </summary>
-    public partial class RecommendationsPage : UserControl
+    public partial class RecommendationsPage
     {
         /// <summary>
         /// Gets or sets the recommendations list view item collection.
@@ -95,7 +95,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void ComboBoxDropDownOpened(object sender, System.EventArgs e)
+        private void ComboBoxDropDownOpened(object sender, EventArgs e)
         {
             listView.Visibility = statusLabel.Visibility = Visibility.Hidden;
         }
@@ -105,7 +105,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void ComboBoxDropDownClosed(object sender, System.EventArgs e)
+        private void ComboBoxDropDownClosed(object sender, EventArgs e)
         {
             listView.Visibility = statusLabel.Visibility = Visibility.Visible;
         }

@@ -7,7 +7,6 @@
     using System.Windows.Controls;
 
     using Microsoft.WindowsAPICodePack.Dialogs;
-    using Microsoft.WindowsAPICodePack.Shell;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -16,10 +15,10 @@
     /// <summary>
     /// Interaction logic for AddNewWindow.xaml
     /// </summary>
-    public partial class AddNewWindow : GlassWindow
+    public partial class AddNewWindow
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ActivateBetaWindow"/> class.
+        /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
         /// </summary>
         public AddNewWindow()
         {

@@ -26,7 +26,7 @@
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         /// <summary>
         /// Gets or sets the active main window.
@@ -269,7 +269,7 @@
                 _statusTimer.Stop();
             }
 
-            var last = 0d;
+            double last;
             if (!double.TryParse(Database.Setting("last update"), out last))
             {
                 Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = string.Empty; }));
@@ -384,13 +384,13 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         public void UpdateDatabaseClick(object sender = null, RoutedEventArgs e = null)
         {
-            var update = new Updater();
+            var updater = new Updater();
 
-            update.UpdateProgressChanged += UpdateProgressChanged;
-            update.UpdateDone            += UpdateDone;
-            update.UpdateError           += UpdateError;
+            updater.UpdateProgressChanged += UpdateProgressChanged;
+            updater.UpdateDone            += UpdateDone;
+            updater.UpdateError           += UpdateError;
 
-            update.UpdateAsync();
+            updater.UpdateAsync();
         }
 
         /// <summary>
@@ -431,16 +431,6 @@
         private void ConfigureSoftwareClick(object sender, RoutedEventArgs e)
         {
             new SettingsWindow().ShowDialog();
-        }
-
-        /// <summary>
-        /// Handles the Click event of the ActivateBetaFeatures control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void ActivateBetaFeaturesClick(object sender, RoutedEventArgs e)
-        {
-            new ActivateBetaWindow().ShowDialog();
         }
 
         /// <summary>
@@ -639,7 +629,7 @@
         /// Reports the parsed exception silently and asynchronously to lab.rolisoft.net.
         /// </summary>
         /// <param name="ex">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
-        private void ReportException(string ex)
+        private static void ReportException(string ex)
         {
             new Task(() => { try { API.ReportError(ex); } catch { } }).Start();
         }

@@ -68,7 +68,7 @@
                     StartInfo           =
                         {
                             FileName               = process,
-                            Arguments              = arguments,
+                            Arguments              = arguments ?? string.Empty,
                             UseShellExecute        = false,
                             RedirectStandardOutput = true,
                             RedirectStandardError  = true,

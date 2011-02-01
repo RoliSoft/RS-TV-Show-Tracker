@@ -19,7 +19,7 @@
     /// <summary>
     /// Interaction logic for GuidesPage.xaml
     /// </summary>
-    public partial class GuidesPage : UserControl, IRefreshable
+    public partial class GuidesPage : IRefreshable
     {
         /// <summary>
         /// Gets or sets the date when this control was loaded.
@@ -150,7 +150,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void ComboBoxDropDownOpened(object sender, System.EventArgs e)
+        private void ComboBoxDropDownOpened(object sender, EventArgs e)
         {
             // the dropdown's background is transparent and if it opens while the guide listview
             // is populated, then you won't be able to read the show names due to the mess
@@ -164,7 +164,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void ComboBoxDropDownClosed(object sender, System.EventArgs e)
+        private void ComboBoxDropDownClosed(object sender, EventArgs e)
         {
             tabControl.Visibility = statusLabel.Visibility = Visibility.Visible;
         }

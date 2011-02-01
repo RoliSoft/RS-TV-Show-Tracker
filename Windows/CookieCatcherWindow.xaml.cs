@@ -11,14 +11,12 @@
 
     using WebBrowser = System.Windows.Forms.WebBrowser;
 
-    using Microsoft.WindowsAPICodePack.Shell;
-
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
     /// Interaction logic for CookieCatcherWindow.xaml
     /// </summary>
-    public partial class CookieCatcherWindow : GlassWindow
+    public partial class CookieCatcherWindow
     {
         /// <summary>
         /// Gets or sets the engine edited on this window.

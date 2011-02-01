@@ -97,7 +97,7 @@
         public static Languages ParseLanguage(string language)
         {
             language = Regex.Replace(language, @"\s?\(.+\)", string.Empty);
-            var detected = Languages.Unknown;
+            Languages detected;
             Enum.TryParse(language, out detected);
             return detected;
         }

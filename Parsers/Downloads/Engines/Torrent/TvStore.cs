@@ -252,20 +252,13 @@
             {
                 return ShowIDs[id];
             }
-            else
-            {
-                // try to refresh
-                GetIDs();
 
-                if (ShowIDs.ContainsKey(id))
-                {
-                    return ShowIDs[id];
-                }
-                else
-                {
-                    return "ID-" + id;
-                }
-            }
+            // try to refresh
+            GetIDs();
+
+            return ShowIDs.ContainsKey(id)
+                   ? ShowIDs[id]
+                   : "ID-" + id;
         }
     }
 }

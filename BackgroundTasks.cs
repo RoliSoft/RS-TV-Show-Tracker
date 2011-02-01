@@ -62,7 +62,7 @@
         /// </summary>
         public static void CheckUpdate()
         {
-            var last = 0d;
+            double last;
             double.TryParse(Database.Setting("last update"), out last);
 
             if ((DateTime.Now - last.GetUnixTimestamp()).TotalHours > 10)

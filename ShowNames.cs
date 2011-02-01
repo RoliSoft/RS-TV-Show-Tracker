@@ -114,18 +114,13 @@
                                         )",
                                   RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
-            if (m.Success)
-            {
-                return new ShowEpisode 
-                    {
-                        Season  = m.Groups["s"].Value.ToInteger(),
-                        Episode = m.Groups["e"].Value.ToInteger()
-                    };
-            }
-            else
-            {
-                return null;
-            }
+            return m.Success
+                   ? new ShowEpisode
+                       {
+                           Season  = m.Groups["s"].Value.ToInteger(),
+                           Episode = m.Groups["e"].Value.ToInteger()
+                       }
+                   : null;
         }
 
         /// <summary>

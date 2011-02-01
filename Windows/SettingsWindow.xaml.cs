@@ -10,7 +10,6 @@
     using System.Windows.Forms;
 
     using Microsoft.Win32;
-    using Microsoft.WindowsAPICodePack.Shell;
 
     using RoliSoft.TVShowTracker.Parsers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -21,7 +20,7 @@
     /// <summary>
     /// Interaction logic for SettingsWindow.xaml
     /// </summary>
-    public partial class SettingsWindow : GlassWindow
+    public partial class SettingsWindow
     {
 
         /// <summary>

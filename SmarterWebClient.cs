@@ -15,19 +15,11 @@
         /// </summary>
         public class SmarterWebClient : WebClient
         {
-            Uri _responseUri;
-
             /// <summary>
             /// Gets the final URL.
             /// </summary>
             /// <value>The response URI.</value>
-            public Uri ResponseUri
-            {
-                get
-                {
-                    return _responseUri;
-                }
-            }
+            public Uri ResponseUri { get; private set; }
 
             /// <summary>
             /// Gets the name of the file.
@@ -49,7 +41,7 @@
                     }
 
                     // try to get the file name from the last URL
-                    return new FileInfo(_responseUri.LocalPath).Name;
+                    return new FileInfo(ResponseUri.LocalPath).Name;
                 }
             }
 
@@ -63,7 +55,7 @@
             protected override WebResponse GetWebResponse(WebRequest request)
             {
                 var response = base.GetWebResponse(request);
-                _responseUri = response.ResponseUri;
+                this.ResponseUri = response.ResponseUri;
                 return response;
             }
 
@@ -78,7 +70,7 @@
             protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
             {
                 var response = base.GetWebResponse(request);
-                _responseUri = response.ResponseUri;
+                this.ResponseUri = response.ResponseUri;
                 return response;
             }
         }

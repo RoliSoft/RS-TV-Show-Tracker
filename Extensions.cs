@@ -289,14 +289,9 @@
         /// <returns>DateTime in local timezone.</returns>
         public static DateTime ToLocalTimeZone(this DateTime date, string source = "Central Standard Time")
         {
-            if (Settings.Get("Convert Timezone", true))
-            {
-                return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local);
-            }
-            else
-            {
-                return date;
-            }
+            return Settings.Get("Convert Timezone", true)
+                   ? TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local)
+                   : date;
         }
 
         /// <summary>
