@@ -81,7 +81,7 @@
         public IEnumerable<Link> Search(string query)
         {
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query = ShowNames.Normalize(query);
+            query = ShowNames.Tools.Normalize(query);
 
             // start in parallel
             var tasks = SearchEngines.Select(engine => Task<IEnumerable<Link>>.Factory.StartNew(() =>
@@ -110,7 +110,7 @@
         public void SearchAsync(string query)
         {
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query      = ShowNames.Normalize(query);
+            query      = ShowNames.Tools.Normalize(query);
 
             SearchEngines.ForEach(engine => engine.SearchAsync(query));
         }

@@ -52,7 +52,7 @@
 
             foreach (var node in subs)
             {
-                if(!ShowNames.IsMatch(query, node.SelectSingleNode("span[2]").InnerText.Trim()))
+                if(!ShowNames.Tools.IsMatch(query, node.SelectSingleNode("span[2]").InnerText.Trim()))
                 {
                     continue;
                 }

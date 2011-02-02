@@ -37,7 +37,7 @@
 
             foreach (var link in links)
             {
-                var ep = ShowNames.ExtractEpisode(link.Release);
+                var ep = ShowNames.Tools.ExtractEpisode(link.Release);
 
                 if (ep != null)
                 {

@@ -85,7 +85,7 @@
         /// <returns>ID.</returns>
         public override string GetID(string name)
         {
-            var txt = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname=" + Uri.EscapeUriString(ShowNames.Normalize(name)));
+            var txt = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(name)));
             var id  = txt.Descendants("Series").First().Element("seriesid").Value;
             return id;
         }

@@ -92,7 +92,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var show  = ShowNames.Split(query)[0];
+            var show  = ShowNames.Tools.Split(query)[0];
             var html  = Utils.GetHTML(Site + "loggedin/search.do?search=" + Uri.EscapeUriString(show), cookies: Cookies);
             var links = html.DocumentNode.SelectNodes("//table[2]/tr/td[3]");
 
@@ -103,7 +103,7 @@
 
             var hash    = Regex.Match(html.DocumentNode.InnerHtml, "hash='(.*?)';").Groups[1].Value;
             var digest  = Regex.Match(html.DocumentNode.InnerHtml, "digest='(.*?)';").Groups[1].Value;
-            var episode = ShowNames.ExtractEpisode(query, 1);
+            var episode = ShowNames.Tools.ExtractEpisode(query, "{0:0}x{1:00}");
             
             foreach (var node in links)
             {

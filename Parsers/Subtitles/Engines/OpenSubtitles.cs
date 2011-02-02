@@ -62,7 +62,7 @@
 
             foreach (XmlRpcStruct data in search["data"] as object[])
             {
-                if (!ShowNames.IsMatch(query, data["SubFileName"].ToString()))
+                if (!ShowNames.Tools.IsMatch(query, data["SubFileName"].ToString()))
                 {
                     continue;
                 }

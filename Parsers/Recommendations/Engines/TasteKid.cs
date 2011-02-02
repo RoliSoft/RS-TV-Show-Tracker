@@ -7,6 +7,8 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.ShowNames;
+
     /// <summary>
     /// Provides support for TasteKid's TV show recommendation service.
     /// </summary>
@@ -20,7 +22,7 @@
         /// <returns>Recommended shows list.</returns>
         public override IEnumerable<RecommendedShow> GetList(IEnumerable<string> shows)
         {
-            var kid = XDocument.Load("http://www.tastekid.com/ask/ws?verbose=1&q=" + shows.Aggregate(String.Empty, (current, r) => current + (Uri.EscapeUriString(ShowNames.Normalize(r).Replace(",", String.Empty)) + ",")).TrimEnd(','));
+            var kid = XDocument.Load("http://www.tastekid.com/ask/ws?verbose=1&q=" + shows.Aggregate(String.Empty, (current, r) => current + (Uri.EscapeUriString(Tools.Normalize(r).Replace(",", String.Empty)) + ",")).TrimEnd(','));
 
             return kid.Descendants("results").Descendants("resource")
                    .Where(item => !shows.Contains(item.Descendants("name").First().Value, new ShowEqualityComparer()))

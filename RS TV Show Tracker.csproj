@@ -133,6 +133,10 @@
     <Compile Include="Remote\API.cs" />
     <Compile Include="Remote\Objects.cs" />
     <Compile Include="Remote\Tests.cs" />
+    <Compile Include="ShowNames\Regexes.cs" />
+    <Compile Include="ShowNames\ShowEpisode.cs" />
+    <Compile Include="ShowNames\ShowEqualityComparer.cs" />
+    <Compile Include="ShowNames\Tests.cs" />
     <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
     <Compile Include="UserControls\ListViews\LinkItem.cs" />
     <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />
@@ -174,7 +178,7 @@
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ShowNames.cs" />
+    <Compile Include="ShowNames\Tools.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TvTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TvTorrentsRo.cs" />
     <Compile Include="Parsers\Downloads\DownloadSearchEngine.cs" />
