@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 
 [assembly: Obfuscation(Feature = "code control flow obfuscation", Exclude = false)]
+[assembly: Obfuscation(Feature = "anonymous type properties renaming", Exclude = true)]
 //[assembly: Obfuscation(Feature = "rename symbol names with printable characters", Exclude = false)]
 
 [assembly: Obfuscation(Feature = "Apply to RoliSoft.TVShowTracker.Remote.Objects.*: renaming", Exclude = true, ApplyToMembers = true)]

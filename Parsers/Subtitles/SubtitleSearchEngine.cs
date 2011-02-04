@@ -95,11 +95,11 @@
         /// Tests the parser by searching for "House S07E01" on the site.
         /// </summary>
         [Test]
-        public void TestSearch()
+        public virtual void TestSearch()
         {
             var list = Search("House S07E01").ToList();
 
-            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for a popular show.");
+            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House S07E01 on {0}.".FormatWith(Name));
 
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");

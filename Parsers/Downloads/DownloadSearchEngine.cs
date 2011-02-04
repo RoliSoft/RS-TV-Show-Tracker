@@ -119,7 +119,7 @@
         /// Tests the parser by searching for "House" on the tracker.
         /// </summary>
         [Test]
-        public void TestSearch()
+        public virtual void TestSearch()
         {
             if (Private)
             {
@@ -133,7 +133,7 @@
 
             var list = Search("House").ToList();
 
-            Assert.Greater(list.Count, 0, "Failed to grab any download links for a popular show.");
+            Assert.Greater(list.Count, 0, "Failed to grab any download links for House on {0}.".FormatWith(Name));
 
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Size       │ Quality    │ URL                                                          │");
