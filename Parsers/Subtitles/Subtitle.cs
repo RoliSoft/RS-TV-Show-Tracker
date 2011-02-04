@@ -6,10 +6,10 @@
     public class Subtitle
     {
         /// <summary>
-        /// Gets or sets the name of the site.
+        /// Gets the source of the subtitle.
         /// </summary>
         /// <value>The site.</value>
-        public string Site { get; set; }
+        public SubtitleSearchEngine Source { get; internal set; }
 
         /// <summary>
         /// Gets or sets the release name.
@@ -40,8 +40,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Subtitle"/> class.
         /// </summary>
-        public Subtitle()
+        /// <param name="source">The source of the subtitle.</param>
+        public Subtitle(SubtitleSearchEngine source)
         {
+            Source       = source;
             IsLinkDirect = true;
         }
     }

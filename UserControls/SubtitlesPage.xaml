@@ -35,7 +35,7 @@
                         <GridViewColumnHeader Content="Site" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Site}" TextTrimming="CharacterEllipsis" Width="100" Margin="-7,0" TextAlignment="Center" />
+                                <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="100" Margin="-7,0" TextAlignment="Center" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

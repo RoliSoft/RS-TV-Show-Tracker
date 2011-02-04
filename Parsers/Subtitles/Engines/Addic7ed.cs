@@ -86,18 +86,18 @@
 
             foreach (var node in subs)
             {
-                yield return new Subtitle
-                    {
-                        Site     = Name,
-                        Release  = head[0] + " " + head[1] + " - "
-                                   + node.GetTextValue("../../../tr/td[contains(text(),'Version')]").Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
-                                   + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
-                                   + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null ? " - corrected" : string.Empty)
-                                   + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]") != null ? " - HI" : string.Empty)
-                                   + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty),
-                        Language = ParseLanguage(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim()),
-                        URL      = Site.TrimEnd('/') + node.GetAttributeValue("href")
-                    };
+                var sub = new Subtitle(this);
+
+                sub.Release  = head[0] + " " + head[1] + " - "
+                             + node.GetTextValue("../../../tr/td[contains(text(),'Version')]").Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
+                             + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]")    != null ? "/HD"          : string.Empty)
+                             + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null ? " - corrected" : string.Empty)
+                             + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]")    != null ? " - HI"        : string.Empty)
+                             + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty);
+                sub.Language = ParseLanguage(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
+                sub.URL      = Site.TrimEnd('/') + node.GetAttributeValue("href");
+
+                yield return sub;
             }
         }
 

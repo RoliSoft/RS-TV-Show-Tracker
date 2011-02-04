@@ -64,13 +64,13 @@
 
             foreach (var node in subs)
             {
-                yield return new Subtitle
-                    {
-                        Site     = Name,
-                        Release  = node.GetTextValue("td[2]/a").Trim(),
-                        Language = ParseLanguage(node.GetTextValue("td[4]").Trim()),
-                        URL      = Site + node.GetNodeAttributeValue("td[6]/a", "href")
-                    };
+                var sub = new Subtitle(this);
+
+                sub.Release  = node.GetTextValue("td[2]/a").Trim();
+                sub.Language = ParseLanguage(node.GetTextValue("td[4]").Trim());
+                sub.URL      = Site + node.GetNodeAttributeValue("td[6]/a", "href");
+
+                yield return sub;
             }
         }
 

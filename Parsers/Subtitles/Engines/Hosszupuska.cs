@@ -66,13 +66,13 @@
 
             foreach (var node in subs)
             {
-                yield return new Subtitle
-                    {
-                        Site     = Name,
-                        Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty),
-                        Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty)),
-                        URL      = Site + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty)
-                    };
+                var sub = new Subtitle(this);
+
+                sub.Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty);
+                sub.Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty));
+                sub.URL      = Site + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty);
+
+                yield return sub;
             }
         }
 

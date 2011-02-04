@@ -79,13 +79,13 @@
                     continue;
                 }
 
-                yield return new Subtitle
-                    {
-                        Site     = Name,
-                        Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty),
-                        Language = Addic7ed.ParseLanguage(data["LanguageName"].ToString()),
-                        URL      = data["ZipDownloadLink"].ToString()
-                    };
+                var sub = new Subtitle(this);
+
+                sub.Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty);
+                sub.Language = Addic7ed.ParseLanguage(data["LanguageName"].ToString());
+                sub.URL      = data["ZipDownloadLink"].ToString();
+
+                yield return sub;
             }
         }
 
