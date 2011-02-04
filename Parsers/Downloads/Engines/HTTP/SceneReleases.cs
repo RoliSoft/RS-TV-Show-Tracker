@@ -92,16 +92,15 @@
 
             foreach (var node in links)
             {
-                yield return new Link
-                    {
-                        Site         = Name,
-                        Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & "),
-                        URL          = node.GetAttributeValue("href"),
-                        Size         = "N/A",
-                        Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.')),
-                        Type         = Types.HTTP,
-                        IsLinkDirect = false
-                    };
+                var link = new Link(this);
+
+                link.Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & ");
+                link.URL          = node.GetAttributeValue("href");
+                link.Size         = "N/A";
+                link.Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.'));
+                link.IsLinkDirect = false;
+
+                yield return link;
             }
         }
     }

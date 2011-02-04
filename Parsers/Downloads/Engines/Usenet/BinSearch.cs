@@ -93,16 +93,15 @@
 
             foreach (var node in links)
             {
-                yield return new Link
-                    {
-                        Site         = Name,
-                        Release      = HtmlEntity.DeEntitize(node.InnerText),
-                        URL          = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href")),
-                        Size         = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value,
-                        Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.')),
-                        Type         = Types.Usenet,
-                        IsLinkDirect = false
-                    };
+                var link = new Link(this);
+
+                link.Release      = HtmlEntity.DeEntitize(node.InnerText);
+                link.URL          = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
+                link.Size         = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value;
+                link.Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.'));
+                link.IsLinkDirect = false;
+
+                yield return link;
             }
         }
     }

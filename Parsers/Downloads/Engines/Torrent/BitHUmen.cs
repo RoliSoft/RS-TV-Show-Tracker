@@ -101,15 +101,14 @@
 
             foreach (var node in links)
             {
-                yield return new Link
-                    {
-                        Site    = Name,
-                        Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText,
-                        URL     = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href"),
-                        Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " "),
-                        Quality = ThePirateBay.ParseQuality(node.GetNodeAttributeValue("../", "title") ?? node.InnerText),
-                        Type    = Types.Torrent
-                    };
+                var link = new Link(this);
+
+                link.Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText;
+                link.URL     = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href");
+                link.Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " ");
+                link.Quality = ThePirateBay.ParseQuality(node.GetNodeAttributeValue("../", "title") ?? node.InnerText);
+
+                yield return link;
             }
         }
     }

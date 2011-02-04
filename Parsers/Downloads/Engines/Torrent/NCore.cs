@@ -102,15 +102,14 @@
 
             foreach (var node in links)
             {
-                yield return new Link
-                    {
-                        Site    = Name,
-                        Release = node.GetAttributeValue("title"),
-                        URL     = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value,
-                        Size    = node.GetTextValue("../../../../div[@class='box_meret2']/text()").Trim(),
-                        Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title")),
-                        Type    = Types.Torrent
-                    };
+                var link = new Link(this);
+
+                link.Release = node.GetAttributeValue("title");
+                link.URL     = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
+                link.Size    = node.GetTextValue("../../../../div[@class='box_meret2']/text()").Trim();
+                link.Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title"));
+
+                yield return link;
             }
         }
     }

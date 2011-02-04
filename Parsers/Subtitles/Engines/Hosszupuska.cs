@@ -10,6 +10,13 @@
     /// <summary>
     /// Provides support for scraping Hosszupuska Sub.
     /// </summary>
+    /// <remarks>
+    /// WARNING!
+    /// Hosszupuskasub.com currently is not accessable from outside Hungary.
+    /// It either resolves to 127.0.0.1 or shows a "Hamarosan..." page with HTTP 403 status code.
+    /// If I can't access the page anymore, I can't maintain the plugin either, which means,
+    /// if they continue to fuck off everyone outside Hungary, the plugin will be permanently removed.
+    /// </remarks>
     [TestFixture]
     public class Hosszupuska : SubtitleSearchEngine
     {

@@ -115,7 +115,7 @@
 
             for (;idx <= (arr.Length - 10);)
             {
-                var link = new Link { Site = Name };
+                var link = new Link(this);
                 var name = GetShowForID(arr[idx].Trim().ToInteger());
 
                 idx++;

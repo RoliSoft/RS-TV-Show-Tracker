@@ -8,10 +8,10 @@
     public class Link
     {
         /// <summary>
-        /// Gets or sets the name of the site.
+        /// Gets the source of the download link.
         /// </summary>
         /// <value>The site.</value>
-        public string Site { get; set; }
+        public DownloadSearchEngine Source { get; internal set; }
 
         /// <summary>
         /// Gets or sets the release name.
@@ -32,12 +32,6 @@
         public string Size { get; set; }
 
         /// <summary>
-        /// Gets or sets the type of the URL.
-        /// </summary>
-        /// <value>The type.</value>
-        public Types Type { get; set; }
-
-        /// <summary>
         /// Gets or sets the URL to the subtitle.
         /// </summary>
         /// <value>The URL.</value>
@@ -54,8 +48,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Link"/> class.
         /// </summary>
-        public Link()
+        /// <param name="source">The source of this download link.</param>
+        public Link(DownloadSearchEngine source)
         {
+            Source       = source;
             IsLinkDirect = true;
         }
     }

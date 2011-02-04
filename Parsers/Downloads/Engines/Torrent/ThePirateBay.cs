@@ -90,15 +90,14 @@
 
             foreach (var node in links)
             {
-                yield return new Link
-                    {
-                        Site    = Name,
-                        Release = node.InnerText,
-                        URL     = node.GetNodeAttributeValue("../../a[1]", "href"),
-                        Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty),
-                        Quality = ParseQuality(node.InnerText),
-                        Type    = Types.Torrent
-                    };
+                var link = new Link(this);
+
+                link.Release = node.InnerText;
+                link.URL     = node.GetNodeAttributeValue("../../a[1]", "href");
+                link.Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty);
+                link.Quality = ParseQuality(node.InnerText);
+
+                yield return link;
             }
         }
 

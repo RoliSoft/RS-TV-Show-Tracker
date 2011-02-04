@@ -13,15 +13,13 @@
         /// Initializes a new instance of the <see cref="LinkItem"/> class.
         /// </summary>
         /// <param name="link">The link.</param>
-        public LinkItem(Link link)
+        public LinkItem(Link link) : base(link.Source)
         {
             // unfortunately .NET doesn't support upcasting, so we need to do it the hard way
 
-            Site         = link.Site;
             Release      = link.Release;
             Quality      = link.Quality;
             Size         = link.Size;
-            Type         = link.Type;
             URL          = link.URL;
             IsLinkDirect = link.IsLinkDirect;
         }
@@ -34,7 +32,7 @@
         {
             get
             {
-                switch (Type)
+                switch (Source.Type)
                 {
                     case Types.Torrent:
                         return "/RSTVShowTracker;component/Images/torrent.png";
@@ -68,7 +66,7 @@
         {
             get
             {
-                return Type == Types.HTTP || !IsLinkDirect ? "Visible" : "Collapsed";
+                return Source.Type == Types.HTTP || !IsLinkDirect ? "Visible" : "Collapsed";
             }
         }
 
@@ -80,7 +78,7 @@
         {
             get
             {
-                return Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
+                return Source.Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
             }
         }
 
@@ -92,7 +90,7 @@
         {
             get
             {
-                return Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
+                return Source.Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
             }
         }
 
@@ -104,7 +102,7 @@
         {
             get
             {
-                return Type == Types.Torrent && IsLinkDirect && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
+                return Source.Type == Types.Torrent && IsLinkDirect && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
             }
         }
     }

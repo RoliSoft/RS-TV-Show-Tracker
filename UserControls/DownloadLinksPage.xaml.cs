@@ -341,7 +341,7 @@
                         DownloadLinksListViewItemCollection.Clear();
                         DownloadLinksListViewItemCollection.AddRange(_results
                                                                      .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
-                                                                     .ThenBy(link => _trackers.IndexOf(link.Site)));
+                                                                     .ThenBy(link => _trackers.IndexOf(link.Source.Name)));
                     }));
             }
         }
@@ -427,14 +427,14 @@
                     if (direction == ListSortDirection.Ascending)
                     {
                         links = links
-                            .OrderBy(link => this._trackers.IndexOf(link.Site))
+                            .OrderBy(link => this._trackers.IndexOf(link.Source.Name))
                             .ThenBy(link => this._qualities.IndexOf(link.Quality.ToString()))
                             .ToList();
                     }
                     else
                     {
                         links = links
-                            .OrderByDescending(link => this._trackers.IndexOf(link.Site))
+                            .OrderByDescending(link => this._trackers.IndexOf(link.Source.Name))
                             .ThenBy(link => this._qualities.IndexOf(link.Quality.ToString()))
                             .ToList();
                     }
@@ -445,14 +445,14 @@
                     {
                         links = links
                             .OrderBy(link => this._qualities.IndexOf(link.Quality.ToString()))
-                            .ThenBy(link => this._trackers.IndexOf(link.Site))
+                            .ThenBy(link => this._trackers.IndexOf(link.Source.Name))
                             .ToList();
                     }
                     else
                     {
                         links = links
                             .OrderByDescending(link => this._qualities.IndexOf(link.Quality.ToString()))
-                            .ThenBy(link => this._trackers.IndexOf(link.Site))
+                            .ThenBy(link => this._trackers.IndexOf(link.Source.Name))
                             .ToList();
                     }
                     break;
@@ -502,10 +502,9 @@
             var wc  = new Utils.SmarterWebClient();
             var tmp = Utils.GetRandomFileName("torrent");
 
-            var cookies = Settings.Get(link.Site + " Cookies");
-            if (!string.IsNullOrWhiteSpace(cookies))
+            if (!string.IsNullOrWhiteSpace(link.Source.Cookies))
             {
-                wc.Headers[HttpRequestHeader.Cookie] = cookies;
+                wc.Headers[HttpRequestHeader.Cookie] = link.Source.Cookies;
             }
 
             wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
