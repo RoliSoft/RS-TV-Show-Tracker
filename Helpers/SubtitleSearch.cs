@@ -90,7 +90,6 @@
         public void SearchAsync(string query)
         {
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query = ShowNames.Tools.Normalize(query);
 
             SearchEngines.ForEach(engine => engine.SearchAsync(query));
         }

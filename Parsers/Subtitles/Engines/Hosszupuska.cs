@@ -26,6 +26,18 @@
         }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://hosszupuskasub.com/";
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
@@ -44,7 +56,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML("http://hosszupuskasub.com/sorozatok.php", "cim=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(query)), encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html = Utils.GetHTML(Site + "sorozatok.php", "cim=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(query)), encoding: Encoding.GetEncoding("iso-8859-2"));
             var subs = html.DocumentNode.SelectNodes("//td/a[starts-with(@href,'download.php?file=')]");
 
             if (subs == null)
@@ -59,7 +71,7 @@
                         Site     = Name,
                         Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty),
                         Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty)),
-                        URL      = "http://hosszupuskasub.com/" + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty)
+                        URL      = Site + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty)
                     };
             }
         }

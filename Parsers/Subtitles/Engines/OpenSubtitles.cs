@@ -26,6 +26,18 @@
         }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://www.opensubtitles.org/";
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>

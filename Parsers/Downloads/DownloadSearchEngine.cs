@@ -28,7 +28,7 @@
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
-        public abstract string Icon { get; }
+        public virtual string Icon { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the site requires authentication.

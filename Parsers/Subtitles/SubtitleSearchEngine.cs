@@ -19,10 +19,16 @@
         public abstract string Name { get; }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public abstract string Site { get; }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
-        public abstract string Icon { get; }
+        public virtual string Icon { get; internal set; }
 
         /// <summary>
         /// Occurs when a subtitle search is done.

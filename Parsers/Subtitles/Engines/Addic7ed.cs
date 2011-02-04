@@ -25,6 +25,18 @@
         }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://www.addic7ed.com/";
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
@@ -62,7 +74,7 @@
                 }
             }
 
-            var html = Utils.GetHTML("http://www.addic7ed.com/serie/" + adid + "/" + ShowNames.Tools.ExtractEpisode(query, "{0:0}/{1:00}") + "/episode");
+            var html = Utils.GetHTML(Site + "serie/" + adid + "/" + ShowNames.Tools.ExtractEpisode(query, "{0:0}/{1:00}") + "/episode");
             var subs = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/original/')] | //a[starts-with(@href,'/updated/')]");
 
             if (subs == null)
@@ -78,13 +90,13 @@
                     {
                         Site     = Name,
                         Release  = head[0] + " " + head[1] + " - "
-                                   + node.SelectSingleNode("../../../tr/td[contains(text(),'Version')]").InnerText.Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
+                                   + node.GetTextValue("../../../tr/td[contains(text(),'Version')]").Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
                                    + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
                                    + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null ? " - corrected" : string.Empty)
                                    + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]") != null ? " - HI" : string.Empty)
                                    + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty),
-                        Language = ParseLanguage(node.SelectSingleNode("../../td[3]").InnerText.Replace("&nbsp;", string.Empty).Trim()),
-                        URL      = "http://www.addic7ed.com" + node.GetAttributeValue("href", string.Empty)
+                        Language = ParseLanguage(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim()),
+                        URL      = Site.TrimEnd('/') + node.GetAttributeValue("href")
                     };
             }
         }

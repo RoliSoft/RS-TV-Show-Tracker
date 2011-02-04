@@ -24,14 +24,26 @@
         }
 
         /// <summary>
-        /// Gets the URL to the favicon of the site.
+        /// Gets the URL of the site.
         /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
+        /// <value>The site location.</value>
+        public override string Site
         {
             get
             {
-                return "http://feliratok.ro.lt/favicon.ico";
+                /*
+                 * The official site would be feliratok.hu, however that no longer works.
+                 * There are multiple mirrors which continue the work of the main site,
+                 * and they look like they share their data with each other.
+                 * 
+                 * These mirrors are:
+                 * - http://feliratok.ro.lt 
+                 * - http://feliratok.hs.vc
+                 * - http://feliratok.na.tl 
+                 * 
+                 * Source: http://freeforum.n4.hu/feliratok/index.php?topic=40.0 (2011-02-04)
+                 */
+                return "http://feliratok.ro.lt/";
             }
         }
 
@@ -42,7 +54,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML("http://feliratok.ro.lt/index.php?search=" + Uri.EscapeUriString(ShowNames.Tools.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false)));
+            var html = Utils.GetHTML(Site + "index.php?search=" + Uri.EscapeUriString(ShowNames.Tools.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false)));
             var subs = html.DocumentNode.SelectNodes("//tr[@id='vilagit']");
 
             if (subs == null)
@@ -57,7 +69,7 @@
                         Site     = Name,
                         Release  = node.GetTextValue("td[2]/a").Trim(),
                         Language = ParseLanguage(node.GetTextValue("td[4]").Trim()),
-                        URL      = "http://feliratok.ro.lt/" + node.GetNodeAttributeValue("td[6]/a", "href")
+                        URL      = Site + node.GetNodeAttributeValue("td[6]/a", "href")
                     };
             }
         }

@@ -24,6 +24,18 @@
         }
 
         /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://subscene.com/";
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
@@ -42,7 +54,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML("http://subscene.com/s.aspx?q=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(query)));
+            var html = Utils.GetHTML(Site + "s.aspx?q=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(query)));
             var subs = html.DocumentNode.SelectNodes("//a[@class='a1']");
             
             if (subs == null)
@@ -52,7 +64,7 @@
 
             foreach (var node in subs)
             {
-                if(!ShowNames.Tools.IsMatch(query, node.SelectSingleNode("span[2]").InnerText.Trim()))
+                if (!ShowNames.Tools.IsMatch(query, node.GetTextValue("span[2]").Trim()))
                 {
                     continue;
                 }
@@ -60,9 +72,9 @@
                 yield return new Subtitle
                    {
                        Site         = Name,
-                       Release      = node.SelectSingleNode("span[2]").InnerText.Trim(),
-                       Language     = Addic7ed.ParseLanguage(node.SelectSingleNode("span[1]").InnerText.Trim()),
-                       URL          = "http://subscene.com" + node.GetAttributeValue("href", string.Empty),
+                       Release      = node.GetTextValue("span[2]").Trim(),
+                       Language     = Addic7ed.ParseLanguage(node.GetTextValue("span[1]").Trim()),
+                       URL          = Site.TrimEnd('/') + node.GetAttributeValue("href"),
                        IsLinkDirect = false
                    };
             }

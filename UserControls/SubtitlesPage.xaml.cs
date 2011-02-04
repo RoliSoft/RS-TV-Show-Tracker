@@ -124,9 +124,10 @@
 
                     (mi.Header as StackPanel).Children.Add(new Image
                         {
-                            Source = new BitmapImage(new Uri(engine.Icon), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
+                            Source = new BitmapImage(engine.Icon != null ? new Uri(engine.Icon) : new Uri("/RSTVShowTracker;component/Images/navigation.png", UriKind.Relative), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
                             Width  = 16,
-                            Height = 16
+                            Height = 16,
+                            Margin = new Thickness(3, -2, 0, 0)
                         });
                     (mi.Header as StackPanel).Children.Add(new Label
                         {
