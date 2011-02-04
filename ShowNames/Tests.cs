@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using NUnit.Framework;
 
@@ -51,6 +52,28 @@
                 Console.WriteLine(show.Value + ": [" + String.Join(", ", Tools.GetRoot(show.Value)) + "]");
 
                 Assert.IsFalse(cmp.Equals(show.Key, show.Value), "'{0}' shouldn't equal '{1}'".FormatWith(show.Key, show.Value));
+            }
+        }
+
+        /// <summary>
+        /// Tests whether the show names are correctly cleaned.
+        /// </summary>
+        [Test]
+        public void Cleaning()
+        {
+            var list = new Dictionary<string, string[]>
+                {
+                    { "House, M.D.", new[] { "HOUSE" } },
+                    { "Two and a half men", new[] { "TWO", "AND", "A", "HALF", "MEN" } },
+                    { "How I met your mother", new[] { "HOW", "I", "MET", "YOUR", "MOTHER" } },
+                    { "The V", new[] { "V" } }
+                };
+
+            foreach (var show in list)
+            {
+                Console.WriteLine(show.Key + ": [" + String.Join(", ", Tools.GetRoot(show.Key, false)) + "], [" + String.Join(", ", show.Value) + "]");
+
+                Assert.IsTrue(show.Value.SequenceEqual(Tools.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly.".FormatWith(show.Key));
             }
         }
     }

@@ -62,7 +62,6 @@
         public IEnumerable<Subtitle> Search(string query)
         {
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query = ShowNames.Tools.Normalize(query);
 
             // start in parallel
             var tasks = SearchEngines.Select(engine => Task<IEnumerable<Subtitle>>.Factory.StartNew(() =>

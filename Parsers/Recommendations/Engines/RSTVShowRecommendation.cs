@@ -10,12 +10,20 @@
     /// <summary>
     /// Provides support for the service located at http://lab.rolisoft.net/tv/
     /// </summary>
-    [TestFixture(0)]
+    [TestFixture]
     public class RSTVShowRecommendation : RecommendationEngine
     {
         private readonly int _type;
         private readonly string _key  = "S2qNfbCFCWoQ8RoL1S0FTbjbW",
                                 _uuid = Utils.GetUUID();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RSTVShowRecommendation"/> class.
+        /// </summary>
+        public RSTVShowRecommendation()
+        {
+            _type = 0;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RSTVShowRecommendation"/> class.

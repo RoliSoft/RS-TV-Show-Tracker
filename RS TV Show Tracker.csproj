@@ -129,6 +129,7 @@
     <Compile Include="Parsers\OnlineVideos\OnlineVideoNotFoundException.cs" />
     <Compile Include="Parsers\ParserAttribute.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\SuperSubtitles.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Remote\API.cs" />
     <Compile Include="Remote\Objects.cs" />

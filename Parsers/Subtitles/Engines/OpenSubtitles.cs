@@ -53,7 +53,7 @@
                 yield break;
             }
 
-            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query } });
+            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Tools.Normalize(query) } });
 
             if (search["data"] is bool)
             {

@@ -13,8 +13,12 @@
         /// Gets the root words from a show name.
         /// </summary>
         /// <param name="show">The show's name.</param>
+        /// <param name="removeCommon">
+        /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
+        /// otherwise, only "the" and any one character word that is other than "a" will be removed.
+        /// </param>
         /// <returns>List of the required words.</returns>
-        public static string[] GetRoot(string show)
+        public static string[] GetRoot(string show, bool removeCommon = true)
         {
             // see if the show has a different name
             show = show.Trim();
@@ -42,8 +46,16 @@
             }
 
             // remove common words and single characters
-            show = Regexes.Common.Replace(show, string.Empty);
-            show = Regexes.OneChar.Replace(show.Trim(), string.Empty);
+            if (removeCommon)
+            {
+                show = Regexes.Common.Replace(show, string.Empty);
+                show = Regexes.OneChar.Replace(show.Trim(), string.Empty);
+            }
+            else
+            {
+                show = Regexes.StrictCommon.Replace(show, string.Empty);
+                show = Regexes.StrictOneChar.Replace(show.Trim(), string.Empty);
+            }
 
             // split it up
             var parts = Regexes.Whitespace.Split(Regexes.Whitespace.Replace(show, " ").Trim());
@@ -55,19 +67,23 @@
         /// Normalizes the specified TV show name.
         /// </summary>
         /// <param name="show">The show name.</param>
+        /// <param name="removeCommon">
+        /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
+        /// otherwise, only "the" and any one character word that is other than "a" will be removed.
+        /// </param>
         /// <returns>Normalized name.</returns>
-        public static string Normalize(string show)
+        public static string Normalize(string show, bool removeCommon = true)
         {
             var episode = string.Empty;
 
             if (Regexes.Numbering.IsMatch(show))
             {
                 var tmp = Regexes.Numbering.Split(show);
-                show = tmp[0];
+                show    = tmp[0];
                 episode = tmp[1];
             }
 
-            var parts = String.Join(" ", GetRoot(show)).ToLower();
+            var parts = String.Join(" ", GetRoot(show, removeCommon)).ToLower();
 
             return episode.Length != 0
                    ? parts + " " + episode
@@ -159,13 +175,19 @@
         /// <param name="query">The show name with episode.</param>
         /// <param name="format">The format, see <c>ExtractEpisode()</c> for this parameter.</param>
         /// <param name="normalize">if set to <c>true</c> it will also normalize the name.</param>
+        /// <param name="removeCommon">
+        /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
+        /// otherwise, only "the" and any one character word that is other than "a" will be removed.
+        /// </param>
         /// <returns>Show name with new episode notation.</returns>
-        public static string ReplaceEpisode(string query, string format = "S{0:00}E{1:00}", bool normalize = false)
+        public static string ReplaceEpisode(string query, string format = "S{0:00}E{1:00}", bool normalize = false, bool removeCommon = true)
         {
-            return (normalize
-                   ? Normalize(Split(query)[0])
-                   : Split(query)[0])
-                     + " " + ExtractEpisode(query, format);
+            if (normalize)
+            {
+                query = Normalize(query, removeCommon);
+            }
+
+            return Split(query)[0] + " " + ExtractEpisode(query, format);
         }
     }
 }

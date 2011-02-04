@@ -2,16 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
-    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping Hosszupuska Sub.
+    /// Provides support for scraping feliratok.hu and/or its mirrors.
     /// </summary>
     [TestFixture]
-    public class Hosszupuska : SubtitleSearchEngine
+    public class SuperSubtitles : SubtitleSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -21,7 +19,7 @@
         {
             get
             {
-                return "Hosszupuska";
+                return "SuperSubtitles";
             }
         }
 
@@ -33,7 +31,7 @@
         {
             get
             {
-                return "http://hosszupuskasub.com/favicon.ico";
+                return "http://feliratok.ro.lt/favicon.ico";
             }
         }
 
@@ -44,8 +42,8 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML("http://hosszupuskasub.com/sorozatok.php", "cim=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(query)), encoding: Encoding.GetEncoding("iso-8859-2"));
-            var subs = html.DocumentNode.SelectNodes("//td/a[starts-with(@href,'download.php?file=')]");
+            var html = Utils.GetHTML("http://feliratok.ro.lt/index.php?search=" + Uri.EscapeUriString(ShowNames.Tools.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false)));
+            var subs = html.DocumentNode.SelectNodes("//tr[@id='vilagit']");
 
             if (subs == null)
             {
@@ -57,9 +55,9 @@
                 yield return new Subtitle
                     {
                         Site     = Name,
-                        Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty),
-                        Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty)),
-                        URL      = "http://hosszupuskasub.com/" + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty)
+                        Release  = node.GetTextValue("td[2]/a").Trim(),
+                        Language = ParseLanguage(node.GetTextValue("td[4]").Trim()),
+                        URL      = "http://feliratok.ro.lt/" + node.GetNodeAttributeValue("td[6]/a", "href")
                     };
             }
         }
@@ -73,10 +71,10 @@
         {
             switch(language)
             {
-                case "flags/1.gif":
+                case "Magyar":
                     return Languages.Hungarian;
 
-                case "flags/2.gif":
+                case "Angol":
                     return Languages.English;
 
                 default:
