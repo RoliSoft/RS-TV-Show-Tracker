@@ -59,9 +59,9 @@
 
             wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
             wc.DownloadProgressChanged           += (s, e) => DownloadProgressChanged.Fire(this, e.ProgressPercentage);
-            wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, (e.UserState as string[])[0], (s as Utils.SmarterWebClient).FileName, null);
+            wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
 
-            wc.DownloadFileAsync(uri, target, new[] { target, token ?? string.Empty });
+            wc.DownloadFileAsync(uri, target);
         }
     }
 }

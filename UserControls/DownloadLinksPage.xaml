@@ -80,7 +80,7 @@
                             <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Send to associated application" Click="SendToAssociatedClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.ShowSendToAssociated}">
+                    <MenuItem Header="Send to associated app" Click="SendToAssociatedClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.ShowSendToAssociated}">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/defapp.png" />
                         </MenuItem.Icon>

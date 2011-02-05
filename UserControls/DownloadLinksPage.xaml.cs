@@ -496,28 +496,15 @@
 
             var link = (LinkItem)listView.SelectedValue;
 
-            var uri = new Uri(link.URL);
-            SetStatus("Sending request to " + uri.DnsSafeHost.Replace("www.", string.Empty) + "...", true);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            SetStatus("Sending request to " + new Uri(link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
 
-            var wc  = new Utils.SmarterWebClient();
-            var tmp = Utils.GetRandomFileName("torrent");
+            var dl = link.Source.Downloader;
 
-            if (!string.IsNullOrWhiteSpace(link.Source.Cookies))
-            {
-                wc.Headers[HttpRequestHeader.Cookie] = link.Source.Cookies;
-            }
+            dl.DownloadFileCompleted   += DownloadFileCompleted;
+            dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
 
-            wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
-            wc.DownloadFileCompleted             += WebClientDownloadFileCompleted;
-            wc.DownloadProgressChanged           += (s, a) => SetStatus("Downloading file... (" + a.ProgressPercentage + "%)", true);
-
-            wc.DownloadFileAsync(uri, tmp, new[]
-                {
-                    // temporary file name
-                    tmp,
-                    // action to do when finished
-                    sender is string ? sender as string : "DownloadFile"
-                });
+            dl.Download(link, Utils.GetRandomFileName(), sender is string ? sender as string : "DownloadFile");
         }
         #endregion
 
@@ -550,25 +537,21 @@
         #endregion
 
         /// <summary>
-        /// Handles the DownloadFileCompleted event of the wc control.
+        /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.AsyncCompletedEventArgs"/> instance containing the event data.</param>
-        private void WebClientDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
-            var web   = sender as Utils.SmarterWebClient;
-            var token = e.UserState as string[];
-            var file  = web.FileName;
-
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-            switch (token[1])
+            switch (e.Third)
             {
                 case "DownloadFile":
                     var sfd = new SaveFileDialog
                         {
                             CheckPathExists = true,
-                            FileName = file
+                            FileName        = e.Second
                         };
 
                     if (sfd.ShowDialog().Value)
@@ -578,26 +561,30 @@
                             File.Delete(sfd.FileName);
                         }
 
-                        File.Move(token[0], sfd.FileName);
+                        File.Move(e.First, sfd.FileName);
                     }
                     else
                     {
-                        File.Delete(token[0]);
+                        File.Delete(e.First);
                     }
 
                     SetStatus("File downloaded successfully.");
                     break;
 
                 case "SendToAssociated":
-                    Utils.Run(token[0]);
+                    Utils.Run(e.First);
 
                     SetStatus("File sent to associated application successfully.");
                     break;
 
                 case "SendToTorrent":
-                    Utils.Run(Settings.Get("Torrent Downloader"), token[0]);
+                    Utils.Run(Settings.Get("Torrent Downloader"), e.First);
 
                     SetStatus("File sent to " + DefaultTorrent + " successfully.");
+                    break;
+
+                case "LaunchedBrowser":
+                    SetStatus("File sent to browser successfully.");
                     break;
             }
         }

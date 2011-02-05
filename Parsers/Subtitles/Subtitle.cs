@@ -35,7 +35,7 @@
         /// <param name="source">The source of the subtitle.</param>
         public Subtitle(SubtitleSearchEngine source)
         {
-            Source       = source;
+            Source = source;
         }
     }
 }

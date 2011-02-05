@@ -36,21 +36,12 @@
         public string URL { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the URL is a direct link to the download.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the URL is a direct link; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsLinkDirect { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Link"/> class.
         /// </summary>
         /// <param name="source">The source of this download link.</param>
         public Link(DownloadSearchEngine source)
         {
-            Source       = source;
-            IsLinkDirect = true;
+            Source = source;
         }
     }
 }

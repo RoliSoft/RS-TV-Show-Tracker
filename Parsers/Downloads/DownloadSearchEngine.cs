@@ -7,6 +7,8 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Downloaders;
+
     /// <summary>
     /// Represents a download link search engine.
     /// </summary>
@@ -53,6 +55,18 @@
         /// </summary>
         /// <value>The type of the link.</value>
         public abstract Types Type { get; }
+
+        /// <summary>
+        /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
+        /// </summary>
+        /// <value>The downloader.</value>
+        public virtual IDownloader Downloader
+        {
+            get
+            {
+                return new HTTPDownloader();
+            }
+        }
 
         /// <summary>
         /// Occurs when a download link search is done.

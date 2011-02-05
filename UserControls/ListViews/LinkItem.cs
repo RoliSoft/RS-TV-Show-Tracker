@@ -2,6 +2,7 @@
 {
     using System.ComponentModel;
 
+    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
@@ -17,11 +18,10 @@
         {
             // unfortunately .NET doesn't support upcasting, so we need to do it the hard way
 
-            Release      = link.Release;
-            Quality      = link.Quality;
-            Size         = link.Size;
-            URL          = link.URL;
-            IsLinkDirect = link.IsLinkDirect;
+            Release = link.Release;
+            Quality = link.Quality;
+            Size    = link.Size;
+            URL     = link.URL;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@
         {
             get
             {
-                return Source.Type == Types.HTTP || !IsLinkDirect ? "Visible" : "Collapsed";
+                return Source.Type == Types.HTTP || Source.Downloader is ExternalDownloader ? "Visible" : "Collapsed";
             }
         }
 
@@ -78,7 +78,7 @@
         {
             get
             {
-                return Source.Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
+                return Source.Type != Types.HTTP && !(Source.Downloader is ExternalDownloader) ? "Visible" : "Collapsed";
             }
         }
 
@@ -90,7 +90,7 @@
         {
             get
             {
-                return Source.Type != Types.HTTP && IsLinkDirect ? "Visible" : "Collapsed";
+                return Source.Type != Types.HTTP && !(Source.Downloader is ExternalDownloader) ? "Visible" : "Collapsed";
             }
         }
 
@@ -102,7 +102,7 @@
         {
             get
             {
-                return Source.Type == Types.Torrent && IsLinkDirect && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
+                return Source.Type == Types.Torrent && !(Source.Downloader is ExternalDownloader) && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
             }
         }
     }

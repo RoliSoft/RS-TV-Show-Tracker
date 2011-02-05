@@ -7,6 +7,7 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
@@ -76,6 +77,18 @@
         }
 
         /// <summary>
+        /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
+        /// </summary>
+        /// <value>The downloader.</value>
+        public override IDownloader Downloader
+        {
+            get
+            {
+                return new ExternalDownloader();
+            }
+        }
+
+        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -94,11 +107,10 @@
             {
                 var link = new Link(this);
 
-                link.Release      = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & ");
-                link.URL          = node.GetAttributeValue("href");
-                link.Size         = "N/A";
-                link.Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.'));
-                link.IsLinkDirect = false;
+                link.Release = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & ");
+                link.URL     = node.GetAttributeValue("href");
+                link.Size    = "N/A";
+                link.Quality = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.'));
 
                 yield return link;
             }

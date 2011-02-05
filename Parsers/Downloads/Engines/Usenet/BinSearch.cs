@@ -8,6 +8,7 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
@@ -77,6 +78,18 @@
         }
 
         /// <summary>
+        /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
+        /// </summary>
+        /// <value>The downloader.</value>
+        public override IDownloader Downloader
+        {
+            get
+            {
+                return new ExternalDownloader();
+            }
+        }
+
+        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -95,11 +108,10 @@
             {
                 var link = new Link(this);
 
-                link.Release      = HtmlEntity.DeEntitize(node.InnerText);
-                link.URL          = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
-                link.Size         = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value;
-                link.Quality      = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.'));
-                link.IsLinkDirect = false;
+                link.Release = HtmlEntity.DeEntitize(node.InnerText);
+                link.URL     = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
+                link.Size    = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value;
+                link.Quality = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.InnerText).Replace(' ', '.'));
 
                 yield return link;
             }
