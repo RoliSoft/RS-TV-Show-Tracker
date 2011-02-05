@@ -504,7 +504,7 @@
             dl.DownloadFileCompleted   += DownloadFileCompleted;
             dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
 
-            dl.Download(link, Utils.GetRandomFileName(), sender is string ? sender as string : "DownloadFile");
+            dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), sender is string ? sender as string : "DownloadFile");
         }
         #endregion
 
