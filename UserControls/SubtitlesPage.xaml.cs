@@ -14,6 +14,7 @@
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
@@ -404,44 +405,36 @@
 
             var sub = (Subtitle)listView.SelectedValue;
 
-            if (!sub.IsLinkDirect)
-            {
-                Utils.Run(sub.URL);
-                return;
-            }
-
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            SetStatus("Sending request to " + new Uri(sub.URL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
 
-            var uri = new Uri(sub.URL);
-            SetStatus("Sending request to " + uri.DnsSafeHost.Replace("www.", string.Empty) + "...", true);
+            var dl = sub.Source.Downloader;
 
-            var wc  = new Utils.SmarterWebClient();
-            var tmp = Utils.GetRandomFileName();
+            dl.DownloadFileCompleted   += DownloadFileCompleted;
+            dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
 
-            wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
-            wc.DownloadFileCompleted             += WebClientDownloadFileCompleted;
-            wc.DownloadProgressChanged           += (s, a) => SetStatus("Downloading file... (" + a.ProgressPercentage + "%)", true);
-
-            wc.DownloadFileAsync(uri, tmp, new[] { tmp });
+            dl.Download(sub, Utils.GetRandomFileName());
         }
 
         /// <summary>
-        /// Handles the DownloadFileCompleted event of the wc control.
+        /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.AsyncCompletedEventArgs"/> instance containing the event data.</param>
-        private void WebClientDownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
-            var web   = sender as Utils.SmarterWebClient;
-            var token = e.UserState as string[];
-            var file  = web.FileName;
-
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-            
+
+            if (e.Third == "LaunchedBrowser")
+            {
+                SetStatus("File sent to browser successfully.");
+                return;
+            }
+
             var sfd = new SaveFileDialog
                 {
                     CheckPathExists = true,
-                    FileName        = file
+                    FileName        = e.Second
                 };
 
             if (sfd.ShowDialog().Value)
@@ -451,11 +444,11 @@
                     File.Delete(sfd.FileName);
                 }
 
-                File.Move(token[0], sfd.FileName);
+                File.Move(e.First, sfd.FileName);
             }
             else
             {
-                File.Delete(token[0]);
+                File.Delete(e.First);
             }
 
             SetStatus("File downloaded successfully.");

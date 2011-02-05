@@ -30,21 +30,12 @@
         public string URL { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the URL is a direct link to the download.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the URL is a direct link; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsLinkDirect { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Subtitle"/> class.
         /// </summary>
         /// <param name="source">The source of the subtitle.</param>
         public Subtitle(SubtitleSearchEngine source)
         {
             Source       = source;
-            IsLinkDirect = true;
         }
     }
 }

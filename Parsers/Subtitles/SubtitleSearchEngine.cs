@@ -7,6 +7,8 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Downloaders;
+
     /// <summary>
     /// Represents a subtitle search engine.
     /// </summary>
@@ -29,6 +31,18 @@
         /// </summary>
         /// <value>The icon location.</value>
         public virtual string Icon { get; internal set; }
+
+        /// <summary>
+        /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
+        /// </summary>
+        /// <value>The downloader.</value>
+        public virtual IDownloader Downloader
+        {
+            get
+            {
+                return new HTTPDownloader();
+            }
+        }
 
         /// <summary>
         /// Occurs when a subtitle search is done.

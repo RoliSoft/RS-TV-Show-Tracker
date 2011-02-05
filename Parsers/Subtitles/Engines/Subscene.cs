@@ -5,6 +5,8 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Downloaders;
+
     /// <summary>
     /// Provides support for scraping Subscene.
     /// </summary>
@@ -48,6 +50,18 @@
         }
 
         /// <summary>
+        /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
+        /// </summary>
+        /// <value>The downloader.</value>
+        public override IDownloader Downloader
+        {
+            get
+            {
+                return new SubsceneDownloader();
+            }
+        }
+
+        /// <summary>
         /// Searches for subtitles on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -74,7 +88,6 @@
                 sub.Release      = node.GetTextValue("span[2]").Trim();
                 sub.Language     = Addic7ed.ParseLanguage(node.GetTextValue("span[1]").Trim());
                 sub.URL          = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                sub.IsLinkDirect = false;
 
                 yield return sub;
             }

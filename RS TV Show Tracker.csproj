@@ -118,11 +118,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Downloaders\SubsceneDownloader.cs" />
+    <Compile Include="Downloaders\ExternalDownloader.cs" />
+    <Compile Include="Downloaders\HTTPDownloader.cs" />
+    <Compile Include="Downloaders\IDownloader.cs" />
     <Compile Include="DynamicDictionary.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitMeTV.cs" />
     <Compile Include="Parsers\Downloads\Link.cs" />
+    <Compile Include="Parsers\Downloads\Qualities.cs" />
+    <Compile Include="Parsers\Downloads\Types.cs" />
     <Compile Include="Parsers\Guides\Engines\TVcom.cs" />
     <Compile Include="Parsers\Guides\Engines\Guess.cs" />
     <Compile Include="Parsers\Guides\TVShow.cs" />
@@ -130,6 +136,7 @@
     <Compile Include="Parsers\ParserAttribute.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Engines\SuperSubtitles.cs" />
+    <Compile Include="Parsers\Subtitles\Languages.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Remote\API.cs" />
     <Compile Include="Remote\Objects.cs" />
@@ -418,6 +425,7 @@
   <ItemGroup>
     <Resource Include="Images\navigation.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
