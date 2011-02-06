@@ -50,9 +50,6 @@
         </Grid.RowDefinitions>
         <ComboBox Grid.Row="0" Height="23" Margin="0,0,0,0" Name="comboBox" VerticalAlignment="Top" Background="Transparent" Foreground="White" FontWeight="Bold" SelectionChanged="ComboBoxSelectionChanged" DropDownOpened="ComboBoxDropDownOpened" DropDownClosed="ComboBoxDropDownClosed" />
 
-        <Image Name="emptyPageImage" Source="/RSTVShowTracker;component/Images/arrow-090.png" Margin="10,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"  Height="32" Width="32" />
-        <TextBlock Name="emptyPageMessage" FontFamily="Calibri" FontSize="16" Margin="50,35,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" Text="Select a show from the menu above to view its information and episode listing." />
-        
         <TabControl Grid.Row="0" Name="tabControl" ContentTemplate="{StaticResource TabTemplate}" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0">
 
             <!-- general tab -->

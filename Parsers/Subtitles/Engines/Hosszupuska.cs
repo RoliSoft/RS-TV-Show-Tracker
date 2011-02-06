@@ -85,22 +85,22 @@
         }
 
         /// <summary>
-        /// Parses the language of the subtitle.
+        /// Extracts the language from the string and returns its ISO 3166-1 alpha-2 code.
         /// </summary>
         /// <param name="language">The language.</param>
-        /// <returns>Strongly-typed language of the subtitle.</returns>
-        public static Languages ParseLanguage(string language)
+        /// <returns>ISO 3166-1 alpha-2 code of the language.</returns>
+        public static string ParseLanguage(string language)
         {
-            switch(language)
+            switch (language)
             {
                 case "flags/1.gif":
-                    return Languages.Hungarian;
+                    return "hu";
 
                 case "flags/2.gif":
-                    return Languages.English;
+                    return "en";
 
                 default:
-                    return Languages.Unknown;
+                    return string.Empty;
             }
         }
 

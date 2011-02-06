@@ -14,7 +14,6 @@
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
@@ -27,7 +26,7 @@
         /// Gets or sets the subtitles list view item collection.
         /// </summary>
         /// <value>The subtitles list view item collection.</value>
-        public ObservableCollection<Subtitle> SubtitlesListViewItemCollection { get; set; }
+        public ObservableCollection<SubtitleItem> SubtitlesListViewItemCollection { get; set; }
 
         /// <summary>
         /// Gets or sets the search engines active in this application.
@@ -88,7 +87,7 @@
         {
             if (SubtitlesListViewItemCollection == null)
             {
-                SubtitlesListViewItemCollection = new ObservableCollection<Subtitle>();
+                SubtitlesListViewItemCollection = new ObservableCollection<SubtitleItem>();
                 listView.ItemsSource            = SubtitlesListViewItemCollection;
             }
 
@@ -145,34 +144,27 @@
 
             if (languages.Items.Count == 0)
             {
-                var langs = new Dictionary<string, string>
-                    {
-                        {"English",   "flag-en"},
-                        {"Hungarian", "flag-hu"},
-                        {"Romanian",  "flag-ro"},
-                        {"Unknown",   "unknown"}
-                    };
-
-                foreach (var lang in langs)
+                foreach (var lang in Languages.List)
                 {
                     var mi = new MenuItem
-                    {
-                        Header           = new StackPanel { Orientation = Orientation.Horizontal },
-                        IsCheckable      = true,
-                        IsChecked        = !_langExcl.Contains(lang.Key),
-                        StaysOpenOnClick = true,
-                        Tag              = lang.Key
-                    };
+                        {
+                            Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                            IsCheckable      = true,
+                            IsChecked        = !_langExcl.Contains(lang.Key),
+                            StaysOpenOnClick = true,
+                            Tag              = lang.Key
+                        };
 
                     (mi.Header as StackPanel).Children.Add(new Image
                         {
-                            Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/" + lang.Value + ".png", UriKind.Relative)),
-                            Width = 16,
-                            Height = 16
+                            Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/flag-" + lang.Key + ".png", UriKind.Relative)),
+                            Width  = 16,
+                            Height = 16,
+                            Margin = new Thickness(3, -2, 0, 0)
                         });
                     (mi.Header as StackPanel).Children.Add(new Label
                         {
-                            Content = lang.Key,
+                            Content = lang.Value,
                             Padding = new Thickness(5, 0, 0, 0)
                         });
 
@@ -181,6 +173,33 @@
 
                     languages.Items.Add(mi);
                 }
+
+                var mi2 = new MenuItem
+                    {
+                        Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                        IsCheckable      = true,
+                        IsChecked        = !_langExcl.Contains("null"),
+                        StaysOpenOnClick = true,
+                        Tag              = "null"
+                    };
+
+                (mi2.Header as StackPanel).Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/unknown.png", UriKind.Relative)),
+                        Width  = 16,
+                        Height = 16,
+                        Margin = new Thickness(3, -2, 0, 0)
+                    });
+                (mi2.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Unknown",
+                        Padding = new Thickness(5, 0, 0, 0)
+                    });
+
+                mi2.Checked   += LanguageMenuItemChecked;
+                mi2.Unchecked += LanguageMenuItemUnchecked;
+
+                languages.Items.Add(mi2);
             }
         }
 
@@ -335,7 +354,9 @@
 
             if (e.First != null)
             {
-                Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(e.First.Where(sub => !_langExcl.Contains(sub.Language.ToString())))));
+                Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(e.First
+                                                                                           .Where(sub => !_langExcl.Contains(sub.Language))
+                                                                                           .Select(sub => new SubtitleItem(sub)))));
             }
         }
 

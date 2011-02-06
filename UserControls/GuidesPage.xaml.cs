@@ -105,11 +105,6 @@
             {
                 Refresh();
             }
-
-            if (comboBox.SelectedIndex == -1)
-            {
-                emptyPageImage.Visibility = emptyPageMessage.Visibility = Visibility.Visible;
-            }
         }
 
         /// <summary>
@@ -155,7 +150,6 @@
             // the dropdown's background is transparent and if it opens while the guide listview
             // is populated, then you won't be able to read the show names due to the mess
 
-            emptyPageImage.Visibility = emptyPageMessage.Visibility = Visibility.Collapsed;
             tabControl.Visibility = statusLabel.Visibility = Visibility.Hidden;
         }
 
@@ -176,8 +170,6 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            emptyPageImage.Visibility = emptyPageMessage.Visibility = Visibility.Collapsed;
-
             showGeneral.Visibility = Visibility.Hidden;
             GuideListViewItemCollection.Clear();
 

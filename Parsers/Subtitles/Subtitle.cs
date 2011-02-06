@@ -21,7 +21,7 @@
         /// Gets or sets the language of the subtitle.
         /// </summary>
         /// <value>The language.</value>
-        public Languages Language { get; set; }
+        public string Language { get; set; }
 
         /// <summary>
         /// Gets or sets the URL to the subtitle.

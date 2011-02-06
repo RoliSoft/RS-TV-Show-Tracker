@@ -86,7 +86,7 @@
                 var sub = new Subtitle(this);
 
                 sub.Release  = node.GetTextValue("span[2]").Trim();
-                sub.Language = Addic7ed.ParseLanguage(node.GetTextValue("span[1]").Trim());
+                sub.Language = Languages.Parse(node.GetTextValue("span[1]").Trim());
                 sub.URL      = Site.TrimEnd('/') + node.GetAttributeValue("href");
 
                 yield return sub;

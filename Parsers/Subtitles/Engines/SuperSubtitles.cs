@@ -48,6 +48,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://lab.rolisoft.net/includes/tvshowtracker/navigation.png";
+            }
+        }
+
+        /// <summary>
         /// Searches for subtitles on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -75,22 +87,22 @@
         }
 
         /// <summary>
-        /// Parses the language of the subtitle.
+        /// Extracts the language from the string and returns its ISO 3166-1 alpha-2 code.
         /// </summary>
         /// <param name="language">The language.</param>
-        /// <returns>Strongly-typed language of the subtitle.</returns>
-        public static Languages ParseLanguage(string language)
+        /// <returns>ISO 3166-1 alpha-2 code of the language.</returns>
+        public static string ParseLanguage(string language)
         {
-            switch(language)
+            switch (language)
             {
                 case "Magyar":
-                    return Languages.Hungarian;
+                    return "hu";
 
                 case "Angol":
-                    return Languages.English;
+                    return "en";
 
                 default:
-                    return Languages.Unknown;
+                    return string.Empty;
             }
         }
     }

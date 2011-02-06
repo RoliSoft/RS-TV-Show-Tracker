@@ -26,19 +26,15 @@
         <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="ListViewMouseDoubleClick" GridViewColumnHeader.Click="ListViewSortClick">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Width="30">
-                        <GridViewColumnHeader Margin="-3,0,0,0" Padding="6,3,3,3" />
+                    <GridViewColumn Width="140">
+                        <GridViewColumnHeader Content="Site" Cursor="Hand" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Image Source="{Binding TypeImage}" Width="16" Height="16" HorizontalAlignment="Center" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="100">
-                        <GridViewColumnHeader Content="Site" Cursor="Hand" />
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="100" Margin="-7,0" TextAlignment="Center" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Image Source="{Binding TypeImage}" Width="16" Height="16" />
+                                    <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="108" Margin="-7,0" TextAlignment="Center" />
+                                    <Image Source="{Binding Source.Icon}" Width="16" Height="16" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -46,7 +42,7 @@
                         <GridViewColumnHeader Content="Release name" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" Margin="-7,0" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -58,11 +54,14 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="80">
+                    <GridViewColumn Width="110">
                         <GridViewColumnHeader Content="Quality" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding QualityText}" Width="80" Margin="-7,0" TextAlignment="Center" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock FontWeight="Normal" Text="{Binding QualityText}" Width="94" Margin="-7,0" TextAlignment="Center" />
+                                    <Image Source="{Binding HDIcon}" Width="16" Height="16" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

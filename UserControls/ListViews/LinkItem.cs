@@ -16,8 +16,6 @@
         /// <param name="link">The link.</param>
         public LinkItem(Link link) : base(link.Source)
         {
-            // unfortunately .NET doesn't support upcasting, so we need to do it the hard way
-
             Release = link.Release;
             Quality = link.Quality;
             Size    = link.Size;
@@ -55,6 +53,32 @@
             get
             {
                 return Quality.GetAttribute<DescriptionAttribute>().Description;
+            }
+        }
+
+        /// <summary>
+        /// Gets the HD icon, if the quality is HD.
+        /// </summary>
+        /// <value>The HD icon.</value>
+        public string HDIcon
+        {
+            get
+            {
+                switch (Quality)
+                {
+                    case Qualities.BluRay1080p:
+                    case Qualities.WebDL1080p:
+                    case Qualities.HDTV1080i:
+                        return "/RSTVShowTracker;component/Images/hd_1080.png";
+
+                    case Qualities.BluRay720p:
+                    case Qualities.WebDL720p:
+                    case Qualities.HDTV720p:
+                        return "/RSTVShowTracker;component/Images/hd_720.png";
+
+                    default:
+                        return "/RSTVShowTracker;component/Images/empty.png";
+                }
             }
         }
 

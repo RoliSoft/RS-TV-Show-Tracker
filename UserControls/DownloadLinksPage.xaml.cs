@@ -294,7 +294,7 @@
             _results = new List<LinkItem>();
             DownloadLinksListViewItemCollection.Clear();
 
-            textBox.IsEnabled = false;
+            textBox.IsEnabled    = false;
             searchButton.Content = "Cancel";
 
             ActiveSearch = new DownloadSearch(SearchEngines

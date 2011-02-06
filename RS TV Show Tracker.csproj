@@ -145,6 +145,7 @@
     <Compile Include="ShowNames\ShowEpisode.cs" />
     <Compile Include="ShowNames\ShowEqualityComparer.cs" />
     <Compile Include="ShowNames\Tests.cs" />
+    <Compile Include="UserControls\ListViews\SubtitleItem.cs" />
     <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
     <Compile Include="UserControls\ListViews\LinkItem.cs" />
     <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />
@@ -425,7 +426,48 @@
   <ItemGroup>
     <Resource Include="Images\navigation.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\flag-ar.png" />
+    <Resource Include="Images\flag-cz.png" />
+    <Resource Include="Images\flag-de.png" />
+    <Resource Include="Images\flag-es.png" />
+    <Resource Include="Images\flag-fr.png" />
+    <Resource Include="Images\flag-gr.png" />
+    <Resource Include="Images\flag-hr.png" />
+    <Resource Include="Images\flag-id.png" />
+    <Resource Include="Images\flag-il.png" />
+    <Resource Include="Images\flag-it.png" />
+    <Resource Include="Images\flag-nl.png" />
+    <Resource Include="Images\flag-no.png" />
+    <Resource Include="Images\flag-pl.png" />
+    <Resource Include="Images\flag-pt.png" />
+    <Resource Include="Images\flag-ru.png" />
+    <Resource Include="Images\flag-se.png" />
+    <Resource Include="Images\flag-tr.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\flag-br.png" />
+    <Resource Include="Images\flag-ch.png" />
+    <Resource Include="Images\flag-dk.png" />
+    <Resource Include="Images\flag-ee.png" />
+    <Resource Include="Images\flag-fi.png" />
+    <Resource Include="Images\flag-is.png" />
+    <Resource Include="Images\flag-jp.png" />
+    <Resource Include="Images\flag-kr.png" />
+    <Resource Include="Images\flag-rs.png" />
+    <Resource Include="Images\flag-si.png" />
+    <Resource Include="Images\flag-sk.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\flag-ir.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\hd_1080.png" />
+    <Resource Include="Images\hd_720.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\empty.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -31,11 +31,14 @@
         <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="DownloadSubtitleClick">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Width="100">
+                    <GridViewColumn Width="120">
                         <GridViewColumnHeader Content="Site" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="100" Margin="-7,0" TextAlignment="Center" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="104" Margin="-7,0" TextAlignment="Center" />
+                                    <Image Source="{Binding Source.Icon}" Width="16" Height="16" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -43,15 +46,18 @@
                         <GridViewColumnHeader Content="Release name" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" Margin="-7,0" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="80">
+                    <GridViewColumn Width="100">
                         <GridViewColumnHeader Content="Language" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Language}" Width="80" Margin="-7,0" TextAlignment="Center" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding LanguageImage}" Width="16" Height="16" />
+                                    <TextBlock FontWeight="Normal" Text="{Binding LanguageName}" Width="84" Margin="3,0,0,0" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

@@ -82,7 +82,7 @@
                 var sub = new Subtitle(this);
 
                 sub.Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty);
-                sub.Language = Addic7ed.ParseLanguage(data["LanguageName"].ToString());
+                sub.Language = Languages.Parse(data["LanguageName"].ToString());
                 sub.URL      = data["ZipDownloadLink"].ToString();
 
                 yield return sub;

@@ -1,6 +1,5 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles.Engines
 {
-    using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
@@ -94,24 +93,11 @@
                              + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null ? " - corrected" : string.Empty)
                              + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]")    != null ? " - HI"        : string.Empty)
                              + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty);
-                sub.Language = ParseLanguage(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
+                sub.Language = Languages.Parse(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
                 sub.URL      = Site.TrimEnd('/') + node.GetAttributeValue("href");
 
                 yield return sub;
             }
-        }
-
-        /// <summary>
-        /// Parses the language of the subtitle.
-        /// </summary>
-        /// <param name="language">The language.</param>
-        /// <returns>Strongly-typed language of the subtitle.</returns>
-        public static Languages ParseLanguage(string language)
-        {
-            language = Regex.Replace(language, @"\s?\(.+\)", string.Empty);
-            Languages detected;
-            Enum.TryParse(language, out detected);
-            return detected;
         }
     }
 }
