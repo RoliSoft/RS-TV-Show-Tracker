@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping BroadcasTheNet.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-10 8:13 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-10 10:33 AM"), TestFixture]
     public class BroadcasTheNet : DownloadSearchEngine
     {
         /// <summary>
@@ -124,7 +124,7 @@
                     link.Quality = ParseQuality(quality);
                 }
 
-                link.URL     = Site + node.GetNodeAttributeValue("span/a[contains(@href, 'action=download')]", "href");
+                link.URL     = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("span/a[contains(@href, 'action=download')]", "href"));
                 link.Size    = node.GetTextValue("../td[5]").Trim();
 
                 yield return link;
