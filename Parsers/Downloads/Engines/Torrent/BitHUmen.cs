@@ -106,7 +106,7 @@
                 link.Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText;
                 link.URL     = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href");
                 link.Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " ");
-                link.Quality = ThePirateBay.ParseQuality(node.GetNodeAttributeValue("../", "title") ?? node.InnerText);
+                link.Quality = ThePirateBay.ParseQuality(link.Release);
 
                 yield return link;
             }

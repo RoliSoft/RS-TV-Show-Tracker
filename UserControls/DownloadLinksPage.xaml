@@ -26,13 +26,13 @@
         <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="ListViewMouseDoubleClick" GridViewColumnHeader.Click="ListViewSortClick">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Width="140">
+                    <GridViewColumn Width="145">
                         <GridViewColumnHeader Content="Site" Cursor="Hand" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <Image Source="{Binding TypeImage}" Width="16" Height="16" />
-                                    <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="108" Margin="-7,0" TextAlignment="Center" />
+                                    <TextBlock FontWeight="Normal" Text="{Binding Source.Name}" TextTrimming="CharacterEllipsis" Width="113" Margin="-7,0" TextAlignment="Center" />
                                     <Image Source="{Binding Source.Icon}" Width="16" Height="16" />
                                 </StackPanel>
                             </DataTemplate>

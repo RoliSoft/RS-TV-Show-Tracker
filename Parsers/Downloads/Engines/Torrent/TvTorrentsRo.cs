@@ -106,7 +106,7 @@
                 link.Release = node.GetAttributeValue("title");
                 link.URL     = Site + "download.php?id=" + Regex.Replace(node.GetAttributeValue("href"), "[^0-9]+", string.Empty) + "&type=torrent";
                 link.Size    = node.GetHtmlValue("../../../td[@class='table_size']").Trim().Replace("<br>", " ");
-                link.Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title"));
+                link.Quality = ThePirateBay.ParseQuality(link.Release);
 
                 yield return link;
             }

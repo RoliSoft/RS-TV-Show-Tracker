@@ -107,7 +107,7 @@
                 link.Release = node.GetAttributeValue("title");
                 link.URL     = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
                 link.Size    = node.GetTextValue("../../../../div[@class='box_meret2']/text()").Trim();
-                link.Quality = ThePirateBay.ParseQuality(node.GetAttributeValue("title"));
+                link.Quality = ThePirateBay.ParseQuality(link.Release);
 
                 yield return link;
             }

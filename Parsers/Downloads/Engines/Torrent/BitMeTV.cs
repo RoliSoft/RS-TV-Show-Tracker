@@ -92,7 +92,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML("http://www.bitmetv.org/browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var html  = Utils.GetHTML(Site + "browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
             var links = html.DocumentNode.SelectNodes("//table/tr/td/a[starts-with(@href, 'details.php')]");
 
             if (links == null)
@@ -107,7 +107,7 @@
                 link.Release = HtmlEntity.DeEntitize(node.GetAttributeValue("title"));
                 link.URL     = Site + node.GetNodeAttributeValue("../td[1]/a", "href");
                 link.Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " ");
-                link.Quality = ThePirateBay.ParseQuality(HtmlEntity.DeEntitize(node.GetAttributeValue("title")));
+                link.Quality = ThePirateBay.ParseQuality(link.Release);
 
                 yield return link;
             }
