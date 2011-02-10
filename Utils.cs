@@ -33,6 +33,96 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether the operating system is Windows 7 or newer.
+        /// </summary>
+        /// <value><c>true</c> if the OS is Windows 7 or newer; otherwise, <c>false</c>.</value>
+        public static bool Is7
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT &&
+                     ((Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 1) ||
+                       Environment.OSVersion.Version.Major >= 6);
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the operating system.
+        /// </summary>
+        /// <value>The OS.</value>
+        public static string OS
+        {
+            get
+            {
+                switch (Environment.OSVersion.Platform)
+                {
+                    case PlatformID.Win32S:
+                        return "Windows 3.1";
+
+                    case PlatformID.Win32Windows:
+                        switch (Environment.OSVersion.Version.Minor)
+                        {
+                            case 0:
+                                return "Windows 95";
+
+                            case 10:
+                                return Environment.OSVersion.Version.Revision.ToString() == "2222A"
+                                       ? "Windows 98 Second Edition"
+                                       : "Windows 98";
+
+                            case 90:
+                                return "Windows ME";
+                        }
+                        break;
+
+                    case PlatformID.Win32NT:
+                        switch (Environment.OSVersion.Version.Major)
+                        {
+                            case 3:
+                                return "Windows NT 3.51";
+
+                            case 4:
+                                return "Windows NT 4.0";
+
+                            case 5:
+                                switch (Environment.OSVersion.Version.Minor)
+                                {
+                                    case 0:
+                                        return "Windows 2000";
+
+                                    case 1:
+                                        return "Windows XP";
+
+                                    case 2:
+                                        return "Windows 2003";
+                                }
+                                break;
+
+                            case 6:
+                                switch (Environment.OSVersion.Version.Minor)
+                                {
+                                    case 0:
+                                        return "Windows Vista";
+
+                                    case 1:
+                                        return "Windows 7";
+                                }
+                                break;
+                        }
+                        break;
+
+                    case PlatformID.WinCE:
+                        return "Windows CE";
+
+                    case PlatformID.Unix:
+                        return "Unix";
+                }
+
+                return "Unknown OS";
+            }
+        }
+
+        /// <summary>
         /// Appends a unit to a number and makes it plural if the number is not 1.
         /// </summary>
         /// <param name="number">The number.</param>
@@ -325,7 +415,7 @@
         /// <returns>Pure ASCII text.</returns>
         public static string EscapeUTF8(string text)
         {
-            return Regex.Replace(text, @"[^\u0000-\u007F]", new MatchEvaluator(m => string.Format(@"\u{0:x4}", (int)m.Value[0])));
+            return Regex.Replace(text, @"[^\u0000-\u007F]", m => string.Format(@"\u{0:x4}", (int)m.Value[0]));
         }
 
         /// <summary>

@@ -168,7 +168,6 @@
     </Compile>
     <Compile Include="SmarterWebClient.cs" />
     <Compile Include="IRefreshable.cs" />
-    <Compile Include="Properties\ObfuscationSettings.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\BinSearch.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHUmen.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\FileList.cs" />

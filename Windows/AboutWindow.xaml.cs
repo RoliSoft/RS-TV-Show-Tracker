@@ -35,8 +35,7 @@
 
             site.Content = "© " + DateTime.Now.Year + " " + ε + " – lab." + ε.ToLower() + ".net";
 
-            info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss")
-                      + "\r\nv" + Signature.Version + (Signature.IsDebug ? "-debug" : string.Empty) + (Signature.IsObfuscated ? "-public" : string.Empty);
+            info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss") + "\r\nv" + Signature.Version;
         }
 
         /// <summary>

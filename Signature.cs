@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
-    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// Contains informations about the assembly.
@@ -22,34 +21,6 @@
         /// </summary>
         /// <value>The compile time.</value>
         public static DateTime CompileTime { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the executed assembly was compiled from Visual Studio under the Debug configuration.
-        /// </summary>
-        /// <value>
-        ///     <c>true</c> if the DEBUG constant is defined; otherwise, <c>false</c>.
-        /// </value>
-        public static bool IsDebug
-        {
-            get
-            {
-                return
-#if DEBUG
-                    true
-#else
-                    false
-#endif
-                    ;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this assembly is obfuscated.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if this assembly is obfuscated; otherwise, <c>false</c>.
-        /// </value>
-        public static bool IsObfuscated { get; internal set; }
 
         /// <summary>
         /// Gets the full path to the executing assembly.
@@ -77,7 +48,6 @@
 
             Version      = ver.Major + "." + ver.MajorRevision + "." + ver.Build.ToString("0000") + "." + ver.Revision.ToString("00000");
             CompileTime  = new DateTime(2000, 1, 1, 1, 0, 0).AddDays(ver.Build).AddSeconds(ver.Revision * 2);
-            IsObfuscated = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(SuppressIldasmAttribute), false).Length == 1;
             try { FullPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; } catch (ArgumentException) { }
         }
 

@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("RoliSoft")]
 [assembly: AssemblyProduct("RS TV Show Tracker")]
-[assembly: AssemblyCopyright("Copyright © RoliSoft 2010")]
+[assembly: AssemblyCopyright("Copyright © RoliSoft 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
