@@ -125,6 +125,7 @@
     <Compile Include="DynamicDictionary.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Parsers\Downloads\Engines\PreDB\ORLYDB.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitMeTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BroadcasTheNet.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBClub.cs" />

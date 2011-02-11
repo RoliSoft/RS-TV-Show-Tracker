@@ -16,6 +16,10 @@
         /// <summary>
         /// A link to a page which contains HTTP links to the file. Usually RapidShare (and similar) links.
         /// </summary>
-        HTTP
+        HTTP,
+        /// <summary>
+        /// A link which represents the existance of a scene release.
+        /// </summary>
+        PreDB
     }
 }

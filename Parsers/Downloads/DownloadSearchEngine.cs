@@ -152,7 +152,7 @@
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Size       │ Quality    │ URL                                                          │");
             Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
-            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-10} │ {3,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Size.CutIfLonger(10), item.Quality, item.URL.CutIfLonger(60))));
+            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-10} │ {3,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Size.CutIfLonger(10), item.Quality, (item.URL ?? string.Empty).CutIfLonger(60))));
             Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
         }
     }
