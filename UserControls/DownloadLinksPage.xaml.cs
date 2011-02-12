@@ -13,6 +13,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Interop;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
@@ -201,13 +202,37 @@
                             Source = new BitmapImage(engine.Icon != null ? new Uri(engine.Icon) : new Uri("/RSTVShowTracker;component/Images/navigation.png", UriKind.Relative), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
                             Width  = 16,
                             Height = 16,
-                            Margin = new Thickness(3, -2, 0, 0)
+                            Margin = new Thickness(3, -2, 0, 0),
                         });
                     (mi.Header as StackPanel).Children.Add(new Label
                         {
                             Content = engine.Name,
-                            Padding = new Thickness(5, 0, 0, 0)
+                            Padding = new Thickness(5, 0, 0, 0),
+                            Width   = 100
                         });
+
+                    if (engine.Private)
+                    {
+                        var cookies = Settings.Get(engine.Name + " Cookies");
+                        var tooltip = string.Empty;
+
+                        foreach (var cookie in cookies.Split(';'))
+                        {
+                            tooltip += "\r\n - " + cookie.Trim();
+                        }
+
+                        (mi.Header as StackPanel).Children.Add(new Image
+                            {
+                                Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/" + (string.IsNullOrWhiteSpace(cookies) ? "lock" : "key") + ".png", UriKind.Relative)),
+                                Width   = 16,
+                                Height  = 16,
+                                Margin  = new Thickness(3, -2, -100, 0),
+                                ToolTip = "This is a private site and cookies are required to search on it.\r\n" +
+                                          (string.IsNullOrWhiteSpace(cookies)
+                                           ? "Go to Settings, click on the Downloads tab, then select this site to enter the cookies."
+                                           : "You have supplied the following cookies:" + tooltip)
+                            });
+                    }
 
                     mi.Checked   += SearchEngineMenuItemChecked;
                     mi.Unchecked += SearchEngineMenuItemUnchecked;

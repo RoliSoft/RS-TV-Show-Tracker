@@ -38,6 +38,9 @@
                     case Types.Usenet:
                         return "/RSTVShowTracker;component/Images/usenet.png";
 
+                    case Types.PreDB:
+                        return "/RSTVShowTracker;component/Images/globe.png";
+
                     default:
                         return "/RSTVShowTracker;component/Images/filehoster.png";
                 }
