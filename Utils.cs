@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.IO.Compression;
     using System.Linq;
     using System.Net;
     using System.Text;
@@ -259,7 +260,9 @@
             var req       = (HttpWebRequest)WebRequest.Create(url);
             req.Timeout   = 10000;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
-            
+
+            req.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+
             if (!string.IsNullOrWhiteSpace(postData))
             {
                 req.Method                    = "POST";
@@ -297,16 +300,27 @@
                 }
             }
 
+            var resp = (HttpWebResponse)req.GetResponse();
+            var rstr = resp.GetResponseStream();
+
+            if (resp.ContentEncoding.ToUpper().Contains("GZIP"))
+            {
+                rstr = new GZipStream(rstr, CompressionMode.Decompress);
+            }
+            else if (resp.ContentEncoding.ToUpper().Contains("DEFLATE"))
+            {
+                rstr = new DeflateStream(rstr, CompressionMode.Decompress);
+            }
+
             if (!autoDetectEncoding)
             {
-                using (var sr = new StreamReader(req.GetResponse().GetResponseStream(), encoding ?? Encoding.UTF8))
+                using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
                 {
                     return sr.ReadToEnd();
                 }
             }
             else
             {
-                var rs = req.GetResponse().GetResponseStream();
                 var ms = new MemoryStream();
                 byte[] bs;
 
@@ -314,7 +328,7 @@
                 do
                 {
                     bs = new byte[8192];
-                    read = rs.Read(bs, 0, bs.Length);
+                    read = rstr.Read(bs, 0, bs.Length);
                     ms.Write(bs, 0, read);
                 } while (read > 0);
 

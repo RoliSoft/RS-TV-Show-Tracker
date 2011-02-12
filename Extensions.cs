@@ -499,6 +499,19 @@
             try   { return doc.Descendants(name).First().Value.Trim(); }
             catch { return null; }
         }
+
+        /// <summary>
+        /// Extension method to XContainer to get the value of an attribute or null if it doesn't exist.
+        /// </summary>
+        /// <param name="doc">The document.</param>
+        /// <param name="name">The name of the tag.</param>
+        /// <param name="attribute">The name of the attribute.</param>
+        /// <returns>Value or null.</returns>
+        public static string GetAttributeValue<T>(this T doc, string name, string attribute) where T : XContainer
+        {
+            try   { return doc.Descendants(name).First().Attribute(attribute).Value.Trim(); }
+            catch { return null; }
+        }
         #endregion
 
         #region HtmlNode

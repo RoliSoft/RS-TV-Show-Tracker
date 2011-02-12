@@ -23,8 +23,8 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id)
         {
-            var info = XDocument.Load("http://services.tvrage.com/myfeeds/showinfo.php?key=" + Key + "&sid=" + id);
-            var list = XDocument.Load("http://services.tvrage.com/myfeeds/episode_list.php?key=" + Key + "&sid=" + id);
+            var info = XDocument.Load("http://services.tvrage.com/myfeeds/showinfo.php?key={0}&sid={1}".FormatWith(Key, id));
+            var list = XDocument.Load("http://services.tvrage.com/myfeeds/episode_list.php?key={0}&sid={1}".FormatWith(Key, id));
             var show = new TVShow
                 {
                     Title       = info.GetValue("showname"),

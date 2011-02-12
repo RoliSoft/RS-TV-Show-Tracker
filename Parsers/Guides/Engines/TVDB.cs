@@ -23,7 +23,7 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id)
         {
-            var info = XDocument.Load("http://www.thetvdb.com/api/" + Key + "/series/" + id + "/all/en.xml");
+            var info = XDocument.Load("http://www.thetvdb.com/api/{0}/series/{1}/all/en.xml".FormatWith(Key, id));
             var show = new TVShow
                 {
                     Title       = info.GetValue("SeriesName"),
