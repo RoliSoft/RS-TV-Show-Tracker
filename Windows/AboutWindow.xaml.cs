@@ -24,6 +24,7 @@
         {
             if (AeroGlassCompositionEnabled)
             {
+                ExcludeElementFromAeroGlass(webBrowser);
                 SetAeroGlassTransparency();
             }
 
@@ -35,7 +36,11 @@
 
             site.Content = "© " + DateTime.Now.Year + " " + ε + " – lab." + ε.ToLower() + ".net";
 
-            info.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss") + "\r\nv" + Signature.Version;
+            webBrowser.NavigateToString(
+                Properties.Resources.AboutPage
+                    .Replace("$0", Signature.Version)
+                    .Replace("$1", Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss"))
+            );
         }
 
         /// <summary>

@@ -17,6 +17,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,7 +30,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -143,6 +143,11 @@
     <Compile Include="Parsers\Subtitles\Engines\SuperSubtitles.cs" />
     <Compile Include="Parsers\Subtitles\Languages.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Remote\API.cs" />
     <Compile Include="Remote\Objects.cs" />
     <Compile Include="Remote\Tests.cs" />
@@ -290,11 +295,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -418,7 +418,7 @@
     <Resource Include="Images\eye.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TVShows.sql" />
+    <None Include="Resources\TVShows.sql" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\bug.png" />
@@ -484,6 +484,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\funnel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AboutPage.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

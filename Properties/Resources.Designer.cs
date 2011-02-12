@@ -61,6 +61,23 @@ namespace RoliSoft.TVShowTracker.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;p&gt;Libraries used in this software:&lt;/p&gt;
+        ///&lt;ul&gt;
+        ///	&lt;li&gt;&lt;a href=&quot;http://system.data.sqlite.org/&quot;&gt;System.Data.SQLite&lt;/a&gt;&lt;/li&gt;
+        ///	&lt;li&gt;&lt;a href=&quot;http://htmlagilitypack.codeplex.com/&quot;&gt;Html Agility Pack&lt;/a&gt;&lt;/li&gt;
+        ///	&lt;li&gt;&lt;a href=&quot;http://json.codeplex.com/&quot;&gt;Json.NET&lt;/a&gt;&lt;/li&gt;
+        ///	&lt;li&gt;&lt;a href=&quot;http://www.xml-rpc.net/&quot;&gt;XML-RPC.NET&lt;/a&gt;&lt;/li&gt;
+        ///	&lt;li&gt;&lt;a href=&quot;http://www.nunit.org/&quot;&gt;NUnit&lt;/a&gt;&lt;/li&gt;
+        ///	&lt;li&gt;&lt;a href=&quot;http://code.msdn.microsoft.com/WindowsAPICodePack&quot;&gt;Windows® API Code Pack for Microsoft® .NET Framework&lt;/a&gt;&lt;/li&gt;
+        ///	&lt;li&gt;&lt;a  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string AboutPage {
+            get {
+                return ResourceManager.GetString("AboutPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /*
         ///	The TVShows table contains the name of the TV shows,
         ///	their ID and position when displayed by the software.
@@ -79,9 +96,9 @@ namespace RoliSoft.TVShowTracker.Properties {
         ///	The AirDate field is a UNIX timestamp.
         ///	The Pic field contains an UR [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string TVShows_SQL {
+        internal static string DatabaseStructure {
             get {
-                return ResourceManager.GetString("TVShows-SQL", resourceCulture);
+                return ResourceManager.GetString("DatabaseStructure", resourceCulture);
             }
         }
     }

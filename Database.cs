@@ -53,7 +53,7 @@
 
             if (!exists)
             {
-                var tables = Properties.Resources.TVShows_SQL.Split(new[]{ "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var tables = Properties.Resources.DatabaseStructure.Split(new[]{ "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var table in tables)
                 {

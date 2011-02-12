@@ -1,31 +1,26 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AboutWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" TextOptions.TextFormattingMode="Display"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" Title="About RS TV Show Tracker" Loaded="GlassWindowLoaded" Icon="/RSTVShowTracker;component/Images/information.png" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Height="154" Width="374" SnapsToDevicePixels="True">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" Title="About RS TV Show Tracker" Loaded="GlassWindowLoaded" Icon="/RSTVShowTracker;component/Images/information.png" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Height="290" Width="408" SnapsToDevicePixels="True">
     <Grid Margin="10">
-        <Image Name="logo" Height="64" HorizontalAlignment="Left" Margin="0,-8,0,0" VerticalAlignment="Top" Source="/RSTVShowTracker;component/tv.ico">
+        <Image Name="logo" Height="64" HorizontalAlignment="Left" Margin="0,-13,0,0" VerticalAlignment="Top" Source="/RSTVShowTracker;component/tv.ico">
             <Image.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.7" />
             </Image.Effect>
         </Image>
-        <Label Name="name" Content="RS TV Show Tracker" FontFamily="Calibri" FontSize="32" Foreground="White" Cursor="Hand" Height="50" Margin="70,-10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
+        <Label Name="name" Content="RS TV Show Tracker" FontSize="32" Foreground="White" Cursor="Hand" Height="50" Margin="70,-19,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
             <Label.Effect>
-                <DropShadowEffect ShadowDepth="0" Color="YellowGreen" BlurRadius="10" />
+                <DropShadowEffect ShadowDepth="2" Color="Black" BlurRadius="5" />
             </Label.Effect>
         </Label>
-        <Label Name="site" FontFamily="Cambria" FontSize="18" Foreground="White" Cursor="Hand" Margin="70,25,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
+        <Label Name="site" FontSize="18" Foreground="White" Cursor="Hand" Margin="70,18,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
             <Label.Effect>
-                <DropShadowEffect ShadowDepth="0" Color="YellowGreen" BlurRadius="10" />
+                <DropShadowEffect ShadowDepth="2" Color="Black" BlurRadius="5" />
             </Label.Effect>
         </Label>
-        <Border Background="#50000000" Margin="0,60,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="45" CornerRadius="10">
-            <Border.Effect>
+        <WebBrowser Name="webBrowser" Margin="0,58,0,0">
+            <WebBrowser.Effect>
                 <DropShadowEffect ShadowDepth="0" />
-            </Border.Effect>
-        </Border>
-        <TextBlock Foreground="White" FontWeight="Bold" TextAlignment="Right" Margin="65,67,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
-            Compiled on:<LineBreak />
-            Software version:
-        </TextBlock>
-        <TextBlock Name="info" Foreground="White" Margin="170,67,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            </WebBrowser.Effect>
+        </WebBrowser>
     </Grid>
 </Shell:GlassWindow>
