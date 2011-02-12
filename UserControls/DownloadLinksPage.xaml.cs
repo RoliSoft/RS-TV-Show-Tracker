@@ -13,7 +13,6 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Interop;
-    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
@@ -113,6 +112,8 @@
             {
                 DownloadLinksListViewItemCollection = new ObservableCollection<LinkItem>();
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
+
+                filterResults.IsChecked = Settings.Get<bool>("Filter Download Links");
             }
 
             LoadEngines();
@@ -273,6 +274,26 @@
         }
 
         /// <summary>
+        /// Handles the Checked event of the filterResults control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FilterResultsChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Filter Download Links", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the filterResults control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FilterResultsUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Filter Download Links", false);
+        }
+
+        /// <summary>
         /// Saves the exclusions to the XML settings file.
         /// </summary>
         public void SaveExclusions()
@@ -324,7 +345,8 @@
 
             ActiveSearch = new DownloadSearch(SearchEngines
                                               .Where(engine => !_excludes.Contains(engine.Name))
-                                              .Select(engine => engine.GetType()));
+                                              .Select(engine => engine.GetType()))
+                                              { Filter = filterResults.IsChecked };
 
             ActiveSearch.DownloadSearchDone            += DownloadSearchDone;
             ActiveSearch.DownloadSearchProgressChanged += DownloadSearchProgressChanged;

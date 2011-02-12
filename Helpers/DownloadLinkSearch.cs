@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -33,7 +34,14 @@
         /// <value>The search engines.</value>
         public List<DownloadSearchEngine> SearchEngines { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to filter search results.
+        /// </summary>
+        /// <value><c>true</c> if filtering is enabled; otherwise, <c>false</c>.</value>
+        public bool Filter { get; set; }
+
         private volatile List<string> _remaining;
+        private IEnumerable<string> _titleParts, _episodeParts;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitleSearch"/> class.
@@ -109,6 +117,31 @@
         /// <param name="query">The name of the release to search for.</param>
         public void SearchAsync(string query)
         {
+            if (Filter)
+            {
+                if (ShowNames.Regexes.Numbering.IsMatch(query))
+                {
+                    var tmp       = ShowNames.Tools.Split(query);
+                    _titleParts   = ShowNames.Tools.GetRoot(tmp[0]);
+                    _episodeParts = new[]
+                        {
+                            // S02E14
+                            tmp[1],
+                            // S02.E14
+                            tmp[1].Replace("E", @"\bE"),
+                            // 2x14
+                            Regex.Replace(tmp[1], "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase),
+                            // 214
+                            Regex.Replace(tmp[1], "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
+                        };
+                }
+                else
+                {
+                    _titleParts   = ShowNames.Tools.GetRoot(query);
+                    _episodeParts = new[] { string.Empty };
+                }
+            }
+
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
             query      = ShowNames.Tools.Normalize(query);
 
@@ -133,6 +166,14 @@
             _remaining.Remove((sender as DownloadSearchEngine).Name);
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
+
+            if (Filter)
+            {
+                e.Data = e.Data
+                          .Where(link => _titleParts.All(part => Regex.IsMatch(link.Release, @"\b" + part + @"\b", RegexOptions.IgnoreCase))
+                                      && _episodeParts.Any(ep => Regex.IsMatch(link.Release, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)))
+                          .ToList();
+            }
 
             DownloadSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
 
