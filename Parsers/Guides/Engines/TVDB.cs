@@ -24,55 +24,54 @@
         public override TVShow GetData(string id)
         {
             var info = XDocument.Load("http://www.thetvdb.com/api/{0}/series/{1}/all/en.xml".FormatWith(Key, id));
-            var show = new TVShow
-                {
-                    Title       = info.GetValue("SeriesName"),
-                    Genre       = info.GetValue("Genre").Trim('|').Replace("|", ", "),
-                    Description = info.GetValue("Overview"),
-                    Cover       = info.GetValue("poster"),
-                    Airing      = !Regex.IsMatch(info.GetValue("Status"), "(Canceled|Ended)"),
-                    AirTime     = info.GetValue("Airs_Time"),
-                    AirDay      = info.GetValue("Airs_DayOfWeek"),
-                    Network     = info.GetValue("Network"),
-                    Runtime     = info.GetValue("Runtime").ToInteger(),
-                    Episodes    = new List<TVShow.Episode>()
-                };
+            var show = new TVShow();
 
+            show.Title       = info.GetValue("SeriesName");
+            show.Genre       = info.GetValue("Genre").Trim('|').Replace("|", ", ");
+            show.Description = info.GetValue("Overview");
+            show.Airing      = !Regex.IsMatch(info.GetValue("Status"), "(Canceled|Ended)");
+            show.AirTime     = info.GetValue("Airs_Time");
+            show.AirDay      = info.GetValue("Airs_DayOfWeek");
+            show.Network     = info.GetValue("Network");
+            show.Episodes    = new List<TVShow.Episode>();
+
+            show.Cover = info.GetValue("poster");
             if (!string.IsNullOrWhiteSpace(show.Cover))
             {
                 show.Cover = "http://thetvdb.com/banners/_cache/" + show.Cover;
             }
 
+            show.Runtime = info.GetValue("Runtime").ToInteger();
             show.Runtime = show.Runtime == 30
                            ? 20
                            : show.Runtime == 50 || show.Runtime == 60
                              ? 40
                              : show.Runtime;
 
-            foreach (var ep in info.Descendants("Episode"))
+            foreach (var node in info.Descendants("Episode"))
             {
-                DateTime dt;
                 int sn;
-                string pic;
+                if ((sn = node.GetValue("SeasonNumber").ToInteger()) == 0) { continue; }
 
-                if ((sn = ep.GetValue("SeasonNumber").ToInteger()) == 0)
+                var ep = new TVShow.Episode();
+
+                ep.Season  = sn;
+                ep.Number  = node.GetValue("EpisodeNumber").ToInteger();
+                ep.Title   = node.GetValue("EpisodeName");
+                ep.Summary = node.GetValue("Overview");
+
+                ep.Picture = node.GetValue("filename");
+                if (!string.IsNullOrWhiteSpace(ep.Picture))
                 {
-                    continue;
+                    ep.Picture = "http://thetvdb.com/banners/_cache/" + ep.Picture;
                 }
 
-                show.Episodes.Add(new TVShow.Episode
-                    {
-                        Season  = sn,
-                        Number  = ep.GetValue("EpisodeNumber").ToInteger(),
-                        Airdate = DateTime.TryParse(ep.GetValue("FirstAired"), out dt)
-                                  ? dt
-                                  : Utils.UnixEpoch,
-                        Title   = ep.GetValue("EpisodeName"),
-                        Summary = ep.GetValue("Overview"),
-                        Picture = !string.IsNullOrWhiteSpace(pic = ep.GetValue("filename"))
-                                  ? "http://thetvdb.com/banners/_cache/" + pic
-                                  : null
-                    });
+                DateTime dt;
+                ep.Airdate = DateTime.TryParse(node.GetValue("FirstAired"), out dt)
+                             ? dt
+                             : Utils.UnixEpoch;
+
+                show.Episodes.Add(ep);
             }
 
             return show;

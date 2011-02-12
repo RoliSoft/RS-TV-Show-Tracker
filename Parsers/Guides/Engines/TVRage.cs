@@ -25,44 +25,44 @@
         {
             var info = XDocument.Load("http://services.tvrage.com/myfeeds/showinfo.php?key={0}&sid={1}".FormatWith(Key, id));
             var list = XDocument.Load("http://services.tvrage.com/myfeeds/episode_list.php?key={0}&sid={1}".FormatWith(Key, id));
-            var show = new TVShow
-                {
-                    Title       = info.GetValue("showname"),
-                    Genre       = info.Descendants("genre").Aggregate(string.Empty, (current, g) => current + (g.Value + ", ")).TrimEnd(", ".ToCharArray()),
-                    Description = info.GetValue("summary"),
-                    Cover       = info.GetValue("image"),
-                    Airing      = !Regex.IsMatch(info.GetValue("status"), "(Canceled|Ended)"),
-                    AirTime     = info.GetValue("airtime"),
-                    AirDay      = info.GetValue("airday"),
-                    Network     = info.GetValue("network"),
-                    Runtime     = info.GetValue("runtime").ToInteger(),
-                    Episodes    = new List<TVShow.Episode>()
-                };
+            var show = new TVShow();
 
+            show.Title       = info.GetValue("showname");
+            show.Genre       = info.Descendants("genre").Aggregate(string.Empty, (current, g) => current + (g.Value + ", ")).TrimEnd(", ".ToCharArray());
+            show.Description = info.GetValue("summary");
+            show.Cover       = info.GetValue("image");
+            show.Airing      = !Regex.IsMatch(info.GetValue("status"), "(Canceled|Ended)");
+            show.AirTime     = info.GetValue("airtime");
+            show.AirDay      = info.GetValue("airday");
+            show.Network     = info.GetValue("network");
+            show.Episodes    = new List<TVShow.Episode>();
+
+            show.Runtime = info.GetValue("runtime").ToInteger();
             show.Runtime = show.Runtime == 30
                            ? 20
                            : show.Runtime == 50 || show.Runtime == 60
                              ? 40
                              : show.Runtime;
 
-            foreach (var ep in list.Descendants("episode"))
+            foreach (var node in list.Descendants("episode"))
             {
-                DateTime dt;
                 int sn;
+                try { sn = node.Parent.Attribute("no").Value.ToInteger(); } catch { continue; }
 
-                try { sn = ep.Parent.Attribute("no").Value.ToInteger(); } catch { continue; }
+                var ep = new TVShow.Episode();
 
-                show.Episodes.Add(new TVShow.Episode
-                    {
-                        Season  = sn,
-                        Number  = ep.GetValue("seasonnum").ToInteger(),
-                        Airdate = DateTime.TryParse(ep.GetValue("airdate"), out dt)
-                                  ? dt
-                                  : Utils.UnixEpoch,
-                        Title   = ep.GetValue("title"),
-                        Summary = ep.GetValue("summary"),
-                        Picture = ep.GetValue("screencap")
-                    });
+                ep.Season  = sn;
+                ep.Number  = node.GetValue("seasonnum").ToInteger();
+                ep.Title   = node.GetValue("title");
+                ep.Summary = node.GetValue("summary");
+                ep.Picture = node.GetValue("screencap");
+
+                DateTime dt;
+                ep.Airdate = DateTime.TryParse(node.GetValue("airdate"), out dt)
+                             ? dt
+                             : Utils.UnixEpoch;
+
+                show.Episodes.Add(ep);
             }
 
             return show;

@@ -33,10 +33,10 @@
             show.Runtime     = info.GetValue("length").ToInteger();
             show.Episodes    = new List<TVShow.Episode>();
 
-            var picture = info.GetValue("picture");
-            if (!string.IsNullOrWhiteSpace(picture))
+            show.Cover = info.GetValue("picture");
+            if (!string.IsNullOrWhiteSpace(show.Cover))
             {
-                show.Cover = "http://img7.anidb.net/pics/anime/" + picture;
+                show.Cover = "http://img7.anidb.net/pics/anime/" + show.Cover;
             }
 
             foreach (var node in info.Descendants("episode"))

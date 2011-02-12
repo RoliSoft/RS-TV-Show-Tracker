@@ -106,19 +106,20 @@
                 throw new Exception("Failed to extract the listing. Maybe the EPGuides.com regex is out of date.");
             }
 
-            foreach(Match m in mc)
+            foreach (Match m in mc)
             {
-                DateTime dt;
+                var ep = new TVShow.Episode();
 
-                show.Episodes.Add(new TVShow.Episode
-                    {
-                        Season  = m.Groups["season"].Value.Trim().ToInteger(),
-                        Number  = m.Groups["episode"].Value.Trim().ToInteger(),
-                        Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
-                                ? dt
-                                : Utils.UnixEpoch,
-                        Title   = HtmlEntity.DeEntitize(m.Groups["title"].Value)
-                    });
+                ep.Season = m.Groups["season"].Value.Trim().ToInteger();
+                ep.Number = m.Groups["episode"].Value.Trim().ToInteger();
+                ep.Title  = HtmlEntity.DeEntitize(m.Groups["title"].Value);
+
+                DateTime dt;
+                ep.Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
+                             ? dt
+                             : Utils.UnixEpoch;
+
+                show.Episodes.Add(ep);
             }
 
             return show;

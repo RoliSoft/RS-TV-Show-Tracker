@@ -24,16 +24,15 @@
         public override TVShow GetData(string id)
         {
             var summary = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0')));
-            var show    = new TVShow
-                {
-                    Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:title']", "content")),
-                    Genre       = Regex.Replace(summary.DocumentNode.GetTextValue("//h4[text()='Genre']/following-sibling::p[1]") ?? string.Empty, @"\s+", string.Empty).Replace(",", ", "),
-                    Description = HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//p[starts-with(@class, 'show_description')]") ?? string.Empty).Replace("&hellip; More", string.Empty)),
-                    Cover       = summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:image']", "content"),
-                    Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//h4[text()='Status']/following-sibling::p[1]") ?? string.Empty, "(Canceled|Ended)"),
-                    Runtime     = 30,
-                    Episodes    = new List<TVShow.Episode>()
-                };
+            var show = new TVShow();
+
+            show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:title']", "content"));
+            show.Genre       = Regex.Replace(summary.DocumentNode.GetTextValue("//h4[text()='Genre']/following-sibling::p[1]") ?? string.Empty, @"\s+", string.Empty).Replace(",", ", ");
+            show.Description = HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//p[starts-with(@class, 'show_description')]") ?? string.Empty).Replace("&hellip; More", string.Empty));
+            show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:image']", "content");
+            show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//h4[text()='Status']/following-sibling::p[1]") ?? string.Empty, "(Canceled|Ended)");
+            show.Runtime     = 30;
+            show.Episodes    = new List<TVShow.Episode>();
 
             var airinfo = summary.DocumentNode.GetTextValue("//span[@class='tagline']");
             if (airinfo != null)
@@ -59,39 +58,37 @@
                 }
             }
 
-            var listing = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/episode.html?tag=list_header;paginator;All&season=All".FormatWith(id.Split('\0')));
-            var episodes = listing.DocumentNode.SelectNodes("//li[starts-with(@class, 'episode')]");
+            var listing  = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/episode.html?tag=list_header;paginator;All&season=All".FormatWith(id.Split('\0')));
+            var nodes    = listing.DocumentNode.SelectNodes("//li[starts-with(@class, 'episode')]");
 
-            if (episodes == null)
+            if (nodes == null)
             {
                 return show;
             }
 
-            foreach (var episode in episodes.Reverse())
+            foreach (var node in nodes.Reverse())
             {
-                DateTime dt;
-
-                var meta   = episode.GetTextValue(".//div[@class='meta']");
+                var meta   = node.GetTextValue(".//div[@class='meta']");
                 var season = Regex.Match(meta, "Season ([0-9]+)");
                 var epnr   = Regex.Match(meta, "Episode ([0-9]+)");
                 var aired  = Regex.Match(meta, @"Aired: (\d{1,2}/\d{1,2}/\d{4})");
 
-                if (!season.Success || !epnr.Success)
-                {
-                    continue;
-                }
+                if (!season.Success || !epnr.Success) { continue; }
 
-                show.Episodes.Add(new TVShow.Episode
-                    {
-                        Season  = season.Groups[1].Value.ToInteger(),
-                        Number  = epnr.Groups[1].Value.ToInteger(),
-                        Airdate = DateTime.TryParseExact(aired.Groups[1].Value, "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
-                                  ? dt
-                                  : Utils.UnixEpoch,
-                        Title   = HtmlEntity.DeEntitize(episode.GetTextValue(".//h3").Trim()),
-                        Summary = HtmlEntity.DeEntitize(episode.GetTextValue(".//p[@class='synopsis']").Trim()),
-                        Picture = episode.GetNodeAttributeValue(".//div[@class='THUMBNAIL']/a/img", "src")
-                    });
+                var ep = new TVShow.Episode();
+
+                ep.Season  = season.Groups[1].Value.ToInteger();
+                ep.Number  = epnr.Groups[1].Value.ToInteger();
+                ep.Title   = HtmlEntity.DeEntitize(node.GetTextValue(".//h3").Trim());
+                ep.Summary = HtmlEntity.DeEntitize(node.GetTextValue(".//p[@class='synopsis']").Trim());
+                ep.Picture = node.GetNodeAttributeValue(".//div[@class='THUMBNAIL']/a/img", "src");
+
+                DateTime dt;
+                ep.Airdate = DateTime.TryParseExact(aired.Groups[1].Value, "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
+                             ? dt
+                             : Utils.UnixEpoch;
+
+                show.Episodes.Add(ep);
             }
 
             return show;
