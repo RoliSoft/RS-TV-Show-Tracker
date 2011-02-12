@@ -146,6 +146,10 @@
                     guide = new EPGuides("tv.com");
                     break;
 
+                case "AniDB":
+                    guide = new AniDB();
+                    break;
+
                 case "Generate list based on download links":
                     guide = new Guess();
                     break;

@@ -207,6 +207,9 @@
                 case "EPGuides":
                     return new EPGuides();
 
+                case "AniDB":
+                    return new AniDB();
+
                 case "Guess":
                     return new Guess();
 

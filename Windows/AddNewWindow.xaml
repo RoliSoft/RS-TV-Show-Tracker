@@ -22,6 +22,7 @@
                                 <Label Content="beta" Foreground="#50000000" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
+                        <ComboBoxItem Content="AniDB" Margin="10,0" />
                         <ComboBoxItem Content="Episode Listing Only" IsEnabled="False" />
                         <ComboBoxItem Content="EPGuides - TVRage" Margin="10,0" />
                         <ComboBoxItem Content="EPGuides - TV.com" Margin="10,0" />

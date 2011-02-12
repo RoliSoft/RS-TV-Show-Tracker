@@ -13,7 +13,7 @@
         /// </summary>
         /// <value>The developer.</value>
         public string Developer { get; set; }
-
+        
         /// <summary>
         /// Gets or sets the revision date.
         /// </summary>
