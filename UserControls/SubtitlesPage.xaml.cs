@@ -417,6 +417,19 @@
         }
 
         /// <summary>
+        /// Handles the ContextMenuOpening event of the listView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
+        private void ListViewContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (listView.SelectedIndex == -1)
+            {
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
         /// Handles the Click event of the DownloadSubtitle control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>

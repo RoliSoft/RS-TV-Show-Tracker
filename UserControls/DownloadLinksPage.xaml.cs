@@ -4,21 +4,19 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.Diagnostics;
-    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Runtime.InteropServices;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Interop;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
@@ -121,7 +119,7 @@
             var cm  = listView.ContextMenu;
             var tdl = Settings.Get("Torrent Downloader");
 
-            if (!string.IsNullOrWhiteSpace(tdl))
+            /*if (!string.IsNullOrWhiteSpace(tdl))
             {
                 ((MenuItem)cm.Items[3]).Visibility = Visibility.Visible;
                 DefaultTorrent = FileVersionInfo.GetVersionInfo(tdl).ProductName;
@@ -148,7 +146,50 @@
             else
             {
                 ((MenuItem)cm.Items[3]).Visibility = Visibility.Collapsed;
+            }*/
+        }
+
+        /// <summary>
+        /// Handles the ContextMenuOpening event of the ListViewItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
+        private void ListViewItemContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            e.Handled = true;
+
+            var cm = new ContextMenu();
+            (e.Source as FrameworkElement).ContextMenu = cm;
+            var link = (LinkItem)listView.SelectedValue;
+
+            if (link.Source.Type == Types.HTTP || link.Source.Downloader is ExternalDownloader)
+            {
+                var oib    = new MenuItem();
+                oib.Header = "Open in browser";
+                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page.png")) };
+                oib.Click += OpenPageClick;
+                cm.Items.Add(oib);
             }
+
+            if (link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            {
+                var df    = new MenuItem();
+                df.Header = "Download file";
+                df.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+                df.Click += DownloadFileClick;
+                cm.Items.Add(df);
+            }
+
+            if (link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            {
+                var sap    = new MenuItem();
+                sap.Header = "Send to associated app";
+                sap.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")) };
+                sap.Click += SendToAssociatedClick;
+                cm.Items.Add(sap);
+            }
+
+            cm.IsOpen = true;
         }
 
         /// <summary>
@@ -267,7 +308,7 @@
         {
             if (_actives.Contains((sender as MenuItem).Tag as string))
             {
-                _actives.Add((sender as MenuItem).Tag as string);
+                _actives.Remove((sender as MenuItem).Tag as string);
 
                 SaveActivated();
             }
@@ -647,15 +688,15 @@
 
             var link = (LinkItem)listView.SelectedValue;
 
-            if (link.ShowOpenPage == "Visible")
+            if (link.Source.Type == Types.HTTP || link.Source.Downloader is ExternalDownloader)
             {
                 OpenPageClick(sender, e);
             }
-            else if(link.ShowSendToTorrent == "Visible")
+            else if (link.Source.Type == Types.Torrent && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent))
             {
                 SendToTorrentClick(sender, e);
             }
-            else if (link.ShowSendToAssociated == "Visible")
+            else if (link.Source.Type != Types.HTTP)
             {
                 SendToAssociatedClick(sender, e);
             }

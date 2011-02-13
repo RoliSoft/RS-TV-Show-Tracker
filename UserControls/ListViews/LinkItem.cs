@@ -2,7 +2,6 @@
 {
     using System.ComponentModel;
 
-    using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
@@ -82,54 +81,6 @@
                     default:
                         return "/RSTVShowTracker;component/Images/empty.png";
                 }
-            }
-        }
-
-        /// <summary>
-        /// Gets a value whether to show the "Show open page" context menu item.
-        /// </summary>
-        /// <value>Visible or Collapsed.</value>
-        public string ShowOpenPage
-        {
-            get
-            {
-                return Source.Type == Types.HTTP || Source.Downloader is ExternalDownloader ? "Visible" : "Collapsed";
-            }
-        }
-
-        /// <summary>
-        /// Gets a value whether to show the "Download file" context menu item.
-        /// </summary>
-        /// <value>Visible or Collapsed.</value>
-        public string ShowDownloadFile
-        {
-            get
-            {
-                return Source.Type != Types.HTTP && !(Source.Downloader is ExternalDownloader) ? "Visible" : "Collapsed";
-            }
-        }
-
-        /// <summary>
-        /// Gets a value whether to show the "Send to associated application" context menu item.
-        /// </summary>
-        /// <value>Visible or Collapsed.</value>
-        public string ShowSendToAssociated
-        {
-            get
-            {
-                return Source.Type != Types.HTTP && !(Source.Downloader is ExternalDownloader) ? "Visible" : "Collapsed";
-            }
-        }
-
-        /// <summary>
-        /// Gets a value whether to show the "Send to [torrent application]" context menu item.
-        /// </summary>
-        /// <value>Visible or Collapsed.</value>
-        public string ShowSendToTorrent
-        {
-            get
-            {
-                return Source.Type == Types.Torrent && !(Source.Downloader is ExternalDownloader) && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent) ? "Visible" : "Collapsed";
             }
         }
     }

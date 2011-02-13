@@ -28,7 +28,7 @@
                 </MenuItem>
             </MenuItem>
         </Menu>
-        <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="DownloadSubtitleClick">
+        <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="DownloadSubtitleClick" ContextMenuOpening="ListViewContextMenuOpening">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Width="120">

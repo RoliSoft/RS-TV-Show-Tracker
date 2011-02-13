@@ -7,6 +7,8 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
+    using HtmlAgilityPack;
+
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
@@ -124,7 +126,7 @@
 
                 idx++;
 
-                link.Release = name + " " + arr[idx].Trim();
+                link.Release = HtmlEntity.DeEntitize(name + " " + arr[idx].Trim());
 
                 idx++;
 
