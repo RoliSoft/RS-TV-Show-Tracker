@@ -8,6 +8,8 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+
     /// <summary>
     /// Provides access to the default JSON settings file.
     /// </summary>
@@ -49,8 +51,40 @@
             {
                 Keys = new Dictionary<string, object>();
             }
-        }
 
+            // set defaults, if they're missing
+
+            if (!Keys.ContainsKey("Active Trackers"))
+            {
+                Keys["Active Trackers"] = new List<string>
+                    {
+                        "The Pirate Bay", "SceneReleases", "ReleaseLog", "BinSearch", "NZBClub"
+                    };
+            }
+
+            if (!Keys.ContainsKey("Tracker Order"))
+            {
+                Keys["Tracker Order"] = new List<string>
+                    {
+                        "Tv Torrents Ro", "BroadcasTheNet", "TvStore", "BitMeTV", "TvTorrents", "FileList",
+                        "nCore", "bitHUmen", "The Pirate Bay", "SceneReleases", "ReleaseLog", "BinSearch"
+                    };
+            }
+
+            if (!Keys.ContainsKey("Active Subtitle Sites"))
+            {
+                Keys["Active Subtitle Sites"] = typeof(SubtitleSearchEngine)
+                                                .GetDerivedTypes()
+                                                .Select(type => (Activator.CreateInstance(type) as SubtitleSearchEngine).Name)
+                                                .ToList();
+            }
+
+            if (!Keys.ContainsKey("Active Subtitle Languages"))
+            {
+                Keys["Active Subtitle Languages"] = new List<string> { "en" };
+            }
+        }
+        
         /// <summary>
         /// Retrieves the key from the XML settings.
         /// </summary>

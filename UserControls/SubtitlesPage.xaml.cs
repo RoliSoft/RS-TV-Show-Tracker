@@ -34,7 +34,7 @@
         /// <value>The search engines.</value>
         public List<SubtitleSearchEngine> SearchEngines { get; set; }
 
-        private List<string> _excludes, _langExcl;
+        private List<string> _actives, _langs;
 
         private volatile bool _searching;
 
@@ -96,17 +96,18 @@
                 SearchEngines = typeof(SubtitleSearchEngine)
                                 .GetDerivedTypes()
                                 .Select(type => Activator.CreateInstance(type) as SubtitleSearchEngine)
+                                .OrderBy(engine => engine.Name)
                                 .ToList();
             }
 
-            if (_excludes == null)
+            if (_actives == null)
             {
-                _excludes = Settings.GetList("Subtitle Site Exclusions").ToList();
+                _actives = Settings.GetList("Active Subtitle Sites").ToList();
             }
 
-            if (_langExcl == null)
+            if (_langs == null)
             {
-                _langExcl = Settings.GetList("Subtitle Language Exclusions").ToList();
+                _langs = Settings.GetList("Active Subtitle Languages").ToList();
             }
 
             if (availableEngines.Items.Count == 0)
@@ -117,7 +118,7 @@
                     {
                         Header           = new StackPanel { Orientation = Orientation.Horizontal },
                         IsCheckable      = true,
-                        IsChecked        = !_excludes.Contains(engine.Name),
+                        IsChecked        = _actives.Contains(engine.Name),
                         StaysOpenOnClick = true,
                         Tag              = engine.Name
                     };
@@ -150,7 +151,7 @@
                         {
                             Header           = new StackPanel { Orientation = Orientation.Horizontal },
                             IsCheckable      = true,
-                            IsChecked        = !_langExcl.Contains(lang.Key),
+                            IsChecked        = _langs.Contains(lang.Key),
                             StaysOpenOnClick = true,
                             Tag              = lang.Key
                         };
@@ -178,7 +179,7 @@
                     {
                         Header           = new StackPanel { Orientation = Orientation.Horizontal },
                         IsCheckable      = true,
-                        IsChecked        = !_langExcl.Contains("null"),
+                        IsChecked        = _langs.Contains("null"),
                         StaysOpenOnClick = true,
                         Tag              = "null"
                     };
@@ -210,11 +211,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemChecked(object sender, RoutedEventArgs e)
         {
-            if (_excludes.Contains((sender as MenuItem).Tag as string))
+            if (!_actives.Contains((sender as MenuItem).Tag as string))
             {
-                _excludes.Remove((sender as MenuItem).Tag as string);
+                _actives.Add((sender as MenuItem).Tag as string);
 
-                SaveExclusions();
+                SaveActiveSites();
             }
         }
 
@@ -225,20 +226,20 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemUnchecked(object sender, RoutedEventArgs e)
         {
-            if (!_excludes.Contains((sender as MenuItem).Tag as string))
+            if (_actives.Contains((sender as MenuItem).Tag as string))
             {
-                _excludes.Add((sender as MenuItem).Tag as string);
+                _actives.Remove((sender as MenuItem).Tag as string);
 
-                SaveExclusions();
+                SaveActiveSites();
             }
         }
 
         /// <summary>
-        /// Saves the exclusions to the XML settings file.
+        /// Saves the active sites to the XML settings file.
         /// </summary>
-        public void SaveExclusions()
+        public void SaveActiveSites()
         {
-            Settings.Set("Subtitle Site Exclusions", _excludes);
+            Settings.Set("Active Subtitle Sites", _actives);
         }
 
         /// <summary>
@@ -248,11 +249,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void LanguageMenuItemChecked(object sender, RoutedEventArgs e)
         {
-            if (_langExcl.Contains((sender as MenuItem).Tag as string))
+            if (!_langs.Contains((sender as MenuItem).Tag as string))
             {
-                _langExcl.Remove((sender as MenuItem).Tag as string);
+                _langs.Add((sender as MenuItem).Tag as string);
 
-                SaveLanguageExclusions();
+                SaveActiveLanguages();
             }
         }
 
@@ -263,20 +264,20 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void LanguageMenuItemUnchecked(object sender, RoutedEventArgs e)
         {
-            if (!_langExcl.Contains((sender as MenuItem).Tag as string))
+            if (_langs.Contains((sender as MenuItem).Tag as string))
             {
-                _langExcl.Add((sender as MenuItem).Tag as string);
+                _langs.Remove((sender as MenuItem).Tag as string);
 
-                SaveLanguageExclusions();
+                SaveActiveLanguages();
             }
         }
 
         /// <summary>
-        /// Saves the exclusions to the XML settings file.
+        /// Saves the active languages to the XML settings file.
         /// </summary>
-        public void SaveLanguageExclusions()
+        public void SaveActiveLanguages()
         {
-            Settings.Set("Subtitle Language Exclusions", _langExcl);
+            Settings.Set("Active Subtitle Languages", _langs);
         }
 
         /// <summary>
@@ -321,7 +322,7 @@
             searchButton.Content = "Cancel";
 
             ActiveSearch = new SubtitleSearch(SearchEngines
-                                              .Where(engine => !_excludes.Contains(engine.Name))
+                                              .Where(engine => _actives.Contains(engine.Name))
                                               .Select(engine => engine.GetType()));
 
             ActiveSearch.SubtitleSearchDone            += SubtitleSearchDone;
@@ -355,7 +356,7 @@
             if (e.First != null)
             {
                 Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(e.First
-                                                                                           .Where(sub => !_langExcl.Contains(sub.Language))
+                                                                                           .Where(sub => _langs.Contains(sub.Language))
                                                                                            .Select(sub => new SubtitleItem(sub)))));
             }
         }
