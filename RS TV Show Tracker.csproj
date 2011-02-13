@@ -118,6 +118,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="WebSearch.cs" />
     <Compile Include="Downloaders\SubsceneDownloader.cs" />
     <Compile Include="Downloaders\ExternalDownloader.cs" />
     <Compile Include="Downloaders\HTTPDownloader.cs" />

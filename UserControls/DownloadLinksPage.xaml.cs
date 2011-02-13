@@ -47,7 +47,7 @@
         /// <value>The search engines.</value>
         public List<DownloadSearchEngine> SearchEngines { get; set; }
 
-        private List<string> _trackers, _qualities, _excludes;
+        private List<string> _trackers, _qualities, _actives;
         private List<LinkItem> _results;
 
         private ListSortDirection _lastSortDirection;
@@ -178,9 +178,9 @@
                 _qualities = Enum.GetNames(typeof(Qualities)).Reverse().ToList();
             }
 
-            if (reload || _excludes == null)
+            if (reload || _actives == null)
             {
-                _excludes = Settings.GetList("Tracker Exclusions").ToList();
+                _actives = Settings.GetList("Active Trackers").ToList();
             }
 
             if (reload || availableEngines.Items.Count == 0)
@@ -193,7 +193,7 @@
                         {
                             Header           = new StackPanel { Orientation = Orientation.Horizontal },
                             IsCheckable      = true,
-                            IsChecked        = !_excludes.Contains(engine.Name),
+                            IsChecked        = _actives.Contains(engine.Name),
                             StaysOpenOnClick = true,
                             Tag              = engine.Name
                         };
@@ -214,12 +214,12 @@
 
                     if (engine.Private)
                     {
-                        var cookies = Settings.Get(engine.Name + " Cookies");
+                        var cookies = Settings.Get(engine.Name + " Cookies", string.Empty);
                         var tooltip = string.Empty;
 
                         foreach (var cookie in cookies.Split(';'))
                         {
-                            tooltip += "\r\n - " + cookie.Trim();
+                            tooltip += "\r\n - " + cookie.Trim().CutIfLonger(60);
                         }
 
                         (mi.Header as StackPanel).Children.Add(new Image
@@ -228,7 +228,7 @@
                                 Width   = 16,
                                 Height  = 16,
                                 Margin  = new Thickness(3, -2, -100, 0),
-                                ToolTip = "This is a private site and cookies are required to search on it.\r\n" +
+                                ToolTip = "This is a private site and therefore cookies are required to search on it.\r\n" +
                                           (string.IsNullOrWhiteSpace(cookies)
                                            ? "Go to Settings, click on the Downloads tab, then select this site to enter the cookies."
                                            : "You have supplied the following cookies:" + tooltip)
@@ -250,11 +250,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemChecked(object sender, RoutedEventArgs e)
         {
-            if (_excludes.Contains((sender as MenuItem).Tag as string))
+            if (!_actives.Contains((sender as MenuItem).Tag as string))
             {
-                _excludes.Remove((sender as MenuItem).Tag as string);
+                _actives.Add((sender as MenuItem).Tag as string);
 
-                SaveExclusions();
+                SaveActivated();
             }
         }
 
@@ -265,11 +265,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemUnchecked(object sender, RoutedEventArgs e)
         {
-            if (!_excludes.Contains((sender as MenuItem).Tag as string))
+            if (_actives.Contains((sender as MenuItem).Tag as string))
             {
-                _excludes.Add((sender as MenuItem).Tag as string);
+                _actives.Add((sender as MenuItem).Tag as string);
 
-                SaveExclusions();
+                SaveActivated();
             }
         }
 
@@ -294,11 +294,11 @@
         }
 
         /// <summary>
-        /// Saves the exclusions to the XML settings file.
+        /// Saves the activated trackers to the XML settings file.
         /// </summary>
-        public void SaveExclusions()
+        public void SaveActivated()
         {
-            Settings.Set("Tracker Exclusions", _excludes);
+            Settings.Set("Active Trackers", _actives);
         }
 
         /// <summary>
@@ -344,7 +344,7 @@
             searchButton.Content = "Cancel";
 
             ActiveSearch = new DownloadSearch(SearchEngines
-                                              .Where(engine => !_excludes.Contains(engine.Name))
+                                              .Where(engine => _actives.Contains(engine.Name))
                                               .Select(engine => engine.GetType()))
                                               { Filter = filterResults.IsChecked };
 

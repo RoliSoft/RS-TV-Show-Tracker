@@ -133,7 +133,7 @@
         public override string GetID(string name)
         {
             // EPGuides doesn't have an internal search engine.
-            return Utils.Google("allintitle:" + name + " site:epguides.com");
+            return WebSearch.DuckDuckGo("intitle:{0} site:epguides.com".FormatWith(name));
         }
     }
 }

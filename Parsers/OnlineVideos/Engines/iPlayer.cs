@@ -17,7 +17,7 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = Utils.Google(String.Format("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/", name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase)));
+            var g = WebSearch.Google("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/".FormatWith(name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase)));
 
             if (!string.IsNullOrWhiteSpace(g))
             {

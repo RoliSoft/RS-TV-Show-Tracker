@@ -14,8 +14,6 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using Newtonsoft.Json.Linq;
-
     /// <summary>
     /// Provides various little utility functions.
     /// </summary>
@@ -188,37 +186,6 @@
             p.WaitForExit();
 
             return sb.ToString();
-        }
-
-        /// <summary>
-        /// Googles the specified query.
-        /// </summary>
-        /// <param name="query">The query.</param>
-        /// <returns>First link on the search result or empty string.</returns>
-        [Obsolete("Google is continuously changing their APIs and putting limits on them. The AJAX API used here is deprecated since November 1st, 2010, however it will still work for a limited time. Use Bing instead.")]
-        public static string Google(string query)
-        {
-            var search = GetURL("http://www.google.com/uds/GwebSearch?callback=google.search.WebSearch.RawCompletion&context=0&lstkp=0&rsz=small&hl=en&source=gsc&gss=.com&sig=22c4e39868158a22aac047a2c138a780&q=" + Uri.EscapeUriString(query) + "&gl=www.google.com&qid=12a9cb9d0a6870d28&key=AIzaSyA5m1Nc8ws2BbmPRwKu5gFradvD_hgq6G0&v=1.0");
-            var json   = JObject.Parse(search.Remove(0, "google.search.WebSearch.RawCompletion('0',".Length));
-
-            return json["results"].HasValues
-                   ? json["results"][0]["unescapedUrl"].Value<string>()
-                   : string.Empty;
-        }
-
-        /// <summary>
-        /// Bings (...it just doesn't sound right...) the specified query.
-        /// </summary>
-        /// <param name="query">The query.</param>
-        /// <returns>First link on the search result or empty string.</returns>
-        public static string Bing(string query)
-        {
-            var search = GetURL("http://api.bing.net/json.aspx?AppId=072CCFDBC52FB4552FF96CE87A95F8E9DE30C37B&Query=" + Uri.EscapeUriString(query) + "&Sources=Web&Version=2.0&Market=en-us&Adult=Off&Web.Count=1&Web.Offset=0&Web.Options=DisableHostCollapsing+DisableQueryAlterations");
-            var json   = JObject.Parse(search);
-
-            return json["SearchResponse"]["Web"]["Total"].Value<int>() != 0
-                   ? json["SearchResponse"]["Web"]["Results"][0]["Url"].Value<string>()
-                   : string.Empty;
         }
 
         /// <summary>

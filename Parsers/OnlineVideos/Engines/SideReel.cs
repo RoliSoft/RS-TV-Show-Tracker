@@ -17,11 +17,11 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = Utils.Google(String.Format("intitle:\"{0}\" intitle:\"online links for\" site:sidereel.com", name));
+            var g = WebSearch.Google("intitle:\"{0}\" intitle:\"online links for\" site:sidereel.com".FormatWith(name));
 
             if (string.IsNullOrWhiteSpace(g))
             {
-                g = Utils.Google(String.Format("intitle:{0} intitle:\"online links for\" site:sidereel.com", name));
+                g = WebSearch.Google("intitle:{0} intitle:\"online links for\" site:sidereel.com".FormatWith(name));
             }
 
             g = g.Replace("'", "%27");
