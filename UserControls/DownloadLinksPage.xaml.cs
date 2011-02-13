@@ -566,7 +566,7 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            Utils.Run(((LinkItem)listView.SelectedValue).URL);
+            Utils.Run(((LinkItem)listView.SelectedValue).FileURL);
         }
         #endregion
 
@@ -585,7 +585,7 @@
             var link = (LinkItem)listView.SelectedValue;
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-            SetStatus("Sending request to " + new Uri(link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
+            SetStatus("Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
 
             var dl = link.Source.Downloader;
 

@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping FileList.ro.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-30 5:35 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 6:03 PM"), TestFixture]
     public class FileList : DownloadSearchEngine
     {
         /// <summary>
@@ -103,10 +103,13 @@
                 var link = new Link(this);
 
                 link.Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText;
-                link.URL     = Site + node.GetNodeAttributeValue("../../../td[3]/a", "href");
+                link.InfoURL = Site + node.GetNodeAttributeValue("../../a", "href");
+                link.FileURL = Site + node.GetNodeAttributeValue("../../../td[3]/a", "href");
                 link.Size    = node.GetHtmlValue("../../../td[7]").Replace("<br>", " ");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
-
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[9]").Trim(), node.GetTextValue("../../../td[10]").Trim())
+                             + (node.GetTextValue("../../b/small/font") == "[FreeLeech]" ? ", Free Torrent" : string.Empty);
+                
                 yield return link;
             }
         }

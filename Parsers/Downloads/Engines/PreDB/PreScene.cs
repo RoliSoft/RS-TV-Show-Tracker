@@ -106,8 +106,7 @@
                 var link = new Link(this);
 
                 link.Release = node.InnerText;
-                link.URL     = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                link.Size    = "N/A";
+                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
 
                 yield return link;

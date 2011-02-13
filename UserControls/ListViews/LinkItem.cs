@@ -18,7 +18,9 @@
             Release = link.Release;
             Quality = link.Quality;
             Size    = link.Size;
-            URL     = link.URL;
+            InfoURL = link.InfoURL;
+            FileURL = link.FileURL;
+            Infos   = link.Infos;
         }
 
         /// <summary>

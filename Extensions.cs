@@ -413,6 +413,17 @@
 
         #region String
         /// <summary>
+        /// Extension method to string to remove any excessive whitespace.
+        /// </summary>
+        /// <param name="value">The string.</param>
+        /// <param name="minify">if set to <c>true</c> the whitespace will be replaced to nothing instead of just 1 space.</param>
+        /// <returns>String without excessive whitespace.</returns>
+        public static string TrimAll(this string value, bool minify = true)
+        {
+            return Regex.Replace(value.Trim(), @"\s+", minify ? string.Empty : " ", RegexOptions.Singleline).Trim();
+        }
+
+        /// <summary>
         /// Extension method to string to uppercase the first letter.
         /// </summary>
         /// <param name="value">The string.</param>

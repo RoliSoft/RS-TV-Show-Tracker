@@ -41,7 +41,7 @@
             }
             else if (link is Link)
             {
-                uri = new Uri((link as Link).URL);
+                uri = new Uri((link as Link).FileURL);
 
                 if (!string.IsNullOrWhiteSpace((link as Link).Source.Cookies))
                 {

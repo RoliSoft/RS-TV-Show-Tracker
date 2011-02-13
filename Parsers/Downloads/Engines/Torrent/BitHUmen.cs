@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping bitHUmen.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:40 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 6:08 PM"), TestFixture]
     public class BitHUmen : DownloadSearchEngine
     {
         /// <summary>
@@ -104,9 +104,11 @@
                 var link = new Link(this);
 
                 link.Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText;
-                link.URL     = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href");
+                link.InfoURL = Site + node.GetNodeAttributeValue("../../a", "href");
+                link.FileURL = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href");
                 link.Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " ");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[8]").Trim(), node.GetTextValue("../../../td[9]").Trim().Split('/')[1].Trim());
 
                 yield return link;
             }

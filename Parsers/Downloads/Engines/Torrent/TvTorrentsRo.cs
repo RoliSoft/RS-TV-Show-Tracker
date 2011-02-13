@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping freshon.tv.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:21 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 5:31 PM"), TestFixture]
     public class TvTorrentsRo : DownloadSearchEngine
     {
         /// <summary>
@@ -104,9 +104,13 @@
                 var link = new Link(this);
 
                 link.Release = node.GetAttributeValue("title");
-                link.URL     = Site + "download.php?id=" + Regex.Replace(node.GetAttributeValue("href"), "[^0-9]+", string.Empty) + "&type=torrent";
+                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                link.FileURL = Site + "download.php?id=" + Regex.Replace(node.GetAttributeValue("href"), "[^0-9]+", string.Empty) + "&type=torrent";
                 link.Size    = node.GetHtmlValue("../../../td[@class='table_size']").Trim().Replace("<br>", " ");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[@class='table_seeders']").Trim(), node.GetTextValue("../../../td[@class='table_leechers']").Trim())
+                             + (node.GetHtmlValue("../..//img[@alt='50% Free']") != null ? ", 50% Free" : string.Empty)
+                             + (node.GetHtmlValue("../..//img[@alt='100% Free']") != null ? ", 100% Free" : string.Empty);
 
                 yield return link;
             }

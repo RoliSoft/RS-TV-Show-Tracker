@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping BitMeTV.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-30 5:58 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 6:13 AM"), TestFixture]
     public class BitMeTV : DownloadSearchEngine
     {
         /// <summary>
@@ -105,9 +105,11 @@
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.GetAttributeValue("title"));
-                link.URL     = Site + node.GetNodeAttributeValue("../td[1]/a", "href");
+                link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetAttributeValue("href"));
+                link.FileURL = Site + node.GetNodeAttributeValue("../td[1]/a", "href");
                 link.Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " ");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[8]").Trim(), node.GetTextValue("../../td[9]").Trim());
 
                 yield return link;
             }

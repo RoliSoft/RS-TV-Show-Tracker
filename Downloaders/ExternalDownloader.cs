@@ -41,7 +41,7 @@
             }
             else if (link is Link)
             {
-                url = (link as Link).URL;
+                url = (link as Link).FileURL;
             }
             else if (link is Subtitle)
             {

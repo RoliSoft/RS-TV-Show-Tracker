@@ -109,7 +109,7 @@
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
-                link.URL     = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
+                link.InfoURL = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
                 link.Size    = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value;
                 link.Quality = ThePirateBay.ParseQuality(link.Release.Replace(' ', '.'));
 

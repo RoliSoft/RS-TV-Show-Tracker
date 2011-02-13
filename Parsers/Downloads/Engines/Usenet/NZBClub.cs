@@ -96,7 +96,7 @@
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
-                link.URL     = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../..//span[contains(@id, 'sizelabel')]/a", "href");
+                link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../..//span[contains(@id, 'sizelabel')]/a", "href");
                 link.Size    = Regex.Match(node.GetHtmlValue("../../..//span[contains(@id, 'sizecolumnlabel')]"), @"^(?:<b>)?([^<]+)").Groups[1].Value;
                 link.Quality = ThePirateBay.ParseQuality(link.Release.Replace(' ', '.'));
 

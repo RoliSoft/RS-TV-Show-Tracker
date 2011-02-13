@@ -108,8 +108,7 @@
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & ");
-                link.URL     = node.GetAttributeValue("href");
-                link.Size    = "N/A";
+                link.InfoURL = node.GetAttributeValue("href");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
 
                 yield return link;

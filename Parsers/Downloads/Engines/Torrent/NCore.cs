@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping nCore.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-31 4:45 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 5:52 PM"), TestFixture]
     public class NCore : DownloadSearchEngine
     {
         /// <summary>
@@ -105,9 +105,14 @@
                 var link = new Link(this);
 
                 link.Release = node.GetAttributeValue("title");
-                link.URL     = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
+                link.InfoURL = Site + "torrents.php?action=details&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
+                link.FileURL = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
                 link.Size    = node.GetTextValue("../../../../div[@class='box_meret2']/text()").Trim();
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../../div[@class='box_s2']").Trim(), node.GetTextValue("../../../../div[@class='box_l2']").Trim())
+                             + (node.GetHtmlValue("../..//div[contains(@title, 'Ingyenes torrent!')]") != null ? ", Free Torrent" : string.Empty)
+                             + (node.GetHtmlValue("../../../..//span[@class='bonus_down']") != null ? ", " + node.GetTextValue("../../../..//span[@class='bonus_down']").Trim().Substring(2) + " Download" : string.Empty)
+                             + (node.GetHtmlValue("../../../..//span[@class='bonus_up']") != null ? ", " + node.GetTextValue("../../../..//span[@class='bonus_up']").Trim().Substring(2) + " Upload" : string.Empty);
 
                 yield return link;
             }

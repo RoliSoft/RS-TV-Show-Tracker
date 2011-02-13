@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping The Pirate Bay.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:46 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 4:46 PM"), TestFixture]
     public class ThePirateBay : DownloadSearchEngine
     {
         /// <summary>
@@ -93,9 +93,13 @@
                 var link = new Link(this);
 
                 link.Release = node.InnerText;
-                link.URL     = node.GetNodeAttributeValue("../../a[1]", "href");
+                link.FileURL = node.GetNodeAttributeValue("../../a[1]", "href");
+                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
                 link.Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty);
                 link.Quality = ParseQuality(node.InnerText);
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[3]").Trim(), node.GetTextValue("../../../td[4]").Trim())
+                             + (node.GetHtmlValue("../..//img[@title='VIP']") != null ? ", VIP Uploader" : string.Empty)
+                             + (node.GetHtmlValue("../..//img[@title='Trusted']") != null ? ", Trusted Uploader" : string.Empty);
 
                 yield return link;
             }

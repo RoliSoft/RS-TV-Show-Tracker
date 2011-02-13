@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping BroadcasTheNet.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-10 10:33 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 6:22 PM"), TestFixture]
     public class BroadcasTheNet : DownloadSearchEngine
     {
         /// <summary>
@@ -124,8 +124,12 @@
                     link.Quality = ParseQuality(quality);
                 }
 
-                link.URL     = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("span/a[contains(@href, 'action=download')]", "href"));
+                link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("a[2]", "href"));
+                link.FileURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("span/a[contains(@href, 'action=download')]", "href"));
                 link.Size    = node.GetTextValue("../td[5]").Trim();
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../td[6]").Trim(), node.GetTextValue("../td[7]").Trim())
+                             + (node.GetHtmlValue("../td[4]/img[@title='FastTorrent']") != null ? ", Fast Torrent" : string.Empty)
+                             + (node.GetHtmlValue("../td[4]/img[@title='Official BTN AutoUp']") != null ? ", Official BTN AutoUp" : string.Empty);
 
                 yield return link;
             }

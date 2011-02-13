@@ -122,7 +122,8 @@
 
                 idx++;
 
-                link.URL = Site + "torrent/download.php?id=" + arr[idx].Trim();
+                link.InfoURL = Site + "torrent/browse.php?id=" + arr[idx].Trim();
+                link.FileURL = Site + "torrent/download.php?id=" + arr[idx].Trim();
 
                 idx++;
 
@@ -138,7 +139,11 @@
 
                 link.Size = Utils.GetFileSize(long.Parse(arr[idx].Trim()));
 
-                idx += 18;
+                idx += 10;
+
+                link.Infos = Link.SeedLeechFormat.FormatWith(arr[idx + 1].Trim(), arr[idx].Trim());
+
+                idx += 8;
 
                 yield return link;
             }

@@ -98,7 +98,7 @@
                 var info  = node.GetTextValue("..//span[@class='info']");
                 link.Size = info != null
                             ? info.Replace("MB", " MB").Split('|')[0].Trim()
-                            : "N/A";
+                            : null;
 
                 yield return link;
             }

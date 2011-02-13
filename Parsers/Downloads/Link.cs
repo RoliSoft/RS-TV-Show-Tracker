@@ -18,6 +18,18 @@
         public string Release { get; set; }
 
         /// <summary>
+        /// Gets or sets the URL to the details page.
+        /// </summary>
+        /// <value>The URL.</value>
+        public string InfoURL { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL to the downloadable file.
+        /// </summary>
+        /// <value>The URL.</value>
+        public string FileURL { get; set; }
+
+        /// <summary>
         /// Gets or sets the quality of the video.
         /// </summary>
         /// <value>The quality.</value>
@@ -30,10 +42,22 @@
         public string Size { get; set; }
 
         /// <summary>
-        /// Gets or sets the URL to the subtitle.
+        /// Gets or sets additional information about the file.
         /// </summary>
-        /// <value>The URL.</value>
-        public string URL { get; set; }
+        /// <value>The info.</value>
+        public string Infos { get; set; }
+
+        /// <summary>
+        /// Gets the string format for displaying a seed/leech information.
+        /// </summary>
+        /// <value>The S/L string format.</value>
+        public static string SeedLeechFormat
+        {
+            get
+            {
+                return "Seeders: {0}, Leechers: {1}";
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Link"/> class.
