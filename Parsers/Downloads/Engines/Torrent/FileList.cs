@@ -108,7 +108,7 @@
                 link.Size    = node.GetHtmlValue("../../../td[7]").Replace("<br>", " ");
                 link.Quality = ThePirateBay.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[9]").Trim(), node.GetTextValue("../../../td[10]").Trim())
-                             + (node.GetTextValue("../../b/small/font") == "[FreeLeech]" ? ", Free Torrent" : string.Empty);
+                             + (node.GetTextValue("../../b/small/font") == "[FreeLeech]" ? ", Free" : string.Empty);
                 
                 yield return link;
             }

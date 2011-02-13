@@ -149,49 +149,7 @@
             }*/
         }
 
-        /// <summary>
-        /// Handles the ContextMenuOpening event of the ListViewItem control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
-        private void ListViewItemContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            e.Handled = true;
-
-            var cm = new ContextMenu();
-            (e.Source as FrameworkElement).ContextMenu = cm;
-            var link = (LinkItem)listView.SelectedValue;
-
-            if (link.Source.Type == Types.HTTP || link.Source.Downloader is ExternalDownloader)
-            {
-                var oib    = new MenuItem();
-                oib.Header = "Open in browser";
-                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page.png")) };
-                oib.Click += OpenPageClick;
-                cm.Items.Add(oib);
-            }
-
-            if (link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
-            {
-                var df    = new MenuItem();
-                df.Header = "Download file";
-                df.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
-                df.Click += DownloadFileClick;
-                cm.Items.Add(df);
-            }
-
-            if (link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
-            {
-                var sap    = new MenuItem();
-                sap.Header = "Send to associated app";
-                sap.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")) };
-                sap.Click += SendToAssociatedClick;
-                cm.Items.Add(sap);
-            }
-
-            cm.IsOpen = true;
-        }
-
+        #region Settings
         /// <summary>
         /// Loads the engines.
         /// </summary>
@@ -341,7 +299,9 @@
         {
             Settings.Set("Active Trackers", _actives);
         }
+        #endregion
 
+        #region Search
         /// <summary>
         /// Initiates a search on this usercontrol.
         /// </summary>
@@ -487,7 +447,9 @@
 
             MainWindow.Active.HandleUnexpectedException(e.Second);
         }
+        #endregion
 
+        #region ListView events
         /// <summary>
         /// Handles the Click event of the listView control.
         /// </summary>
@@ -556,17 +518,85 @@
             DownloadLinksListViewItemCollection.AddRange(links);
         }
 
-        #region Open page
         /// <summary>
-        /// Handles the Click event of the OpenPage control.
+        /// Handles the ContextMenuOpening event of the ListViewItem control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void OpenPageClick(object sender, RoutedEventArgs e)
+        /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
+        private void ListViewItemContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            e.Handled = true;
+
+            var cm = new ContextMenu();
+            (e.Source as FrameworkElement).ContextMenu = cm;
+            var link = (LinkItem)listView.SelectedValue;
+
+            if (!string.IsNullOrWhiteSpace(link.InfoURL))
+            {
+                var oib    = new MenuItem();
+                oib.Header = "Open details in browser";
+                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page.png")) };
+                oib.Click += (s, r) => Utils.Run(link.InfoURL);
+                cm.Items.Add(oib);
+            }
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL))
+            {
+                var oib    = new MenuItem();
+                oib.Header = "Download file in browser";
+                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
+                oib.Click += (s, r) => Utils.Run(link.FileURL);
+                cm.Items.Add(oib);
+            }
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && !(link.Source.Downloader is ExternalDownloader))
+            {
+                var df    = new MenuItem();
+                df.Header = "Download file";
+                df.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+                df.Click += DownloadFileClick;
+                cm.Items.Add(df);
+            }
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            {
+                var sap    = new MenuItem();
+                sap.Header = "Send to associated";
+                sap.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")) };
+                sap.Click += (s, r) => DownloadFileClick("SendToAssociated", r);
+                cm.Items.Add(sap);
+            }
+
+            cm.IsOpen = true;
+        }
+
+        /// <summary>
+        /// Handles the MouseDoubleClick event of the listView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ListViewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
 
-            Utils.Run(((LinkItem)listView.SelectedValue).FileURL);
+            var link = (LinkItem)listView.SelectedValue;
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            {
+                DownloadFileClick("SendToAssociated", e);
+            }
+            else if (!string.IsNullOrWhiteSpace(link.FileURL) && !(link.Source.Downloader is ExternalDownloader))
+            {
+                DownloadFileClick(null, e);
+            }
+            else if (!string.IsNullOrWhiteSpace(link.FileURL))
+            {
+                Utils.Run(link.FileURL);
+            }
+            else if (!string.IsNullOrWhiteSpace(link.InfoURL))
+            {
+                Utils.Run(link.InfoURL);
+            }
         }
         #endregion
 
@@ -594,35 +624,6 @@
 
             dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), sender is string ? sender as string : "DownloadFile");
         }
-        #endregion
-
-        #region Send to associated
-        /// <summary>
-        /// Handles the Click event of the SendToAssociated control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SendToAssociatedClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            DownloadFileClick("SendToAssociated", e);
-        }
-        #endregion
-
-        #region Send to [torrent application]
-        /// <summary>
-        /// Handles the Click event of the SendToTorrent control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SendToTorrentClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            DownloadFileClick("SendToTorrent", e);
-        }
-        #endregion
 
         /// <summary>
         /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
@@ -676,34 +677,6 @@
                     break;
             }
         }
-
-        /// <summary>
-        /// Handles the MouseDoubleClick event of the listView control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void ListViewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var link = (LinkItem)listView.SelectedValue;
-
-            if (link.Source.Type == Types.HTTP || link.Source.Downloader is ExternalDownloader)
-            {
-                OpenPageClick(sender, e);
-            }
-            else if (link.Source.Type == Types.Torrent && !string.IsNullOrWhiteSpace(MainWindow.Active.activeDownloadLinksPage.DefaultTorrent))
-            {
-                SendToTorrentClick(sender, e);
-            }
-            else if (link.Source.Type != Types.HTTP)
-            {
-                SendToAssociatedClick(sender, e);
-            }
-            else
-            {
-                DownloadFileClick(sender, e);
-            }
-        }
+        #endregion
     }
 }

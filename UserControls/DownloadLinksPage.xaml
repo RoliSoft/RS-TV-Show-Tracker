@@ -136,7 +136,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="400">
+                    <GridViewColumn Width="350">
                         <GridViewColumnHeader Content="Release name" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -144,22 +144,30 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="80">
+                    <GridViewColumn Width="60">
                         <GridViewColumnHeader Content="Size" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Size}" Width="80" Margin="-7,0" TextAlignment="Center" />
+                                <TextBlock FontWeight="Normal" Text="{Binding Size}" Width="60" Margin="-7,0" TextAlignment="Center" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="110">
+                    <GridViewColumn Width="100">
                         <GridViewColumnHeader Content="Quality" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="-10,0,0,0">
                                     <TextBlock FontWeight="Normal" Text="{Binding QualityText}" Width="94" Margin="-7,0" TextAlignment="Center" />
                                     <Image Source="{Binding HDIcon}" Width="16" Height="16" />
                                 </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="200">
+                        <GridViewColumnHeader Content="Details" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock FontWeight="Normal" Text="{Binding Infos}" TextTrimming="CharacterEllipsis" Margin="-7,0" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
