@@ -127,14 +127,13 @@
             var title = GetRoot(name);
             var episodes = new[] {
                                    episode, // S02E14
-                                   episode.Replace("E", ".E"), // S02.E14
-                                   Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", ".$1X$2.", RegexOptions.IgnoreCase), // 2x14
-                                   Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", ".$1$2.", RegexOptions.IgnoreCase) // 214
+                                   episode.Replace("E", "\bE"), // S02.E14
+                                   Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase), // 2x14
+                                   Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase) // 214
                                  };
 
             return title.All(part => Regex.IsMatch(release, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
-                && episodes.Any(ep => release.ToUpper().Contains(ep)) // is it the episode we want?
-                   ;
+                && episodes.Any(ep => Regex.IsMatch(release, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)); // is it the episode we want?
         }
 
         /// <summary>

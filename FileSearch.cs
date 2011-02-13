@@ -105,10 +105,10 @@
             {
                 var fi = new FileInfo(file);
                 if (_titleParts.All(part => Regex.IsMatch(fi.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
-                    && _knownVideoRegex.IsMatch(fi.Name) // is it a known video file extension?
-                    && !_sampleVideoRegex.IsMatch(fi.Name) // is it not a sample?
-                    && _episodeParts.Any(ep => fi.Name.ToUpper().Contains(ep)) // is it the episode we want?
-                    && !Files.Contains(file)) // and not in the array already?
+                 && _knownVideoRegex.IsMatch(fi.Name) // is it a known video file extension?
+                 && !_sampleVideoRegex.IsMatch(fi.Name) // is it not a sample?
+                 && _episodeParts.Any(ep => Regex.IsMatch(fi.Name, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)) // is it the episode we want?
+                 && !Files.Contains(file)) // and not in the array already?
                 {
                     Files.Add(file);
                 }
@@ -118,14 +118,14 @@
             foreach (var dir in Directory.GetDirectories(path))
             {
                 if (_titleParts.All(part => Regex.IsMatch(dir, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
-                    && _episodeParts.Any(ep => dir.ToUpper().Contains(ep))) // is it the episode we want?
+                 && _episodeParts.Any(ep => Regex.IsMatch(dir, @"\b" + ep + @"\b", RegexOptions.IgnoreCase))) // is it the episode we want?
                 {
                     // search for matching episodes inside the matching directory
                     foreach (var file in Directory.GetFiles(dir))
                     {
                         if (_knownVideoRegex.IsMatch(file) // is it a video?
-                           && !Files.Contains(file) // and not in the array already?
-                           && !_sampleVideoRegex.IsMatch(file)) // and not just a sample?
+                         && !Files.Contains(file) // and not in the array already?
+                         && !_sampleVideoRegex.IsMatch(file)) // and not just a sample?
                         {
                             Files.Add(file);
                         }

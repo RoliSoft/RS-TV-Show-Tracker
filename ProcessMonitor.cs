@@ -72,7 +72,7 @@
                 foreach (var file in files)
                 {
                     if (parts.All(part => (Regex.IsMatch(file.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase) // does it have all the words in the file name?
-                                           || Regex.IsMatch(file.Directory.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase))) // or in the directory name?
+                                        || Regex.IsMatch(file.Directory.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase))) // or in the directory name?
                         && Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4)$", RegexOptions.IgnoreCase)) // is it a known video file extension?
                     {
                         var ep = ShowNames.Tools.ExtractEpisode(file.ToString());
