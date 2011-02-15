@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -16,6 +17,7 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Helpers;
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
@@ -480,48 +482,27 @@
                 return;
             }
 
-            string dest = null;
-
-            if (e.Third.StartsWith("SaveTo\0"))
-            {
-                var parts = e.Third.Split('\0');
-                dest = parts[1];
-
-                if (parts.Length == 3 && parts[2] == "ExtToDl")
+            var sfd = new SaveFileDialog
                 {
-                    // ExtToDl changes the extension of the SaveTo file to the downloaded file's extension.
-                    dest = Path.ChangeExtension(dest, new FileInfo(e.Second).Extension);
-                }
-            }
-            else
-            {
-                var sfd = new SaveFileDialog
-                    {
-                        CheckPathExists = true,
-                        FileName = e.Second
-                    };
+                    CheckPathExists = true,
+                    FileName        = e.Second
+                };
 
-                if (sfd.ShowDialog().Value)
-                {
-                    dest = sfd.FileName;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(dest))
+            if (sfd.ShowDialog().Value)
             {
-                if (File.Exists(dest))
+                if (File.Exists(sfd.FileName))
                 {
-                    File.Delete(dest);
+                    File.Delete(sfd.FileName);
                 }
 
-                File.Move(e.First, dest);
+                File.Move(e.First, sfd.FileName);
             }
             else
             {
                 File.Delete(e.First);
             }
 
-            SetStatus("File downloaded successfully" + (e.Third.StartsWith("SaveTo\0") ? " to " + dest : "."));
+            SetStatus("File downloaded successfully.");
         }
 
         /// <summary>
@@ -533,27 +514,29 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var sub  = (Subtitle)listView.SelectedValue;
-            var path = Settings.Get("Download Path");
-            var show = ShowNames.Tools.Split(textBox.Text);
+            var sub   = (Subtitle)listView.SelectedValue;
+            var path  = Settings.Get("Download Path");
+            var show  = ShowNames.Tools.Split(textBox.Text);
+            var query = textBox.Text;
 
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
                 new TaskDialog
-                {
-                    Icon            = TaskDialogStandardIcon.Error,
-                    Caption         = "Search path not configured",
-                    InstructionText = "Search path not configured",
-                    Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                    Cancelable      = true
-                }.Show();
+                    {
+                        Icon            = TaskDialogStandardIcon.Error,
+                        Caption         = "Search path not configured",
+                        InstructionText = "Search path not configured",
+                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
+                        Cancelable      = true
+                    }.Show();
                 return;
             }
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 
             var finder = new FileSearch(path, show[0], show[1]);
-            finder.FileSearchDone += (sender2, e2) =>
+            finder.FileSearchDone += (d, f) =>
                 {
                     if (finder.Files.Count == 0)
                     {
@@ -561,7 +544,7 @@
                             {
                                 Icon            = TaskDialogStandardIcon.Error,
                                 Caption         = "No files found",
-                                InstructionText = textBox.Text,
+                                InstructionText = query,
                                 Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.",
                                 Cancelable      = true
                             }.Show();
@@ -572,10 +555,56 @@
 
                     var dl = sub.Source.Downloader;
 
-                    dl.DownloadFileCompleted   += DownloadFileCompleted;
                     dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
+                    dl.DownloadFileCompleted   += (s, a) =>
+                        {
+                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-                    dl.Download(sub, Utils.GetRandomFileName(), "SaveTo\0" + finder.Files[0] + "\0ExtToDl");
+                            var td = new TaskDialog
+                            {
+                                Icon            = TaskDialogStandardIcon.Information,
+                                Caption         = "Download subtitle near video",
+                                InstructionText = sub.Release,
+                                Text            = "The following files were found for {0}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(query),
+                                Cancelable      = true,
+                                StandardButtons = TaskDialogStandardButtons.Cancel
+                            };
+
+                            foreach (var file in finder.Files)
+                            {
+                                var tmp     = file;
+                                var fi      = new FileInfo(file);
+                                var quality = ThePirateBay.ParseQuality(file);
+                                var instr   = string.Empty;
+
+                                if (quality != Parsers.Downloads.Qualities.Unknown)
+                                {
+                                    instr = quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
+                                }
+
+                                instr += Utils.GetFileSize(fi.Length)
+                                       + Environment.NewLine
+                                       + fi.DirectoryName;
+
+                                var fd = new TaskDialogCommandLink
+                                    {
+                                        Text        = fi.Name,
+                                        Instruction = instr
+                                    };
+                                fd.Click += (x, r) =>
+                                    {
+                                        td.Close();
+                                        File.Move(a.First, Path.ChangeExtension(tmp, new FileInfo(a.Second).Extension));
+                                    };
+
+                                td.Controls.Add(fd);
+                            }
+
+                            td.Show();
+                            SetStatus("File downloaded successfully.");
+                        };
+
+                    dl.Download(sub, Utils.GetRandomFileName());
                 };
             finder.BeginSearch();
         }
