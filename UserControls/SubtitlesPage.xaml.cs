@@ -531,7 +531,7 @@
                     }.Show();
                 return;
             }
-
+            
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
             SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
 

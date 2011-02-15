@@ -75,6 +75,7 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>.\HtmlAgilityPack.dll</HintPath>
     </Reference>
+    <Reference Include="Ionic.Zip.Reduced, Version=1.7.2.26, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Windows.Shell">
       <HintPath>.\Microsoft.Windows.Shell.dll</HintPath>
     </Reference>
@@ -494,6 +495,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\inbox-download.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Ionic.Zip.Reduced.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

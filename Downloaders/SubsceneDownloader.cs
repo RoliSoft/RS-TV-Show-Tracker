@@ -7,6 +7,8 @@
     using System.Text.RegularExpressions;
     using System.Threading;
 
+    using Ionic.Zip;
+
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
@@ -114,22 +116,19 @@
 
             DownloadProgressChanged.Fire(this, 100);
 
-            // extract file name
+            // extract subtitle file
 
-            var fn = string.Empty;
-
-            if (!string.IsNullOrWhiteSpace(resp.GetResponseHeader("Content-Disposition")))
+            string fn;
+            using (var mstream = new MemoryStream())
             {
-                var m = Regex.Match(resp.GetResponseHeader("Content-Disposition"), @"filename=[""']?([^$]+)", RegexOptions.IgnoreCase);
-
-                if (m.Success)
+                using (var zip = ZipFile.Read(target))
                 {
-                    fn = m.Groups[1].Value.TrimEnd(new[] { ' ', '\'', '"' });
+                    fn = zip.Entries[0].FileName;
+                    zip.Entries[0].Extract(mstream);
                 }
-            }
-            else
-            {
-                fn = "subscene-sub." + typeid;
+
+                File.Delete(target);
+                File.WriteAllBytes(target, mstream.ToArray());
             }
 
             DownloadFileCompleted.Fire(this, target, fn, token);
