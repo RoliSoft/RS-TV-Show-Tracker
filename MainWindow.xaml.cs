@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Media;
@@ -563,6 +564,11 @@
         /// <param name="ex">The exception.</param>
         public void HandleUnexpectedException(Exception ex)
         {
+            if (ex is ThreadAbortException)
+            {
+                return;
+            }
+
             var show = Settings.Get<bool>("Show Unhandled Errors");
             var sb   = new StringBuilder();
 

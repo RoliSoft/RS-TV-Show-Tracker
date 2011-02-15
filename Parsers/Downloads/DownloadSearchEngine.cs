@@ -93,10 +93,7 @@
         /// <param name="query">The name of the release to search for.</param>
         public void SearchAsync(string query)
         {
-            if (_job != null)
-            {
-                _job.Abort();
-            }
+            CancelAsync();
 
             _job = new Thread(() =>
                 {
@@ -104,10 +101,6 @@
                     {
                         var list = Search(query);
                         DownloadSearchDone.Fire(this, list.ToList());
-                    }
-                    catch (ThreadAbortException)
-                    {
-                        return;
                     }
                     catch (Exception ex)
                     {

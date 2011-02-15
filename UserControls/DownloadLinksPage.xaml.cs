@@ -323,6 +323,19 @@
         }
 
         /// <summary>
+        /// Handles the KeyUp event of the textBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
+        private void TextBoxKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                SearchButtonClick(null, null);
+            }
+        }
+
+        /// <summary>
         /// Handles the Click event of the searchButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>

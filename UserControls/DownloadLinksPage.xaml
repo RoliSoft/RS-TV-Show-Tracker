@@ -99,7 +99,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="17" />
         </Grid.RowDefinitions>
-        <TextBox Grid.Row="0" Height="23" Margin="0,0,150,0" Name="textBox" VerticalAlignment="Top" />
+        <TextBox Grid.Row="0" Height="23" Margin="0,0,150,0" Name="textBox" VerticalAlignment="Top" KeyUp="TextBoxKeyUp" />
         <Button Grid.Row="0" Content="Search" Height="23" Margin="0" HorizontalAlignment="Right" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
         <Menu Grid.Row="0" Name="settingsMenu" Height="23" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75" Margin="0,0,75,0" Background="#50000000">
             <MenuItem Padding="5,4">

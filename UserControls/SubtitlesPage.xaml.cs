@@ -12,6 +12,7 @@
     using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
+    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Helpers;
@@ -301,6 +302,19 @@
         }
 
         /// <summary>
+        /// Handles the KeyUp event of the textBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
+        private void TextBoxKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                SearchButtonClick(null, null);
+            }
+        }
+
+        /// <summary>
         /// Handles the Click event of the searchButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -466,27 +480,104 @@
                 return;
             }
 
-            var sfd = new SaveFileDialog
-                {
-                    CheckPathExists = true,
-                    FileName        = e.Second
-                };
+            string dest = null;
 
-            if (sfd.ShowDialog().Value)
+            if (e.Third.StartsWith("SaveTo\0"))
             {
-                if (File.Exists(sfd.FileName))
+                var parts = e.Third.Split('\0');
+                dest = parts[1];
+
+                if (parts.Length == 3 && parts[2] == "ExtToDl")
                 {
-                    File.Delete(sfd.FileName);
+                    // ExtToDl changes the extension of the SaveTo file to the downloaded file's extension.
+                    dest = Path.ChangeExtension(dest, new FileInfo(e.Second).Extension);
+                }
+            }
+            else
+            {
+                var sfd = new SaveFileDialog
+                    {
+                        CheckPathExists = true,
+                        FileName = e.Second
+                    };
+
+                if (sfd.ShowDialog().Value)
+                {
+                    dest = sfd.FileName;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(dest))
+            {
+                if (File.Exists(dest))
+                {
+                    File.Delete(dest);
                 }
 
-                File.Move(e.First, sfd.FileName);
+                File.Move(e.First, dest);
             }
             else
             {
                 File.Delete(e.First);
             }
 
-            SetStatus("File downloaded successfully.");
+            SetStatus("File downloaded successfully" + (e.Third.StartsWith("SaveTo\0") ? " to " + dest : "."));
+        }
+
+        /// <summary>
+        /// Handles the Click event of the DownloadSubtitle control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DownloadSubtitleNearVideoClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+
+            var sub  = (Subtitle)listView.SelectedValue;
+            var path = Settings.Get("Download Path");
+            var show = ShowNames.Tools.Split(textBox.Text);
+
+            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            {
+                new TaskDialog
+                {
+                    Icon            = TaskDialogStandardIcon.Error,
+                    Caption         = "Search path not configured",
+                    InstructionText = "Search path not configured",
+                    Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
+                    Cancelable      = true
+                }.Show();
+                return;
+            }
+
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+
+            var finder = new FileSearch(path, show[0], show[1]);
+            finder.FileSearchDone += (sender2, e2) =>
+                {
+                    if (finder.Files.Count == 0)
+                    {
+                        new TaskDialog
+                            {
+                                Icon            = TaskDialogStandardIcon.Error,
+                                Caption         = "No files found",
+                                InstructionText = textBox.Text,
+                                Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.",
+                                Cancelable      = true
+                            }.Show();
+                        return;
+                    }
+
+                    SetStatus("Sending request to " + new Uri(sub.URL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
+
+                    var dl = sub.Source.Downloader;
+
+                    dl.DownloadFileCompleted   += DownloadFileCompleted;
+                    dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
+
+                    dl.Download(sub, Utils.GetRandomFileName(), "SaveTo\0" + finder.Files[0] + "\0ExtToDl");
+                };
+            finder.BeginSearch();
         }
     }
 }
