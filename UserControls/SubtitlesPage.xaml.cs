@@ -548,6 +548,9 @@
                                 Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.",
                                 Cancelable      = true
                             }.Show();
+
+                        Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                        SetStatus("Couldn't find video file for the subtitle.");
                         return;
                     }
 
@@ -561,14 +564,14 @@
                             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
                             var td = new TaskDialog
-                            {
-                                Icon            = TaskDialogStandardIcon.Information,
-                                Caption         = "Download subtitle near video",
-                                InstructionText = sub.Release,
-                                Text            = "The following files were found for {0}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(query),
-                                Cancelable      = true,
-                                StandardButtons = TaskDialogStandardButtons.Cancel
-                            };
+                                {
+                                    Icon            = TaskDialogStandardIcon.Information,
+                                    Caption         = "Download subtitle near video",
+                                    InstructionText = sub.Release,
+                                    Text            = "The following files were found for {0}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(query),
+                                    Cancelable      = true,
+                                    StandardButtons = TaskDialogStandardButtons.Cancel
+                                };
 
                             foreach (var file in finder.Files)
                             {
