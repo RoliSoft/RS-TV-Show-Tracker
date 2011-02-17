@@ -63,6 +63,12 @@
         public int Runtime { get; set; }
 
         /// <summary>
+        /// Gets or sets the URL to the show's page on the site.
+        /// </summary>
+        /// <value>The URL.</value>
+        public string URL { get; set; }
+
+        /// <summary>
         /// Gets or sets the episode list.
         /// </summary>
         /// <value>The episode list.</value>
@@ -108,6 +114,12 @@
             /// </summary>
             /// <value>The URL to the screen capture.</value>
             public string Picture { get; set; }
+
+            /// <summary>
+            /// Gets or sets the URL to the episode's page on the site.
+            /// </summary>
+            /// <value>The URL.</value>
+            public string URL { get; set; }
         }
     }
 }

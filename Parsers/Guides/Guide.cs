@@ -30,7 +30,7 @@
         [Test]
         public void TestGrab()
         {
-            var id = GetID("House");
+            var id = GetID(this is Engines.AniDB ? "hack" : "House");
 
             Assert.IsNotNullOrEmpty(id, "Failed to find the ID of the show.");
 
@@ -49,13 +49,14 @@
             Console.WriteLine("AirDay:      " + data.AirDay);
             Console.WriteLine("Network:     " + data.Network);
             Console.WriteLine("Runtime:     " + data.Runtime);
+            Console.WriteLine("URL:         " + data.URL);
             Console.WriteLine();
 
-            Console.WriteLine("┌────────┬────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
-            Console.WriteLine("│ Number │ Title                          │ Airdate    │ Summary                                                      │ Screen capture                                               │");
-            Console.WriteLine("├────────┼────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┤");
-            data.Episodes.ForEach(item => Console.WriteLine("│ S{0:00}E{1:00} │ {2,-30} │ {3:yyyy-MM-dd} │ {4,-60} │ {5,-60} │".FormatWith(item.Season, item.Number, item.Title.Transliterate().CutIfLonger(30), item.Airdate, (item.Summary ?? string.Empty).Transliterate().CutIfLonger(60), (item.Picture ?? string.Empty).CutIfLonger(60))));
-            Console.WriteLine("└────────┴────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┘");
+            Console.WriteLine("┌────────┬────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Number │ Title                          │ Airdate    │ Summary                                                      │ Screen capture                                               │ Link to episode                                              │");
+            Console.WriteLine("├────────┼────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┤");
+            data.Episodes.ForEach(item => Console.WriteLine("│ S{0:00}E{1:00} │ {2,-30} │ {3:yyyy-MM-dd} │ {4,-60} │ {5,-60} │ {6,-60} │".FormatWith(item.Season, item.Number, item.Title.Transliterate().CutIfLonger(30), item.Airdate, (item.Summary ?? string.Empty).Transliterate().CutIfLonger(60), (item.Picture ?? string.Empty).CutIfLonger(60), (item.URL ?? string.Empty).CutIfLonger(60))));
+            Console.WriteLine("└────────┴────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┘");
         }
     }
 }

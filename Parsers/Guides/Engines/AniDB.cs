@@ -22,7 +22,7 @@
         public override TVShow GetData(string id)
         {
             // XDocument will fail, because the response is gzipped; Utils.GetURL supports gzipped content
-            var req  = Utils.GetURL("http://api.anidb.net:9001/httpapi?request=anime&client=rstvshowtracker&clientver=2&protover=1&aid={0}".FormatWith(id));
+            var req  = Utils.GetURL("http://api.anidb.net:9001/httpapi?request=anime&client=rstvshowtracker&clientver=2&protover=1&aid=" + id);
             var info = XDocument.Load(new StringReader(req));
             var show = new TVShow();
 
@@ -31,6 +31,7 @@
             show.Description = info.GetValue("description");
             show.Airing      = string.IsNullOrWhiteSpace(info.GetValue("enddate"));
             show.Runtime     = info.GetValue("length").ToInteger();
+            show.URL         = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id;
             show.Episodes    = new List<TVShow.Episode>();
 
             show.Cover = info.GetValue("picture");
@@ -47,6 +48,7 @@
 
                 ep.Season = 1;
                 ep.Number = node.GetValue("epno").ToInteger();
+                ep.URL    = "http://anidb.net/perl-bin/animedb.pl?show=ep&eid=" + node.Attribute("id").Value;
 
                 try   { ep.Title = node.Descendants("title").Where(t => t.Attributes().First().Value == "en").First().Value; }
                 catch { ep.Title = node.GetValue("title"); }

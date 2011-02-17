@@ -33,6 +33,7 @@
             show.AirTime     = info.GetValue("Airs_Time");
             show.AirDay      = info.GetValue("Airs_DayOfWeek");
             show.Network     = info.GetValue("Network");
+            show.URL         = "http://thetvdb.com/?tab=series&id=" + info.GetValue("id");
             show.Episodes    = new List<TVShow.Episode>();
 
             show.Cover = info.GetValue("poster");
@@ -59,6 +60,7 @@
                 ep.Number  = node.GetValue("EpisodeNumber").ToInteger();
                 ep.Title   = node.GetValue("EpisodeName");
                 ep.Summary = node.GetValue("Overview");
+                ep.URL     = "http://thetvdb.com/?tab=episode&seriesid={0}&seasonid={1}&id={2}".FormatWith(node.GetValue("seriesid"), node.GetValue("seasonid"), node.GetValue("id"));
 
                 ep.Picture = node.GetValue("filename");
                 if (!string.IsNullOrWhiteSpace(ep.Picture))

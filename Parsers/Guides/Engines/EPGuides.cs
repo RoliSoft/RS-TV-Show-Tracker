@@ -68,6 +68,7 @@
             var show    = new TVShow
                 {
                     AirTime  = "20:00",
+                    URL      = id,
                     Episodes = new List<TVShow.Episode>()
                 };
 

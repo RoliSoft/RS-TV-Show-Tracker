@@ -24,7 +24,7 @@
         public override TVShow GetData(string id)
         {
             var summary = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0')));
-            var show = new TVShow();
+            var show    = new TVShow();
 
             show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:title']", "content"));
             show.Genre       = Regex.Replace(summary.DocumentNode.GetTextValue("//h4[text()='Genre']/following-sibling::p[1]") ?? string.Empty, @"\s+", string.Empty).Replace(",", ", ");
@@ -32,6 +32,7 @@
             show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:image']", "content");
             show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//h4[text()='Status']/following-sibling::p[1]") ?? string.Empty, "(Canceled|Ended)");
             show.Runtime     = 30;
+            show.URL         = "http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0'));
             show.Episodes    = new List<TVShow.Episode>();
 
             var airinfo = summary.DocumentNode.GetTextValue("//span[@class='tagline']");
@@ -82,6 +83,7 @@
                 ep.Title   = HtmlEntity.DeEntitize(node.GetTextValue(".//h3").Trim());
                 ep.Summary = HtmlEntity.DeEntitize(node.GetTextValue(".//p[@class='synopsis']").Trim());
                 ep.Picture = node.GetNodeAttributeValue(".//div[@class='THUMBNAIL']/a/img", "src");
+                ep.URL     = node.GetNodeAttributeValue("div/h3/a", "href");
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParseExact(aired.Groups[1].Value, "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)

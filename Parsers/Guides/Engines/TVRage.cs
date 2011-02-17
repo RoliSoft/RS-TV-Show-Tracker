@@ -35,6 +35,7 @@
             show.AirTime     = info.GetValue("airtime");
             show.AirDay      = info.GetValue("airday");
             show.Network     = info.GetValue("network");
+            show.URL         = info.GetValue("showlink");
             show.Episodes    = new List<TVShow.Episode>();
 
             show.Runtime = info.GetValue("runtime").ToInteger();
@@ -56,6 +57,7 @@
                 ep.Title   = node.GetValue("title");
                 ep.Summary = node.GetValue("summary");
                 ep.Picture = node.GetValue("screencap");
+                ep.URL     = node.GetValue("link");
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParse(node.GetValue("airdate"), out dt)
