@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Data;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
@@ -98,7 +100,7 @@
             if (GuideListViewItemCollection == null)
             {
                 GuideListViewItemCollection = new ObservableCollection<GuideListViewItem>();
-                listView.ItemsSource        = GuideListViewItemCollection;
+                (FindResource("cvs") as CollectionViewSource).Source = GuideListViewItemCollection;
             }
 
             if (MainWindow.Active != null && MainWindow.Active.IsActive && LoadDate < Database.DataChange)
@@ -269,7 +271,7 @@
 
             // fill up episode list
 
-            var shows = Database.Query("select (select tracking.episodeid from tracking where tracking.episodeid = episodes.episodeid) as seenit, (showid || '|' || episodeid) as id, 'S0' || season || 'E0' || episode as notation, airdate, name, descr, pic from episodes where showid = ? order by (season * 1000 + episode) desc", id);
+            var shows = Database.Query("select (select tracking.episodeid from tracking where tracking.episodeid = episodes.episodeid) as seenit, (showid || '|' || episodeid) as id, season, episode, airdate, name, descr, pic from episodes where showid = ? order by (season * 1000 + episode) desc", id);
 
             foreach (var show in shows)
             {
@@ -277,7 +279,8 @@
                     {
                         SeenIt  = show["seenit"] != String.Empty,
                         Id      = show["id"],
-                        Episode = Regex.Replace(show["notation"], @"(?=[SE][0-9]{3})([SE])0", "$1"),
+                        Season  = "Season " + show["season"],
+                        Episode = "S{0:00}E{1:00}".FormatWith(show["season"].ToInteger(), show["episode"].ToInteger()),
                         Airdate = show["airdate"] != "0"
                                   ? show["airdate"].ToDouble().GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show["airdate"].ToDouble().GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
                                   : "Unaired episode",

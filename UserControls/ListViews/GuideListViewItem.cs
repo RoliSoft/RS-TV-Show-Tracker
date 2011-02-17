@@ -18,6 +18,12 @@
         public string Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the season.
+        /// </summary>
+        /// <value>The season.</value>
+        public string Season { get; set; }
+
+        /// <summary>
         /// Gets or sets the episode.
         /// </summary>
         /// <value>The episode.</value>
