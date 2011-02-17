@@ -597,7 +597,14 @@
                                 fd.Click += (x, r) =>
                                     {
                                         td.Close();
-                                        File.Move(a.First, Path.ChangeExtension(tmp, new FileInfo(a.Second).Extension));
+                                        
+                                        var dest = Path.ChangeExtension(tmp, new FileInfo(a.Second).Extension);
+                                        if (File.Exists(dest))
+                                        {
+                                            File.Delete(dest);
+                                        }
+
+                                        File.Move(a.First, dest);
                                     };
 
                                 td.Controls.Add(fd);

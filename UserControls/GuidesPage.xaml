@@ -59,7 +59,7 @@
                     <Image Source="/RSTVShowTracker;component/Images/television-image.png" Margin="0,-1,0,0" Height="16" Width="16"></Image>
                 </TabItem.Header>
                 <Grid Name="showGeneral" Visibility="Hidden">
-                    <Image Source="/RSTVShowTracker;component/Images/cd.png" Name="showGeneralCover" Height="278" Width="195" Stretch="Fill" ImageFailed="ShowGeneralCoverImageFailed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,20,0,0" />
+                    <Image Source="/RSTVShowTracker;component/Images/cd.png" Name="showGeneralCover" Height="278" Width="195" ImageFailed="ShowGeneralCoverImageFailed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,20,0,0" Stretch="UniformToFill" />
                     <Image Source="/RSTVShowTracker;component/Images/case.png" Height="300" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10,0,0" />
                     <TextBlock Name="showGeneralName" FontFamily="Calibri" FontWeight="Bold" FontSize="29" Margin="270,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
                     <TextBlock Name="showGeneralSub" FontWeight="Bold" Margin="270,80,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />

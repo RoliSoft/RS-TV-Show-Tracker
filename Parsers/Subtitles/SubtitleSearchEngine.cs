@@ -30,7 +30,13 @@
         /// Gets the URL to the favicon of the site.
         /// </summary>
         /// <value>The icon location.</value>
-        public virtual string Icon { get; internal set; }
+        public virtual string Icon
+        {
+            get
+            {
+                return Site + "favicon.ico";
+            }
+        }
 
         /// <summary>
         /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.

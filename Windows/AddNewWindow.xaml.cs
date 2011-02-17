@@ -72,7 +72,7 @@
                     Dispatcher.Invoke((Action)delegate
                         {
                             show    = textBox.Text;
-                            grabber = (comboBox.SelectedValue as ComboBoxItem).Content.ToString();
+                            grabber = (((comboBox.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim();
                             mark    = markCheckBox.IsChecked ?? mark;
                         });
 
@@ -134,7 +134,7 @@
                     guide = new TVDB();
                     break;
 
-                case "System.Windows.Controls.StackPanel":
+                case "TV.com":
                     guide = new TVcom();
                     break;
 

@@ -37,18 +37,6 @@
         }
 
         /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
-        {
-            get
-            {
-                return "http://bithumen.be/favicon.ico";
-            }
-        }
-
-        /// <summary>
         /// Gets a value indicating whether the site requires authentication.
         /// </summary>
         /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>

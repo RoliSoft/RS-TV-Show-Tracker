@@ -499,6 +499,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Ionic.Zip.Reduced.dll" />
+    <None Include="todo.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

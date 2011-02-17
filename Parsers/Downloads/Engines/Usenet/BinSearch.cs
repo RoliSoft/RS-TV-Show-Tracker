@@ -40,19 +40,7 @@
                 return "http://binsearch.info/";
             }
         }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
-        {
-            get
-            {
-                return "http://www.binsearch.info/favicon.ico";
-            }
-        }
-
+        
         /// <summary>
         /// Gets a value indicating whether the site requires authentication.
         /// </summary>

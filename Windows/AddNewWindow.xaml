@@ -14,20 +14,51 @@
                     <Label Content="Database:" FontSize="18" Margin="5,37,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <ComboBox Margin="95,40,0,0" Name="comboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="393" FontSize="18">
                         <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
-                        <ComboBoxItem Content="TVRage" Margin="10,0" Selector.IsSelected="True" />
-                        <ComboBoxItem Content="The TVDB" Margin="10,0" />
+                        <ComboBoxItem Margin="10,0" Selector.IsSelected="True">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/tvrage.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" TVRage" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="TV.com " Padding="0" />
+                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/thetvdb.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" The TVDB" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/tvcom.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" TV.com " Padding="0" />
                                 <Label Content="beta" Foreground="#50000000" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
-                        <ComboBoxItem Content="AniDB" Margin="10,0" />
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/anidb.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" AniDB" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
                         <ComboBoxItem Content="Episode Listing Only" IsEnabled="False" />
-                        <ComboBoxItem Content="EPGuides - TVRage" Margin="10,0" />
-                        <ComboBoxItem Content="EPGuides - TV.com" Margin="10,0" />
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" EPGuides - TVRage" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" EPGuides - TV.com" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
                         <ComboBoxItem Content="Experimental Features" IsEnabled="False" />
-                        <ComboBoxItem Content="Generate list based on download links" Margin="10,0" />
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/torrents.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Label Content=" Generate list based on download links" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
                     </ComboBox>
                     <CheckBox Content="Mark all aired episodes as seen" FontSize="15" HorizontalAlignment="Left" Margin="11,81,0,0" Name="markCheckBox" IsChecked="True" VerticalAlignment="Top" />
                     <Button Content="Search" Height="23" HorizontalAlignment="Left" Margin="413,77,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
