@@ -89,14 +89,34 @@
             </ListView.View>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="View IMDb page" Click="ViewImdbClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/imdb.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
                     <MenuItem Header="View Wikipedia entry" Click="ViewWikipediaClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/wikipedia.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="View official website" Click="ViewOfficialWebClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/page.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="View TVRage page" Click="ViewTVRageClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/tvrage.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="View The TVDB page" Click="ViewTVDBClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/thetvdb.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="View TV.com page" Click="ViewTVcomClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/tvcom.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="View IMDb page" Click="ViewImdbClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/imdb.png" />
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="View EPGuides listing" Click="ViewEpguidesClick">
@@ -104,9 +124,19 @@
                             <Image Source="/RSTVShowTracker;component/Images/epg.png" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Search for first episode" Click="SearchFirstEpisodeClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="Search videos on YouTube" Click="SearchYouTubeClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/youtube.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Search on Google" Click="SearchGoogleClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/google.png" />
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>

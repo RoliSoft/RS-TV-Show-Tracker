@@ -498,8 +498,13 @@
     <Resource Include="Images\inbox-download.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Ionic.Zip.Reduced.dll" />
     <None Include="todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\anidb.png" />
+    <Resource Include="Images\thetvdb.png" />
+    <Resource Include="Images\tvcom.png" />
+    <Resource Include="Images\tvrage.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

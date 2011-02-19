@@ -297,6 +297,17 @@
         }
 
         /// <summary>
+        /// Handles the Click event of the ViewOfficialWeb control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ViewOfficialWebClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+            Utils.Run(((RecommendedShow)listView.SelectedValue).Official);
+        }
+
+        /// <summary>
         /// Handles the Click event of the ViewWikipedia control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -305,6 +316,39 @@
         {
             if (listView.SelectedIndex == -1) return;
             Utils.Run(((RecommendedShow)listView.SelectedValue).Wikipedia);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the ViewTVRage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ViewTVRageClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+            Utils.Run(((RecommendedShow)listView.SelectedValue).TVRage);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the ViewTVDB control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ViewTVDBClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+            Utils.Run(((RecommendedShow)listView.SelectedValue).TVDB);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the ViewTVcom control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ViewTVcomClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+            Utils.Run(((RecommendedShow)listView.SelectedValue).TVcom);
         }
 
         /// <summary>
@@ -327,6 +371,30 @@
         {
             if (listView.SelectedIndex == -1) return;
             Utils.Run("http://www.youtube.com/results?search_query=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name) + "+promo");
+        }
+
+        /// <summary>
+        /// Handles the Click event of the SearchGoogle control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchGoogleClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name));
+        }
+
+        /// <summary>
+        /// Handles the Click event of the SearchFirstEpisode control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchFirstEpisodeClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+
+            MainWindow.Active.tabControl.SelectedIndex = 2;
+            MainWindow.Active.activeDownloadLinksPage.Search(((RecommendedShow)listView.SelectedValue).Name + " S01E01");
         }
         #endregion
     }

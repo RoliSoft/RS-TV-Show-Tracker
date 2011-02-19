@@ -52,6 +52,30 @@
         public string Wikipedia { get; set; }
 
         /// <summary>
+        /// Gets or sets the official page.
+        /// </summary>
+        /// <value>The official page.</value>
+        public string Official { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TVRage listing.
+        /// </summary>
+        /// <value>The TVRage listing.</value>
+        public string TVRage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the The TVDB listing.
+        /// </summary>
+        /// <value>The The TVDB listing.</value>
+        public string TVDB { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TV.com listing.
+        /// </summary>
+        /// <value>The TV.com listing.</value>
+        public string TVcom { get; set; }
+
+        /// <summary>
         /// Gets or sets the EPGuides listing.
         /// </summary>
         /// <value>The EPGuides listing.</value>

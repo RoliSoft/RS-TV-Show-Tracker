@@ -30,9 +30,12 @@
                    {
                        Name      = item.Descendants("name").First().Value,
                        Wikipedia = item.Descendants("wUrl").First().Value,
-                       // since TasteKid doesn't give us EPGuides and IMDb, we need to improvise :)
                        Epguides  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"Titles & Air Dates Guide\" site:epguides.com"),
                        Imdb      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"TV Series\" site:imdb.com"),
+                       Official  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " official site"),
+                       TVRage    = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"TV Show\" site:tvrage.com"),
+                       TVDB      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"Series Info\" site:thetvdb.com"),
+                       TVcom     = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"on TV.com\" inurl:summary.html site:tv.com"),
                    });
         }
     }

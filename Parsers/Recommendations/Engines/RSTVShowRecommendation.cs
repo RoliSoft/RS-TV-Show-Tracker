@@ -48,7 +48,11 @@
                    {
                        Name      = item.Value,
                        Score     = item.Attribute("score").Value,
+                       Official  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " official site"),
                        Wikipedia = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " TV Series site:en.wikipedia.org"),
+                       TVRage    = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"TV Show\" site:tvrage.com"),
+                       TVDB      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"Series Info\" site:thetvdb.com"),
+                       TVcom     = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"on TV.com\" inurl:summary.html site:tv.com"),
                        Epguides  = item.Attribute("epguides").Value,
                        Imdb      = item.Attribute("imdb").Value
                    });

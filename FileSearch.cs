@@ -60,9 +60,9 @@
                     // S02.E14
                     episode.Replace("E", ".E"),
                     // 2x14
-                    Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", ".$1X$2.", RegexOptions.IgnoreCase),
+                    Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase),
                     // 214
-                    Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", ".$1$2.", RegexOptions.IgnoreCase)
+                    Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
                 };
             
             _knownVideoRegex  = new Regex(@"\.(avi|mkv|mp4)$", RegexOptions.IgnoreCase);
