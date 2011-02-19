@@ -236,6 +236,7 @@
             Database.ShowData(showid, "airday",  tv.AirDay);
             Database.ShowData(showid, "network", tv.Network);
             Database.ShowData(showid, "runtime", tv.Runtime.ToString());
+            Database.ShowData(showid, "url",     tv.URL);
 
             // create transaction
             SQLiteTransaction tr;
@@ -262,7 +263,7 @@
             {
                 try
                 {
-                    Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
+                    Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                                   ep.Number + (ep.Season * 1000) + (showid.ToInteger() * 100 * 1000),
                                                   showid,
                                                   ep.Season,
@@ -272,7 +273,8 @@
                                                    : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                   ep.Title,
                                                   ep.Summary,
-                                                  ep.Picture);
+                                                  ep.Picture,
+                                                  ep.URL);
                 }
                 catch
                 {

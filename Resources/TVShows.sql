@@ -24,7 +24,8 @@ CREATE TABLE episodes (
 	airdate INTEGER,
 	name TEXT,
 	descr TEXT,
-	pic TEXT
+	pic TEXT,
+	url TEXT
 )
 
 /*

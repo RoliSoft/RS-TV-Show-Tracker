@@ -2,14 +2,13 @@
 {
     using System;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
+    using System.Windows.Input;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
@@ -271,22 +270,25 @@
 
             // fill up episode list
 
-            var shows = Database.Query("select (select tracking.episodeid from tracking where tracking.episodeid = episodes.episodeid) as seenit, (showid || '|' || episodeid) as id, season, episode, airdate, name, descr, pic from episodes where showid = ? order by (season * 1000 + episode) desc", id);
+            var shows = Database.Query("select (select tracking.episodeid from tracking where tracking.episodeid = episodes.episodeid) as seenit, (showid || '|' || episodeid) as id, season, episode, airdate, name, descr, pic, url from episodes where showid = ? order by (season * 1000 + episode) desc", id);
+            var icon  = Updater.CreateGuide(Database.ShowData(id, "grabber")).Icon;
 
             foreach (var show in shows)
             {
                 GuideListViewItemCollection.Add(new GuideListViewItem
                     {
-                        SeenIt  = show["seenit"] != String.Empty,
-                        Id      = show["id"],
-                        Season  = "Season " + show["season"],
-                        Episode = "S{0:00}E{1:00}".FormatWith(show["season"].ToInteger(), show["episode"].ToInteger()),
-                        Airdate = show["airdate"] != "0"
-                                  ? show["airdate"].ToDouble().GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show["airdate"].ToDouble().GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
-                                  : "Unaired episode",
-                        Title   = show["name"],
-                        Summary = show["descr"],
-                        Picture = show["pic"]
+                        SeenIt      = show["seenit"] != String.Empty,
+                        Id          = show["id"],
+                        Season      = "Season " + show["season"],
+                        Episode     = "S{0:00}E{1:00}".FormatWith(show["season"].ToInteger(), show["episode"].ToInteger()),
+                        Airdate     = show["airdate"] != "0"
+                                      ? show["airdate"].ToDouble().GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show["airdate"].ToDouble().GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
+                                      : "Unaired episode",
+                        Title       = show["name"],
+                        Summary     = show["descr"],
+                        Picture     = show["pic"],
+                        URL         = show["url"],
+                        GrabberIcon = icon
                     });
             }
         }
@@ -329,6 +331,29 @@
             finder.BeginSearch();
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+        }
+        #endregion
+
+        #region Open details page
+        /// <summary>
+        /// Handles the Click event of the OpenDetailsPage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void OpenDetailsPageClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1 || string.IsNullOrWhiteSpace(((GuideListViewItem)listView.SelectedValue).URL)) return;
+            Utils.Run(((GuideListViewItem)listView.SelectedValue).URL);
+        }
+
+        /// <summary>
+        /// Handles the MouseDoubleClick event of the listView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            OpenDetailsPageClick(null, null);
         }
         #endregion
 

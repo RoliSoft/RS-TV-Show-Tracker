@@ -110,13 +110,14 @@
                 Database.ShowData(r["showid"], "airday",  tv.AirDay);
                 Database.ShowData(r["showid"], "network", tv.Network);
                 Database.ShowData(r["showid"], "runtime", tv.Runtime.ToString());
+                Database.ShowData(r["showid"], "url",     tv.URL);
 
                 // update episodes
                 foreach (var ep in tv.Episodes)
                 {
                     try
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?)",
+                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                                       ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000),
                                                       r["showid"],
                                                       ep.Season,
@@ -126,7 +127,8 @@
                                                        : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
                                                       ep.Title,
                                                       ep.Summary,
-                                                      ep.Picture);
+                                                      ep.Picture,
+                                                      ep.URL);
                     }
                     catch (Exception ex)
                     {
@@ -191,7 +193,7 @@
         /// <param name="name">The name of the class.</param>
         /// <returns>New guide class.</returns>
         /// <exception cref="NotSupportedException">When a name is specified which is not supported.</exception>
-        public Guide CreateGuide(string name)
+        public static Guide CreateGuide(string name)
         {
             switch(name)
             {

@@ -1,5 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
+    using System.Windows.Media.Imaging;
+
     /// <summary>
     /// Represents a TV show episode on the list view.
     /// </summary>
@@ -54,6 +57,18 @@
         public string Picture { get; set; }
 
         /// <summary>
+        /// Gets or sets the URL to the details page.
+        /// </summary>
+        /// <value>The URL to the details page.</value>
+        public string URL { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon of the grabber.
+        /// </summary>
+        /// <value>The icon of the grabber.</value>
+        public string GrabberIcon { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether to show the tooltip.
         /// </summary>
         /// <value><c>true</c> if yes; otherwise, <c>false</c>.</value>
@@ -86,6 +101,18 @@
             get
             {
                 return string.IsNullOrWhiteSpace(Picture) ? "Collapsed" : "Visible";
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether to show the 'Open details page' context menu item.
+        /// </summary>
+        /// <value><c>true</c> if yes; otherwise, <c>false</c>.</value>
+        public string OpenDetailsPageVisible
+        {
+            get
+            {
+                return string.IsNullOrWhiteSpace(URL) ? "Collapsed" : "Visible";
             }
         }
     }

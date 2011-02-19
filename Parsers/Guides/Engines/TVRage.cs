@@ -14,6 +14,42 @@
     [TestFixture]
     public class TVRage : Guide
     {
+        /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "TVRage";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://tvrage.com/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "/RSTVShowTracker;component/Images/tvrage.png";
+            }
+        }
+
         private const string Key = "d3fGaRW6adgVgvVNMLa4";
 
         /// <summary>

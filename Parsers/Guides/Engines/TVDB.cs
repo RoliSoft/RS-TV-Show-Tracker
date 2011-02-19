@@ -14,6 +14,42 @@
     [TestFixture]
     public class TVDB : Guide
     {
+        /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "The TVDB";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://thetvdb.com/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "/RSTVShowTracker;component/Images/thetvdb.png";
+            }
+        }
+
         private const string Key = "AB576C5FF150A8EE";
 
         /// <summary>

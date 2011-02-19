@@ -15,6 +15,42 @@
     [TestFixture]
     public class EPGuides : Guide
     {
+        /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "EPGuides";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://epguides.com/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "/RSTVShowTracker;component/Images/epguides.png";
+            }
+        }
+
         private readonly Regex _infoRegex = new Regex(@"
 (?:<h1>(?:<a.*?>)?(?<title>[^<]+)| # title
 (?<airing>to:\s<em>_*\s_*)|        # airing
