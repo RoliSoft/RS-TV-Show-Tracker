@@ -120,6 +120,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Parsers\Downloads\Engines\HTTP\Katz.cs" />
+    <Compile Include="Parsers\Guides\ShowID.cs" />
     <Compile Include="WebSearch.cs" />
     <Compile Include="Downloaders\SubsceneDownloader.cs" />
     <Compile Include="Downloaders\ExternalDownloader.cs" />

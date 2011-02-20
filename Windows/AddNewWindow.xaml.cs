@@ -2,6 +2,7 @@
 {
     using System;
     using System.Data.SQLite;
+    using System.Linq;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
@@ -159,12 +160,7 @@
             string id;
             try
             {
-                id = guide.GetID(show);
-
-                if (string.IsNullOrWhiteSpace(id))
-                {
-                    throw new Exception();
-                }
+                id = guide.GetID(show).First().ID;
             }
             catch
             {

@@ -116,9 +116,9 @@
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns>ID.</returns>
-        public override string GetID(string name)
+        public override IEnumerable<ShowID> GetID(string name)
         {
-            return name;
+            yield return new ShowID { ID = name };
         }
     }
 }

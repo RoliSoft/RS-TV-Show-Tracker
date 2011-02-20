@@ -137,12 +137,28 @@
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns>ID.</returns>
-        public override string GetID(string name)
+        public override IEnumerable<ShowID> GetID(string name)
         {
-            var html = Utils.GetHTML("http://www.tv.com/search.php?type=Search&stype=ajax_search&search_type=program&pg_results=0&sort=&qs=" + Uri.EscapeUriString(name));
-            var url  = html.DocumentNode.GetNodeAttributeValue("//li//h2/a", "href");
-            var id   = Regex.Match(url, @"[a-z]/([0-9]+)/[a-z]").Groups[1].Value + '\0' + Regex.Match(url, @"tv\.com/([^/]*)/").Groups[1].Value;
-            return id;
+            var html  = Utils.GetHTML("http://www.tv.com/search.php?type=Search&stype=ajax_search&search_type=program&pg_results=0&sort=&qs=" + Uri.EscapeUriString(name));
+            var shows = html.DocumentNode.SelectNodes("//li//h2/a");
+
+            if (shows == null)
+            {
+                yield break;
+            }
+
+            foreach (var show in shows)
+            {
+                var id  = new ShowID();
+                
+                id.URL      = HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
+                id.ID       = Regex.Match(id.URL, @"[a-z]/([0-9]+)/[a-z]").Groups[1].Value + '\0' + Regex.Match(id.URL, @"tv\.com/([^/]*)/").Groups[1].Value;
+                id.Title    = show.InnerText;
+                id.Cover    = Regex.Match(show.GetNodeAttributeValue("../../../a/img", "style"), @"""(?>http://)([^""]+)").Groups[1].Value;
+                id.Language = "en";
+
+                yield return id;
+            }
         }
     }
 }

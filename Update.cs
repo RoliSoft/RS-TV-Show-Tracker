@@ -79,7 +79,7 @@
                     id = Database.ShowData(r["showid"], gname + ".id");
                     if (string.IsNullOrWhiteSpace(id))
                     {
-                        id = guide.GetID(r["name"]);
+                        id = guide.GetID(r["name"]).First().ID;
                         Database.ShowData(r["showid"], gname + ".id", id);
                     }
                 }

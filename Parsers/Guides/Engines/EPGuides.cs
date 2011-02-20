@@ -167,10 +167,20 @@
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns>ID.</returns>
-        public override string GetID(string name)
+        public override IEnumerable<ShowID> GetID(string name)
         {
-            // EPGuides doesn't have an internal search engine.
-            return WebSearch.DuckDuckGo("intitle:{0} site:epguides.com".FormatWith(name));
+            var list = WebSearch.DuckDuckGo("intitle:{0} site:epguides.com".FormatWith(name)).ToList();
+
+            foreach (var result in list)
+            {
+                yield return new ShowID
+                    {
+                        ID       = result,
+                        Title    = Regex.Match(result, @"\.com/([^/]+)").Groups[1].Value,
+                        Language = "en",
+                        URL      = result
+                    };
+            }
         }
     }
 }

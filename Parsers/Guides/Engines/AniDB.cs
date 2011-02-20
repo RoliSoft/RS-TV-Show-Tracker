@@ -107,10 +107,21 @@
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns>ID.</returns>
-        public override string GetID(string name)
+        public override IEnumerable<ShowID> GetID(string name)
         {
-            var info = XDocument.Load("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
-            return info.GetAttributeValue("anime", "aid");
+            var list = XDocument.Load("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
+
+            foreach (var show in list.Descendants("anime"))
+            {
+                var id = new ShowID();
+
+                id.ID       = show.Attribute("aid").Value;
+                id.Title    = show.GetValue("title");
+                id.Language = "en";
+                id.URL      = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id.ID;
+
+                yield return id;
+            }
         }
     }
 }

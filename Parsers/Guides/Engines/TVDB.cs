@@ -120,11 +120,27 @@
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns>ID.</returns>
-        public override string GetID(string name)
+        public override IEnumerable<ShowID> GetID(string name)
         {
-            var txt = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(name)));
-            var id  = txt.Descendants("Series").First().Element("seriesid").Value;
-            return id;
+            var list = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(name)));
+
+            foreach (var show in list.Descendants("Series"))
+            {
+                var id = new ShowID();
+
+                id.ID       = show.GetValue("seriesid");
+                id.Title    = show.GetValue("SeriesName");
+                id.Language = show.GetValue("language");
+                id.URL      = "http://thetvdb.com/?tab=series&id=" + id.ID;
+                id.Cover    = show.GetValue("banner");
+
+                if (!string.IsNullOrWhiteSpace(id.Cover))
+                {
+                    id.Cover = "http://thetvdb.com/banners/_cache/" + id.Cover;
+                }
+
+                yield return id;
+            }
         }
     }
 }

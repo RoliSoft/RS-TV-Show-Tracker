@@ -111,11 +111,22 @@
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns>ID.</returns>
-        public override string GetID(string name)
+        public override IEnumerable<ShowID> GetID(string name)
         {
-            var txt = Utils.GetURL("http://services.tvrage.com/tools/quickinfo.php?show=" + Uri.EscapeUriString(name));
-            var id  = Regex.Match(txt, @"Show ID@([0-9]+)").Groups[1].Value;
-            return id;
+            var list = XDocument.Load("http://services.tvrage.com/myfeeds/search.php?key={0}&show={1}".FormatWith(Key, Uri.EscapeUriString(name)));
+
+            foreach (var show in list.Descendants("show"))
+            {
+                var id = new ShowID();
+
+                id.ID       = show.GetValue("showid");
+                id.Title    = show.GetValue("name");
+                id.Cover    = "http://images.tvrage.com/shows/4/{0}.jpg".FormatWith(id.ID);
+                id.Language = "en";
+                id.URL      = show.GetValue("link");
+
+                yield return id;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines
 {
     using System;
+    using System.Linq;
     using System.Text.RegularExpressions;
 
     /// <summary>
@@ -17,20 +18,16 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Google("intitle:\"{0}\" intitle:\"online links for\" site:sidereel.com".FormatWith(name));
+            var g = WebSearch.Google("intitle:\"{0}\" intitle:\"online links for\" site:sidereel.com".FormatWith(name)).ToList();
 
-            if (string.IsNullOrWhiteSpace(g))
+            if (g.Count == 0)
             {
-                g = WebSearch.Google("intitle:{0} intitle:\"online links for\" site:sidereel.com".FormatWith(name));
+                g = WebSearch.Google("intitle:{0} intitle:\"online links for\" site:sidereel.com".FormatWith(name)).ToList();
             }
 
-            g = g.Replace("'", "%27");
-
-            var urln = Regex.Match(g, @"sidereel\.com/([^/]+)", RegexOptions.IgnoreCase);
-
-            if (!string.IsNullOrWhiteSpace(g) && urln.Success)
+            if (g.Count != 0 && Regex.Match(g[0].Replace("'", "%27"), @"sidereel\.com/([^/]+)", RegexOptions.IgnoreCase).Success)
             {
-                return g;
+                return g[0].Replace("'", "%27");
             }
             else
             {

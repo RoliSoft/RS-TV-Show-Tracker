@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles.Engines
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
 
     using NUnit.Framework;
@@ -53,7 +54,7 @@
 
             if (string.IsNullOrWhiteSpace(adid))
             {
-                adid = Regex.Match(WebSearch.Google(show[0] + " site:addic7ed.com/serie/"), @"/serie/([^/$]+)").Groups[1].Value;
+                adid = Regex.Match(WebSearch.Google(show[0] + " site:addic7ed.com/serie/").First(), @"/serie/([^/$]+)").Groups[1].Value;
 
                 if (!string.IsNullOrWhiteSpace(dbid))
                 {
