@@ -434,6 +434,37 @@
         }
 
         /// <summary>
+        /// Extension method to string to uppercase the first letter of each word.
+        /// </summary>
+        /// <param name="value">The string.</param>
+        /// <returns>String with uppercased first letters.</returns>
+        public static string ToUppercaseWords(this string value)
+        {
+            var array = value.ToCharArray();
+
+            if (array.Length >= 1)
+            {
+                if (char.IsLower(array[0]))
+                {
+                    array[0] = char.ToUpper(array[0]);
+                }
+            }
+
+            for (var i = 1; i < array.Length; i++)
+            {
+                if (array[i - 1] == ' ')
+                {
+                    if (char.IsLower(array[i]))
+                    {
+                        array[i] = char.ToUpper(array[i]);
+                    }
+                }
+            }
+
+            return new string(array);
+        }
+
+        /// <summary>
         /// Extension method to string to alias the <c>string.Format()</c> method.
         /// </summary>
         /// <param name="format">The string to be formatted.</param>

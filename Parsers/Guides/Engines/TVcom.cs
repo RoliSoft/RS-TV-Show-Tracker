@@ -153,7 +153,7 @@
                 
                 id.URL      = HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
                 id.ID       = Regex.Match(id.URL, @"[a-z]/([0-9]+)/[a-z]").Groups[1].Value + '\0' + Regex.Match(id.URL, @"tv\.com/([^/]*)/").Groups[1].Value;
-                id.Title    = show.InnerText;
+                id.Title    = HtmlEntity.DeEntitize(show.InnerText);
                 id.Cover    = Regex.Match(show.GetNodeAttributeValue("../../../a/img", "style"), @"""(?>http://)([^""]+)").Groups[1].Value;
                 id.Language = "en";
 
