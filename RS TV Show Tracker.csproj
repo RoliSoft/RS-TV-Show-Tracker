@@ -145,7 +145,7 @@
     <Compile Include="Parsers\ParserAttribute.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Engines\SuperSubtitles.cs" />
-    <Compile Include="Parsers\Subtitles\Languages.cs" />
+    <Compile Include="Languages.cs" />
     <Compile Include="Parsers\Subtitles\Subtitle.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -436,38 +436,38 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\flag-ar.png" />
-    <Resource Include="Images\flag-cz.png" />
+    <Resource Include="Images\flag-cs.png" />
     <Resource Include="Images\flag-de.png" />
     <Resource Include="Images\flag-es.png" />
     <Resource Include="Images\flag-fr.png" />
-    <Resource Include="Images\flag-gr.png" />
+    <Resource Include="Images\flag-el.png" />
     <Resource Include="Images\flag-hr.png" />
     <Resource Include="Images\flag-id.png" />
-    <Resource Include="Images\flag-il.png" />
+    <Resource Include="Images\flag-he.png" />
     <Resource Include="Images\flag-it.png" />
     <Resource Include="Images\flag-nl.png" />
     <Resource Include="Images\flag-no.png" />
     <Resource Include="Images\flag-pl.png" />
     <Resource Include="Images\flag-pt.png" />
     <Resource Include="Images\flag-ru.png" />
-    <Resource Include="Images\flag-se.png" />
+    <Resource Include="Images\flag-sv.png" />
     <Resource Include="Images\flag-tr.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\flag-br.png" />
-    <Resource Include="Images\flag-ch.png" />
-    <Resource Include="Images\flag-dk.png" />
-    <Resource Include="Images\flag-ee.png" />
+    <Resource Include="Images\flag-zh.png" />
+    <Resource Include="Images\flag-da.png" />
+    <Resource Include="Images\flag-et.png" />
     <Resource Include="Images\flag-fi.png" />
     <Resource Include="Images\flag-is.png" />
-    <Resource Include="Images\flag-jp.png" />
-    <Resource Include="Images\flag-kr.png" />
-    <Resource Include="Images\flag-rs.png" />
-    <Resource Include="Images\flag-si.png" />
+    <Resource Include="Images\flag-ja.png" />
+    <Resource Include="Images\flag-ko.png" />
+    <Resource Include="Images\flag-sr.png" />
+    <Resource Include="Images\flag-sl.png" />
     <Resource Include="Images\flag-sk.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\flag-ir.png" />
+    <Resource Include="Images\flag-fa.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\hd_1080.png" />

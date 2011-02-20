@@ -37,6 +37,18 @@
         }
 
         /// <summary>
+        /// Gets the list of supported languages.
+        /// </summary>
+        /// <value>The list of supported languages.</value>
+        public virtual string[] SupportedLanguages
+        {
+            get
+            {
+                return new[] { "en" };
+            }
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>

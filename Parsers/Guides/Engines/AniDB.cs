@@ -51,6 +51,18 @@
         }
 
         /// <summary>
+        /// Gets the list of supported languages.
+        /// </summary>
+        /// <value>The list of supported languages.</value>
+        public override string[] SupportedLanguages
+        {
+            get
+            {
+                return Languages.List.Keys.ToArray();
+            }
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>

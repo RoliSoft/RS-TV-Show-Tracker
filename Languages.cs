@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Subtitles
+﻿namespace RoliSoft.TVShowTracker
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
     public static class Languages
     {
         /// <summary>
-        /// A list of languages with their full name and ISO 3166-1 alpha-2 code.
+        /// A list of languages with their full name and ISO 639-1 code.
         /// </summary>
         public static Dictionary<string, string> List = new Dictionary<string, string>
             {
@@ -19,39 +19,39 @@
                 { "de", "German"     },
                 { "fr", "French"     },
                 { "es", "Spanish"    },
-                { "se", "Swedish"    },
+                { "sv", "Swedish"    },
                 { "it", "Italian"    },
                 { "nl", "Dutch"      },
-                { "dk", "Danish"     },
+                { "da", "Danish"     },
                 { "no", "Norwegian"  },
-                { "ee", "Estonian"   },
+                { "et", "Estonian"   },
                 { "fi", "Finnish"    },
                 { "pl", "Polish"     },
                 { "is", "Icelandic"  },
-                { "cz", "Czech"      },
+                { "cs", "Czech"      },
                 { "hr", "Croatian"   },
-                { "rs", "Serbian"    },
+                { "sr", "Serbian"    },
                 { "sk", "Slovak"     },
-                { "si", "Slovenian"  },
+                { "sl", "Slovenian"  },
                 { "ru", "Russian"    },
                 { "br", "Brazilian"  },
                 { "pt", "Portuguese" },
-                { "gr", "Greek"      },
+                { "el", "Greek"      },
                 { "tr", "Turkish"    },
-                { "ch", "Chinese"    },
-                { "jp", "Japanese"   },
-                { "kr", "Korean"     },
+                { "zh", "Chinese"    },
+                { "ja", "Japanese"   },
+                { "ko", "Korean"     },
                 { "ar", "Arabic"     },
-                { "il", "Hebrew"     },
+                { "he", "Hebrew"     },
                 { "id", "Indonesian" },
-                { "ir", "Persian"    },
+                { "fa", "Persian"    },
             };
 
         /// <summary>
-        /// Extracts the language from the string and returns its ISO 3166-1 alpha-2 code.
+        /// Extracts the language from the string and returns its ISO 639-1 code.
         /// </summary>
         /// <param name="language">The language.</param>
-        /// <returns>ISO 3166-1 alpha-2 code of the language.</returns>
+        /// <returns>ISO 639-1 code of the language.</returns>
         public static string Parse(string language)
         {
             foreach (var lang in List)

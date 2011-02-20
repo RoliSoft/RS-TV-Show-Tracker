@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
@@ -47,6 +46,43 @@
             get
             {
                 return "/RSTVShowTracker;component/Images/thetvdb.png";
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of supported languages.
+        /// </summary>
+        /// <value>The list of supported languages.</value>
+        public override string[] SupportedLanguages
+        {
+            get
+            {
+                return new[]
+                    {
+                        "en",
+                        "hu",
+                        "da",
+                        "fi",
+                        "nl",
+                        "de",
+                        "it",
+                        "es",
+                        "fr",
+                        "pl",
+                        "el",
+                        "tr",
+                        "ru",
+                        "he",
+                        "ja",
+                        "pt",
+                        "zh",
+                        "cs",
+                        "sl",
+                        "hr",
+                        "ko",
+                        "sv",
+                        "no"
+                    };
             }
         }
 
