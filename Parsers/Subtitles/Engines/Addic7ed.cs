@@ -54,7 +54,7 @@
 
             if (string.IsNullOrWhiteSpace(adid))
             {
-                adid = Regex.Match(WebSearch.Google(show[0] + " site:addic7ed.com/serie/").First(), @"/serie/([^/$]+)").Groups[1].Value;
+                adid = Regex.Match(WebSearch.Engines.Google(show[0] + " site:addic7ed.com/serie/").First().URL, @"/serie/([^/$]+)").Groups[1].Value;
 
                 if (!string.IsNullOrWhiteSpace(dbid))
                 {

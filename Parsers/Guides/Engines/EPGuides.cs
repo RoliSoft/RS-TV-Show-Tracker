@@ -84,12 +84,33 @@
         }
 
         /// <summary>
+        /// Gets the ID of a TV show in the database.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>ID.</returns>
+        public override IEnumerable<ShowID> GetID(string name, string language = "en")
+        {
+            var list = WebSearch.Engines.DuckDuckGo("intitle:{0} site:epguides.com".FormatWith(name)).ToList();
+
+            foreach (var result in list)
+            {
+                yield return new ShowID
+                    {
+                        ID       = result.URL,
+                        Title    = result.Title.Replace(" (a Titles & Air Dates Guide)", string.Empty),
+                        Language = "en",
+                        URL      = result.URL
+                    };
+            }
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <returns>TV show data.</returns>
         /// <exception cref="Exception">Failed to extract the listing. Maybe the EPGuides.com regex is out of date.</exception>
-        public override TVShow GetData(string id)
+        public override TVShow GetData(string id, string language = "en")
         {
             var db = _defaultDb;
 
@@ -101,7 +122,7 @@
             }
 
             var listing = Utils.GetURL(id, "list=" + db, autoDetectEncoding: true);
-            var show    = new TVShow
+            var show = new TVShow
                 {
                     AirTime  = "20:00",
                     URL      = id,
@@ -134,7 +155,7 @@
             }
 
             var prod = Regex.Match(listing, @"(?<start>_+\s{1,5}_+\s{1,5})(?<length>_+\s{1,5})_+\s{1,5}_+");
-            listing  = Regex.Replace(listing, @"(.{" + prod.Groups["start"].Value.Length + "})(.{" + prod.Groups["length"].Value.Length + "})(.+)", "$1$3");
+            listing = Regex.Replace(listing, @"(.{" + prod.Groups["start"].Value.Length + "})(.{" + prod.Groups["length"].Value.Length + "})(.+)", "$1$3");
 
             mc = _guideRegex.Matches(listing);
 
@@ -149,7 +170,7 @@
 
                 ep.Season = m.Groups["season"].Value.Trim().ToInteger();
                 ep.Number = m.Groups["episode"].Value.Trim().ToInteger();
-                ep.Title  = HtmlEntity.DeEntitize(m.Groups["title"].Value);
+                ep.Title = HtmlEntity.DeEntitize(m.Groups["title"].Value);
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
@@ -160,27 +181,6 @@
             }
 
             return show;
-        }
-
-        /// <summary>
-        /// Gets the ID of a TV show in the database.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns>ID.</returns>
-        public override IEnumerable<ShowID> GetID(string name)
-        {
-            var list = WebSearch.DuckDuckGo("intitle:{0} site:epguides.com".FormatWith(name)).ToList();
-
-            foreach (var result in list)
-            {
-                yield return new ShowID
-                    {
-                        ID       = result,
-                        Title    = Regex.Match(result, @"\.com/([^/]+)").Groups[1].Value,
-                        Language = "en",
-                        URL      = result
-                    };
-            }
         }
     }
 }

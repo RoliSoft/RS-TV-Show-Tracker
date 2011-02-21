@@ -47,11 +47,21 @@
         }
 
         /// <summary>
+        /// Gets the ID of a TV show in the database.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>ID.</returns>
+        public override IEnumerable<ShowID> GetID(string name, string language = "en")
+        {
+            yield return new ShowID { ID = name };
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <returns>TV show data.</returns>
-        public override TVShow GetData(string id)
+        public override TVShow GetData(string id, string language = "en")
         {
             // create an average TV show
             var show = new TVShow
@@ -109,16 +119,6 @@
             }
 
             return show;
-        }
-
-        /// <summary>
-        /// Gets the ID of a TV show in the database.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns>ID.</returns>
-        public override IEnumerable<ShowID> GetID(string name)
-        {
-            yield return new ShowID { ID = name };
         }
     }
 }

@@ -20,11 +20,11 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Google("\"{0}\" \"{1}\" \"{2}\" site:hulu.com/watch/".FormatWith(ShowNames.Tools.Normalize(name), extra as string, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Season $1 Ep. $2", RegexOptions.IgnoreCase))).ToList();
+            var g = WebSearch.Engines.Google("\"{0}\" \"{1}\" \"{2}\" site:hulu.com/watch/".FormatWith(ShowNames.Tools.Normalize(name), extra as string, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Season $1 Ep. $2", RegexOptions.IgnoreCase))).ToList();
 
             if (g.Count != 0)
             {
-                return g[0];
+                return g[0].URL;
             }
 
             var xml  = Utils.GetURL("http://www.hulu.com/feed/search?fs=0&query=" + Uri.EscapeUriString("show:" + ShowNames.Tools.Normalize(name) + Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", " season:$1 episode:$2", RegexOptions.IgnoreCase) + " type:episode") + "&sort_by=relevance&st=1");

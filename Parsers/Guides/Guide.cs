@@ -52,15 +52,17 @@
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>TV show data.</returns>
-        public abstract TVShow GetData(string id);
+        public abstract TVShow GetData(string id, string language = "en");
 
         /// <summary>
         /// Gets the ID of a TV show in the database.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>ID.</returns>
-        public abstract IEnumerable<ShowID> GetID(string name);
+        public abstract IEnumerable<ShowID> GetID(string name, string language = "en");
 
         /// <summary>
         /// Tests the parser by searching and downloading the data for "House" on the site.

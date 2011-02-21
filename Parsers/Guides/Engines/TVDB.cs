@@ -89,11 +89,39 @@
         private const string Key = "AB576C5FF150A8EE";
 
         /// <summary>
+        /// Gets the ID of a TV show in the database.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>ID.</returns>
+        public override IEnumerable<ShowID> GetID(string name, string language = "en")
+        {
+            var list = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Tools.Normalize(name)), language));
+
+            foreach (var show in list.Descendants("Series"))
+            {
+                var id = new ShowID();
+
+                id.ID       = show.GetValue("seriesid");
+                id.Title    = show.GetValue("SeriesName");
+                id.Language = show.GetValue("language");
+                id.URL      = "http://thetvdb.com/?tab=series&id=" + id.ID;
+                id.Cover    = show.GetValue("banner");
+
+                if (!string.IsNullOrWhiteSpace(id.Cover))
+                {
+                    id.Cover = "http://thetvdb.com/banners/_cache/" + id.Cover;
+                }
+
+                yield return id;
+            }
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <returns>TV show data.</returns>
-        public override TVShow GetData(string id)
+        public override TVShow GetData(string id, string language = "en")
         {
             var info = XDocument.Load("http://www.thetvdb.com/api/{0}/series/{1}/all/en.xml".FormatWith(Key, id));
             var show = new TVShow();
@@ -149,34 +177,6 @@
             }
 
             return show;
-        }
-
-        /// <summary>
-        /// Gets the ID of a TV show in the database.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns>ID.</returns>
-        public override IEnumerable<ShowID> GetID(string name)
-        {
-            var list = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname=" + Uri.EscapeUriString(ShowNames.Tools.Normalize(name)));
-
-            foreach (var show in list.Descendants("Series"))
-            {
-                var id = new ShowID();
-
-                id.ID       = show.GetValue("seriesid");
-                id.Title    = show.GetValue("SeriesName");
-                id.Language = show.GetValue("language");
-                id.URL      = "http://thetvdb.com/?tab=series&id=" + id.ID;
-                id.Cover    = show.GetValue("banner");
-
-                if (!string.IsNullOrWhiteSpace(id.Cover))
-                {
-                    id.Cover = "http://thetvdb.com/banners/_cache/" + id.Cover;
-                }
-
-                yield return id;
-            }
         }
     }
 }

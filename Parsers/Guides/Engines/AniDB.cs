@@ -63,11 +63,33 @@
         }
 
         /// <summary>
+        /// Gets the ID of a TV show in the database.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>ID.</returns>
+        public override IEnumerable<ShowID> GetID(string name, string language = "en")
+        {
+            var list = XDocument.Load("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
+
+            foreach (var show in list.Descendants("anime"))
+            {
+                var id = new ShowID();
+
+                id.ID       = show.Attribute("aid").Value;
+                id.Title    = show.GetValue("title");
+                id.Language = "en";
+                id.URL      = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id.ID;
+
+                yield return id;
+            }
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <returns>TV show data.</returns>
-        public override TVShow GetData(string id)
+        public override TVShow GetData(string id, string language = "en")
         {
             // XDocument will fail, because the response is gzipped; Utils.GetURL supports gzipped content
             var req  = Utils.GetURL("http://api.anidb.net:9001/httpapi?request=anime&client=rstvshowtracker&clientver=2&protover=1&aid=" + id);
@@ -112,28 +134,6 @@
             show.Episodes = show.Episodes.OrderBy(e => e.Number).ToList();
 
             return show;
-        }
-
-        /// <summary>
-        /// Gets the ID of a TV show in the database.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns>ID.</returns>
-        public override IEnumerable<ShowID> GetID(string name)
-        {
-            var list = XDocument.Load("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
-
-            foreach (var show in list.Descendants("anime"))
-            {
-                var id = new ShowID();
-
-                id.ID       = show.Attribute("aid").Value;
-                id.Title    = show.GetValue("title");
-                id.Language = "en";
-                id.URL      = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id.ID;
-
-                yield return id;
-            }
         }
     }
 }

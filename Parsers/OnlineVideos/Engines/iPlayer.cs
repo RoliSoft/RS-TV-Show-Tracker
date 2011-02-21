@@ -18,11 +18,11 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Google("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/".FormatWith(name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase))).ToList();
+            var g = WebSearch.Engines.Google("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/".FormatWith(name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase))).ToList();
 
             if (g.Count != 0)
             {
-                return g[0];
+                return g[0].URL;
             }
             else
             {

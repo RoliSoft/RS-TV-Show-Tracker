@@ -53,11 +53,40 @@
         }
 
         /// <summary>
+        /// Gets the ID of a TV show in the database.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>ID.</returns>
+        public override IEnumerable<ShowID> GetID(string name, string language = "en")
+        {
+            var html  = Utils.GetHTML("http://www.tv.com/search.php?type=Search&stype=ajax_search&search_type=program&pg_results=0&sort=&qs=" + Uri.EscapeUriString(name));
+            var shows = html.DocumentNode.SelectNodes("//li//h2/a");
+
+            if (shows == null)
+            {
+                yield break;
+            }
+
+            foreach (var show in shows)
+            {
+                var id  = new ShowID();
+                
+                id.URL      = HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
+                id.ID       = Regex.Match(id.URL, @"[a-z]/([0-9]+)/[a-z]").Groups[1].Value + '\0' + Regex.Match(id.URL, @"tv\.com/([^/]*)/").Groups[1].Value;
+                id.Title    = HtmlEntity.DeEntitize(show.InnerText);
+                id.Cover    = Regex.Match(show.GetNodeAttributeValue("../../../a/img", "style"), @"""(?>http://)([^""]+)").Groups[1].Value;
+                id.Language = "en";
+
+                yield return id;
+            }
+        }
+
+        /// <summary>
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <returns>TV show data.</returns>
-        public override TVShow GetData(string id)
+        public override TVShow GetData(string id, string language = "en")
         {
             var summary = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0')));
             var show    = new TVShow();
@@ -130,35 +159,6 @@
             }
 
             return show;
-        }
-
-        /// <summary>
-        /// Gets the ID of a TV show in the database.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns>ID.</returns>
-        public override IEnumerable<ShowID> GetID(string name)
-        {
-            var html  = Utils.GetHTML("http://www.tv.com/search.php?type=Search&stype=ajax_search&search_type=program&pg_results=0&sort=&qs=" + Uri.EscapeUriString(name));
-            var shows = html.DocumentNode.SelectNodes("//li//h2/a");
-
-            if (shows == null)
-            {
-                yield break;
-            }
-
-            foreach (var show in shows)
-            {
-                var id  = new ShowID();
-                
-                id.URL      = HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
-                id.ID       = Regex.Match(id.URL, @"[a-z]/([0-9]+)/[a-z]").Groups[1].Value + '\0' + Regex.Match(id.URL, @"tv\.com/([^/]*)/").Groups[1].Value;
-                id.Title    = HtmlEntity.DeEntitize(show.InnerText);
-                id.Cover    = Regex.Match(show.GetNodeAttributeValue("../../../a/img", "style"), @"""(?>http://)([^""]+)").Groups[1].Value;
-                id.Language = "en";
-
-                yield return id;
-            }
         }
     }
 }
