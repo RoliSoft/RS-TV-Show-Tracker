@@ -74,11 +74,22 @@
             foreach (var show in list.Descendants("anime"))
             {
                 var id = new ShowID();
+                
+                try
+                {
+                    id.Title    = show.Descendants("title").Where(t => t.Attribute("lang").Value == language).First().Value;
+                    id.Language = language;
+                }
+                catch
+                {
+                    try   { id.Title = show.Descendants("title").Where(t => t.Attribute("lang").Value == "en").First().Value; }
+                    catch { id.Title = show.GetValue("title"); }
 
-                id.ID       = show.Attribute("aid").Value;
-                id.Title    = show.GetValue("title");
-                id.Language = "en";
-                id.URL      = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id.ID;
+                    id.Language = "en";
+                }
+
+                id.ID  = show.Attribute("aid").Value;
+                id.URL = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id.ID;
 
                 yield return id;
             }
@@ -96,7 +107,13 @@
             var info = XDocument.Load(new StringReader(req));
             var show = new TVShow();
 
-            show.Title       = info.GetValue("title");
+            try { show.Title = info.Descendants("title").Where(t => t.Attributes().First().Value == language).First().Value; }
+            catch
+            {
+                try   { show.Title = info.Descendants("title").Where(t => t.Attributes().First().Value == "en").First().Value; }
+                catch { show.Title = info.GetValue("title"); }
+            }
+
             show.Genre       = info.Descendants("category").Aggregate(string.Empty, (current, g) => current + (g.GetValue("name") + ", ")).TrimEnd(", ".ToCharArray());
             show.Description = info.GetValue("description");
             show.Airing      = string.IsNullOrWhiteSpace(info.GetValue("enddate"));
@@ -120,8 +137,12 @@
                 ep.Number = node.GetValue("epno").ToInteger();
                 ep.URL    = "http://anidb.net/perl-bin/animedb.pl?show=ep&eid=" + node.Attribute("id").Value;
 
-                try   { ep.Title = node.Descendants("title").Where(t => t.Attributes().First().Value == "en").First().Value; }
-                catch { ep.Title = node.GetValue("title"); }
+                try { ep.Title = node.Descendants("title").Where(t => t.Attributes().First().Value == language).First().Value; }
+                catch
+                {
+                    try   { ep.Title = node.Descendants("title").Where(t => t.Attributes().First().Value == "en").First().Value; }
+                    catch { ep.Title = node.GetValue("title"); }
+                }
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParse(node.GetValue("airdate"), out dt)

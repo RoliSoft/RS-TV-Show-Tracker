@@ -5,7 +5,6 @@
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading;
-    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
@@ -78,7 +77,11 @@
 
             foreach (var lang in _guide.SupportedLanguages)
             {
-                var sp = new StackPanel { Orientation = Orientation.Horizontal };
+                var sp = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Tag         = lang
+                    };
 
                 sp.Children.Add(new Image
                     {
@@ -87,6 +90,7 @@
                         Width  = 16,
                         Margin = new Thickness(0, 1, 0, 0)
                     });
+
                 sp.Children.Add(new Label
                     {
                         Content = " " + Languages.List[lang],
@@ -116,12 +120,20 @@
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
 
             var show = textBox.Text;
+            var lang = (language.SelectedValue as StackPanel).Tag.ToString();
 
             _worker = new Thread(() =>
                 {
                     try
                     {
-                        _shows = _guide.GetID(show).ToList();
+                        _shows = _guide.GetID(show, lang).ToList();
+
+                        if (_shows.Count == 0)
+                        {
+                            var up = new Exception();
+
+                            throw up; // hehe
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -135,6 +147,8 @@
                                 workingTabItem.Visibility = Visibility.Collapsed;
                                 addTabItem.Visibility     = Visibility.Visible;
                                 tabControl.SelectedIndex  = 0;
+
+                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                             }));
 
                         new TaskDialog
@@ -210,6 +224,8 @@
             workingTabItem.Visibility = Visibility.Collapsed;
             addTabItem.Visibility     = Visibility.Visible;
             tabControl.SelectedIndex  = 0;
+
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
         }
 
         /// <summary>
@@ -222,6 +238,8 @@
             selectTabItem.Visibility = Visibility.Collapsed;
             addTabItem.Visibility    = Visibility.Visible;
             tabControl.SelectedIndex = 0;
+
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
         }
 
         /// <summary>
@@ -247,13 +265,15 @@
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
 
+            var lang = (language.SelectedValue as StackPanel).Tag.ToString();
+
             _worker = new Thread(() =>
                 {
                     // get data from guide
                     TVShow tv;
                     try
                     {
-                        tv = _guide.GetData(show.ID);
+                        tv = _guide.GetData(show.ID, lang);
 
                         if (tv.Episodes.Count == 0)
                         {
@@ -272,6 +292,8 @@
                                 workingTabItem.Visibility = Visibility.Collapsed;
                                 addTabItem.Visibility     = Visibility.Visible;
                                 tabControl.SelectedIndex  = 0;
+
+                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                             }));
 
                         new TaskDialog
@@ -295,6 +317,8 @@
                                 workingTabItem.Visibility = Visibility.Collapsed;
                                 addTabItem.Visibility     = Visibility.Visible;
                                 tabControl.SelectedIndex  = 0;
+
+                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                             }));
 
                         new TaskDialog
@@ -327,6 +351,8 @@
                             workingTabItem.Visibility = Visibility.Collapsed;
                             addTabItem.Visibility     = Visibility.Visible;
                             tabControl.SelectedIndex  = 0;
+
+                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                         }));
 
                         new TaskDialog
@@ -350,8 +376,14 @@
                     // then get that showid
                     _dbid = Database.GetShowID(tv.Title);
 
+                    // insert guide fields
+                    var gname = _guide.GetType().Name;
+
+                    Database.ShowData(_dbid, "grabber",       gname);
+                    Database.ShowData(_dbid, gname + ".id",   show.ID);
+                    Database.ShowData(_dbid, gname + ".lang", lang);
+
                     // insert showdata fields
-                    Database.ShowData(_dbid, "grabber", _guide.GetType().Name);
                     Database.ShowData(_dbid, "genre",   tv.Genre);
                     Database.ShowData(_dbid, "descr",   tv.Description);
                     Database.ShowData(_dbid, "cover",   tv.Cover);
@@ -402,6 +434,8 @@
                             workingTabItem.Visibility = Visibility.Collapsed;
                             finishTabItem.Visibility  = Visibility.Visible;
                             tabControl.SelectedIndex  = 3;
+
+                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
                             var shows = Database.Query("select season, episode, name, airdate from episodes where showid = ? order by (season * 1000 + episode) desc", _dbid);
 

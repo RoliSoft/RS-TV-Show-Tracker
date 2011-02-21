@@ -1,6 +1,6 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AddNewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" RenderOptions.BitmapScalingMode="HighQuality"
         Title="Add new TV show" Height="227" Width="531" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/plus.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,10" Name="tabControl" FocusVisualStyle="{x:Null}">
@@ -16,53 +16,53 @@
                         <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
                         <ComboBoxItem Margin="10,0" Selector.IsSelected="True">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/tvrage.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/tvrage.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" TVRage" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/thetvdb.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/thetvdb.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" The TVDB" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/tvcom.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/tvcom.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" TV.com " Padding="0" />
                                 <Label Content="beta" Foreground="#50000000" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="http://lab.rolisoft.net/images/tvshowtracker/favicons/anidb.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/anidb.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" AniDB" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                         <ComboBoxItem Content="Episode Listing Only" IsEnabled="False" />
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" EPGuides - TVRage" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" EPGuides - TV.com" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                         <ComboBoxItem Content="Experimental Features" IsEnabled="False" />
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/torrents.png" Height="16" Width="16" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,1,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/torrents.png" Height="16" Width="16" Margin="0,1,0,0" />
                                 <Label Content=" Generate list based on download links" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
                     </ComboBox>
                     <Label Content="Language:" FontSize="18" HorizontalAlignment="Left" Margin="2,75,0,0" VerticalAlignment="Top" />
                     <ComboBox FontSize="18" HorizontalAlignment="Left" Margin="95,78,0,0" Name="language" VerticalAlignment="Top" Width="393" />
-                    <Button Content="Search" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
+                    <Button Content="Next" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
                 </Grid>
             </TabItem>
             <TabItem Header="Working" Name="workingTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
@@ -87,8 +87,8 @@
             <TabItem Header="Select a TV show" Name="selectTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
                 <Grid Name="selectGrid">
                     <ListBox Height="104" HorizontalAlignment="Left" Margin="6,6,0,0" Name="listBox" VerticalAlignment="Top" Width="482" FontSize="16" />
-                    <Button Content="Back" Height="23" HorizontalAlignment="Left" Margin="6,118,0,0" Name="selectBackButton" VerticalAlignment="Top" Width="75" Click="SelectBackButtonClick" />
-                    <Button Content="Add" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="addButton" VerticalAlignment="Top" Width="75" Click="AddButtonClick" />
+                    <Button Content="Back" Height="23" HorizontalAlignment="Left" Margin="330,118,0,0" Name="selectBackButton" VerticalAlignment="Top" Width="75" Click="SelectBackButtonClick" />
+                    <Button Content="Next" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="addButton" VerticalAlignment="Top" Width="75" Click="AddButtonClick" />
                 </Grid>
             </TabItem>
             <TabItem Header="Add a TV show" Name="finishTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
@@ -96,8 +96,8 @@
                     <Label Content="Nothing has been added to your list! Fuck yeah!" Name="finishTitle" FontSize="18" Margin="3,1,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <Label Content="Mark as seen until:" FontSize="16" HorizontalAlignment="Left" Margin="2,39,0,0" VerticalAlignment="Top" />
                     <ComboBox FontSize="16" HorizontalAlignment="Left" Margin="6,68,0,0" Name="markUntil" VerticalAlignment="Top" Width="482" SelectionChanged="MarkUntilSelectionChanged" />
-                    <Button Content="Close" Height="23" HorizontalAlignment="Left" Margin="6,118,0,0" Name="closeButton" VerticalAlignment="Top" Width="75" Click="CloseButtonClick" />
-                    <Button Content="Add another" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="addAnotherButton" VerticalAlignment="Top" Width="75" Click="AddAnotherButtonClick" />
+                    <Button Content="Close" Height="23" HorizontalAlignment="Left" Margin="330,118,0,0" Name="closeButton" VerticalAlignment="Top" Width="75" Click="CloseButtonClick" />
+                    <Button Content="Start Over" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="addAnotherButton" VerticalAlignment="Top" Width="75" Click="AddAnotherButtonClick" />
                 </Grid>
             </TabItem>
         </TabControl>

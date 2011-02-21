@@ -73,14 +73,19 @@
                 }
 
                 // get ID on guide
-                string id;
+                string id, lang;
                 try
                 {
                     id = Database.ShowData(r["showid"], gname + ".id");
                     if (string.IsNullOrWhiteSpace(id))
                     {
-                        id = guide.GetID(r["name"]).First().ID;
-                        Database.ShowData(r["showid"], gname + ".id", id);
+                        throw new ArgumentNullException();
+                    }
+
+                    lang = Database.ShowData(r["showid"], gname + ".lang");
+                    if (string.IsNullOrWhiteSpace(lang))
+                    {
+                        lang = "en";
                     }
                 }
                 catch (Exception ex)
@@ -93,7 +98,7 @@
                 TVShow tv;
                 try
                 {
-                    tv = guide.GetData(id);
+                    tv = guide.GetData(id, lang);
                 }
                 catch (Exception ex)
                 {
