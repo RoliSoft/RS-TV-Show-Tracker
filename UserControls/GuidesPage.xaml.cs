@@ -33,7 +33,9 @@
         /// </summary>
         /// <value>The guide list view item collection.</value>
         public ObservableCollection<GuideListViewItem> GuideListViewItemCollection { get; set; }
-        
+
+        private string _activeShowUrl, _activeShowID;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="GuidesPage"/> class.
         /// </summary>
@@ -187,6 +189,7 @@
             }
 
             var id = qid[0]["showid"];
+            _activeShowID = id;
 
             // fill up general informations
 
@@ -237,7 +240,16 @@
                 showGeneralSub.Text += Environment.NewLine + "Airs" + airs;
             }
 
-            showGeneralSub.Text += Environment.NewLine + "Episode listing provided by " + Database.ShowData(id, "grabber");
+            var guide = Updater.CreateGuide(Database.ShowData(id, "grabber"));
+
+            showGeneralSub.Text        += Environment.NewLine + "Episode listing provided by " + guide.Name;
+            showGeneralGuideIcon.Source = new BitmapImage(new Uri(guide.Icon, UriKind.Relative));
+
+            _activeShowUrl = Database.ShowData(id, "url");
+            if (string.IsNullOrWhiteSpace(_activeShowUrl))
+            {
+                _activeShowUrl = guide.Site;
+            }
 
             showGeneralDescr.Text = string.Empty;
             string descr;
@@ -251,11 +263,27 @@
                 var last = Database.Query("select name, airdate from episodes where showid = ? and airdate < ? and airdate != 0 order by (season * 1000 + episode) desc limit 1", id, DateTime.Now.ToUnixTimestamp());
                 var next = Database.Query("select name, airdate from episodes where showid = ? and airdate > ? order by (season * 1000 + episode) asc limit 1", id, DateTime.Now.ToUnixTimestamp());
 
-                showGeneralLast.Text = last.Count != 0 ? last[0]["name"] : string.Empty;
-                showGeneralNext.Text = next.Count != 0 ? next[0]["name"] : string.Empty;
+                if (last.Count != 0)
+                {
+                    showGeneralLastPanel.Visibility = Visibility.Visible;
+                    showGeneralLast.Text            = last[0]["name"];
+                    showGeneralLastDate.Text        = last[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true);
+                }
+                else
+                {
+                    showGeneralLastPanel.Visibility = Visibility.Collapsed;
+                }
 
-                showGeneralLastDate.Text = last.Count != 0 ? last[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true) : "no data available";
-                showGeneralNextDate.Text = next.Count != 0 ? next[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true) : airing ? "no data available" : "this show has ended";
+                if (next.Count != 0)
+                {
+                    showGeneralNextPanel.Visibility = Visibility.Visible;
+                    showGeneralNext.Text            = next[0]["name"];
+                    showGeneralNextDate.Text        = next[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true);
+                }
+                else
+                {
+                    showGeneralNextPanel.Visibility = Visibility.Collapsed;
+                }
             }
             catch
             {
@@ -551,5 +579,57 @@
         {
             showGeneralCover.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
         }
+
+        #region Icons
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the showGeneralGuideIcon control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ShowGeneralGuideIconMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Utils.Run(_activeShowUrl);
+        }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the showGeneralWikipedia control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ShowGeneralWikipediaMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(showGeneralName.Text + " TV Series site:en.wikipedia.org"));
+        }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the showGeneralImdb control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ShowGeneralImdbMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(showGeneralName.Text + " intitle:\"TV Series\" site:imdb.com"));
+        }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the showGeneralGoogle control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ShowGeneralGoogleMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Utils.Run("http://www.google.com/search?hl=en&q=" + Uri.EscapeUriString(showGeneralName.Text));
+        }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the showGeneralSettings control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void ShowGeneralSettingsMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            new EditShowWindow(_activeShowID, showGeneralName.Text).ShowDialog();
+        }
+        #endregion
     }
 }

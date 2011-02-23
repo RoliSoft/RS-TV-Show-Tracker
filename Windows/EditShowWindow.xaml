@@ -1,0 +1,94 @@
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.EditShowWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" RenderOptions.BitmapScalingMode="HighQuality"
+        Title="Edit TV show" Height="227" Width="531" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+    <Grid>
+        <TabControl Margin="10,10" Name="tabControl" FocusVisualStyle="{x:Null}">
+            <TabControl.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </TabControl.Effect>
+            <TabItem Header="Edit x" Name="editTabItem" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
+                <Grid Name="addGrid">
+                    <Label Content="Database:" FontSize="18" Margin="3,20,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <ComboBox Margin="96,23,0,0" Name="database" HorizontalAlignment="Left" VerticalAlignment="Top" Width="393" FontSize="18" SelectionChanged="DatabaseSelectionChanged">
+                        <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
+                        <ComboBoxItem Margin="10,0" Selector.IsSelected="True">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/tvrage.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" TVRage" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/thetvdb.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" The TVDB" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/tvcom.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" TV.com " Padding="0" />
+                                <Label Content="beta" Foreground="#50000000" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/anidb.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" AniDB" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Content="Episode Listing Only" IsEnabled="False" />
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" EPGuides - TVRage" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/epg.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" EPGuides - TV.com" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Content="Experimental Features" IsEnabled="False" />
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/torrents.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" Generate list based on download links" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
+                    </ComboBox>
+                    <Label Content="Language:" FontSize="18" HorizontalAlignment="Left" Margin="3,58,0,0" VerticalAlignment="Top" />
+                    <ComboBox FontSize="18" HorizontalAlignment="Left" Margin="96,61,0,0" Name="language" VerticalAlignment="Top" Width="393" />
+                    <Button Content="Next" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="searchButton" VerticalAlignment="Top" Width="75" Click="SearchButtonClick" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Working" Name="workingTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
+                <Grid Name="workingGrid">
+                    <Label Name="statusThrobber" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="50,0,0,0" Width="12" Height="17" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Label.Effect>
+                            <DropShadowEffect Color="Gray" ShadowDepth="0" />
+                        </Label.Effect>
+                        <Label.RenderTransform>
+                            <RotateTransform x:Name="statusThrobberRotate" CenterX="6" CenterY="8" Angle="0" />
+                        </Label.RenderTransform>
+                        <Label.Resources>
+                            <Storyboard x:Key="statusThrobberSpinner">
+                                <DoubleAnimation Storyboard.TargetName="statusThrobberRotate" Storyboard.TargetProperty="Angle" By="360" Duration="0:0:0.3" AutoReverse="False" RepeatBehavior="Forever" />
+                            </Storyboard>
+                        </Label.Resources>
+                    </Label>
+                    <Label Content="Fucking around..." Name="working" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="65,-3,0,0" />
+                    <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="searchCancelButton" VerticalAlignment="Top" Width="75" Click="SearchCancelButtonClick" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Select a TV show" Name="selectTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
+                <Grid Name="selectGrid">
+                    <ListBox Height="104" HorizontalAlignment="Left" Margin="6,6,0,0" Name="listBox" VerticalAlignment="Top" Width="482" FontSize="16" />
+                    <Button Content="Back" Height="23" HorizontalAlignment="Left" Margin="330,118,0,0" Name="selectBackButton" VerticalAlignment="Top" Width="75" Click="SelectBackButtonClick" />
+                    <Button Content="Next" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="addButton" VerticalAlignment="Top" Width="75" Click="AddButtonClick" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Shell:GlassWindow>

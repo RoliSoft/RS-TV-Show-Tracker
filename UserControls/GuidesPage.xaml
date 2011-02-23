@@ -173,20 +173,31 @@
                 <Grid Name="showGeneral" Visibility="Hidden">
                     <Image Source="/RSTVShowTracker;component/Images/cd.png" Name="showGeneralCover" Height="278" Width="195" ImageFailed="ShowGeneralCoverImageFailed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,20,0,0" Stretch="UniformToFill" />
                     <Image Source="/RSTVShowTracker;component/Images/case.png" Height="300" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10,0,0" />
-                    <TextBlock Name="showGeneralName" FontFamily="Calibri" FontWeight="Bold" FontSize="29" Margin="270,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
-                    <TextBlock Name="showGeneralSub" FontWeight="Bold" Margin="270,80,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
-                    <ScrollViewer Margin="270,132,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" Width="580" Height="93">
-                        <TextBlock Name="showGeneralDescr" TextWrapping="Wrap" Foreground="White" />
-                    </ScrollViewer>
-                    <TextBlock Text="Last episode:" FontWeight="Bold" Margin="276,233,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Calibri" FontSize="20" Foreground="White" />
-                    <TextBlock Text="Next episode:" FontWeight="Bold" Margin="270,256,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Calibri" FontSize="20" Foreground="White" />
-                    <StackPanel Orientation="Horizontal" Margin="392,233,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
-                        <TextBlock Name="showGeneralLast" FontFamily="Calibri" FontSize="20" Foreground="White" />
-                        <TextBlock Name="showGeneralLastDate" FontFamily="Calibri" FontSize="14" Padding="7,6,0,0" Foreground="White" Opacity="0.5" />
+                    <StackPanel Orientation="Horizontal" Margin="270,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBlock Text="House, M.D." Name="showGeneralName" FontFamily="Calibri" FontWeight="Bold" FontSize="29" Foreground="White" />
+                        <Image Source="/RSTVShowTracker;component/Images/settings.png" Margin="15,0,10,0" Name="showGeneralSettings" MouseLeftButtonUp="ShowGeneralSettingsMouseLeftButtonUp" ToolTip="Change settings" Cursor="Hand" Width="16" Height="16" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Image Source="/RSTVShowTracker;component/Images/page.png" Margin="3,0" Name="showGeneralGuideIcon" MouseLeftButtonUp="ShowGeneralGuideIconMouseLeftButtonUp" ToolTip="Open guide's page" Cursor="Hand" Width="16" Height="16" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Image Source="/RSTVShowTracker;component/Images/wikipedia.png" Margin="3,0" Name="showGeneralWikipedia" MouseLeftButtonUp="ShowGeneralWikipediaMouseLeftButtonUp" ToolTip="Open Wikipedia article" Cursor="Hand" Width="16" Height="16" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Image Source="/RSTVShowTracker;component/Images/imdb.png" Margin="3,0" Name="showGeneralImdb" MouseLeftButtonUp="ShowGeneralImdbMouseLeftButtonUp" ToolTip="Open IMDb profile" Cursor="Hand" Width="16" Height="16" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Image Source="/RSTVShowTracker;component/Images/google.png" Margin="3,0" Name="showGeneralGoogle" MouseLeftButtonUp="ShowGeneralGoogleMouseLeftButtonUp" ToolTip="Search on Google" Cursor="Hand" Width="16" Height="16" RenderOptions.BitmapScalingMode="HighQuality" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="392,256,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
-                        <TextBlock Name="showGeneralNext" FontFamily="Calibri" FontSize="20" Foreground="White" />
-                        <TextBlock Name="showGeneralNextDate" FontFamily="Calibri" FontSize="14" Padding="7,6,0,0" Foreground="White" Opacity="0.5" />
+                    <TextBlock Text="Drama, Medical, Mystery show; 40 minutes
+Airs Monday at 20:00 at FOX
+Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Margin="270,80,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" />
+                    <ScrollViewer Margin="270,132,0,54" VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="Description of the show." Name="showGeneralDescr" TextWrapping="Wrap" Foreground="White" />
+                    </ScrollViewer>
+                    <StackPanel Orientation="Vertical" Margin="270,0,0,2" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                        <StackPanel Name="showGeneralLastPanel" Orientation="Horizontal" Margin="6,0,0,0">
+                            <TextBlock Text="Last: " FontWeight="Bold" FontFamily="Calibri" FontSize="20" Foreground="White" />
+                            <TextBlock Text="Two Stories" Name="showGeneralLast" FontFamily="Calibri" FontSize="20" Foreground="White" />
+                            <TextBlock Text="Yesterday at 4:00 AM" Name="showGeneralLastDate" FontFamily="Calibri" FontSize="14" Padding="7,5,0,0" Foreground="White" Opacity="0.5" />
+                        </StackPanel>
+                        <StackPanel Name="showGeneralNextPanel" Orientation="Horizontal">
+                            <TextBlock Text="Next: " FontWeight="Bold" FontFamily="Calibri" FontSize="20" Foreground="White" />
+                            <TextBlock Text="Recession Proof" Name="showGeneralNext" FontFamily="Calibri" FontSize="20" Foreground="White" />
+                            <TextBlock Text="Next Tuesday at 4:00 AM" Name="showGeneralNextDate" FontFamily="Calibri" FontSize="14" Padding="7,5,0,0" Foreground="White" Opacity="0.5" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </TabItem>
