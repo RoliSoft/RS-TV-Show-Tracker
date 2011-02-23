@@ -225,7 +225,7 @@
                                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
                                 workingTabItem.Visibility = Visibility.Collapsed;
-                                editTabItem.Visibility    = Visibility.Visible;
+                                selectTabItem.Visibility  = Visibility.Visible;
                                 tabControl.SelectedIndex  = 2;
                             }
                         }));
