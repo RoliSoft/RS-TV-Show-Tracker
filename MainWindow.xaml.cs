@@ -453,6 +453,16 @@
         {
             new SendFeedbackWindow().ShowDialog();
         }
+
+        /// <summary>
+        /// Handles the Click event of the ExitSoftware control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ExitSoftwareClick(object sender, RoutedEventArgs e)
+        {
+            NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+        }
         #endregion
 
         #region Database update

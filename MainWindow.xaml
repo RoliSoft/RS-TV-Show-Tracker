@@ -651,6 +651,11 @@
                             <Image Source="/RSTVShowTracker;component/Images/information.png" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Exit software" Click="ExitSoftwareClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/cross.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </MenuItem>
             </Menu>
             

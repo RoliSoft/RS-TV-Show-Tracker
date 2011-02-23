@@ -24,6 +24,18 @@
         /// <value>The date of last change.</value>
         public static DateTime DataChange { get; set; }
 
+        /// <summary>
+        /// Gets the version of the database structure.
+        /// </summary>
+        /// <value>The version.</value>
+        public static int Version
+        {
+            get
+            {
+                return 1;
+            }
+        }
+
         private static readonly string _dbFile;
 
         /// <summary>
@@ -51,6 +63,8 @@
             
             Connection.Open();
 
+            // if this is a new database, run table creations
+
             if (!exists)
             {
                 var tables = Properties.Resources.DatabaseStructure.Split(new[]{ "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -59,6 +73,22 @@
                 {
                     Execute(table);
                 }
+            }
+
+            // if this is an older database, upgrade
+
+            var sver = Setting("Version");
+            var ver  = !string.IsNullOrWhiteSpace(sver)
+                       ? sver.ToInteger()
+                       : 0;
+
+            // -> revision 9bec72227f611e4283cbdc24357c83a23b5798a9
+            if (ver == 0)
+            {
+                Execute("alter table episodes add column url TEXT");
+
+                ver++;
+                Setting("Version", ver.ToString());
             }
         }
 
