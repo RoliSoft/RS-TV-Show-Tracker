@@ -6,6 +6,7 @@
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
     /// Provides support for scraping Subscene.

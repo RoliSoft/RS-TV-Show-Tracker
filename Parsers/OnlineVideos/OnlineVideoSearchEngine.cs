@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -28,6 +29,12 @@
         public abstract string Search(string name, string episode, object extra = null);
 
         /// <summary>
+        /// Gets the search thread.
+        /// </summary>
+        /// <value>The search thread.</value>
+        public Thread SearchThread { get; internal set; }
+
+        /// <summary>
         /// Searches for videos on the service asynchronously.
         /// </summary>
         /// <param name="name">The name of the show.</param>
@@ -35,7 +42,7 @@
         /// <param name="extra">The extra information required for the selected parser.</param>
         public void SearchAsync(string name, string episode, object extra = null)
         {
-            new Task(() =>
+            SearchThread = new Thread(() =>
                 {
                     try
                     {
@@ -50,7 +57,16 @@
                     {
                         OnlineSearchError.Fire(this, name + " " + episode, "There was an error while searching for the video on this service.", new Tuple<string, string, string>(null, null, ex.Message));
                     }
-                }).Start();
+                });
+            SearchThread.Start();
+        }
+
+        /// <summary>
+        /// Cancels the asynchronous search.
+        /// </summary>
+        public void CancelSearch()
+        {
+            try { SearchThread.Abort(); } catch { }
         }
     }
 }

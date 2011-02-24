@@ -9,7 +9,7 @@
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
     /// Provides support for scraping Katz Downloads.

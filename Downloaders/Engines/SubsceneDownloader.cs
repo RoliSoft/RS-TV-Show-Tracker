@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Downloaders
+﻿namespace RoliSoft.TVShowTracker.Downloaders.Engines
 {
     using System;
     using System.IO;
@@ -26,6 +26,8 @@
         /// </summary>
         public event EventHandler<EventArgs<int>> DownloadProgressChanged;
 
+        private Thread _thd;
+
         /// <summary>
         /// Asynchronously downloads the specified link.
         /// </summary>
@@ -52,7 +54,8 @@
                 throw new Exception("The link object is an unsupported type.");
             }
 
-            new Thread(() => InternalDownload(url, target, token ?? string.Empty)).Start();
+            _thd = new Thread(() => InternalDownload(url, target, token ?? string.Empty));
+            _thd.Start();
         }
 
         /// <summary>
@@ -132,6 +135,14 @@
             }
 
             DownloadFileCompleted.Fire(this, target, fn, token);
+        }
+
+        /// <summary>
+        /// Cancels the asynchronous download.
+        /// </summary>
+        public void CancelAsync()
+        {
+            try { _thd.Abort(); } catch { }
         }
     }
 }

@@ -27,5 +27,10 @@
         /// <param name="target">The target location.</param>
         /// <param name="token">The user token.</param>
         void Download(object link, string target, string token = null);
+
+        /// <summary>
+        /// Cancels the asynchronous download.
+        /// </summary>
+        void CancelAsync();
     }
 }

@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Runtime.InteropServices;
@@ -13,12 +12,12 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Downloaders;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     using Image = System.Windows.Controls.Image;
 
@@ -623,72 +622,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-
             var link = (LinkItem)listView.SelectedValue;
 
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-            SetStatus("Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
-
-            var dl = link.Source.Downloader;
-
-            dl.DownloadFileCompleted   += DownloadFileCompleted;
-            dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
-
-            dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), sender is string ? sender as string : "DownloadFile");
-        }
-
-        /// <summary>
-        /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
-        {
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            switch (e.Third)
-            {
-                case "DownloadFile":
-                    var sfd = new SaveFileDialog
-                        {
-                            CheckPathExists = true,
-                            FileName        = e.Second
-                        };
-
-                    if (sfd.ShowDialog().Value)
-                    {
-                        if (File.Exists(sfd.FileName))
-                        {
-                            File.Delete(sfd.FileName);
-                        }
-
-                        File.Move(e.First, sfd.FileName);
-                    }
-                    else
-                    {
-                        File.Delete(e.First);
-                    }
-
-                    SetStatus("File downloaded successfully.");
-                    break;
-
-                case "SendToAssociated":
-                    Utils.Run(e.First);
-
-                    SetStatus("File sent to associated application successfully.");
-                    break;
-
-                case "SendToTorrent":
-                    Utils.Run(Settings.Get("Torrent Downloader"), e.First);
-
-                    SetStatus("File sent to " + DefaultTorrent + " successfully.");
-                    break;
-
-                case "LaunchedBrowser":
-                    SetStatus("File sent to browser successfully.");
-                    break;
-            }
+            new LinkDownloadTaskDialog().Download(link, sender is string ? sender as string : "DownloadFile");
         }
         #endregion
     }

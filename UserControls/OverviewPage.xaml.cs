@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Input;
     using System.Windows.Media.Animation;
@@ -15,6 +16,7 @@
 
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for OverviewPage.xaml
@@ -214,34 +216,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var path = Settings.Get("Download Path");
             var show = GetSelectedShow();
 
-            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
-            {
-                new TaskDialog
-                    {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Search path not configured",
-                        InstructionText = "Search path not configured",
-                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        Cancelable      = true
-                    }.Show();
-                return;
-            }
-
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
-
-            var finder = new FileSearch(path, show[0], show[1]);
-            finder.FileSearchDone += (sender2, e2) =>
-                {
-                    Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                    ResetStatus();
-                    PlayEpisodeFileSearchDone(sender2, e2);
-                };
-            finder.BeginSearch();
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new FileSearchTaskDialog().Search(show[0], show[1]);
         }
 
         /// <summary>
@@ -253,113 +230,12 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var path = Settings.Get("Download Path");
-            var show = GetSelectedShow();
-
-            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
-            {
-                new TaskDialog
-                    {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Search path not configured",
-                        InstructionText = "Search path not configured",
-                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        Cancelable      = true
-                    }.Show();
-                return;
-            }
-
+            var show    = GetSelectedShow();
             var showid  = Database.GetShowID(show[0]);
             var dbep    = Database.Query("select season, episode from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
             var episode = "S" + dbep["season"].ToInteger().ToString("00") + "E" + dbep["episode"].ToInteger().ToString("00");
 
-            SetStatus("Searching for " + show[0] + " " + episode + " on the disk...", true);
-
-            var finder = new FileSearch(path, show[0], episode);
-            finder.FileSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    PlayEpisodeFileSearchDone(sender2, e2);
-                };
-            finder.BeginSearch();
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-        }
-
-        /// <summary>
-        /// Event handler for <c>FileSearch.FileSearchDone</c>.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        public static void PlayEpisodeFileSearchDone(object sender, EventArgs e)
-        {
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            var fs = sender as FileSearch;
-
-            switch (fs.Files.Count)
-            {
-                case 0:
-                    new TaskDialog
-                        {
-                            Icon            = TaskDialogStandardIcon.Error,
-                            Caption         = "No files found",
-                            InstructionText = fs.ShowQuery,
-                            Text            = "No files were found for this episode.",
-                            Cancelable      = true
-                        }.Show();
-                    break;
-
-                case 1:
-                    Utils.Run(fs.Files[0]);
-                    break;
-
-                default:
-                    {
-                        var td = new TaskDialog
-                            {
-                                Icon            = TaskDialogStandardIcon.Information,
-                                Caption         = "Multiple files found",
-                                InstructionText = fs.ShowQuery,
-                                Text            = "Multiple files were found for this episode:",
-                                Cancelable      = true,
-                                StandardButtons = TaskDialogStandardButtons.Cancel
-                            };
-
-                        foreach (var file in fs.Files)
-                        {
-                            var tmp     = file;
-                            var fi      = new FileInfo(file);
-                            var quality = ThePirateBay.ParseQuality(file);
-                            var instr   = string.Empty;
-
-                            if (quality != Parsers.Downloads.Qualities.Unknown)
-                            {
-                                instr = quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
-                            }
-
-                            instr += Utils.GetFileSize(fi.Length)
-                                   + Environment.NewLine
-                                   + fi.DirectoryName;
-
-                            var fd = new TaskDialogCommandLink
-                                {
-                                    Text        = fi.Name,
-                                    Instruction = instr
-                                };
-                            fd.Click += (s, r) =>
-                                {
-                                    td.Close();
-                                    Utils.Run(tmp);
-                                };
-
-                            td.Controls.Add(fd);
-                        }
-
-                        td.Show();
-                    }
-                    break;
-            }
+            new FileSearchTaskDialog().Search(show[0], episode);
         }
         #endregion
 
@@ -455,57 +331,6 @@
 
         #region Search for online videos
         /// <summary>
-        /// Called when the online search is done.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        public static void OnlineSearchDone(object sender, EventArgs<string, string> e)
-        {
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            Utils.Run(e.Second);
-        }
-
-        /// <summary>
-        /// Called when the online search has encountered an error.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        public static void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
-        {
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            var td = new TaskDialog
-                {
-                    Icon            = TaskDialogStandardIcon.Error,
-                    Caption         = "No videos found",
-                    InstructionText = e.First,
-                    Text            = e.Second,
-                    Cancelable      = true,
-                    StandardButtons = TaskDialogStandardButtons.Ok
-                };
-
-            if (!string.IsNullOrWhiteSpace(e.Third.Item3))
-            {
-                td.DetailsExpandedText = e.Third.Item3;
-            }
-
-            if (!string.IsNullOrEmpty(e.Third.Item1))
-            {
-                var fd = new TaskDialogCommandLink { Text = e.Third.Item1 };
-                fd.Click += (s, r) =>
-                    {
-                        td.Close();
-                        Utils.Run(e.Third.Item2);
-                    };
-
-                td.Controls.Add(fd);
-            }
-
-            td.Show();
-        }
-
-        /// <summary>
         /// Handles the Click event of the Hulu control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -521,24 +346,7 @@
                 title = title.Substring(0, title.IndexOf(" · "));
             }
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on Hulu...", true);
-
-            var os = new Hulu();
-            
-            os.OnlineSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OnlineSearchDone(sender2, e2);
-                };
-            os.OnlineSearchError += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OnlineSearchError(sender2, e2);
-                };
-
-            os.SearchAsync(show[0], show[1], title);
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show[0], show[1], title);
         }
 
         /// <summary>
@@ -552,24 +360,7 @@
 
             var show = GetSelectedShow();
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on iPlayer...", true);
-
-            var os = new BBCiPlayer();
-            
-            os.OnlineSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OnlineSearchDone(sender2, e2);
-                };
-            os.OnlineSearchError += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OnlineSearchError(sender2, e2);
-                };
-
-            os.SearchAsync(show[0], show[1]);
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show[0], show[1]);
         }
 
         /// <summary>
@@ -583,24 +374,7 @@
 
             var show = GetSelectedShow();
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on SideReel...", true);
-
-            var os = new SideReel();
-            
-            os.OnlineSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OnlineSearchDone(sender2, e2);
-                };
-            os.OnlineSearchError += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OnlineSearchError(sender2, e2);
-                };
-
-            os.SearchAsync(show[0], show[1]);
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show[0], show[1]);
         }
 
         /// <summary>

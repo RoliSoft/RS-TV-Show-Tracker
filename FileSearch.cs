@@ -5,7 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
+    using System.Threading;
 
     /// <summary>
     /// Provides file search for finding the episodes on the disk.
@@ -33,7 +33,7 @@
         /// Gets the search thread.
         /// </summary>
         /// <value>The search thread.</value>
-        public Task SearchThread { get; internal set; }
+        public Thread SearchThread { get; internal set; }
 
         /// <summary>
         /// Gets or sets the files found by this class.
@@ -78,8 +78,16 @@
         /// </summary>
         public void BeginSearch()
         {
-            SearchThread = new Task(Search);
+            SearchThread = new Thread(Search);
             SearchThread.Start();
+        }
+
+        /// <summary>
+        /// Cancels the asynchronous search.
+        /// </summary>
+        public void CancelSearch()
+        {
+            try { SearchThread.Abort(); } catch { }
         }
 
         /// <summary>

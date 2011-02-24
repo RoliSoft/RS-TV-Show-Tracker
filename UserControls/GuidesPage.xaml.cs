@@ -16,6 +16,7 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for GuidesPage.xaml
@@ -332,33 +333,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var path = Settings.Get("Download Path");
             var show = GetSelectedShow();
-            
-            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
-            {
-                new TaskDialog
-                    {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Search path not configured",
-                        InstructionText = "Search path not configured",
-                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        Cancelable      = true
-                    }.Show();
-                return;
-            }
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on the disk...", true);
-
-            var finder = new FileSearch(path, show[0], show[1]);
-            finder.FileSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.PlayEpisodeFileSearchDone(sender2, e2);
-                };
-            finder.BeginSearch();
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new FileSearchTaskDialog().Search(show[0], show[1]);
         }
         #endregion
 
@@ -432,24 +409,7 @@
             var show  = GetSelectedShow();
             var title = ((GuideListViewItem)listView.SelectedValue).Title;
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on Hulu...", true);
-
-            var os = new Hulu();
-
-            os.OnlineSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.OnlineSearchDone(sender2, e2);
-                };
-            os.OnlineSearchError += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.OnlineSearchError(sender2, e2);
-                };
-
-            os.SearchAsync(show[0], show[1], title);
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show[0], show[1], title);
         }
 
         /// <summary>
@@ -463,24 +423,7 @@
 
             var show = GetSelectedShow();
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on iPlayer...", true);
-
-            var os = new BBCiPlayer();
-            
-            os.OnlineSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.OnlineSearchDone(sender2, e2);
-                };
-            os.OnlineSearchError += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.OnlineSearchError(sender2, e2);
-                };
-
-            os.SearchAsync(show[0], show[1]);
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show[0], show[1]);
         }
 
         /// <summary>
@@ -494,24 +437,7 @@
 
             var show = GetSelectedShow();
 
-            SetStatus("Searching for " + show[0] + " " + show[1] + " on SideReel...", true);
-
-            var os = new SideReel();
-            
-            os.OnlineSearchDone += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.OnlineSearchDone(sender2, e2);
-                };
-            os.OnlineSearchError += (sender2, e2) =>
-                {
-                    ResetStatus();
-                    OverviewPage.OnlineSearchError(sender2, e2);
-                };
-
-            os.SearchAsync(show[0], show[1]);
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+            new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show[0], show[1]);
         }
 
         /// <summary>

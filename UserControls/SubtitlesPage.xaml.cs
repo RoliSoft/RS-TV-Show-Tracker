@@ -19,6 +19,7 @@
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for SubtitlesPage.xaml
@@ -455,54 +456,8 @@
             if (listView.SelectedIndex == -1) return;
 
             var sub = (Subtitle)listView.SelectedValue;
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-            SetStatus("Sending request to " + new Uri(sub.URL).DnsSafeHost.Replace("www.", string.Empty) + "...", true);
-
-            var dl = sub.Source.Downloader;
-
-            dl.DownloadFileCompleted   += DownloadFileCompleted;
-            dl.DownloadProgressChanged += (s, a) => SetStatus("Downloading file... (" + a.Data + "%)", true);
-
-            dl.Download(sub, Utils.GetRandomFileName());
-        }
-
-        /// <summary>
-        /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
-        {
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            if (e.Third == "LaunchedBrowser")
-            {
-                SetStatus("File sent to browser successfully.");
-                return;
-            }
-
-            var sfd = new SaveFileDialog
-                {
-                    CheckPathExists = true,
-                    FileName        = e.Second
-                };
-
-            if (sfd.ShowDialog().Value)
-            {
-                if (File.Exists(sfd.FileName))
-                {
-                    File.Delete(sfd.FileName);
-                }
-
-                File.Move(e.First, sfd.FileName);
-            }
-            else
-            {
-                File.Delete(e.First);
-            }
-
-            SetStatus("File downloaded successfully.");
+            
+            new SubtitleDownloadTaskDialog().Download(sub);
         }
 
         /// <summary>

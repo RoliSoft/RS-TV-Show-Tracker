@@ -6,6 +6,7 @@
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>

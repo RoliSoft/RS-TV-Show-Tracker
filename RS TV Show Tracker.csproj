@@ -121,6 +121,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />
+    <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
+    <Compile Include="TaskDialogs\OnlineVideoSearchEngineTaskDialog.cs" />
+    <Compile Include="TaskDialogs\FileSearchTaskDialog.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Katz.cs" />
     <Compile Include="Parsers\Guides\ShowID.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Google.cs" />
@@ -128,9 +132,9 @@
     <Compile Include="Parsers\WebSearch\SearchResult.cs" />
     <Compile Include="Parsers\WebSearch\Tests.cs" />
     <Compile Include="Parsers\WebSearch\Engines\DuckDuckGo.cs" />
-    <Compile Include="Downloaders\SubsceneDownloader.cs" />
-    <Compile Include="Downloaders\ExternalDownloader.cs" />
-    <Compile Include="Downloaders\HTTPDownloader.cs" />
+    <Compile Include="Downloaders\Engines\SubsceneDownloader.cs" />
+    <Compile Include="Downloaders\Engines\ExternalDownloader.cs" />
+    <Compile Include="Downloaders\Engines\HTTPDownloader.cs" />
     <Compile Include="Downloaders\IDownloader.cs" />
     <Compile Include="DynamicDictionary.cs" />
     <Compile Include="EventArgs.cs" />

@@ -1,7 +1,6 @@
-﻿namespace RoliSoft.TVShowTracker.Downloaders
+﻿namespace RoliSoft.TVShowTracker.Downloaders.Engines
 {
     using System;
-    using System.Net;
     using System.Text.RegularExpressions;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -62,6 +61,13 @@
             Utils.Run(url);
 
             DownloadFileCompleted.Fire(this, null, null, "LaunchedBrowser");
+        }
+
+        /// <summary>
+        /// Cancels the asynchronous download.
+        /// </summary>
+        public void CancelAsync()
+        {
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Downloaders
+﻿namespace RoliSoft.TVShowTracker.Downloaders.Engines
 {
     using System;
     using System.Net;
@@ -21,6 +21,8 @@
         /// </summary>
         public event EventHandler<EventArgs<int>> DownloadProgressChanged;
 
+        private WebClient _wc;
+
         /// <summary>
         /// Asynchronously downloads the specified link.
         /// </summary>
@@ -32,7 +34,7 @@
         /// <param name="token">The user token.</param>
         public void Download(object link, string target, string token = null)
         {
-            var wc  = new Utils.SmarterWebClient();
+            _wc  = new Utils.SmarterWebClient();
             Uri uri;
 
             if (link is string)
@@ -45,7 +47,7 @@
 
                 if (!string.IsNullOrWhiteSpace((link as Link).Source.Cookies))
                 {
-                    wc.Headers[HttpRequestHeader.Cookie] = (link as Link).Source.Cookies;
+                    _wc.Headers[HttpRequestHeader.Cookie] = (link as Link).Source.Cookies;
                 }
             }
             else if (link is Subtitle)
@@ -57,11 +59,19 @@
                 throw new Exception("The link object is an unsupported type.");
             }
 
-            wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
-            wc.DownloadProgressChanged           += (s, e) => DownloadProgressChanged.Fire(this, e.ProgressPercentage);
-            wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
+            _wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
+            _wc.DownloadProgressChanged           += (s, e) => DownloadProgressChanged.Fire(this, e.ProgressPercentage);
+            _wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
+            
+            _wc.DownloadFileAsync(uri, target);
+        }
 
-            wc.DownloadFileAsync(uri, target);
+        /// <summary>
+        /// Cancels the asynchronous download.
+        /// </summary>
+        public void CancelAsync()
+        {
+            try { _wc.CancelAsync(); } catch { }
         }
     }
 }
