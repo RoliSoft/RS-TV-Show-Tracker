@@ -102,7 +102,6 @@
 
                 default:
                     Thread.Sleep(100);
-                    _td.Icon        = TaskDialogStandardIcon.Information;
                     _td.Caption     = "Multiple files found";
                     _td.Text        = "Multiple files were found for this episode:";
                     _td.ProgressBar = null;
@@ -130,7 +129,7 @@
                             };
                         fd.Click += (s, r) =>
                             {
-                                _td.Close();
+                                _td.Close(TaskDialogResult.Ok);
                                 Utils.Run(tmp);
                             };
 
