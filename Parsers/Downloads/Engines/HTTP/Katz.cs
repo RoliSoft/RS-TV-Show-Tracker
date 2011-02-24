@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
@@ -86,7 +87,7 @@
             var html  = Utils.GetHTML(Site + "search?type=tv&q=" + Uri.EscapeUriString(query));
             var links = html.DocumentNode.SelectNodes("//div[@id='list']//dl");
 
-            if (links == null)
+            if (links == null || Regex.IsMatch(html.DocumentNode.InnerHtml, @"Your search \- .*? \- did not match any downloads."))
             {
                 yield break;
             }
