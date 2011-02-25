@@ -4,6 +4,7 @@
     using System.IO;
     using System.Threading;
 
+    using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
@@ -74,13 +75,13 @@
             switch (e.Third)
             {
                 case "DownloadFile":
-                    var sfd = new CommonSaveFileDialog
+                    var sfd = new SaveFileDialog
                         {
-                            EnsurePathExists = true,
-                            DefaultFileName  = e.Second
+                            CheckPathExists = true,
+                            FileName        = e.Second
                         };
 
-                    if (sfd.ShowDialog() == CommonFileDialogResult.OK)
+                    if (sfd.ShowDialog().Value)
                     {
                         if (File.Exists(sfd.FileName))
                         {

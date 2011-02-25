@@ -119,19 +119,22 @@
 
             DownloadProgressChanged.Fire(this, 100);
 
-            // extract subtitle file
+            // extract file name
 
-            string fn;
-            using (var mstream = new MemoryStream())
+            var fn = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(resp.GetResponseHeader("Content-Disposition")))
             {
-                using (var zip = ZipFile.Read(target))
-                {
-                    fn = zip.Entries[0].FileName;
-                    zip.Entries[0].Extract(mstream);
-                }
+                var m = Regex.Match(resp.GetResponseHeader("Content-Disposition"), @"filename=[""']?([^$]+)", RegexOptions.IgnoreCase);
 
-                File.Delete(target);
-                File.WriteAllBytes(target, mstream.ToArray());
+                if (m.Success)
+                {
+                    fn = m.Groups[1].Value.TrimEnd(new[] { ' ', '\'', '"' });
+                }
+            }
+            else
+            {
+                fn = "subscene-sub." + typeid;
             }
 
             DownloadFileCompleted.Fire(this, target, fn, token);

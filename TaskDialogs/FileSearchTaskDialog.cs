@@ -152,7 +152,7 @@
                             };
                         fd.Click += (s, r) =>
                             {
-                                _td.Close(TaskDialogResult.Ok);
+                                try { _td.Close(TaskDialogResult.Ok); } catch { }
                                 Utils.Run(tmp);
                             };
 

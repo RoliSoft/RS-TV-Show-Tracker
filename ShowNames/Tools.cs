@@ -110,7 +110,7 @@
         public static bool IsMatch(string query, string release)
         {
             var show = Split(query);
-            return IsMatch(show[0], show[1], release);
+            return IsMatch(show[0], show.Length != 1 ? show[1] : string.Empty, release);
         }
 
         /// <summary>
@@ -124,7 +124,7 @@
         /// </returns>
         public static bool IsMatch(string name, string episode, string release)
         {
-            var title = GetRoot(name);
+            var title    = GetRoot(name);
             var episodes = new[] {
                                    episode, // S02E14
                                    episode.Replace("E", "\bE"), // S02.E14

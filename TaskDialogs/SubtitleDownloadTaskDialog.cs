@@ -5,6 +5,9 @@
     using System.IO;
     using System.Threading;
 
+    using Ionic.Zip;
+
+    using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
@@ -66,13 +69,13 @@
                 return;
             }
 
-            var sfd = new CommonSaveFileDialog
+            var sfd = new SaveFileDialog
                 {
-                    EnsurePathExists = true,
-                    DefaultFileName  = e.Second
+                    CheckPathExists = true,
+                    FileName        = e.Second
                 };
 
-            if (sfd.ShowDialog() == CommonFileDialogResult.OK)
+            if (sfd.ShowDialog().Value)
             {
                 if (File.Exists(sfd.FileName))
                 {
@@ -152,7 +155,7 @@
 
                 _td.Icon            = TaskDialogStandardIcon.Error;
                 _td.Caption         = "No files found";
-                _td.InstructionText = _show + " " + _episode;
+                _td.InstructionText = _link.Release;
                 _td.Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.";
                 _td.StandardButtons = TaskDialogStandardButtons.Ok;
                 _td.Cancelable      = true;
@@ -183,14 +186,14 @@
             _td = new TaskDialog();
 
             _td.Caption         = "Download subtitle near video";
-            _td.InstructionText = _show + " " + _episode;
+            _td.InstructionText = _link.Release;
             _td.Text            = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode);
             _td.StandardButtons = TaskDialogStandardButtons.Cancel;
             _td.Cancelable      = true;
 
-            foreach (var file in _fs.Files)
+            foreach (var f in _fs.Files)
             {
-                var tmp     = file;
+                var file    = f;
                 var fi      = new FileInfo(file);
                 var quality = ThePirateBay.ParseQuality(file);
                 var instr   = string.Empty;
@@ -211,21 +214,91 @@
                     };
                 fd.Click += (x, r) =>
                     {
-                        _td.Close(TaskDialogResult.Ok);
-
-                        var dest = Path.ChangeExtension(tmp, new FileInfo(e.Second).Extension);
-                        if (File.Exists(dest))
-                        {
-                            File.Delete(dest);
-                        }
-
-                        File.Move(e.First, dest);
+                        try { _td.Close(TaskDialogResult.Ok); } catch { }
+                        NearVideoFinishMove(file, e.First, e.Second);
                     };
 
                 _td.Controls.Add(fd);
             }
 
             _td.Show();
+        }
+
+        /// <summary>
+        /// Moves the downloaded subtitle near the video.
+        /// </summary>
+        /// <param name="video">The location of the video.</param>
+        /// <param name="temp">The location of the downloaded subtitle.</param>
+        /// <param name="subtitle">The original file name of the subtitle.</param>
+        private void NearVideoFinishMove(string video, string temp, string subtitle)
+        {
+            if (new FileInfo(subtitle).Extension == ".zip")
+            {
+                var zip = ZipFile.Read(temp);
+
+                if (zip.Entries.Count == 1)
+                {
+                    using (var mstream = new MemoryStream())
+                    {
+                        subtitle = zip.Entries[0].FileName;
+                        zip.Entries[0].Extract(mstream);
+                        
+                        try { zip.Dispose(); } catch { }
+                        try { File.Delete(temp); } catch { }
+                        File.WriteAllBytes(temp, mstream.ToArray());
+                    }
+                }
+                else
+                {
+                    _td = new TaskDialog();
+
+                    _td.Caption         = "Download subtitle near video";
+                    _td.InstructionText = _link.Release;
+                    _td.Text            = "The downloaded subtitle was a ZIP package with more than one files.\r\nSelect the matching subtitle file to extract it from the package:";
+                    _td.StandardButtons = TaskDialogStandardButtons.Cancel;
+                    _td.Cancelable      = true;
+
+                    foreach (var c in zip.Entries)
+                    {
+                        var cmp = c;
+                        var fd  = new TaskDialogCommandLink
+                            {
+                                Text        = cmp.FileName,
+                                Instruction = "{0}   –   {1}".FormatWith(Utils.GetFileSize(cmp.UncompressedSize), cmp.LastModified)
+                            };
+                        fd.Click += (x, r) =>
+                            {
+                                try { _td.Close(TaskDialogResult.Ok); } catch { }
+
+                                using (var mstream = new MemoryStream())
+                                {
+                                    subtitle = cmp.FileName;
+                                    cmp.Extract(mstream);
+
+                                    try { zip.Dispose(); } catch { }
+                                    try { File.Delete(temp); } catch { }
+                                    File.WriteAllBytes(temp, mstream.ToArray());
+                                }
+
+                                NearVideoFinishMove(video, temp, subtitle);
+                            };
+
+                        _td.Controls.Add(fd);
+                    }
+
+                    _td.Show();
+                    return;
+                }
+            }
+
+            var dest = Path.ChangeExtension(video, new FileInfo(subtitle).Extension);
+
+            if (File.Exists(dest))
+            {
+                try { File.Delete(dest); } catch { }
+            }
+
+            File.Move(temp, dest);
         }
         #endregion
 
