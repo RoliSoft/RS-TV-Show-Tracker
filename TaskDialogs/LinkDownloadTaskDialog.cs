@@ -4,7 +4,6 @@
     using System.IO;
     using System.Threading;
 
-    using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
@@ -18,6 +17,7 @@
     {
         private TaskDialog _td;
         private IDownloader _dl;
+        private LinkItem _link;
 
         /// <summary>
         /// Downloads the specified link.
@@ -26,6 +26,8 @@
         /// <param name="token">The token.</param>
         public void Download(LinkItem link, string token)
         {
+            _link = link;
+
             _td = new TaskDialog();
 
             _td.Caption         = "Downloading...";
@@ -67,19 +69,18 @@
         private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            _td.Close(TaskDialogResult.Ok);
+            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
             switch (e.Third)
             {
                 case "DownloadFile":
-                    var sfd = new SaveFileDialog
-                    {
-                        CheckPathExists = true,
-                        FileName = e.Second
-                    };
+                    var sfd = new CommonSaveFileDialog
+                        {
+                            EnsurePathExists = true,
+                            DefaultFileName  = e.Second
+                        };
 
-                    if (sfd.ShowDialog().Value)
+                    if (sfd.ShowDialog() == CommonFileDialogResult.OK)
                     {
                         if (File.Exists(sfd.FileName))
                         {

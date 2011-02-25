@@ -17,6 +17,8 @@
     {
         private TaskDialog _td;
         private FileSearch _fs;
+        private string _show, _episode;
+        private volatile bool _active;
 
         /// <summary>
         /// Searches for the specified show and its episode.
@@ -25,6 +27,9 @@
         /// <param name="episode">The episode.</param>
         public void Search(string show, string episode)
         {
+            _show    = show;
+            _episode = episode;
+
             var path = Settings.Get("Download Path");
 
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
@@ -50,7 +55,16 @@
             _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
             _td.Closing        += TaskDialogClosing;
 
-            new Thread(() => _td.Show()).Start();
+            _active = true;
+            new Thread(() =>
+                {
+                    Thread.Sleep(500);
+
+                    if (_active)
+                    {
+                        _td.Show();
+                    }
+                }).Start();
 
             _fs = new FileSearch(path, show, episode);
 
@@ -69,6 +83,8 @@
         {
             if (e.TaskDialogResult == TaskDialogResult.Cancel)
             {
+                _active = false;
+
                 _fs.CancelSearch();
             }
         }
@@ -80,19 +96,23 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void FileSearchDone(object sender, EventArgs e)
         {
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            _active = false;
 
-            _td.Close(TaskDialogResult.Ok);
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
             switch (_fs.Files.Count)
             {
                 case 0:
-                    Thread.Sleep(100);
+                    _td = new TaskDialog();
+
                     _td.Icon            = TaskDialogStandardIcon.Error;
                     _td.Caption         = "No files found";
+                    _td.InstructionText = _show + " " + _episode;
                     _td.Text            = "No files were found for this episode.";
                     _td.StandardButtons = TaskDialogStandardButtons.Ok;
-                    _td.ProgressBar     = null;
+                    _td.Cancelable      = true;
+
                     _td.Show();
                     break;
 
@@ -101,10 +121,13 @@
                     break;
 
                 default:
-                    Thread.Sleep(100);
-                    _td.Caption     = "Multiple files found";
-                    _td.Text        = "Multiple files were found for this episode:";
-                    _td.ProgressBar = null;
+                    _td = new TaskDialog();
+
+                    _td.Caption         = "Multiple files found";
+                    _td.InstructionText = _show + " " + _episode;
+                    _td.Text            = "Multiple files were found for this episode:";
+                    _td.StandardButtons = TaskDialogStandardButtons.Cancel;
+                    _td.Cancelable      = true;
 
                     foreach (var file in _fs.Files)
                     {

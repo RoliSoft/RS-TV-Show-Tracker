@@ -12,8 +12,6 @@
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
-    using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
-
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>SubtitlesPage</c> links.
     /// </summary>
@@ -23,7 +21,7 @@
         private IDownloader _dl;
         private FileSearch _fs;
         private Subtitle _link;
-        private string _show, _ep;
+        private string _show, _episode;
 
         #region Download subtitle
         /// <summary>
@@ -61,21 +59,20 @@
         private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-            _td.Close(TaskDialogResult.Ok);
+            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
             if (e.Third == "LaunchedBrowser")
             {
                 return;
             }
 
-            var sfd = new SaveFileDialog
+            var sfd = new CommonSaveFileDialog
                 {
-                    CheckPathExists = true,
-                    FileName        = e.Second
+                    EnsurePathExists = true,
+                    DefaultFileName  = e.Second
                 };
 
-            if (sfd.ShowDialog().Value)
+            if (sfd.ShowDialog() == CommonFileDialogResult.OK)
             {
                 if (File.Exists(sfd.FileName))
                 {
@@ -100,9 +97,9 @@
         /// <param name="episode">The episode.</param>
         public void DownloadNearVideo(Subtitle link, string show, string episode)
         {
-            _link = link;
-            _show = show;
-            _ep   = episode;
+            _link    = link;
+            _show    = show;
+            _episode = episode;
 
             var path = Settings.Get("Download Path");
 
@@ -122,7 +119,7 @@
             _td = new TaskDialog();
 
             _td.Caption         = "Searching...";
-            _td.InstructionText = _link.Release;
+            _td.InstructionText = link.Release;
             _td.Text            = "Searching for the episode...";
             _td.StandardButtons = TaskDialogStandardButtons.Cancel;
             _td.Cancelable      = true;
@@ -148,17 +145,19 @@
         {
             if (_fs.Files.Count == 0)
             {
-                _td.Close(TaskDialogResult.Ok);
-                Thread.Sleep(100);
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                try { _td.Close(TaskDialogResult.Ok); } catch { }
+
+                _td = new TaskDialog();
 
                 _td.Icon            = TaskDialogStandardIcon.Error;
                 _td.Caption         = "No files found";
+                _td.InstructionText = _show + " " + _episode;
                 _td.Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.";
                 _td.StandardButtons = TaskDialogStandardButtons.Ok;
-                _td.ProgressBar     = null;
-                _td.Show();
+                _td.Cancelable      = true;
 
-                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                _td.Show();
                 return;
             }
 
@@ -179,12 +178,15 @@
         private void NearVideoDownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-            _td.Close(TaskDialogResult.Ok);
-            Thread.Sleep(100);
+            _td = new TaskDialog();
 
-            _td.Caption = "Download subtitle near video";
-            _td.Text    = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _ep);
+            _td.Caption         = "Download subtitle near video";
+            _td.InstructionText = _show + " " + _episode;
+            _td.Text            = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode);
+            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
+            _td.Cancelable      = true;
 
             foreach (var file in _fs.Files)
             {

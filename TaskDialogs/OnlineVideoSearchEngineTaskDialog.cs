@@ -78,16 +78,16 @@
         private void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-            _td.Close(TaskDialogResult.Ok);
-            Thread.Sleep(100);
+            _td = new TaskDialog();
 
             _td.Icon            = TaskDialogStandardIcon.Error;
             _td.Caption         = "No videos found";
             _td.InstructionText = e.First;
             _td.Text            = e.Second;
             _td.StandardButtons = TaskDialogStandardButtons.Ok;
-            _td.ProgressBar     = null;
+            _td.Cancelable      = true;
 
             if (!string.IsNullOrWhiteSpace(e.Third.Item3))
             {
