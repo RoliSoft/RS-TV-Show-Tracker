@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.FileNames
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -34,11 +35,22 @@
         public static readonly Dictionary<string, TVShow> TVShowCache = new Dictionary<string, TVShow>();
 
         /// <summary>
+        /// Contains a list of show names and their IDs from the local database.
+        /// </summary>
+        public static List<Dictionary<string, string>> LocalTVShows;
+
+        /// <summary>
+        /// Contains the date when the <c>LocalTVShows</c> list was loaded.
+        /// </summary>
+        public static DateTime LoadDate;
+
+        /// <summary>
         /// Parses the name of the specified file.
         /// </summary>
         /// <param name="file">The file.</param>
+        /// <param name="askExternalGuide">if set to <c>true</c> TVRage's API will be asked to identify a show after the local database failed.</param>
         /// <returns>Parsed file information.</returns>
-        public static ShowFile ParseFile(string file)
+        public static ShowFile ParseFile(string file, bool askExternalGuide = true)
         {
             // split the name into two parts: before and after the episode numbering
 
@@ -53,9 +65,14 @@
             // try to find show in local database
 
             var match = false;
-            var shows = Database.Query("select showid, name from tvshows");
 
-            foreach (var show in shows)
+            if (LocalTVShows == null || LoadDate < Database.DataChange)
+            {
+                LoadDate     = DateTime.Now;
+                LocalTVShows = Database.Query("select showid, name from tvshows");
+            }
+
+            foreach (var show in LocalTVShows)
             {
                 var titleParts = Tools.GetRoot(show["name"]);
                 if (titleParts.All(part => Regex.IsMatch(name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)))
@@ -74,7 +91,7 @@
 
             // try to find show in cache
 
-            if (!match && ShowIDCache.ContainsKey(name))
+            if (!match && askExternalGuide && ShowIDCache.ContainsKey(name))
             {
                 match = true;
                 name  = ShowIDCache[name].Title;
@@ -88,7 +105,7 @@
 
             // try to identify show using TVRage's API
 
-            if (!match)
+            if (!match && askExternalGuide)
             {
                 var guide = new TVRage();
                 var ids   = guide.GetID(name).ToList();

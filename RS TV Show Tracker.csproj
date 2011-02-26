@@ -121,6 +121,7 @@
     </ApplicationDefinition>
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />
+    <Compile Include="FileNames\Tests.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\OnlineVideoSearchEngineTaskDialog.cs" />

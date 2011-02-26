@@ -68,18 +68,7 @@
             var episodes = 0;
             var minutes  = new TimeSpan(0);
             var shows = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'runtime') as runtime, (select count(episodeid) from tracking where tracking.showid = tvshows.showid) as count from tvshows order by rowid asc");
-            /*
-Tvshows
-    .OrderBy(c => c.Rowid)
-    .Select(c => new {
-        Name = c.Name,
-        Runtime = Showdata
-            .Single(s => s.Showid == c.Showid && s.Key == "runtime").Value,
-        Count = Tracking
-            .Where(t => t.Showid == c.Showid)
-            .Count()
-    })
-             */
+            
             foreach (var show in shows)
             {
                 episodes += show["count"].ToInteger();
