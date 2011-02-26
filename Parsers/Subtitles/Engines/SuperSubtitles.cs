@@ -43,19 +43,7 @@
                  * 
                  * Source: http://freeforum.n4.hu/feliratok/index.php?topic=40.0 (2011-02-04)
                  */
-                return "http://feliratok.ro.lt/";
-            }
-        }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
-        {
-            get
-            {
-                return "http://lab.rolisoft.net/includes/tvshowtracker/navigation.png";
+                return "http://feliratok.na.tl/";
             }
         }
 
