@@ -192,7 +192,7 @@
             // set timer to the next air date
 
             _timer.Stop();
-            _timer.Interval = (ndate - DateTime.Now).Add(TimeSpan.FromSeconds(1)).Milliseconds;
+            _timer.Interval = (ndate - DateTime.Now).Add(TimeSpan.FromSeconds(1)).TotalMilliseconds;
             _timer.Start();
 
             // set status
