@@ -93,9 +93,7 @@
     <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\SQLite.NET\bin\System.Data.SQLite.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
@@ -529,6 +527,23 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\cross.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dependencies\CookComputing.XmlRpcV2.dll" />
+    <None Include="Dependencies\handle.exe" />
+    <None Include="Dependencies\HtmlAgilityPack.dll" />
+    <None Include="Dependencies\Ionic.Zip.Reduced.dll" />
+    <None Include="Dependencies\Microsoft.Windows.Shell.dll" />
+    <None Include="Dependencies\Microsoft.WindowsAPICodePack.dll" />
+    <None Include="Dependencies\Microsoft.WindowsAPICodePack.Shell.dll" />
+    <None Include="Dependencies\Newtonsoft.Json.dll" />
+    <None Include="Dependencies\Transitionals.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dependencies\System.Data.SQLite.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dependencies\nunit.framework.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
