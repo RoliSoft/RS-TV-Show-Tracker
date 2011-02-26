@@ -36,12 +36,12 @@
 
                         if (m.Success)
                         {
-                            return m.Groups[1].Value.TrimEnd(new[] { ' ', '\'', '"' });
+                            return SanitizeFileName(m.Groups[1].Value.TrimEnd(new[] { ' ', '\'', '"' }));
                         }
                     }
 
                     // try to get the file name from the last URL
-                    return new FileInfo(ResponseUri.LocalPath).Name;
+                    return SanitizeFileName(new FileInfo(ResponseUri.LocalPath).Name);
                 }
             }
 

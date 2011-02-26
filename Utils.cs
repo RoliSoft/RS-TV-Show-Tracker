@@ -538,5 +538,21 @@
                 return new Tuple<string, BitmapSource>(name, null);
             }
         }
+
+        /// <summary>
+        /// Gets a regular expression which matches illegal characters in file names.
+        /// </summary>
+        /// <value>Regex for illegal characters.</value>
+        public static Regex InvalidFileNameChars = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
+
+        /// <summary>
+        /// Removes illegal characters from a file name.
+        /// </summary>
+        /// <param name="file">The file name.</param>
+        /// <returns>Sanitized file name.</returns>
+        public static string SanitizeFileName(string file)
+        {
+            return InvalidFileNameChars.Replace(file, string.Empty);
+        }
     }
 }

@@ -240,7 +240,7 @@
                 {
                     using (var mstream = new MemoryStream())
                     {
-                        subtitle = zip.Entries[0].FileName;
+                        subtitle = Utils.SanitizeFileName(zip.Entries[0].FileName);
                         zip.Entries[0].Extract(mstream);
                         
                         try { zip.Dispose(); } catch { }
@@ -272,7 +272,7 @@
 
                                 using (var mstream = new MemoryStream())
                                 {
-                                    subtitle = cmp.FileName;
+                                    subtitle = Utils.SanitizeFileName(cmp.FileName);
                                     cmp.Extract(mstream);
 
                                     try { zip.Dispose(); } catch { }
