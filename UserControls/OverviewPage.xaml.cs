@@ -2,19 +2,15 @@
 {
     using System;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
-    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Threading;
+    using System.Timers;
     using System.Windows;
     using System.Windows.Input;
     using System.Windows.Media.Animation;
 
     using Microsoft.WindowsAPICodePack.Dialogs;
-    using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
     using RoliSoft.TVShowTracker.TaskDialogs;
 
@@ -35,6 +31,9 @@
         /// <value>The overview list view item collection.</value>
         public ObservableCollection<OverviewListViewItem> OverviewListViewItemCollection { get; set; }
 
+        private int _eps;
+        private Timer _timer;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OverviewPage"/> class.
         /// </summary>
@@ -54,6 +53,9 @@
             {
                 OverviewListViewItemCollection = new ObservableCollection<OverviewListViewItem>();
                 listView.ItemsSource           = OverviewListViewItemCollection;
+
+                _timer = new Timer { AutoReset = false };
+                _timer.Elapsed += (a, b) => MainWindow.Active.DataChanged();
             }
 
             if (LoadDate < Database.DataChange)
@@ -103,31 +105,7 @@
         /// </summary>
         public void ResetStatus()
         {
-            Dispatcher.Invoke((Action)(() =>
-                {
-                    var eps = 0;
-
-                    foreach (var show in OverviewListViewItemCollection)
-                    {
-                        if (show.Title.EndsWith(" · NEW EPISODE!"))
-                        {
-                            eps++;
-                        }
-                        else if (show.Title.EndsWith(" NEW EPISODES!"))
-                        {
-                            eps += Regex.Match(show.Title, " · ([0-9]*) NEW EPISODES!").Groups[1].Value.ToInteger();
-                        }
-                    }
-
-                    if (eps == 0)
-                    {
-                        SetStatus("No new episodes.");
-                    }
-                    else
-                    {
-                        SetStatus(Utils.FormatNumber(eps, "new episode") + "!");
-                    }
-                }));
+            Dispatcher.Invoke((Action)(() => SetStatus(_eps == 0 ? "No new episodes." : Utils.FormatNumber(_eps, "new episode") + "!")));
         }
 
         /// <summary>
@@ -154,6 +132,8 @@
             OverviewListViewItemCollection.Clear();
 
             var shows = Database.Query("select name, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || showid from episodes where tvshows.showid = episodes.showid and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as title, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + DateTime.Now.ToUnixTimestamp() + " order by (season * 1000 + episode) asc limit 1) as next, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
+                 _eps = 0;
+            var ndate = DateTime.Now.AddYears(1);
 
             NewHelp.Visibility = shows.Count != 0 ? Visibility.Collapsed : Visibility.Visible;
 
@@ -165,6 +145,7 @@
 
                 var showid = title[1];
                 var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"].ToInteger();
+                     _eps += count;
 
                 if (count == 1)
                 {
@@ -178,8 +159,14 @@
                 if (show["next"] != String.Empty)
                 {
                     var next = show["next"].Split(new[] { "||" }, StringSplitOptions.None);
-                    show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " +
-                                   next[1].ToDouble().GetUnixTimestamp().ToRelativeDate();
+                    var nair = next[1].ToDouble().GetUnixTimestamp();
+
+                    show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " + nair.ToRelativeDate();
+
+                    if (nair < ndate)
+                    {
+                        ndate = nair;
+                    }
                 }
                 else if (show["airing"] == "True")
                 {
@@ -201,6 +188,14 @@
                         PlayNextVisible   = count >= 2 ? "Visible" : "Collapsed"
                     });
             }
+
+            // set timer to the next air date
+
+            _timer.Stop();
+            _timer.Interval = (ndate - DateTime.Now).Add(TimeSpan.FromSeconds(1)).Milliseconds;
+            _timer.Start();
+
+            // set status
 
             ResetStatus();
         }

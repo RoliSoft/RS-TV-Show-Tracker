@@ -8,6 +8,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
 
@@ -148,8 +149,14 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
-        private void WindowKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void WindowKeyUp(object sender, KeyEventArgs e)
         {
+            // on F5 refresh the current user control
+            if (e.Key == Key.F5)
+            {
+                DataChanged();
+            }
+
             // if the overview page is selected, send any keys to the listview
             if (tabControl.SelectedIndex == 0)
             {
