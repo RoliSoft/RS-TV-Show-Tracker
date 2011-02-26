@@ -57,3 +57,5 @@ CREATE TABLE settings (
 	key TEXT PRIMARY KEY ON CONFLICT REPLACE,
 	value TEXT
 )
+
+INSERT INTO settings VALUES ("Version", "1")

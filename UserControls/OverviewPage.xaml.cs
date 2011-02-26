@@ -133,7 +133,7 @@
 
             var shows = Database.Query("select name, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || showid from episodes where tvshows.showid = episodes.showid and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as title, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + DateTime.Now.ToUnixTimestamp() + " order by (season * 1000 + episode) asc limit 1) as next, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
                  _eps = 0;
-            var ndate = DateTime.Now.AddYears(1);
+            var ndate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59);
 
             NewHelp.Visibility = shows.Count != 0 ? Visibility.Collapsed : Visibility.Visible;
 
