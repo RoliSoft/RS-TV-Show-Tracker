@@ -6,7 +6,6 @@
     using System.ComponentModel;
     using System.Linq;
     using System.Net;
-    using System.Runtime.InteropServices;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media.Animation;
@@ -27,12 +26,6 @@
     public partial class DownloadLinksPage
     {
         /// <summary>
-        /// Gets or sets the name of the specified torrent downloader.
-        /// </summary>
-        /// <value>The default torrent.</value>
-        public string DefaultTorrent { get; set; }
-
-        /// <summary>
         /// Gets or sets the download links list view item collection.
         /// </summary>
         /// <value>The download links list view item collection.</value>
@@ -49,6 +42,8 @@
 
         private ListSortDirection _lastSortDirection;
         private GridViewColumnHeader _lastClickedHeader;
+
+        private Tuple<string, BitmapSource> _defaultTorrent, _assocTorrent, _assocUsenet;
 
         private volatile bool _searching;
 
@@ -92,11 +87,6 @@
                 }));
         }
 
-        [DllImport("shell32.dll", EntryPoint = "ExtractIconEx")]
-        private static extern int ExtractIconExA(string lpszFile, int nIconIndex, ref IntPtr phiconLarge, ref IntPtr phiconSmall, int nIcons);
-
-        [DllImport("user32.dll")]
-        private static extern int DestroyIcon(IntPtr hIcon);
 
         /// <summary>
         /// Handles the Loaded event of the UserControl control.
@@ -115,37 +105,23 @@
 
             LoadEngines();
 
-            var cm  = listView.ContextMenu;
             var tdl = Settings.Get("Torrent Downloader");
-
-            /*if (!string.IsNullOrWhiteSpace(tdl))
+            if (!string.IsNullOrWhiteSpace(tdl))
             {
-                ((MenuItem)cm.Items[3]).Visibility = Visibility.Visible;
-                DefaultTorrent = FileVersionInfo.GetVersionInfo(tdl).ProductName;
-                ((MenuItem)cm.Items[3]).Header = "Send to " + DefaultTorrent;
-
-                try
-                {
-                    var largeIcon = IntPtr.Zero;
-                    var smallIcon = IntPtr.Zero;
-
-                    ExtractIconExA(tdl, 0, ref largeIcon, ref smallIcon, 1);
-                    DestroyIcon(largeIcon);
-
-                    if (smallIcon != IntPtr.Zero)
-                    {
-                        ((MenuItem)cm.Items[3]).Icon = new Image
-                            {
-                                Source = Imaging.CreateBitmapSourceFromHBitmap(Icon.FromHandle(smallIcon).ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions())
-                            };
-                    }
-                }
-                catch { }
+                _defaultTorrent = Utils.GetExecutableInfo(tdl);
             }
-            else
+
+            var atr = Utils.GetApplicationForExtension(".torrent");
+            if (!string.IsNullOrWhiteSpace(atr))
             {
-                ((MenuItem)cm.Items[3]).Visibility = Visibility.Collapsed;
-            }*/
+                _assocTorrent = Utils.GetExecutableInfo(atr);
+            }
+
+            var anz = Utils.GetApplicationForExtension(".nzb");
+            if (!string.IsNullOrWhiteSpace(anz))
+            {
+                _assocUsenet = Utils.GetExecutableInfo(anz);
+            }
         }
 
         #region Settings
@@ -554,9 +530,9 @@
 
             if (!string.IsNullOrWhiteSpace(link.FileURL))
             {
-                var oib    = new MenuItem();
+                var oib = new MenuItem();
                 oib.Header = "Download file in browser";
-                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
+                oib.Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
                 oib.Click += (s, r) => Utils.Run(link.FileURL);
                 cm.Items.Add(oib);
             }
@@ -570,11 +546,26 @@
                 cm.Items.Add(df);
             }
 
-            if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            if (_defaultTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
             {
                 var sap    = new MenuItem();
-                sap.Header = "Send to associated";
-                sap.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")) };
+                sap.Header = "Send to " + _defaultTorrent.Item1;
+                sap.Icon   = new Image { Source = _defaultTorrent.Item2 };
+                sap.Click += (s, r) => DownloadFileClick("SendToTorrent", r);
+                cm.Items.Add(sap);
+            }
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            {
+                var target = link.Source.Type == Types.Torrent
+                           ? _assocTorrent
+                           : link.Source.Type == Types.Usenet
+                             ? _assocUsenet
+                             : null;
+
+                var sap    = new MenuItem();
+                sap.Header = "Send to " + (target != null ? target.Item1 : "associated");
+                sap.Icon   = new Image { Source = target != null ? target.Item2 : new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")) };
                 sap.Click += (s, r) => DownloadFileClick("SendToAssociated", r);
                 cm.Items.Add(sap);
             }
@@ -593,7 +584,11 @@
 
             var link = (LinkItem)listView.SelectedValue;
 
-            if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
+            if (_defaultTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
+            {
+                DownloadFileClick("SendToTorrent", e);
+            }
+            else if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
             {
                 DownloadFileClick("SendToAssociated", e);
             }
