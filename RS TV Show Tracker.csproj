@@ -119,6 +119,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FileNames\Parser.cs" />
+    <Compile Include="FileNames\FileName.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\OnlineVideoSearchEngineTaskDialog.cs" />
@@ -545,6 +547,7 @@
   <ItemGroup>
     <None Include="Dependencies\nunit.framework.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

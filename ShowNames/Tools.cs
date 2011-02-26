@@ -147,7 +147,7 @@
             return m.Success
                    ? new ShowEpisode
                        {
-                           Season = m.Groups["s"].Value.ToInteger(),
+                           Season  = m.Groups["s"].Value.ToInteger(),
                            Episode = m.Groups["e"].Value.ToInteger()
                        }
                    : null;
