@@ -452,6 +452,16 @@
         }
 
         /// <summary>
+        /// Handles the Click event of the RenamerSoftware control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void RenameVideoFilesClick(object sender, RoutedEventArgs e)
+        {
+            new RenamerWindow().Show();
+        }
+
+        /// <summary>
         /// Handles the Click event of the SendFeedback control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>

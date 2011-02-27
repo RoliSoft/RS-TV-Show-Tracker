@@ -500,7 +500,30 @@
         /// <param name="hIcon">A handle to the icon to be destroyed. The icon must not be in use.</param>
         /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
         [DllImport("user32.dll")]
-        private static extern int DestroyIcon(IntPtr hIcon);
+        public static extern int DestroyIcon(IntPtr hIcon);
+
+        /// <summary>
+        /// Extracts the icon for a specified path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>WPF-compatible small icon.</returns>
+        public static BitmapSource ExtractIcon(string path)
+        {
+            try
+            {
+                var largeIcon = IntPtr.Zero;
+                var smallIcon = IntPtr.Zero;
+
+                ExtractIconExW(path, 0, ref largeIcon, ref smallIcon, 1);
+                DestroyIcon(largeIcon);
+
+                return Imaging.CreateBitmapSourceFromHBitmap(Icon.FromHandle(smallIcon).ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Gets the name and small icon of the specified executable.
@@ -521,22 +544,9 @@
                 name = new FileInfo(path).Name.ToUppercaseFirst().Replace(".exe", string.Empty);
             }
 
-            try
-            {
-                var largeIcon = IntPtr.Zero;
-                var smallIcon = IntPtr.Zero;
+            var icon = ExtractIcon(path);
 
-                ExtractIconExW(path, 0, ref largeIcon, ref smallIcon, 1);
-                DestroyIcon(largeIcon);
-
-                var icon = Imaging.CreateBitmapSourceFromHBitmap(Icon.FromHandle(smallIcon).ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-                return new Tuple<string, BitmapSource>(name, icon);
-            }
-            catch
-            {
-                return new Tuple<string, BitmapSource>(name, null);
-            }
+            return new Tuple<string, BitmapSource>(name, icon);
         }
 
         /// <summary>

@@ -2,9 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
     using RoliSoft.TVShowTracker.ShowNames;
@@ -139,7 +141,9 @@
                 title = "Season {0}, Episode {1}".FormatWith(ep.Season, ep.Episode);
             }
 
-            return new ShowFile(file, name, ep, title);
+            var quality = ThePirateBay.ParseQuality(file).GetAttribute<DescriptionAttribute>().Description;
+
+            return new ShowFile(file, name, ep, title, quality);
         }
     }
 }

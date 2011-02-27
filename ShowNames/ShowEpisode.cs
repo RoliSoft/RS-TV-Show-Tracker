@@ -16,5 +16,23 @@
         /// </summary>
         /// <value>The episode.</value>
         public int Episode { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShowEpisode"/> class.
+        /// </summary>
+        public ShowEpisode()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShowEpisode"/> class.
+        /// </summary>
+        /// <param name="season">The season.</param>
+        /// <param name="episode">The episode.</param>
+        public ShowEpisode(int season, int episode)
+        {
+            Season  = season;
+            Episode = episode;
+        }
     }
 }

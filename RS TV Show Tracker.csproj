@@ -204,6 +204,10 @@
     <Compile Include="Windows\CookieCatcherWindow.xaml.cs">
       <DependentUpon>CookieCatcherWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ListViews\FileListViewItem.cs" />
+    <Compile Include="Windows\RenamerWindow.xaml.cs">
+      <DependentUpon>RenamerWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EditShowWindow.xaml.cs">
       <DependentUpon>EditShowWindow.xaml</DependentUpon>
     </Compile>
@@ -286,6 +290,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\CookieCatcherWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\RenamerWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -548,7 +556,9 @@
   <ItemGroup>
     <None Include="Dependencies\nunit.framework.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\folder-rename.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

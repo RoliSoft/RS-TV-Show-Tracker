@@ -22,7 +22,6 @@
     /// </summary>
     public partial class SettingsWindow
     {
-
         /// <summary>
         /// Gets or sets the downloads list view item collection.
         /// </summary>

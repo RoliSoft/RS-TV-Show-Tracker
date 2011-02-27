@@ -631,6 +631,11 @@
                             <Image Source="/RSTVShowTracker;component/Images/settings.png" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Rename video files" Click="RenameVideoFilesClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/folder-rename.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="Minimize to tray" Click="MinimizeToTrayClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/minimize.png" />
