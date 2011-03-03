@@ -36,7 +36,7 @@
 
             foreach (var process in processes)
             {
-                sb.AppendLine(Utils.RunAndRead(Path.Combine(Signature.FullPath, "handle.exe"), "-accepteula -p " + process));
+                sb.AppendLine(Utils.RunAndRead(Path.Combine(Signature.FullPath, "handle.exe"), "-accepteula -p " + process, true));
             }
 
             return Regex.Matches(sb.ToString(), @"(?:D|\-)\)\s+(.+)(?:\r|$)")

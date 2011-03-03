@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
@@ -9,6 +10,7 @@
     using System.Linq;
     using System.Net;
     using System.Runtime.InteropServices;
+    using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Windows;
@@ -153,8 +155,9 @@
         /// </summary>
         /// <param name="process">The process.</param>
         /// <param name="arguments">The arguments.</param>
+        /// <param name="elevate">if set to <c>true</c> the process will be elevated if the invoker is not under admin.</param>
         /// <returns>Console output.</returns>
-        public static string RunAndRead(string process, string arguments = null)
+        public static string RunAndRead(string process, string arguments = null, bool elevate = false)
         {
             var sb = new StringBuilder();
             var p  = new Process
@@ -171,6 +174,14 @@
                         }
                 };
 
+            if (elevate)
+            {
+                if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+                {
+                    p.StartInfo.Verb = "runas";
+                }
+            }
+
             p.OutputDataReceived += (s, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
@@ -186,10 +197,14 @@
                     }
                 };
 
-            p.Start();
-            p.BeginOutputReadLine();
-            p.BeginErrorReadLine();
-            p.WaitForExit();
+            try
+            {
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                p.WaitForExit();
+            }
+            catch (Win32Exception) { }
 
             return sb.ToString();
         }
