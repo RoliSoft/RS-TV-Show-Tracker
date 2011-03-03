@@ -5,6 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Timers;
     using System.Windows;
     using System.Collections.ObjectModel;
@@ -15,6 +16,8 @@
     using Microsoft.Win32;
 
     using RoliSoft.TVShowTracker.ShowNames;
+
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// Interaction logic for RenamerWindow.xaml
@@ -74,8 +77,6 @@
             ParserTimer.Start();
 
             RenameFormatTextBoxTextChanged(null, null);
-
-            ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
         }
 
         /// <summary>
@@ -93,23 +94,50 @@
             _parsing = true;
 
             var files = FilesListViewItemCollection.Where(f => !f.Parsed).ToList();
-            if (files.Count == 0) goto end;
+            if (files.Count == 0)
+            {
+                goto end;
+            }
 
-            Dispatcher.Invoke((Action)(() => { statusThrobber.Visibility = Visibility.Visible; }));
+            SetStatus("Identifying " + Utils.FormatNumber(files.Count, "file") + "...", true);
 
             foreach (var file in files)
             {
-                file.Parsed = true;
-
                 try   { file.Information = Parser.ParseFile(file.Information.Name, false); }
                 catch { file.Enabled = false; }
-                
+
+                file.Parsed = true;
             }
 
-            Dispatcher.Invoke((Action)(() => { statusThrobber.Visibility = Visibility.Hidden; }));
-
           end:
+            SetStatus();
             _parsing = false;
+        }
+
+        /// <summary>
+        /// Sets the status message to the specified message or to the number of files if the message is null.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="activity">if set to <c>true</c> an animating spinner will be displayed.</param>
+        public void SetStatus(string message = null, bool activity = false)
+        {
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    statusLabel.Content = message ?? Utils.FormatNumber(FilesListViewItemCollection.Count, "file") + " added; " + Utils.FormatNumber(FilesListViewItemCollection.Count(f => f.Information.Show != null), "file") + " identified.";
+
+                    if (activity)
+                    {
+                        statusImage.Visibility    = Visibility.Hidden;
+                        statusThrobber.Visibility = Visibility.Visible;
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
+                    }
+                    else
+                    {
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
+                        statusThrobber.Visibility = Visibility.Hidden;
+                        statusImage.Visibility    = Visibility.Visible;
+                    }
+                }));
         }
 
         /// <summary>
@@ -133,23 +161,47 @@
         /// Adds the specified list of files to the list view.
         /// </summary>
         /// <param name="files">The list of files.</param>
-        private void AddFiles(IEnumerable<string> files)
+        /// <param name="first">if set to <c>true</c> the <c>_parsing</c> variable will be modified accordingly.</param>
+        private void AddFiles(IEnumerable<string> files, bool first = true)
         {
-            _parsing = true;
-
-            foreach (var file in files)
+            if (first)
             {
-                if (!Regex.IsMatch(file, @"\.(avi|mkv|mp4|wmv|srt|sub|ass|smi)$", RegexOptions.IgnoreCase)) continue;
-
-                FilesListViewItemCollection.Add(new FileListViewItem
-                    {
-                        Enabled     = true,
-                        Location    = file,
-                        Information = new ShowFile(file)
-                    });
+                _parsing = true;
+                SetStatus("Adding files...", true);
             }
 
-            _parsing = false;
+            new Thread(() => AddFilesInternal(files, first)).Start();
+        }
+
+        /// <summary>
+        /// Adds the specified list of files to the list view.
+        /// </summary>
+        /// <param name="files">The list of files.</param>
+        /// <param name="first">if set to <c>true</c> the <c>_parsing</c> variable will be modified accordingly.</param>
+        private void AddFilesInternal(IEnumerable<string> files, bool first = true)
+        {
+            foreach (var file in files)
+            {
+                if (Directory.Exists(file))
+                {
+                    AddFilesInternal(Directory.EnumerateFiles(file, "*.*", SearchOption.AllDirectories), false);
+                }
+                else if (Regex.IsMatch(file, @"\.(avi|mkv|mp4|wmv|srt|sub|ass|smi)$", RegexOptions.IgnoreCase))
+                {
+                    Dispatcher.Invoke((Action)(() => FilesListViewItemCollection.Add(new FileListViewItem
+                        {
+                            Enabled     = true,
+                            Location    = file,
+                            Information = new ShowFile(file)
+                        })));
+                }
+            }
+
+            if (first)
+            {
+                SetStatus();
+                _parsing = false;
+            }
         }
 
         /// <summary>
@@ -214,6 +266,8 @@
             {
                 FilesListViewItemCollection.Remove(item);
             }
+
+            SetStatus();
         }
 
         /// <summary>
@@ -239,6 +293,34 @@
             foreach (FileListViewItem item in listView.SelectedItems)
             {
                 item.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the selectAllButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SelectAllButtonClick(object sender, RoutedEventArgs e)
+        {
+            SelectNoneButtonClick(sender, e);
+
+            foreach (var item in listView.Items)
+            {
+                listView.SelectedItems.Add(item);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the selectNoneButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SelectNoneButtonClick(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in listView.SelectedItems.Cast<FileListViewItem>().ToList())
+            {
+                listView.SelectedItems.Remove(item);
             }
         }
         #endregion
