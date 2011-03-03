@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Linq;
     using System.Text;
@@ -168,11 +169,11 @@
         /// Handles the Closing event of the Window control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        /// <param name="e">The <see cref="CancelEventArgs"/> instance containing the event data.</param>
+        private void WindowClosing(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
-            ShowMenuClick(null, null);
+            ShowMenuClick(null, e);
         }
         #endregion
 
@@ -249,14 +250,14 @@
         {
             if (Visibility == Visibility.Visible)
             {
-                NotifyIcon.ContextMenu.MenuItems[0].Text = "Show";
                 Hide();
+                NotifyIcon.ContextMenu.MenuItems[0].Text = "Show";
             }
-            else if (NotifyIcon.Visible)
+            else if (NotifyIcon.Visible && !(e is CancelEventArgs))
             {
-                NotifyIcon.ContextMenu.MenuItems[0].Text = "Hide";
                 Show();
                 Activate();
+                NotifyIcon.ContextMenu.MenuItems[0].Text = "Hide";
             }
         }
         #endregion
