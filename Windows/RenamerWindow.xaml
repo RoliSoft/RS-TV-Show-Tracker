@@ -111,6 +111,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Resulting name:" FontSize="14" Padding="0" Margin="11,0,10,0" />
                                 <TextBox Name="resultingNameTextBox" Margin="0,0,5,0" Width="500" IsReadOnly="True" />
+                                <Image Name="resultingDetected" Source="/RSTVShowTracker;component/Images/tick.png" Margin="0" Height="16" Width="16" ToolTipService.ShowDuration="600000" />
                             </StackPanel>
                             <TextBlock FontFamily="Consolas" HorizontalAlignment="Center" xml:space="preserve"><![CDATA[
                 List of variables with examples:

@@ -10,6 +10,7 @@
     using System.Windows;
     using System.Collections.ObjectModel;
     using System.Windows.Media.Animation;
+    using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.FileNames;
 
@@ -48,6 +49,18 @@
         /// Contains a sample <c>ShowFile</c> object.
         /// </summary>
         public static readonly ShowFile SampleInfo = new ShowFile("House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv", "House, M.D.", new ShowEpisode(6, 2), "Epic Fail", "Web-DL 720p");
+
+        private static readonly string[] SampleTitleParts   = Tools.GetRoot(SampleInfo.Show);
+        private static readonly string[] SampleEpisodeParts = new[]
+            {
+                "S06E02",
+                "S06E02".Replace("E", ".E"),
+                Regex.Replace("S06E02", "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase),
+                Regex.Replace("S06E02", "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
+            };
+
+        private static readonly Regex SampleKnownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|wmv)$", RegexOptions.IgnoreCase);
+        private static readonly Regex SampleSampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenamerWindow"/> class.
@@ -325,6 +338,7 @@
         }
         #endregion
 
+        #region Renaming
         /// <summary>
         /// Handles the TextChanged event of the renameFormatTextBox control.
         /// </summary>
@@ -336,6 +350,17 @@
 
             Format = renameFormatTextBox.Text;
             resultingNameTextBox.Text = GenerateName(SampleInfo);
+
+            if (TestName(resultingNameTextBox.Text))
+            {
+                resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/tick.png", UriKind.Relative));
+                resultingDetected.ToolTip = "The software recognizes this format.\r\nThis means you will be able to find the episode using the 'Play episode' context menu\r\nand the software can automatically mark the episode as watched when you're playing it.";
+            }
+            else
+            {
+                resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cross.png", UriKind.Relative));
+                resultingDetected.ToolTip = "The software doesn't recognize this format.\r\nThis means you won't be able to find the episode using the 'Play episode' context menu\r\nand the software can't automatically mark the episode as watched when you're playing it.";
+            }
         }
 
         /// <summary>
@@ -354,5 +379,20 @@
                          .Replace("$quality",  file.Quality)
                          .Replace("$ext",      file.Extension);
         }
+
+        /// <summary>
+        /// Tests the new format to see if the <c>FileSearch</c> class will find it.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns><c>true</c> if the software can find the new name.</returns>
+        public static bool TestName(string name)
+        {
+            return !string.IsNullOrWhiteSpace(name)
+                && SampleTitleParts.All(part => Regex.IsMatch(name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
+                && SampleKnownVideoRegex.IsMatch(name) // is it a known video file extension?
+                && !SampleSampleVideoRegex.IsMatch(name) // is it not a sample?
+                && SampleEpisodeParts.Any(ep => Regex.IsMatch(name, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)); // is it the episode we want?
+        }
+        #endregion
     }
 }
