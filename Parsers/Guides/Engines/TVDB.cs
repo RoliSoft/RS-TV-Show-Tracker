@@ -95,7 +95,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Tools.Normalize(name)), language));
+            var list = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(name)), language));
             var prev = new List<string>();
 
             foreach (var show in list.Descendants("Series"))

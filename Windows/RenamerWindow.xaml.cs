@@ -50,8 +50,15 @@
         /// </summary>
         public static readonly ShowFile SampleInfo = new ShowFile("House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv", "House, M.D.", new ShowEpisode(6, 2), "Epic Fail", "Web-DL 720p");
 
-        private static readonly string[] SampleTitleParts   = Tools.GetRoot(SampleInfo.Show);
-        private static readonly string[] SampleEpisodeParts = new[]
+        /// <summary>
+        /// Contains the parsed name for the sample file.
+        /// </summary>
+        public static readonly string[] SampleTitleParts = ShowNames.Parser.GetRoot(SampleInfo.Show);
+
+        /// <summary>
+        /// Contains the matching episode parts for the sample file.
+        /// </summary>
+        public static readonly string[] SampleEpisodeParts = new[]
             {
                 "S06E02",
                 "S06E02".Replace("E", ".E"),
@@ -59,8 +66,15 @@
                 Regex.Replace("S06E02", "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
             };
 
-        private static readonly Regex SampleKnownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|wmv)$", RegexOptions.IgnoreCase);
-        private static readonly Regex SampleSampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
+        /// <summary>
+        /// Contains a regular expression which matches for video file extensions.
+        /// </summary>
+        public static readonly Regex SampleKnownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|wmv)$", RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Contains a regular expression which matches for sample files.
+        /// </summary>
+        public static readonly Regex SampleSampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenamerWindow"/> class.
@@ -112,11 +126,11 @@
                 goto end;
             }
 
-            SetStatus("Identifying " + Utils.FormatNumber(files.Count, "file") + "...", true);
-
             foreach (var file in files)
             {
-                try   { file.Information = Parser.ParseFile(file.Information.Name, false); }
+                SetStatus("Identifying " + file.Information.Name + "...", true);
+
+                try   { file.Information = FileNames.Parser.ParseFile(file.Information.Name); }
                 catch { file.Enabled = false; }
 
                 file.Parsed = true;

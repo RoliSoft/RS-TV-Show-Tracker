@@ -218,7 +218,7 @@
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ShowNames\Tools.cs" />
+    <Compile Include="ShowNames\Parser.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TvTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TvTorrentsRo.cs" />
     <Compile Include="Parsers\Downloads\DownloadSearchEngine.cs" />

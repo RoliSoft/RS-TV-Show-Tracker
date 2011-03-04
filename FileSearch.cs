@@ -52,7 +52,7 @@
         /// <param name="episode">The episode number.</param>
         public FileSearch(string path, string show, string episode)
         {
-            _titleParts   = ShowNames.Tools.GetRoot(show);
+            _titleParts   = ShowNames.Parser.GetRoot(show);
             _episodeParts = new[]
                 {
                     // S02E14

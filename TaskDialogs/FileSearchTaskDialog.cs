@@ -8,6 +8,7 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.FileNames;
     using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
@@ -133,7 +134,7 @@
                     {
                         var tmp     = file;
                         var fi      = new FileInfo(file);
-                        var quality = ThePirateBay.ParseQuality(file);
+                        var quality = Parser.ParseQuality(file);
                         var instr   = string.Empty;
 
                         if (quality != Parsers.Downloads.Qualities.Unknown)

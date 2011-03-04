@@ -7,7 +7,7 @@
     /// <summary>
     /// Provides methods to work with TV show names.
     /// </summary>
-    public static class Tools
+    public static class Parser
     {
         /// <summary>
         /// Gets the root words from a show name.

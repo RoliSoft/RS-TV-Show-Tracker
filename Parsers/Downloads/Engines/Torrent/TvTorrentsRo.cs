@@ -107,7 +107,7 @@
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
                 link.FileURL = Site + "download.php?id=" + Regex.Replace(node.GetAttributeValue("href"), "[^0-9]+", string.Empty) + "&type=torrent";
                 link.Size    = node.GetHtmlValue("../../../td[@class='table_size']").Trim().Replace("<br>", " ");
-                link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[@class='table_seeders']").Trim(), node.GetTextValue("../../../td[@class='table_leechers']").Trim())
                              + (node.GetHtmlValue("../..//img[@alt='50% Free']") != null ? ", 50% Free" : string.Empty)
                              + (node.GetHtmlValue("../..//img[@alt='100% Free']") != null ? ", 100% Free" : string.Empty);

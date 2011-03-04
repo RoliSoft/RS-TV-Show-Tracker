@@ -94,7 +94,7 @@
                 link.InfoURL = Site + node.GetNodeAttributeValue("../../a", "href");
                 link.FileURL = Site + node.GetNodeAttributeValue("../../../td[3]/a", "href");
                 link.Size    = node.GetHtmlValue("../../../td[7]").Replace("<br>", " ");
-                link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[9]").Trim(), node.GetTextValue("../../../td[10]").Trim())
                              + (node.GetTextValue("../../b/small/font") == "[FreeLeech]" ? ", Free" : string.Empty);
                 

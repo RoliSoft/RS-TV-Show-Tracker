@@ -40,16 +40,16 @@
 
             foreach (var show in shouldMatch)
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", Tools.GetRoot(show.Key)) + "]");
-                Console.WriteLine(show.Value + ": [" + String.Join(", ", Tools.GetRoot(show.Value)) + "]");
+                Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key)) + "]");
+                Console.WriteLine(show.Value + ": [" + String.Join(", ", Parser.GetRoot(show.Value)) + "]");
 
                 Assert.IsTrue(cmp.Equals(show.Key, show.Value), "'{0}' doesn't equal '{1}'".FormatWith(show.Key, show.Value));
             }
 
             foreach (var show in shouldntMatch)
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", Tools.GetRoot(show.Key)) + "]");
-                Console.WriteLine(show.Value + ": [" + String.Join(", ", Tools.GetRoot(show.Value)) + "]");
+                Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key)) + "]");
+                Console.WriteLine(show.Value + ": [" + String.Join(", ", Parser.GetRoot(show.Value)) + "]");
 
                 Assert.IsFalse(cmp.Equals(show.Key, show.Value), "'{0}' shouldn't equal '{1}'".FormatWith(show.Key, show.Value));
             }
@@ -71,9 +71,9 @@
 
             foreach (var show in list)
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", Tools.GetRoot(show.Key, false)) + "], [" + String.Join(", ", show.Value) + "]");
+                Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key, false)) + "], [" + String.Join(", ", show.Value) + "]");
 
-                Assert.IsTrue(show.Value.SequenceEqual(Tools.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly.".FormatWith(show.Key));
+                Assert.IsTrue(show.Value.SequenceEqual(Parser.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly.".FormatWith(show.Key));
             }
         }
     }

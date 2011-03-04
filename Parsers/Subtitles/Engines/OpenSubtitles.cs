@@ -65,7 +65,7 @@
                 yield break;
             }
 
-            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Tools.Normalize(query) } });
+            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Parser.Normalize(query) } });
 
             if (search["data"] is bool)
             {
@@ -74,7 +74,7 @@
 
             foreach (XmlRpcStruct data in search["data"] as object[])
             {
-                if (!ShowNames.Tools.IsMatch(query, data["SubFileName"].ToString()))
+                if (!ShowNames.Parser.IsMatch(query, data["SubFileName"].ToString()))
                 {
                     continue;
                 }

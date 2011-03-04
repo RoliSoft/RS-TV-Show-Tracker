@@ -43,7 +43,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var show = ShowNames.Tools.Split(query);
+            var show = ShowNames.Parser.Split(query);
             var dbid = Database.GetShowID(show[0]);
             var adid = string.Empty;
 
@@ -62,7 +62,7 @@
                 }
             }
 
-            var html = Utils.GetHTML(Site + "serie/" + adid + "/" + ShowNames.Tools.ExtractEpisode(query, "{0:0}/{1:00}") + "/episode");
+            var html = Utils.GetHTML(Site + "serie/" + adid + "/" + ShowNames.Parser.ExtractEpisode(query, "{0:0}/{1:00}") + "/episode");
             var subs = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/original/')] | //a[starts-with(@href,'/updated/')]");
 
             if (subs == null)

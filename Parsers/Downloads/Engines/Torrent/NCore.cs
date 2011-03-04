@@ -108,7 +108,7 @@
                 link.InfoURL = Site + "torrents.php?action=details&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
                 link.FileURL = Site + "torrents.php?action=download&id=" + Regex.Match(node.GetAttributeValue("href"), @"id=(\d+)").Groups[1].Value;
                 link.Size    = node.GetTextValue("../../../../div[@class='box_meret2']/text()").Trim();
-                link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../../div[@class='box_s2']").Trim(), node.GetTextValue("../../../../div[@class='box_l2']").Trim())
                              + (node.GetHtmlValue("../..//div[contains(@title, 'Ingyenes torrent!')]") != null ? ", Free" : string.Empty)
                              + (node.GetHtmlValue("../../../..//span[@class='bonus_down']") != null ? ", " + node.GetTextValue("../../../..//span[@class='bonus_down']").Trim().Substring(2) + " Download" : string.Empty)

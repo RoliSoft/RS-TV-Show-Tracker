@@ -165,19 +165,19 @@
                     }
 
                     // test if the application's engine sees the entered and the returned first result as an exact match
-                    var enterroot = ShowNames.Tools.Normalize(show);
-                    var matchroot = ShowNames.Tools.Normalize(_shows[0].Title);
+                    var enterroot = ShowNames.Parser.Normalize(show);
+                    var matchroot = ShowNames.Parser.Normalize(_shows[0].Title);
                     var exact     = enterroot == matchroot;
 
                     if (exact && _shows.Count != 1)
                     {
                         // test if the second result is an exact match too
                         // if it is, then selection is required by the user
-                        exact = enterroot != ShowNames.Tools.Normalize(_shows[1].Title);
+                        exact = enterroot != ShowNames.Parser.Normalize(_shows[1].Title);
 
                         if (exact && _shows.Count != 2)
                         {
-                            exact = enterroot != ShowNames.Tools.Normalize(_shows[2].Title);
+                            exact = enterroot != ShowNames.Parser.Normalize(_shows[2].Title);
                         }
                     }
 

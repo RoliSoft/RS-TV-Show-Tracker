@@ -5,8 +5,6 @@
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
-
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
@@ -81,7 +79,7 @@
                 var link = new Link(this);
 
                 link.Release = node.InnerText;
-                link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
 
                 var info  = node.GetTextValue("..//span[@class='info']");
                 link.Size = info != null

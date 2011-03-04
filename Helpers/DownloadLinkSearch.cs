@@ -89,7 +89,7 @@
         public IEnumerable<Link> Search(string query)
         {
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query = ShowNames.Tools.Normalize(query);
+            query = ShowNames.Parser.Normalize(query);
 
             // start in parallel
             var tasks = SearchEngines.Select(engine => Task<IEnumerable<Link>>.Factory.StartNew(() =>
@@ -121,8 +121,8 @@
             {
                 if (ShowNames.Regexes.Numbering.IsMatch(query))
                 {
-                    var tmp       = ShowNames.Tools.Split(query);
-                    _titleParts   = ShowNames.Tools.GetRoot(tmp[0]);
+                    var tmp       = ShowNames.Parser.Split(query);
+                    _titleParts   = ShowNames.Parser.GetRoot(tmp[0]);
                     _episodeParts = new[]
                         {
                             // S02E14
@@ -137,13 +137,13 @@
                 }
                 else
                 {
-                    _titleParts   = ShowNames.Tools.GetRoot(query);
+                    _titleParts   = ShowNames.Parser.GetRoot(query);
                     _episodeParts = new[] { string.Empty };
                 }
             }
 
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query      = ShowNames.Tools.Normalize(query);
+            query      = ShowNames.Parser.Normalize(query);
 
             SearchEngines.ForEach(engine => engine.SearchAsync(query));
         }

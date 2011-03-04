@@ -100,7 +100,7 @@
                 if (release.Success && !release.Groups[1].Value.Trim().Contains("Not Available"))
                 {
                     link.Release = release.Groups[1].Value.Trim();
-                    link.Quality = ThePirateBay.ParseQuality(link.Release);
+                    link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 }
                 else
                 {

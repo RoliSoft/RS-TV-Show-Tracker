@@ -95,7 +95,7 @@
                 link.InfoURL = Site + node.GetNodeAttributeValue("../../a", "href");
                 link.FileURL = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href");
                 link.Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " ");
-                link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[8]").Trim(), node.GetTextValue("../../../td[9]").Trim().Split('/')[1].Trim());
 
                 yield return link;

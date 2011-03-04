@@ -105,7 +105,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var gyors = Utils.GetURL(Site + "torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.Tools.ReplaceEpisode(query, "{0:0}x{1:00}"))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
+            var gyors = Utils.GetURL(Site + "torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.Parser.ReplaceEpisode(query, "{0:0}x{1:00}"))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
             var arr   = gyors.Split('\\');
 
             if (arr[0] == "0")

@@ -2,8 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using NUnit.Framework;
+
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
+
+    using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
     /// <summary>
     /// Provides unit tests for the file name matching methods.
@@ -46,6 +51,22 @@
                 Console.WriteLine(info + Environment.NewLine);
 
                 Assert.AreEqual(file.Value, info);
+            }
+        }
+
+        /// <summary>
+        /// Tests if the quality descriptions match themselves.
+        /// </summary>
+        [Test]
+        public void Qualities()
+        {
+            foreach (var quality in Enum.GetValues(typeof(Qualities)).Cast<Qualities>().Reverse())
+            {
+                var descr = quality.GetAttribute<DescriptionAttribute>().Description;
+                var parse = Parser.ParseQuality(descr);
+
+                Console.WriteLine(descr);
+                Assert.AreEqual(quality, parse);
             }
         }
     }

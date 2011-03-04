@@ -16,7 +16,7 @@
         /// </returns>
         public bool Equals(string x, string y)
         {
-            return Tools.GetRoot(x).SequenceEqual(Tools.GetRoot(y));
+            return Parser.GetRoot(x).SequenceEqual(Parser.GetRoot(y));
         }
 
         /// <summary>
@@ -29,7 +29,7 @@
         /// <exception cref="T:System.ArgumentNullException">The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.</exception>
         public int GetHashCode(string obj)
         {
-            return Tools.GetRoot(obj).Sum(word => word.GetHashCode());
+            return Parser.GetRoot(obj).Sum(word => word.GetHashCode());
         }
     }
 }

@@ -10,7 +10,6 @@
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
     /// Provides support for scraping BinSearch.
@@ -100,7 +99,7 @@
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
                 link.InfoURL = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
                 link.Size    = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value;
-                link.Quality = ThePirateBay.ParseQuality(link.Release.Replace(' ', '.'));
+                link.Quality = FileNames.Parser.ParseQuality(link.Release.Replace(' ', '.'));
 
                 yield return link;
             }

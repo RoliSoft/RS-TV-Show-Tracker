@@ -83,7 +83,7 @@
 
             foreach (var link in links)
             {
-                var ep = ShowNames.Tools.ExtractEpisode(link.Release);
+                var ep = ShowNames.Parser.ExtractEpisode(link.Release);
 
                 if (ep != null)
                 {

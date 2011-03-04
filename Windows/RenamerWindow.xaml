@@ -100,7 +100,7 @@
                     <Button Name="startRenamingButton" Content="Start renaming" Click="RemoveSelectedButtonClick" Padding="7,2" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
                 </Grid>
             </TabItem>
-            <TabItem Header="Settings" Name="settingsTabItem">
+            <TabItem Header="Format" Name="settingsTabItem">
                 <Grid Margin="7" HorizontalAlignment="Center">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">

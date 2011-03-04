@@ -8,8 +8,6 @@
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
-
     /// <summary>
     /// Provides support for scraping NZBClub.
     /// </summary>
@@ -98,7 +96,7 @@
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
                 link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../..//span[contains(@id, 'sizelabel')]/a", "href");
                 link.Size    = Regex.Match(node.GetHtmlValue("../../..//span[contains(@id, 'sizecolumnlabel')]"), @"^(?:<b>)?([^<]+)").Groups[1].Value;
-                link.Quality = ThePirateBay.ParseQuality(link.Release.Replace(' ', '.'));
+                link.Quality = FileNames.Parser.ParseQuality(link.Release.Replace(' ', '.'));
 
                 yield return link;
             }

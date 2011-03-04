@@ -67,7 +67,7 @@
 
             foreach (var show in shows)
             {
-                var parts = ShowNames.Tools.GetRoot(show["name"]);
+                var parts = ShowNames.Parser.GetRoot(show["name"]);
 
                 foreach (var file in files)
                 {
@@ -75,7 +75,7 @@
                                         || Regex.IsMatch(file.Directory.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase))) // or in the directory name?
                         && Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4|wmv)$", RegexOptions.IgnoreCase)) // is it a known video file extension?
                     {
-                        var ep = ShowNames.Tools.ExtractEpisode(file.ToString());
+                        var ep = ShowNames.Parser.ExtractEpisode(file.ToString());
 
                         if (ep != null)
                         {

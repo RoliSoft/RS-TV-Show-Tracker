@@ -7,7 +7,6 @@
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
     /// Provides support for scraping ReleaseLog.
@@ -96,7 +95,7 @@
 
                 link.Release = node.InnerText;
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                link.Quality = ThePirateBay.ParseQuality(link.Release);
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
 
                 yield return link;
             }

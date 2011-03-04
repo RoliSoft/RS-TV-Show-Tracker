@@ -470,7 +470,7 @@
             if (listView.SelectedIndex == -1) return;
 
             var sub  = (Subtitle)listView.SelectedValue;
-            var show = ShowNames.Tools.Split(textBox.Text);
+            var show = ShowNames.Parser.Split(textBox.Text);
 
             new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, show[0], show[1]);
         }
