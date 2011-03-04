@@ -9,16 +9,17 @@
     using System.Timers;
     using System.Windows;
     using System.Collections.ObjectModel;
+    using System.Windows.Forms;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.FileNames;
-
-    using Microsoft.Win32;
-
     using RoliSoft.TVShowTracker.ShowNames;
 
-    using Timer = System.Timers.Timer;
+    using DataFormats    = System.Windows.DataFormats;
+    using DragEventArgs  = System.Windows.DragEventArgs;
+    using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+    using Timer          = System.Timers.Timer;
 
     /// <summary>
     /// Interaction logic for RenamerWindow.xaml
@@ -103,7 +104,29 @@
             ParserTimer.Elapsed += ParserTimerElapsed;
             ParserTimer.Start();
 
+            renameFormatTextBox.Text = Settings.Get("Rename Format", "$show S$seasonE$episode - $title - $quality$ext");
             RenameFormatTextBoxTextChanged(null, null);
+
+            switch (Settings.Get("Rename File Operation", "rename"))
+            {
+                case "rename":
+                    renameRadioButton.IsChecked = true;
+                    break;
+
+                case "copy":
+                    copyRadioButton.IsChecked = true;
+                    break;
+
+                case "move":
+                    moveRadioButton.IsChecked = true;
+                    break;
+
+                case "symlink":
+                    symLinkRadioButton.IsChecked = true;
+                    break;
+            }
+
+            targetDirTextBox.Text = Settings.Get("Rename Target Directory");
         }
 
         /// <summary>
@@ -150,15 +173,17 @@
         {
             Dispatcher.Invoke((Action)(() =>
                 {
-                    statusLabel.Content = message ?? Utils.FormatNumber(FilesListViewItemCollection.Count, "file") + " added; " + Utils.FormatNumber(FilesListViewItemCollection.Count(f => f.Information.Show != null), "file") + " identified.";
+                    var id = FilesListViewItemCollection.Count(f => f.Information.Show != null);
+                    statusLabel.Content = message ?? Utils.FormatNumber(FilesListViewItemCollection.Count, "file") + " added; " + Utils.FormatNumber(id, "file") + " identified.";
+                    startRenamingButton.IsEnabled = id != 0;
 
-                    if (activity)
+                    if (activity && statusThrobber.Visibility != Visibility.Visible)
                     {
                         statusImage.Visibility    = Visibility.Hidden;
                         statusThrobber.Visibility = Visibility.Visible;
                         ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
                     }
-                    else
+                    else if (!activity && statusThrobber.Visibility != Visibility.Hidden)
                     {
                         ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
                         statusThrobber.Visibility = Visibility.Hidden;
@@ -270,7 +295,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void AddFoldersButtonClick(object sender, RoutedEventArgs e)
         {
-            var fbd = new System.Windows.Forms.FolderBrowserDialog { ShowNewFolderButton = false };
+            var fbd = new FolderBrowserDialog
+                {
+                    Description         = "Select the directory where the files you want to rename are located:",
+                    ShowNewFolderButton = false
+                };
 
             if (fbd.ShowDialog() != System.Windows.Forms.DialogResult.OK)
             {
@@ -352,7 +381,7 @@
         }
         #endregion
 
-        #region Renaming
+        #region Format tab
         /// <summary>
         /// Handles the TextChanged event of the renameFormatTextBox control.
         /// </summary>
@@ -375,6 +404,8 @@
                 resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cross.png", UriKind.Relative));
                 resultingDetected.ToolTip = "The software doesn't recognize this format.\r\nThis means you won't be able to find the episode using the 'Play episode' context menu\r\nand the software can't automatically mark the episode as watched when you're playing it.";
             }
+
+            Settings.Set("Rename Format", Format);
         }
 
         /// <summary>
@@ -406,6 +437,77 @@
                 && SampleKnownVideoRegex.IsMatch(name) // is it a known video file extension?
                 && !SampleSampleVideoRegex.IsMatch(name) // is it not a sample?
                 && SampleEpisodeParts.Any(ep => Regex.IsMatch(name, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)); // is it the episode we want?
+        }
+        #endregion
+
+        #region Settings tab
+        /// <summary>
+        /// Handles the Checked event of the renameRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void RenameRadioButtonChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Rename File Operation", "rename");
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the copyRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void CopyRadioButtonChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Rename File Operation", "copy");
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the moveRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void MoveRadioButtonChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Rename File Operation", "move");
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the symLinkRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SymLinkRadioButtonChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Rename File Operation", "symlink");
+        }
+
+        /// <summary>
+        /// Handles the TextChanged event of the targetDirTextBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
+        private void TargetDirTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            Settings.Set("Rename Target Directory", targetDirTextBox.Text);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the targetDirBrowseButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void TargetDirBrowseButtonClick(object sender, RoutedEventArgs e)
+        {
+            var fbd = new FolderBrowserDialog
+                {
+                    Description         = "Select the directory where you want to copy/move/symlink the files:",
+                    ShowNewFolderButton = true
+                };
+
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                targetDirTextBox.Text = fbd.SelectedPath + Path.DirectorySeparatorChar;
+            }
         }
         #endregion
     }

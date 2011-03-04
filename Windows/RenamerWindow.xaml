@@ -97,16 +97,16 @@
                     </Label>
                     <Image Name="statusImage" Source="/RSTVShowTracker;component/Images/tick.png" Margin="0" Height="16" Width="16" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
 
-                    <Button Name="startRenamingButton" Content="Start renaming" Click="RemoveSelectedButtonClick" Padding="7,2" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+                    <Button Name="startRenamingButton" Content="Start renaming" Click="RemoveSelectedButtonClick" Padding="7,2" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsEnabled="False" />
                 </Grid>
             </TabItem>
-            <TabItem Header="Format" Name="settingsTabItem">
+            <TabItem Header="Format" Name="formatTabItem">
                 <Grid Margin="7" HorizontalAlignment="Center">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Rename format:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,10,0" />
-                                <TextBox Name="renameFormatTextBox" Margin="0,0,5,0" Width="500" TextChanged="RenameFormatTextBoxTextChanged" Text="$show S$seasonE$episode - $title - $quality$ext" />
+                                <TextBox Name="renameFormatTextBox" Margin="0,0,5,0" Width="500" TextChanged="RenameFormatTextBoxTextChanged" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Resulting name:" FontSize="14" Padding="0" Margin="11,0,10,0" />
@@ -129,6 +129,22 @@ $ext      — Extension of the file               — .mkv
 To find renamed episodes with the "Play episode" context menu,
 the new file name has to contain the name of the show and the
 episode numbering in one of these formats: S06E02, 6x02, 602]]></TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Settings" Name="settingsTabItem">
+                <Grid Margin="7" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Vertical">
+                        <Label Content="File operation:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                        <RadioButton Name="renameRadioButton" Content="Rename the files to their new name" VerticalAlignment="Top" Checked="RenameRadioButtonChecked" HorizontalAlignment="Left" Margin="5,0,0,5" />
+                        <RadioButton Name="copyRadioButton" Content="Copy the files to another location with their new name" Checked="CopyRadioButtonChecked" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,0,0,5" />
+                        <RadioButton Name="moveRadioButton" Content="Move the files to another location with their new name" Checked="MoveRadioButtonChecked" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,0,0,5" />
+                        <RadioButton Name="symLinkRadioButton" Content="Create a symblic link to another location with the new name" Checked="SymLinkRadioButtonChecked" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,0,0,5" />
+                        <Label Content="Target directory:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,10,5" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Name="targetDirTextBox" TextChanged="TargetDirTextBoxTextChanged" Margin="5,0,5,0" Width="500" />
+                            <Button Content="Browse" Name="targetDirBrowseButton" Click="TargetDirBrowseButtonClick" Width="75" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>

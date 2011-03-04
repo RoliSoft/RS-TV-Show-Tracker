@@ -152,7 +152,7 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void DlPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (Directory.Exists(dlPathTextBox.Text))
+            if (dlPathTextBox.Text.Length == 0 || Directory.Exists(dlPathTextBox.Text))
             {
                 Settings.Set("Download Path", dlPathTextBox.Text);
             }
@@ -165,7 +165,7 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void TorrentPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (File.Exists(torrentPathTextBox.Text))
+            if (torrentPathTextBox.Text.Length == 0 || File.Exists(torrentPathTextBox.Text))
             {
                 Settings.Set("Torrent Downloader", torrentPathTextBox.Text);
             }
@@ -283,7 +283,7 @@
             var sel    = listView.SelectedItem as DownloadsListViewItem;
             var engine = _engines.Single(en => en.Name == sel.Site);
 
-            if (engine.Private && !string.IsNullOrWhiteSpace(cookiesTextBox.Text))
+            if (engine.Private)
             {
                 Settings.Set(engine.Name + " Cookies", cookiesTextBox.Text.Trim());
             }
