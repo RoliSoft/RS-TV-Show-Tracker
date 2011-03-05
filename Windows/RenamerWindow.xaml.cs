@@ -39,10 +39,28 @@
         public Timer ParserTimer { get; set; }
 
         /// <summary>
+        /// Gets or sets the worker thread.
+        /// </summary>
+        /// <value>The worker thread.</value>
+        public Thread WorkerThread { get; set; }
+
+        /// <summary>
         /// Gets or sets the rename format.
         /// </summary>
         /// <value>The rename format.</value>
         public static string Format { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rename file operation.
+        /// </summary>
+        /// <value>The rename file operation.</value>
+        public static string Operation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the target directory of the file operation.
+        /// </summary>
+        /// <value>The target directory of the file operation.</value>
+        public static string TargetDir { get; set; }
 
         private volatile bool _parsing;
 
@@ -70,7 +88,7 @@
         /// <summary>
         /// Contains a regular expression which matches for video file extensions.
         /// </summary>
-        public static readonly Regex SampleKnownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|wmv)$", RegexOptions.IgnoreCase);
+        public static readonly Regex SampleKnownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Contains a regular expression which matches for sample files.
@@ -104,10 +122,10 @@
             ParserTimer.Elapsed += ParserTimerElapsed;
             ParserTimer.Start();
 
-            renameFormatTextBox.Text = Settings.Get("Rename Format", "$show S$seasonE$episode - $title - $quality$ext");
+            Format = renameFormatTextBox.Text = Settings.Get("Rename Format", "$show S$seasonE$episode - $title - $quality$ext");
             RenameFormatTextBoxTextChanged(null, null);
 
-            switch (Settings.Get("Rename File Operation", "rename"))
+            switch (Operation = Settings.Get("Rename File Operation", "rename"))
             {
                 case "rename":
                     renameRadioButton.IsChecked = true;
@@ -126,7 +144,23 @@
                     break;
             }
 
-            targetDirTextBox.Text = Settings.Get("Rename Target Directory");
+            TargetDir = targetDirTextBox.Text = Settings.Get("Rename Target Directory");
+        }
+
+        /// <summary>
+        /// Handles the Closing event of the GlassWindow control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
+        private void GlassWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _parsing = true;
+            ParserTimer.Stop();
+
+            if (WorkerThread != null && WorkerThread.IsAlive)
+            {
+                try { WorkerThread.Abort(); } catch { }
+            }
         }
 
         /// <summary>
@@ -222,7 +256,13 @@
                 SetStatus("Adding files...", true);
             }
 
-            new Thread(() => AddFilesInternal(files, first)).Start();
+            if (WorkerThread != null && WorkerThread.IsAlive)
+            {
+                return;
+            }
+
+            WorkerThread = new Thread(() => AddFilesInternal(files, first));
+            WorkerThread.Start();
         }
 
         /// <summary>
@@ -238,7 +278,7 @@
                 {
                     AddFilesInternal(Directory.EnumerateFiles(file, "*.*", SearchOption.AllDirectories), false);
                 }
-                else if (Regex.IsMatch(file, @"\.(avi|mkv|mp4|wmv|srt|sub|ass|smi)$", RegexOptions.IgnoreCase))
+                else if (Regex.IsMatch(file, @"\.(avi|mkv|mp4|ts|wmv|srt|sub|ass|smi)$", RegexOptions.IgnoreCase))
                 {
                     Dispatcher.Invoke((Action)(() => FilesListViewItemCollection.Add(new FileListViewItem
                         {
@@ -391,7 +431,7 @@
         {
             if (resultingNameTextBox == null) return;
 
-            Format = renameFormatTextBox.Text;
+            Settings.Set("Rename Format", Format = renameFormatTextBox.Text);
             resultingNameTextBox.Text = GenerateName(SampleInfo);
 
             if (TestName(resultingNameTextBox.Text))
@@ -404,8 +444,6 @@
                 resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cross.png", UriKind.Relative));
                 resultingDetected.ToolTip = "The software doesn't recognize this format.\r\nThis means you won't be able to find the episode using the 'Play episode' context menu\r\nand the software can't automatically mark the episode as watched when you're playing it.";
             }
-
-            Settings.Set("Rename Format", Format);
         }
 
         /// <summary>
@@ -448,7 +486,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void RenameRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Rename File Operation", "rename");
+            Settings.Set("Rename File Operation", Operation = "rename");
         }
 
         /// <summary>
@@ -458,7 +496,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void CopyRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Rename File Operation", "copy");
+            Settings.Set("Rename File Operation", Operation = "copy");
         }
 
         /// <summary>
@@ -468,7 +506,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MoveRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Rename File Operation", "move");
+            Settings.Set("Rename File Operation", Operation = "move");
         }
 
         /// <summary>
@@ -478,7 +516,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SymLinkRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Rename File Operation", "symlink");
+            Settings.Set("Rename File Operation", Operation = "symlink");
         }
 
         /// <summary>
@@ -488,7 +526,7 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void TargetDirTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            Settings.Set("Rename Target Directory", targetDirTextBox.Text);
+            Settings.Set("Rename Target Directory", TargetDir = targetDirTextBox.Text);
         }
 
         /// <summary>

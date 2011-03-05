@@ -65,7 +65,7 @@
                     Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
                 };
             
-            _knownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|wmv)$", RegexOptions.IgnoreCase);
+            _knownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
             _sampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
 
             ShowQuery = show + " " + episode;
