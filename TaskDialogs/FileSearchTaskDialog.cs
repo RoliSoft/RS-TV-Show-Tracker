@@ -9,7 +9,6 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.FileNames;
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>FileSearch</c> class.
@@ -35,14 +34,16 @@
 
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                new TaskDialog
+                var spnctd = new TaskDialog
                     {
                         Icon            = TaskDialogStandardIcon.Error,
                         Caption         = "Search path not configured",
                         InstructionText = "Search path not configured",
                         Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
                         Cancelable      = true
-                    }.Show();
+                    };
+
+                spnctd.Show();
                 return;
             }
 
@@ -63,7 +64,7 @@
 
                     if (_active)
                     {
-                        _td.Show();
+                        try { _td.Show(); } catch (NullReferenceException) { }
                     }
                 }).Start();
 
@@ -105,16 +106,16 @@
             switch (_fs.Files.Count)
             {
                 case 0:
-                    _td = new TaskDialog();
+                    var nfftd = new TaskDialog();
 
-                    _td.Icon            = TaskDialogStandardIcon.Error;
-                    _td.Caption         = "No files found";
-                    _td.InstructionText = _show + " " + _episode;
-                    _td.Text            = "No files were found for this episode.";
-                    _td.StandardButtons = TaskDialogStandardButtons.Ok;
-                    _td.Cancelable      = true;
+                    nfftd.Icon            = TaskDialogStandardIcon.Error;
+                    nfftd.Caption         = "No files found";
+                    nfftd.InstructionText = _show + " " + _episode;
+                    nfftd.Text            = "No files were found for this episode.";
+                    nfftd.StandardButtons = TaskDialogStandardButtons.Ok;
+                    nfftd.Cancelable      = true;
 
-                    _td.Show();
+                    nfftd.Show();
                     break;
 
                 case 1:
@@ -122,13 +123,13 @@
                     break;
 
                 default:
-                    _td = new TaskDialog();
+                    var mfftd = new TaskDialog();
 
-                    _td.Caption         = "Multiple files found";
-                    _td.InstructionText = _show + " " + _episode;
-                    _td.Text            = "Multiple files were found for this episode:";
-                    _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-                    _td.Cancelable      = true;
+                    mfftd.Caption         = "Multiple files found";
+                    mfftd.InstructionText = _show + " " + _episode;
+                    mfftd.Text            = "Multiple files were found for this episode:";
+                    mfftd.StandardButtons = TaskDialogStandardButtons.Cancel;
+                    mfftd.Cancelable      = true;
 
                     foreach (var file in _fs.Files)
                     {
@@ -153,14 +154,15 @@
                             };
                         fd.Click += (s, r) =>
                             {
-                                try { _td.Close(TaskDialogResult.Ok); } catch { }
+                                try   { mfftd.Close(TaskDialogResult.Ok); }
+                                catch { }
                                 Utils.Run(tmp);
                             };
 
-                        _td.Controls.Add(fd);
+                        mfftd.Controls.Add(fd);
                     }
 
-                    _td.Show();
+                    mfftd.Show();
                     break;
             }
         }

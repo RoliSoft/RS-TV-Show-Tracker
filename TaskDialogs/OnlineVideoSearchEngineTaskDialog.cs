@@ -80,18 +80,18 @@
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
             try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-            _td = new TaskDialog();
+            var nvftd = new TaskDialog();
 
-            _td.Icon            = TaskDialogStandardIcon.Error;
-            _td.Caption         = "No videos found";
-            _td.InstructionText = e.First;
-            _td.Text            = e.Second;
-            _td.StandardButtons = TaskDialogStandardButtons.Ok;
-            _td.Cancelable      = true;
+            nvftd.Icon            = TaskDialogStandardIcon.Error;
+            nvftd.Caption         = "No videos found";
+            nvftd.InstructionText = e.First;
+            nvftd.Text            = e.Second;
+            nvftd.StandardButtons = TaskDialogStandardButtons.Ok;
+            nvftd.Cancelable      = true;
 
             if (!string.IsNullOrWhiteSpace(e.Third.Item3))
             {
-                _td.DetailsExpandedText = e.Third.Item3;
+                nvftd.DetailsExpandedText = e.Third.Item3;
             }
 
             if (!string.IsNullOrEmpty(e.Third.Item1))
@@ -99,14 +99,14 @@
                 var fd = new TaskDialogCommandLink { Text = e.Third.Item1 };
                 fd.Click += (s, r) =>
                     {
-                        _td.Close();
+                        nvftd.Close();
                         Utils.Run(e.Third.Item2);
                     };
 
-                _td.Controls.Add(fd);
+                nvftd.Controls.Add(fd);
             }
 
-            _td.Show();
+            nvftd.Show();
         }
     }
 }

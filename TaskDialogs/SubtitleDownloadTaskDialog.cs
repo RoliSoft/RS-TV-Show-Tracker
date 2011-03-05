@@ -13,7 +13,6 @@
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.FileNames;
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
@@ -109,14 +108,16 @@
 
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                new TaskDialog
+                var spnctd = new TaskDialog
                     {
                         Icon            = TaskDialogStandardIcon.Error,
                         Caption         = "Search path not configured",
                         InstructionText = "Search path not configured",
                         Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
                         Cancelable      = true
-                    }.Show();
+                    };
+
+                spnctd.Show();
                 return;
             }
 
@@ -130,7 +131,18 @@
             _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
             _td.Closing        += TaskDialogClosing;
 
-            new Thread(() => _td.Show()).Start();
+            new Thread(() => 
+                {
+                    try
+                    {
+                        _td.Show();
+                    }
+                    catch (NullReferenceException)
+                    {
+                        // when _td is closed and disposed in the next step
+                        // a NullReferenceException will be thrown at this point
+                    }
+                }).Start();
 
             _fs = new FileSearch(path, show, episode);
 
@@ -152,16 +164,16 @@
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                 try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-                _td = new TaskDialog();
+                var nfftd = new TaskDialog();
 
-                _td.Icon            = TaskDialogStandardIcon.Error;
-                _td.Caption         = "No files found";
-                _td.InstructionText = _link.Release;
-                _td.Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.";
-                _td.StandardButtons = TaskDialogStandardButtons.Ok;
-                _td.Cancelable      = true;
+                nfftd.Icon            = TaskDialogStandardIcon.Error;
+                nfftd.Caption         = "No files found";
+                nfftd.InstructionText = _link.Release;
+                nfftd.Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.";
+                nfftd.StandardButtons = TaskDialogStandardButtons.Ok;
+                nfftd.Cancelable      = true;
 
-                _td.Show();
+                nfftd.Show();
                 return;
             }
 
@@ -169,7 +181,7 @@
 
             _dl                          = _link.Source.Downloader;
             _dl.DownloadFileCompleted   += NearVideoDownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => _td.Text = "Downloading file... ({0}%)".FormatWith(a.Data);
+            _dl.DownloadProgressChanged += (s, a) => { if (_td != null) _td.Text = "Downloading file... ({0}%)".FormatWith(a.Data); };
 
             _dl.Download(_link, Utils.GetRandomFileName());
         }
@@ -184,13 +196,13 @@
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
             try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-            _td = new TaskDialog();
+            var dlsnvtd = new TaskDialog();
 
-            _td.Caption         = "Download subtitle near video";
-            _td.InstructionText = _link.Release;
-            _td.Text            = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode);
-            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-            _td.Cancelable      = true;
+            dlsnvtd.Caption         = "Download subtitle near video";
+            dlsnvtd.InstructionText = _link.Release;
+            dlsnvtd.Text            = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode);
+            dlsnvtd.StandardButtons = TaskDialogStandardButtons.Cancel;
+            dlsnvtd.Cancelable      = true;
 
             foreach (var f in _fs.Files)
             {
@@ -215,14 +227,15 @@
                     };
                 fd.Click += (x, r) =>
                     {
-                        try { _td.Close(TaskDialogResult.Ok); } catch { }
+                        try   { dlsnvtd.Close(TaskDialogResult.Ok); }
+                        catch { }
                         NearVideoFinishMove(file, e.First, e.Second);
                     };
 
-                _td.Controls.Add(fd);
+                dlsnvtd.Controls.Add(fd);
             }
 
-            _td.Show();
+            dlsnvtd.Show();
         }
 
         /// <summary>
@@ -244,20 +257,20 @@
                         subtitle = Utils.SanitizeFileName(zip.Entries[0].FileName);
                         zip.Entries[0].Extract(mstream);
                         
-                        try { zip.Dispose(); } catch { }
+                        try { zip.Dispose();     } catch { }
                         try { File.Delete(temp); } catch { }
                         File.WriteAllBytes(temp, mstream.ToArray());
                     }
                 }
                 else
                 {
-                    _td = new TaskDialog();
+                    var dlsnvtd = new TaskDialog();
 
-                    _td.Caption         = "Download subtitle near video";
-                    _td.InstructionText = _link.Release;
-                    _td.Text            = "The downloaded subtitle was a ZIP package with more than one files.\r\nSelect the matching subtitle file to extract it from the package:";
-                    _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-                    _td.Cancelable      = true;
+                    dlsnvtd.Caption         = "Download subtitle near video";
+                    dlsnvtd.InstructionText = _link.Release;
+                    dlsnvtd.Text            = "The downloaded subtitle was a ZIP package with more than one files.\r\nSelect the matching subtitle file to extract it from the package:";
+                    dlsnvtd.StandardButtons = TaskDialogStandardButtons.Cancel;
+                    dlsnvtd.Cancelable      = true;
 
                     foreach (var c in zip.Entries)
                     {
@@ -269,14 +282,15 @@
                             };
                         fd.Click += (x, r) =>
                             {
-                                try { _td.Close(TaskDialogResult.Ok); } catch { }
+                                try   { dlsnvtd.Close(TaskDialogResult.Ok); }
+                                catch { }
 
                                 using (var mstream = new MemoryStream())
                                 {
                                     subtitle = Utils.SanitizeFileName(cmp.FileName);
                                     cmp.Extract(mstream);
 
-                                    try { zip.Dispose(); } catch { }
+                                    try { zip.Dispose();     } catch { }
                                     try { File.Delete(temp); } catch { }
                                     File.WriteAllBytes(temp, mstream.ToArray());
                                 }
@@ -284,10 +298,10 @@
                                 NearVideoFinishMove(video, temp, subtitle);
                             };
 
-                        _td.Controls.Add(fd);
+                        dlsnvtd.Controls.Add(fd);
                     }
 
-                    _td.Show();
+                    dlsnvtd.Show();
                     return;
                 }
             }
