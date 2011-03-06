@@ -8,12 +8,13 @@
     using Ionic.Zip;
 
     using Microsoft.Win32;
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.FileNames;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
+
+    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>SubtitlesPage</c> links.
@@ -21,10 +22,12 @@
     public class SubtitleDownloadTaskDialog
     {
         private TaskDialog _td;
+        private Result _res;
         private IDownloader _dl;
         private FileSearch _fs;
         private Subtitle _link;
         private string _show, _episode;
+        private bool _play;
 
         #region Download subtitle
         /// <summary>
@@ -33,21 +36,23 @@
         /// <param name="link">The link.</param>
         public void Download(Subtitle link)
         {
-            _td = new TaskDialog();
+            _td = new TaskDialog
+                {
+                    Title           = "Downloading...",
+                    Instruction     = link.Release,
+                    Content         = "Sending request to " + new Uri(link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
 
-            _td.Caption         = "Downloading...";
-            _td.InstructionText = link.Release;
-            _td.Text            = "Sending request to " + new Uri(link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...";
-            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-            _td.Cancelable      = true;
-            _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
-            _td.Closing        += TaskDialogClosing;
+            _td.SetMarqueeProgressBar(true);
+            _td.Destroyed += TaskDialogDestroyed;
 
-            new Thread(() => _td.Show()).Start();
+            new Thread(() => _res = _td.Show().CommonButton).Start();
 
             _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += DownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => _td.Text = "Downloading file... ({0}%)".FormatWith(a.Data);
+            _dl.DownloadProgressChanged += (s, a) => _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
 
             _dl.Download(link, Utils.GetRandomFileName());
 
@@ -62,7 +67,11 @@
         private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-            try { _td.Close(TaskDialogResult.Ok); } catch { }
+
+            if (_td != null && _td.IsShowing)
+            {
+                _td.SimulateButtonClick(-1);
+            }
 
             if (e.Third == "LaunchedBrowser")
             {
@@ -108,41 +117,29 @@
 
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                var spnctd = new TaskDialog
+                new TaskDialog
                     {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Search path not configured",
-                        InstructionText = "Search path not configured",
-                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        Cancelable      = true
-                    };
-
-                spnctd.Show();
+                        CommonIcon  = TaskDialogIcon.Stop,
+                        Title       = "Search path not configured",
+                        Instruction = "Search path not configured",
+                        Content     = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'."
+                    }.Show();
                 return;
             }
 
-            _td = new TaskDialog();
-
-            _td.Caption         = "Searching...";
-            _td.InstructionText = link.Release;
-            _td.Text            = "Searching for the episode...";
-            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-            _td.Cancelable      = true;
-            _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
-            _td.Closing        += TaskDialogClosing;
-
-            new Thread(() => 
+            _td = new TaskDialog
                 {
-                    try
-                    {
-                        _td.Show();
-                    }
-                    catch (NullReferenceException)
-                    {
-                        // when _td is closed and disposed in the next step
-                        // a NullReferenceException will be thrown at this point
-                    }
-                }).Start();
+                    Title           = "Searching...",
+                    Instruction     = link.Release,
+                    Content         = "Searching for the episode...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
+
+            _td.SetMarqueeProgressBar(true);
+            _td.Destroyed += TaskDialogDestroyed;
+
+            new Thread(() => _res = _td.Show().CommonButton).Start();
 
             _fs = new FileSearch(path, show, episode);
 
@@ -162,26 +159,28 @@
             if (_fs.Files.Count == 0)
             {
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-                var nfftd = new TaskDialog();
+                if (_td != null && _td.IsShowing)
+                {
+                    _td.SimulateButtonClick(-1);
+                }
 
-                nfftd.Icon            = TaskDialogStandardIcon.Error;
-                nfftd.Caption         = "No files found";
-                nfftd.InstructionText = _link.Release;
-                nfftd.Text            = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.";
-                nfftd.StandardButtons = TaskDialogStandardButtons.Ok;
-                nfftd.Cancelable      = true;
-
-                nfftd.Show();
+                new TaskDialog
+                    {
+                        CommonIcon    = TaskDialogIcon.Stop,
+                        Title         = "No files found",
+                        Instruction   = _link.Release,
+                        Content       = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.",
+                        CommonButtons = TaskDialogButton.OK
+                    }.Show();
                 return;
             }
 
-            _td.Text = "Sending request to " + new Uri(_link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...";
+            _td.Content = "Sending request to " + new Uri(_link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...";
 
             _dl                          = _link.Source.Downloader;
             _dl.DownloadFileCompleted   += NearVideoDownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => { if (_td != null) _td.Text = "Downloading file... ({0}%)".FormatWith(a.Data); };
+            _dl.DownloadProgressChanged += (s, a) => _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
 
             _dl.Download(_link, Utils.GetRandomFileName());
         }
@@ -194,45 +193,56 @@
         private void NearVideoDownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-            var dlsnvtd = new TaskDialog();
+            if (_td != null && _td.IsShowing)
+            {
+                _td.SimulateButtonClick(-1);
+            }
 
-            dlsnvtd.Caption         = "Download subtitle near video";
-            dlsnvtd.InstructionText = _link.Release;
-            dlsnvtd.Text            = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode);
-            dlsnvtd.StandardButtons = TaskDialogStandardButtons.Cancel;
-            dlsnvtd.Cancelable      = true;
+            var dlsnvtd = new TaskDialog
+                {
+                    Title                 = "Download subtitle near video",
+                    Instruction           = _link.Release,
+                    Content               = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode),
+                    CommonButtons         = TaskDialogButton.Cancel,
+                    CustomButtons         = new CustomButton[_fs.Files.Count],
+                    UseCommandLinks       = true,
+                    VerificationText      = "Play video after subtitle is downloaded",
+                    IsVerificationChecked = false
+                };
 
+            dlsnvtd.VerificationClick += (s, c) => _play = c.IsChecked ;
+            dlsnvtd.ButtonClick       += (s, c) =>
+                {
+                    if (c.ButtonID < _fs.Files.Count)
+                    {
+                        new Thread(() =>
+                            {
+                                NearVideoFinishMove(_fs.Files[c.ButtonID], e.First, e.Second);
+
+                                if (_play)
+                                {
+                                    Utils.Run(_fs.Files[c.ButtonID]);
+                                }
+                            }).Start();
+                    }
+                };
+
+            var i = 0;
             foreach (var f in _fs.Files)
             {
                 var file    = f;
                 var fi      = new FileInfo(file);
                 var quality = Parser.ParseQuality(file);
-                var instr   = string.Empty;
+                var instr   = fi.Name + "\n";
 
                 if (quality != Parsers.Downloads.Qualities.Unknown)
                 {
-                    instr = quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
+                    instr += quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
                 }
 
-                instr += Utils.GetFileSize(fi.Length)
-                       + Environment.NewLine
-                       + fi.DirectoryName;
-
-                var fd = new TaskDialogCommandLink
-                    {
-                        Text        = fi.Name,
-                        Instruction = instr
-                    };
-                fd.Click += (x, r) =>
-                    {
-                        try   { dlsnvtd.Close(TaskDialogResult.Ok); }
-                        catch { }
-                        NearVideoFinishMove(file, e.First, e.Second);
-                    };
-
-                dlsnvtd.Controls.Add(fd);
+                dlsnvtd.CustomButtons[i] = new CustomButton(i, instr + Utils.GetFileSize(fi.Length) + "\n" + fi.DirectoryName);
+                i++;
             }
 
             dlsnvtd.Show();
@@ -264,31 +274,24 @@
                 }
                 else
                 {
-                    var dlsnvtd = new TaskDialog();
+                    var dlsnvtd = new TaskDialog
+                        {
+                            Title           = "Download subtitle near video",
+                            Instruction     = _link.Release,
+                            Content         = "The downloaded subtitle was a ZIP package with more than one files.\r\nSelect the matching subtitle file to extract it from the package:",
+                            CommonButtons   = TaskDialogButton.Cancel,
+                            CustomButtons   = new CustomButton[zip.Count],
+                            UseCommandLinks = true
+                        };
 
-                    dlsnvtd.Caption         = "Download subtitle near video";
-                    dlsnvtd.InstructionText = _link.Release;
-                    dlsnvtd.Text            = "The downloaded subtitle was a ZIP package with more than one files.\r\nSelect the matching subtitle file to extract it from the package:";
-                    dlsnvtd.StandardButtons = TaskDialogStandardButtons.Cancel;
-                    dlsnvtd.Cancelable      = true;
-
-                    foreach (var c in zip.Entries)
-                    {
-                        var cmp = c;
-                        var fd  = new TaskDialogCommandLink
+                    dlsnvtd.ButtonClick += (s, c) =>
+                        {
+                            if (c.ButtonID < zip.Count)
                             {
-                                Text        = cmp.FileName,
-                                Instruction = "{0}   –   {1}".FormatWith(Utils.GetFileSize(cmp.UncompressedSize), cmp.LastModified)
-                            };
-                        fd.Click += (x, r) =>
-                            {
-                                try   { dlsnvtd.Close(TaskDialogResult.Ok); }
-                                catch { }
-
                                 using (var mstream = new MemoryStream())
                                 {
-                                    subtitle = Utils.SanitizeFileName(cmp.FileName);
-                                    cmp.Extract(mstream);
+                                    subtitle = Utils.SanitizeFileName(zip.Entries[c.ButtonID].FileName);
+                                    zip.Entries[c.ButtonID].Extract(mstream);
 
                                     try { zip.Dispose();     } catch { }
                                     try { File.Delete(temp); } catch { }
@@ -296,9 +299,18 @@
                                 }
 
                                 NearVideoFinishMove(video, temp, subtitle);
-                            };
+                            }
+                            else
+                            {
+                                _play = false;
+                            }
+                        };
 
-                        dlsnvtd.Controls.Add(fd);
+                    var i = 0;
+                    foreach (var c in zip.Entries)
+                    {
+                        dlsnvtd.CustomButtons[i] = new CustomButton(i, c.FileName + "\n" + Utils.GetFileSize(c.UncompressedSize) + "   –   " + c.LastModified);
+                        i++;
                     }
 
                     dlsnvtd.Show();
@@ -318,13 +330,13 @@
         #endregion
 
         /// <summary>
-        /// Handles the Closing event of the TaskDialog control.
+        /// Handles the Destroyed event of the _td control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="Microsoft.WindowsAPICodePack.Dialogs.TaskDialogClosingEventArgs"/> instance containing the event data.</param>
-        private void TaskDialogClosing(object sender, TaskDialogClosingEventArgs e)
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (e.TaskDialogResult == TaskDialogResult.Cancel)
+            if (_res == Result.Cancel)
             {
                 if (_fs != null)
                 {

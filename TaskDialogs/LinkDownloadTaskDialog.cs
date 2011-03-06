@@ -5,11 +5,12 @@
     using System.Threading;
 
     using Microsoft.Win32;
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
+
+    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>DownloadLinksPage</c> links.
@@ -17,8 +18,8 @@
     public class LinkDownloadTaskDialog
     {
         private TaskDialog _td;
+        private Result _res;
         private IDownloader _dl;
-        private LinkItem _link;
 
         /// <summary>
         /// Downloads the specified link.
@@ -27,23 +28,23 @@
         /// <param name="token">The token.</param>
         public void Download(LinkItem link, string token)
         {
-            _link = link;
+            _td = new TaskDialog
+                {
+                    Title           = "Downloading...",
+                    Instruction     = link.Release,
+                    Content         = "Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
 
-            _td = new TaskDialog();
+            _td.SetMarqueeProgressBar(true);
+            _td.Destroyed += TaskDialogDestroyed;
 
-            _td.Caption         = "Downloading...";
-            _td.InstructionText = link.Release;
-            _td.Text            = "Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...";
-            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-            _td.Cancelable      = true;
-            _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
-            _td.Closing        += TaskDialogClosing;
-
-            new Thread(() => _td.Show()).Start();
+            new Thread(() => _res = _td.Show().CommonButton).Start();
 
             _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += DownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => _td.Text = "Downloading file... ({0}%)".FormatWith(a.Data);
+            _dl.DownloadProgressChanged += (s, a) => _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
 
             _dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
 
@@ -51,17 +52,18 @@
         }
 
         /// <summary>
-        /// Handles the Closing event of the TaskDialog control.
+        /// Handles the Destroyed event of the _td control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="Microsoft.WindowsAPICodePack.Dialogs.TaskDialogClosingEventArgs"/> instance containing the event data.</param>
-        private void TaskDialogClosing(object sender, TaskDialogClosingEventArgs e)
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (e.TaskDialogResult == TaskDialogResult.Cancel)
+            if (_res == Result.Cancel)
             {
                 _dl.CancelAsync();
             }
         }
+
         /// <summary>
         /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
         /// </summary>
@@ -70,7 +72,11 @@
         private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-            try { _td.Close(TaskDialogResult.Ok); } catch { }
+
+            if (_td != null && _td.IsShowing)
+            {
+                _td.SimulateButtonClick(-1);
+            }
 
             switch (e.Third)
             {

@@ -109,6 +109,7 @@
       <HintPath>.\Transitionals.dll</HintPath>
     </Reference>
     <Reference Include="UIAutomationProvider" />
+    <Reference Include="VistaControls, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -568,6 +569,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\tick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dependencies\VistaControls.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

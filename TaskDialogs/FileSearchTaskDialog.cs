@@ -5,10 +5,11 @@
     using System.IO;
     using System.Threading;
 
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.FileNames;
+
+    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>FileSearch</c> class.
@@ -16,6 +17,7 @@
     public class FileSearchTaskDialog
     {
         private TaskDialog _td;
+        private Result _res;
         private FileSearch _fs;
         private string _show, _episode;
         private volatile bool _active;
@@ -34,28 +36,27 @@
 
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                var spnctd = new TaskDialog
+                new TaskDialog
                     {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Search path not configured",
-                        InstructionText = "Search path not configured",
-                        Text            = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        Cancelable      = true
-                    };
-
-                spnctd.Show();
+                        CommonIcon  = TaskDialogIcon.Stop,
+                        Title       = "Search path not configured",
+                        Instruction = "Search path not configured",
+                        Content     = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'."
+                    }.Show();
                 return;
             }
 
-            _td = new TaskDialog();
+            _td = new TaskDialog
+                {
+                    Title           = "Searching...",
+                    Instruction     = show + " " + episode,
+                    Content         = "Searching for the episode...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
 
-            _td.Caption         = "Searching...";
-            _td.InstructionText = show + " " + episode;
-            _td.Text            = "Searching for the episode...";
-            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-            _td.Cancelable      = true;
-            _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
-            _td.Closing        += TaskDialogClosing;
+            _td.SetMarqueeProgressBar(true);
+            _td.Destroyed += TaskDialogDestroyed;
 
             _active = true;
             new Thread(() =>
@@ -64,10 +65,10 @@
 
                     if (_active)
                     {
-                        try { _td.Show(); } catch (NullReferenceException) { }
+                        _res = _td.Show().CommonButton;
                     }
                 }).Start();
-
+            
             _fs = new FileSearch(path, show, episode);
 
             _fs.FileSearchDone += FileSearchDone;
@@ -77,13 +78,13 @@
         }
 
         /// <summary>
-        /// Handles the Closing event of the TaskDialog control.
+        /// Handles the Destroyed event of the _td control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="Microsoft.WindowsAPICodePack.Dialogs.TaskDialogClosingEventArgs"/> instance containing the event data.</param>
-        private void TaskDialogClosing(object sender, TaskDialogClosingEventArgs e)
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (e.TaskDialogResult == TaskDialogResult.Cancel)
+            if (_active && _res == Result.Cancel)
             {
                 _active = false;
 
@@ -101,21 +102,23 @@
             _active = false;
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-            try { _td.Close(TaskDialogResult.Ok); } catch { }
+
+            if (_td != null && _td.IsShowing)
+            {
+                _td.SimulateButtonClick(-1);
+            }
 
             switch (_fs.Files.Count)
             {
                 case 0:
-                    var nfftd = new TaskDialog();
-
-                    nfftd.Icon            = TaskDialogStandardIcon.Error;
-                    nfftd.Caption         = "No files found";
-                    nfftd.InstructionText = _show + " " + _episode;
-                    nfftd.Text            = "No files were found for this episode.";
-                    nfftd.StandardButtons = TaskDialogStandardButtons.Ok;
-                    nfftd.Cancelable      = true;
-
-                    nfftd.Show();
+                    new TaskDialog
+                        {
+                            CommonIcon    = TaskDialogIcon.Stop,
+                            Title         = "No files found",
+                            Instruction   = _show + " " + _episode,
+                            Content       = "No files were found for this episode.",
+                            CommonButtons = TaskDialogButton.OK
+                        }.Show();
                     break;
 
                 case 1:
@@ -123,43 +126,38 @@
                     break;
 
                 default:
-                    var mfftd = new TaskDialog();
+                    var mfftd = new TaskDialog
+                        {
+                            Title           = "Multiple files found",
+                            Instruction     = _show + " " + _episode,
+                            Content         = "Multiple files were found for this episode:",
+                            CommonButtons   = TaskDialogButton.Cancel,
+                            CustomButtons   = new CustomButton[_fs.Files.Count],
+                            UseCommandLinks = true
+                        };
 
-                    mfftd.Caption         = "Multiple files found";
-                    mfftd.InstructionText = _show + " " + _episode;
-                    mfftd.Text            = "Multiple files were found for this episode:";
-                    mfftd.StandardButtons = TaskDialogStandardButtons.Cancel;
-                    mfftd.Cancelable      = true;
+                    mfftd.ButtonClick += (s, c) =>
+                        {
+                            if(c.ButtonID < _fs.Files.Count)
+                            {
+                                Utils.Run(_fs.Files[c.ButtonID]);
+                            }
+                        };
 
+                    var i = 0;
                     foreach (var file in _fs.Files)
                     {
-                        var tmp     = file;
                         var fi      = new FileInfo(file);
                         var quality = Parser.ParseQuality(file);
-                        var instr   = string.Empty;
+                        var instr   = fi.Name + "\n";
 
                         if (quality != Parsers.Downloads.Qualities.Unknown)
                         {
-                            instr = quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
+                            instr += quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
                         }
 
-                        instr += Utils.GetFileSize(fi.Length)
-                               + Environment.NewLine
-                               + fi.DirectoryName;
-
-                        var fd = new TaskDialogCommandLink
-                            {
-                                Text        = fi.Name,
-                                Instruction = instr
-                            };
-                        fd.Click += (s, r) =>
-                            {
-                                try   { mfftd.Close(TaskDialogResult.Ok); }
-                                catch { }
-                                Utils.Run(tmp);
-                            };
-
-                        mfftd.Controls.Add(fd);
+                        mfftd.CustomButtons[i] = new CustomButton(i, instr + Utils.GetFileSize(fi.Length) + "\n" + fi.DirectoryName);
+                        i++;
                     }
 
                     mfftd.Show();

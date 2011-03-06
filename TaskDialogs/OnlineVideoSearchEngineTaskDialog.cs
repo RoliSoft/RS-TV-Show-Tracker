@@ -3,10 +3,11 @@
     using System;
     using System.Threading;
 
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+
+    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>OnlineVideoSearchEngine</c> class.
@@ -14,6 +15,7 @@
     public class OnlineVideoSearchEngineTaskDialog<T> where T : OnlineVideoSearchEngine, new()
     {
         private TaskDialog _td;
+        private Result _res;
         private T _os;
 
         /// <summary>
@@ -24,17 +26,19 @@
         /// <param name="extra">The extra which might be needed by the engine.</param>
         public void Search(string show, string episode, object extra = null)
         {
-            _td = new TaskDialog();
+            _td = new TaskDialog
+                {
+                    Title           = "Searching...",
+                    Instruction     = show + " " + episode,
+                    Content         = "Searching for the episode...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
 
-            _td.Caption         = "Searching...";
-            _td.InstructionText = show + " " + episode;
-            _td.Text            = "Searching for the episode...";
-            _td.StandardButtons = TaskDialogStandardButtons.Cancel;
-            _td.Cancelable      = true;
-            _td.ProgressBar     = new TaskDialogProgressBar { State = TaskDialogProgressBarState.Marquee };
-            _td.Closing        += TaskDialogClosing;
+            _td.SetMarqueeProgressBar(true);
+            _td.Destroyed += TaskDialogDestroyed;
 
-            new Thread(() => _td.Show()).Start();
+            new Thread(() => _res = _td.Show().CommonButton).Start();
 
             _os = new T();
 
@@ -46,13 +50,13 @@
         }
 
         /// <summary>
-        /// Handles the Closing event of the TaskDialog control.
+        /// Handles the Destroyed event of the _td control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="Microsoft.WindowsAPICodePack.Dialogs.TaskDialogClosingEventArgs"/> instance containing the event data.</param>
-        private void TaskDialogClosing(object sender, TaskDialogClosingEventArgs e)
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (e.TaskDialogResult == TaskDialogResult.Cancel)
+            if (_res == Result.Cancel)
             {
                 _os.CancelSearch();
             }
@@ -67,6 +71,11 @@
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
+            if (_td != null && _td.IsShowing)
+            {
+                _td.SimulateButtonClick(-1);
+            }
+
             Utils.Run(e.Second);
         }
 
@@ -78,32 +87,37 @@
         private void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-            try { _td.Close(TaskDialogResult.Ok); } catch { }
 
-            var nvftd = new TaskDialog();
+            if (_td != null && _td.IsShowing)
+            {
+                _td.SimulateButtonClick(-1);
+            }
 
-            nvftd.Icon            = TaskDialogStandardIcon.Error;
-            nvftd.Caption         = "No videos found";
-            nvftd.InstructionText = e.First;
-            nvftd.Text            = e.Second;
-            nvftd.StandardButtons = TaskDialogStandardButtons.Ok;
-            nvftd.Cancelable      = true;
+            var nvftd = new TaskDialog
+                {
+                    CommonIcon    = TaskDialogIcon.Stop,
+                    Title         = "No videos found",
+                    Instruction   = e.First,
+                    Content       = e.Second,
+                    CommonButtons = TaskDialogButton.OK
+                };
 
             if (!string.IsNullOrWhiteSpace(e.Third.Item3))
             {
-                nvftd.DetailsExpandedText = e.Third.Item3;
+                nvftd.ExpandedInformation = e.Third.Item3;
             }
 
             if (!string.IsNullOrEmpty(e.Third.Item1))
             {
-                var fd = new TaskDialogCommandLink { Text = e.Third.Item1 };
-                fd.Click += (s, r) =>
+                nvftd.UseCommandLinks = true;
+                nvftd.CustomButtons   = new[] { new CustomButton(0, e.Third.Item1) };
+                nvftd.ButtonClick    += (s, c) =>
                     {
-                        nvftd.Close();
-                        Utils.Run(e.Third.Item2);
+                        if (c.ButtonID == 0)
+                        {
+                            Utils.Run(e.Third.Item2);
+                        }
                     };
-
-                nvftd.Controls.Add(fd);
             }
 
             nvftd.Show();
