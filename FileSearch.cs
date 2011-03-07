@@ -41,8 +41,8 @@
         /// <value>The files.</value>
         public List<string> Files { get; set; }
 
-        private readonly IEnumerable<string> _titleParts, _episodeParts;
-        private readonly Regex _knownVideoRegex, _sampleVideoRegex;
+        private readonly IEnumerable<string> _titleParts;
+        private readonly Regex _episodeRegex, _knownVideoRegex, _sampleVideoRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
@@ -52,19 +52,8 @@
         /// <param name="episode">The episode number.</param>
         public FileSearch(string path, string show, string episode)
         {
-            _titleParts   = ShowNames.Parser.GetRoot(show);
-            _episodeParts = new[]
-                {
-                    // S02E14
-                    episode,
-                    // S02.E14
-                    episode.Replace("E", ".E"),
-                    // 2x14
-                    Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase),
-                    // 214
-                    Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
-                };
-            
+            _titleParts       = ShowNames.Parser.GetRoot(show);
+            _episodeRegex     = ShowNames.Parser.GenerateEpisodeRegexes(episode);
             _knownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
             _sampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
 
@@ -123,7 +112,7 @@
                  && _titleParts.All(part => Regex.IsMatch(name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
                  && _knownVideoRegex.IsMatch(name) // is it a known video file extension?
                  && !_sampleVideoRegex.IsMatch(name) // is it not a sample?
-                 && _episodeParts.Any(ep => Regex.IsMatch(name, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)) // is it the episode we want?
+                 && _episodeRegex.IsMatch(name) // is it the episode we want?
                  && !Files.Contains(file)) // and not in the array already?
                 {
                     Files.Add(file);
@@ -139,7 +128,7 @@
                 }
 
                 if (_titleParts.All(part => Regex.IsMatch(dir, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
-                 && _episodeParts.Any(ep => Regex.IsMatch(dir, @"\b" + ep + @"\b", RegexOptions.IgnoreCase))) // is it the episode we want?
+                 && _episodeRegex.IsMatch(dir)) // is it the episode we want?
                 {
                     // search for matching episodes inside the matching directory
                     foreach (var file in Directory.GetFiles(dir))

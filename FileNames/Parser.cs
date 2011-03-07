@@ -227,5 +227,23 @@
         {
             return regexes.All(regex => Regex.IsMatch(input, regex, RegexOptions.IgnoreCase));
         }
+
+        /// <summary>
+        /// Generates a new name.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="file">The file.</param>
+        /// <returns>New file name.</returns>
+        public static string FormatFileName(string format, ShowFile file)
+        {
+            return format.Replace("$show", file.Show)
+                         .Replace("$seasonz", file.Season.ToString("0"))
+                         .Replace("$season", file.Season.ToString("00"))
+                         .Replace("$episodez", file.SecondEpisode.HasValue ? file.Episode.ToString("0") + "-" + file.SecondEpisode.Value.ToString("0") : file.Episode.ToString("0"))
+                         .Replace("$episode", file.SecondEpisode.HasValue ? file.Episode.ToString("00") + "-" + file.SecondEpisode.Value.ToString("00") : file.Episode.ToString("00"))
+                         .Replace("$title", file.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title)
+                         .Replace("$quality", file.Quality)
+                         .Replace("$ext", file.Extension);
+        }
     }
 }

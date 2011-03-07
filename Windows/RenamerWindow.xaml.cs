@@ -75,20 +75,14 @@
         public static readonly string[] SampleTitleParts = ShowNames.Parser.GetRoot(SampleInfo.Show);
 
         /// <summary>
-        /// Contains the matching episode parts for the sample file.
+        /// Contains a regular expression which matches the episode parts for the sample file.
         /// </summary>
-        public static readonly string[] SampleEpisodeParts = new[]
-            {
-                "S06E02",
-                "S06E02".Replace("E", ".E"),
-                Regex.Replace("S06E02", "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase),
-                Regex.Replace("S06E02", "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
-            };
+        public static readonly Regex SampleEpisodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(new ShowEpisode(SampleInfo.Season, SampleInfo.Episode));
 
         /// <summary>
         /// Contains a regular expression which matches for video file extensions.
         /// </summary>
-        public static readonly Regex SampleKnownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
+        public static readonly Regex SampleKnownVideoRegex = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Contains a regular expression which matches for sample files.
@@ -432,7 +426,7 @@
             if (resultingNameTextBox == null) return;
 
             Settings.Set("Rename Format", Format = renameFormatTextBox.Text);
-            resultingNameTextBox.Text = GenerateName(SampleInfo);
+            resultingNameTextBox.Text = FileNames.Parser.FormatFileName(Format, SampleInfo);
 
             if (TestName(resultingNameTextBox.Text))
             {
@@ -447,23 +441,6 @@
         }
 
         /// <summary>
-        /// Generates a new name.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <returns>New file name.</returns>
-        public static string GenerateName(ShowFile file)
-        {
-            return Format.Replace("$show",     file.Show)
-                         .Replace("$seasonz",  file.Season.ToString("0"))
-                         .Replace("$season",   file.Season.ToString("00"))
-                         .Replace("$episodez", file.Episode.ToString("0"))
-                         .Replace("$episode",  file.Episode.ToString("00"))
-                         .Replace("$title",    file.Title)
-                         .Replace("$quality",  file.Quality)
-                         .Replace("$ext",      file.Extension);
-        }
-
-        /// <summary>
         /// Tests the new format to see if the <c>FileSearch</c> class will find it.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -474,7 +451,7 @@
                 && SampleTitleParts.All(part => Regex.IsMatch(name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
                 && SampleKnownVideoRegex.IsMatch(name) // is it a known video file extension?
                 && !SampleSampleVideoRegex.IsMatch(name) // is it not a sample?
-                && SampleEpisodeParts.Any(ep => Regex.IsMatch(name, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)); // is it the episode we want?
+                && SampleEpisodeRegex.IsMatch(name); // is it the episode we want?
         }
         #endregion
 

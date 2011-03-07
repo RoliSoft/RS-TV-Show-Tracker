@@ -46,6 +46,12 @@
         public int Episode { get; set; }
 
         /// <summary>
+        /// Gets or sets the second episode number.
+        /// </summary>
+        /// <value>The second episode.</value>
+        public int? SecondEpisode { get; set; }
+
+        /// <summary>
         /// Gets or sets the title of the episode.
         /// </summary>
         /// <value>The episode title.</value>
@@ -78,13 +84,14 @@
         /// <param name="quality">The quality of the file.</param>
         public ShowFile(string name, string show, ShowEpisode ep, string title, string quality)
         {
-            Name      = name;
-            Extension = Path.GetExtension(Name);
-            Show      = show;
-            Season    = ep.Season;
-            Episode   = ep.Episode;
-            Title     = title;
-            Quality   = quality;
+            Name          = name;
+            Extension     = Path.GetExtension(Name);
+            Show          = show;
+            Season        = ep.Season;
+            Episode       = ep.Episode;
+            SecondEpisode = ep.SecondEpisode;
+            Title         = title;
+            Quality       = quality;
         }
     }
 }

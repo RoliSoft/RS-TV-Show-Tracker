@@ -144,13 +144,29 @@
         public static ShowEpisode ExtractEpisode(string name)
         {
             var m = Regexes.AdvNumbering.Match(name);
-            return m.Success
-                   ? new ShowEpisode
+
+            if (m.Success)
+            {
+                if (m.Groups["em"].Success)
+                {
+                    return new ShowEpisode
+                       {
+                           Season        = m.Groups["s"].Value.ToInteger(),
+                           Episode       = m.Groups["em"].Value.ToInteger(),
+                           SecondEpisode = m.Groups["e"].Value.ToInteger()
+                       };
+                }
+                else
+                {
+                    return new ShowEpisode
                        {
                            Season  = m.Groups["s"].Value.ToInteger(),
                            Episode = m.Groups["e"].Value.ToInteger()
-                       }
-                   : null;
+                       };
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -187,6 +203,46 @@
             }
 
             return Split(query)[0] + " " + ExtractEpisode(query, format);
+        }
+
+        /// <summary>
+        /// Generates regular expressions for matching a huge variety of episode numberings.
+        /// </summary>
+        /// <param name="episode">The raw episode.</param>
+        /// <returns>List of regular expressions.</returns>
+        public static Regex GenerateEpisodeRegexes(string episode)
+        {
+            return GenerateEpisodeRegexes(ExtractEpisode(episode));
+        }
+
+        /// <summary>
+        /// Generates regular expressions for matching a huge variety of episode numberings.
+        /// </summary>
+        /// <param name="episode">The extracted episode.</param>
+        /// <returns>List of regular expressions.</returns>
+        public static Regex GenerateEpisodeRegexes(ShowEpisode episode)
+        {
+            var regexes = new[]
+                {
+                    // S02E14
+                    @"S{0:00}E{1:00}",
+                    // S02E13-14
+                    @"S{0:00}E(?:[0-9]{{1,2}}\-E?){1:00}",
+                    // S02.E14
+                    @"S{0:00}.E{1:00}",
+                    // S02.E13-14
+                    @"S{0:00}.E(?:[0-9]{{1,2}}.?\-.?E?){1:00}",
+                    // 2x14
+                    @"{0:0}X{1:00}",
+                    // 2x13-14
+                    @"{0:0}X(?:[0-9]{{1,2}}\-){1:00}",
+                    // 214
+                    @"{0:0}{1:00}",
+                };
+
+            var expr = regexes.Aggregate(@"\b(?:", (current, format) => current + (format.FormatWith(episode.Season, episode.Episode) + "|")).TrimEnd('|') + @")\b";
+
+            return new Regex(expr, RegexOptions.IgnoreCase);
         }
     }
 }

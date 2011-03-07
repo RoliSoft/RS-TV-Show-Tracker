@@ -57,6 +57,11 @@
         public static readonly Regex Whitespace    = new Regex(@"\s+");
 
         /// <summary>
+        /// Matches any part numbering in the episode title.
+        /// </summary>
+        public static readonly Regex PartText      = new Regex(@"(,? part \d| \((part ?)?\d\))\s*$", RegexOptions.IgnoreCase);
+
+        /// <summary>
         /// Simple regular expression to detect S00E00 and 0x00 at the end of a query.
         /// </summary>
         public static readonly Regex Numbering     = new Regex(@"\s+((?:S[0-9]{2}E[0-9]{2})|(?:[0-9]{1,2}x[0-9]{1,2}))", RegexOptions.IgnoreCase);
@@ -66,9 +71,9 @@
         /// </summary>
         public static readonly Regex AdvNumbering  = new Regex(@"(
                                                                    # S01E01, S01E01-02, S01E01-E02, S01E01E02
-                                                                    S(?<s>[0-9]{1,2})(\.|\s|\-)?E([0-9]{1,2}(?!\-(?:1080|720|480))(\-E?|E))?(?<e>[0-9]{1,2})|
+                                                                    S(?<s>[0-9]{1,2})(\.|\s|\-)?E(?:(?<em>[0-9]{1,2})(?!\-(?:1080|720|480))(\-E?|E))?(?<e>[0-9]{1,2})|
                                                                    # 1x01, 1x01-02
-                                                                    (?<s>[0-9]{1,2})x([0-9]{1,2}\-)?(?<e>[0-9]{1,2})
+                                                                    (?<s>[0-9]{1,2})x(?:(?<em>[0-9]{1,2})\-)?(?<e>[0-9]{1,2})
                                                                  )", RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
     }
 }

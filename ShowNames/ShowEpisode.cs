@@ -18,6 +18,13 @@
         public int Episode { get; set; }
 
         /// <summary>
+        /// Gets or sets the second episode number.
+        /// For example 2 in S01E01-02.
+        /// </summary>
+        /// <value>The second episode.</value>
+        public int? SecondEpisode { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ShowEpisode"/> class.
         /// </summary>
         public ShowEpisode()
@@ -36,6 +43,19 @@
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ShowEpisode"/> class.
+        /// </summary>
+        /// <param name="season">The season.</param>
+        /// <param name="episode">The episode.</param>
+        /// <param name="episode2">The second episode.</param>
+        public ShowEpisode(int season, int episode, int episode2)
+        {
+            Season        = season;
+            Episode       = episode;
+            SecondEpisode = episode2;
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>
@@ -43,7 +63,25 @@
         /// </returns>
         public override string ToString()
         {
-            return "S{0:00}E{1:00}".FormatWith(Season, Episode);
+            return SecondEpisode.HasValue
+                   ? "S{0:00}E{1:00}-{2:00}".FormatWith(Season, Episode, SecondEpisode)
+                   : "S{0:00}E{1:00}".FormatWith(Season, Episode);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            var ep = obj as ShowEpisode;
+            return ep != null
+                && Season == ep.Season
+                && Episode == ep.Episode
+                && SecondEpisode == ep.SecondEpisode;
         }
     }
 }

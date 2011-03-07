@@ -84,7 +84,7 @@
             get
             {
                 return Parsed && !string.IsNullOrWhiteSpace(Information.Show)
-                       ? Utils.SanitizeFileName(RenamerWindow.GenerateName(Information))
+                       ? Utils.SanitizeFileName(Parser.FormatFileName(RenamerWindow.Format, Information))
                        : string.Empty;
             }
         }

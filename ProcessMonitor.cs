@@ -6,6 +6,8 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
+    using RoliSoft.TVShowTracker.ShowNames;
+
     /// <summary>
     /// Provides methods to monitor a given process for open file handles.
     /// </summary>
@@ -67,7 +69,7 @@
 
             foreach (var show in shows)
             {
-                var parts = ShowNames.Parser.GetRoot(show["name"]);
+                var parts = Parser.GetRoot(show["name"]);
 
                 foreach (var file in files)
                 {
@@ -75,7 +77,7 @@
                                         || Regex.IsMatch(file.Directory.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase))) // or in the directory name?
                         && Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase)) // is it a known video file extension?
                     {
-                        var ep = ShowNames.Parser.ExtractEpisode(file.ToString());
+                        var ep = Parser.ExtractEpisode(file.ToString());
 
                         if (ep != null)
                         {
@@ -89,27 +91,41 @@
                             }
                             else
                             {
-                                // mark it as seen
-
-                                try
-                                {
-                                    var epid  = Database.GetEpisodeID(show["showid"], ep.Season, ep.Episode);
-
-                                    if (Database.Query("select * from tracking where showid = ? and episodeid = ?", show["showid"], epid).Count == 0)
-                                    {
-                                        Database.Execute("insert into tracking values (?, ?)", show["showid"], epid);
-                                        MainWindow.Active.DataChanged();
-                                    }
-                                }
-                                catch
-                                {
-                                    continue;
-                                }
+                                MarkAsSeen(show["showid"], ep);
                             }
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Marks the specified episode as seen.
+        /// </summary>
+        /// <param name="showid">The ID of the show.</param>
+        /// <param name="ep">The episode.</param>
+        public static void MarkAsSeen(string showid, ShowEpisode ep)
+        {
+            var eps = ep.SecondEpisode.HasValue
+                      ? Enumerable.Range(ep.Episode, ep.SecondEpisode.Value)
+                      : new[] { ep.Episode };
+
+            foreach (var epnr in eps)
+            {
+                var epid = Database.GetEpisodeID(showid, ep.Season, epnr);
+
+                if (string.IsNullOrEmpty(epid))
+                {
+                    continue;
+                }
+
+                if (Database.Query("select * from tracking where showid = ? and episodeid = ?", showid, epid).Count == 0)
+                {
+                    Database.Execute("insert into tracking values (?, ?)", showid, epid);
+                }
+            }
+
+            MainWindow.Active.DataChanged();
         }
     }
 }

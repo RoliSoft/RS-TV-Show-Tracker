@@ -72,8 +72,28 @@
             foreach (var show in list)
             {
                 Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key, false)) + "], [" + String.Join(", ", show.Value) + "]");
-
                 Assert.IsTrue(show.Value.SequenceEqual(Parser.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly.".FormatWith(show.Key));
+            }
+        }
+
+        /// <summary>
+        /// Tests the extraction of episode numberings.
+        /// </summary>
+        [Test]
+        public void EpisodeExtraction()
+        {
+            var shouldEqual = new Dictionary<string, ShowEpisode>
+                {
+                    { "lost.s06e03.720p.bluray.x264-macro.mkv", new ShowEpisode(6, 3) },
+                    { "lost.s06e17-18.720p.bluray.x264-macro.mkv", new ShowEpisode(6, 17, 18) },
+                    { "Archer.1x10.Dial.M.for.Mother.720p.WEB-DL.DD5.1.AVC-DON.mkv", new ShowEpisode(1, 10) },
+                    { "Community.S02E01.Anthropology.101.720p.WEB-DL.DD5.1.H.264-HoodBag", new ShowEpisode(2, 1) }
+                };
+
+            foreach (var show in shouldEqual)
+            {
+                Console.WriteLine(show.Key + " -> " + show.Value);
+                Assert.AreEqual(show.Value, Parser.ExtractEpisode(show.Key));
             }
         }
     }
