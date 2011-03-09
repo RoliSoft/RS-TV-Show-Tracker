@@ -516,6 +516,8 @@
         {
             e.Handled = true;
 
+            if (listView.SelectedIndex == -1) return;
+
             var cm = new ContextMenu();
             (e.Source as FrameworkElement).ContextMenu = cm;
             var link = (LinkItem)listView.SelectedValue;
