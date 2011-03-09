@@ -164,11 +164,6 @@
             {
                 activeOverviewPage.ListViewKeyUp(sender, e);
             }
-
-            var lnk = new Parsers.Subtitles.Subtitle(new Parsers.Subtitles.Engines.Addic7ed());
-            lnk.Release = "CacheFly";
-            lnk.URL = "http://cachefly.cachefly.net/100mb.test";
-            new TaskDialogs.SubtitleDownloadTaskDialog().Download(lnk);
         }
 
         /// <summary>
