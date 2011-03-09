@@ -36,7 +36,8 @@
                 };
 
             _td.SetMarqueeProgressBar(true);
-            _td.Destroyed += TaskDialogDestroyed;
+            _td.Destroyed   += TaskDialogDestroyed;
+            _td.ButtonClick += TaskDialogDestroyed;
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
@@ -56,8 +57,12 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (_res == Result.Cancel)
+            if (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2))
             {
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+
+                _res = Result.Cancel;
+
                 _os.CancelSearch();
             }
         }
@@ -76,6 +81,11 @@
                 _td.SimulateButtonClick(-1);
             }
 
+            if (_res == Result.Cancel)
+            {
+                return;
+            }
+
             Utils.Run(e.Second);
         }
 
@@ -91,6 +101,11 @@
             if (_td != null && _td.IsShowing)
             {
                 _td.SimulateButtonClick(-1);
+            }
+
+            if (_res == Result.Cancel)
+            {
+                return;
             }
 
             var nvftd = new TaskDialog

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display"
         Title="Settings" Height="395" Width="615" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize" Closing="GlassWindowClosing">
     <Grid>
-        <TabControl Margin="10,10" Name="tabControl">
+        <TabControl Margin="10,10" Padding="0" Name="tabControl">
             <TabControl.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
@@ -11,39 +11,39 @@
                 <ScrollViewer Name="generalScrollViewer">
                     <Grid Name="generalGrid">
                         <StackPanel Orientation="Vertical">
-                            <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                                <Label Content="Download Path:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                            <StackPanel Margin="10,10,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <Label Content="Download Path" FontSize="14" FontWeight="Bold" Padding="0" />
+                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                    Point to the directory where you download your TV shows. The "Play episode" feature will search this directory recursively for a matching video files.
+                                </TextBlock>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBox Name="dlPathTextBox" TextChanged="DlPathTextBoxTextChanged" Margin="0,0,5,0" Width="462" />
                                     <Button Content="Browse" Name="dlPathBrowseButton" Width="75" Click="DlPathBrowseButtonClick" />
                                 </StackPanel>
-                                <TextBlock TextWrapping="Wrap" Margin="0,5">
-                                    Point to the directory where you download your TV shows. The "Play episode" feature will search this directory recursively for a matching video files.
-                                </TextBlock>
                             </StackPanel>
 
-                            <StackPanel Margin="10,3,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                                <Label Content="Alternative Torrent Downloader Path:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <Label Content="Alternative Torrent Downloader" FontSize="14" FontWeight="Bold" Padding="0" />
+                                <TextBlock TextWrapping="Wrap" Margin="0,5">
+                                    If you want to open torrent files with an application other than the default association for .torrent files, point to the executable file here. You DON'T have to put here anything if you want to use the default.
+                                </TextBlock>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBox Name="torrentPathTextBox" TextChanged="TorrentPathTextBoxTextChanged" Margin="0,0,5,0" Width="462" />
                                     <Button Content="Browse" Name="torrentPathBrowseButton" Width="75" Click="TorrentPathBrowseButtonClick" />
                                 </StackPanel>
-                                <TextBlock TextWrapping="Wrap" Margin="0,5">
-                                    If you want to open torrent files with an application other than the default association for .torrent files, point to the executable file here. You DON'T have to put here anything if you want to use the default.
-                                </TextBlock>
                             </StackPanel>
 
-                            <StackPanel Margin="10,3,10,0" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                                <Label Content="Processes to Monitor:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
-                                <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
+                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <Label Content="Processes to Monitor" FontSize="14" FontWeight="Bold" Padding="0" />
                                 <TextBlock TextWrapping="Wrap" Margin="0,5">
                                     Enter the file name (not the path) of the video player you're using to watch TV shows. If you're using more than one, enter each name separated by a comma.<LineBreak />
                                     The application will monitor the open file handles of these processes and automatically mark a TV show as seen if you're watching it for more than 10 minutes.<LineBreak />
                                     For example: kmplayer.exe,wmplayer.exe
                                 </TextBlock>
+                                <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
                             </StackPanel>
 
-                            <StackPanel Margin="10,3,10,5" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                                 <CheckBox Content=" Start at system startup" Name="startAtStartup" Checked="StartAtStartupChecked" Unchecked="StartAtStartupUnchecked" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
                                 <TextBlock TextWrapping="Wrap" Margin="0">
                                     If you check this, the software will start automatically with the system, it will update itself and alert you if there are any new episodes from the TV shows you're watching.
@@ -51,7 +51,7 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <StackPanel Margin="10,3,10,5" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                                 <CheckBox Content=" Convert times to your local timezone" Name="convertTimezone" Checked="ConvertTimezoneChecked" Unchecked="ConvertTimezoneUnchecked" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
                                 <TextBlock TextWrapping="Wrap" Margin="0,0,0,5" Name="currentTimezone" />
                                 <TextBlock TextWrapping="Wrap" Margin="0">
@@ -61,8 +61,8 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <StackPanel Margin="10,3,10,10" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                                <CheckBox Content=" Show unhandled errors" Name="showUnhandledErrors" Checked="ShowUnhandledErrorsChecked"  Unchecked="ShowUnhandledErrorsUnchecked"  FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                            <StackPanel Margin="10,3,10,15" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <CheckBox Content=" Show unhandled errors" Name="showUnhandledErrors" Checked="ShowUnhandledErrorsChecked"  Unchecked="ShowUnhandledErrorsUnchecked" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
                                 <TextBlock TextWrapping="Wrap" Margin="0">
                                     If you check this, the software will show any unhandled exceptions along with their stacktrace.
                                     Only check it if you're a software developer, otherwise the displayed text will be gibberish to you.
@@ -142,8 +142,8 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    
-                    <Label Name="engineTitle" Content="Engine title" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,230,0,0" />
+
+                    <Label Name="engineTitle" Content="Engine title" FontFamily="Segoe UI" FontSize="16" Foreground="#FF003399" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,233,0,0" />
                     <Label Content="Cookies:" Name="cookiesLabel" FontWeight="Bold" HorizontalAlignment="Left" Margin="6,261,0,0" VerticalAlignment="Top" />
                     <StackPanel Orientation="Horizontal" Margin="11,284,11,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                         <TextBox Name="cookiesTextBox" TextChanged="CookiesTextBoxTextChanged" Margin="0,0,5,0" Width="465" />

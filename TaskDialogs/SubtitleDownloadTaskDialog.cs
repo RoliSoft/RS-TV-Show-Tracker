@@ -46,13 +46,30 @@
                 };
 
             _td.SetMarqueeProgressBar(true);
-            _td.Destroyed += TaskDialogDestroyed;
+            _td.Destroyed   += TaskDialogDestroyed;
+            _td.ButtonClick += TaskDialogDestroyed;
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
+            var prm = true;
+
             _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += DownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
+            _dl.DownloadProgressChanged += (s, a) =>
+                {
+                    if (_td != null && _td.IsShowing)
+                    {
+                        if (prm)
+                        {
+                            _td.SetMarqueeProgressBar(false);
+                            _td.Navigate(_td);
+                            prm = false;
+                        }
+
+                        _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
+                        _td.ProgressBarPosition = a.Data;
+                    }
+                };
 
             _dl.Download(link, Utils.GetRandomFileName());
 
@@ -71,6 +88,11 @@
             if (_td != null && _td.IsShowing)
             {
                 _td.SimulateButtonClick(-1);
+            }
+
+            if (_res == Result.Cancel)
+            {
+                return;
             }
 
             if (e.Third == "LaunchedBrowser")
@@ -137,7 +159,8 @@
                 };
 
             _td.SetMarqueeProgressBar(true);
-            _td.Destroyed += TaskDialogDestroyed;
+            _td.Destroyed   += TaskDialogDestroyed;
+            _td.ButtonClick += TaskDialogDestroyed;
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
@@ -165,6 +188,11 @@
                     _td.SimulateButtonClick(-1);
                 }
 
+                if (_res == Result.Cancel)
+                {
+                    return;
+                }
+
                 new TaskDialog
                     {
                         CommonIcon    = TaskDialogIcon.Stop,
@@ -178,9 +206,25 @@
 
             _td.Content = "Sending request to " + new Uri(_link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...";
 
+            var prm = true;
+
             _dl                          = _link.Source.Downloader;
             _dl.DownloadFileCompleted   += NearVideoDownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
+            _dl.DownloadProgressChanged += (s, a) =>
+                {
+                    if (_td != null && _td.IsShowing)
+                    {
+                        if (prm)
+                        {
+                            _td.SetMarqueeProgressBar(false);
+                            _td.Navigate(_td);
+                            prm = false;
+                        }
+
+                        _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
+                        _td.ProgressBarPosition = a.Data;
+                    }
+                };
 
             _dl.Download(_link, Utils.GetRandomFileName());
         }
@@ -197,6 +241,11 @@
             if (_td != null && _td.IsShowing)
             {
                 _td.SimulateButtonClick(-1);
+            }
+
+            if (_res == Result.Cancel)
+            {
+                return;
             }
 
             var dlsnvtd = new TaskDialog
@@ -336,8 +385,12 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (_res == Result.Cancel)
+            if (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2))
             {
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+
+                _res = Result.Cancel;
+
                 if (_fs != null)
                 {
                     _fs.CancelSearch();

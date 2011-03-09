@@ -535,9 +535,6 @@
     <Resource Include="Images\tvrage.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\throbber.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\cross.png" />
   </ItemGroup>
   <ItemGroup>

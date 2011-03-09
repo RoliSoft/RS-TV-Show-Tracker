@@ -38,13 +38,30 @@
                 };
 
             _td.SetMarqueeProgressBar(true);
-            _td.Destroyed += TaskDialogDestroyed;
+            _td.Destroyed   += TaskDialogDestroyed;
+            _td.ButtonClick += TaskDialogDestroyed;
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
+            var prm = true;
+
             _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += DownloadFileCompleted;
-            _dl.DownloadProgressChanged += (s, a) => _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
+            _dl.DownloadProgressChanged += (s, a) =>
+                {
+                    if (_td != null && _td.IsShowing)
+                    {
+                        if (prm)
+                        {
+                            _td.SetMarqueeProgressBar(false);
+                            _td.Navigate(_td);
+                            prm = false;
+                        }
+
+                        _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
+                        _td.ProgressBarPosition = a.Data;
+                    }
+                };
 
             _dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
 
@@ -58,8 +75,12 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (_res == Result.Cancel)
+            if (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2))
             {
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+
+                _res = Result.Cancel;
+
                 _dl.CancelAsync();
             }
         }
@@ -76,6 +97,11 @@
             if (_td != null && _td.IsShowing)
             {
                 _td.SimulateButtonClick(-1);
+            }
+
+            if (_res == Result.Cancel)
+            {
+                return;
             }
 
             switch (e.Third)

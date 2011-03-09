@@ -17,6 +17,7 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Remote;
 
     using Drawing     = System.Drawing;
@@ -163,6 +164,11 @@
             {
                 activeOverviewPage.ListViewKeyUp(sender, e);
             }
+
+            var lnk = new Parsers.Subtitles.Subtitle(new Parsers.Subtitles.Engines.Addic7ed());
+            lnk.Release = "CacheFly";
+            lnk.URL = "http://cachefly.cachefly.net/100mb.test";
+            new TaskDialogs.SubtitleDownloadTaskDialog().Download(lnk);
         }
 
         /// <summary>
