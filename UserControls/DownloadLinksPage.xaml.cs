@@ -8,6 +8,7 @@
     using System.Net;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
@@ -569,6 +570,10 @@
                 sap.Click += (s, r) => DownloadFileClick("SendToAssociated", r);
                 cm.Items.Add(sap);
             }
+
+            TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(cm, TextRenderingMode.ClearType);
+            RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
 
             cm.IsOpen = true;
         }

@@ -1,6 +1,6 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AboutWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" TextOptions.TextFormattingMode="Display"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" Title="About RS TV Show Tracker" Loaded="GlassWindowLoaded" Icon="/RSTVShowTracker;component/Images/information.png" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Height="290" Width="408" SnapsToDevicePixels="True">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" Title="About RS TV Show Tracker" Loaded="GlassWindowLoaded" Icon="/RSTVShowTracker;component/Images/information.png" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Height="290" Width="408">
     <Grid Margin="10">
         <Image Name="logo" Height="64" HorizontalAlignment="Left" Margin="0,-13,0,0" VerticalAlignment="Top" Source="/RSTVShowTracker;component/tv.ico">
             <Image.Effect>
