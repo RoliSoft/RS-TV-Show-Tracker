@@ -3,6 +3,7 @@
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -17,7 +18,6 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Remote;
 
     using Drawing     = System.Drawing;
@@ -51,10 +51,19 @@
         /// </summary>
         public MainWindow()
         {
+            Thread.CurrentThread.CurrentCulture   = CultureInfo.CreateSpecificCulture("en-US");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+
+            if (!Utils.Is7)
+            {
+                MessageBox.Show("This software currently doesn't support " + Utils.OS + ", only Windows 7 or newer. Because the underlying code would run on any operating system which can run CLI code, a universal interface will be developed sometime in the future.", Utils.OS + " is not supported", MessageBoxButton.OK, MessageBoxImage.Error);
+                Process.GetCurrentProcess().Kill();
+            }
+
             InitializeComponent();
 
             Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception);
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
         }
 
         #region Window events
@@ -591,7 +600,8 @@
         /// Handles the unexpected exception.
         /// </summary>
         /// <param name="ex">The exception.</param>
-        public void HandleUnexpectedException(Exception ex)
+        /// <param name="isTerminating">if set to <c>true</c> the exception will terminate the execution.</param>
+        public void HandleUnexpectedException(Exception ex, bool isTerminating = false)
         {
             if (ex is ThreadAbortException)
             {
@@ -613,7 +623,7 @@
 
             if (show)
             {
-                var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs):line (?<ln>[0-9]+)");
+                var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs):(?::lig?ne|, sor:) (?<ln>[0-9]+)");
                 var loc = "at a location where it was not expected";
 
                 if (mc.Count != 0)
@@ -626,7 +636,7 @@
                         Icon                  = TaskDialogStandardIcon.Error,
                         Caption               = "An unexpected error occurred",
                         InstructionText       = "An unexpected error occurred",
-                        Text                  = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), loc),
+                        Text                  = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), loc) + (isTerminating ? "\r\n\r\nUnfortunately this exception occured at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
                         DetailsExpandedText   = sb.ToString(),
                         DetailsExpandedLabel  = "Hide stacktrace",
                         DetailsCollapsedLabel = "Show stacktrace",

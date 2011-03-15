@@ -59,29 +59,33 @@
         {
             var svc   = XmlRpcProxyGen.Create<IOpenSubtitles>();
             var login = svc.LogIn(string.Empty, string.Empty, "en", "RS TV Show Tracker 1.0");
-
-            if (login["status"].ToString() == "401 Unauthorized" || login["status"].ToString() == "407 Download limit reached")
+            if (login == null || !login.ContainsKey("status") || login["status"].ToString() == "401 Unauthorized" || login["status"].ToString() == "407 Download limit reached")
             {
                 yield break;
             }
 
             var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Parser.Normalize(query) } });
-
-            if (search["data"] is bool)
+            if (search == null || !search.ContainsKey("data"))
             {
                 yield break;
             }
 
-            foreach (XmlRpcStruct data in search["data"] as object[])
+            var list = search["data"] as object[];
+            if (list == null || list.Length == 0)
             {
-                if (!ShowNames.Parser.IsMatch(query, data["SubFileName"].ToString()))
+                yield break;
+            }
+
+            foreach (XmlRpcStruct data in list)
+            {
+                if (!data.ContainsKey("SubFileName") || !data.ContainsKey("SubFormat") || !data.ContainsKey("LanguageName") || !data.ContainsKey("ZipDownloadLink") || !ShowNames.Parser.IsMatch(query, data["SubFileName"].ToString()))
                 {
                     continue;
                 }
 
                 var sub = new Subtitle(this);
 
-                sub.Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], String.Empty);
+                sub.Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], string.Empty);
                 sub.Language = Languages.Parse(data["LanguageName"].ToString());
                 sub.URL      = data["ZipDownloadLink"].ToString();
 

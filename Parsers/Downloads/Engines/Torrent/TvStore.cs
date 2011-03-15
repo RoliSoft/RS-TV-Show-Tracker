@@ -113,7 +113,7 @@
                 yield break;
             }
 
-            var idx  = 3;
+            var idx = 4;
 
             for (;idx <= (arr.Length - 10);)
             {
@@ -143,7 +143,7 @@
 
                 link.Infos = Link.SeedLeechFormat.FormatWith(arr[idx + 1].Trim(), arr[idx].Trim());
 
-                idx += 8;
+                idx += 7;
 
                 yield return link;
             }

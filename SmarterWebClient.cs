@@ -29,6 +29,11 @@
             {
                 get
                 {
+                    if (ResponseUri == null)
+                    {
+                        return string.Empty;
+                    }
+
                     // try to get the file name from Content-Disposition
                     if (ResponseHeaders["Content-Disposition"] != null)
                     {
@@ -55,7 +60,10 @@
             protected override WebResponse GetWebResponse(WebRequest request)
             {
                 var response = base.GetWebResponse(request);
-                this.ResponseUri = response.ResponseUri;
+                if (response != null)
+                {
+                    this.ResponseUri = response.ResponseUri;
+                }
                 return response;
             }
 
@@ -70,7 +78,10 @@
             protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
             {
                 var response = base.GetWebResponse(request);
-                this.ResponseUri = response.ResponseUri;
+                if (response != null)
+                {
+                    this.ResponseUri = response.ResponseUri;
+                }
                 return response;
             }
         }
