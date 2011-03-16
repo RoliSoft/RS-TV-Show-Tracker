@@ -288,4 +288,17 @@
         public string Error { get; set; }
         #endregion
     }
+
+    /// <summary>
+    /// Represents a serialzied show information including its marked episodes.
+    /// </summary>
+    public class SerializedShowInfo
+    {
+        public int RowID { get; set; }
+        public string Title { get; set; }
+        public string Source { get; set; }
+        public string SourceID { get; set; }
+        public string SourceLanguage { get; set; }
+        public List<int[]> MarkedEpisodes { get; set; }
+    }
 }

@@ -120,6 +120,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Synchronization.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />
     <Compile Include="FileNames\Tests.cs" />

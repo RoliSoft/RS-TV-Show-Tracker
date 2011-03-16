@@ -76,7 +76,7 @@
                 if (secure)
                 {
                     var tmp = Encoding.UTF8.GetBytes(post);
-                    post = Convert.ToBase64String(_algo.CreateEncryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
+                    post    = Convert.ToBase64String(_algo.CreateEncryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
                 }
 
                 var resp = Utils.GetURL(
@@ -89,7 +89,7 @@
                 if (secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
-                    resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
+                    resp    = Encoding.UTF8.GetString(_algo.CreateDecryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
                 }
 
                 obj = JsonConvert.DeserializeObject<T>(resp);
