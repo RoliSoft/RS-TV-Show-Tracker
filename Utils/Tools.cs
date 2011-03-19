@@ -9,7 +9,6 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Net;
-    using System.Runtime.InteropServices;
     using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -498,26 +497,6 @@
         }
 
         /// <summary>
-        /// Creates an array of handles to large or small icons extracted from the specified executable file, DLL, or icon file.
-        /// </summary>
-        /// <param name="lpszFile">The name of an executable file, DLL, or icon file from which icons will be extracted.</param>
-        /// <param name="nIconIndex">The zero-based index of the first icon to extract. For example, if this value is zero, the function extracts the first icon in the specified file.</param>
-        /// <param name="phiconLarge">An array of icon handles that receives handles to the large icons extracted from the file. If this parameter is NULL, no large icons are extracted from the file.</param>
-        /// <param name="phiconSmall">An array of icon handles that receives handles to the small icons extracted from the file. If this parameter is NULL, no small icons are extracted from the file.</param>
-        /// <param name="nIcons">The number of icons to be extracted from the file.</param>
-        /// <returns>If the nIconIndex parameter is -1, the phiconLarge parameter is NULL, and the phiconSmall parameter is NULL, then the return value is the number of icons contained in the specified file. Otherwise, the return value is the number of icons successfully extracted from the file.</returns>
-        [DllImport("shell32.dll", EntryPoint = "ExtractIconEx")]
-        public static extern int ExtractIconExW(string lpszFile, int nIconIndex, ref IntPtr phiconLarge, ref IntPtr phiconSmall, int nIcons);
-
-        /// <summary>
-        /// Destroys an icon and frees any memory the icon occupied.
-        /// </summary>
-        /// <param name="hIcon">A handle to the icon to be destroyed. The icon must not be in use.</param>
-        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
-        [DllImport("user32.dll")]
-        public static extern int DestroyIcon(IntPtr hIcon);
-
-        /// <summary>
         /// Extracts the icon for a specified path.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -529,8 +508,8 @@
                 var largeIcon = IntPtr.Zero;
                 var smallIcon = IntPtr.Zero;
 
-                ExtractIconExW(path, 0, ref largeIcon, ref smallIcon, 1);
-                DestroyIcon(largeIcon);
+                Interop.ExtractIconExW(path, 0, ref largeIcon, ref smallIcon, 1);
+                Interop.DestroyIcon(largeIcon);
 
                 return Imaging.CreateBitmapSourceFromHBitmap(Icon.FromHandle(smallIcon).ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             }

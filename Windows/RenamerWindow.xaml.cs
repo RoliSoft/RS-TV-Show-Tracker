@@ -171,7 +171,7 @@
 
             _parsing = true;
 
-            var files = FilesListViewItemCollection.Where(f => !f.Parsed).ToList();
+            var files = FilesListViewItemCollection.Where(f => !f.Processed).ToList();
             if (files.Count == 0)
             {
                 goto end;
@@ -181,14 +181,15 @@
             {
                 SetStatus("Identifying " + file.Information.Name + "...", true);
 
-                try   { file.Information = FileNames.Parser.ParseFile(file.Information.Name); }
-                catch { file.Enabled = false; }
+                try   { file.Information = FileNames.Parser.ParseFile(file.Information.Name); file.Recognized = true; }
+                catch { file.Enabled = file.Recognized = false; }
 
-                file.Parsed = true;
+                file.Processed = true;
             }
 
-          end:
             SetStatus();
+
+          end:
             _parsing = false;
         }
 
@@ -201,7 +202,7 @@
         {
             Dispatcher.Invoke((Action)(() =>
                 {
-                    var id = FilesListViewItemCollection.Count(f => f.Information.Show != null);
+                    var id = FilesListViewItemCollection.Count(f => f.Recognized);
                     statusLabel.Content = message ?? Utils.FormatNumber(FilesListViewItemCollection.Count, "file") + " added; " + Utils.FormatNumber(id, "file") + " identified.";
                     startRenamingButton.IsEnabled = id != 0;
 
@@ -297,7 +298,7 @@
         /// <param name="e">The <see cref="System.Windows.DragEventArgs"/> instance containing the event data.</param>
         private void ListViewDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (listView.ContextMenu.IsEnabled && e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 AddFiles(e.Data.GetData(DataFormats.FileDrop, true) as string[]);
             }
@@ -523,6 +524,61 @@
             {
                 targetDirTextBox.Text = fbd.SelectedPath + Path.DirectorySeparatorChar;
             }
+        }
+        #endregion
+
+        #region Renaming
+        /// <summary>
+        /// Handles the Click event of the startRenamingButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void StartRenamingButtonClick(object sender, RoutedEventArgs e)
+        {
+            formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = false;
+            _parsing = true;
+
+            if (WorkerThread != null && WorkerThread.IsAlive)
+            {
+                try { WorkerThread.Abort(); } catch { }
+            }
+
+            WorkerThread = new Thread(RenameRecognizedFiles);
+            WorkerThread.Start();
+        }
+
+        /// <summary>
+        /// Renames the recognized files.
+        /// </summary>
+        private void RenameRecognizedFiles()
+        {
+            var i = 0;
+            foreach (var file in FilesListViewItemCollection.Where(f => f.Enabled && f.Recognized).ToList())
+            {
+                var name = Utils.SanitizeFileName(FileNames.Parser.FormatFileName(Format, file.Information));
+                SetStatus("Copying " + name + "...", true);
+
+                var pbCancel = 0;
+                var last = 0;
+                Utils.Interop.CopyFileEx(file.Location, Path.Combine(TargetDir, name), (totalSize, transferred, streamSize, streamTransferred, streamNumber, callbackReason, sourceFile, destinationFile, lpData) =>
+                    {
+                        var perc = (int)Math.Round((double)transferred / totalSize * 100);
+                        if (perc != last)
+                        {
+                            last = perc;
+                            SetStatus("Copying " + name + "... (" + perc + "%)", true);
+                        }
+
+                        return Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE;
+                    }, IntPtr.Zero, ref pbCancel, 0);
+
+                file.Enabled = false;
+                i++;
+            }
+
+            Dispatcher.Invoke((Action)(() => formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true ));
+            SetStatus("Symlinked " + Utils.FormatNumber(i, "file") + "!");
+            _parsing = false;
         }
         #endregion
     }

@@ -37,37 +37,37 @@
             }
         }
 
-        private bool _parsed;
+        private bool _processed;
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="FileListViewItem"/> is parsed.
+        /// Gets or sets a value indicating whether this <see cref="FileListViewItem"/> is processed.
         /// </summary>
-        /// <value><c>true</c> if parsed; otherwise, <c>false</c>.</value>
-        public bool Parsed
+        /// <value><c>true</c> if processed; otherwise, <c>false</c>.</value>
+        public bool Processed
         {
             get
             {
-                return _parsed;
+                return _processed;
             }
             set
             {
-                _parsed = value;
+                _processed = value;
 
                 RefreshTarget();
             }
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="FileListViewItem"/> is recognized successfully.
+        /// </summary>
+        /// <value><c>true</c> if recognized successfully; otherwise, <c>false</c>.</value>
+        public bool Recognized { get; set; }
+
+        /// <summary>
         /// Gets or sets the location of the file.
         /// </summary>
         /// <value>The location.</value>
         public string Location { get; set; }
-
-        /// <summary>
-        /// Gets or sets the file.
-        /// </summary>
-        /// <value>The file.</value>
-        public string File { get; set; }
 
         /// <summary>
         /// Gets or sets the parsed information.
@@ -83,7 +83,7 @@
         {
             get
             {
-                return Parsed && !string.IsNullOrWhiteSpace(Information.Show)
+                return Processed && !string.IsNullOrWhiteSpace(Information.Show)
                        ? Utils.SanitizeFileName(Parser.FormatFileName(RenamerWindow.Format, Information))
                        : string.Empty;
             }

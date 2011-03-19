@@ -177,6 +177,7 @@
     <Compile Include="UserControls\ListViews\LinkItem.cs" />
     <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />
     <Compile Include="UserControls\ListViews\StatisticsListViewItem.cs" />
+    <Compile Include="Utils\Interop.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
@@ -193,7 +194,7 @@
     <Compile Include="UserControls\GuidesPage.xaml.cs">
       <DependentUpon>GuidesPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SmarterWebClient.cs" />
+    <Compile Include="Utils\SmarterWebClient.cs" />
     <Compile Include="IRefreshable.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\BinSearch.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHUmen.cs" />
@@ -253,7 +254,7 @@
       <DependentUpon>SubtitlesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Update.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Utils\Tools.cs" />
     <Page Include="Windows\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -571,6 +572,7 @@
   <ItemGroup>
     <None Include="Dependencies\VistaControls.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
