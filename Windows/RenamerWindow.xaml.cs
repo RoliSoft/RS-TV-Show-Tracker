@@ -107,7 +107,7 @@
         /// <value>The target directory of the file operation.</value>
         public static string TargetDir { get; set; }
 
-        private volatile bool _parsing;
+        private volatile bool _parsing, _renaming;
 
         /// <summary>
         /// Contains a sample <c>ShowFile</c> object.
@@ -226,8 +226,8 @@
             {
                 SetStatus("Identifying " + file.Information.Name + "...", true);
 
-                try   { file.Information = FileNames.Parser.ParseFile(file.Information.Name); file.Recognized = true; }
-                catch { file.Enabled = file.Recognized = false; }
+                try   { file.Information = FileNames.Parser.ParseFile(file.Information.Name); file.Checked = file.Recognized = file.Enabled = true; }
+                catch { file.Checked = file.Recognized = file.Enabled = false; }
 
                 file.Processed = true;
             }
@@ -247,7 +247,7 @@
         {
             Dispatcher.Invoke((Action)(() =>
                 {
-                    var id = FilesListViewItemCollection.Count(f => f.Recognized);
+                    var id = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked);
                     statusLabel.Content = message ?? Utils.FormatNumber(FilesListViewItemCollection.Count, "file") + " added; " + Utils.FormatNumber(id, "file") + " identified.";
                     startRenamingButton.IsEnabled = id != 0;
 
@@ -322,7 +322,6 @@
                 {
                     Dispatcher.Invoke((Action)(() => FilesListViewItemCollection.Add(new FileListViewItem
                         {
-                            Enabled     = true,
                             Location    = file,
                             Information = new ShowFile(file)
                         })));
@@ -415,7 +414,10 @@
         {
             foreach (FileListViewItem item in listView.SelectedItems)
             {
-                item.Enabled = true;
+                if (item.Enabled)
+                {
+                    item.Checked = true;
+                }
             }
         }
 
@@ -428,7 +430,7 @@
         {
             foreach (FileListViewItem item in listView.SelectedItems)
             {
-                item.Enabled = false;
+                item.Checked = false;
             }
         }
 
@@ -474,7 +476,7 @@
             Settings.Set("Rename Format", Format = renameFormatTextBox.Text);
             resultingNameTextBox.Text = FileNames.Parser.FormatFileName(Format, SampleInfo);
 
-            if (TestName(resultingNameTextBox.Text))
+            if (TestName(Path.GetFileName(resultingNameTextBox.Text)))
             {
                 resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/tick.png", UriKind.Relative));
                 resultingDetected.ToolTip = "The software recognizes this format.\r\nThis means you will be able to find the episode using the 'Play episode' context menu\r\nand the software can automatically mark the episode as watched when you're playing it.";
@@ -580,16 +582,34 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void StartRenamingButtonClick(object sender, RoutedEventArgs e)
         {
-            formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = false;
-            _parsing = true;
-
-            if (WorkerThread != null && WorkerThread.IsAlive)
+            if (_renaming)
             {
-                try { WorkerThread.Abort(); } catch { }
-            }
+                if (WorkerThread != null && WorkerThread.IsAlive)
+                {
+                    try { WorkerThread.Abort(); } catch { }
+                }
 
-            WorkerThread = new Thread(RenameRecognizedFiles);
-            WorkerThread.Start();
+                startRenamingButton.Content   = "Start renaming";
+                startRenamingButton.IsEnabled = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked) != 0;
+                formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
+                _parsing = _renaming = false;
+
+                SetStatus("Canceled " + _operationVerb.ToLower() + " operation.");
+            }
+            else
+            {
+                startRenamingButton.Content = "Stop renaming";
+                formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = false;
+                _parsing = _renaming = true;
+
+                if (WorkerThread != null && WorkerThread.IsAlive)
+                {
+                    try { WorkerThread.Abort(); } catch { }
+                }
+
+                WorkerThread = new Thread(RenameRecognizedFiles);
+                WorkerThread.Start();
+            }
         }
 
         /// <summary>
@@ -598,20 +618,25 @@
         private void RenameRecognizedFiles()
         {
             var i = 0;
-            foreach (var file in FilesListViewItemCollection.Where(f => f.Enabled && f.Recognized).ToList())
+            foreach (var file in FilesListViewItemCollection.Where(f => f.Enabled && f.Checked).ToList())
             {
                 var name = Utils.SanitizeFileName(FileNames.Parser.FormatFileName(Format, file.Information));
                 SetStatus(_operationVerb + " " + name + "...", true);
 
                 try { ProcessFile(name, file.Location, Path.Combine(TargetDir, name)); } catch { }
 
-                file.Enabled = false;
+                file.Enabled = file.Checked = false;
                 i++;
             }
 
-            Dispatcher.Invoke((Action)(() => formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true ));
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    startRenamingButton.Content   = "Start renaming";
+                    startRenamingButton.IsEnabled = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked) != 0;
+                    formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
+                }));
             SetStatus(_operationPast + " " + Utils.FormatNumber(i, "file") + "!");
-            _parsing = false;
+            _parsing = _renaming = false;
         }
 
         /// <summary>
@@ -646,7 +671,7 @@
                                 SetStatus(_operationVerb + " " + name + "... (" + perc + "%)", true);
                             }
 
-                            return Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE;
+                            return _renaming ? Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE : Utils.Interop.CopyProgressResult.PROGRESS_CANCEL;
                         }, IntPtr.Zero, ref pbCancel, 0);
                     break;
 
@@ -661,7 +686,7 @@
                                 SetStatus(_operationVerb + " " + name + "... (" + perc + "%)", true);
                             }
 
-                            return Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE;
+                            return _renaming ? Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE : Utils.Interop.CopyProgressResult.PROGRESS_CANCEL;
                         }, IntPtr.Zero, Utils.Interop.MoveFileFlags.MOVE_FILE_COPY_ALLOWED);
                     break;
 

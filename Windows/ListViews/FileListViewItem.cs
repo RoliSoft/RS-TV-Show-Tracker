@@ -33,6 +33,30 @@
                 if (PropertyChanged != null)
                 {
                     PropertyChanged(this, new PropertyChangedEventArgs("Enabled"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("Opacity"));
+                }
+            }
+        }
+
+        private bool _checked;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="FileListViewItem"/> is checked.
+        /// </summary>
+        /// <value><c>true</c> if checked; otherwise, <c>false</c>.</value>
+        public bool Checked
+        {
+            get
+            {
+                return _checked;
+            }
+            set
+            {
+                _checked = value;
+
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs("Checked"));
                 }
             }
         }
@@ -97,6 +121,18 @@
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs("Target"));
+            }
+        }
+
+        /// <summary>
+        /// Gets the opacity.
+        /// </summary>
+        /// <value>The opacity.</value>
+        public double Opacity
+        {
+            get
+            {
+                return _enabled ? 1 : 0.5;
             }
         }
     }

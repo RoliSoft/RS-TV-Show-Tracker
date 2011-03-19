@@ -16,7 +16,7 @@
                                     <GridViewColumnHeader />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox Name="Enabled" Tag="{Binding File}" IsChecked="{Binding Enabled}" />
+                                            <CheckBox Name="Enabled" Tag="{Binding File}" IsChecked="{Binding Checked}" IsEnabled="{Binding Enabled}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -24,7 +24,7 @@
                                     <GridViewColumnHeader Content="File" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Information.Name}" ToolTip="{Binding Information.Name}" />
+                                            <TextBlock Text="{Binding Information.Name}" ToolTip="{Binding Information.Name}" IsEnabled="{Binding Enabled}" Opacity="{Binding Opacity}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -32,7 +32,7 @@
                                     <GridViewColumnHeader Content="New name" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Target}" ToolTip="{Binding Target}" />
+                                            <TextBlock Text="{Binding Target}" ToolTip="{Binding Target}" IsEnabled="{Binding Enabled}" Opacity="{Binding Opacity}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -150,5 +150,10 @@ episode numbering in one of these formats: S06E02, 6x02, 602]]></TextBlock>
                 </Grid>
             </TabItem>
         </TabControl>
+        <Label FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="#CDFFFFFF" Content="RS TV Show Tracker" Margin="0,5,8,0">
+            <Label.Effect>
+                <DropShadowEffect BlurRadius="5" Color="#CD000000" Direction="0" ShadowDepth="0" />
+            </Label.Effect>
+        </Label>
     </Grid>
 </Shell:GlassWindow>
