@@ -56,6 +56,51 @@
         /// <value>The rename file operation.</value>
         public static string Operation { get; set; }
 
+        private static string _operationVerb
+        {
+            get
+            {
+                switch (Operation)
+                {
+                    default:
+                    case "rename":
+                        return "Renaming";
+
+                    case "copy":
+                        return "Copying";
+
+                    case "move":
+                        return "Moving";
+
+                    case "symlink":
+                        return "Symlinking";
+                }
+            }
+        }
+
+
+        private static string _operationPast
+        {
+            get
+            {
+                switch (Operation)
+                {
+                    default:
+                    case "rename":
+                        return "Renamed";
+
+                    case "copy":
+                        return "Copied";
+
+                    case "move":
+                        return "Moved";
+
+                    case "symlink":
+                        return "Symlinked";
+                }
+            }
+        }
+
         /// <summary>
         /// Gets or sets the target directory of the file operation.
         /// </summary>
@@ -556,29 +601,68 @@
             foreach (var file in FilesListViewItemCollection.Where(f => f.Enabled && f.Recognized).ToList())
             {
                 var name = Utils.SanitizeFileName(FileNames.Parser.FormatFileName(Format, file.Information));
-                SetStatus("Copying " + name + "...", true);
+                SetStatus(_operationVerb + " " + name + "...", true);
 
-                var pbCancel = 0;
-                var last = 0;
-                Utils.Interop.CopyFileEx(file.Location, Path.Combine(TargetDir, name), (totalSize, transferred, streamSize, streamTransferred, streamNumber, callbackReason, sourceFile, destinationFile, lpData) =>
-                    {
-                        var perc = (int)Math.Round((double)transferred / totalSize * 100);
-                        if (perc != last)
-                        {
-                            last = perc;
-                            SetStatus("Copying " + name + "... (" + perc + "%)", true);
-                        }
-
-                        return Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE;
-                    }, IntPtr.Zero, ref pbCancel, 0);
+                try { ProcessFile(name, file.Location, Path.Combine(TargetDir, name)); } catch { }
 
                 file.Enabled = false;
                 i++;
             }
 
             Dispatcher.Invoke((Action)(() => formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true ));
-            SetStatus("Symlinked " + Utils.FormatNumber(i, "file") + "!");
+            SetStatus(_operationPast + " " + Utils.FormatNumber(i, "file") + "!");
             _parsing = false;
+        }
+
+        /// <summary>
+        /// Processes the specified file.
+        /// </summary>
+        /// <param name="name">The name of the file.</param>
+        /// <param name="source">The source file.</param>
+        /// <param name="target">The target file.</param>
+        private void ProcessFile(string name, string source, string target)
+        {
+            switch (Operation)
+            {
+                default:
+                case "rename":
+                    File.Move(source, Path.Combine(Path.GetDirectoryName(source), name));
+                    break;
+
+                case "copy":
+                    int pbCancel = 0, lastCopyPerc = 0;
+                    Utils.Interop.CopyFileEx(source, target, (totalSize, transferred, streamSize, streamTransferred, streamNumber, callbackReason, sourceFile, destinationFile, lpData) =>
+                        {
+                            var perc = (int)Math.Round((double)transferred / totalSize * 100);
+                            if (perc != lastCopyPerc)
+                            {
+                                lastCopyPerc = perc;
+                                SetStatus(_operationVerb + " " + name + "... (" + perc + "%)", true);
+                            }
+
+                            return Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE;
+                        }, IntPtr.Zero, ref pbCancel, 0);
+                    break;
+
+                case "move":
+                    var lastMovePerc = 0;
+                    Utils.Interop.MoveFileWithProgress(source, target, (totalSize, transferred, streamSize, streamTransferred, streamNumber, callbackReason, sourceFile, destinationFile, lpData) =>
+                        {
+                            var perc = (int)Math.Round((double)transferred / totalSize * 100);
+                            if (perc != lastMovePerc)
+                            {
+                                lastMovePerc = perc;
+                                SetStatus(_operationVerb + " " + name + "... (" + perc + "%)", true);
+                            }
+
+                            return Utils.Interop.CopyProgressResult.PROGRESS_CONTINUE;
+                        }, IntPtr.Zero, Utils.Interop.MoveFileFlags.MOVE_FILE_COPY_ALLOWED);
+                    break;
+
+                case "symlink":
+                    Utils.Interop.CreateSymbolicLink(target, source, Utils.Interop.SymbolicLinkFlags.SYMBLOC_LINK_FLAG_FILE);
+                    break;
+            }
         }
         #endregion
     }

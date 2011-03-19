@@ -45,20 +45,16 @@
             /// <param name="dwFlags">Indicates whether the link target, lpTargetFileName, is a directory.</param>
             /// <returns></returns>
             [DllImport("kernel32.dll")]
-            public static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, int dwFlags);
+            public static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, SymbolicLinkFlags dwFlags);
 
-            /// <summary>
-            /// The symbolic link is a file.
-            /// </summary>
-            public const uint SYMBLOC_LINK_FLAG_FILE = 0x0;
-
-            /// <summary>
-            /// The symbolic link is a directory.
-            /// </summary>
-            public const uint SYMBLOC_LINK_FLAG_DIRECTORY = 0x1;
+            public enum SymbolicLinkFlags : uint
+            {
+                SYMBLOC_LINK_FLAG_FILE      = 0x0,
+                SYMBLOC_LINK_FLAG_DIRECTORY = 0x1
+            }
             #endregion
 
-            #region File copy with progress
+            #region File copy/move with progress
             /// <summary>
             /// Copies an existing file to a new file, notifying the application of its progress through a callback function.
             /// </summary>
@@ -75,6 +71,22 @@
             [DllImport("kernel32.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool CopyFileEx(string lpExistingFileName, string lpNewFileName, CopyProgressRoutine lpProgressRoutine, IntPtr lpData, ref Int32 pbCancel, CopyFileFlags dwCopyFlags);
+
+            /// <summary>
+            /// Moves a file or directory, including its children. You can provide a callback function that receives progress notifications.
+            /// </summary>
+            /// <param name="lpExistingFileName">The name of the existing file or directory on the local computer.</param>
+            /// <param name="lpNewFileName">The new name of the file or directory on the local computer.</param>
+            /// <param name="lpProgressRoutine">A pointer to a CopyProgressRoutine callback function that is called each time another portion of the file has been moved. The callback function can be useful if you provide a user interface that displays the progress of the operation. This parameter can be NULL.</param>
+            /// <param name="lpData">An argument to be passed to the CopyProgressRoutine callback function. This parameter can be NULL.</param>
+            /// <param name="dwFlags">The move options. This parameter can be one or more of the following values.</param>
+            /// <returns>
+            /// If the function succeeds, the return value is nonzero.
+            /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
+            /// </returns>
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool MoveFileWithProgress(string lpExistingFileName, string lpNewFileName, CopyProgressRoutine lpProgressRoutine, IntPtr lpData, MoveFileFlags dwFlags);
 
             /// <summary>
             /// An application-defined callback function used with the CopyFileEx, MoveFileTransacted, and MoveFileWithProgress functions. It is called when a portion of a copy or move operation is completed. The LPPROGRESS_ROUTINE type defines a pointer to this callback function. CopyProgressRoutine is a placeholder for the application-defined function name.
@@ -102,6 +114,17 @@
                 COPY_FILE_RESTARTABLE                 = 0x00000002,
                 COPY_FILE_OPEN_SOURCE_FOR_WRITE       = 0x00000004,
                 COPY_FILE_ALLOW_DECRYPTED_DESTINATION = 0x00000008
+            }
+
+            [Flags]
+            public enum MoveFileFlags : uint
+            {
+                MOVE_FILE_REPLACE_EXISTSING     = 0x00000001,
+                MOVE_FILE_COPY_ALLOWED          = 0x00000002,
+                MOVE_FILE_DELAY_UNTIL_REBOOT    = 0x00000004,
+                MOVE_FILE_WRITE_THROUGH         = 0x00000008,
+                MOVE_FILE_CREATE_HARDLINK       = 0x00000010,
+                MOVE_FILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
             }
             #endregion
         }
