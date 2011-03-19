@@ -547,7 +547,7 @@
         /// Gets a regular expression which matches illegal characters in file names.
         /// </summary>
         /// <value>Regex for illegal characters.</value>
-        public static Regex InvalidFileNameChars = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
+        public static Regex InvalidFileNameChars = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars().Where(c => c != '\\' && c != '/').ToArray())) + "]");
 
         /// <summary>
         /// Removes illegal characters from a file name.

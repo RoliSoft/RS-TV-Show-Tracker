@@ -161,7 +161,7 @@
             ParserTimer.Elapsed += ParserTimerElapsed;
             ParserTimer.Start();
 
-            Format = renameFormatTextBox.Text = Settings.Get("Rename Format", "$show S$seasonE$episode - $title - $quality$ext");
+            Format = renameFormatTextBox.Text = Settings.Get("Rename Format", @"$show\Season $seasonz\$show S$seasonE$episode - $title$ext");
             RenameFormatTextBoxTextChanged(null, null);
 
             switch (Operation = Settings.Get("Rename File Operation", "rename"))
@@ -622,6 +622,12 @@
         /// <param name="target">The target file.</param>
         private void ProcessFile(string name, string source, string target)
         {
+            var parent = Path.GetDirectoryName(target);
+            if (!string.IsNullOrWhiteSpace(parent) && !Directory.Exists(parent))
+            {
+                Directory.CreateDirectory(parent);
+            }
+
             switch (Operation)
             {
                 default:

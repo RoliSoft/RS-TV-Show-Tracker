@@ -71,7 +71,7 @@
         /// </summary>
         public static readonly Regex AdvNumbering  = new Regex(@"(
                                                                    # S01E01, S01E01-02, S01E01-E02, S01E01E02
-                                                                    S(?<s>[0-9]{1,2})(\.|\s|\-)?E(?:(?<em>[0-9]{1,2})(?!\-(?:1080|720|480))(\-E?|E))?(?<e>[0-9]{1,2})|
+                                                                    S(?<s>[0-9]{1,2})(\.|\s|\-)?EP?(?:(?<em>[0-9]{1,2})(?!\-(?:1080|720|480))(\-(?:EP?)?|EP?))?(?<e>[0-9]{1,2})|
                                                                    # 1x01, 1x01-02
                                                                     (?<s>[0-9]{1,2})x(?:(?<em>[0-9]{1,2})\-)?(?<e>[0-9]{1,2})
                                                                  )", RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
