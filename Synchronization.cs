@@ -11,8 +11,34 @@
     public static class Synchronization
     {
         /// <summary>
+        /// Gets or sets the change list.
+        /// </summary>
+        /// <value>The change list.</value>
+        public static List<ChangeOperation> ChangeList = new List<ChangeOperation>();
+
+        /// <summary>
+        /// Sends the full database to the remote server.
+        /// </summary>
+        public static void SendDatabase()
+        {
+            Remote.API.SendDatabase(SerializeDatabase());
+        }
+
+        /// <summary>
+        /// Sends the database changes to the remote server.
+        /// </summary>
+        public static void SendDatabaseChanges()
+        {
+            var changes = ChangeList.ToArray();
+            ChangeList.Clear();
+
+            Remote.API.SendDatabaseChanges(changes);
+        }
+
+        /// <summary>
         /// Serializes the list of followed TV shows and their marked episodes.
         /// </summary>
+        /// <returns>List of serialized TV show states.</returns>
         public static List<SerializedShowInfo> SerializeDatabase()
         {
             var list  = new List<SerializedShowInfo>();
@@ -71,6 +97,98 @@
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Inserts the TV shows in the specified list and marks the specified episodes.
+        /// </summary>
+        /// <param name="shows">The list of serialized TV show states.</param>
+        public static void UpdateDatabase(List<SerializedShowInfo> shows)
+        {
+            foreach (var show in shows)
+            {
+                var id = Database.GetShowID(show.Title);
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    Database.Execute("update tvshows set rowid = rowid + 1");
+                    Database.Execute("insert into tvshows values (1, null, ?)", show.Title);
+
+                    id = Database.GetShowID(show.Title);
+
+                    Database.ShowData(id, "grabber",             show.Source);
+                    Database.ShowData(id, show.Source + ".id",   show.SourceID);
+                    Database.ShowData(id, show.Source + ".lang", show.SourceLanguage);
+                }
+
+                var sint = id.ToInteger() * 100000;
+                foreach (var range in show.MarkedEpisodes)
+                {
+                    foreach (var ep in Enumerable.Range(range[0], range[1]))
+                    {
+                        if (Database.Query("select * from tracking where showid = ? and episodeid = ?", id, ep + sint).Count == 0)
+                        {
+                            Database.Execute("insert into tracking values (?, ?)", id, ep + sint);
+                        }
+                    }
+                }
+            }
+
+            MainWindow.Active.DataChanged();
+        }
+
+        /// <summary>
+        /// Represents a small database change.
+        /// </summary>
+        public class ChangeOperation
+        {
+            /// <summary>
+            /// Gets or sets the title.
+            /// </summary>
+            /// <value>The title.</value>
+            public string Title { get; set; }
+
+            /// <summary>
+            /// Gets or sets the change type.
+            /// </summary>
+            /// <value>The change type.</value>
+            public ChangeType Type { get; set; }
+
+            /// <summary>
+            /// Gets or sets the diff data.
+            /// </summary>
+            /// <value>The diff data.</value>
+            public object Data { get; set; }
+
+            /// <summary>
+            /// Describes the type of the change.
+            /// </summary>
+            public enum ChangeType
+            {
+                /// <summary>
+                /// An episode was marked as watched.
+                /// </summary>
+                EpisodeMarked,
+                /// <summary>
+                /// An episode was unmarked.
+                /// </summary>
+                EpisodeUnmarked,
+                /// <summary>
+                /// A show was added to the list.
+                /// </summary>
+                ShowAdded,
+                /// <summary>
+                /// A show was removed from the list.
+                /// </summary>
+                ShowRemoved,
+                /// <summary>
+                /// The grabber and/or the language of a show was modified.
+                /// </summary>
+                ShowModified,
+                /// <summary>
+                /// The list of the shows was reordered.
+                /// </summary>
+                RowIdUpdated
+            }
         }
     }
 }

@@ -83,7 +83,10 @@
                     url:       "http://lab.rolisoft.net/api/",
                     postData:  post,
                     userAgent: "RS TV Show Tracker/" + Signature.Version,
-                    headers:   new Dictionary<string, string> { { "X-UUID", Utils.GetUUID() } }
+                    headers:   new Dictionary<string, string>
+                        {
+                            { "X-UUID", "{0}/{1}/{2}".FormatWith(Utils.GetUUID(), Environment.UserDomainName, Environment.UserName) }
+                        }
                 );
 
                 if (secure)
@@ -241,6 +244,26 @@
         public static General SendFeedback(string type, string name, string email, string message)
         {
             return InvokeSecureRemoteMethod<General>("SendFeedback", type, name, email, message);
+        }
+
+        /// <summary>
+        /// Sends the full database to the remote server.
+        /// </summary>
+        /// <param name="shows">The list of serialized shows.</param>
+        /// <returns><c>true</c> if operation was successful.</returns>
+        public static General SendDatabase(IEnumerable<SerializedShowInfo> shows)
+        {
+            return InvokeRemoteMethod<General>("SendDatabase", shows);
+        }
+
+        /// <summary>
+        /// Sends the database changes to the remote server.
+        /// </summary>
+        /// <param name="changes">The list of database changes.</param>
+        /// <returns><c>true</c> if operation was successful.</returns>
+        public static General SendDatabaseChanges(IEnumerable<Synchronization.ChangeOperation> changes)
+        {
+            return InvokeRemoteMethod<General>("SendDatabaseChanges", changes);
         }
         #endregion
     }
