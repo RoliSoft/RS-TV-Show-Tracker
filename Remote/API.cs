@@ -24,6 +24,10 @@
                 IV        = Encoding.ASCII.GetBytes("0+R7L$O%Eq8Zieuo!rHkw@778rcrC5=+"),
                 Padding   = PaddingMode.Zeros
             };
+        private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
         private static byte[] _key;
 
         #region Remote method invocation
@@ -71,7 +75,7 @@
                     DoKeyExchange();
                 }
 
-                var post = Utils.EscapeUTF8(JsonConvert.SerializeObject(new Request(func, args)));
+                var post = Utils.EscapeUTF8(JsonConvert.SerializeObject(new Request(func, args), Formatting.None, _settings));
 
                 if (secure)
                 {
@@ -81,6 +85,7 @@
 
                 var resp = Utils.GetURL(
                     url:       "http://lab.rolisoft.net/api/",
+                  //url:       "http://home.rolisoft.net/api/",
                     postData:  post,
                     userAgent: "RS TV Show Tracker/" + Signature.Version,
                     headers:   new Dictionary<string, string>
@@ -251,9 +256,9 @@
         /// </summary>
         /// <param name="shows">The list of serialized shows.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SendDatabase(IEnumerable<SerializedShowInfo> shows)
+        public static Generic<int> SendDatabase(IEnumerable<SerializedShowInfo> shows)
         {
-            return InvokeRemoteMethod<General>("SendDatabase", shows);
+            return InvokeRemoteMethod<Generic<int>>("SendDatabase", shows);
         }
 
         /// <summary>
@@ -261,9 +266,18 @@
         /// </summary>
         /// <param name="changes">The list of database changes.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SendDatabaseChanges(IEnumerable<Synchronization.ChangeOperation> changes)
+        public static Generic<int> SendDatabaseChanges(IEnumerable<SerializedShowInfoDiff> changes)
         {
-            return InvokeRemoteMethod<General>("SendDatabaseChanges", changes);
+            return InvokeRemoteMethod<Generic<int>>("SendDatabaseChanges", changes);
+        }
+
+        /// <summary>
+        /// Gets the checksum of the remote database.
+        /// </summary>
+        /// <returns>The SHA-256 hash of the remote database.</returns>
+        public static DatabaseChecksum GetDatabaseChecksum()
+        {
+            return InvokeRemoteMethod<DatabaseChecksum>("GetDatabaseChecksum");
         }
         #endregion
     }

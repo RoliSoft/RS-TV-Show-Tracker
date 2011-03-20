@@ -293,6 +293,20 @@
         }
 
         /// <summary>
+        /// Gets the ID of a show in the database.
+        /// </summary>
+        /// <param name="showid">The ID of the show.</param>
+        /// <returns>Title of the show or empty string.</returns>
+        public static string GetShowTitle(string showid)
+        {
+            var show = Query("select name from tvshows where showid = ? limit 1", showid);
+
+            return show.Count != 0
+                   ? show[0]["name"]
+                   : string.Empty;
+        }
+
+        /// <summary>
         /// Gets the ID of an episode in the database.
         /// </summary>
         /// <param name="show">The name of the show.</param>

@@ -1,7 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
 
     using RoliSoft.TVShowTracker.Remote.Objects;
 
@@ -11,17 +14,89 @@
     public static class Synchronization
     {
         /// <summary>
+        /// Gets or sets a value indicating whether synchronization is enabled.
+        /// </summary>
+        /// <value><c>true</c> if enabled; otherwise, <c>false</c>.</value>
+        public static bool Enabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to send the full database instead of just the differences on the next synchronization.
+        /// </summary>
+        /// <value><c>true</c> if full synchronization is required on the next request; otherwise, <c>false</c>.</value>
+        public static bool SendFull { get; set; }
+
+        /// <summary>
         /// Gets or sets the change list.
         /// </summary>
         /// <value>The change list.</value>
-        public static List<ChangeOperation> ChangeList = new List<ChangeOperation>();
+        public static Dictionary<string, SerializedShowInfoDiff> ChangeList = new Dictionary<string, SerializedShowInfoDiff>();
+
+        /// <summary>
+        /// Add a database change to the list of operations to be sent to the remote server.
+        /// </summary>
+        /// <param name="showid">The ID of the show.</param>
+        /// <param name="type">The type of the change.</param>
+        public static void AddChange(string showid, SerializedShowInfoDiff.ChangeType type)
+        {
+            //if (!Enabled) return;
+            if (SendFull) return;
+
+            if (!ChangeList.ContainsKey(showid))
+            {
+                ChangeList[showid] = new SerializedShowInfoDiff { Title = Database.GetShowTitle(showid) };
+            }
+
+            switch (type)
+            {
+                case SerializedShowInfoDiff.ChangeType.MarkedEpisodesModified:
+                    if (ChangeList[showid].Changes != SerializedShowInfoDiff.ChangeType.ShowModified)
+                    {
+                        ChangeList[showid].Changes = SerializedShowInfoDiff.ChangeType.MarkedEpisodesModified;
+                    }
+
+                    ChangeList[showid].MarkedEpisodes = SerializeMarkedEpisodes(showid);
+                    break;
+
+                case SerializedShowInfoDiff.ChangeType.ShowModified:
+                    var show = Database.Query("select rowid, name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
+                    var info = new SerializedShowInfoDiff
+                        {
+                            RowID          = show["rowid"].ToInteger(),
+                            Title          = show["name"],
+                            Source         = show["grabber"],
+                            SourceID       = Database.ShowData(showid, show["grabber"] + ".id"),
+                            SourceLanguage = Database.ShowData(showid, show["grabber"] + ".lang"),
+                            Changes        = SerializedShowInfoDiff.ChangeType.ShowModified,
+                            MarkedEpisodes = SerializeMarkedEpisodes(showid)
+                        };
+
+                    if (string.IsNullOrWhiteSpace(info.SourceLanguage))
+                    {
+                        info.SourceLanguage = "en";
+                    }
+
+                    ChangeList[showid] = info;
+                    break;
+
+                case SerializedShowInfoDiff.ChangeType.ShowAdded:
+                case SerializedShowInfoDiff.ChangeType.ShowRemoved:
+                case SerializedShowInfoDiff.ChangeType.RowIdModified:
+                    SendFull = true;
+                    ChangeList.Clear();
+                    break;
+            }
+        }
 
         /// <summary>
         /// Sends the full database to the remote server.
         /// </summary>
         public static void SendDatabase()
         {
-            Remote.API.SendDatabase(SerializeDatabase());
+            var sync = Remote.API.SendDatabase(SerializeDatabase());
+            if (sync.Success)
+            {
+                Settings.Set("Last Sync", sync.Result);
+            }
         }
 
         /// <summary>
@@ -29,10 +104,51 @@
         /// </summary>
         public static void SendDatabaseChanges()
         {
-            var changes = ChangeList.ToArray();
-            ChangeList.Clear();
+            if (SendFull)
+            {
+                ChangeList.Clear();
+                SendFull = false;
 
-            Remote.API.SendDatabaseChanges(changes);
+                SendDatabase();
+            }
+            else
+            {
+                var changes = ChangeList.Select(kv => kv.Value).ToList();
+                ChangeList.Clear();
+                
+                var sync = Remote.API.SendDatabaseChanges(changes);
+                if (sync.Success)
+                {
+                    Settings.Set("Last Sync", sync.Result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if the databases on both sides are equal, and if not, initiates synchronization.
+        /// </summary>
+        public static void FirstRunSynchronize()
+        {
+            var localhash = GetDatabaseChecksum();
+            var rsnethash = Remote.API.GetDatabaseChecksum();
+
+            if (!rsnethash.Success)
+            {
+                return;
+            }
+
+            if (localhash.Checksum != rsnethash.Checksum)
+            {
+                if (localhash.LastSync >= rsnethash.LastSync)
+                {
+                    SendDatabase();
+                }
+
+                if (localhash.LastSync < rsnethash.LastSync)
+                {
+                    // get database changes
+                }
+            }
         }
 
         /// <summary>
@@ -60,43 +176,76 @@
                     info.SourceLanguage = "en";
                 }
 
-                var sint   = show["showid"].ToInteger() * 100000;
-                var marked = Database.Query("select distinct episodeid from tracking where showid = ? order by episodeid asc", show["showid"]);
-
-                // the marked episodes member is a list of integer array with two numbers
-                // the first number represents the start of the range, while the second one represents the end of the range
-                // by storing the whole list of marked episodes, my database would be 32 kB
-                // by storing just the ranges, my database serializes to 8 kB
-                info.MarkedEpisodes = new List<int[]>();
-
-                var start = 0;
-                var prev  = 0;
-                foreach (var ep in marked.Select(ep => ep["episodeid"].ToInteger() - sint).Where(ep => ep >= 0))
-                {
-                    if (prev == ep - 1)
-                    {
-                        prev = ep;
-                    }
-                    else
-                    {
-                        if (start != 0 && prev != 0)
-                        {
-                            info.MarkedEpisodes.Add(new[] { start, prev });
-                        }
-
-                        start = prev = ep;
-                    }
-                }
-
-                if ((info.MarkedEpisodes.Count == 0 && start != 0 && prev != 0) || info.MarkedEpisodes.Last() != new[] { start, prev })
-                {
-                    info.MarkedEpisodes.Add(new[] { start, prev });
-                }
+                info.MarkedEpisodes = SerializeMarkedEpisodes(show["showid"]);
 
                 list.Add(info);
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Serializes the list of marked episodes for the specified TV show.
+        /// </summary>
+        /// <param name="showid">The ID of the show.</param>
+        /// <returns>List of marked episode ranges.</returns>
+        public static List<int[]> SerializeMarkedEpisodes(string showid)
+        {
+            var sint   = showid.ToInteger() * 100000;
+            var marked = Database.Query("select distinct episodeid from tracking where showid = ? order by episodeid asc", showid);
+            var list   = new List<int[]>();
+            var start  = 0;
+            var prev   = 0;
+
+            foreach (var ep in marked.Select(ep => ep["episodeid"].ToInteger() - sint).Where(ep => ep >= 0))
+            {
+                if (prev == ep - 1)
+                {
+                    prev = ep;
+                }
+                else
+                {
+                    if (start != 0 && prev != 0)
+                    {
+                        list.Add(new[] { start, prev });
+                    }
+
+                    start = prev = ep;
+                }
+            }
+
+            if ((list.Count == 0 && start != 0 && prev != 0) || (list.Count != 0 && list.Last() != new[] { start, prev }))
+            {
+                list.Add(new[] { start, prev });
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Serializes the database and computes its SHA-256 checksum.
+        /// </summary>
+        /// <returns>The last modification time and SHA-256 hash.</returns>
+        public static DatabaseChecksum GetDatabaseChecksum()
+        {
+            var db = SerializeDatabase();
+            var sb = new StringBuilder();
+
+            foreach (var show in db)
+            {
+                sb.Append(show.RowID.Value + "\0" + show.Title + "\0" + show.Source + "\0" + show.SourceID + "\0" + show.SourceLanguage + "\0");
+
+                foreach (var eps in show.MarkedEpisodes)
+                {
+                    sb.Append(eps[0] + "\0" + eps[1] + "\0");
+                }
+            }
+
+            return new DatabaseChecksum
+                {
+                    LastSync = Settings.Get<int>("Last Sync"),
+                    Checksum = BitConverter.ToString(new SHA256CryptoServiceProvider().ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()))).Replace("-", string.Empty).ToLower()
+                };
         }
 
         /// <summary>
@@ -134,61 +283,6 @@
             }
 
             MainWindow.Active.DataChanged();
-        }
-
-        /// <summary>
-        /// Represents a small database change.
-        /// </summary>
-        public class ChangeOperation
-        {
-            /// <summary>
-            /// Gets or sets the title.
-            /// </summary>
-            /// <value>The title.</value>
-            public string Title { get; set; }
-
-            /// <summary>
-            /// Gets or sets the change type.
-            /// </summary>
-            /// <value>The change type.</value>
-            public ChangeType Type { get; set; }
-
-            /// <summary>
-            /// Gets or sets the diff data.
-            /// </summary>
-            /// <value>The diff data.</value>
-            public object Data { get; set; }
-
-            /// <summary>
-            /// Describes the type of the change.
-            /// </summary>
-            public enum ChangeType
-            {
-                /// <summary>
-                /// An episode was marked as watched.
-                /// </summary>
-                EpisodeMarked,
-                /// <summary>
-                /// An episode was unmarked.
-                /// </summary>
-                EpisodeUnmarked,
-                /// <summary>
-                /// A show was added to the list.
-                /// </summary>
-                ShowAdded,
-                /// <summary>
-                /// A show was removed from the list.
-                /// </summary>
-                ShowRemoved,
-                /// <summary>
-                /// The grabber and/or the language of a show was modified.
-                /// </summary>
-                ShowModified,
-                /// <summary>
-                /// The list of the shows was reordered.
-                /// </summary>
-                RowIdUpdated
-            }
         }
     }
 }

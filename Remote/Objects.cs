@@ -1,8 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker.Remote.Objects
 {
+    using System;
     using System.Collections.Generic;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     /// <summary>
     /// Represents a request.
@@ -181,9 +183,28 @@
         public string Error { get; set; }
         #endregion
 
+        /// <summary>
+        /// Gets or sets a value indicating whether there is a new version.
+        /// </summary>
+        /// <value><c>true</c> if there is; otherwise, <c>false</c>.</value>
         public bool New { get; set; }
+
+        /// <summary>
+        /// Gets or sets the new version.
+        /// </summary>
+        /// <value>The new version.</value>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL.
+        /// </summary>
+        /// <value>The URL.</value>
         public string URL { get; set; }
+
+        /// <summary>
+        /// Gets or sets the change list.
+        /// </summary>
+        /// <value>The change list.</value>
         public string Description { get; set; }
     }
 
@@ -260,6 +281,10 @@
         public string Error { get; set; }
         #endregion
 
+        /// <summary>
+        /// Gets or sets the date of the last update.
+        /// </summary>
+        /// <value>The last updated date.</value>
         public long LastUpdated { get; set; }
     }
 
@@ -290,15 +315,122 @@
     }
 
     /// <summary>
-    /// Represents a serialzied show information including its marked episodes.
+    /// Represents a serialized show information including its marked episodes.
     /// </summary>
     public class SerializedShowInfo
     {
-        public int RowID { get; set; }
+        /// <summary>
+        /// Gets or sets the row ID.
+        /// </summary>
+        /// <value>The row ID.</value>
+        public int? RowID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source.
+        /// </summary>
+        /// <value>The source.</value>
         public string Source { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source ID.
+        /// </summary>
+        /// <value>The source ID.</value>
         public string SourceID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source language.
+        /// </summary>
+        /// <value>The source language.</value>
         public string SourceLanguage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of marked episodes.
+        /// </summary>
+        /// <value>The list of marked episodes.</value>
         public List<int[]> MarkedEpisodes { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a serialized show information that only contains the differences from the previously submitted object.
+    /// </summary>
+    public class SerializedShowInfoDiff : SerializedShowInfo
+    {
+        /// <summary>
+        /// Gets or sets the type of the change.
+        /// </summary>
+        /// <value>The type of the change.</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ChangeType Changes { get; set; }
+
+        /// <summary>
+        /// Describes the type of the change.
+        /// </summary>
+        public enum ChangeType
+        {
+            /// <summary>
+            /// The list of marked episodes was modified.
+            /// </summary>
+            MarkedEpisodesModified,
+            /// <summary>
+            /// A show was added to the list.
+            /// </summary>
+            ShowAdded,
+            /// <summary>
+            /// A show was removed from the list.
+            /// </summary>
+            ShowRemoved,
+            /// <summary>
+            /// The grabber and/or the language of a show was modified.
+            /// </summary>
+            ShowModified,
+            /// <summary>
+            /// The list of the shows was reordered.
+            /// </summary>
+            RowIdModified
+        }
+    }
+
+    /// <summary>
+    /// Represents a checksum of a serialized database.
+    /// </summary>
+    public class DatabaseChecksum : IRemoteObject
+    {
+        #region Implementation of IRemoteObject
+        /// <summary>
+        /// Gets or sets a value indicating whether the request was successfully fulfilled.
+        /// </summary>
+        /// <value><c>true</c> if request was successful; otherwise, <c>false</c>.</value>
+        public bool Success { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of seconds it took for the request to finish.
+        /// </summary>
+        /// <value>The number of seconds.</value>
+        public double Time { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message, if any.
+        /// </summary>
+        /// <value>The error message.</value>
+        public string Error { get; set; }
+        #endregion
+
+        /// <summary>
+        /// Gets or sets the unix timestamp of the last modification.
+        /// </summary>
+        /// <value>The unix timestamp of the last modification.</value>
+        public int LastSync { get; set; }
+
+        /// <summary>
+        /// Gets or sets the SHA-256 hash.
+        /// </summary>
+        /// <value>The SHA-256 hash.</value>
+        public string Checksum { get; set; }
     }
 }
