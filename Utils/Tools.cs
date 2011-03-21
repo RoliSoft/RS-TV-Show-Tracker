@@ -217,13 +217,14 @@
         /// <param name="encoding">The encoding.</param>
         /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
+        /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
         /// <returns>Remote page's parsed content.</returns>
-        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, Dictionary<string, string> headers = null)
+        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(
-                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, headers)
+                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers)
             );
 
             return doc;
@@ -238,14 +239,15 @@
         /// <param name="encoding">The encoding.</param>
         /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
+        /// <param name="timeout">The requrest timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
         /// <returns>Remote page's content.</returns>
-        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, Dictionary<string, string> headers = null)
+        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
         {
             ServicePointManager.Expect100Continue = false;
 
             var req       = (HttpWebRequest)WebRequest.Create(url);
-            req.Timeout   = 10000;
+            req.Timeout   = timeout;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
 
             req.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");

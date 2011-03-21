@@ -357,16 +357,34 @@
     }
 
     /// <summary>
-    /// Represents a serialized show information that only contains the differences from the previously submitted object.
+    /// Represents a show information change.
     /// </summary>
-    public class SerializedShowInfoDiff : SerializedShowInfo
+    public class ShowInfoChange
     {
+        /// <summary>
+        /// Gets or sets the show.
+        /// </summary>
+        /// <value>An array with 4 items: 1 - title of the show; 2 - grabber name; 3 - ID on the grabber; 4 - language.</value>
+        public string[] Show { get; set; }
+
+        /// <summary>
+        /// Gets or sets the GMT unix timestamp which indicates when did this change occur.
+        /// </summary>
+        /// <value>The GMT unix timestamp.</value>
+        public double Time { get; set; }
+
+        /// <summary>
+        /// Gets or sets the data which contains the changed information.
+        /// </summary>
+        /// <value>The changed information.</value>
+        public object Data { get; set; }
+
         /// <summary>
         /// Gets or sets the type of the change.
         /// </summary>
         /// <value>The type of the change.</value>
         [JsonConverter(typeof(StringEnumConverter))]
-        public ChangeType Changes { get; set; }
+        public ChangeType Change { get; set; }
 
         /// <summary>
         /// Describes the type of the change.
@@ -374,63 +392,25 @@
         public enum ChangeType
         {
             /// <summary>
-            /// The list of marked episodes was modified.
+            /// Adds a show.
             /// </summary>
-            MarkedEpisodesModified,
+            AddShow,
             /// <summary>
-            /// A show was added to the list.
+            /// Removes a show.
             /// </summary>
-            ShowAdded,
+            RemoveShow,
             /// <summary>
-            /// A show was removed from the list.
+            /// Modifies a show.
             /// </summary>
-            ShowRemoved,
+            ModifyShow,
             /// <summary>
-            /// The grabber and/or the language of a show was modified.
+            /// Marks an episode.
             /// </summary>
-            ShowModified,
+            MarkEpisode,
             /// <summary>
-            /// The list of the shows was reordered.
+            /// Unmarks an episode.
             /// </summary>
-            RowIdModified
+            UnmarkEpisode
         }
-    }
-
-    /// <summary>
-    /// Represents a checksum of a serialized database.
-    /// </summary>
-    public class DatabaseChecksum : IRemoteObject
-    {
-        #region Implementation of IRemoteObject
-        /// <summary>
-        /// Gets or sets a value indicating whether the request was successfully fulfilled.
-        /// </summary>
-        /// <value><c>true</c> if request was successful; otherwise, <c>false</c>.</value>
-        public bool Success { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of seconds it took for the request to finish.
-        /// </summary>
-        /// <value>The number of seconds.</value>
-        public double Time { get; set; }
-
-        /// <summary>
-        /// Gets or sets the error message, if any.
-        /// </summary>
-        /// <value>The error message.</value>
-        public string Error { get; set; }
-        #endregion
-
-        /// <summary>
-        /// Gets or sets the unix timestamp of the last modification.
-        /// </summary>
-        /// <value>The unix timestamp of the last modification.</value>
-        public int LastSync { get; set; }
-
-        /// <summary>
-        /// Gets or sets the SHA-256 hash.
-        /// </summary>
-        /// <value>The SHA-256 hash.</value>
-        public string Checksum { get; set; }
     }
 }

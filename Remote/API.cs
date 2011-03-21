@@ -88,6 +88,7 @@
                   //url:       "http://home.rolisoft.net/api/",
                     postData:  post,
                     userAgent: "RS TV Show Tracker/" + Signature.Version,
+                    timeout:   120000,
                     headers:   new Dictionary<string, string>
                         {
                             { "X-UUID", "{0}/{1}/{2}".FormatWith(Utils.GetUUID(), Environment.UserDomainName, Environment.UserName) }
@@ -250,34 +251,35 @@
         {
             return InvokeSecureRemoteMethod<General>("SendFeedback", type, name, email, message);
         }
-
+        
         /// <summary>
-        /// Sends the full database to the remote server.
+        /// Sends a database change to the remote server.
         /// </summary>
-        /// <param name="shows">The list of serialized shows.</param>
+        /// <param name="change">The database change.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static Generic<int> SendDatabase(IEnumerable<SerializedShowInfo> shows)
+        public static General SendDatabaseChange(ShowInfoChange change)
         {
-            return InvokeRemoteMethod<Generic<int>>("SendDatabase", shows);
+            return InvokeRemoteMethod<General>("SendDatabaseChange", change);
         }
 
         /// <summary>
-        /// Sends the database changes to the remote server.
+        /// Sends multiple database changes to the remote server.
         /// </summary>
         /// <param name="changes">The list of database changes.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static Generic<int> SendDatabaseChanges(IEnumerable<SerializedShowInfoDiff> changes)
+        public static General SendDatabaseChanges(IEnumerable<ShowInfoChange> changes)
         {
-            return InvokeRemoteMethod<Generic<int>>("SendDatabaseChanges", changes);
+            return InvokeRemoteMethod<General>("SendDatabaseChanges", changes);
         }
 
         /// <summary>
-        /// Gets the checksum of the remote database.
+        /// Retrieves multiple database changes from the remote server.
         /// </summary>
-        /// <returns>The SHA-256 hash of the remote database.</returns>
-        public static DatabaseChecksum GetDatabaseChecksum()
+        /// <param name="time">The last date when sync occurred.</param>
+        /// <returns><c>true</c> if operation was successful.</returns>
+        public static General GetDatabaseChanges(double time)
         {
-            return InvokeRemoteMethod<DatabaseChecksum>("GetDatabaseChecksum");
+            return InvokeRemoteMethod<General>("GetDatabaseChanges", time);
         }
         #endregion
     }
