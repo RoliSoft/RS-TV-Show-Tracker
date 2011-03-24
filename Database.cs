@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data.SQLite;
     using System.IO;
+    using System.Linq;
 
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
 
@@ -289,6 +290,24 @@
 
             return showid.Count != 0
                    ? showid[0]["showid"]
+                   : string.Empty;
+        }
+
+        /// <summary>
+        /// Gets the ID of a show in the database.
+        /// </summary>
+        /// <param name="show">The name of the show.</param>
+        /// <param name="grabber">The grabber.</param>
+        /// <param name="grabberId">The grabber id.</param>
+        /// <param name="grabberLang">The grabber language.</param>
+        /// <returns>ID of the show or empty string.</returns>
+        public static string GetShowID(string show, string grabber, string grabberId, string grabberLang)
+        {
+            var query  = Query("select showid, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where name = ?", show);
+            var filter = query.Where(sh => sh["grabber"] == grabber && ShowData(sh["showid"], sh["grabber"] + ".id") == grabberId && ShowData(sh["showid"], sh["grabber"] + ".lang") == grabberLang).ToList();
+
+            return filter.Count != 0
+                   ? filter[0]["showid"]
                    : string.Empty;
         }
 

@@ -371,7 +371,7 @@
         /// Gets or sets the GMT unix timestamp which indicates when did this change occur.
         /// </summary>
         /// <value>The GMT unix timestamp.</value>
-        public double Time { get; set; }
+        public long Time { get; set; }
 
         /// <summary>
         /// Gets or sets the data which contains the changed information.
@@ -412,5 +412,43 @@
             /// </summary>
             UnmarkEpisode
         }
+    }
+
+    /// <summary>
+    /// Represents a list of show changes since the last request.
+    /// </summary>
+    public class ShowInfoChangeList : IRemoteObject
+    {
+        #region Implementation of IRemoteObject
+        /// <summary>
+        /// Gets or sets a value indicating whether the request was successfully fulfilled.
+        /// </summary>
+        /// <value><c>true</c> if request was successful; otherwise, <c>false</c>.</value>
+        public bool Success { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of seconds it took for the request to finish.
+        /// </summary>
+        /// <value>The number of seconds.</value>
+        public double Time { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message, if any.
+        /// </summary>
+        /// <value>The error message.</value>
+        public string Error { get; set; }
+        #endregion
+
+        /// <summary>
+        /// Gets or sets the date of the last synchronization.
+        /// </summary>
+        /// <value>The last synchronization date.</value>
+        public long LastSync { get; set; }
+
+        /// <summary>
+        /// Gets or sets the change list.
+        /// </summary>
+        /// <value>The change list.</value>
+        public List<ShowInfoChange> Changes { get; set; }
     }
 }

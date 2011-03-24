@@ -277,9 +277,9 @@
         /// </summary>
         /// <param name="time">The last date when sync occurred.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General GetDatabaseChanges(double time)
+        public static ShowInfoChangeList GetDatabaseChanges(long time)
         {
-            return InvokeRemoteMethod<General>("GetDatabaseChanges", time);
+            return InvokeRemoteMethod<ShowInfoChangeList>("GetDatabaseChanges", time);
         }
         #endregion
     }

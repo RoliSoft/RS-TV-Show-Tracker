@@ -3,6 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+
+    using Newtonsoft.Json.Linq;
 
     using RoliSoft.TVShowTracker.Remote.Objects;
 
@@ -25,24 +28,27 @@
         /// <param name="data">The changed information.</param>
         public static void SendChange(string showid, ShowInfoChange.ChangeType type, object data = null)
         {
-            //if (!Enabled) return;
+            if (!Enabled) return;
 
-            var show   = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
-            var change = new ShowInfoChange
+            new Thread(() =>
                 {
-                    Time   = DateTime.UtcNow.ToUnixTimestamp(),
-                    Change = type,
-                    Data   = data,
-                    Show   = new[]
+                    var show   = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
+                    var change = new ShowInfoChange
                         {
-                            show["name"],
-                            show["grabber"],
-                            Database.ShowData(showid, show["grabber"] + ".id"),
-                            Database.ShowData(showid, show["grabber"] + ".lang")
-                        }
-                };
+                            Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
+                            Change = type,
+                            Data   = data,
+                            Show   = new[]
+                                {
+                                    show["name"],
+                                    show["grabber"],
+                                    Database.ShowData(showid, show["grabber"] + ".id"),
+                                    Database.ShowData(showid, show["grabber"] + ".lang")
+                                }
+                        };
 
-            Remote.API.SendDatabaseChange(change);
+                    Remote.API.SendDatabaseChange(change);
+                }).Start();
         }
 
         /// <summary>
@@ -74,7 +80,7 @@
 
                 var addchg = new ShowInfoChange
                     {
-                        Time   = DateTime.UtcNow.ToUnixTimestamp(),
+                        Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
                         Change = ShowInfoChange.ChangeType.AddShow,
                         Show   = showinf
                     };
@@ -83,7 +89,7 @@
 
                 var markchg = new ShowInfoChange
                     {
-                        Time   = DateTime.UtcNow.ToUnixTimestamp(),
+                        Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
                         Change = ShowInfoChange.ChangeType.MarkEpisode,
                         Show   = showinf,
                         Data   = SerializeMarkedEpisodes(show["showid"])
@@ -134,39 +140,103 @@
         }
 
         /// <summary>
-        /// Inserts the TV shows in the specified list and marks the specified episodes.
+        /// Gets the changes on the remote server.
         /// </summary>
-        /// <param name="shows">The list of serialized TV show states.</param>
-        public static void UpdateDatabase(List<SerializedShowInfo> shows)
+        public static void GetChanges()
         {
-            foreach (var show in shows)
+            var last = Database.Setting("Last Sync");
+            if (string.IsNullOrWhiteSpace(last))
             {
-                var id = Database.GetShowID(show.Title);
+                last = "0";
+            }
+
+            var changes = Remote.API.GetDatabaseChanges(long.Parse(last));
+            if (changes.Success && changes.Changes.Count != 0)
+            {
+                ApplyRemoteChanges(changes);
+            }
+        }
+
+        /// <summary>
+        /// Applies the changes retrieved from the remote database.
+        /// </summary>
+        /// <param name="changes">The list of serialized TV show states.</param>
+        public static void ApplyRemoteChanges(ShowInfoChangeList changes)
+        {
+            foreach (var change in changes.Changes)
+            {
+                var id = Database.GetShowID(change.Show[0], change.Show[1], change.Show[2], change.Show[3]);
                 if (string.IsNullOrWhiteSpace(id))
                 {
-                    Database.Execute("update tvshows set rowid = rowid + 1");
-                    Database.Execute("insert into tvshows values (1, null, ?)", show.Title);
+                    if (change.Change == ShowInfoChange.ChangeType.AddShow || change.Change == ShowInfoChange.ChangeType.MarkEpisode || change.Change == ShowInfoChange.ChangeType.UnmarkEpisode)
+                    {
+                        Database.Execute("update tvshows set rowid = rowid + 1");
+                        Database.Execute("insert into tvshows values (1, null, ?)", change.Show[0]);
 
-                    id = Database.GetShowID(show.Title);
+                        id = Database.GetShowID(change.Show[0]);
 
-                    Database.ShowData(id, "grabber",             show.Source);
-                    Database.ShowData(id, show.Source + ".id",   show.SourceID);
-                    Database.ShowData(id, show.Source + ".lang", show.SourceLanguage);
+                        Database.ShowData(id, "grabber", change.Show[1]);
+                        Database.ShowData(id, change.Show[1] + ".id", change.Show[2]);
+                        Database.ShowData(id, change.Show[1] + ".lang", change.Show[3]);
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
 
                 var sint = id.ToInteger() * 100000;
-                foreach (var range in show.MarkedEpisodes)
+
+                switch (change.Change)
                 {
-                    foreach (var ep in Enumerable.Range(range[0], range[1]))
-                    {
-                        if (Database.Query("select * from tracking where showid = ? and episodeid = ?", id, ep + sint).Count == 0)
+                    case ShowInfoChange.ChangeType.RemoveShow:
+                        Database.Execute("delete from tvshows where showid = ?", id);
+                        Database.Execute("delete from showdata where showid = ?", id);
+                        Database.Execute("delete from episodes where showid = ?", id);
+                        Database.Execute("delete from tracking where showid = ?", id);
+
+                        Database.Execute("update tvshows set rowid = rowid * -1");
+
+                        var tr = Database.Connection.BeginTransaction();
+
+                        var shows = Database.Query("select showid from tvshows order by rowid desc");
+                        var i = 1;
+                        foreach (var show in shows)
                         {
-                            Database.Execute("insert into tracking values (?, ?)", id, ep + sint);
+                            Database.ExecuteOnTransaction(tr, "update tvshows set rowid = ? where showid = ?", i, show["showid"]);
+                            i++;
                         }
-                    }
+
+                        tr.Commit();
+
+                        Database.Execute("vacuum;");
+                        break;
+
+                    case ShowInfoChange.ChangeType.MarkEpisode:
+                        var tr2 = Database.Connection.BeginTransaction();
+
+                        foreach (var ep in (JArray)change.Data)
+                        {
+                            if (Database.Query("select * from tracking where showid = ? and episodeid = ?", id, (int)ep + sint).Count == 0)
+                            {
+                                Database.ExecuteOnTransaction(tr2, "insert into tracking values (?, ?)", id, (int)ep + sint);
+                            }
+                        }
+
+                        tr2.Commit();
+                        break;
+
+                    case ShowInfoChange.ChangeType.UnmarkEpisode:
+                        foreach (var ep in (JArray)change.Data)
+                        {
+                            Database.Execute("delete from tracking where showid = ? and episodeid = ?", id, (int)ep + sint);
+                        }
+                        break;
                 }
             }
 
+            Database.Setting("Last Sync", changes.LastSync.ToString());
+            Database.Execute("vacuum;");
             MainWindow.Active.DataChanged();
         }
     }
