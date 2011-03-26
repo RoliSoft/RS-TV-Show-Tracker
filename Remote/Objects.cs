@@ -410,7 +410,11 @@
             /// <summary>
             /// Unmarks an episode.
             /// </summary>
-            UnmarkEpisode
+            UnmarkEpisode,
+            /// <summary>
+            /// Reorders the list.
+            /// </summary>
+            ReorderList
         }
     }
 

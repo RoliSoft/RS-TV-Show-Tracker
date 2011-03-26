@@ -284,6 +284,8 @@
         {
             var gname = _guide.GetType().Name;
 
+            Synchronization.SendChange(_id, Remote.Objects.ShowInfoChange.ChangeType.ModifyShow, new[] { _show, gname, show.ID, show.Language });
+
             Database.ShowData(_id, "grabber",       gname);
             Database.ShowData(_id, gname + ".id",   show.ID);
             Database.ShowData(_id, gname + ".lang", show.Language);

@@ -467,6 +467,8 @@
                 var val = ((CheckBox)e.OriginalSource).Tag.ToString().Split('|');
                 Database.Execute("insert into tracking values (" + val[0] + ", '" + val[1] + "')");
 
+                Synchronization.SendChange(val[0], Remote.Objects.ShowInfoChange.ChangeType.MarkEpisode, new[] { val[1].ToInteger() - (val[0].ToInteger() * 100000) }.ToList(), true);
+
                 MainWindow.Active.DataChanged(false);
             }
             catch
@@ -486,6 +488,8 @@
             {
                 var val = ((CheckBox)e.OriginalSource).Tag.ToString().Split('|');
                 Database.Execute("delete from tracking where showid = " + val[0] + " and episodeid = '" + val[1] + "'");
+
+                Synchronization.SendChange(val[0], Remote.Objects.ShowInfoChange.ChangeType.UnmarkEpisode, new[] { val[1].ToInteger() - (val[0].ToInteger() * 100000) }.ToList(), true);
 
                 MainWindow.Active.DataChanged(false);
             }

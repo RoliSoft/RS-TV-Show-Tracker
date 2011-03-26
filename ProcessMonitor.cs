@@ -107,7 +107,7 @@
         public static void MarkAsSeen(string showid, ShowEpisode ep)
         {
             var eps = ep.SecondEpisode.HasValue
-                      ? Enumerable.Range(ep.Episode, ep.SecondEpisode.Value)
+                      ? Enumerable.Range(ep.Episode, ep.SecondEpisode.Value).ToArray()
                       : new[] { ep.Episode };
 
             foreach (var epnr in eps)
@@ -124,6 +124,8 @@
                     Database.Execute("insert into tracking values (?, ?)", showid, epid);
                 }
             }
+
+            Synchronization.SendChange(showid, Remote.Objects.ShowInfoChange.ChangeType.MarkEpisode, eps.Select(x => x + (ep.Season * 1000)).ToList());
 
             MainWindow.Active.DataChanged();
         }

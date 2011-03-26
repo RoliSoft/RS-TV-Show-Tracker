@@ -252,6 +252,8 @@
 
                 Database.Execute("insert into tracking values (" + showid + ", '" + episodeid + "')");
 
+                Synchronization.SendChange(showid, Remote.Objects.ShowInfoChange.ChangeType.MarkEpisode, new[] { episodeid.ToInteger() - (showid.ToInteger() * 100000) }.ToList(), true);
+
                 MainWindow.Active.DataChanged();
             }
             catch
@@ -417,6 +419,8 @@
                 listView.SelectedIndex = listid - 1;
                 listView.ScrollIntoView(listView.SelectedItem);
 
+                Synchronization.SendChange(null, Remote.Objects.ShowInfoChange.ChangeType.ReorderList, delay: true);
+
                 MainWindow.Active.DataChanged(false);
             }
 
@@ -440,6 +444,8 @@
                 OverviewListViewItemCollection.Move(listid, listid + 1);
                 listView.SelectedIndex = listid + 1;
                 listView.ScrollIntoView(listView.SelectedItem);
+
+                Synchronization.SendChange(null, Remote.Objects.ShowInfoChange.ChangeType.ReorderList, delay: true);
 
                 MainWindow.Active.DataChanged(false);
             }
@@ -469,6 +475,8 @@
 
                 if(td.Show() == TaskDialogResult.Yes)
                 {
+                    Synchronization.SendChange(showid, Remote.Objects.ShowInfoChange.ChangeType.RemoveShow);
+
                     Database.Execute("delete from tvshows where showid = ?", showid);
                     Database.Execute("delete from showdata where showid = ?", showid);
                     Database.Execute("delete from episodes where showid = ?", showid);

@@ -9,6 +9,8 @@
 
     using RoliSoft.TVShowTracker.Remote.Objects;
 
+    using Timer = System.Timers.Timer;
+
     /// <summary>
     /// Provides methods to synchronize the database with a remote server.
     /// </summary>
@@ -21,42 +23,183 @@
         public static bool Enabled { get; set; }
 
         /// <summary>
+        /// Gets or sets the list of delayed changes.
+        /// </summary>
+        /// <value>The list of delayed changes.</value>
+        public static List<ShowInfoChange> DelayedChanges { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delayed changes timer.
+        /// </summary>
+        /// <value>The delayed changes timer.</value>
+        public static Timer DelayedChangesTimer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of pending changes.
+        /// </summary>
+        /// <value>The list of pending changes.</value>
+        public static List<ShowInfoChange> PendingChanges { get; set; }
+
+        /// <summary>
+        /// Gets or sets the pending changes timer.
+        /// </summary>
+        /// <value>The pending changes timer.</value>
+        public static Timer PendingChangesTimer { get; set; }
+
+        /// <summary>
+        /// Initializes the <see cref="Synchronization"/> class.
+        /// </summary>
+        static Synchronization()
+        {
+            DelayedChanges = new List<ShowInfoChange>();
+            PendingChanges = new List<ShowInfoChange>();
+
+            DelayedChangesTimer = new Timer(30 * 1000) { AutoReset = false };
+            PendingChangesTimer = new Timer(120 * 1000) { AutoReset = false };
+
+            DelayedChangesTimer.Elapsed += DelayedChangesTimerElapsed;
+            PendingChangesTimer.Elapsed += PendingChangesTimerElapsed;
+        }
+
+        /// <summary>
+        /// Handles the Elapsed event of the DelayedChangesTimer control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
+        static void DelayedChangesTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (DelayedChanges.Count == 0)
+            {
+                return;
+            }
+
+            var changes = DelayedChanges.ToList();
+            DelayedChanges.Clear();
+
+            var req = Remote.API.SendDatabaseChanges(changes);
+            if (!req.Success || !req.OK)
+            {
+                PendingChanges.AddRange(changes);
+                PendingChangesTimer.Start();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Elapsed event of the PendingChangesTimer control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
+        static void PendingChangesTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (PendingChanges.Count == 0)
+            {
+                return;
+            }
+
+            var changes = PendingChanges.ToList();
+            PendingChanges.Clear();
+
+            var req = Remote.API.SendDatabaseChanges(changes);
+            if (!req.Success || !req.OK)
+            {
+                PendingChanges.AddRange(changes);
+                PendingChangesTimer.Start();
+            }
+        }
+
+        /// <summary>
         /// Sends a database change to the remote server.
         /// </summary>
         /// <param name="showid">The ID of the show.</param>
         /// <param name="type">The type of the change.</param>
         /// <param name="data">The changed information.</param>
-        public static void SendChange(string showid, ShowInfoChange.ChangeType type, object data = null)
+        /// <param name="delay">if set to <c>true</c> the API requests will be delayed.</param>
+        public static void SendChange(string showid, ShowInfoChange.ChangeType type, object data = null, bool delay = false)
         {
-            if (!Enabled) return;
-
-            new Thread(() =>
+            if (!Enabled)
+            {
+                return;
+            }
+            
+            var show   = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
+            var change = new ShowInfoChange
                 {
-                    var show   = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
-                    var change = new ShowInfoChange
+                    Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
+                    Change = type,
+                    Data   = data,
+                    Show   = new[]
                         {
-                            Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
-                            Change = type,
-                            Data   = data,
-                            Show   = new[]
-                                {
-                                    show["name"],
-                                    show["grabber"],
-                                    Database.ShowData(showid, show["grabber"] + ".id"),
-                                    Database.ShowData(showid, show["grabber"] + ".lang")
-                                }
-                        };
+                            show["name"],
+                            show["grabber"],
+                            Database.ShowData(showid, show["grabber"] + ".id"),
+                            Database.ShowData(showid, show["grabber"] + ".lang")
+                        }
+                };
 
-                    Remote.API.SendDatabaseChange(change);
-                }).Start();
+            if (delay)
+            {
+                if (type == ShowInfoChange.ChangeType.ReorderList)
+                {
+                    DelayedChanges.RemoveAll(x => x.Change == ShowInfoChange.ChangeType.ReorderList);
+                    DelayedChanges.Add(change);
+                }
+                else if (type == ShowInfoChange.ChangeType.MarkEpisode && DelayedChanges.Any(x => x.Change == ShowInfoChange.ChangeType.MarkEpisode && x.Show == change.Show))
+                {
+                    var prevmark = DelayedChanges.First(x => x.Change == ShowInfoChange.ChangeType.MarkEpisode && x.Show == change.Show);
+
+                    if (prevmark.Data is List<int> && change.Data is List<int>)
+                    {
+                        (prevmark.Data as List<int>).AddRange(change.Data as List<int>);
+                    }
+                    else
+                    {
+                        DelayedChanges.Add(change);
+                    }
+                }
+                else if (type == ShowInfoChange.ChangeType.UnmarkEpisode && DelayedChanges.Any(x => x.Change == ShowInfoChange.ChangeType.UnmarkEpisode && x.Show == change.Show))
+                {
+                    var prevmark = DelayedChanges.First(x => x.Change == ShowInfoChange.ChangeType.UnmarkEpisode && x.Show == change.Show);
+
+                    if (prevmark.Data is List<int> && change.Data is List<int>)
+                    {
+                        (prevmark.Data as List<int>).AddRange(change.Data as List<int>);
+                    }
+                    else
+                    {
+                        DelayedChanges.Add(change);
+                    }
+                }
+                else
+                {
+                    DelayedChanges.Add(change);
+                }
+
+                DelayedChangesTimer.Start();
+            }
+            else
+            {
+                new Thread(() => InternalSendChange(change)).Start();
+            }
+        }
+
+        private static void InternalSendChange(ShowInfoChange change)
+        {
+            var req = Remote.API.SendDatabaseChange(change);
+            if (!req.Success || !req.OK)
+            {
+                PendingChanges.Add(change);
+                PendingChangesTimer.Start();
+            }
         }
 
         /// <summary>
         /// Sends the full database to the remote server.
         /// </summary>
-        public static void SendDatabase()
+        /// <returns><c>true</c> if sent successfully.</returns>
+        public static bool SendDatabase()
         {
-            Remote.API.SendDatabaseChanges(SerializeDatabase());
+            var req = Remote.API.SendDatabaseChanges(SerializeDatabase());
+            return req.Success && req.OK;
         }
 
         /// <summary>
