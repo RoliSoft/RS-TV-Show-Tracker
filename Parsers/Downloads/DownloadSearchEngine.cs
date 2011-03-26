@@ -43,7 +43,13 @@
         /// Gets a value indicating whether the site requires authentication.
         /// </summary>
         /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>
-        public abstract bool Private { get; }
+        public virtual bool Private
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the cookies used to access the site.

@@ -7,8 +7,6 @@
     using System.Text.RegularExpressions;
     using System.Threading;
 
-    using Ionic.Zip;
-
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>

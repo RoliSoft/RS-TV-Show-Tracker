@@ -1,7 +1,10 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.PreDB
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.HTTP
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
+
+    using HtmlAgilityPack;
 
     using NUnit.Framework;
 
@@ -9,10 +12,10 @@
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping ReleaseLog.
+    /// Provides support for scraping PhazeDDL.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-12 3:58 AM"), TestFixture]
-    public class PreScene : DownloadSearchEngine
+    [Parser("RoliSoft", "2011-03-26 4:32 PM"), TestFixture]
+    public class PhazeDDL : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -22,7 +25,7 @@
         {
             get
             {
-                return "PreScene";
+                return "PhazeDDL";
             }
         }
 
@@ -34,7 +37,7 @@
         {
             get
             {
-                return "http://prescene.com/";
+                return "http://www.phazeddl.com/";
             }
         }
 
@@ -46,7 +49,7 @@
         {
             get
             {
-                return Types.PreDB;
+                return Types.HTTP;
             }
         }
 
@@ -69,10 +72,10 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site, "q=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//h4/a");
+            var html  = Utils.GetHTML(Site + "searchcat.php?cat=5&q=" + Uri.EscapeUriString(query));
+            var links = html.DocumentNode.SelectNodes("//td[@class='vertTh']/..");
 
-            if (links == null)
+            if (links == null || Regex.IsMatch(html.DocumentNode.InnerHtml, @"Sorry no results found"))
             {
                 yield break;
             }
@@ -81,9 +84,14 @@
             {
                 var link = new Link(this);
 
-                link.Release = node.InnerText;
-                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                link.Quality = FileNames.Parser.ParseQuality(link.Release);
+                var site = node.GetTextValue("td[4]/a");
+                var star = node.GetTextValue("td[4]/a/following-sibling::text()");
+
+                link.Release = HtmlEntity.DeEntitize(node.GetTextValue("td[2]/a")).Trim()
+                             + (!string.IsNullOrWhiteSpace(site) ? " @ " + site : string.Empty)
+                             + (!string.IsNullOrWhiteSpace(star) && Regex.IsMatch(star, @"\s*\*\d") ? " " + star.Trim(new[] { ' ', '*' }) + "✩" : string.Empty);
+                link.InfoURL = node.GetNodeAttributeValue("td[2]/a", "href");
+                link.Quality = Qualities.HDTVXviD;
 
                 yield return link;
             }

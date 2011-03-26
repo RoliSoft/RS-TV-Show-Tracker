@@ -184,7 +184,7 @@
                         {
                             Content = engine.Name,
                             Padding = new Thickness(5, 0, 0, 0),
-                            Width   = 100
+                            Width   = 105
                         });
 
                     if (engine.Private)
@@ -202,7 +202,7 @@
                                 Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/" + (string.IsNullOrWhiteSpace(cookies) ? "lock" : "key") + ".png", UriKind.Relative)),
                                 Width   = 16,
                                 Height  = 16,
-                                Margin  = new Thickness(3, -2, -100, 0),
+                                Margin  = new Thickness(3, -2, -105, 0),
                                 ToolTip = "This is a private site and therefore cookies are required to search on it.\r\n" +
                                           (string.IsNullOrWhiteSpace(cookies)
                                            ? "Go to Settings, click on the Downloads tab, then select this site to enter the cookies."

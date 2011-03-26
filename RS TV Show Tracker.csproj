@@ -120,6 +120,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\PhazeDDL.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
     <Compile Include="Synchronization.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />
@@ -128,7 +134,6 @@
     <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\OnlineVideoSearchEngineTaskDialog.cs" />
     <Compile Include="TaskDialogs\FileSearchTaskDialog.cs" />
-    <Compile Include="Parsers\Downloads\Engines\HTTP\Katz.cs" />
     <Compile Include="Parsers\Guides\ShowID.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Google.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Bing.cs" />

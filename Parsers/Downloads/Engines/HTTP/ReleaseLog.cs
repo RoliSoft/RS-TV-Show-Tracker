@@ -53,18 +53,6 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether the site requires authentication.
-        /// </summary>
-        /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>
-        public override bool Private
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Gets the type of the link.
         /// </summary>
         /// <value>The type of the link.</value>

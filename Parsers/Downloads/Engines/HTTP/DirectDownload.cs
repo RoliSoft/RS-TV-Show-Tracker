@@ -12,10 +12,10 @@
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping Katz Downloads.
+    /// Provides support for scraping DirectDownload.tv.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-17 1:06 PM"), TestFixture]
-    public class Katz : DownloadSearchEngine
+    [Parser("RoliSoft", "2011-03-26 4:56 PM"), TestFixture]
+    public class DirectDownload : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -25,7 +25,7 @@
         {
             get
             {
-                return "Katz";
+                return "DirectDownload.tv";
             }
         }
 
@@ -37,19 +37,19 @@
         {
             get
             {
-                return "http://katz.cd/";
+                return "http://directdownload.tv/";
             }
         }
 
         /// <summary>
-        /// Gets a value indicating whether the site requires authentication.
+        /// Gets the URL to the favicon of the site.
         /// </summary>
-        /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>
-        public override bool Private
+        /// <value>The icon location.</value>
+        public override string Icon
         {
             get
             {
-                return false;
+                return "http://directdownload.tv/favicon.png";
             }
         }
 
@@ -84,41 +84,33 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "search?type=tv&q=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//div[@id='list']//dl");
+            var html  = Utils.GetHTML(Site + "ajaxSearch.php?keyword=" + Uri.EscapeUriString(query));
+            var links = html.DocumentNode.SelectNodes("//dl");
 
-            if (links == null || Regex.IsMatch(html.DocumentNode.InnerHtml, @"Your search \- .*? \- did not match any downloads."))
+            if (links == null)
             {
                 yield break;
             }
 
             foreach (var node in links)
             {
-                var link = new Link(this);
+                var release = HtmlEntity.DeEntitize(node.GetTextValue("dd[@class='title']/strong")).Trim();
+                var quality = FileNames.Parser.ParseQuality(release);
+                var size    = Regex.Match(node.GetTextValue("dd[@class='title']"), @"(\d+\.\d+ MB)").Groups[1].Value;
+                var sites   = node.SelectNodes("dd[@class='links']/a");
 
-                var site = node.GetTextValue("dd[@class='si']/a");
-                var star = node.GetTextValue("dd[@class='si']/span");
-                var list = node.SelectNodes("dd[@class='fh']/abbr");
-
-                link.Release = HtmlEntity.DeEntitize(node.GetTextValue("dt/a/text()")).Trim()
-                             + (!string.IsNullOrWhiteSpace(site) ? " @ " + site : string.Empty)
-                             + (!string.IsNullOrWhiteSpace(star) ? " " + star + "✩" : string.Empty);
-                link.InfoURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("dt/a", "href");
-                link.Quality = (node.GetTextValue("dt/a/span") ?? string.Empty).Contains("MKV")
-                               ? Qualities.HDTV720p
-                               : Qualities.HDTVXviD;
-
-                if (list != null)
+                foreach (var site in sites)
                 {
-                    foreach (var fs in list)
-                    {
-                        link.Infos += fs.GetTextValue("span") + " " + fs.GetAttributeValue("title") + ", ";
-                    }
+                    var link = new Link(this);
 
-                    link.Infos = link.Infos.TrimEnd(", ".ToCharArray());
+                    link.Release = release;
+                    link.Quality = quality;
+                    link.Size    = size;
+                    link.FileURL = site.GetAttributeValue("href");
+                    link.Infos   = site.GetNodeAttributeValue("img", "title").Replace("Download on ", string.Empty);
+
+                    yield return link;
                 }
-
-                yield return link;
             }
         }
     }

@@ -103,6 +103,18 @@
             {
                 return;
             }
+            
+            if (e.First == null && e.Second == null)
+            {
+                new TaskDialog
+                    {
+                        CommonIcon  = TaskDialogIcon.Stop,
+                        Title       = "Download error",
+                        Instruction = _td.Instruction,
+                        Content     = "There was an error while downloading the requested file." + Environment.NewLine + "Try downloading another file from the list."
+                    }.Show();
+                return;
+            }
 
             switch (e.Third)
             {
