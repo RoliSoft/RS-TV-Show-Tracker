@@ -67,12 +67,12 @@
             </TabItem>
             <TabItem Header="Working" Name="workingTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
                 <Grid Name="workingGrid">
-                    <Label Name="statusThrobber" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="50,0,0,0" Width="12" Height="17" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Label Name="statusThrobber" FontWeight="Bold" FontFamily="Consolas" Content="&#9696;" Padding="0,0" Margin="34,54,0,64" FontSize="28" Width="24" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center">
                         <Label.Effect>
                             <DropShadowEffect Color="Gray" ShadowDepth="0" />
                         </Label.Effect>
                         <Label.RenderTransform>
-                            <RotateTransform x:Name="statusThrobberRotate" CenterX="6" CenterY="8" Angle="0" />
+                            <RotateTransform x:Name="statusThrobberRotate" CenterX="13" CenterY="15" Angle="0" />
                         </Label.RenderTransform>
                         <Label.Resources>
                             <Storyboard x:Key="statusThrobberSpinner">
@@ -80,7 +80,8 @@
                             </Storyboard>
                         </Label.Resources>
                     </Label>
-                    <Label Content="Fucking around..." Name="working" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="65,-3,0,0" />
+                    <Label Content="Searching for TV show..." Name="working" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="65,-20,0,0" />
+                    <Label Content="House, M.D." Name="subworking" FontSize="15" Foreground="#FF454545" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="66,20,0,0" />
                     <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="413,118,0,0" Name="searchCancelButton" VerticalAlignment="Top" Width="75" Click="SearchCancelButtonClick" />
                 </Grid>
             </TabItem>

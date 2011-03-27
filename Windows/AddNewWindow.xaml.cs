@@ -112,7 +112,8 @@
         {
             if (string.IsNullOrWhiteSpace(textBox.Text)) return;
 
-            working.Content           = "Searching for {0}...".FormatWith(textBox.Text.ToUppercaseWords());
+            working.Content           = "Searching on {0}...".FormatWith(_guide.Name);
+            subworking.Content        = textBox.Text.ToUppercaseWords();
             addTabItem.Visibility     = Visibility.Collapsed;
             workingTabItem.Visibility = Visibility.Visible;
             tabControl.SelectedIndex  = 1;
@@ -258,7 +259,8 @@
         /// <param name="show">The show.</param>
         private void AddShow(ShowID show)
         {
-            working.Content           = "Downloading guide for {0}...".FormatWith(show.Title);
+            working.Content           = "Downloading guide...";
+            subworking.Content        = show.Title;
             selectTabItem.Visibility  = Visibility.Collapsed;
             workingTabItem.Visibility = Visibility.Visible;
             tabControl.SelectedIndex  = 1;
