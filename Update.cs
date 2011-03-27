@@ -117,6 +117,9 @@
                 Database.ShowData(r["showid"], "runtime", tv.Runtime.ToString());
                 Database.ShowData(r["showid"], "url",     tv.URL);
 
+                // remove current episodes
+                Database.ExecuteOnTransaction(tr, "delete from episodes where showid = ?", r["showid"]);
+
                 // update episodes
                 foreach (var ep in tv.Episodes)
                 {

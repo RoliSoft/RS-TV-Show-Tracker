@@ -109,7 +109,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleSubtitleSearchDone(object sender, EventArgs<List<Subtitle>> e)
         {
-            _remaining.Remove((sender as SubtitleSearchEngine).Name);
+            try { _remaining.Remove((sender as SubtitleSearchEngine).Name); } catch { }
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
@@ -128,7 +128,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleSubtitleSearchError(object sender, EventArgs<string, Exception> e)
         {
-            _remaining.Remove((sender as SubtitleSearchEngine).Name);
+            try { _remaining.Remove((sender as SubtitleSearchEngine).Name); } catch { }
 
             SubtitleSearchError.Fire(this, e.First, e.Second);
 

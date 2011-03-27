@@ -163,7 +163,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
         {
-            _remaining.Remove((sender as DownloadSearchEngine).Name);
+            try { _remaining.Remove((sender as DownloadSearchEngine).Name); } catch { }
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
@@ -190,7 +190,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchError(object sender, EventArgs<string, Exception> e)
         {
-            _remaining.Remove((sender as DownloadSearchEngine).Name);
+            try { _remaining.Remove((sender as DownloadSearchEngine).Name); } catch { }
 
             DownloadSearchError.Fire(this, e.First, e.Second);
 

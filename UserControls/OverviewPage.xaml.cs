@@ -131,7 +131,9 @@
 
             OverviewListViewItemCollection.Clear();
 
-            var shows = Database.Query("select name, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || showid from episodes where tvshows.showid = episodes.showid and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as title, (select 'S0' || season || 'E0' || episode || ' · ' || name || '||' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + DateTime.Now.ToUnixTimestamp() + " order by (season * 1000 + episode) asc limit 1) as next, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
+            var sep = '☃';
+
+            var shows = Database.Query("select showid, name, (select season || '" + sep + "' || episode || '" + sep + "' || name from episodes where tvshows.showid = episodes.showid and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as lastep, (select season || '" + sep + "' || episode || '" + sep + "' || name || '" + sep + "' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + DateTime.Now.ToUnixTimestamp() + " order by (season * 1000 + episode) asc limit 1) as nextep, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
                  _eps = 0;
             var ndate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0).AddDays(1);
 
@@ -139,29 +141,37 @@
 
             foreach (var show in shows)
             {
-                var title = show["title"].Split(new[] { "||" }, StringSplitOptions.None);
+                var lastep = show["lastep"].Split(sep);
+                var nextep = show["nextep"].Split(sep);
 
-                show["title"] = Regex.Replace(title[0], @"(?=[SE][0-9]{3})([SE])0", "$1");
+                var last = string.Empty;
+                var next = string.Empty;
 
-                var showid = title[1];
-                var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"].ToInteger();
+                if (lastep.Length == 3)
+                {
+                    last = "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].ToInteger(), lastep[1].ToInteger(), lastep[2]);
+                }
+                else
+                {
+                    last = "This show hasn't started yet.";
+                }
+
+                var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + show["showid"] + " and episodeid not in (select episodeid from tracking where showid = " + show["showid"] + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"].ToInteger();
                      _eps += count;
 
                 if (count == 1)
                 {
-                    show["title"] += " · NEW EPISODE!";
+                    last += " · NEW EPISODE!";
                 }
                 else if (count >= 2)
                 {
-                    show["title"] += " · " + count + " NEW EPISODES!";
+                    last += " · " + count + " NEW EPISODES!";
                 }
 
-                if (show["next"] != String.Empty)
+                if (nextep.Length == 4)
                 {
-                    var next = show["next"].Split(new[] { "||" }, StringSplitOptions.None);
-                    var nair = next[1].ToDouble().GetUnixTimestamp();
-
-                    show["next"] = Regex.Replace(next[0], @"(?=[SE][0-9]{3})([SE])0", "$1") + " · " + nair.ToRelativeDate();
+                    var nair = nextep[3].ToDouble().GetUnixTimestamp();
+                        next = "S{0:00}E{1:00} · {2} · {3}".FormatWith(nextep[0].ToInteger(), nextep[1].ToInteger(), nextep[2], nair.ToRelativeDate());
 
                     if (nair < ndate)
                     {
@@ -170,22 +180,32 @@
                 }
                 else if (show["airing"] == "True")
                 {
-                    show["next"] = "No data available";
+                    next = "No data available";
                 }
                 else
                 {
-                    show["next"] = "This show has ended.";
+                    next = "This show has ended.";
                 }
 
                 OverviewListViewItemCollection.Add(new OverviewListViewItem
                     {
                         Name              = show["name"],
-                        Title             = show["title"],
-                        Next              = show["next"],
-                        TitleColor        = count != 0 ? "Red" : "White",
-                        NextColor         = show["next"].StartsWith("S") ? "White" : "#50FFFFFF",
-                        MarkAsSeenVisible = count != 0 ? "Visible" : "Collapsed",
-                        PlayNextVisible   = count >= 2 ? "Visible" : "Collapsed"
+                        Title             = last,
+                        Next              = next,
+                        TitleColor        = count != 0
+                                            ? "Red"
+                                            : lastep.Length == 3
+                                              ? "White"
+                                              : "#50FFFFFF",
+                        NextColor         = nextep.Length == 4
+                                            ? "White"
+                                            : "#50FFFFFF",
+                        MarkAsSeenVisible = count != 0 
+                                            ? "Visible"
+                                            : "Collapsed",
+                        PlayNextVisible   = count >= 2
+                                            ? "Visible"
+                                            : "Collapsed"
                     });
             }
 
