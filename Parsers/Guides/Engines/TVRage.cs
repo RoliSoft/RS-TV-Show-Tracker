@@ -94,6 +94,7 @@
             show.AirTime     = info.GetValue("airtime");
             show.AirDay      = info.GetValue("airday");
             show.Network     = info.GetValue("network");
+            show.TimeZone    = info.GetValue("timezone");
             show.URL         = info.GetValue("showlink");
             show.Episodes    = new List<TVShow.Episode>();
 

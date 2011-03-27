@@ -63,6 +63,12 @@
         public int Runtime { get; set; }
 
         /// <summary>
+        /// Gets or sets the timezone of the airdates.
+        /// </summary>
+        /// <value>The timezone of the airdates.</value>
+        public string TimeZone { get; set; }
+
+        /// <summary>
         /// Gets or sets the URL to the show's page on the site.
         /// </summary>
         /// <value>The URL.</value>

@@ -142,6 +142,11 @@
             show.URL         = "http://thetvdb.com/?tab=series&id=" + info.GetValue("id");
             show.Episodes    = new List<TVShow.Episode>();
 
+            if (show.Network.Contains("BBC"))
+            {
+                show.TimeZone = "GMT+0";
+            }
+
             show.Cover = info.GetValue("poster");
             if (!string.IsNullOrWhiteSpace(show.Cover))
             {

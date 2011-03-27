@@ -287,11 +287,27 @@
         /// <param name="date">The date.</param>
         /// <param name="source">The time zone of the specified date.</param>
         /// <returns>DateTime in local timezone.</returns>
-        public static DateTime ToLocalTimeZone(this DateTime date, string source = "Central Standard Time")
+        public static DateTime ToLocalTimeZone(this DateTime date, string source)
         {
-            return Settings.Get("Convert Timezone", true)
-                   ? TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local)
-                   : date;
+            if (!Settings.Get("Convert Timezone", true))
+            {
+                return date;
+            }
+
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                source = "Central Standard Time";
+            }
+
+            if (source.StartsWith("GMT"))
+            {
+                var offset = Regex.Match(source, @"(\-?\d{1,2})").Groups[1].Value.ToInteger();
+                return TimeZoneInfo.ConvertTime(date.AddHours(offset * -1), TimeZoneInfo.Utc, TimeZoneInfo.Local);
+            }
+            else
+            {
+                return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.FindSystemTimeZoneById(source), TimeZoneInfo.Local);
+            }
         }
 
         /// <summary>

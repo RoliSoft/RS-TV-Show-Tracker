@@ -623,7 +623,7 @@
 
             if (show)
             {
-                var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs):(?::lig?ne|, sor:) (?<ln>[0-9]+)");
+                var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs)(?::lig?ne|, sor:) (?<ln>[0-9]+)");
                 var loc = "at a location where it was not expected";
 
                 if (mc.Count != 0)

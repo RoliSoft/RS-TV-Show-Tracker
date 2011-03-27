@@ -107,15 +107,16 @@
                 }
 
                 // update showdata fields
-                Database.ShowData(r["showid"], "genre",   tv.Genre);
-                Database.ShowData(r["showid"], "descr",   tv.Description);
-                Database.ShowData(r["showid"], "cover",   tv.Cover);
-                Database.ShowData(r["showid"], "airing",  tv.Airing.ToString());
-                Database.ShowData(r["showid"], "airtime", tv.AirTime);
-                Database.ShowData(r["showid"], "airday",  tv.AirDay);
-                Database.ShowData(r["showid"], "network", tv.Network);
-                Database.ShowData(r["showid"], "runtime", tv.Runtime.ToString());
-                Database.ShowData(r["showid"], "url",     tv.URL);
+                Database.ShowData(r["showid"], "genre",    tv.Genre);
+                Database.ShowData(r["showid"], "descr",    tv.Description);
+                Database.ShowData(r["showid"], "cover",    tv.Cover);
+                Database.ShowData(r["showid"], "airing",   tv.Airing.ToString());
+                Database.ShowData(r["showid"], "airtime",  tv.AirTime);
+                Database.ShowData(r["showid"], "airday",   tv.AirDay);
+                Database.ShowData(r["showid"], "network",  tv.Network);
+                Database.ShowData(r["showid"], "timezone", tv.TimeZone);
+                Database.ShowData(r["showid"], "runtime",  tv.Runtime.ToString());
+                Database.ShowData(r["showid"], "url",      tv.URL);
 
                 // remove current episodes
                 Database.ExecuteOnTransaction(tr, "delete from episodes where showid = ?", r["showid"]);
@@ -132,7 +133,7 @@
                                                       ep.Number,
                                                       string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch
                                                        ? ep.Airdate.ToUnixTimestamp()
-                                                       : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone().ToUnixTimestamp(),
+                                                       : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(),
                                                       ep.Title,
                                                       ep.Summary,
                                                       ep.Picture,
