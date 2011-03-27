@@ -433,7 +433,7 @@
                     // show finish page
                     Dispatcher.Invoke((Action)(() =>
                         {
-                            finishTitle.Content       = "{0} has been added to your list!".FormatWith(tv.Title);
+                            finishTitle.Content       = tv.Title;
                             workingTabItem.Visibility = Visibility.Collapsed;
                             finishTabItem.Visibility  = Visibility.Visible;
                             tabControl.SelectedIndex  = 3;
