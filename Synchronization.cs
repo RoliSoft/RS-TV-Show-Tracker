@@ -2,7 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Runtime.Serialization.Formatters.Binary;
     using System.Threading;
 
     using Newtonsoft.Json.Linq;
@@ -59,6 +61,30 @@
 
             DelayedChangesTimer.Elapsed += DelayedChangesTimerElapsed;
             PendingChangesTimer.Elapsed += PendingChangesTimerElapsed;
+
+            if (File.Exists(Path.Combine(Signature.FullPath, ".sync-delayed-data")))
+            {
+                var bf = new BinaryFormatter();
+
+                using (var fs = new FileStream(Path.Combine(Signature.FullPath, ".sync-delayed-data"), FileMode.Open))
+                {
+                    DelayedChanges = (List<ShowInfoChange>)bf.Deserialize(fs);
+                }
+
+                DelayedChangesTimer.Start();
+            }
+
+            if (File.Exists(Path.Combine(Signature.FullPath, ".sync-pending-data")))
+            {
+                var bf = new BinaryFormatter();
+
+                using (var fs = new FileStream(Path.Combine(Signature.FullPath, ".sync-pending-data"), FileMode.Open))
+                {
+                    PendingChanges = (List<ShowInfoChange>)bf.Deserialize(fs);
+                }
+
+                PendingChangesTimer.Start();
+            }
         }
 
         /// <summary>
@@ -76,11 +102,17 @@
             var changes = DelayedChanges.ToList();
             DelayedChanges.Clear();
 
+            if (File.Exists(Path.Combine(Signature.FullPath, ".sync-delayed-data")))
+            {
+                try { File.Delete(Path.Combine(Signature.FullPath, ".sync-delayed-data")); } catch { }
+            }
+
             var req = Remote.API.SendDatabaseChanges(changes);
             if (!req.Success || !req.OK)
             {
                 PendingChanges.AddRange(changes);
                 PendingChangesTimer.Start();
+                SavePendingChanges();
             }
         }
 
@@ -98,12 +130,18 @@
 
             var changes = PendingChanges.ToList();
             PendingChanges.Clear();
+            
+            if (File.Exists(Path.Combine(Signature.FullPath, ".sync-pending-data")))
+            {
+                try { File.Delete(Path.Combine(Signature.FullPath, ".sync-pending-data")); } catch { }
+            }
 
             var req = Remote.API.SendDatabaseChanges(changes);
             if (!req.Success || !req.OK)
             {
                 PendingChanges.AddRange(changes);
                 PendingChangesTimer.Start();
+                SavePendingChanges();
             }
         }
 
@@ -120,26 +158,38 @@
             {
                 return;
             }
-            
-            var show   = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
+
+            new Thread(() => InternalSendChange(showid, type, data, delay)).Start();
+        }
+
+        private static void InternalSendChange(string showid, ShowInfoChange.ChangeType type, object data = null, bool delay = false)
+        {
+            string[] show;
+
+            if (!string.IsNullOrEmpty(showid))
+            {
+                var showq = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
+                show = new[] { showq["name"], showq["grabber"], Database.ShowData(showid, showq["grabber"] + ".id"), Database.ShowData(showid, showq["grabber"] + ".lang") };
+            }
+            else
+            {
+                show = null;
+            }
+
             var change = new ShowInfoChange
                 {
                     Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
                     Change = type,
                     Data   = data,
-                    Show   = new[]
-                        {
-                            show["name"],
-                            show["grabber"],
-                            Database.ShowData(showid, show["grabber"] + ".id"),
-                            Database.ShowData(showid, show["grabber"] + ".lang")
-                        }
+                    Show   = show
                 };
 
             if (delay)
             {
                 if (type == ShowInfoChange.ChangeType.ReorderList)
                 {
+                    change.Data = Database.Query("select name from tvshows order by rowid asc").Select(dict => dict["name"]).ToArray();
+
                     DelayedChanges.RemoveAll(x => x.Change == ShowInfoChange.ChangeType.ReorderList);
                     DelayedChanges.Add(change);
                 }
@@ -175,20 +225,16 @@
                 }
 
                 DelayedChangesTimer.Start();
+                SaveDelayedChanges();
             }
             else
             {
-                new Thread(() => InternalSendChange(change)).Start();
-            }
-        }
-
-        private static void InternalSendChange(ShowInfoChange change)
-        {
-            var req = Remote.API.SendDatabaseChange(change);
-            if (!req.Success || !req.OK)
-            {
-                PendingChanges.Add(change);
-                PendingChangesTimer.Start();
+                var req = Remote.API.SendDatabaseChange(change);
+                if (!req.Success || !req.OK)
+                {
+                    PendingChanges.Add(change);
+                    PendingChangesTimer.Start();
+                }
             }
         }
 
@@ -209,7 +255,7 @@
         public static List<ShowInfoChange> SerializeDatabase()
         {
             var list  = new List<ShowInfoChange>();
-            var shows = Database.Query("select showid, name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows order by rowid asc");
+            var shows = Database.Query("select showid, name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows order by name asc");
 
             foreach (var show in shows)
             {
@@ -240,6 +286,15 @@
 
                 list.Add(markchg);
             }
+
+            var orderchg = new ShowInfoChange
+                {
+                    Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
+                    Change = ShowInfoChange.ChangeType.ReorderList,
+                    Data   = Database.Query("select name from tvshows order by rowid asc").Select(dict => dict["name"]).ToArray()
+                };
+
+            list.Add(orderchg);
 
             return list;
         }
@@ -287,6 +342,11 @@
         /// </summary>
         public static void GetChanges()
         {
+            if (!Enabled)
+            {
+                return;
+            }
+
             var last = Database.Setting("Last Sync");
             if (string.IsNullOrWhiteSpace(last))
             {
@@ -375,12 +435,52 @@
                             Database.Execute("delete from tracking where showid = ? and episodeid = ?", id, (int)ep + sint);
                         }
                         break;
+
+                    case ShowInfoChange.ChangeType.ReorderList:
+                        // TODO
+                        break;
                 }
             }
 
             Database.Setting("Last Sync", changes.LastSync.ToString());
             Database.Execute("vacuum;");
             MainWindow.Active.DataChanged();
+        }
+
+        /// <summary>
+        /// Saves the list of delayed changes.
+        /// </summary>
+        public static void SaveDelayedChanges()
+        {
+            try
+            {
+                var bf = new BinaryFormatter();
+
+                using (var fs = new FileStream(Path.Combine(Signature.FullPath, ".sync-delayed-data"), FileMode.Create))
+                {
+                    bf.Serialize(fs, DelayedChanges);
+                    fs.Flush();
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Saves the list of pending changes.
+        /// </summary>
+        public static void SavePendingChanges()
+        {
+            try
+            {
+                var bf = new BinaryFormatter();
+
+                using (var fs = new FileStream(Path.Combine(Signature.FullPath, ".sync-pending-data"), FileMode.Create))
+                {
+                    bf.Serialize(fs, PendingChanges);
+                    fs.Flush();
+                }
+            }
+            catch { }
         }
     }
 }

@@ -9,6 +9,7 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Net;
+    using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -380,8 +381,8 @@
         public static string GetRandomFileName(string extension = null)
         {
             return Path.GetTempPath() + Path.PathSeparator + Path.GetRandomFileName() + (extension != null ? "." + extension : string.Empty);
-        } 
-        
+        }
+
         /// <summary>
         /// Gets the size of the file in human-readable format.
         /// </summary>
@@ -559,6 +560,38 @@
         public static string SanitizeFileName(string file)
         {
             return InvalidFileNameChars.Replace(file, string.Empty);
+        }
+
+        /// <summary>
+        /// Serializes the specified object to a byte array.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <returns>Serialized object.</returns>
+        public static byte[] SerializeObject(object obj)
+        {
+            var bf = new BinaryFormatter();
+
+            using (var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the specified byte array to an object of type <c>T</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of the serialized object.</typeparam>
+        /// <param name="obj">The object.</param>
+        /// <returns>Unserialized object.</returns>
+        public static T DeserializeObject<T>(byte[] obj) where T : class
+        {
+            var bf = new BinaryFormatter();
+
+            using (var ms = new MemoryStream(obj))
+            {
+                return bf.Deserialize(ms) as T;
+            }
         }
     }
 }

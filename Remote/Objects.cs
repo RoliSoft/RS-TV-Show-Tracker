@@ -359,6 +359,7 @@
     /// <summary>
     /// Represents a show information change.
     /// </summary>
+    [Serializable]
     public class ShowInfoChange
     {
         /// <summary>

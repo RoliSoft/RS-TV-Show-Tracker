@@ -122,6 +122,7 @@
             }
 
             new Task(CheckForUpdate).Start();
+            //Synchronization.Enabled = true;
         }
 
         /// <summary>
