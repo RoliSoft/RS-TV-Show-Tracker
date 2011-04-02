@@ -203,7 +203,7 @@
                     {
                         return dr.Read()
                                ? dr["value"].ToString()
-                               : string.Empty;
+                               : null;
                     }
                 }
             }

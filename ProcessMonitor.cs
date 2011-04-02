@@ -125,7 +125,10 @@
                 }
             }
 
-            Synchronization.SendChange(showid, Remote.Objects.ShowInfoChange.ChangeType.MarkEpisode, eps.Select(x => x + (ep.Season * 1000)).ToList());
+            if (Synchronization.Status.Enabled)
+            {
+                Synchronization.Status.Engine.MarkEpisodes(showid, eps.Select(x => x + (ep.Season * 1000)).ToList());
+            }
 
             MainWindow.Active.DataChanged();
         }

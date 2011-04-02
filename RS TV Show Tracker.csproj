@@ -126,10 +126,12 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
-    <Compile Include="Synchronization.cs" />
+    <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />
     <Compile Include="FileNames\Tests.cs" />
+    <Compile Include="Synchronization\Engines\RoliSoftDotNetAPI.cs" />
+    <Compile Include="Synchronization\SyncEngine.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\OnlineVideoSearchEngineTaskDialog.cs" />

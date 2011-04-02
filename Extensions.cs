@@ -535,6 +535,16 @@
         }
 
         /// <summary>
+        /// Extension method to string to convert it to an Int64.
+        /// </summary>
+        /// <param name="value">The string.</param>
+        /// <returns>Int64 value of the string.</returns>
+        public static long ToLong(this string value)
+        {
+            return long.Parse(value);
+        }
+
+        /// <summary>
         /// Extension method to string to convert it to a double.
         /// </summary>
         /// <param name="value">The string.</param>

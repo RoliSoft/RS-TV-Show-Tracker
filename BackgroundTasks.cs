@@ -43,7 +43,14 @@
             try { CheckSoftwareUpdate(); }           catch { }
             try { CheckUpdate(); }                   catch { }
             try { ProcessMonitor.CheckOpenFiles(); } catch { }
-            try { Synchronization.GetChanges(); }    catch { }
+            try
+            {
+                if (Synchronization.Status.Enabled)
+                {
+                    Synchronization.Status.Engine.GetRemoteChanges();
+                }
+            }
+            catch { }
         }
 
         /// <summary>
@@ -63,10 +70,7 @@
         /// </summary>
         public static void CheckUpdate()
         {
-            double last;
-            double.TryParse(Database.Setting("last update"), out last);
-
-            if ((DateTime.Now - last.GetUnixTimestamp()).TotalHours > 10)
+            if ((DateTime.Now - (Database.Setting("last update") ?? "0").ToDouble().GetUnixTimestamp()).TotalHours > 10)
             {
                 MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.UpdateDatabaseClick()));
             }

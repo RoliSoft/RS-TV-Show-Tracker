@@ -289,14 +289,14 @@
                 _statusTimer.Stop();
             }
 
-            double last;
-            if (!double.TryParse(Database.Setting("last update"), out last))
+            var last = Database.Setting("last update");
+            if (string.IsNullOrEmpty(last))
             {
                 Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = string.Empty; }));
                 return;
             }
 
-            var ts = DateTime.Now - last.GetUnixTimestamp();
+            var ts = DateTime.Now - last.ToDouble().GetUnixTimestamp();
 
             Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = "last updated " + ts.ToShortRelativeTime() + " ago"; }));
 

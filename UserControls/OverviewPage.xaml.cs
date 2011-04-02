@@ -272,7 +272,10 @@
 
                 Database.Execute("insert into tracking values (" + showid + ", '" + episodeid + "')");
 
-                Synchronization.SendChange(showid, Remote.Objects.ShowInfoChange.ChangeType.MarkEpisode, new[] { episodeid.ToInteger() - (showid.ToInteger() * 100000) }.ToList(), true);
+                if (Synchronization.Status.Enabled)
+                {
+                    Synchronization.Status.Engine.MarkEpisodes(showid, new[] { episodeid.ToInteger() - (showid.ToInteger() * 100000) }.ToList());
+                }
 
                 MainWindow.Active.DataChanged();
             }
@@ -439,7 +442,10 @@
                 listView.SelectedIndex = listid - 1;
                 listView.ScrollIntoView(listView.SelectedItem);
 
-                Synchronization.SendChange(null, Remote.Objects.ShowInfoChange.ChangeType.ReorderList, delay: true);
+                if (Synchronization.Status.Enabled)
+                {
+                    Synchronization.Status.Engine.ReorderList();
+                }
 
                 MainWindow.Active.DataChanged(false);
             }
@@ -465,7 +471,10 @@
                 listView.SelectedIndex = listid + 1;
                 listView.ScrollIntoView(listView.SelectedItem);
 
-                Synchronization.SendChange(null, Remote.Objects.ShowInfoChange.ChangeType.ReorderList, delay: true);
+                if (Synchronization.Status.Enabled)
+                {
+                    Synchronization.Status.Engine.ReorderList();
+                }
 
                 MainWindow.Active.DataChanged(false);
             }
@@ -495,7 +504,10 @@
 
                 if(td.Show() == TaskDialogResult.Yes)
                 {
-                    Synchronization.SendChange(showid, Remote.Objects.ShowInfoChange.ChangeType.RemoveShow);
+                    if (Synchronization.Status.Enabled)
+                    {
+                        Synchronization.Status.Engine.RemoveShow(showid);
+                    }
 
                     Database.Execute("delete from tvshows where showid = ?", showid);
                     Database.Execute("delete from showdata where showid = ?", showid);
