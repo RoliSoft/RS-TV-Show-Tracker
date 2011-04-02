@@ -10,6 +10,7 @@
     using System.Linq;
     using System.Net;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Security.Cryptography;
     using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -592,6 +593,17 @@
             {
                 return bf.Deserialize(ms) as T;
             }
+        }
+
+        /// <summary>
+        /// Computes the HMAC-SHA256 hash of the specified data.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="data">The data.</param>
+        /// <returns>Secure hash.</returns>
+        public static string HMACSHA256(string key, string data)
+        {
+            return BitConverter.ToString(new HMACSHA256(Encoding.UTF8.GetBytes(key)).ComputeHash(Encoding.UTF8.GetBytes(data))).Replace("-", string.Empty).ToLower();
         }
     }
 }

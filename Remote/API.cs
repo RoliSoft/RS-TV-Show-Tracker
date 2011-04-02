@@ -40,7 +40,7 @@
         /// <returns>Answer deserialized to type <c>T</c>.</returns>
         public static T InvokeRemoteMethod<T>(string func, params object[] args) where T : IRemoteObject, new()
         {
-            return InternalInvokeRemoteMethod<T>(func, false, args);
+            return InternalInvokeRemoteMethod<T>(func, args);
         }
 
         /// <summary>
@@ -52,7 +52,35 @@
         /// <returns>Answer deserialized to type <c>T</c>.</returns>
         public static T InvokeSecureRemoteMethod<T>(string func, params object[] args) where T : IRemoteObject, new()
         {
-            return InternalInvokeRemoteMethod<T>(func, true, args);
+            return InternalInvokeRemoteMethod<T>(func, args, true);
+        }
+
+        /// <summary>
+        /// Invokes a remote method, with user authentication.
+        /// </summary>
+        /// <typeparam name="T">The answer type of the method.</typeparam>
+        /// <param name="func">The name of the method.</param>
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
+        /// <param name="args">The arguments of the method.</param>
+        /// <returns>Answer deserialized to type <c>T</c>.</returns>
+        public static T InvokeAuthedRemoteMethod<T>(string func, string user, string pass, params object[] args) where T : IRemoteObject, new()
+        {
+            return InternalInvokeRemoteMethod<T>(func, args, user: user, pass: pass);
+        }
+
+        /// <summary>
+        /// Invokes a remote method, with user authentication and encryption enabled.
+        /// </summary>
+        /// <typeparam name="T">The answer type of the method.</typeparam>
+        /// <param name="func">The name of the method.</param>
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
+        /// <param name="args">The arguments of the method.</param>
+        /// <returns>Answer deserialized to type <c>T</c>.</returns>
+        public static T InvokeAuthedSecureRemoteMethod<T>(string func, string user, string pass, params object[] args) where T : IRemoteObject, new()
+        {
+            return InternalInvokeRemoteMethod<T>(func, args, true, user, pass);
         }
 
         /// <summary>
@@ -60,10 +88,12 @@
         /// </summary>
         /// <typeparam name="T">The answer type of the method.</typeparam>
         /// <param name="func">The name of the method.</param>
-        /// <param name="secure">if set to <c>true</c> encryption will be enabled.</param>
         /// <param name="args">The arguments of the method.</param>
+        /// <param name="secure">if set to <c>true</c> encryption will be enabled.</param>
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
         /// <returns>Answer deserialized to type <c>T</c>.</returns>
-        private static T InternalInvokeRemoteMethod<T>(string func, bool secure, object[] args) where T : IRemoteObject, new()
+        private static T InternalInvokeRemoteMethod<T>(string func, object[] args, bool secure = false, string user = null, string pass = null) where T : IRemoteObject, new()
         {
             T obj;
             var sw = Stopwatch.StartNew();
@@ -76,6 +106,10 @@
                 }
 
                 var post = Utils.EscapeUTF8(JsonConvert.SerializeObject(new Request(func, args), Formatting.None, _settings));
+                var head = new Dictionary<string, string>
+                    {
+                        { "X-UUID", "{0}/{1}/{2}".FormatWith(Utils.GetUUID(), Environment.UserDomainName, Environment.UserName) }
+                    };
 
                 if (secure)
                 {
@@ -83,16 +117,24 @@
                     post    = Convert.ToBase64String(_algo.CreateEncryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
                 }
 
+                if (!string.IsNullOrWhiteSpace(user))
+                {
+                    head["X-UUID"] += "/" + user;
+
+                    if (!string.IsNullOrEmpty(pass))
+                    {
+                        var key = Utils.HMACSHA256(Signature.Software, user + "\0" + pass);
+                        head["X-Auth"] = Utils.HMACSHA256(key, post);
+                    }
+                }
+
                 var resp = Utils.GetURL(
                     url:       "http://lab.rolisoft.net/api/",
                   //url:       "http://home.rolisoft.net/api/",
                     postData:  post,
-                    userAgent: "RS TV Show Tracker/" + Signature.Version,
+                    userAgent: "{0}/{1}".FormatWith(Signature.Software, Signature.Version),
                     timeout:   120000,
-                    headers:   new Dictionary<string, string>
-                        {
-                            { "X-UUID", "{0}/{1}/{2}".FormatWith(Utils.GetUUID(), Environment.UserDomainName, Environment.UserName) }
-                        }
+                    headers:   head
                 );
 
                 if (secure)
@@ -256,30 +298,36 @@
         /// Sends a database change to the remote server.
         /// </summary>
         /// <param name="change">The database change.</param>
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SendDatabaseChange(ShowInfoChange change)
+        public static General SendDatabaseChange(ShowInfoChange change, string user, string pass)
         {
-            return InvokeRemoteMethod<General>("SendDatabaseChange", change);
+            return InvokeAuthedRemoteMethod<General>("SendDatabaseChange", user, pass, change);
         }
 
         /// <summary>
         /// Sends multiple database changes to the remote server.
         /// </summary>
         /// <param name="changes">The list of database changes.</param>
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SendDatabaseChanges(IEnumerable<ShowInfoChange> changes)
+        public static General SendDatabaseChanges(IEnumerable<ShowInfoChange> changes, string user, string pass)
         {
-            return InvokeRemoteMethod<General>("SendDatabaseChanges", changes);
+            return InvokeAuthedRemoteMethod<General>("SendDatabaseChanges", user, pass, changes);
         }
 
         /// <summary>
         /// Retrieves multiple database changes from the remote server.
         /// </summary>
         /// <param name="time">The last date when sync occurred.</param>
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static ShowInfoChangeList GetDatabaseChanges(long time)
+        public static ShowInfoChangeList GetDatabaseChanges(long time, string user, string pass)
         {
-            return InvokeRemoteMethod<ShowInfoChangeList>("GetDatabaseChanges", time);
+            return InvokeAuthedRemoteMethod<ShowInfoChangeList>("GetDatabaseChanges", user, pass, time);
         }
         #endregion
     }

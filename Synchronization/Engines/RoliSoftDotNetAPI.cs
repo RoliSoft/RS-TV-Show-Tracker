@@ -47,11 +47,18 @@
         private readonly string _delayedDataPath = Path.Combine(Signature.FullPath, ".sync-delayed-data");
         private readonly string _pendingDataPath = Path.Combine(Signature.FullPath, ".sync-pending-data");
 
+        private readonly string _user, _pass;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RoliSoftDotNetAPI"/> class.
         /// </summary>
-        public RoliSoftDotNetAPI()
+        /// <param name="user">The username.</param>
+        /// <param name="pass">The password.</param>
+        public RoliSoftDotNetAPI(string user, string pass)
         {
+            _user = user;
+            _pass = pass;
+
             DelayedChanges = new List<ShowInfoChange>();
             PendingChanges = new List<ShowInfoChange>();
 
@@ -106,7 +113,7 @@
                 try { File.Delete(_delayedDataPath); } catch { }
             }
 
-            var req = Remote.API.SendDatabaseChanges(changes);
+            var req = Remote.API.SendDatabaseChanges(changes, _user, _pass);
             if (!req.Success || !req.OK)
             {
                 PendingChanges.AddRange(changes);
@@ -135,7 +142,7 @@
                 try { File.Delete(_pendingDataPath); } catch { }
             }
 
-            var req = Remote.API.SendDatabaseChanges(changes);
+            var req = Remote.API.SendDatabaseChanges(changes, _user, _pass);
             if (!req.Success || !req.OK)
             {
                 PendingChanges.AddRange(changes);
@@ -364,7 +371,7 @@
         /// <returns><c>true</c> if sent successfully.</returns>
         public override bool SendDatabase()
         {
-            var req = Remote.API.SendDatabaseChanges(SerializeDatabase());
+            var req = Remote.API.SendDatabaseChanges(SerializeDatabase(), _user, _pass);
             return req.Success && req.OK;
         }
 
@@ -374,7 +381,7 @@
         /// <returns>Number of changes since last synchronization or -1 on sync failure.</returns>
         public override int GetRemoteChanges()
         {
-            var changes = Remote.API.GetDatabaseChanges((Database.Setting("Last Sync") ?? "0").ToLong());
+            var changes = Remote.API.GetDatabaseChanges((Database.Setting("Last Sync") ?? "0").ToLong(), _user, _pass);
             if (changes.Success && changes.Changes.Count != 0)
             {
                 ApplyRemoteChanges(changes);
@@ -435,7 +442,7 @@
         {
             new Thread(() =>
                 {
-                    var req = Remote.API.SendDatabaseChange(change);
+                    var req = Remote.API.SendDatabaseChange(change, _user, _pass);
                     if (!req.Success || !req.OK)
                     {
                         PendingChanges.Add(change);

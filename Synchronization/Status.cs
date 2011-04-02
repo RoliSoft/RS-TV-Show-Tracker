@@ -22,7 +22,16 @@
         /// </summary>
         static Status()
         {
-            Engine = new Engines.RoliSoftDotNetAPI();
+            if (Settings.Get<bool>("Synchronization Enabled"))
+            {
+                var auth = Settings.GetList("Synchronization Authentication");
+
+                if (auth != null && auth.Length == 2)
+                {
+                    Enabled = true;
+                    Engine  = new Engines.RoliSoftDotNetAPI(auth[0], auth[1]);
+                }
+            }
         }
     }
 }

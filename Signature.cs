@@ -11,6 +11,12 @@
     public static class Signature
     {
         /// <summary>
+        /// Gets the name of the software.
+        /// </summary>
+        /// <value>The software name.</value>
+        public static string Software { get; internal set; }
+
+        /// <summary>
         /// Gets the version number of the executing assembly.
         /// </summary>
         /// <value>The software version.</value>
@@ -46,8 +52,9 @@
         {
             var ver = Assembly.GetExecutingAssembly().GetName().Version;
 
-            Version      = ver.Major + "." + ver.MajorRevision + "." + ver.Build.ToString("0000") + "." + ver.Revision.ToString("00000");
-            CompileTime  = new DateTime(2000, 1, 1, 1, 0, 0).AddDays(ver.Build).AddSeconds(ver.Revision * 2);
+            Software       = "RS TV Show Tracker";
+            Version        = ver.Major + "." + ver.MajorRevision + "." + ver.Build.ToString("0000") + "." + ver.Revision.ToString("00000");
+            CompileTime    = new DateTime(2000, 1, 1, 1, 0, 0).AddDays(ver.Build).AddSeconds(ver.Revision * 2);
             try { FullPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; } catch (ArgumentException) { }
         }
 
