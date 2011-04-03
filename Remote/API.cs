@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Numerics;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -21,14 +20,21 @@
                 KeySize   = 256,
                 BlockSize = 256,
                 Mode      = CipherMode.CBC,
-                IV        = Encoding.ASCII.GetBytes("0+R7L$O%Eq8Zieuo!rHkw@778rcrC5=+"),
                 Padding   = PaddingMode.Zeros
             };
+        private static readonly RSACryptoServiceProvider _rsa    = new RSACryptoServiceProvider();
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             };
-        private static byte[] _key;
+
+        /// <summary>
+        /// Initializes the <see cref="API"/> class.
+        /// </summary>
+        static API()
+        {
+            _rsa.FromXmlString(Properties.Resources.APIPublicKey);
+        }
 
         #region Remote method invocation
         /// <summary>
@@ -96,15 +102,11 @@
         private static T InternalInvokeRemoteMethod<T>(string func, object[] args, bool secure = false, string user = null, string pass = null) where T : IRemoteObject, new()
         {
             T obj;
-            var sw = Stopwatch.StartNew();
+            byte[] key = null;
+            var sw     = Stopwatch.StartNew();
 
             try
             {
-                if (secure && _key == null)
-                {
-                    DoKeyExchange();
-                }
-
                 var post = Utils.EscapeUTF8(JsonConvert.SerializeObject(new Request(func, args), Formatting.None, _settings));
                 var head = new Dictionary<string, string>
                     {
@@ -113,8 +115,13 @@
 
                 if (secure)
                 {
+                    key = new byte[32];
+                    Utils.CryptoRand.GetBytes(key);
+
                     var tmp = Encoding.UTF8.GetBytes(post);
-                    post    = Convert.ToBase64String(_algo.CreateEncryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length));
+                    post    = Convert.ToBase64String(_algo.CreateEncryptor(key, Properties.Resources.APIInitVector).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('=');
+
+                    head["X-Key"] = Convert.ToBase64String(_rsa.Encrypt(key, false)).TrimEnd('=');
                 }
 
                 if (!string.IsNullOrWhiteSpace(user))
@@ -123,8 +130,8 @@
 
                     if (!string.IsNullOrEmpty(pass))
                     {
-                        var key = Utils.HMACSHA256(Signature.Software, user + "\0" + pass);
-                        head["X-Auth"] = Utils.HMACSHA256(key, post);
+                        var auth = Utils.HMACSHA256(Signature.Software, user + "\0" + pass);
+                        head["X-Auth"] = Utils.HMACSHA256(auth, post);
                     }
                 }
 
@@ -140,7 +147,7 @@
                 if (secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
-                    resp    = Encoding.UTF8.GetString(_algo.CreateDecryptor(_key, _algo.IV).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
+                    resp    = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, Properties.Resources.APIInitVector).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
                 }
 
                 obj = JsonConvert.DeserializeObject<T>(resp);
@@ -159,30 +166,6 @@
             obj.Time = sw.Elapsed.TotalSeconds;
 
             return obj;
-        }
-        #endregion
-
-        #region Helper functions
-        /// <summary>
-        /// Does a Diffie-Hellman key exchange with the remote server.
-        /// </summary>
-        private static void DoKeyExchange()
-        {
-            var rnd = new Random();
-            var bob = new Dictionary<char, BigInteger>();
-            
-            var p = BigInteger.Parse("183682834604905165125374810562602240615039986742318115450988359927262634871970663686082391591571623296491813572206401878197607636471172058124265110443906080939593540162506781839597172463988741080705606095776622355713840538525653792028784953754106620637366292156337482013251106492137087709430744178761665741403");
-            var g = BigInteger.Parse("61227611534968388375124936854200746871679995580772705150329453309087544957323554562027463863857207765497271190735467292732535878823724019374755036814635360313197846720835593946532390821329580360235202031925540785237946846175217930676261651251368873545788764052112494004417035497379029236476914726253888580467");
-
-            bob['x'] = (BigInteger)rnd.Next(int.MaxValue) * rnd.Next(int.MaxValue) + 2;
-            bob['a'] = BigInteger.ModPow(g, bob['x'], p);
-
-            var alice = ExchangeKeys(Convert.ToBase64String(Encoding.ASCII.GetBytes(bob['a'].ToString())));
-
-            bob['b'] = BigInteger.Parse(Encoding.ASCII.GetString(Convert.FromBase64String(alice.PublicKey)));
-            bob['k'] = BigInteger.ModPow(bob['b'], bob['x'], p);
-
-            _key = new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID())).ComputeHash(Encoding.ASCII.GetBytes(bob['k'].ToString()));
         }
         #endregion
 
@@ -215,16 +198,6 @@
         public static UpdateCheck CheckForUpdate()
         {
             return InvokeRemoteMethod<UpdateCheck>("CheckForUpdate");
-        }
-
-        /// <summary>
-        /// Sends the specified public key to the remote server for a Diffie-Hellman key exchange.
-        /// </summary>
-        /// <param name="key">The local public key.</param>
-        /// <returns>Remote public key.</returns>
-        public static KeyExchange ExchangeKeys(string key)
-        {
-            return InvokeRemoteMethod<KeyExchange>("ExchangeKeys", key);
         }
 
         /// <summary>

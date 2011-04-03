@@ -29,6 +29,18 @@
     public static partial class Utils
     {
         /// <summary>
+        /// Gets or sets a fast pseudo-random number generator.
+        /// </summary>
+        /// <value>The fast pseudo-random number generator.</value>
+        public static Random Rand { get; set; }
+
+        /// <summary>
+        /// Gets or sets a cryptographically strong pseudo-random number generator.
+        /// </summary>
+        /// <value>The cryptographically strong pseudo-random number generator.</value>
+        public static RNGCryptoServiceProvider CryptoRand { get; set; }
+
+        /// <summary>
         /// Gets the Unix epoch date. (1970-01-01 00:00:00)
         /// </summary>
         /// <value>The Unix epoch.</value>
@@ -128,6 +140,15 @@
 
                 return "Unknown OS";
             }
+        }
+
+        /// <summary>
+        /// Initializes the <see cref="Utils"/> class.
+        /// </summary>
+        static Utils()
+        {
+            Rand       = new Random();
+            CryptoRand = new RNGCryptoServiceProvider();
         }
 
         /// <summary>

@@ -29,7 +29,7 @@
                 Assert.Fail("The API call failed with the following internal error: " + res.Error);
             }
 
-            Assert.AreEqual(i1 + i2, res.Result, 0.0000000000001);
+            Assert.AreEqual(i1 + i2, res.Result, 0.0000000001);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@
                 Assert.Fail("The API call failed with the following internal error: " + res.Error);
             }
 
-            Assert.AreEqual(nums.Sum() / nums.Count(), res.Result, 0.0000000000001);
+            Assert.AreEqual(nums.Sum() / nums.Count(), res.Result, 0.0000000001);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@
                 Assert.Fail("The API call failed with the following internal error: " + res.Error);
             }
 
-            Assert.AreEqual(i1 + i2, res.Result, 0.0000000000001);
+            Assert.AreEqual(i1 + i2, res.Result, 0.0000000001);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@
                 Assert.Fail("The API call failed with the following internal error: " + res.Error);
             }
 
-            Assert.AreEqual(nums.Sum() / nums.Count(), res.Result, 0.0000000000001);
+            Assert.AreEqual(nums.Sum() / nums.Count(), res.Result, 0.0000000001);
         }
     }
 }
