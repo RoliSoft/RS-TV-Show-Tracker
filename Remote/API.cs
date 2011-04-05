@@ -122,7 +122,7 @@
                     var tmp = Encoding.UTF8.GetBytes(post);
                        post = Convert.ToBase64String(_algo.CreateEncryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('=');
 
-                    head["X-Key"] = Convert.ToBase64String(iv.Concat(_rsa.Encrypt(key, true)).ToArray()).TrimEnd('=');
+                    head["X-Key"] = Convert.ToBase64String(_rsa.Encrypt(Utils.Combine(iv, key), true)).TrimEnd('=');
                 }
 
                 if (!string.IsNullOrWhiteSpace(user))
@@ -148,7 +148,7 @@
                 if (secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
-                       resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
+                       resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length));
                 }
 
                 obj = JsonConvert.DeserializeObject<T>(resp);

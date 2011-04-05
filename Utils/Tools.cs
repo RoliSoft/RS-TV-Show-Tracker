@@ -617,14 +617,14 @@
         }
 
         /// <summary>
-        /// Computes the HMAC-SHA256 hash of the specified data.
+        /// Combines the specified byte arrays.
         /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="data">The data.</param>
-        /// <returns>Secure hash.</returns>
-        public static byte[] HMACSHA256(string key, string data)
+        /// <param name="first">The first array.</param>
+        /// <param name="second">The second array.</param>
+        /// <returns>Combined array.</returns>
+        public static byte[] Combine(byte[] first, byte[] second)
         {
-            return new HMACSHA256(Encoding.UTF8.GetBytes(key)).ComputeHash(Encoding.UTF8.GetBytes(data));
+            return first.Concat(second).ToArray();
         }
     }
 }
