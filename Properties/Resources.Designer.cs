@@ -86,13 +86,6 @@ namespace RoliSoft.TVShowTracker.Properties {
             }
         }
         
-        internal static byte[] APIInitVector {
-            get {
-                object obj = ResourceManager.GetObject("APIInitVector", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
         /// <summary>
         ///   Looks up a localized string similar to &lt;RSAKeyValue&gt;&lt;Modulus&gt;06aq3Z11HvmCeXGFnqRvNXkjj+P3QzM/g88lq4TNC99lYnAYuX3MKUZtIWZu1rLcq0/DxaRp2FHOu478/yz178Wynx+3p9Ag5Sj0kEewzQHznkl336pkni1V8qT+ost0vNOcoQTkGpdL/RctzHmI9tIMTkImd+r/cTlXWZqZRq5s0tSpLP93qfTAAor+GhBvj6seKDcs4nOOTTjLHABSAFieM+p3nxJSgwhDpLvPY1Kq6CaDzYucHilMgazyHPIALXQ0v6JdrsULGygOelFgvFYVVYqvD+RQ2hnVukhk5kzWRHvQucseU2F4JMDp+BCr8GczxElc/0ptaIFFHdQ/OQ==&lt;/Modulus&gt;&lt;Exponent&gt;AQAB&lt;/Exponent&gt;&lt;/RSAKeyValue&gt;.
         /// </summary>

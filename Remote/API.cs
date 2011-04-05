@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -15,14 +16,11 @@
     /// </summary>
     public static class API
     {
-        private static readonly SymmetricAlgorithm _algo = new RijndaelManaged
+        private static readonly RSACryptoServiceProvider _rsa = new RSACryptoServiceProvider();
+        private static readonly SymmetricAlgorithm _algo      = new RijndaelManaged
             {
-                KeySize   = 256,
-                BlockSize = 256,
-                Mode      = CipherMode.CBC,
-                Padding   = PaddingMode.Zeros
+                BlockSize = 256
             };
-        private static readonly RSACryptoServiceProvider _rsa    = new RSACryptoServiceProvider();
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
@@ -102,8 +100,8 @@
         private static T InternalInvokeRemoteMethod<T>(string func, object[] args, bool secure = false, string user = null, string pass = null) where T : IRemoteObject, new()
         {
             T obj;
-            byte[] key = null;
-            var sw     = Stopwatch.StartNew();
+            byte[] key = null, iv = null;
+            var sw = Stopwatch.StartNew();
 
             try
             {
@@ -118,10 +116,13 @@
                     key = new byte[32];
                     Utils.CryptoRand.GetBytes(key);
 
-                    var tmp = Encoding.UTF8.GetBytes(post);
-                    post    = Convert.ToBase64String(_algo.CreateEncryptor(key, Properties.Resources.APIInitVector).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('=');
+                    iv = new byte[32];
+                    Utils.CryptoRand.GetBytes(iv);
 
-                    head["X-Key"] = Convert.ToBase64String(_rsa.Encrypt(key, false)).TrimEnd('=');
+                    var tmp = Encoding.UTF8.GetBytes(post);
+                       post = Convert.ToBase64String(_algo.CreateEncryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('=');
+
+                    head["X-Key"] = Convert.ToBase64String(iv.Concat(_rsa.Encrypt(key, true)).ToArray()).TrimEnd('=');
                 }
 
                 if (!string.IsNullOrWhiteSpace(user))
@@ -130,8 +131,8 @@
 
                     if (!string.IsNullOrEmpty(pass))
                     {
-                        var auth = Utils.HMACSHA256(Signature.Software, user + "\0" + pass);
-                        head["X-Auth"] = Utils.HMACSHA256(auth, post);
+                        var auth = new HMACSHA256(Encoding.UTF8.GetBytes(Signature.Software)).ComputeHash(Encoding.UTF8.GetBytes(user + "\0" + pass));
+                        head["X-Auth"] = Convert.ToBase64String(new HMACSHA256(auth).ComputeHash(Encoding.UTF8.GetBytes(post))).TrimEnd('=');
                     }
                 }
 
@@ -147,7 +148,7 @@
                 if (secure)
                 {
                     var tmp = Convert.FromBase64String(resp);
-                    resp    = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, Properties.Resources.APIInitVector).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
+                       resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('\0');
                 }
 
                 obj = JsonConvert.DeserializeObject<T>(resp);

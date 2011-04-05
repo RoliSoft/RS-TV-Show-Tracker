@@ -622,9 +622,9 @@
         /// <param name="key">The key.</param>
         /// <param name="data">The data.</param>
         /// <returns>Secure hash.</returns>
-        public static string HMACSHA256(string key, string data)
+        public static byte[] HMACSHA256(string key, string data)
         {
-            return BitConverter.ToString(new HMACSHA256(Encoding.UTF8.GetBytes(key)).ComputeHash(Encoding.UTF8.GetBytes(data))).Replace("-", string.Empty).ToLower();
+            return new HMACSHA256(Encoding.UTF8.GetBytes(key)).ComputeHash(Encoding.UTF8.GetBytes(data));
         }
     }
 }

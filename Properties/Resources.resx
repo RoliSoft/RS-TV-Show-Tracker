@@ -127,7 +127,4 @@
   <data name="DatabaseStructure" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\tvshows.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="APIInitVector" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\api init vector.txt;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
 </root>
