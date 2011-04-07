@@ -6,6 +6,12 @@
     public class OverviewListViewItem
     {
         /// <summary>
+        /// Gets or sets the ID of the show in the database.
+        /// </summary>
+        /// <value>The ID of the show in the database.</value>
+        public string ShowID { get; set; }
+
+        /// <summary>
         /// Gets or sets the name.
         /// </summary>
         /// <value>The name.</value>
@@ -36,15 +42,15 @@
         public string NextColor { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to show the "mark as seen visible" menu item.
+        /// Gets or sets the count of unseen episodes.
         /// </summary>
-        /// <value>The string boolean.</value>
-        public string MarkAsSeenVisible { get; set; }
+        /// <value>The count of new episodes.</value>
+        public int NewEpisodes { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to show the "play next unseen" menu item.
+        /// Gets or sets a value indicating whether this TV show has started airing.
         /// </summary>
-        /// <value>The string boolean.</value>
-        public string PlayNextVisible { get; set; }
+        /// <value><c>true</c> if started; otherwise, <c>false</c>.</value>
+        public bool Started { get; set; }
     }
 }

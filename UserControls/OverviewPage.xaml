@@ -9,7 +9,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="17" />
         </Grid.RowDefinitions>
-        <ListView Grid.Row="0" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" MouseDoubleClick="ListViewMouseDoubleClick" KeyUp="ListViewKeyUp">
+        <ListView Grid.Row="0" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" MouseDoubleClick="ListViewMouseDoubleClick" KeyUp="ListViewKeyUp" ContextMenuOpening="ListViewItemContextMenuOpening">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Width="240">
@@ -38,65 +38,6 @@
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
-            <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Play latest episode" Click="PlayEpisodeClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/play.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Mark latest as seen" Click="SeenClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.MarkAsSeenVisible}">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/eye.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Play next unseen episode" Click="PlayNextEpisodeClick" Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.PlayNextVisible}">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/next.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="View episode list" Click="EpisodeListClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/guides.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Search for download links" Click="SearchDownloadLinksClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Search for subtitles" Click="SearchSubtitlesClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/subtitles.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Search for online videos">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/monitor.png" />
-                        </MenuItem.Icon>
-                        <MenuItem Header="Hulu" Click="HuluClick">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/hulu.png" Width="16" Height="16" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="iPlayer" Click="IPlayerClick">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/bbc.png" Width="16" Height="16" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="SideReel" Click="SideReelClick">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/sidereel.png" Width="16" Height="16" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="Google search" Click="GoogleSearchClick">
-                            <MenuItem.Icon>
-                                <Image Source="/RSTVShowTracker;component/Images/google.png" Width="16" Height="16" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </MenuItem>
-                </ContextMenu>
-            </ListView.ContextMenu>
         </ListView>
         <TextBlock Name="NewHelp" Width="500" Height="80" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" Foreground="White" Text="Press Ctrl+N to add a new TV show. To order the list, select a TV show and press Ctrl+Up or Ctrl+Down to move it. To remove a TV show, select it and press Delete on the keyboard." />
         <Label Grid.Row="1" Name="statusThrobber" Foreground="White" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="7,0" Width="12" Height="17" HorizontalAlignment="Left" Visibility="Hidden">

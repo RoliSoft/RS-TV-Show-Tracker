@@ -66,7 +66,10 @@
                     { "House, M.D.", new[] { "HOUSE" } },
                     { "Two and a half men", new[] { "TWO", "AND", "A", "HALF", "MEN" } },
                     { "How I met your mother", new[] { "HOW", "I", "MET", "YOUR", "MOTHER" } },
-                    { "The V", new[] { "V" } }
+                    { "V (2009)", new[] { "V" } },
+                    { "The V (2009)", new[] { "V" } },
+                    { "V (1965)", new[] { "V", "(1965)" } },
+                    { "The V (1965)", new[] { "V", "(1965)" } }
                 };
 
             foreach (var show in list)

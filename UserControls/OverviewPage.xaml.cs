@@ -6,8 +6,11 @@
     using System.Text.RegularExpressions;
     using System.Timers;
     using System.Windows;
+    using System.Windows.Controls;
     using System.Windows.Input;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
+    using System.Windows.Media.Imaging;
 
     using Microsoft.WindowsAPICodePack.Dialogs;
 
@@ -189,23 +192,20 @@
 
                 OverviewListViewItemCollection.Add(new OverviewListViewItem
                     {
-                        Name              = show["name"],
-                        Title             = last,
-                        Next              = next,
-                        TitleColor        = count != 0
-                                            ? "Red"
-                                            : lastep.Length == 3
-                                              ? "White"
-                                              : "#50FFFFFF",
-                        NextColor         = nextep.Length == 4
-                                            ? "White"
-                                            : "#50FFFFFF",
-                        MarkAsSeenVisible = count != 0 
-                                            ? "Visible"
-                                            : "Collapsed",
-                        PlayNextVisible   = count >= 2
-                                            ? "Visible"
-                                            : "Collapsed"
+                        ShowID      = show["showid"],
+                        Name        = show["name"],
+                        Title       = last,
+                        Next        = next,
+                        TitleColor  = count != 0
+                                      ? "Red"
+                                      : lastep.Length == 3
+                                        ? "White"
+                                        : "#50FFFFFF",
+                        NextColor   = nextep.Length == 4
+                                      ? "White"
+                                      : "#50FFFFFF",
+                        NewEpisodes = count,
+                        Started     = lastep.Length == 3
                     });
             }
 
@@ -218,71 +218,6 @@
             // set status
 
             ResetStatus();
-        }
-        #endregion
-
-        #region Play episode
-        /// <summary>
-        /// Handles the Click event of the PlayEpisode control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void PlayEpisodeClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var show = GetSelectedShow();
-
-            new FileSearchTaskDialog().Search(show[0], show[1]);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the PlayNextEpisode control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void PlayNextEpisodeClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var show    = GetSelectedShow();
-            var showid  = Database.GetShowID(show[0]);
-            var dbep    = Database.Query("select season, episode from episodes where showid = " + showid + " and episodeid not in (select episodeid from tracking where showid = " + showid + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
-            var episode = "S" + dbep["season"].ToInteger().ToString("00") + "E" + dbep["episode"].ToInteger().ToString("00");
-
-            new FileSearchTaskDialog().Search(show[0], episode);
-        }
-        #endregion
-
-        #region Mark as seen
-        /// <summary>
-        /// Handles the Click event of the Seen control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SeenClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            try
-            {
-                var show      = GetSelectedShow();
-                var showid    = Database.Query("select showid from tvshows where name = ? limit 1", show[0]).First()["showid"];
-                var episodeid = Database.Query("select episodeid from episodes where showid = ? and season = ? and episode = ? limit 1", showid, ((OverviewListViewItem)listView.SelectedItem).Title.Substring(1, 2).TrimStart('0'), ((OverviewListViewItem)listView.SelectedItem).Title.Substring(4, 2).TrimStart('0')).First()["episodeid"];
-
-                Database.Execute("insert into tracking values (" + showid + ", '" + episodeid + "')");
-
-                if (Synchronization.Status.Enabled)
-                {
-                    Synchronization.Status.Engine.MarkEpisodes(showid, new[] { episodeid.ToInteger() - (showid.ToInteger() * 100000) }.ToList());
-                }
-
-                MainWindow.Active.DataChanged();
-            }
-            catch
-            {
-                SetStatus("Couldn't mark episode as seen due to a database error.");
-            }
         }
         #endregion
 
@@ -319,16 +254,12 @@
         /// <summary>
         /// Handles the Click event of the SearchDownloadLinks control.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchDownloadLinksClick(object sender, RoutedEventArgs e)
+        /// <param name="show">The show.</param>
+        /// <param name="episode">The episode.</param>
+        private void SearchDownloadLinksClick(string show, string episode)
         {
-            if (listView.SelectedIndex == -1) return;
-
-            var show = GetSelectedShow();
-
             MainWindow.Active.tabControl.SelectedIndex = 2;
-            MainWindow.Active.activeDownloadLinksPage.Search(show[0] + " " + show[1]);
+            MainWindow.Active.activeDownloadLinksPage.Search(show + " " + episode);
         }
         #endregion
 
@@ -336,78 +267,12 @@
         /// <summary>
         /// Handles the Click event of the SearchSubtitles control.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchSubtitlesClick(object sender, RoutedEventArgs e)
+        /// <param name="show">The show.</param>
+        /// <param name="episode">The episode.</param>
+        private void SearchSubtitlesClick(string show, string episode)
         {
-            if (listView.SelectedIndex == -1) return;
-
-            var show = GetSelectedShow();
-
             MainWindow.Active.tabControl.SelectedIndex = 3;
-            MainWindow.Active.activeSubtitlesPage.Search(show[0] + " " + show[1]);
-        }
-        #endregion
-
-        #region Search for online videos
-        /// <summary>
-        /// Handles the Click event of the Hulu control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void HuluClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var show  = GetSelectedShow();
-            var title = ((OverviewListViewItem)listView.SelectedValue).Title.Substring(9);
-            if (title.Contains(" · "))
-            {
-                title = title.Substring(0, title.IndexOf(" · "));
-            }
-
-            new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show[0], show[1], title);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the iPlayer control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void IPlayerClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var show = GetSelectedShow();
-
-            new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show[0], show[1]);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the SideReel control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SideReelClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var show = GetSelectedShow();
-
-            new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show[0], show[1]);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the GoogleSearch control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void GoogleSearchClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var show = GetSelectedShow();
-            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show[0] + " " + show[1]));
+            MainWindow.Active.activeSubtitlesPage.Search(show + " " + episode);
         }
         #endregion
 
@@ -533,6 +398,330 @@
                     MainWindow.Active.DataChanged();
                 }
             }
+        }
+
+        /// <summary>
+        /// Handles the ContextMenuOpening event of the ListViewItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
+        private void ListViewItemContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            e.Handled = true;
+
+            if (listView.SelectedIndex == -1) return;
+
+            var cm = new ContextMenu();
+            (e.Source as FrameworkElement).ContextMenu = cm;
+            var show = (OverviewListViewItem)listView.SelectedValue;
+
+            var spm = -55;
+            var lbw = 160;
+
+            if (show.NewEpisodes >= 2)
+            {
+                var dbep   = Database.Query("select season, episode from episodes where showid = " + show.ShowID + " and episodeid not in (select episodeid from tracking where showid = " + show.ShowID + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
+                var nextep = "S{0:00}E{1:00}".FormatWith(dbep["season"].ToInteger(), dbep["episode"].ToInteger());
+
+                // Play next unseen episode
+
+                var pla    = new MenuItem();
+                pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/next.png")) };
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, nextep);
+                pla.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+                
+                (pla.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Play next unseen episode",
+                        Padding = new Thickness(0),
+                        Width   = lbw
+                    });
+                (pla.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = nextep,
+                        Padding    = new Thickness(0)
+                    });
+
+                cm.Items.Add(pla);
+
+                // Search for download links
+
+                var sfd    = new MenuItem();
+                sfd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+                sfd.Click += (s, r) => SearchDownloadLinksClick(show.Name, nextep);
+                sfd.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+                
+                (sfd.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "➥",
+                        Padding    = new Thickness(0),
+                        Width      = 15
+                    });
+                (sfd.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Search for download links",
+                        Padding = new Thickness(0),
+                        Width   = lbw - 15
+                    });
+
+                cm.Items.Add(sfd);
+
+                // Search for subtitles
+
+                var sfs    = new MenuItem();
+                sfs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/subtitles.png")) };
+                sfs.Click += (s, r) => SearchSubtitlesClick(show.Name, nextep);
+                sfs.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+                
+                (sfs.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "➥",
+                        Padding    = new Thickness(0),
+                        Width      = 15
+                    });
+                (sfs.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Search for subtitles",
+                        Padding = new Thickness(0),
+                        Width   = lbw - 15
+                    });
+
+                cm.Items.Add(sfs);
+
+                // Search for online videos
+
+                var sov    = new MenuItem();
+                sov.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/monitor.png")) };
+                sov.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+
+                (sov.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "➥",
+                        Padding    = new Thickness(0),
+                        Width      = 15
+                    });
+                (sov.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Search for online videos",
+                        Padding = new Thickness(0),
+                        Width   = lbw - 15
+                    });
+
+                cm.Items.Add(sov);
+
+                // - Hulu
+
+                var hul    = new MenuItem();
+                hul.Header = "Hulu";
+                hul.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/hulu.png")) };
+                hul.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show.Name, nextep, show.Next.Substring(9));
+
+                sov.Items.Add(hul);
+
+                // - iPlayer
+
+                var ipl    = new MenuItem();
+                ipl.Header = "iPlayer";
+                ipl.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/bbc.png")) };
+                ipl.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show.Name, nextep);
+
+                sov.Items.Add(ipl);
+
+                // - SideReel
+
+                var srs    = new MenuItem();
+                srs.Header = "SideReel";
+                srs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sidereel.png")) };
+                srs.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show.Name, nextep);
+
+                sov.Items.Add(srs);
+
+                // - Google search
+
+                var gls    = new MenuItem();
+                gls.Header = "Google search";
+                gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
+                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + nextep));
+
+                sov.Items.Add(gls);
+            }
+
+            if (show.Started)
+            {
+                var lastep = show.Title.Substring(0, 6);
+
+                var pla    = new MenuItem();
+                pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, lastep);
+                pla.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+                
+                (pla.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Play last aired episode",
+                        Padding = new Thickness(0),
+                        Width   = lbw
+                    });
+                (pla.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = lastep,
+                        Padding    = new Thickness(0)
+                    });
+
+                cm.Items.Add(pla);
+
+                // Search for download links
+
+                var sfd    = new MenuItem();
+                sfd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+                sfd.Click += (s, r) => SearchDownloadLinksClick(show.Name, lastep);
+                sfd.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+                
+                (sfd.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "➥",
+                        Padding    = new Thickness(0),
+                        Width      = 15
+                    });
+                (sfd.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Search for download links",
+                        Padding = new Thickness(0),
+                        Width   = lbw - 15
+                    });
+
+                cm.Items.Add(sfd);
+
+                // Search for subtitles
+
+                var sfs    = new MenuItem();
+                sfs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/subtitles.png")) };
+                sfs.Click += (s, r) => SearchSubtitlesClick(show.Name, lastep);
+                sfs.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+                
+                (sfs.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "➥",
+                        Padding    = new Thickness(0),
+                        Width      = 15
+                    });
+                (sfs.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Search for subtitles",
+                        Padding = new Thickness(0),
+                        Width   = lbw - 15
+                    });
+
+                cm.Items.Add(sfs);
+
+                // Search for online videos
+
+                var sov    = new MenuItem();
+                sov.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/monitor.png")) };
+                sov.Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+
+                (sov.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "➥",
+                        Padding    = new Thickness(0),
+                        Width      = 15
+                    });
+                (sov.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = "Search for online videos",
+                        Padding = new Thickness(0),
+                        Width   = lbw - 15
+                    });
+
+                cm.Items.Add(sov);
+
+                // - Hulu
+
+                var hul    = new MenuItem();
+                hul.Header = "Hulu";
+                hul.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/hulu.png")) };
+                hul.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show.Name, lastep, Regex.Replace(show.Title.Substring(9), " · .+", string.Empty));
+
+                sov.Items.Add(hul);
+
+                // - iPlayer
+
+                var ipl    = new MenuItem();
+                ipl.Header = "iPlayer";
+                ipl.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/bbc.png")) };
+                ipl.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show.Name, lastep);
+
+                sov.Items.Add(ipl);
+
+                // - SideReel
+
+                var srs    = new MenuItem();
+                srs.Header = "SideReel";
+                srs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sidereel.png")) };
+                srs.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show.Name, lastep);
+
+                sov.Items.Add(srs);
+
+                // - Google search
+
+                var gls    = new MenuItem();
+                gls.Header = "Google search";
+                gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
+                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + lastep));
+
+                sov.Items.Add(gls);
+            }
+
+            var vel    = new MenuItem();
+            vel.Header = "View episode list";
+            vel.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/guides.png")) };
+            vel.Click += EpisodeListClick;
+            cm.Items.Add(vel);
+            
+            TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(cm, TextRenderingMode.ClearType);
+            RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
+
+            cm.IsOpen = true;
         }
         #endregion
     }
