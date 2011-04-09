@@ -582,6 +582,13 @@
   <ItemGroup>
     <None Include="Resources\API Public Key.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\calendar-pencil.png" />
+    <Resource Include="Images\code.png" />
+    <Resource Include="Images\folder-open-film.png" />
+    <Resource Include="Images\jdownloader.png" />
+    <Resource Include="Images\windows-7.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -7,7 +7,9 @@
     using System.Linq;
     using System.Reflection;
     using System.Windows;
+    using System.Windows.Controls;
     using System.Windows.Forms;
+    using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
 
@@ -53,9 +55,8 @@
 
             // general
 
-            dlPathTextBox.Text      = Settings.Get("Download Path");
-            torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
-            processTextBox.Text     = string.Join(",", Settings.GetList("Processes to Monitor"));
+            dlPathTextBox.Text  = Settings.Get("Download Path");
+            processTextBox.Text = string.Join(",", Settings.GetList("Processes to Monitor"));
 
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
@@ -68,7 +69,52 @@
 
             showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
             
-            // downloads
+            // downloaders
+
+            torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
+            usenetPathTextBox.Text  = Settings.Get("Usenet Downloader");
+            jDlPathTextBox.Text     = Settings.Get("JDownloader");
+
+            var atr = Utils.GetApplicationForExtension(".torrent");
+            if (!string.IsNullOrWhiteSpace(atr))
+            {
+                var tri = Utils.GetExecutableInfo(atr);
+
+                torrentAssociationName.Text   = tri.Item1;
+                torrentAssociationIcon.Source = tri.Item2;
+            }
+            else
+            {
+                torrentAssociationName.Text = "[no software associated with .torrent files]";
+            }
+
+            var anz = Utils.GetApplicationForExtension(".nzb");
+            if (!string.IsNullOrWhiteSpace(anz))
+            {
+                var nzi = Utils.GetExecutableInfo(anz);
+
+                usenetAssociationName.Text   = nzi.Item1;
+                usenetAssociationIcon.Source = nzi.Item2;
+            }
+            else
+            {
+                usenetAssociationName.Text = "[no software associated with .nzb files]";
+            }
+
+            var htz = Utils.GetApplicationForExtension(".htm");
+            if (!string.IsNullOrWhiteSpace(htz))
+            {
+                var hti = Utils.GetExecutableInfo(htz);
+
+                httpAssociationName.Text   = hti.Item1;
+                httpAssociationIcon.Source = hti.Item2;
+            }
+            else
+            {
+                httpAssociationName.Text = "[no software associated with .htm files]";
+            }
+
+            // parsers
 
             DownloadsListViewItemCollection = new ObservableCollection<DownloadsListViewItem>();
             listView.ItemsSource            = DownloadsListViewItemCollection;
@@ -124,28 +170,6 @@
         }
 
         /// <summary>
-        /// Handles the Click event of the torrentPathBrowseButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void TorrentPathBrowseButtonClick(object sender, RoutedEventArgs e)
-        {
-            var ofd = new OpenFileDialog
-                {
-                    Title           = "Select the alternative torrent downloader",
-                    CheckFileExists = true,
-                    CheckPathExists = true,
-                    Multiselect     = false,
-                    Filter          = "Executable|*.exe"
-                };
-
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                torrentPathTextBox.Text = ofd.FileName;
-            }
-        }
-
-        /// <summary>
         /// Handles the TextChanged event of the dlPathTextBox control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -155,19 +179,6 @@
             if (dlPathTextBox.Text.Length == 0 || Directory.Exists(dlPathTextBox.Text))
             {
                 Settings.Set("Download Path", dlPathTextBox.Text);
-            }
-        }
-
-        /// <summary>
-        /// Handles the TextChanged event of the torrentPathTextBox control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
-        private void TorrentPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (torrentPathTextBox.Text.Length == 0 || File.Exists(torrentPathTextBox.Text))
-            {
-                Settings.Set("Torrent Downloader", torrentPathTextBox.Text);
             }
         }
 
@@ -248,17 +259,125 @@
         }
         #endregion
 
-        #region Downloads
+        #region Downloaders
+        /// <summary>
+        /// Handles the Click event of the torrentPathBrowseButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void TorrentPathBrowseButtonClick(object sender, RoutedEventArgs e)
+        {
+            var ofd = new OpenFileDialog
+                {
+                    Title           = "Select the alternative torrent downloader",
+                    CheckFileExists = true,
+                    CheckPathExists = true,
+                    Multiselect     = false,
+                    Filter          = "Executable|*.exe"
+                };
+
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                torrentPathTextBox.Text = ofd.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Handles the TextChanged event of the torrentPathTextBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
+        private void TorrentPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (torrentPathTextBox.Text.Length == 0 || File.Exists(torrentPathTextBox.Text))
+            {
+                Settings.Set("Torrent Downloader", torrentPathTextBox.Text);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the usenetPathBrowseButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void UsenetPathBrowseButtonClick(object sender, RoutedEventArgs e)
+        {
+            var ofd = new OpenFileDialog
+                {
+                    Title           = "Select the alternative usenet downloader",
+                    CheckFileExists = true,
+                    CheckPathExists = true,
+                    Multiselect     = false,
+                    Filter          = "Executable|*.exe"
+                };
+
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                usenetPathTextBox.Text = ofd.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Handles the TextChanged event of the usenetPathTextBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
+        private void UsenetPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (usenetPathTextBox.Text.Length == 0 || File.Exists(usenetPathTextBox.Text))
+            {
+                Settings.Set("Usenet Downloader", usenetPathTextBox.Text);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the jDlPathBrowseButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void JDlPathBrowseButtonClick(object sender, RoutedEventArgs e)
+        {
+            var ofd = new OpenFileDialog
+                {
+                    Title           = "Select the path to JDownloader",
+                    CheckFileExists = true,
+                    CheckPathExists = true,
+                    Multiselect     = false,
+                    Filter          = "JDownloader executable|JDownloader.exe"
+                };
+
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                jDlPathTextBox.Text = ofd.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Handles the TextChanged event of the jDlPathTextBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
+        private void JDlPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (jDlPathTextBox.Text.Length == 0 || File.Exists(jDlPathTextBox.Text))
+            {
+                Settings.Set("JDownloader", jDlPathTextBox.Text);
+            }
+        }
+        #endregion
+
+        #region Parsers
         /// <summary>
         /// Handles the SelectionChanged event of the listView control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
-        private void ListViewSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void ListViewSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var sel    = listView.SelectedItem as DownloadsListViewItem;
             var engine = _engines.Single(en => en.Name == sel.Site);
 
+            engineIcon.Source   = new BitmapImage(new Uri(sel.Icon));
             engineTitle.Content = sel.Site;
 
             if (engine.Private)
