@@ -57,12 +57,23 @@
             // split the name into two parts: before and after the episode numbering
 
             var fi = Regexes.AdvNumbering.Split(file);
+
+            if (fi.Length < 2)
+            {
+                return new ShowFile();
+            }
+
             var ep = ShowNames.Parser.ExtractEpisode(fi[1]);
+
+            if (ep == null)
+            {
+                return new ShowFile();
+            }
 
             // clean name
 
-            var name  = Regexes.SpecialChars.Replace(RemoveKeywords.Replace(fi[0].ToUpper(), String.Empty).Trim(), " ").Trim();
-            var title = String.Empty;
+            var name  = Regexes.SpecialChars.Replace(RemoveKeywords.Replace(fi[0].ToUpper(), string.Empty).Trim(), " ").Trim();
+            var title = string.Empty;
 
             // try to find show in local database
 
@@ -77,7 +88,9 @@
             foreach (var show in LocalTVShows)
             {
                 var titleParts = ShowNames.Parser.GetRoot(show["name"]);
-                if (titleParts.All(part => Regex.IsMatch(name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)))
+                var fileParts  = ShowNames.Parser.GetRoot(name);
+
+                if (titleParts.SequenceEqual(fileParts))
                 {
                     var episode = Database.Query("select name from episodes where episodeid = ?", ep.Episode + (ep.Season * 1000) + (show["showid"].ToInteger() * 100 * 1000));
                     if (episode.Count != 0)
@@ -136,14 +149,14 @@
             {
                 name = name.ToLower().ToUppercaseWords();
             }
-            if (String.IsNullOrWhiteSpace(title))
+            if (string.IsNullOrWhiteSpace(title))
             {
                 title = "Season {0}, Episode {1}".FormatWith(ep.Season, ep.Episode);
             }
 
             var quality = ParseQuality(file).GetAttribute<DescriptionAttribute>().Description;
 
-            return new ShowFile(file, name, ep, title, quality);
+            return new ShowFile(file, name, ep, title, quality, match);
         }
 
         /// <summary>

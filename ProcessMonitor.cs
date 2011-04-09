@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -43,7 +44,9 @@
 
             return Regex.Matches(sb.ToString(), @"(?:D|\-)\)\s+(.+)(?:\r|$)")
                    .Cast<Match>()
-                   .Select(m => new FileInfo(m.Groups[1].Value.Trim()))
+                   .Select(m => m.Groups[1].Value.Trim())
+                   .Distinct()
+                   .Select(f => new FileInfo(f))
                    .ToList();
         }
 
@@ -73,13 +76,12 @@
 
                 foreach (var file in files)
                 {
-                    if (parts.All(part => (Regex.IsMatch(file.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase) // does it have all the words in the file name?
-                                        || Regex.IsMatch(file.Directory.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase))) // or in the directory name?
-                        && Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase)) // is it a known video file extension?
+                    if (Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase) && // is it a known video file extension?
+                        parts.All(part => (Regex.IsMatch(file.Directory.Name + @"\" + file.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)))) // does it have all the words?
                     {
-                        var ep = Parser.ExtractEpisode(file.ToString());
-
-                        if (ep != null)
+                        var pf = FileNames.Parser.ParseFile(file.Name);
+                        if ((pf.Success && parts.SequenceEqual(Parser.GetRoot(pf.Show))) || // is the show extracted from the file name the exact same?
+                            ((pf = FileNames.Parser.ParseFile(file.Directory.Name)).Success && parts.SequenceEqual(Parser.GetRoot(pf.Show)))) // or the one extracted from the directory name?
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {
@@ -91,7 +93,7 @@
                             }
                             else
                             {
-                                MarkAsSeen(show["showid"], ep);
+                                MarkAsSeen(show["showid"], Parser.ExtractEpisode(file.Directory.Name + @"\" + file.Name));
                             }
                         }
                     }

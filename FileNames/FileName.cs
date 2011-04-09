@@ -10,6 +10,12 @@
     public class ShowFile
     {
         /// <summary>
+        /// Gets or sets a value indicating whether the file name was successfully parsed.
+        /// </summary>
+        /// <value><c>true</c> if parsed successfully; otherwise, <c>false</c>.</value>
+        public bool Success { get; set; }
+
+        /// <summary>
         /// Gets or sets the original name of the file.
         /// </summary>
         /// <value>The file name.</value>
@@ -82,7 +88,8 @@
         /// <param name="ep">The parsed season and episode.</param>
         /// <param name="title">The title of the episode.</param>
         /// <param name="quality">The quality of the file.</param>
-        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality)
+        /// <param name="success">if set to <c>true</c> the file was successfully parsed.</param>
+        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, bool success = true)
         {
             Name          = name;
             Extension     = Path.GetExtension(Name);
@@ -92,6 +99,7 @@
             SecondEpisode = ep.SecondEpisode;
             Title         = title;
             Quality       = quality;
+            Success       = success;
         }
     }
 }
