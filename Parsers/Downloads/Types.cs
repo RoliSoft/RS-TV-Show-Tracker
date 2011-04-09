@@ -14,9 +14,13 @@
         /// </summary>
         Usenet,
         /// <summary>
-        /// A link to a page which contains HTTP links to the file. Usually RapidShare (and similar) links.
+        /// A link to a page which contains one or more links to the file which is usually located on a one-click hosting service.
         /// </summary>
         HTTP,
+        /// <summary>
+        /// A direct link to a file on a one-click hosting service.
+        /// </summary>
+        DirectHTTP,
         /// <summary>
         /// A link which represents the existance of a scene release.
         /// </summary>

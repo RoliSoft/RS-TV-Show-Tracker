@@ -61,7 +61,7 @@
         {
             get
             {
-                return Types.HTTP;
+                return Types.DirectHTTP;
             }
         }
 

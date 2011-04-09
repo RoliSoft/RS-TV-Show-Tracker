@@ -46,6 +46,8 @@
 
         private Tuple<string, BitmapSource> _defaultTorrent, _assocTorrent, _assocUsenet;
 
+        private string _jDlPath;
+
         private volatile bool _searching;
 
         /// <summary>
@@ -123,6 +125,8 @@
             {
                 _assocUsenet = Utils.GetExecutableInfo(anz);
             }
+
+            _jDlPath = Settings.Get("JDownloader");
         }
 
         #region Settings
@@ -573,6 +577,15 @@
                 cm.Items.Add(sap);
             }
 
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && !string.IsNullOrWhiteSpace(_jDlPath) && link.Source.Type == Types.DirectHTTP)
+            {
+                var jd    = new MenuItem();
+                jd.Header = "Send to JDownloader";
+                jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")) };
+                jd.Click += (s, r) => Utils.Run(_jDlPath, link.FileURL);
+                cm.Items.Add(jd);
+            }
+
             TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
             TextOptions.SetTextRenderingMode(cm, TextRenderingMode.ClearType);
             RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
@@ -602,6 +615,10 @@
             else if (!string.IsNullOrWhiteSpace(link.FileURL) && !(link.Source.Downloader is ExternalDownloader))
             {
                 DownloadFileClick(null, e);
+            }
+            else if (!string.IsNullOrWhiteSpace(link.FileURL) && !string.IsNullOrWhiteSpace(_jDlPath) && link.Source.Type == Types.DirectHTTP)
+            {
+                Utils.Run(_jDlPath, link.FileURL);
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL))
             {
