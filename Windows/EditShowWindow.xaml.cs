@@ -137,7 +137,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchButtonClick(object sender, RoutedEventArgs e)
         {
-            working.Content           = "Searching for {0}...".FormatWith(_show);
+            working.Content           = "Searching on {0}...".FormatWith(_guide.Name);
+            subworking.Content        = _show;
             editTabItem.Visibility    = Visibility.Collapsed;
             workingTabItem.Visibility = Visibility.Visible;
             tabControl.SelectedIndex  = 1;

@@ -9,6 +9,14 @@
             </TabControl.Effect>
             <TabItem Header="Edit x" Name="editTabItem" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
                 <Grid Name="addGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <Label Content="Database:" FontSize="17" Foreground="DarkBlue" Margin="7,25,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <ComboBox Margin="100,27,0,0" Name="database" HorizontalAlignment="Left" VerticalAlignment="Top" Width="393" FontSize="18" SelectionChanged="DatabaseSelectionChanged">
                         <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
@@ -61,12 +69,25 @@
                     <Label Content="Language:" FontSize="17" Foreground="DarkBlue" HorizontalAlignment="Left" Margin="7,63,0,0" VerticalAlignment="Top" />
                     <ComboBox FontSize="18" HorizontalAlignment="Left" Margin="100,65,0,0" Name="language" VerticalAlignment="Top" Width="393" />
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
-                        <Button Content="Next" Height="23" HorizontalAlignment="Right" Name="searchButton" VerticalAlignment="Bottom" Width="75" Click="SearchButtonClick" />
+                        <Button Height="23" HorizontalAlignment="Right" Name="searchButton" VerticalAlignment="Bottom" Width="75" Click="SearchButtonClick">
+                            <StackPanel Orientation="Horizontal" Margin="3,0">
+                                <TextBlock Text="Next" Margin="3,0,0,0" />
+                                <Image Source="/RSTVShowTracker;component/Images/play.png" Height="16" Width="16" Margin="5,0,0,0" />
+                            </StackPanel>
+                        </Button>
                     </Border>
                 </Grid>
             </TabItem>
             <TabItem Header="Working" Name="workingTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
                 <Grid Name="workingGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <Label Name="statusThrobber" FontWeight="Bold" FontFamily="Consolas" Content="&#9696;" Padding="0,0" Margin="34,42,0,92" FontSize="28" Width="24" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center">
                         <Label.Effect>
                             <DropShadowEffect Color="Gray" ShadowDepth="0" />
@@ -83,17 +104,40 @@
                     <Label Content="Searching for TV show..." Name="working" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="65,30,0,90" />
                     <Label Content="House, M.D." Name="subworking" FontSize="15" Foreground="#FF454545" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="66,52,0,72" />
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
-                        <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Name="searchCancelButton" VerticalAlignment="Bottom" Width="75" Click="SearchCancelButtonClick" />
+                        <Button Height="23" HorizontalAlignment="Right" Name="searchCancelButton" VerticalAlignment="Bottom" Width="75" Click="SearchCancelButtonClick">
+                            <StackPanel Orientation="Horizontal" Margin="3,0">
+                                <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                <TextBlock Text="Cancel" Margin="0,0,3,0" />
+                            </StackPanel>
+                        </Button>
                     </Border>
                 </Grid>
             </TabItem>
             <TabItem Header="Select a TV show" Name="selectTabItem" KeyboardNavigation.IsTabStop="False" Visibility="Collapsed" FocusVisualStyle="{x:Null}">
                 <Grid Name="selectGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <ListBox Height="104" HorizontalAlignment="Left" Margin="10,10,0,0" Name="listBox" VerticalAlignment="Top" Width="482" FontSize="16" />
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="Back" Height="23" Margin="0,0,11,0" HorizontalAlignment="Right" Name="selectBackButton" VerticalAlignment="Bottom" Width="75" Click="SelectBackButtonClick" />
-                            <Button Content="Next" Height="23" HorizontalAlignment="Right" Name="addButton" VerticalAlignment="Bottom" Width="75" Click="AddButtonClick" />
+                            <Button Height="23" Margin="0,0,11,0" HorizontalAlignment="Right" Name="selectBackButton" VerticalAlignment="Bottom" Width="75" Click="SelectBackButtonClick">
+                                <StackPanel Orientation="Horizontal" Margin="3,0">
+                                    <Image Source="/RSTVShowTracker;component/Images/back.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                    <TextBlock Text="Back" Margin="0,0,3,0" />
+                                </StackPanel>
+                            </Button>
+                            <Button Height="23" HorizontalAlignment="Right" Name="addButton" VerticalAlignment="Bottom" Width="75" Click="AddButtonClick">
+                                <StackPanel Orientation="Horizontal" Margin="3,0">
+                                    <TextBlock Text="Next" Margin="3,0,0,0" />
+                                    <Image Source="/RSTVShowTracker;component/Images/play.png" Height="16" Width="16" Margin="5,0,0,0" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Border>
                 </Grid>
