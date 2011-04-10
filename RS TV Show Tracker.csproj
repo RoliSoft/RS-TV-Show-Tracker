@@ -593,6 +593,18 @@
     <Resource Include="Images\format.png" />
     <Resource Include="Images\pencil.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\browse.png" />
+    <Resource Include="Images\mail-send.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cookie.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\mail-pencil.png" />
+    <Resource Include="Images\question-balloon.png" />
+    <Resource Include="Images\user.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

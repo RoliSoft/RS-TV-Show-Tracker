@@ -1,6 +1,6 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
         Title="Settings" Height="499" Width="615" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize" Closing="GlassWindowClosing">
     <Grid>
         <TabControl Margin="10,8,10,12" Padding="0" Name="tabControl" Background="White">
@@ -9,6 +9,14 @@
             </TabControl.Effect>
             <TabItem Header="General" Name="generalTabItem">
                 <Grid Name="generalGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
@@ -20,7 +28,12 @@
                             </TextBlock>
                             <StackPanel Orientation="Horizontal">
                                 <TextBox Name="dlPathTextBox" TextChanged="DlPathTextBoxTextChanged" Margin="0,0,5,0" Width="482" />
-                                <Button Content="Browse" Name="dlPathBrowseButton" Width="75" Click="DlPathBrowseButtonClick" />
+                                <Button Name="dlPathBrowseButton" Width="75" Click="DlPathBrowseButtonClick">
+                                    <StackPanel Orientation="Horizontal" Margin="3,0">
+                                        <Image Source="/RSTVShowTracker;component/Images/browse.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                        <TextBlock Text="Browse" Margin="0,0,3,0" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
 
@@ -73,6 +86,14 @@
 
             <TabItem Header="Downloaders" Name="downloadersTabItem">
                 <Grid Name="downloadersGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
@@ -105,7 +126,12 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBox Name="torrentPathTextBox" TextChanged="TorrentPathTextBoxTextChanged" Margin="0,0,5,0" Width="482" />
-                                <Button Content="Browse" Name="torrentPathBrowseButton" Width="75" Click="TorrentPathBrowseButtonClick" />
+                                <Button Name="torrentPathBrowseButton" Width="75" Click="TorrentPathBrowseButtonClick">
+                                    <StackPanel Orientation="Horizontal" Margin="3,0">
+                                        <Image Source="/RSTVShowTracker;component/Images/browse.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                        <TextBlock Text="Browse" Margin="0,0,3,0" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
 
@@ -116,7 +142,12 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <TextBox Name="usenetPathTextBox" TextChanged="UsenetPathTextBoxTextChanged" Margin="0,0,5,0" Width="482" />
-                                <Button Content="Browse" Name="usenetPathBrowseButton" Width="75" Click="UsenetPathBrowseButtonClick" />
+                                <Button Name="usenetPathBrowseButton" Width="75" Click="UsenetPathBrowseButtonClick">
+                                    <StackPanel Orientation="Horizontal" Margin="3,0">
+                                        <Image Source="/RSTVShowTracker;component/Images/browse.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                        <TextBlock Text="Browse" Margin="0,0,3,0" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
 
@@ -131,7 +162,12 @@
                             </TextBlock>
                             <StackPanel Orientation="Horizontal">
                                 <TextBox Name="jDlPathTextBox" TextChanged="JDlPathTextBoxTextChanged" Margin="0,0,5,0" Width="482" />
-                                <Button Content="Browse" Name="jDlPathBrowseButton" Width="75" Click="JDlPathBrowseButtonClick" />
+                                <Button Name="jDlPathBrowseButton" Width="75" Click="JDlPathBrowseButtonClick">
+                                    <StackPanel Orientation="Horizontal" Margin="3,0">
+                                        <Image Source="/RSTVShowTracker;component/Images/browse.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                        <TextBlock Text="Browse" Margin="0,0,3,0" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -140,6 +176,14 @@
             
             <TabItem Header="Parsers" Name="parsersTabItem">
                 <Grid Name="parsersGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
@@ -227,8 +271,13 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <Label Content="Cookies:" Name="cookiesLabel" FontWeight="Bold" Padding="5,3,5,0" />
-                                <TextBox Name="cookiesTextBox" TextChanged="CookiesTextBoxTextChanged" Margin="0,0,5,0" Width="417" />
-                                <Button Content="Grab cookies" Name="grabCookiesButton" Width="85" Click="GrabCookiesButtonClick" />
+                                <TextBox Name="cookiesTextBox" TextChanged="CookiesTextBoxTextChanged" Margin="0,0,5,0" Width="398" />
+                                <Button Name="grabCookiesButton" Click="GrabCookiesButtonClick">
+                                    <StackPanel Orientation="Horizontal" Margin="3,0">
+                                        <Image Source="/RSTVShowTracker;component/Images/cookie.png" Height="16" Width="16" Margin="0,0,5,0" />
+                                        <TextBlock Text="Grab cookies" Margin="0,0,3,0" />
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
