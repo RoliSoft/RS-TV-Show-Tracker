@@ -226,10 +226,9 @@
             {
                 SetStatus("Identifying " + file.Information.Name + "...", true);
 
-                try   { file.Information = FileNames.Parser.ParseFile(file.Information.Name); file.Checked = file.Recognized = file.Enabled = true; }
-                catch { file.Checked = file.Recognized = file.Enabled = false; }
-
-                file.Processed = true;
+                file.Information = FileNames.Parser.ParseFile(file.Information.Name);
+                file.Checked     = file.Recognized = file.Enabled = file.Information.Success;
+                file.Processed   = true;
             }
 
             SetStatus();
@@ -591,7 +590,7 @@
 
                 startRenamingButton.Content   = "Start renaming";
                 startRenamingButton.IsEnabled = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked) != 0;
-                formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
+                settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
                 _parsing = _renaming = false;
 
                 SetStatus("Canceled " + _operationVerb.ToLower() + " operation.");
@@ -599,7 +598,7 @@
             else
             {
                 startRenamingButton.Content = "Stop renaming";
-                formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = false;
+                settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = false;
                 _parsing = _renaming = true;
 
                 if (WorkerThread != null && WorkerThread.IsAlive)
@@ -633,7 +632,7 @@
                 {
                     startRenamingButton.Content   = "Start renaming";
                     startRenamingButton.IsEnabled = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked) != 0;
-                    formatTabItem.IsEnabled = settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
+                    settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
                 }));
             SetStatus(_operationPast + " " + Utils.FormatNumber(i, "file") + "!");
             _parsing = _renaming = false;

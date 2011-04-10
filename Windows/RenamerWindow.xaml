@@ -1,15 +1,15 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.RenamerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
         Title="File renamer" Height="395" Width="800" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/folder-rename.png" Loaded="WindowLoaded" Closing="GlassWindowClosing" ResizeMode="NoResize">
     <Grid>
-        <TabControl Margin="10,10" Name="tabControl" SelectionChanged="TabControlSelectionChanged">
+        <TabControl Padding="0" Margin="10,10" Name="tabControl" SelectionChanged="TabControlSelectionChanged" Background="White">
             <TabControl.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
             <TabItem Header="List of files" Name="filesTabItem">
-                <Grid Margin="7">
-                    <ListView Name="listView" Margin="0,0,0,30" AllowDrop="True" Drop="ListViewDrop">
+                <Grid>
+                    <ListView Name="listView" Margin="0,1,0,40" AllowDrop="True" Drop="ListViewDrop" BorderThickness="0">
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
                                 <GridViewColumn Width="25">
@@ -80,70 +80,72 @@
                             </ContextMenu>
                         </ListView.ContextMenu>
                     </ListView>
-                    
-                    <Label Name="statusLabel" Content="0 files added; 0 files identified." HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="20,0,0,1" />
-                    <Label Name="statusThrobber" FontWeight="Bold" Content="&#9696;" Padding="0" Margin="2,0,0,0" Width="12" Height="17" VerticalAlignment="Bottom" HorizontalAlignment="Left" Visibility="Hidden">
-                        <Label.Effect>
-                            <DropShadowEffect Color="Gray" ShadowDepth="0" />
-                        </Label.Effect>
-                        <Label.RenderTransform>
-                            <RotateTransform x:Name="statusThrobberRotate" CenterX="6" CenterY="8" Angle="0" />
-                        </Label.RenderTransform>
-                        <Label.Resources>
-                            <Storyboard x:Key="statusThrobberSpinner">
-                                <DoubleAnimation Storyboard.TargetName="statusThrobberRotate" Storyboard.TargetProperty="Angle" By="360" Duration="0:0:0.3" AutoReverse="False" RepeatBehavior="Forever" />
-                            </Storyboard>
-                        </Label.Resources>
-                    </Label>
-                    <Image Name="statusImage" Source="/RSTVShowTracker;component/Images/tick.png" Margin="0" Height="16" Width="16" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
 
-                    <Button Name="startRenamingButton" Content="Start renaming" Click="StartRenamingButtonClick" Padding="7,2" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsEnabled="False" />
-                </Grid>
-            </TabItem>
-            <TabItem Header="Format" Name="formatTabItem">
-                <Grid Margin="7" HorizontalAlignment="Center">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Margin="10,5,10,0" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="Rename format:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,10,0" />
-                                <TextBox Name="renameFormatTextBox" Margin="0,0,5,0" Width="500" TextChanged="RenameFormatTextBoxTextChanged" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="Resulting name:" FontSize="14" Padding="0" Margin="11,0,10,0" />
-                                <TextBox Name="resultingNameTextBox" Margin="0,0,5,0" Width="500" IsReadOnly="True" />
-                                <Image Name="resultingDetected" Source="/RSTVShowTracker;component/Images/tick.png" Margin="0" Height="16" Width="16" ToolTipService.ShowDuration="600000" />
-                            </StackPanel>
-                            <TextBlock FontFamily="Consolas" HorizontalAlignment="Center" xml:space="preserve"><![CDATA[
-                List of variables with examples:
-                                
-House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv
-$show     — Name of the show                    — House, M.D.
-$season   — Season number                       — 06
-$seasonz  — Season number without leading zero  — 6
-$episode  — Episode number                      — 02
-$episodez — Episode number without leading zero — 2
-$title    — Title of the episode                — Epic Fail
-$quality  — Detected quality of the video       — Web-DL 720p
-$ext      — Extension of the file               — .mkv
-
-To find renamed episodes with the "Play episode" context menu,
-the new file name has to contain the name of the show and the
-episode numbering in one of these formats: S06E02, 6x02, 602]]></TextBlock>
-                        </StackPanel>
-                    </StackPanel>
+                    <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
+                        <Grid>
+                            <Label Name="statusLabel" Content="0 files added; 0 files identified." HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="20,0,0,4" />
+                            <Label Name="statusThrobber" FontWeight="Bold" Content="&#9696;" Padding="0" Margin="2,0,0,0" Width="12" Height="17" VerticalAlignment="Bottom" HorizontalAlignment="Left" Visibility="Hidden">
+                                <Label.Effect>
+                                    <DropShadowEffect Color="Gray" ShadowDepth="0" />
+                                </Label.Effect>
+                                <Label.RenderTransform>
+                                    <RotateTransform x:Name="statusThrobberRotate" CenterX="6" CenterY="8" Angle="0" />
+                                </Label.RenderTransform>
+                                <Label.Resources>
+                                    <Storyboard x:Key="statusThrobberSpinner">
+                                        <DoubleAnimation Storyboard.TargetName="statusThrobberRotate" Storyboard.TargetProperty="Angle" By="360" Duration="0:0:0.3" AutoReverse="False" RepeatBehavior="Forever" />
+                                    </Storyboard>
+                                </Label.Resources>
+                            </Label>
+                            <Image Name="statusImage" Source="/RSTVShowTracker;component/Images/tick.png" Margin="0,0,0,4" Height="16" Width="16" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                            
+                            <Button Name="startRenamingButton" Content="Start renaming" Click="StartRenamingButtonClick" Padding="7,2" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsEnabled="False" />
+                        </Grid>
+                    </Border>
                 </Grid>
             </TabItem>
             <TabItem Header="Settings" Name="settingsTabItem">
-                <Grid Margin="7" HorizontalAlignment="Center">
+                <Grid Margin="10">
+                    <TextBlock FontFamily="Consolas" HorizontalAlignment="Right" VerticalAlignment="Top" xml:space="preserve" Margin="0,15,26,0"><![CDATA[   List of variables:
+
+    $show — House, M.D.
+  $season — 06
+ $seasonz — 6
+ $episode — 02
+$episodez — 2
+   $title — Epic Fail
+ $quality — Web-DL 720p
+     $ext — .mkv]]></TextBlock>
                     <StackPanel Orientation="Vertical">
-                        <Label Content="File operation:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,0,5" />
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/RSTVShowTracker;component/Images/format.png" Height="16" Width="16" Margin="0,1,5,0" />
+                            <Label Content="Rename format" FontSize="16" Foreground="DarkBlue" Padding="0" Margin="0,0,5,0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,07">
+                            <TextBox Name="renameFormatTextBox" Margin="5,1,5,0" Width="500" TextChanged="RenameFormatTextBoxTextChanged" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/RSTVShowTracker;component/Images/next.png" Height="16" Width="16" Margin="0,1,5,0" />
+                            <Label Content="Resulting name" FontSize="16" Foreground="DarkBlue" Padding="0" Margin="0,0,5,0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,7">
+                            <TextBox Name="resultingNameTextBox" Margin="5,1,5,0" Width="500" IsReadOnly="True" />
+                            <Image Name="resultingDetected" Source="/RSTVShowTracker;component/Images/tick.png" Margin="0" Height="16" Width="16" ToolTipService.ShowDuration="600000" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="0,1,5,0" />
+                            <Label Content="File operation" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                        </StackPanel>
                         <RadioButton Name="renameRadioButton" Content="Rename the files to their new name" VerticalAlignment="Top" Checked="RenameRadioButtonChecked" HorizontalAlignment="Left" Margin="5,0,0,5" />
                         <RadioButton Name="copyRadioButton" Content="Copy the files to another location with their new name" Checked="CopyRadioButtonChecked" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,0,0,5" />
                         <RadioButton Name="moveRadioButton" Content="Move the files to another location with their new name" Checked="MoveRadioButtonChecked" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,0,0,5" />
                         <RadioButton Name="symLinkRadioButton" Content="Create a symblic link to another location with the new name" Checked="SymLinkRadioButtonChecked" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,0,0,5" />
-                        <Label Content="Target directory:" FontSize="14" FontWeight="Bold" Padding="0" Margin="0,0,10,5" />
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Name="targetDirTextBox" TextChanged="TargetDirTextBoxTextChanged" Margin="5,0,5,0" Width="500" />
+                        <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
+                            <Image Source="/RSTVShowTracker;component/Images/folder-open-film.png" Height="16" Width="16" Margin="0,1,5,0" />
+                            <Label Content="Target directory" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBox Name="targetDirTextBox" TextChanged="TargetDirTextBoxTextChanged" Margin="5,0,5,0" Width="442" />
                             <Button Content="Browse" Name="targetDirBrowseButton" Click="TargetDirBrowseButtonClick" Width="75" />
                         </StackPanel>
                     </StackPanel>
