@@ -370,7 +370,6 @@
     <Resource Include="Images\settings.png" />
     <Resource Include="Images\sidereel.png" />
     <Resource Include="Images\smiley.png" />
-    <Resource Include="Images\smile_sad_48.png" />
     <Resource Include="Images\statistics.png" />
     <Resource Include="Images\subtitles.png" />
     <Resource Include="Images\tag.png" />
@@ -463,9 +462,6 @@
   <ItemGroup>
     <Resource Include="Images\bug.png" />
     <Resource Include="Images\light-bulb.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\arrow-090.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\navigation.png" />
