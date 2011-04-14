@@ -4,6 +4,7 @@
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -45,6 +46,7 @@
         public static NotifyIcon NotifyIcon { get; set; }
 
         private Timer _statusTimer;
+        private bool _hideOnStart;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -59,6 +61,45 @@
                 MessageBox.Show("This software currently doesn't support " + Utils.OS + ", only Windows 7 or newer. Because the underlying code would run on any operating system which can run CLI code, a universal interface will be developed sometime in the future.", Utils.OS + " is not supported", MessageBoxButton.OK, MessageBoxImage.Error);
                 Process.GetCurrentProcess().Kill();
             }
+
+            var args = Environment.GetCommandLineArgs();
+
+            if (args.Length != 1)
+            {
+                if (args.Contains("-hide"))
+                {
+                    _hideOnStart = true;
+                }
+
+                if (args.Length == 2 && args[1][0] != '-' && File.Exists(args[1]))
+                {
+                    var fid = FileNames.Parser.ParseFile(Path.GetFileName(args[1]));
+
+                    if (fid.Success)
+                    {
+                        new VistaControls.TaskDialog.TaskDialog
+                            {
+                                CommonIcon  = VistaControls.TaskDialog.TaskDialogIcon.Information,
+                                Title       = Signature.Software + " " + Signature.Version,
+                                Instruction = Path.GetFileNameWithoutExtension(args[1]),
+                                Content     = fid + " [" + fid.Quality + "]"
+                            }.Show();
+                    }
+                    else
+                    {
+                        new VistaControls.TaskDialog.TaskDialog
+                            {
+                                CommonIcon  = VistaControls.TaskDialog.TaskDialogIcon.Stop,
+                                Title       = Signature.Software + " " + Signature.Version,
+                                Instruction = Path.GetFileNameWithoutExtension(args[1]),
+                                Content     = "Couldn't identify the specified file."
+                            }.Show();
+                    }
+                    
+                    Process.GetCurrentProcess().Kill();
+                }
+            }
+
 
             InitializeComponent();
 
@@ -102,7 +143,7 @@
             SetLastUpdated();
             LoadNotifyIcon();
 
-            if (Environment.GetCommandLineArgs().Contains("-hide"))
+            if (_hideOnStart)
             {
                 // hiding the window when it isn't even visible is a tricky thing :]
                 // we wait for the next event, until then we make it inactive and -999px off the screen

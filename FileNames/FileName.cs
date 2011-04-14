@@ -101,5 +101,18 @@
             Quality       = quality;
             Success       = success;
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return SecondEpisode.HasValue
+                   ? "{0} S{1:00}E{2:00}-{3:00}".FormatWith(Show, Season, Episode, SecondEpisode)
+                   : "{0} S{1:00}E{2:00}".FormatWith(Show, Season, Episode);
+        }
     }
 }
