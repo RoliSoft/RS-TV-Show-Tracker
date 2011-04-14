@@ -10,6 +10,30 @@
     public class BBCiPlayer : OnlineVideoSearchEngine
     {
         /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "BBC iPlayer";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://www.bbc.co.uk/iplayer/";
+            }
+        }
+
+        /// <summary>
         /// Searches for videos on BBC iPlayer.
         /// </summary>
         /// <param name="name">The name of the show.</param>

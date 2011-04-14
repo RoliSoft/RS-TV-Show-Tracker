@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers
 {
     using System;
+    using System.Reflection;
 
     /// <summary>
     /// Provides metadata information for the parser engines.
@@ -23,12 +24,19 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ParserAttribute"/> class.
         /// </summary>
-        /// <param name="developer">The developer.</param>
-        /// <param name="revision">The revision date.</param>
-        public ParserAttribute(string developer, DateTime revision)
+        public ParserAttribute()
         {
-            Developer = developer;
-            Revision  = revision;
+            Developer = ((AssemblyCompanyAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), true)[0]).Company;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParserAttribute"/> class.
+        /// </summary>
+        /// <param name="revision">The revision date.</param>
+        public ParserAttribute(string revision)
+        {
+            Developer = ((AssemblyCompanyAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), true)[0]).Company;
+            Revision  = DateTime.Parse(revision);
         }
 
         /// <summary>

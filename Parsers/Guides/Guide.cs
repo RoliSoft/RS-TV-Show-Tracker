@@ -10,32 +10,8 @@
     /// <summary>
     /// Represents a TV show database.
     /// </summary>
-    public abstract class Guide
+    public abstract class Guide : ParserEngine
     {
-        /// <summary>
-        /// Gets the name of the site.
-        /// </summary>
-        /// <value>The name.</value>
-        public abstract string Name { get; }
-
-        /// <summary>
-        /// Gets the URL of the site.
-        /// </summary>
-        /// <value>The site location.</value>
-        public abstract string Site { get; }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public virtual string Icon
-        {
-            get
-            {
-                return Site + "favicon.ico";
-            }
-        }
-
         /// <summary>
         /// Gets the list of supported languages.
         /// </summary>

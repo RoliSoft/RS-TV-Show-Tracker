@@ -14,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping Twilight.
     /// </summary>
-    [Parser("RoliSoft", "2011-03-26 4:06 PM"), TestFixture]
+    [Parser("2011-03-26 4:06 PM"), TestFixture]
     public class Twilight : DownloadSearchEngine
     {
         /// <summary>

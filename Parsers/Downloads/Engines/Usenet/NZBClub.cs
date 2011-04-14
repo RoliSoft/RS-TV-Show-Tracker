@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping NZBClub.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-12 1:23 AM"), TestFixture]
+    [Parser("2011-02-12 1:23 AM"), TestFixture]
     public class NZBClub : DownloadSearchEngine
     {
         /// <summary>

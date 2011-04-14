@@ -13,6 +13,30 @@
     [TestFixture]
     public class RSTVShowRecommendation : RecommendationEngine
     {
+        /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "RS TV Show Recommendation";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://lab.rolisoft.net/tv/";
+            }
+        }
+
         private readonly int _type;
         private readonly string _key  = "S2qNfbCFCWoQ8RoL1S0FTbjbW",
                                 _uuid = Utils.GetUUID();

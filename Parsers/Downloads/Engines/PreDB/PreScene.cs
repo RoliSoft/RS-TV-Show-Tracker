@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-12 3:58 AM"), TestFixture]
+    [Parser("2011-02-12 3:58 AM"), TestFixture]
     public class PreScene : DownloadSearchEngine
     {
         /// <summary>

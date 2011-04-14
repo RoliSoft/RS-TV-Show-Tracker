@@ -13,32 +13,8 @@
     /// <summary>
     /// Represents a subtitle search engine.
     /// </summary>
-    public abstract class SubtitleSearchEngine
+    public abstract class SubtitleSearchEngine : ParserEngine
     {
-        /// <summary>
-        /// Gets the name of the site.
-        /// </summary>
-        /// <value>The name.</value>
-        public abstract string Name { get; }
-
-        /// <summary>
-        /// Gets the URL of the site.
-        /// </summary>
-        /// <value>The site location.</value>
-        public abstract string Site { get; }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public virtual string Icon
-        {
-            get
-            {
-                return Site + "favicon.ico";
-            }
-        }
-
         /// <summary>
         /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
         /// </summary>

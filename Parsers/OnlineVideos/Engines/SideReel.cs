@@ -10,6 +10,30 @@
     public class SideReel : OnlineVideoSearchEngine
     {
         /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "SideReel";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://www.sidereel.com/";
+            }
+        }
+
+        /// <summary>
         /// Searches for videos on SideReel.
         /// </summary>
         /// <param name="name">The name of the show.</param>

@@ -10,7 +10,7 @@
     /// <summary>
     /// Represents a recommendation engine.
     /// </summary>
-    public abstract class RecommendationEngine
+    public abstract class RecommendationEngine : ParserEngine
     {
         /// <summary>
         /// Occurs when a recommendation request is processed.

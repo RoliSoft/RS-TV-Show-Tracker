@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping bitHUmen.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-13 6:08 PM"), TestFixture]
+    [Parser("2011-02-13 6:08 PM"), TestFixture]
     public class BitHUmen : DownloadSearchEngine
     {
         /// <summary>

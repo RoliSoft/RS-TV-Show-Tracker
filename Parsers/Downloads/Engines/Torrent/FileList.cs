@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping FileList.ro.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-13 6:03 PM"), TestFixture]
+    [Parser("2011-02-13 6:03 PM"), TestFixture]
     public class FileList : DownloadSearchEngine
     {
         /// <summary>

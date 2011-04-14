@@ -2,12 +2,11 @@
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Provides methods to search for episodes on online services.
     /// </summary>
-    public abstract class OnlineVideoSearchEngine
+    public abstract class OnlineVideoSearchEngine : ParserEngine
     {
         /// <summary>
         /// Occurs when an online search is done.

@@ -13,32 +13,8 @@
     /// <summary>
     /// Represents a download link search engine.
     /// </summary>
-    public abstract class DownloadSearchEngine
+    public abstract class DownloadSearchEngine : ParserEngine
     {
-        /// <summary>
-        /// Gets the name of the site.
-        /// </summary>
-        /// <value>The name.</value>
-        public abstract string Name { get; }
-
-        /// <summary>
-        /// Gets the URL of the site.
-        /// </summary>
-        /// <value>The site location.</value>
-        public abstract string Site { get; }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public virtual string Icon
-        {
-            get
-            {
-                return Site + "favicon.ico";
-            }
-        }
-
         /// <summary>
         /// Gets a value indicating whether the site requires authentication.
         /// </summary>

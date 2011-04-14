@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping freshon.tv.
     /// </summary>
-    [Parser("RoliSoft", "2011-02-13 5:31 PM"), TestFixture]
+    [Parser("2011-02-13 5:31 PM"), TestFixture]
     public class TvTorrentsRo : DownloadSearchEngine
     {
         /// <summary>

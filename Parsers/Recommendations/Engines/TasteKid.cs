@@ -16,6 +16,30 @@
     public class TasteKid : RecommendationEngine
     {
         /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "TasteKid";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://www.tastekid.com/";
+            }
+        }
+
+        /// <summary>
         /// Gets the list of recommended TV show from the engine.
         /// </summary>
         /// <param name="shows">The currently watched shows.</param>

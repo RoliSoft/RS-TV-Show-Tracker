@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping SceneReleases.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:51 PM"), TestFixture]
+    [Parser("2011-01-29 9:51 PM"), TestFixture]
     public class SceneReleases : DownloadSearchEngine
     {
         /// <summary>
