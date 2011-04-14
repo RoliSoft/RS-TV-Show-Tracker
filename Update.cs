@@ -221,9 +221,6 @@
                 case "AniDB":
                     return new AniDB();
 
-                case "Guess":
-                    return new Guess();
-
                 default:
                     throw new NotSupportedException();
             }
@@ -236,11 +233,6 @@
         /// <param name="tv">The TV show.</param>
         public static void UpdateRemoteCache(Tuple<string, string> guide, TVShow tv)
         {
-            if (guide.Item1 == "Guess")
-            {
-                return;
-            }
-
             new Thread(() => { try
             {
                 var info = new Remote.Objects.ShowInfo

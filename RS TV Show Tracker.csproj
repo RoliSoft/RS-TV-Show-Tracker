@@ -159,7 +159,6 @@
     <Compile Include="Parsers\Downloads\Types.cs" />
     <Compile Include="Parsers\Guides\Engines\AniDB.cs" />
     <Compile Include="Parsers\Guides\Engines\TVcom.cs" />
-    <Compile Include="Parsers\Guides\Engines\Guess.cs" />
     <Compile Include="Parsers\Guides\TVShow.cs" />
     <Compile Include="Parsers\OnlineVideos\OnlineVideoNotFoundException.cs" />
     <Compile Include="Parsers\ParserAttribute.cs" />

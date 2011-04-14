@@ -41,7 +41,8 @@
         public bool Filter { get; set; }
 
         private volatile List<string> _remaining;
-        private IEnumerable<string> _titleParts, _episodeParts;
+        private IEnumerable<string> _titleParts;
+        private Regex _episodeRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitleSearch"/> class.
@@ -83,35 +84,6 @@
         }
 
         /// <summary>
-        /// Searches for download links on multiple services. The search is made in parallel, but this method is blocking.
-        /// </summary>
-        /// <param name="query">The name of the release to search for.</param>
-        public IEnumerable<Link> Search(string query)
-        {
-            _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query = ShowNames.Parser.Normalize(query);
-
-            // start in parallel
-            var tasks = SearchEngines.Select(engine => Task<IEnumerable<Link>>.Factory.StartNew(() =>
-                {
-                    try { return engine.Search(query).ToList(); }
-                    catch (Exception ex)
-                    {
-                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
-                        return null;
-                    }
-                })).ToArray();
-
-            // wait all
-            Task.WaitAll(tasks);
-
-            // collect and return
-            return tasks
-                   .Where(task => task.IsCompleted && task.Result != null)
-                   .SelectMany(task => task.Result);
-        }
-
-        /// <summary>
         /// Searches for download links on multiple services asynchronously.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -123,22 +95,12 @@
                 {
                     var tmp       = ShowNames.Parser.Split(query);
                     _titleParts   = ShowNames.Parser.GetRoot(tmp[0]);
-                    _episodeParts = new[]
-                        {
-                            // S02E14
-                            tmp[1],
-                            // S02.E14
-                            tmp[1].Replace("E", @"\bE"),
-                            // 2x14
-                            Regex.Replace(tmp[1], "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase),
-                            // 214
-                            Regex.Replace(tmp[1], "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase)
-                        };
+                    _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(tmp[1]);
                 }
                 else
                 {
                     _titleParts   = ShowNames.Parser.GetRoot(query);
-                    _episodeParts = new[] { string.Empty };
+                    _episodeRegex = null;
                 }
             }
 
@@ -171,7 +133,7 @@
             {
                 e.Data = e.Data
                           .Where(link => _titleParts.All(part => Regex.IsMatch(link.Release, @"\b" + part + @"\b", RegexOptions.IgnoreCase))
-                                      && _episodeParts.Any(ep => Regex.IsMatch(link.Release, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)))
+                                      && _episodeRegex.IsMatch(link.Release))
                           .ToList();
             }
 

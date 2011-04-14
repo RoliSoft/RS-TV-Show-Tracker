@@ -56,34 +56,6 @@
         }
 
         /// <summary>
-        /// Searches for subtitles on multiple services. The search is made in parallel, but this method is blocking.
-        /// </summary>
-        /// <param name="query">The name of the release to search for.</param>
-        public IEnumerable<Subtitle> Search(string query)
-        {
-            _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-
-            // start in parallel
-            var tasks = SearchEngines.Select(engine => Task<IEnumerable<Subtitle>>.Factory.StartNew(() =>
-                {
-                    try { return engine.Search(query); }
-                    catch (Exception ex)
-                    {
-                        SubtitleSearchError.Fire(this, "There was an error while searching for download links.", ex);
-                        return null;
-                    }
-                })).ToArray();
-
-            // wait all
-            Task.WaitAll(tasks);
-
-            // collect and return
-            return tasks
-                   .Where(task => task.IsCompleted && task.Result != null)
-                   .SelectMany(task => task.Result);
-        }
-
-        /// <summary>
         /// Searches for subtitles on multiple services asynchronously.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>

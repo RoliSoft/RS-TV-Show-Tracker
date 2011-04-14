@@ -538,9 +538,6 @@
 
                 case "AniDB":
                     return new AniDB();
-
-                case "Generate list based on download links":
-                    return new Guess();
             }
         }
     }

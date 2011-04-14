@@ -60,13 +60,6 @@
                                 <Label Content=" EPGuides - TV.com" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
-                        <ComboBoxItem Content="Experimental Features" IsEnabled="False" />
-                        <ComboBoxItem Margin="10,0">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/torrents.png" Height="16" Width="16" Margin="0,1,0,0" />
-                                <Label Content=" Generate list based on download links" Padding="0" />
-                            </StackPanel>
-                        </ComboBoxItem>
                     </ComboBox>
                     <Label Content="Language:" FontSize="17" Foreground="DarkBlue" HorizontalAlignment="Left" Margin="6,79,0,0" VerticalAlignment="Top" />
                     <ComboBox FontSize="18" HorizontalAlignment="Left" Margin="99,82,0,0" Name="language" VerticalAlignment="Top" Width="393" />
