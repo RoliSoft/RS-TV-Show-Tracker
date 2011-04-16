@@ -365,14 +365,14 @@
         /// <summary>
         /// Gets or sets the show.
         /// </summary>
-        /// <value>An array with 4 items: 1 - title of the show; 2 - grabber name; 3 - ID on the grabber; 4 - language.</value>
-        public string[] Show { get; set; }
+        /// <value>An array with 4 items: 1 - title of the show; 2 - grabber name; 3 - language; 4 - ID on the grabber.</value>
+        public string Show { get; set; }
 
         /// <summary>
         /// Gets or sets the GMT unix timestamp which indicates when did this change occur.
         /// </summary>
         /// <value>The GMT unix timestamp.</value>
-        public long Time { get; set; }
+        public double Time { get; set; }
 
         /// <summary>
         /// Gets or sets the data which contains the changed information.

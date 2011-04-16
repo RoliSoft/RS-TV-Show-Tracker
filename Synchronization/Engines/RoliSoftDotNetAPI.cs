@@ -19,6 +19,68 @@
     /// </summary>
     public class RoliSoftDotNetAPI : SyncEngine
     {
+        /// <summary>
+        /// The list of supported engines and their ID on the remote database.
+        /// </summary>
+        public static Dictionary<string, int> Engines = new Dictionary<string, int>
+            {
+                { "TVRage",   0 },
+                { "TVDB",     1 },
+                { "TVcom",    2 },
+                { "IMDb",     3 },
+                { "AniDB",    4 },
+                { "EPGuides", 5 }
+            };
+
+        /// <summary>
+        /// The list of supported engines and their ID on the remote database in reverse order.
+        /// </summary>
+        public static Dictionary<int, string> EnginesReverse;
+
+        /// <summary>
+        /// The list of supported languages by ISO 639-1 code and their ID on the remote database.
+        /// </summary>
+        public static Dictionary<string, int> Languages = new Dictionary<string, int>
+            {
+                { "en", 0  },
+                { "hu", 1  },
+                { "ro", 2  },
+                { "de", 3  },
+                { "fr", 4  },
+                { "es", 5  },
+                { "sv", 6  },
+                { "it", 7  },
+                { "nl", 8  },
+                { "da", 9  },
+                { "no", 10 },
+                { "et", 11 },
+                { "fi", 12 },
+                { "pl", 13 },
+                { "is", 14 },
+                { "cs", 15 },
+                { "hr", 16 },
+                { "sr", 17 },
+                { "sk", 18 },
+                { "sl", 19 },
+                { "ru", 20 },
+                { "br", 21 },
+                { "pt", 22 },
+                { "el", 23 },
+                { "tr", 24 },
+                { "zh", 25 },
+                { "ja", 26 },
+                { "ko", 27 },
+                { "ar", 28 },
+                { "he", 29 },
+                { "id", 30 },
+                { "fa", 31 },
+            };
+
+        /// <summary>
+        /// The list of supported languages by ISO 639-1 code and their ID on the remote database in reverse order.
+        /// </summary>
+        public static Dictionary<int, string> LanguagesReverse;
+
         #region Queue
         /// <summary>
         /// Gets or sets the list of delayed changes.
@@ -48,6 +110,17 @@
         private readonly string _pendingDataPath = Path.Combine(Signature.FullPath, ".sync-pending-data");
 
         private readonly string _user, _pass;
+
+        /// <summary>
+        /// Initializes the <see cref="RoliSoftDotNetAPI"/> class.
+        /// </summary>
+        static RoliSoftDotNetAPI()
+        {
+            EnginesReverse   = Engines.ToDictionary(x => x.Value, y => y.Key);
+            LanguagesReverse = Languages.ToDictionary(x => x.Value, y => y.Key);
+
+            Languages.Add(string.Empty, 0);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoliSoftDotNetAPI"/> class.
@@ -401,17 +474,16 @@
         /// </summary>
         /// <param name="showid">The ID of the TV show in the database.</param>
         /// <returns>Basic TV show information.</returns>
-        public static string[] GetShowData(string showid)
+        public static string GetShowData(string showid)
         {
             var show = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where showid = ? limit 1", showid)[0];
 
-            return new[]
-                {                                                            // [
-                    show["name"],                                            //   "The Big Bang Theory",
-                    show["grabber"],                                         //   "TVRage",
-                    Database.ShowData(showid, show["grabber"] + ".id"),      //   "8511",
-                    Database.ShowData(showid, show["grabber"] + ".lang")     //   "en"
-                };                                                           // ]
+            return "{0}\0{1}\0{2}\0{3}".FormatWith(
+                    show["name"],
+                    Engines[show["grabber"]],
+                    Languages[Database.ShowData(showid, show["grabber"] + ".lang")],
+                    Database.ShowData(showid, show["grabber"] + ".id")
+                );
         }
 
         /// <summary>
@@ -425,7 +497,7 @@
         {
             return new ShowInfoChange
                 {
-                    Time   = (long)DateTime.UtcNow.ToUnixTimestamp(),
+                    Time   = (DateTime.UtcNow.Ticks - 621355968000000000) / 10000000d,
                     Change = type,
                     Data   = data,
                     Show   = type != ShowInfoChange.ChangeType.ReorderList
@@ -462,13 +534,12 @@
 
             foreach (var show in shows)
             {
-                var showinf = new[]
-                    {
+                var showinf = "{0}\0{1}\0{2}\0{3}".FormatWith(
                         show["name"],
-                        show["grabber"],
-                        Database.ShowData(show["showid"], show["grabber"] + ".id"),
-                        Database.ShowData(show["showid"], show["grabber"] + ".lang")
-                    };
+                        Engines[show["grabber"]],
+                        Languages[Database.ShowData(show["showid"], show["grabber"] + ".lang")],
+                        Database.ShowData(show["showid"], show["grabber"] + ".id")
+                    );
 
                 var addchg = new ShowInfoChange
                     {
@@ -548,19 +619,21 @@
         {
             foreach (var change in changes.Changes)
             {
-                var id = Database.GetShowID(change.Show[0], change.Show[1], change.Show[2], change.Show[3]);
+                var chg = change.Show.Split("\0".ToCharArray(), 4);
+
+                var id = Database.GetShowID(chg[0], EnginesReverse[chg[1].ToInteger()], LanguagesReverse[chg[2].ToInteger()], chg[3]);
                 if (string.IsNullOrWhiteSpace(id))
                 {
                     if (change.Change == ShowInfoChange.ChangeType.AddShow || change.Change == ShowInfoChange.ChangeType.MarkEpisode || change.Change == ShowInfoChange.ChangeType.UnmarkEpisode)
                     {
                         Database.Execute("update tvshows set rowid = rowid + 1");
-                        Database.Execute("insert into tvshows values (1, null, ?)", change.Show[0]);
+                        Database.Execute("insert into tvshows values (1, null, ?)", chg[0]);
 
-                        id = Database.GetShowID(change.Show[0]);
+                        id = Database.GetShowID(chg[0]);
 
-                        Database.ShowData(id, "grabber", change.Show[1]);
-                        Database.ShowData(id, change.Show[1] + ".id", change.Show[2]);
-                        Database.ShowData(id, change.Show[1] + ".lang", change.Show[3]);
+                        Database.ShowData(id, "grabber", EnginesReverse[chg[1].ToInteger()]);
+                        Database.ShowData(id, change.Show[1] + ".id", chg[3]);
+                        Database.ShowData(id, change.Show[1] + ".lang", LanguagesReverse[chg[2].ToInteger()]);
                     }
                     else
                     {

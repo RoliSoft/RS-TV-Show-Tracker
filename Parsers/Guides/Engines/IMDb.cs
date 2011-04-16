@@ -1,10 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.Guides.Engines
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
     using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
@@ -92,8 +90,8 @@
             var summary = Utils.GetHTML("http://www.imdb.com/title/tt{0}/".FormatWith(id), headers: new Dictionary<string, string> { { "Accept-Language", "en-US" } });
             var show    = new TVShow();
 
-            show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetNodeAttributeValue("//td[@id='img_primary']//img", "title")).Replace(" Poster", string.Empty);
-            show.Description = HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//h2[text()='Storyline']/following-sibling::p[1]") ?? string.Empty));
+            show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetTextValue("//h1[@class='header']/text()")).Trim();
+            show.Description = Regex.Replace(HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//h2[text()='Storyline']/following-sibling::p[1]") ?? string.Empty)).Trim(), @"\n\nWritten by\s.*$", string.Empty);
             show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//td[@id='img_primary']//img", "src");
             show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//span[@class='tv-series-smaller']") ?? string.Empty, @"\d{4}–\d{4}");
             show.URL         = "http://www.imdb.com/title/tt{0}/".FormatWith(id);
@@ -115,7 +113,7 @@
                 show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
             }
             
-            var listing  = Utils.GetHTML("http://www.imdb.com/title/tt{0}/episodes".FormatWith(id));
+            var listing  = Utils.GetHTML("http://www.imdb.com/title/tt{0}/episodes".FormatWith(id), headers: new Dictionary<string, string> { { "Accept-Language", "en-US" } });
             var nodes    = listing.DocumentNode.SelectNodes("//td/h3");
 
             if (nodes == null)
