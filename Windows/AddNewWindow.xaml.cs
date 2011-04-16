@@ -530,6 +530,9 @@
                 case "TV.com":
                     return new TVcom();
 
+                case "IMDb":
+                    return new IMDb();
+
                 case "EPGuides - TVRage":
                     return new EPGuides("tvrage.com");
 

@@ -215,6 +215,9 @@
                 case "TVcom":
                     return new TVcom();
 
+                case "IMDb":
+                    return new IMDb();
+
                 case "EPGuides":
                     return new EPGuides();
 

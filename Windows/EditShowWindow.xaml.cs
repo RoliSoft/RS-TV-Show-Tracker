@@ -65,12 +65,16 @@
                     database.SelectedIndex = 3;
                     break;
 
-                case "AniDB":
+                case "IMDb":
                     database.SelectedIndex = 4;
                     break;
 
+                case "AniDB":
+                    database.SelectedIndex = 5;
+                    break;
+
                 case "EPGuides":
-                    database.SelectedIndex = 6;
+                    database.SelectedIndex = 7;
                     break;
             }
 

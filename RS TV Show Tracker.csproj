@@ -121,6 +121,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
+    <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\PhazeDDL.cs" />
