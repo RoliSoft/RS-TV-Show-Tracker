@@ -40,6 +40,10 @@
                         "nova.sciencenow.s05e06.720p.hdtv.x264-orenji.mkv",
                         "NOVA scienceNOW S05E06 - What’s the Next Big Thing?"
                     },
+                    {
+                        "top_gear.16x01.real.720p_hdtv_x264-fov.mkv",
+                        "Top Gear S16E01 - Yeti Road Test"
+                    }
                 };
 
             foreach (var file in files)

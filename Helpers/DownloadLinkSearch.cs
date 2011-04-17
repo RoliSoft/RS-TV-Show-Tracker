@@ -132,7 +132,7 @@
             if (Filter)
             {
                 e.Data = e.Data
-                          .Where(link => _titleParts.All(part => Regex.IsMatch(link.Release, @"\b" + part + @"\b", RegexOptions.IgnoreCase))
+                          .Where(link => _titleParts.All(part => Regex.IsMatch(link.Release, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase))
                                       && _episodeRegex.IsMatch(link.Release))
                           .ToList();
             }

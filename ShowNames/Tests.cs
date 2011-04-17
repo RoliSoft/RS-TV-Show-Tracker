@@ -91,7 +91,8 @@
                     { "lost.s06e17-18.720p.bluray.x264-macro.mkv", new ShowEpisode(6, 17, 18) },
                     { "Archer.1x10.Dial.M.for.Mother.720p.WEB-DL.DD5.1.AVC-DON.mkv", new ShowEpisode(1, 10) },
                     { "Community.S02E01.Anthropology.101.720p.WEB-DL.DD5.1.H.264-HoodBag", new ShowEpisode(2, 1) },
-                    { "ARRESTED DEVELOPMENT - S03 EP13 - DEVELOPMENT ARRESTED 720P DD5.1 x264 MMI.mkv", new ShowEpisode(3, 13) }
+                    { "ARRESTED DEVELOPMENT - S03 EP13 - DEVELOPMENT ARRESTED 720P DD5.1 x264 MMI.mkv", new ShowEpisode(3, 13) },
+                    { "top_gear.16x01.real.720p_hdtv_x264-fov.mkv", new ShowEpisode(16, 1) }
                 };
 
             foreach (var show in shouldEqual)

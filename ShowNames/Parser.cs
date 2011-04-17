@@ -124,16 +124,11 @@
         /// </returns>
         public static bool IsMatch(string name, string episode, string release)
         {
-            var title    = GetRoot(name);
-            var episodes = new[] {
-                                   episode, // S02E14
-                                   episode.Replace("E", "\bE"), // S02.E14
-                                   Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1X$2", RegexOptions.IgnoreCase), // 2x14
-                                   Regex.Replace(episode, "S0?([0-9]{1,2})E([0-9]{1,2})", "$1$2", RegexOptions.IgnoreCase) // 214
-                                 };
+            var title      = GetRoot(name);
+            var episodergx = GenerateEpisodeRegexes(episode);
 
-            return title.All(part => Regex.IsMatch(release, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
-                && episodes.Any(ep => Regex.IsMatch(release, @"\b" + ep + @"\b", RegexOptions.IgnoreCase)); // is it the episode we want?
+            return title.All(part => Regex.IsMatch(release, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)) // does it have all the title words?
+                && episodergx.IsMatch(release); // is it the episode we want?
         }
 
         /// <summary>
@@ -224,23 +219,13 @@
         {
             var regexes = new[]
                 {
-                    // S02E14
-                    @"S{0:00}E{1:00}",
-                    // S02E13-14
-                    @"S{0:00}E(?:[0-9]{{1,2}}\-E?){1:00}",
-                    // S02.E14
-                    @"S{0:00}.E{1:00}",
-                    // S02.E13-14
-                    @"S{0:00}.E(?:[0-9]{{1,2}}.?\-.?E?){1:00}",
-                    // 2x14
-                    @"{0:0}X{1:00}",
-                    // 2x13-14
-                    @"{0:0}X(?:[0-9]{{1,2}}\-){1:00}",
-                    // 214
-                    @"{0:0}{1:00}",
+                    // S02[.]E[13-]14
+                    @"S{0:00}.?E(?:[0-9]{{1,2}}\-E?)?{1:00}",
+                    // 2[x][13-]14
+                    @"{0:0}X?(?:[0-9]{{1,2}}\-)?{1:00}",
                 };
 
-            var expr = regexes.Aggregate(@"\b(?:", (current, format) => current + (format.FormatWith(episode.Season, episode.Episode) + "|")).TrimEnd('|') + @")\b";
+            var expr = regexes.Aggregate(@"(?:\b|_)(?:", (current, format) => current + (format.FormatWith(episode.Season, episode.Episode) + "|")).TrimEnd('|') + @")(?:\b|_)";
 
             return new Regex(expr, RegexOptions.IgnoreCase);
         }

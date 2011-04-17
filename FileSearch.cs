@@ -114,7 +114,7 @@
                  && _knownVideoRegex.IsMatch(name) // is it a known video file extension?
                  && !_sampleVideoRegex.IsMatch(name) // is it not a sample?
                  && _episodeRegex.IsMatch(name) // is it the episode we want?
-                 && _titleParts.All(part => Regex.IsMatch(dir + @"\" + name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
+                 && _titleParts.All(part => Regex.IsMatch(dir + @"\" + name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)) // does it have all the title words?
                  && !Files.Contains(file)) // and not in the array already?
                 {
                     var pf = FileNames.Parser.ParseFile(name);

@@ -76,7 +76,7 @@
                 foreach (var file in files)
                 {
                     if (Regex.IsMatch(file.Name, @"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase) && // is it a known video file extension?
-                        parts.All(part => (Regex.IsMatch(file.Directory.Name + @"\" + file.Name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)))) // does it have all the words?
+                        parts.All(part => (Regex.IsMatch(file.Directory.Name + @"\" + file.Name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)))) // does it have all the words?
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name);
                         if ((pf.Success && parts.SequenceEqual(Parser.GetRoot(pf.Show))) || // is the show extracted from the file name the exact same?

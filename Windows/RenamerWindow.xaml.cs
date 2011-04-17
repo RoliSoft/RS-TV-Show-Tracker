@@ -495,7 +495,7 @@
         public static bool TestName(string name)
         {
             return !string.IsNullOrWhiteSpace(name)
-                && SampleTitleParts.All(part => Regex.IsMatch(name, @"\b" + part + @"\b", RegexOptions.IgnoreCase)) // does it have all the title words?
+                && SampleTitleParts.All(part => Regex.IsMatch(name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)) // does it have all the title words?
                 && SampleKnownVideoRegex.IsMatch(name) // is it a known video file extension?
                 && !SampleSampleVideoRegex.IsMatch(name) // is it not a sample?
                 && SampleEpisodeRegex.IsMatch(name); // is it the episode we want?
