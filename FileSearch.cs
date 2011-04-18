@@ -41,8 +41,8 @@
         /// <value>The files.</value>
         public List<string> Files { get; set; }
 
-        private readonly IEnumerable<string> _titleParts;
-        private readonly Regex _episodeRegex, _knownVideoRegex, _sampleVideoRegex;
+        private readonly string[] _titleParts;
+        private readonly Regex _episodeRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
@@ -54,8 +54,6 @@
         {
             _titleParts       = ShowNames.Parser.GetRoot(show);
             _episodeRegex     = ShowNames.Parser.GenerateEpisodeRegexes(episode);
-            _knownVideoRegex  = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
-            _sampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
 
             ShowQuery = show + " " + episode;
             StartPath = path;
@@ -110,12 +108,7 @@
                 var name = Path.GetFileName(file);
                 var dir  = Path.GetFileName(Path.GetDirectoryName(file));
 
-                if (!string.IsNullOrWhiteSpace(name)
-                 && _knownVideoRegex.IsMatch(name) // is it a known video file extension?
-                 && !_sampleVideoRegex.IsMatch(name) // is it not a sample?
-                 && _episodeRegex.IsMatch(name) // is it the episode we want?
-                 && _titleParts.All(part => Regex.IsMatch(dir + @"\" + name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)) // does it have all the title words?
-                 && !Files.Contains(file)) // and not in the array already?
+                if (ShowNames.Parser.IsMatch(dir + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
                 {
                     var pf = FileNames.Parser.ParseFile(name);
                     if ((pf.Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show))) || // is the show extracted from the file name the exact same?

@@ -41,7 +41,7 @@
         public bool Filter { get; set; }
 
         private volatile List<string> _remaining;
-        private IEnumerable<string> _titleParts;
+        private string[] _titleParts;
         private Regex _episodeRegex;
 
         /// <summary>
@@ -132,8 +132,7 @@
             if (Filter)
             {
                 e.Data = e.Data
-                          .Where(link => _titleParts.All(part => Regex.IsMatch(link.Release, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase))
-                                      && _episodeRegex.IsMatch(link.Release))
+                          .Where(link => ShowNames.Parser.IsMatch(link.Release, _titleParts, _episodeRegex, false))
                           .ToList();
             }
 

@@ -62,6 +62,16 @@
         public static readonly Regex PartText      = new Regex(@"(,? part \d| \((part ?)?\d\))\s*$", RegexOptions.IgnoreCase);
 
         /// <summary>
+        /// Matches video file extensions.
+        /// </summary>
+        public static readonly Regex KnownVideo    = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Matches if the specified file name is only a sample of the video.
+        /// </summary>
+        public static readonly Regex SampleVideo   = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
+
+        /// <summary>
         /// Simple regular expression to detect S00E00 and 0x00 at the end of a query.
         /// </summary>
         public static readonly Regex Numbering     = new Regex(@"\s+((?:S[0-9]{2}E[0-9]{2})|(?:[0-9]{1,2}x[0-9]{1,2}))", RegexOptions.IgnoreCase);

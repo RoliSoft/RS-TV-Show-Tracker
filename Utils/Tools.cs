@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
@@ -625,6 +626,78 @@
         public static byte[] Combine(byte[] first, byte[] second)
         {
             return first.Concat(second).ToArray();
+        }
+
+        /// <summary>
+        /// Converts the specified arabic numeral to a roman numeral.
+        /// </summary>
+        /// <param name="number">The arabic numeral.</param>
+        /// <returns>Roman numeral.</returns>
+        public static string NumberToRoman(int number)
+        {
+            if (number == 0) return "N";
+
+            var arabic = new[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
+            var roman  = new[] { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
+
+            var result = new StringBuilder();
+
+            for (var i = 0; i < 13; i++)
+            {
+                while (number >= arabic[i])
+                {
+                    number -= arabic[i];
+                    result.Append(roman[i]);
+                }
+            }
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Converts the specified roman number into an arabic numeral.
+        /// </summary>
+        /// <param name="roman">The roman numeral.</param>
+        /// <returns>Arabic numeral.</returns>
+        public static int RomanToNumber(string roman)
+        {
+            roman = roman.ToUpper().Trim();
+
+            if (roman == "N") return 0;
+
+            var pairs = new Dictionary<char, int>
+                {
+                    { 'I', 1    },
+                    { 'V', 5    },
+                    { 'X', 10   },
+                    { 'L', 50   },
+                    { 'C', 100  },
+                    { 'D', 500  },
+                    { 'M', 1000 }
+                };
+
+            int i = 0, value = 0;
+            while (i < roman.Length)
+            {
+                var digit = pairs[roman[i]];
+
+                if (i < roman.Length - 1)
+                {
+                    var next = pairs[roman[i + 1]];
+
+                    if (next > digit)
+                    {
+                        digit = next - digit;
+                        i++;
+                    }
+                }
+
+                value += digit;
+
+                i++;
+            }
+
+            return value;
         }
     }
 }

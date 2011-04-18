@@ -125,16 +125,6 @@
         public static readonly Regex SampleEpisodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(new ShowEpisode(SampleInfo.Season, SampleInfo.Episode));
 
         /// <summary>
-        /// Contains a regular expression which matches for video file extensions.
-        /// </summary>
-        public static readonly Regex SampleKnownVideoRegex = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
-
-        /// <summary>
-        /// Contains a regular expression which matches for sample files.
-        /// </summary>
-        public static readonly Regex SampleSampleVideoRegex = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="RenamerWindow"/> class.
         /// </summary>
         public RenamerWindow()
@@ -475,7 +465,7 @@
             Settings.Set("Rename Format", Format = renameFormatTextBox.Text);
             resultingNameTextBox.Text = FileNames.Parser.FormatFileName(Format, SampleInfo);
 
-            if (TestName(Path.GetFileName(resultingNameTextBox.Text)))
+            if (ShowNames.Parser.IsMatch(Path.GetFileName(resultingNameTextBox.Text), SampleTitleParts, SampleEpisodeRegex))
             {
                 resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/tick.png", UriKind.Relative));
                 resultingDetected.ToolTip = "The software recognizes this format.\r\nThis means you will be able to find the episode using the 'Play episode' context menu\r\nand the software can automatically mark the episode as watched when you're playing it.";
@@ -485,20 +475,6 @@
                 resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cross.png", UriKind.Relative));
                 resultingDetected.ToolTip = "The software doesn't recognize this format.\r\nThis means you won't be able to find the episode using the 'Play episode' context menu\r\nand the software can't automatically mark the episode as watched when you're playing it.";
             }
-        }
-
-        /// <summary>
-        /// Tests the new format to see if the <c>FileSearch</c> class will find it.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        /// <returns><c>true</c> if the software can find the new name.</returns>
-        public static bool TestName(string name)
-        {
-            return !string.IsNullOrWhiteSpace(name)
-                && SampleTitleParts.All(part => Regex.IsMatch(name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)) // does it have all the title words?
-                && SampleKnownVideoRegex.IsMatch(name) // is it a known video file extension?
-                && !SampleSampleVideoRegex.IsMatch(name) // is it not a sample?
-                && SampleEpisodeRegex.IsMatch(name); // is it the episode we want?
         }
         #endregion
 

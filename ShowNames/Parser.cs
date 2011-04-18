@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.ShowNames
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -124,11 +125,25 @@
         /// </returns>
         public static bool IsMatch(string name, string episode, string release)
         {
-            var title      = GetRoot(name);
-            var episodergx = GenerateEpisodeRegexes(episode);
+            return IsMatch(release, GetRoot(name), GenerateEpisodeRegexes(episode), false);
+        }
 
-            return title.All(part => Regex.IsMatch(release, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase)) // does it have all the title words?
-                && episodergx.IsMatch(release); // is it the episode we want?
+        /// <summary>
+        /// Determines whether the specified release name matches with the specified show and episode.
+        /// </summary>
+        /// <param name="name">The name of the show.</param>
+        /// <param name="titleParts">The title parts.</param>
+        /// <param name="episodeRegex">The episode regex.</param>
+        /// <param name="onlyVideo">if set to <c>true</c> returns false for files that are not video.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified release matches the specified show and episode; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsMatch(string name, string[] titleParts, Regex episodeRegex = null, bool onlyVideo = true)
+        {
+            return !string.IsNullOrWhiteSpace(name)
+                && (!onlyVideo || (Regexes.KnownVideo.IsMatch(name) && !Regexes.SampleVideo.IsMatch(name)))
+                && (episodeRegex == null || episodeRegex.IsMatch(name))
+                && titleParts.All(part => Regex.IsMatch(name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase));
         }
 
         /// <summary>
@@ -217,15 +232,28 @@
         /// <returns>List of regular expressions.</returns>
         public static Regex GenerateEpisodeRegexes(ShowEpisode episode)
         {
-            var regexes = new[]
+            var regexes = new List<string>
                 {
-                    // S02[.]E[13-]14
-                    @"S{0:00}.?E(?:[0-9]{{1,2}}\-E?)?{1:00}",
+                    // S[0]2[.]E[P][13-]14
+                    @"S0?{0}.?EP?(?:[0-9]{{1,2}}\-(?:EP?)?)?0?{1}".FormatWith(episode.Season, episode.Episode),
                     // 2[x][13-]14
-                    @"{0:0}X?(?:[0-9]{{1,2}}\-)?{1:00}",
+                    @"{0}X?(?:[0-9]{{1,2}}\-)?{1:00}".FormatWith(episode.Season, episode.Episode),
+                    // [Season|Series] 1[ - ]E[p[isode]] [1 - ]2
+                    @"(?:Season|Series).?0?{0}[^a-z0-9]*E(?:p(?:isode)?)?.?(?:[0-9]{1,2}[^a-z0-9]{{1,3}})?0?{1}".FormatWith(episode.Season, episode.Episode)
                 };
 
-            var expr = regexes.Aggregate(@"(?:\b|_)(?:", (current, format) => current + (format.FormatWith(episode.Season, episode.Episode) + "|")).TrimEnd('|') + @")(?:\b|_)";
+            if (episode.Season == 1)
+            {
+                regexes.AddRange(new[]
+                    {
+                        // E[P][13-]14
+                        @"EP?(?:[0-9]{{1,2}}\-(?:EP?)?)?0?{0:0}".FormatWith(episode.Episode),
+                        // [E[p[isode]]|P[ar]t|Vol[ume]][ ][9|IX]
+                        @"(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?0?(?:{0}|{1})".FormatWith(episode.Episode, Utils.NumberToRoman(episode.Episode))
+                    });
+            }
+
+            var expr = regexes.Aggregate(@"(?:\b|_)(?:", (current, format) => current + (format + "|")).TrimEnd('|') + @")(?:\b|_)";
 
             return new Regex(expr, RegexOptions.IgnoreCase);
         }
