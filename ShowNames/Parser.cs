@@ -154,6 +154,7 @@
         public static ShowEpisode ExtractEpisode(string name)
         {
             var m = Regexes.AdvNumbering.Match(name);
+            int e;
 
             if (m.Success)
             {
@@ -161,17 +162,27 @@
                 {
                     return new ShowEpisode
                        {
-                           Season        = m.Groups["s"].Value.ToInteger(),
-                           Episode       = m.Groups["em"].Value.ToInteger(),
-                           SecondEpisode = m.Groups["e"].Value.ToInteger()
+                           Season        = m.Groups["s"].Success
+                                           ? m.Groups["s"].Value.ToInteger()
+                                           : 1,
+                           Episode       = int.TryParse(m.Groups["em"].Value, out e)
+                                           ? e
+                                           : Utils.RomanToNumber(m.Groups["em"].Value),
+                           SecondEpisode = int.TryParse(m.Groups["e"].Value, out e)
+                                           ? e
+                                           : Utils.RomanToNumber(m.Groups["e"].Value)
                        };
                 }
                 else
                 {
                     return new ShowEpisode
                        {
-                           Season  = m.Groups["s"].Value.ToInteger(),
-                           Episode = m.Groups["e"].Value.ToInteger()
+                           Season  = m.Groups["s"].Success
+                                     ? m.Groups["s"].Value.ToInteger()
+                                     : 1,
+                           Episode = int.TryParse(m.Groups["e"].Value, out e)
+                                     ? e
+                                     : Utils.RomanToNumber(m.Groups["e"].Value)
                        };
                 }
             }
@@ -232,28 +243,50 @@
         /// <returns>List of regular expressions.</returns>
         public static Regex GenerateEpisodeRegexes(ShowEpisode episode)
         {
+            return GenerateEpisodeRegexes(episode.Season.ToString(), episode.Episode.ToString());
+        }
+
+        /// <summary>
+        /// Generates regular expressions for matching a huge variety of episode numberings.
+        /// </summary>
+        /// <param name="season">The season number or expression.</param>
+        /// <param name="episode">The episode number or expression.</param>
+        /// <param name="generateExtractor">if set to <c>true</c> generates an expression which universally matches any season/episode.</param>
+        /// <returns>List of regular expressions.</returns>
+        public static Regex GenerateEpisodeRegexes(string season = null, string episode = null, bool generateExtractor = false)
+        {
+            if (generateExtractor)
+            {
+                season  = @"(?<s>\d{1,2})";
+                episode = @"(?<e>\d{1,2})";
+            }
+
             var regexes = new List<string>
                 {
                     // S[0]2[.]E[P][13-]14
-                    @"S0?{0}.?EP?(?:[0-9]{{1,2}}\-(?:EP?)?)?0?{1}".FormatWith(episode.Season, episode.Episode),
-                    // 2[x][13-]14
-                    @"{0}X?(?:[0-9]{{1,2}}\-)?{1:00}".FormatWith(episode.Season, episode.Episode),
+                    @"S0?{0}.?EP?(?:(?<em>\d{{1,2}})\-(?:EP?)?)?0?{1}".FormatWith(season, episode),
+                    // 2x[13-]14
+                    @"{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
                     // [Season|Series] 1[ - ]E[p[isode]] [1 - ]2
-                    @"(?:Season|Series).?0?{0}[^a-z0-9]*E(?:p(?:isode)?)?.?(?:[0-9]{1,2}[^a-z0-9]{{1,3}})?0?{1}".FormatWith(episode.Season, episode.Episode)
+                    @"(?:Season|Series).?0?{0}[^a-z0-9]*E(?:p(?:isode)?)?.?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
                 };
 
-            if (episode.Season == 1)
+            if (generateExtractor || season == "1")
             {
+                var roman = generateExtractor
+                            ? @"(?<e>[IVXLCDM]+)"
+                            : Utils.NumberToRoman(episode.ToInteger());
+
                 regexes.AddRange(new[]
                     {
                         // E[P][13-]14
-                        @"EP?(?:[0-9]{{1,2}}\-(?:EP?)?)?0?{0:0}".FormatWith(episode.Episode),
+                        @"EP?(?:(?<em>\d{{1,2}})\-(?:EP?)?)?0?{0}".FormatWith(episode),
                         // [E[p[isode]]|P[ar]t|Vol[ume]][ ][9|IX]
-                        @"(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?0?(?:{0}|{1})".FormatWith(episode.Episode, Utils.NumberToRoman(episode.Episode))
+                        @"(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?(?:(?:0?(?<em>\d{{1,2}})|(?<em>[IVXLCDM]+))[^a-z0-9]{{1,3}})?(?:0?{0}|{1})".FormatWith(episode, roman)
                     });
             }
 
-            var expr = regexes.Aggregate(@"(?:\b|_)(?:", (current, format) => current + (format + "|")).TrimEnd('|') + @")(?:\b|_)";
+            var expr = regexes.Aggregate(@"(?:\b|_)(" + (!generateExtractor ? "?:" : string.Empty), (current, format) => current + (format + "|")).TrimEnd('|') + @")(?:\b|_)";
 
             return new Regex(expr, RegexOptions.IgnoreCase);
         }
