@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
@@ -10,8 +9,10 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Net;
+    using System.Net.Security;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Cryptography;
+    using System.Security.Cryptography.X509Certificates;
     using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -150,6 +151,9 @@
         {
             Rand       = new Random();
             CryptoRand = new RNGCryptoServiceProvider();
+
+            ServicePointManager.Expect100Continue = false;
+            //ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
         }
 
         /// <summary>
@@ -268,8 +272,6 @@
         /// <returns>Remote page's content.</returns>
         public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
         {
-            ServicePointManager.Expect100Continue = false;
-
             var req       = (HttpWebRequest)WebRequest.Create(url);
             req.Timeout   = timeout;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
@@ -365,10 +367,24 @@
         }
 
         /// <summary>
+        /// Verifies the remote Secure Sockets Layer (SSL) certificate used for authentication.
+        /// </summary>
+        /// <param name="sender">An object that contains state information for this validation.</param>
+        /// <param name="certificate">The certificate used to authenticate the remote party.</param>
+        /// <param name="chain">The chain of certificate authorities associated with the remote certificate.</param>
+        /// <param name="sslPolicyErrors">One or more errors associated with the remote certificate.</param>
+        /// <returns>A Boolean value that determines whether the specified certificate is accepted for authentication.</returns>
+        public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            // TODO
+            return sslPolicyErrors == SslPolicyErrors.None;
+        }
+
+        /// <summary>
         /// Modify the specified URL to go through Coral CDN.
         /// </summary>
         /// <param name="url">The URL.</param>
-        /// <returns></returns>
+        /// <returns>Coralified URL.</returns>
         public static string Coralify(string url)
         {
             return Regex.Replace(url, @"(/{2}[^/]+)/", @"$1.nyud.net/");

@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -16,23 +15,10 @@
     /// </summary>
     public static class API
     {
-        private static readonly RSACryptoServiceProvider _rsa = new RSACryptoServiceProvider();
-        private static readonly SymmetricAlgorithm _algo      = new RijndaelManaged
-            {
-                BlockSize = 256
-            };
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             };
-
-        /// <summary>
-        /// Initializes the <see cref="API"/> class.
-        /// </summary>
-        static API()
-        {
-            _rsa.FromXmlString(Properties.Resources.APIPublicKey);
-        }
 
         #region Remote method invocation
         /// <summary>
@@ -100,8 +86,10 @@
         private static T InternalInvokeRemoteMethod<T>(string func, object[] args, bool secure = false, string user = null, string pass = null) where T : IRemoteObject, new()
         {
             T obj;
-            byte[] key = null, iv = null;
             var sw = Stopwatch.StartNew();
+
+            var endpoint = "http" + (secure ? "s" : string.Empty) + "://lab.rolisoft.net/api/";
+            //endpoint = "http://home.rolisoft.net/api/"
 
             try
             {
@@ -110,20 +98,6 @@
                     {
                         { "X-UUID", "{0}/{1}/{2}".FormatWith(Utils.GetUUID(), Environment.UserDomainName, Environment.UserName) }
                     };
-
-                if (secure)
-                {
-                    key = new byte[32];
-                    Utils.CryptoRand.GetBytes(key);
-
-                    iv = new byte[32];
-                    Utils.CryptoRand.GetBytes(iv);
-
-                    var tmp = Encoding.UTF8.GetBytes(post);
-                       post = Convert.ToBase64String(_algo.CreateEncryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length)).TrimEnd('=');
-
-                    head["X-Key"] = Convert.ToBase64String(_rsa.Encrypt(Utils.Combine(iv, key), true)).TrimEnd('=');
-                }
 
                 if (!string.IsNullOrWhiteSpace(user))
                 {
@@ -137,19 +111,12 @@
                 }
 
                 var resp = Utils.GetURL(
-                    url:       "http://lab.rolisoft.net/api/",
-                  //url:       "http://home.rolisoft.net/api/",
+                    url:       endpoint,
                     postData:  post,
                     userAgent: "{0}/{1}".FormatWith(Signature.Software, Signature.Version),
                     timeout:   120000,
                     headers:   head
                 );
-
-                if (secure)
-                {
-                    var tmp = Convert.FromBase64String(resp);
-                       resp = Encoding.UTF8.GetString(_algo.CreateDecryptor(key, iv).TransformFinalBlock(tmp, 0, tmp.Length));
-                }
 
                 obj = JsonConvert.DeserializeObject<T>(resp);
                 obj.Success = string.IsNullOrWhiteSpace(obj.Error);
