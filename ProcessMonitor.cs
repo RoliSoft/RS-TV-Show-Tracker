@@ -107,7 +107,7 @@
         public static void MarkAsSeen(string showid, ShowEpisode ep)
         {
             var eps = ep.SecondEpisode.HasValue
-                      ? Enumerable.Range(ep.Episode, ep.SecondEpisode.Value).ToArray()
+                      ? Enumerable.Range(ep.Episode, (ep.SecondEpisode.Value - ep.Episode + 1)).ToArray()
                       : new[] { ep.Episode };
 
             foreach (var epnr in eps)
