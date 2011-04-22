@@ -13,69 +13,126 @@
     public class ParsingTests
     {
         /// <summary>
-        /// Tests several different TV show names spelled differently to see if the engine succeeds at matching them.
+        /// Contains a list of show names and the array they're supposed to look after processing.
         /// </summary>
-        [Test]
-        public void AlternativeSpellings()
-        {
-            var cmp = new ShowEqualityComparer();
-
-            var shouldMatch = new Dictionary<string, string>
-                {
-                    { "House, M.D.", "House" },
-                    { "Battlestar Galactica (2003)", "Battlestar Galactica" },
-                    { "Supernatural (2005)", "Supernatural" },
-                    { "Tosh.0", "Tosh.0" },
-                    { "Sci-Fi Science: Physics of the Impossible", "Sci Fi Science" },
-                    { "Archer (2009)", "Archer" },
-                    { "The Universe", "The Universe" },
-                    { "V (2009)", "V" },
-                    { "V (1965)", "The V (1965)" }
-                };
-
-            var shouldntMatch = new Dictionary<string, string>
-                {
-                    { "House, M.D.",  "Desperate Housewives" }
-                };
-
-            foreach (var show in shouldMatch)
+        public static Dictionary<string, string[]> ShowNames = new Dictionary<string, string[]>
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key)) + "]");
-                Console.WriteLine(show.Value + ": [" + String.Join(", ", Parser.GetRoot(show.Value)) + "]");
+	            // test to see whether irrevelant single characters are removed
+	            {
+		            "House, M.D.",
+		            new[] { "HOUSE" }
+	            },
+	            {
+		            "Two and a half men",
+		            new[] { "TWO", "AND", "A", "HALF", "MEN" }
+	            },
+	            {
+		            "How I met your mother",
+		            new[] { "HOW", "I", "MET", "YOUR", "MOTHER" }
+	            },
+	
+	            // test to see how years are handled
+	            // if the show is newer than 2000, the year is removed
+	            {
+		            "V (2009)",
+		            new[] { "V" }
+	            },
+	            {
+		            "The V (2009)",
+		            new[] { "V" }
+	            },
+	            {
+		            "V (1965)",
+		            new[] { "V", "(1965)" }
+	            },
+	            {
+		            "The V (1965)",
+		            new[] { "V", "(1965)" }
+	            },
+	
+	            // test the use of dictionary lookup-based cleaning
+	            {
+		            "Sci-Fi Science: Physics of the Impossible",
+		            new[] { "SCI", "FI", "SCIENCE" }
+	            },
+	
+	            // test wierd names
+	            {
+		            "Tosh.0",
+		            new[] { "TOSH", "0" }
+	            },
+            };
 
-                Assert.IsTrue(cmp.Equals(show.Key, show.Value), "'{0}' doesn't equal '{1}'".FormatWith(show.Key, show.Value));
-            }
-
-            foreach (var show in shouldntMatch)
+        /// <summary>
+        /// Contains a list of standard, non-standard and downright pervert episode notations.
+        /// </summary>
+        public static Dictionary<string, ShowEpisode> EpisodeNotations = new Dictionary<string, ShowEpisode>
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key)) + "]");
-                Console.WriteLine(show.Value + ": [" + String.Join(", ", Parser.GetRoot(show.Value)) + "]");
+                // standard scene episode numbering tests
+                {
+	                "lost.s06e03.720p.bluray.x264-macro.mkv",
+	                new ShowEpisode(6, 3)
+                },
+                {
+	                // in this test case the "101" was originally recognized as 1[x]01
+	                "Community.S02E01.Anthropology.101.720p.WEB-DL.DD5.1.H.264-HoodBag",
+	                new ShowEpisode(2, 1)
+                },
+                {
+	                "ARRESTED DEVELOPMENT - S03 EP13 - DEVELOPMENT ARRESTED 720P DD5.1 x264 MMI.mkv",
+	                new ShowEpisode(3, 13)
+                },
+                {
+	                "top_gear.16x01.real.720p_hdtv_x264-fov.mkv",
+	                new ShowEpisode(16, 1)
+                },
+                {
+	                "Archer.1x10.Dial.M.for.Mother.720p.WEB-DL.DD5.1.AVC-DON.mkv",
+	                new ShowEpisode(1, 10)
+                },
+                {
+	                "lost.s06e17-18.720p.bluray.x264-macro.mkv",
+	                new ShowEpisode(6, 17, 18)
+                },
+                {
+	                "30.Rock.S05E20E21.720p.HDTV.X264-DIMENSION.mkv",
+	                new ShowEpisode(5, 20, 21)
+                },
 
-                Assert.IsFalse(cmp.Equals(show.Key, show.Value), "'{0}' shouldn't equal '{1}'".FormatWith(show.Key, show.Value));
-            }
-        }
+                // non-standard episode numbering tests
+                {
+	                // get_iplayer downloads the episodes with this notation
+	                "Bang_Goes_the_Theory_Series_4_-_Episode_2_b00zvcgk_default.mp4",
+	                new ShowEpisode(4, 2)
+                },
+
+                // extremely non-standard episode numbering tests
+                {
+	                // seriously, why the fuck did immerse and dimension use this instead of plain E01?
+	                "spartacus.gods.of.the.arena.pt.i.720p.hdtv.x264-immerse.mkv",
+	                new ShowEpisode(1, 1)
+                },
+                {
+	                "Spartacus.Gods.of.the.Arena.Pt.V.720p.HDTV.X264-DIMENSION.mkv",
+	                new ShowEpisode(1, 5)
+                },
+                {
+	                // this release is fictional to test multiple episode matching with roman numbering
+	                "Spartacus.Gods.of.the.Arena.Part.II-XV.720p.HDTV.X264-DIMENSION.mkv",
+	                new ShowEpisode(1, 2, 15)
+                },
+            };
 
         /// <summary>
         /// Tests whether the show names are correctly cleaned.
         /// </summary>
         [Test]
-        public void Cleaning()
+        public void NameCleaning()
         {
-            var list = new Dictionary<string, string[]>
-                {
-                    { "House, M.D.", new[] { "HOUSE" } },
-                    { "Two and a half men", new[] { "TWO", "AND", "A", "HALF", "MEN" } },
-                    { "How I met your mother", new[] { "HOW", "I", "MET", "YOUR", "MOTHER" } },
-                    { "V (2009)", new[] { "V" } },
-                    { "The V (2009)", new[] { "V" } },
-                    { "V (1965)", new[] { "V", "(1965)" } },
-                    { "The V (1965)", new[] { "V", "(1965)" } }
-                };
-
-            foreach (var show in list)
+            foreach (var show in ShowNames)
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", Parser.GetRoot(show.Key, false)) + "], [" + String.Join(", ", show.Value) + "]");
-                Assert.IsTrue(show.Value.SequenceEqual(Parser.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly.".FormatWith(show.Key));
+                Console.WriteLine(show.Key + ": [" + String.Join(", ", show.Value) + "]");
+                Assert.IsTrue(show.Value.SequenceEqual(Parser.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly: [{1}]".FormatWith(show.Key, string.Join(", ", Parser.GetRoot(show.Key, false))));
             }
         }
 
@@ -85,21 +142,7 @@
         [Test]
         public void EpisodeExtraction()
         {
-            var shouldEqual = new Dictionary<string, ShowEpisode>
-                {
-                    { "lost.s06e03.720p.bluray.x264-macro.mkv", new ShowEpisode(6, 3) },
-                    { "lost.s06e17-18.720p.bluray.x264-macro.mkv", new ShowEpisode(6, 17, 18) },
-                    { "Archer.1x10.Dial.M.for.Mother.720p.WEB-DL.DD5.1.AVC-DON.mkv", new ShowEpisode(1, 10) },
-                    { "Community.S02E01.Anthropology.101.720p.WEB-DL.DD5.1.H.264-HoodBag", new ShowEpisode(2, 1) },
-                    { "ARRESTED DEVELOPMENT - S03 EP13 - DEVELOPMENT ARRESTED 720P DD5.1 x264 MMI.mkv", new ShowEpisode(3, 13) },
-                    { "top_gear.16x01.real.720p_hdtv_x264-fov.mkv", new ShowEpisode(16, 1) },
-                    { "spartacus.gods.of.the.arena.pt.i.720p.hdtv.x264-immerse.mkv", new ShowEpisode(1, 1) },
-                    { "Spartacus.Gods.of.the.Arena.Pt.V.720p.HDTV.X264-DIMENSION.mkv", new ShowEpisode(1, 5) },
-                    { "Spartacus.Gods.of.the.Arena.Part.II-XV.720p.HDTV.X264-DIMENSION.mkv", new ShowEpisode(1, 2, 15) },
-                    { "Bang_Goes_the_Theory_Series_4_-_Episode_2_b00zvcgk_default.mp4", new ShowEpisode(4, 2) }
-                };
-
-            foreach (var show in shouldEqual)
+            foreach (var show in EpisodeNotations)
             {
                 Console.WriteLine(show.Key + " -> " + show.Value);
                 Assert.AreEqual(show.Value, Parser.ExtractEpisode(show.Key));

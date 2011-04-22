@@ -154,37 +154,54 @@
         public static ShowEpisode ExtractEpisode(string name)
         {
             var m = Regexes.AdvNumbering.Match(name);
-            int e;
 
             if (m.Success)
             {
-                if (m.Groups["em"].Success)
+                int e;
+                var se = new ShowEpisode();
+
+                if (m.Groups["s"].Success)
                 {
-                    return new ShowEpisode
-                       {
-                           Season        = m.Groups["s"].Success
-                                           ? m.Groups["s"].Value.ToInteger()
-                                           : 1,
-                           Episode       = int.TryParse(m.Groups["em"].Value, out e)
-                                           ? e
-                                           : Utils.RomanToNumber(m.Groups["em"].Value),
-                           SecondEpisode = int.TryParse(m.Groups["e"].Value, out e)
-                                           ? e
-                                           : Utils.RomanToNumber(m.Groups["e"].Value)
-                       };
+                    se.Season = m.Groups["s"].Value.ToInteger();
                 }
                 else
                 {
-                    return new ShowEpisode
-                       {
-                           Season  = m.Groups["s"].Success
-                                     ? m.Groups["s"].Value.ToInteger()
-                                     : 1,
-                           Episode = int.TryParse(m.Groups["e"].Value, out e)
-                                     ? e
-                                     : Utils.RomanToNumber(m.Groups["e"].Value)
-                       };
+                    se.Season = 1;
                 }
+
+                if (m.Groups["em"].Success)
+                {
+                    if (int.TryParse(m.Groups["em"].Value, out e))
+                    {
+                        se.Episode = e;
+                    }
+                    else
+                    {
+                        se.Episode = Utils.RomanToNumber(m.Groups["em"].Value);
+                    }
+
+                    if (int.TryParse(m.Groups["e"].Value, out e))
+                    {
+                        se.SecondEpisode = e;
+                    }
+                    else
+                    {
+                        se.SecondEpisode = Utils.RomanToNumber(m.Groups["e"].Value);
+                    }
+                }
+                else
+                {
+                    if (int.TryParse(m.Groups["e"].Value, out e))
+                    {
+                        se.Episode = e;
+                    }
+                    else
+                    {
+                        se.Episode = Utils.RomanToNumber(m.Groups["e"].Value);
+                    }
+                }
+
+                return se;
             }
 
             return null;
