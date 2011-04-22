@@ -264,7 +264,7 @@
             var regexes = new List<string>
                 {
                     // S[0]2[.]E[P][13-]14
-                    @"S0?{0}.?EP?(?:(?<em>\d{{1,2}})\-(?:EP?)?)?0?{1}".FormatWith(season, episode),
+                    @"S0?{0}.?EP?(?:(?<em>\d{{1,2}})[\-E_](?:EP?)?)?0?{1}(?:[E_].+)?".FormatWith(season, episode),
                     // 2x[13-]14
                     @"{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
                     // [Season|Series] 1[ - ]E[p[isode]] [1 - ]2
