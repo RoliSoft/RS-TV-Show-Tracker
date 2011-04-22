@@ -59,7 +59,7 @@
         /// <summary>
         /// Matches any part numbering in the episode title.
         /// </summary>
-        public static readonly Regex PartText      = new Regex(@"(,? part \d| \((part ?)?\d\))\s*$", RegexOptions.IgnoreCase);
+        public static readonly Regex PartText      = new Regex(@"(?:,? part \d{1,2}(?: of \d{1,2})| \((?:part ?)?\d{1,2}\))\s*$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Matches video file extensions.
