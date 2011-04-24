@@ -348,7 +348,7 @@
         {
             var release = Query("select release from tvshows where name = ? limit 1", show);
 
-            return release.Count != 0
+            return release.Count != 0 && !string.IsNullOrWhiteSpace(release[0]["release"])
                    ? release[0]["release"].Split(' ')
                    : ShowNames.Parser.GetRoot(show, removeCommon);
         }

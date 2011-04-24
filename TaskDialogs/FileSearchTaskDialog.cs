@@ -122,11 +122,13 @@
                 case 0:
                     new TaskDialog
                         {
-                            CommonIcon    = TaskDialogIcon.Stop,
-                            Title         = "No files found",
-                            Instruction   = _show + " " + _episode,
-                            Content       = "No files were found for this episode.",
-                            CommonButtons = TaskDialogButton.OK
+                            CommonIcon          = TaskDialogIcon.Stop,
+                            Title               = "No files found",
+                            Instruction         = _show + " " + _episode,
+                            Content             = "No files were found for this episode.",
+                            ExpandedControlText = "Troubleshoot",
+                            ExpandedInformation = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
+                            CommonButtons       = TaskDialogButton.OK
                         }.Show();
                     break;
 

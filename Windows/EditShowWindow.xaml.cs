@@ -1,16 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
+    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
-
-    using Microsoft.WindowsAPICodePack.Dialogs;
-    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
 
@@ -20,9 +14,7 @@
     public partial class EditShowWindow
     {
         private Guide _guide;
-        private string _show, _id;
-        private Thread _worker;
-        private List<ShowID> _shows;
+        private string _show, _id, _lang;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -33,25 +25,22 @@
 
             _id   = id;
             _show = show;
-        }
 
-        /// <summary>
-        /// Handles the Loaded event of the Window control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void WindowLoaded(object sender, RoutedEventArgs e)
-        {
-            if (AeroGlassCompositionEnabled)
+            nameTextBox.Text = _show;
+
+            var release = Database.Query("select release from tvshows where name = ? limit 1", show);
+            if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0]["release"]))
             {
-                SetAeroGlassTransparency();
+                customReleaseName.IsChecked = releaseTextBox.IsEnabled = true;
+                releaseTextBox.Text = string.Join(" ", release[0]["release"]).ToLower().ToUppercaseWords();
+            }
+            else
+            {
+                customReleaseName.IsChecked = releaseTextBox.IsEnabled = false;
+                releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(show)).ToLower().ToUppercaseWords();
             }
 
-            editTabItem.Header = "Edit " + _show;
-
-            var grabber = Database.ShowData(_id, "grabber");
-
-            switch (grabber)
+            switch (Database.ShowData(_id, "grabber"))
             {
                 case "TVRage":
                     database.SelectedIndex = 1;
@@ -78,238 +67,106 @@
                     break;
             }
 
-            DatabaseSelectionChanged(null, null);
-
-            var lang = Database.ShowData(_id, grabber + ".lang");
-
-            for (int i = 0; i < language.Items.Count; i++)
-            {
-                if ((language.Items[i] as StackPanel).Tag.ToString() == lang)
-                {
-                    language.SelectedIndex = i;
-                    break;
-                }
-            }
-
-            ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
-        }
-
-        /// <summary>
-        /// Handles the SelectionChanged event of the database control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
-        private void DatabaseSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if ((database.SelectedValue as ComboBoxItem).Content == null) return;
             _guide = AddNewWindow.CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
+            _lang  = Database.ShowData(_id, _guide.GetType().Name + ".lang");
 
-            language.Items.Clear();
+            var sel = 0;
 
             foreach (var lang in _guide.SupportedLanguages)
             {
                 var sp = new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    Tag         = lang
-                };
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Tag         = lang
+                    };
 
                 sp.Children.Add(new Image
-                {
-                    Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/flag-" + lang + ".png", UriKind.Relative)),
-                    Height = 16,
-                    Width  = 16,
-                    Margin = new Thickness(0, 1, 0, 0)
-                });
+                    {
+                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/flag-" + lang + ".png", UriKind.Relative)),
+                        Height = 16,
+                        Width  = 16,
+                        Margin = new Thickness(0, 0, 0, 0)
+                    });
 
                 sp.Children.Add(new Label
-                {
-                    Content = " " + Languages.List[lang],
-                    Padding = new Thickness(0)
-                });
+                    {
+                        Content = " " + Languages.List[lang],
+                        Padding = new Thickness(0)
+                    });
 
                 language.Items.Add(sp);
-            }
 
-            language.SelectedIndex = 0;
-        }
-
-        /// <summary>
-        /// Handles the Click event of the searchButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchButtonClick(object sender, RoutedEventArgs e)
-        {
-            working.Content           = "Searching on {0}...".FormatWith(_guide.Name);
-            subworking.Content        = _show;
-            editTabItem.Visibility    = Visibility.Collapsed;
-            workingTabItem.Visibility = Visibility.Visible;
-            tabControl.SelectedIndex  = 1;
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-
-            var lang = (language.SelectedValue as StackPanel).Tag.ToString();
-
-            _worker = new Thread(() =>
+                if (lang == _lang)
                 {
-                    try
-                    {
-                        _shows = _guide.GetID(_show, lang).ToList();
-
-                        if (_shows.Count == 0)
-                        {
-                            var up = new Exception();
-
-                            throw up; // hehe
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex is ThreadAbortException)
-                        {
-                            return;
-                        }
-
-                        Dispatcher.Invoke((Action)(() =>
-                            {
-                                workingTabItem.Visibility = Visibility.Collapsed;
-                                editTabItem.Visibility    = Visibility.Visible;
-                                tabControl.SelectedIndex  = 0;
-
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                            }));
-
-                        new TaskDialog
-                            {
-                                Icon                = TaskDialogStandardIcon.Error,
-                                Caption             = "Couldn't find TV show",
-                                InstructionText     = _show,
-                                Text                = "Couldn't find the specified TV show on this database.",
-                                DetailsExpandedText = "If this is a popular TV show, then you maybe just misspelled it or didn't enter the full official name.\r\nIf this is a rare or foreign TV show, try using another database.",
-                                Cancelable          = true
-                            }.Show();
-
-                        return;
-                    }
-
-                    // test if the application's engine sees the entered and the returned first result as an exact match
-                    var enterroot = ShowNames.Parser.Normalize(_show);
-                    var matchroot = ShowNames.Parser.Normalize(_shows[0].Title);
-                    var exact = enterroot == matchroot;
-
-                    if (exact && _shows.Count != 1)
-                    {
-                        // test if the second result is an exact match too
-                        // if it is, then selection is required by the user
-                        exact = enterroot != ShowNames.Parser.Normalize(_shows[1].Title);
-
-                        if (exact && _shows.Count != 2)
-                        {
-                            exact = enterroot != ShowNames.Parser.Normalize(_shows[2].Title);
-                        }
-                    }
-
-                    Dispatcher.Invoke((Action)(() =>
-                        {
-                            if (exact)
-                            {
-                                SetShow(_shows[0]);
-                            }
-                            else
-                            {
-                                listBox.Items.Clear();
-
-                                foreach (var id in _shows)
-                                {
-                                    listBox.Items.Add(id.Title);
-                                }
-
-                                listBox.SelectedIndex = 0;
-
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-                                workingTabItem.Visibility = Visibility.Collapsed;
-                                selectTabItem.Visibility  = Visibility.Visible;
-                                tabControl.SelectedIndex  = 2;
-                            }
-                        }));
-                });
-            _worker.Start();
-        }
-
-        /// <summary>
-        /// Handles the Click event of the searchCancelButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchCancelButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (_worker != null && _worker.IsAlive)
-            {
-                _worker.Abort();
+                    sel = language.Items.Count - 1;
+                }
             }
 
-            workingTabItem.Visibility = Visibility.Collapsed;
-            editTabItem.Visibility    = Visibility.Visible;
-            tabControl.SelectedIndex  = 0;
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            language.SelectedIndex = sel;
         }
 
         /// <summary>
-        /// Handles the Click event of the selectBackButton control.
+        /// Handles the Loaded event of the Window control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SelectBackButtonClick(object sender, RoutedEventArgs e)
+        private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            selectTabItem.Visibility = Visibility.Collapsed;
-            editTabItem.Visibility   = Visibility.Visible;
-            tabControl.SelectedIndex = 0;
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the addButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void AddButtonClick(object sender, RoutedEventArgs e)
-        {
-            SetShow(_shows.Where(show => show.Title == (string)listBox.SelectedValue).First());
-        }
-
-        /// <summary>
-        /// Sets the new show ID.
-        /// </summary>
-        /// <param name="show">The show.</param>
-        private void SetShow(ShowID show)
-        {
-            var gname = _guide.GetType().Name;
-
-            if (Synchronization.Status.Enabled)
+            if (AeroGlassCompositionEnabled)
             {
-                Synchronization.Status.Engine.ModifyShow(_id, new[] { _show, gname, show.ID, show.Language });
+                SetAeroGlassTransparency();
             }
+        }
 
-            Database.ShowData(_id, "grabber",       gname);
-            Database.ShowData(_id, gname + ".id",   show.ID);
-            Database.ShowData(_id, gname + ".lang", show.Language);
+        /// <summary>
+        /// Handles the Checked event of the customReleaseName control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void CustomReleaseNameChecked(object sender, RoutedEventArgs e)
+        {
+            releaseTextBox.IsEnabled = true;
+            releaseTextBox.Text = string.Join(" ", Database.GetReleaseName(_show)).ToLower().ToUppercaseWords();
+        }
 
-            Hide();
+        /// <summary>
+        /// Handles the Unchecked event of the customReleaseName control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void CustomReleaseNameUnchecked(object sender, RoutedEventArgs e)
+        {
+            releaseTextBox.IsEnabled = false;
+            releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(_show)).ToLower().ToUppercaseWords();
+        }
 
-            new TaskDialog
-                {
-                    Icon                = TaskDialogStandardIcon.Information,
-                    Caption             = "Show information updated",
-                    InstructionText     = show.Title,
-                    Text                = "The guide of this TV show was changed. Initiate a database update to get the new episode listing and show informations.",
-                    Cancelable          = true
-                }.Show();
-
+        /// <summary>
+        /// Handles the Click event of the cancelButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void CancelButtonClick(object sender, RoutedEventArgs e)
+        {
             Close();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the saveButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SaveButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (customReleaseName.IsChecked.Value && !string.IsNullOrWhiteSpace(releaseTextBox.Text))
+            {
+                Database.Execute("update tvshows set release = ? where showid = ?", Regex.Replace(releaseTextBox.Text.ToUpper().Trim(), @"\s+", " "), _id);
+            }
+            else
+            {
+                Database.Execute("update tvshows set release = ? where showid = ?", string.Empty, _id);
+            }
+
+            Database.ShowData(_id, _guide.GetType().Name + ".lang", (language.SelectedItem as StackPanel).Tag as string);
         }
     }
 }
