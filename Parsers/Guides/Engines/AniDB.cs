@@ -77,15 +77,21 @@
                 
                 try
                 {
-                    id.Title    = show.Descendants("title").Where(t => t.Attribute("lang").Value == language).First().Value;
-                    id.Language = language;
+                    id.Title = show.Descendants("title").Where(t => t.Attribute("lang").Value == "en").First().Value;
+                    id.Language = "en";
                 }
                 catch
                 {
-                    try   { id.Title = show.Descendants("title").Where(t => t.Attribute("lang").Value == "en").First().Value; }
-                    catch { id.Title = show.GetValue("title"); }
-
-                    id.Language = "en";
+                    try
+                    {
+                        id.Title = show.Descendants("title").Where(t => t.Attribute("lang").Value == language).First().Value;
+                        id.Language = language;
+                    }
+                    catch
+                    {
+                        id.Title = show.GetValue("title");
+                        id.Language = "en";
+                    }
                 }
 
                 id.ID  = show.Attribute("aid").Value;

@@ -82,12 +82,14 @@
             if (LocalTVShows == null || LoadDate < Database.DataChange)
             {
                 LoadDate     = DateTime.Now;
-                LocalTVShows = Database.Query("select showid, name from tvshows");
+                LocalTVShows = Database.Query("select showid, name, release from tvshows");
             }
 
             foreach (var show in LocalTVShows)
             {
-                var titleParts = ShowNames.Parser.GetRoot(show["name"]);
+                var titleParts = string.IsNullOrWhiteSpace(show["release"])
+                               ? ShowNames.Parser.GetRoot(show["name"])
+                               : show["release"].Split(' ');
                 var fileParts  = ShowNames.Parser.GetRoot(name);
 
                 if (titleParts.SequenceEqual(fileParts))

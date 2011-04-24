@@ -5,7 +5,8 @@
 CREATE TABLE tvshows (
 	rowid INTEGER,
 	showid INTEGER PRIMARY KEY,
-	name TEXT
+	name TEXT,
+	release TEXT
 )
 
 /*
@@ -58,4 +59,4 @@ CREATE TABLE settings (
 	value TEXT
 )
 
-INSERT INTO settings VALUES ("Version", "1")
+INSERT INTO settings VALUES ("Version", "2")

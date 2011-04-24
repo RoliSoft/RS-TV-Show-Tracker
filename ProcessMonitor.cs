@@ -67,11 +67,13 @@
             }
 
             var files = GetHandleList(procs);
-            var shows = Database.Query("select showid, name from tvshows order by rowid asc");
+            var shows = Database.Query("select showid, name, release from tvshows order by rowid asc");
 
             foreach (var show in shows)
             {
-                var parts = Parser.GetRoot(show["name"]);
+                var parts = string.IsNullOrWhiteSpace(show["release"])
+                          ? Parser.GetRoot(show["name"])
+                          : show["release"].Split(' ');
 
                 foreach (var file in files)
                 {

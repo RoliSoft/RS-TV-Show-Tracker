@@ -165,46 +165,22 @@
                         return;
                     }
 
-                    // test if the application's engine sees the entered and the returned first result as an exact match
-                    var enterroot = ShowNames.Parser.Normalize(show);
-                    var matchroot = ShowNames.Parser.Normalize(_shows[0].Title);
-                    var exact     = enterroot == matchroot;
-
-                    if (exact && _shows.Count != 1)
-                    {
-                        // test if the second result is an exact match too
-                        // if it is, then selection is required by the user
-                        exact = enterroot != ShowNames.Parser.Normalize(_shows[1].Title);
-
-                        if (exact && _shows.Count != 2)
-                        {
-                            exact = enterroot != ShowNames.Parser.Normalize(_shows[2].Title);
-                        }
-                    }
-
                     Dispatcher.Invoke((Action)(() =>
                         {
-                            if (exact)
+                            listBox.Items.Clear();
+
+                            foreach (var id in _shows)
                             {
-                                AddShow(_shows[0]);
+                                listBox.Items.Add(id.Title);
                             }
-                            else
-                            {
-                                listBox.Items.Clear();
 
-                                foreach (var id in _shows)
-                                {
-                                    listBox.Items.Add(id.Title);
-                                }
+                            listBox.SelectedIndex = 0;
 
-                                listBox.SelectedIndex = 0;
+                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-                                workingTabItem.Visibility = Visibility.Collapsed;
-                                selectTabItem.Visibility  = Visibility.Visible;
-                                tabControl.SelectedIndex  = 2;
-                            }
+                            workingTabItem.Visibility = Visibility.Collapsed;
+                            selectTabItem.Visibility  = Visibility.Visible;
+                            tabControl.SelectedIndex  = 2;
                         }));
                 });
             _worker.Start();
@@ -370,10 +346,9 @@
                         return;
                     }
 
-
                     // insert into tvshows and let the autoincrementing field assign a showid
                     Database.Execute("update tvshows set rowid = rowid + 1");
-                    Database.Execute("insert into tvshows values (1, null, ?)", tv.Title);
+                    Database.Execute("insert into tvshows values (1, null, ?, ?)", tv.Title, show.Title != tv.Title ? string.Join(" ", ShowNames.Parser.GetRoot(show.Title)) : string.Empty);
 
                     // then get that showid
                     _dbid = Database.GetShowID(tv.Title);

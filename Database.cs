@@ -33,7 +33,7 @@
         {
             get
             {
-                return 1;
+                return 2;
             }
         }
 
@@ -87,6 +87,14 @@
             if (ver == 0)
             {
                 Execute("alter table episodes add column url TEXT");
+
+                ver++;
+                Setting("Version", ver.ToString());
+            }
+
+            if (ver == 1)
+            {
+                Execute("alter table tvshows add column release TEXT");
 
                 ver++;
                 Setting("Version", ver.ToString());
@@ -312,20 +320,6 @@
         }
 
         /// <summary>
-        /// Gets the ID of a show in the database.
-        /// </summary>
-        /// <param name="showid">The ID of the show.</param>
-        /// <returns>Title of the show or empty string.</returns>
-        public static string GetShowTitle(string showid)
-        {
-            var show = Query("select name from tvshows where showid = ? limit 1", showid);
-
-            return show.Count != 0
-                   ? show[0]["name"]
-                   : string.Empty;
-        }
-
-        /// <summary>
         /// Gets the ID of an episode in the database.
         /// </summary>
         /// <param name="show">The name of the show.</param>
@@ -339,6 +333,24 @@
             return episodeid.Count != 0
                    ? episodeid[0]["episodeid"]
                    : string.Empty;
+        }
+
+        /// <summary>
+        /// Gets the name of the show used in scene releases.
+        /// </summary>
+        /// <param name="show">The name of the show.</param>
+        /// <param name="removeCommon">
+        /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
+        /// otherwise, only "the" and any one character word that is other than "a" will be removed.
+        /// </param>
+        /// <returns>Name of the show used in scene releases.</returns>
+        public static string[] GetReleaseName(string show, bool removeCommon = true)
+        {
+            var release = Query("select release from tvshows where name = ? limit 1", show);
+
+            return release.Count != 0
+                   ? release[0]["release"].Split(' ')
+                   : ShowNames.Parser.GetRoot(show, removeCommon);
         }
     }
 }

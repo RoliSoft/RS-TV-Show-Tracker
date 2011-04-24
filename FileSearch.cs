@@ -52,8 +52,8 @@
         /// <param name="episode">The episode number.</param>
         public FileSearch(string path, string show, string episode)
         {
-            _titleParts       = ShowNames.Parser.GetRoot(show);
-            _episodeRegex     = ShowNames.Parser.GenerateEpisodeRegexes(episode);
+            _titleParts   = Database.GetReleaseName(show);
+            _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode);
 
             ShowQuery = show + " " + episode;
             StartPath = path;

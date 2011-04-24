@@ -84,7 +84,7 @@
                 episode = tmp[1];
             }
 
-            var parts = String.Join(" ", GetRoot(show, removeCommon)).ToLower();
+            var parts = String.Join(" ", Database.GetReleaseName(show, removeCommon)).ToLower();
 
             return episode.Length != 0
                    ? parts + " " + episode
@@ -125,7 +125,7 @@
         /// </returns>
         public static bool IsMatch(string name, string episode, string release)
         {
-            return IsMatch(release, GetRoot(name), GenerateEpisodeRegexes(episode), false);
+            return IsMatch(release, Database.GetReleaseName(name), GenerateEpisodeRegexes(episode), false);
         }
 
         /// <summary>
