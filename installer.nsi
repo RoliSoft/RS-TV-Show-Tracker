@@ -14,9 +14,10 @@
 !define MUI_ICON "${NSISDIR}\contrib\graphics\icons\orange-install.ico"
 !define MUI_UNICON "${NSISDIR}\contrib\graphics\icons\orange-uninstall.ico"
 !define MUI_HEADERIMAGE on
-!define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\contrib\graphics\header\orange.bmp"
+!define MUI_HEADERIMAGE_RIGHT on
+!define MUI_HEADERIMAGE_BITMAP "Images\nsis-header.bmp"
 !define MUI_HEADERIMAGE_UNBITMAP "${NSISDIR}\contrib\graphics\header\orange-uninstall.bmp"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "${NSISDIR}\contrib\graphics\wizard\orange.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "Images\nsis-wizard.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${NSISDIR}\contrib\graphics\wizard\orange-uninstall.bmp"
 
 !define REG_START_MENU "Start Menu Folder"
@@ -49,6 +50,8 @@ InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
 
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
+
+!insertmacro MUI_PAGE_WELCOME
 
 !ifdef LICENSE_TXT
 !insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
