@@ -29,12 +29,6 @@
             set
             {
                 _enabled = value;
-
-                if (PropertyChanged != null)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs("Enabled"));
-                    PropertyChanged(this, new PropertyChangedEventArgs("Opacity"));
-                }
             }
         }
 
@@ -110,6 +104,18 @@
                 return Processed && !string.IsNullOrWhiteSpace(Information.Show)
                        ? Utils.SanitizeFileName(Parser.FormatFileName(RenamerWindow.Format, Information))
                        : string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Fires a <c>PropertyChanged</c> event for the enabled and opacity fields.
+        /// </summary>
+        public void RefreshEnabled()
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs("Enabled"));
+                PropertyChanged(this, new PropertyChangedEventArgs("Opacity"));
             }
         }
 

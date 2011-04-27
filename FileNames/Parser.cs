@@ -60,20 +60,21 @@
 
             if (fi.Length < 2)
             {
-                return new ShowFile();
+                return new ShowFile(file);
             }
 
             var ep = ShowNames.Parser.ExtractEpisode(fi[1]);
 
             if (ep == null)
             {
-                return new ShowFile();
+                return new ShowFile(file);
             }
 
             // clean name
 
             var name  = Regexes.SpecialChars.Replace(RemoveKeywords.Replace(fi[0].ToUpper(), string.Empty).Trim(), " ").Trim();
             var title = string.Empty;
+            var date  = DateTime.MinValue;
 
             // try to find show in local database
 
@@ -94,12 +95,13 @@
 
                 if (titleParts.SequenceEqual(fileParts))
                 {
-                    var episode = Database.Query("select name from episodes where episodeid = ?", ep.Episode + (ep.Season * 1000) + (show["showid"].ToInteger() * 100 * 1000));
+                    var episode = Database.Query("select name, airdate from episodes where episodeid = ?", ep.Episode + (ep.Season * 1000) + (show["showid"].ToInteger() * 100 * 1000));
                     if (episode.Count != 0)
                     {
                         match = true;
                         name  = show["name"];
                         title = episode[0]["name"];
+                        date  = episode[0]["airdate"].ToDouble().GetUnixTimestamp();
 
                         break;
                     }
@@ -117,6 +119,7 @@
                 if (eps.Count() != 0)
                 {
                     title = eps[0].Title;
+                    date  = eps[0].Airdate;
                 }
             }
 
@@ -141,6 +144,7 @@
                     if (eps.Count() != 0)
                     {
                         title = eps[0].Title;
+                        date  = eps[0].Airdate;
                     }
                 }
             }
@@ -158,7 +162,7 @@
 
             var quality = ParseQuality(file).GetAttribute<DescriptionAttribute>().Description;
 
-            return new ShowFile(file, name, ep, title, quality, match);
+            return new ShowFile(file, name, ep, title, quality, date, match);
         }
 
         /// <summary>
@@ -251,14 +255,68 @@
         /// <returns>New file name.</returns>
         public static string FormatFileName(string format, ShowFile file)
         {
-            return format.Replace("$show", file.Show)
-                         .Replace("$seasonz", file.Season.ToString("0"))
-                         .Replace("$season", file.Season.ToString("00"))
-                         .Replace("$episodez", file.SecondEpisode.HasValue ? file.Episode.ToString("0") + "-" + file.SecondEpisode.Value.ToString("0") : file.Episode.ToString("0"))
-                         .Replace("$episode", file.SecondEpisode.HasValue ? file.Episode.ToString("00") + "-" + file.SecondEpisode.Value.ToString("00") : file.Episode.ToString("00"))
-                         .Replace("$title", file.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title)
-                         .Replace("$quality", file.Quality)
-                         .Replace("$ext", file.Extension);
+            var variables = new Dictionary<string, string>
+                {
+                    {
+	                    "$show",
+	                    file.Show
+                    },
+                    {
+	                    "$seasonz",
+	                    file.Season.ToString("0")
+                    },
+                    {
+	                    "$season",
+	                    file.Season.ToString("00")
+                    },
+                    {
+	                    "$episodez",
+	                    file.SecondEpisode.HasValue ? file.Episode.ToString("0") + "-" + file.SecondEpisode.Value.ToString("0") : file.Episode.ToString("0")
+                    },
+                    {
+	                    "$episode",
+	                    file.SecondEpisode.HasValue ? file.Episode.ToString("00") + "-" + file.SecondEpisode.Value.ToString("00") : file.Episode.ToString("00")
+                    },
+                    {
+	                    "$title",
+	                    file.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title
+                    },
+                    {
+	                    "$quality",
+	                    file.Quality
+                    },
+                    {
+	                    "$ext",
+	                    file.Extension
+                    },
+                    {
+	                    "$year",
+	                    file.Airdate.Year.ToString()
+                    },
+                    {
+	                    "$monthz",
+	                    file.Airdate.Month.ToString()
+                    },
+                    {
+	                    "$month",
+	                    file.Airdate.Month.ToString("00")
+                    },
+                    {
+	                    "$dayz",
+	                    file.Airdate.Day.ToString()
+                    },
+                    {
+	                    "$day",
+	                    file.Airdate.Day.ToString("00")
+                    }
+                };
+
+            foreach (var variable in variables)
+            {
+                format = format.Replace(variable.Key, variable.Value);
+            }
+
+            return format;
         }
     }
 }

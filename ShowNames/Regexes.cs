@@ -72,6 +72,16 @@
         public static readonly Regex SampleVideo   = new Regex(@"(^|[\.\-\s])sample[\.\-\s]", RegexOptions.IgnoreCase);
 
         /// <summary>
+        /// Matches a proper notation in a release name.
+        /// </summary>
+        public static readonly Regex Proper        = new Regex(@"\b(PROPER|REPACK|RERIP|REAL|FINAL)\b");
+
+        /// <summary>
+        /// Matches a group name in a release name.
+        /// </summary>
+        public static readonly Regex Group         = new Regex(@"\-(?<group>[a-z0-9&]+)(?:\.[a-z0-9]+)?$", RegexOptions.IgnoreCase);
+
+        /// <summary>
         /// Simple regular expression to detect S00E00 and 0x00 at the end of a query.
         /// </summary>
         public static readonly Regex Numbering     = new Regex(@"\s+((?:S[0-9]{2}E[0-9]{2})|(?:[0-9]{1,2}x[0-9]{1,2}))", RegexOptions.IgnoreCase);

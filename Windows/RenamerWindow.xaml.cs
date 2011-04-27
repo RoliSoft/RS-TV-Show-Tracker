@@ -112,7 +112,7 @@
         /// <summary>
         /// Contains a sample <c>ShowFile</c> object.
         /// </summary>
-        public static readonly ShowFile SampleInfo = new ShowFile("House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv", "House, M.D.", new ShowEpisode(6, 2), "Epic Fail", "Web-DL 720p");
+        public static readonly ShowFile SampleInfo = new ShowFile("House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv", "House, M.D.", new ShowEpisode(6, 2), "Epic Fail", "Web-DL 720p", new DateTime(2009, 9, 28));
 
         /// <summary>
         /// Contains the parsed name for the sample file.
@@ -219,6 +219,8 @@
                 file.Information = FileNames.Parser.ParseFile(file.Information.Name);
                 file.Checked     = file.Recognized = file.Enabled = file.Information.Success;
                 file.Processed   = true;
+
+                file.RefreshEnabled();
             }
 
             SetStatus();

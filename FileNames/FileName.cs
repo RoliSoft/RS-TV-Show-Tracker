@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.FileNames
 {
+    using System;
     using System.IO;
 
     using RoliSoft.TVShowTracker.ShowNames;
@@ -64,6 +65,12 @@
         public string Title { get; set; }
 
         /// <summary>
+        /// Gets or sets the airdate of the episode.
+        /// </summary>
+        /// <value>The episode airdate.</value>
+        public DateTime Airdate { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ShowFile"/> class.
         /// </summary>
         public ShowFile()
@@ -88,8 +95,9 @@
         /// <param name="ep">The parsed season and episode.</param>
         /// <param name="title">The title of the episode.</param>
         /// <param name="quality">The quality of the file.</param>
+        /// <param name="airdate">The airdate of the episode.</param>
         /// <param name="success">if set to <c>true</c> the file was successfully parsed.</param>
-        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, bool success = true)
+        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, DateTime airdate, bool success = true)
         {
             Name          = name;
             Extension     = Path.GetExtension(Name);
@@ -99,6 +107,7 @@
             SecondEpisode = ep.SecondEpisode;
             Title         = title;
             Quality       = quality;
+            Airdate       = airdate;
             Success       = success;
         }
 
