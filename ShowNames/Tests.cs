@@ -105,6 +105,10 @@
 	                "Bang_Goes_the_Theory_Series_4_-_Episode_2_b00zvcgk_default.mp4",
 	                new ShowEpisode(4, 2)
                 },
+                {
+	                "TopGear Series 10 Ep. 01 2007.10.07.avi",
+	                new ShowEpisode(10, 1)
+                },
 
                 // extremely non-standard episode numbering tests
                 {
