@@ -209,32 +209,6 @@
     }
 
     /// <summary>
-    /// Represents a list of known TV shows.
-    /// </summary>
-    public class ListOfShows : List<string>, IRemoteObject
-    {
-        #region Implementation of IRemoteObject
-        /// <summary>
-        /// Gets or sets a value indicating whether the request was successfully fulfilled.
-        /// </summary>
-        /// <value><c>true</c> if request was successful; otherwise, <c>false</c>.</value>
-        public bool Success { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of seconds it took for the request to finish.
-        /// </summary>
-        /// <value>The number of seconds.</value>
-        public double Time { get; set; }
-
-        /// <summary>
-        /// Gets or sets the error message, if any.
-        /// </summary>
-        /// <value>The error message.</value>
-        public string Error { get; set; }
-        #endregion
-    }
-
-    /// <summary>
     /// Represents a show information.
     /// </summary>
     public class ShowInfo

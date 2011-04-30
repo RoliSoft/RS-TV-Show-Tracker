@@ -94,6 +94,7 @@
             show.Description = Regex.Replace(HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//h2[text()='Storyline']/following-sibling::p[1]") ?? string.Empty)).Trim(), @"\n\nWritten by\s.*$", string.Empty);
             show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//td[@id='img_primary']//img", "src");
             show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//span[@class='tv-series-smaller']") ?? string.Empty, @"\d{4}–\d{4}");
+            show.Language    = "en";
             show.URL         = "http://www.imdb.com/title/tt{0}/".FormatWith(id);
             show.Episodes    = new List<TVShow.Episode>();
 

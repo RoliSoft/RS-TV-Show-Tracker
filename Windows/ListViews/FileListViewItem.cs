@@ -101,11 +101,50 @@
         {
             get
             {
-                return Processed && !string.IsNullOrWhiteSpace(Information.Show)
-                       ? Utils.SanitizeFileName(Parser.FormatFileName(RenamerWindow.Format, Information))
-                       : string.Empty;
+                if (!Processed)
+                {
+                    return "[waiting to be processed]";
+                }
+
+                if (!string.IsNullOrWhiteSpace(Information.Show))
+                {
+                    return Utils.SanitizeFileName(Parser.FormatFileName(RenamerWindow.Format, Information));
+                }
+
+                switch (Information.ParseError)
+                {
+                    case ShowFile.FailureReasons.EpisodeNumberingNotFound:
+                        return "[could not extract the episode numbering]";
+
+                    case ShowFile.FailureReasons.ShowNameNotFound:
+                        return "[could not extract the show name]";
+
+                    case ShowFile.FailureReasons.ShowNotIdentified:
+                        return "[could not identify the show in any databases]";
+
+                    default:
+                        return "[unknown error]";
+                }
             }
         }
+
+        /// <summary>
+        /// Gets the value whether to show the checkbox or not.
+        /// </summary>
+        /// <value>The checkbox visibility.</value>
+        public string ShowCheckBox { get; set; }
+
+        /// <summary>
+        /// Gets the image of the file status.
+        /// </summary>
+        /// <value>The status image.</value>
+        public string StatusImage { get; set; }
+
+        /// <summary>
+        /// Gets the value whether to show the status image or not.
+        /// </summary>
+        /// <value>The status image visibility.</value>
+        public string ShowStatusImage { get; set; }
 
         /// <summary>
         /// Fires a <c>PropertyChanged</c> event for the enabled and opacity fields.
@@ -116,6 +155,9 @@
             {
                 PropertyChanged(this, new PropertyChangedEventArgs("Enabled"));
                 PropertyChanged(this, new PropertyChangedEventArgs("Opacity"));
+                PropertyChanged(this, new PropertyChangedEventArgs("StatusImage"));
+                PropertyChanged(this, new PropertyChangedEventArgs("ShowStatusImage"));
+                PropertyChanged(this, new PropertyChangedEventArgs("ShowCheckBox"));
             }
         }
 

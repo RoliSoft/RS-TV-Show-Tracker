@@ -89,7 +89,7 @@
             var sw = Stopwatch.StartNew();
 
             var endpoint = "http" + (secure ? "s" : string.Empty) + "://lab.rolisoft.net/api/";
-            //endpoint = "http://home.rolisoft.net/api/"
+            //endpoint = "http://home.rolisoft.net/api/";
 
             try
             {
@@ -172,9 +172,9 @@
         /// Gets a list of known shows on the server.
         /// </summary>
         /// <returns>List of shows.</returns>
-        public static ListOfShows GetListOfShows()
+        public static Generic<List<string>> GetListOfShows()
         {
-            return InvokeRemoteMethod<ListOfShows>("GetListOfShows");
+            return InvokeRemoteMethod<Generic<List<string>>>("GetListOfShows");
         }
 
         /// <summary>

@@ -21,11 +21,14 @@
                         <ListView Name="listView" AllowDrop="True" Drop="ListViewDrop" BorderThickness="0">
                             <ListView.View>
                                 <GridView AllowsColumnReorder="False">
-                                    <GridViewColumn Width="25">
+                                    <GridViewColumn Width="26">
                                         <GridViewColumnHeader />
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox Name="Enabled" Tag="{Binding File}" IsChecked="{Binding Checked}" IsEnabled="{Binding Enabled}" />
+                                                <Grid>
+                                                    <CheckBox Name="Enabled" Tag="{Binding File}" IsChecked="{Binding Checked}" IsEnabled="{Binding Enabled}" Visibility="{Binding ShowCheckBox}" />
+                                                    <Image Source="{Binding StatusImage}" Width="16" Height="16" Margin="-1,0,0,0" Visibility="{Binding ShowStatusImage}" />
+                                                </Grid>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
@@ -94,7 +97,7 @@
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
                         <Grid>
                             <Label Name="statusLabel" Content="0 files added; 0 files identified." HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="0" Margin="20,0,0,4" />
-                            <Label Name="statusThrobber" FontWeight="Bold" Content="&#9696;" Padding="0" Margin="2,0,0,0" Width="12" Height="17" VerticalAlignment="Bottom" HorizontalAlignment="Left" Visibility="Hidden">
+                            <Label Name="statusThrobber" FontWeight="Bold" Content="&#9696;" Padding="0" Margin="2,0,0,3" Width="12" Height="17" VerticalAlignment="Bottom" HorizontalAlignment="Left" Visibility="Hidden">
                                 <Label.Effect>
                                     <DropShadowEffect Color="Gray" ShadowDepth="0" />
                                 </Label.Effect>
@@ -129,21 +132,22 @@
                             </LinearGradientBrush>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <TextBlock FontFamily="Consolas" HorizontalAlignment="Right" VerticalAlignment="Top" xml:space="preserve" Margin="0,15,26,0"><![CDATA[   List of variables:
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" xml:space="preserve" Margin="0,15,26,0">    <Image Source="/RSTVShowTracker;component/Images/code.png" Height="16" Width="16" Margin="0,0,5,-3" /><Span FontSize="16" Foreground="DarkBlue" FontFamily="Segoe UI">List of variables</Span>
 
-    $show — House, M.D.
-  $season — 06
- $seasonz — 6
- $episode — 02
-$episodez — 2
-   $title — Epic Fail
- $quality — Web-DL 720p
-     $ext — .mkv
-    $year — 2009
-   $month — 09
-  $monthz — 9
-     $day — 02
-    $dayz — 2]]></TextBlock>
+<Span FontFamily="Lucida Console">    $show</Span> → <Bold FontFamily="Segoe UI">House, M.D.</Bold>
+<Span FontFamily="Lucida Console">  $season</Span> → <Bold FontFamily="Segoe UI">06</Bold>
+<Span FontFamily="Lucida Console"> $seasonz</Span> → <Bold FontFamily="Segoe UI">6</Bold>
+<Span FontFamily="Lucida Console"> $episode</Span> → <Bold FontFamily="Segoe UI">02</Bold>
+<Span FontFamily="Lucida Console">$episodez</Span> → <Bold FontFamily="Segoe UI">2</Bold>
+<Span FontFamily="Lucida Console">   $title</Span> → <Bold FontFamily="Segoe UI">Epic Fail</Bold>
+<Span FontFamily="Lucida Console"> $quality</Span> → <Bold FontFamily="Segoe UI">Web-DL 720p</Bold>
+<Span FontFamily="Lucida Console">   $group</Span> → <Bold FontFamily="Segoe UI">LP</Bold>
+<Span FontFamily="Lucida Console">     $ext</Span> → <Bold FontFamily="Segoe UI">.mkv</Bold>
+<Span FontFamily="Lucida Console">    $year</Span> → <Bold FontFamily="Segoe UI">2009</Bold>
+<Span FontFamily="Lucida Console">   $month</Span> → <Bold FontFamily="Segoe UI">09</Bold>
+<Span FontFamily="Lucida Console">  $monthz</Span> → <Bold FontFamily="Segoe UI">9</Bold>
+<Span FontFamily="Lucida Console">     $day</Span> → <Bold FontFamily="Segoe UI">02</Bold>
+<Span FontFamily="Lucida Console">    $dayz</Span> → <Bold FontFamily="Segoe UI">2</Bold></TextBlock>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/RSTVShowTracker;component/Images/format.png" Height="16" Width="16" Margin="0,1,5,0" />

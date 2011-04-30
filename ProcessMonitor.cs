@@ -93,7 +93,7 @@
                             }
                             else
                             {
-                                MarkAsSeen(show["showid"], Parser.ExtractEpisode(file.Directory.Name + @"\" + file.Name));
+                                MarkAsSeen(show["showid"], pf.Episode);
                             }
                         }
                     }

@@ -97,6 +97,7 @@
             show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:image']", "content");
             show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//h4[text()='Status']/following-sibling::p[1]") ?? string.Empty, "(Canceled|Ended)");
             show.Runtime     = 30;
+            show.Language    = "en";
             show.URL         = "http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0'));
             show.Episodes    = new List<TVShow.Episode>();
 

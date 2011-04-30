@@ -139,6 +139,7 @@
             show.AirTime     = info.GetValue("Airs_Time");
             show.AirDay      = info.GetValue("Airs_DayOfWeek");
             show.Network     = info.GetValue("Network");
+            show.Language    = language;
             show.URL         = "http://thetvdb.com/?tab=series&id=" + info.GetValue("id");
             show.Episodes    = new List<TVShow.Episode>();
 

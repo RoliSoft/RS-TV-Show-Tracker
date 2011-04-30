@@ -69,6 +69,12 @@
         public string TimeZone { get; set; }
 
         /// <summary>
+        /// Gets or sets the language of the show's episode listing.
+        /// </summary>
+        /// <value>The episode listing's language.</value>
+        public string Language { get; set; }
+
+        /// <summary>
         /// Gets or sets the URL to the show's page on the site.
         /// </summary>
         /// <value>The URL.</value>

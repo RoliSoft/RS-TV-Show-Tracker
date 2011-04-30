@@ -112,7 +112,7 @@
         /// <summary>
         /// Contains a sample <c>ShowFile</c> object.
         /// </summary>
-        public static readonly ShowFile SampleInfo = new ShowFile("House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv", "House, M.D.", new ShowEpisode(6, 2), "Epic Fail", "Web-DL 720p", new DateTime(2009, 9, 28));
+        public static readonly ShowFile SampleInfo = new ShowFile("House.M.D.S06E02.Epic.Fail.720p.WEB-DL.h.264.DD5.1-LP.mkv", "House, M.D.", new ShowEpisode(6, 2), "Epic Fail", "Web-DL 720p", "LP", new DateTime(2009, 9, 28));
 
         /// <summary>
         /// Contains the parsed name for the sample file.
@@ -122,7 +122,7 @@
         /// <summary>
         /// Contains a regular expression which matches the episode parts for the sample file.
         /// </summary>
-        public static readonly Regex SampleEpisodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(new ShowEpisode(SampleInfo.Season, SampleInfo.Episode));
+        public static readonly Regex SampleEpisodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(new ShowEpisode(SampleInfo.Episode.Season, SampleInfo.Episode.Episode));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenamerWindow"/> class.
@@ -220,6 +220,16 @@
                 file.Checked     = file.Recognized = file.Enabled = file.Information.Success;
                 file.Processed   = true;
 
+                if (file.Information.Success)
+                {
+                    file.ShowStatusImage = "Collapsed";
+                    file.ShowCheckBox    = "Visible";
+                }
+                else
+                {
+                    file.StatusImage = "/RSTVShowTracker;component/Images/exclamation-red.png";
+                }
+
                 file.RefreshEnabled();
             }
 
@@ -311,10 +321,14 @@
                 }
                 else if (Regex.IsMatch(file, @"\.(avi|mkv|mp4|ts|wmv|srt|sub|ass|smi)$", RegexOptions.IgnoreCase))
                 {
+                    var tmp = file;
                     Dispatcher.Invoke((Action)(() => FilesListViewItemCollection.Add(new FileListViewItem
                         {
-                            Location    = file,
-                            Information = new ShowFile(file)
+                            Location        = tmp,
+                            ShowCheckBox    = "Collapsed",
+                            ShowStatusImage = "Visible",
+                            StatusImage     = "/RSTVShowTracker;component/Images/hourglass.png",
+                            Information     = new ShowFile(tmp)
                         })));
                 }
             }

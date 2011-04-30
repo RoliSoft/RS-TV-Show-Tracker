@@ -17,6 +17,12 @@
         public bool Success { get; set; }
 
         /// <summary>
+        /// Gets or sets the parse error if the file wasn't identifiable.
+        /// </summary>
+        /// <value>The parse error.</value>
+        public FailureReasons? ParseError { get; set; }
+
+        /// <summary>
         /// Gets or sets the original name of the file.
         /// </summary>
         /// <value>The file name.</value>
@@ -35,28 +41,22 @@
         public string Quality { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of the scene group which released this file.
+        /// </summary>
+        /// <value>The group.</value>
+        public string Group { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the show.
         /// </summary>
         /// <value>The show.</value>
         public string Show { get; set; }
 
         /// <summary>
-        /// Gets or sets the season of the episode.
-        /// </summary>
-        /// <value>The season.</value>
-        public int Season { get; set; }
-
-        /// <summary>
-        /// Gets or sets the episode number.
+        /// Gets or sets the episode of the show.
         /// </summary>
         /// <value>The episode.</value>
-        public int Episode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the second episode number.
-        /// </summary>
-        /// <value>The second episode.</value>
-        public int? SecondEpisode { get; set; }
+        public ShowEpisode Episode { get; set; }
 
         /// <summary>
         /// Gets or sets the title of the episode.
@@ -81,10 +81,12 @@
         /// Initializes a new instance of the <see cref="ShowFile"/> class.
         /// </summary>
         /// <param name="location">The location of the file.</param>
-        public ShowFile(string location)
+        /// <param name="error">The reason why the parsing has failed.</param>
+        public ShowFile(string location, FailureReasons? error = null)
         {
-            Name      = Path.GetFileName(location);
-            Extension = Path.GetExtension(Name);
+            Name       = Path.GetFileName(location);
+            Extension  = Path.GetExtension(Name);
+            ParseError = error;
         }
 
         /// <summary>
@@ -97,16 +99,15 @@
         /// <param name="quality">The quality of the file.</param>
         /// <param name="airdate">The airdate of the episode.</param>
         /// <param name="success">if set to <c>true</c> the file was successfully parsed.</param>
-        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, DateTime airdate, bool success = true)
+        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, string group, DateTime airdate, bool success = true)
         {
             Name          = name;
             Extension     = Path.GetExtension(Name);
             Show          = show;
-            Season        = ep.Season;
-            Episode       = ep.Episode;
-            SecondEpisode = ep.SecondEpisode;
+            Episode       = ep;
             Title         = title;
             Quality       = quality;
+            Group         = group;
             Airdate       = airdate;
             Success       = success;
         }
@@ -119,9 +120,33 @@
         /// </returns>
         public override string ToString()
         {
-            return SecondEpisode.HasValue
-                   ? "{0} S{1:00}E{2:00}-{3:00}".FormatWith(Show, Season, Episode, SecondEpisode)
-                   : "{0} S{1:00}E{2:00}".FormatWith(Show, Season, Episode);
+            return Episode.SecondEpisode.HasValue
+                   ? "{0} S{1:00}E{2:00}-{3:00}".FormatWith(Show, Episode.Season, Episode.Episode, Episode.SecondEpisode)
+                   : "{0} S{1:00}E{2:00}".FormatWith(Show, Episode.Season, Episode.Episode);
+        }
+
+        /// <summary>
+        /// A short list of bad excuses why the parser failed to identify the file.
+        /// </summary>
+        public enum FailureReasons
+        {
+            /// <summary>
+            /// The file name didn't contain a recognizable episode numbering.
+            /// </summary>
+            EpisodeNumberingNotFound,
+            /// <summary>
+            /// The name of the show could not be extracted from the file name.
+            /// It should be placed before the episode numbering. In this case it wasn't.
+            /// </summary>
+            ShowNameNotFound,
+            /// <summary>
+            /// The extracted name was not identifiable by the following process:
+            /// - matching against the local database
+            /// - matching against the monster database located at lab.rolisoft.net
+            /// - asking TVRage's API
+            /// - asking TheTVDB's API
+            /// </summary>
+            ShowNotIdentified
         }
     }
 }

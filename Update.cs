@@ -107,16 +107,16 @@
                 }
 
                 // update showdata fields
-                Database.ShowData(r["showid"], "genre",    tv.Genre);
-                Database.ShowData(r["showid"], "descr",    tv.Description);
-                Database.ShowData(r["showid"], "cover",    tv.Cover);
-                Database.ShowData(r["showid"], "airing",   tv.Airing.ToString());
-                Database.ShowData(r["showid"], "airtime",  tv.AirTime);
-                Database.ShowData(r["showid"], "airday",   tv.AirDay);
-                Database.ShowData(r["showid"], "network",  tv.Network);
+                Database.ShowData(r["showid"], "genre", tv.Genre);
+                Database.ShowData(r["showid"], "descr", tv.Description);
+                Database.ShowData(r["showid"], "cover", tv.Cover);
+                Database.ShowData(r["showid"], "airing", tv.Airing.ToString());
+                Database.ShowData(r["showid"], "airtime", tv.AirTime);
+                Database.ShowData(r["showid"], "airday", tv.AirDay);
+                Database.ShowData(r["showid"], "network", tv.Network);
                 Database.ShowData(r["showid"], "timezone", tv.TimeZone);
-                Database.ShowData(r["showid"], "runtime",  tv.Runtime.ToString());
-                Database.ShowData(r["showid"], "url",      tv.URL);
+                Database.ShowData(r["showid"], "runtime", tv.Runtime.ToString());
+                Database.ShowData(r["showid"], "url", tv.URL);
 
                 // remove current episodes
                 Database.ExecuteOnTransaction(tr, "delete from episodes where showid = ?", r["showid"]);
@@ -126,18 +126,7 @@
                 {
                     try
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                                      ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000),
-                                                      r["showid"],
-                                                      ep.Season,
-                                                      ep.Number,
-                                                      string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch
-                                                       ? ep.Airdate.ToUnixTimestamp()
-                                                       : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(),
-                                                      ep.Title,
-                                                      ep.Summary,
-                                                      ep.Picture,
-                                                      ep.URL);
+                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)", ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000), r["showid"], ep.Season, ep.Number, string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch ? ep.Airdate.ToUnixTimestamp() : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(), ep.Title, ep.Summary, ep.Picture, ep.URL);
                     }
                     catch (Exception ex)
                     {
@@ -146,7 +135,10 @@
                 }
 
                 // asynchronously update lab.rolisoft.net's cache
-                UpdateRemoteCache(new Tuple<string, string>(gname, id), tv);
+                if (lang == "en")
+                {
+                    UpdateRemoteCache(new Tuple<string, string>(gname, id), tv);
+                }
             }
 
             // commit the changes
@@ -236,32 +228,35 @@
         /// <param name="tv">The TV show.</param>
         public static void UpdateRemoteCache(Tuple<string, string> guide, TVShow tv)
         {
-            new Thread(() => { try
-            {
-                var info = new Remote.Objects.ShowInfo
+            new Thread(() =>
+                {
+                    try
                     {
-                        Title       = tv.Title,
-                        Description = tv.Description,
-                        Genre       = (tv.Genre ?? string.Empty).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries),
-                        Cover       = tv.Cover,
-                        Started     = (long)tv.Episodes[0].Airdate.ToUnixTimestamp(),
-                        Airing      = tv.Airing,
-                        AirTime     = tv.AirTime,
-                        AirDay      = tv.AirDay,
-                        Network     = tv.Network,
-                        Runtime     = tv.Runtime,
-                        Seasons     = tv.Episodes.Last().Season,
-                        Episodes    = tv.Episodes.Count,
-                        Source      = guide.Item1,
-                        SourceID    = guide.Item2
-                    };
+                        var info = new Remote.Objects.ShowInfo
+                            {
+                                Title       = tv.Title,
+                                Description = tv.Description,
+                                Genre       = (tv.Genre ?? string.Empty).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries),
+                                Cover       = tv.Cover,
+                                Started     = (long)tv.Episodes[0].Airdate.ToUnixTimestamp(),
+                                Airing      = tv.Airing,
+                                AirTime     = tv.AirTime,
+                                AirDay      = tv.AirDay,
+                                Network     = tv.Network,
+                                Runtime     = tv.Runtime,
+                                Seasons     = tv.Episodes.Last().Season,
+                                Episodes    = tv.Episodes.Count,
+                                Source      = guide.Item1,
+                                SourceID    = guide.Item2
+                            };
 
-                var hash = BitConverter.ToString(new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID() + "\0" + Signature.Version)).ComputeHash(Encoding.UTF8.GetBytes(
-                    info.Title + info.Description + string.Join(string.Empty, info.Genre) + info.Cover + info.Started + (info.Airing ? "true" : "false") + info.AirTime + info.AirDay + info.Network + info.Runtime + info.Seasons + info.Episodes + info.Source + info.SourceID
-                ))).ToLower().Replace("-", string.Empty);
+                        var hash = BitConverter.ToString(new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID() + "\0" + Signature.Version)).ComputeHash(Encoding.UTF8.GetBytes(
+                            info.Title + info.Description + string.Join(string.Empty, info.Genre) + info.Cover + info.Started + (info.Airing ? "true" : "false") + info.AirTime + info.AirDay + info.Network + info.Runtime + info.Seasons + info.Episodes + info.Source + info.SourceID
+                        ))).ToLower().Replace("-", string.Empty);
                 
-                API.SetShowInfo(info, hash);
-            } catch { } }).Start();
+                        API.SetShowInfo(info, hash);
+                    } catch { }
+                }).Start();
         }
     }
 }

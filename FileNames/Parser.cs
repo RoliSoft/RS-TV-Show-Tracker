@@ -8,7 +8,6 @@
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.Guides;
-    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
     using RoliSoft.TVShowTracker.ShowNames;
 
     /// <summary>
@@ -50,7 +49,7 @@
         /// Parses the name of the specified file.
         /// </summary>
         /// <param name="file">The file.</param>
-        /// <param name="askExternalGuide">if set to <c>true</c> TVRage's API will be asked to identify a show after the local database failed.</param>
+        /// <param name="askExternalGuide">if set to <c>true</c> lab.rolisoft.net's API will be asked to identify a show after the local database failed.</param>
         /// <returns>Parsed file information.</returns>
         public static ShowFile ParseFile(string file, bool askExternalGuide = true)
         {
@@ -60,14 +59,14 @@
 
             if (fi.Length < 2)
             {
-                return new ShowFile(file);
+                return new ShowFile(file, ShowFile.FailureReasons.EpisodeNumberingNotFound);
             }
 
             var ep = ShowNames.Parser.ExtractEpisode(fi[1]);
 
             if (ep == null)
             {
-                return new ShowFile(file);
+                return new ShowFile(file, ShowFile.FailureReasons.EpisodeNumberingNotFound);
             }
 
             // clean name
@@ -75,6 +74,11 @@
             var name  = Regexes.SpecialChars.Replace(RemoveKeywords.Replace(fi[0].ToUpper(), string.Empty).Trim(), " ").Trim();
             var title = string.Empty;
             var date  = DateTime.MinValue;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return new ShowFile(file, ShowFile.FailureReasons.ShowNameNotFound);
+            }
 
             // try to find show in local database
 
@@ -123,24 +127,25 @@
                 }
             }
 
-            // try to identify show using TVRage's API
+            // try to identify show using lab.rolisoft.net's API
 
             if (!match && askExternalGuide)
             {
-                var guide = new TVRage();
-                var ids   = guide.GetID(name).ToList();
+                var req = Remote.API.GetShowInfo(name, new[] { "Title", "Source", "SourceID" });
 
-                if (ids.Count != 0)
+                if (req.Success)
                 {
-                    ShowIDCache[name] = ids[0];
+                    var guide = Updater.CreateGuide(req.Source);
+                    var data  = guide.GetData(req.SourceID);
+
+                    ShowIDCache[name] = new ShowID { Title = data.Title };
 
                     match = true;
-                    name  = ids[0].Title;
+                    name  = data.Title;
 
-                    var tvshow = guide.GetData(ids[0].ID);
-                    TVShowCache[name] = tvshow;
+                    TVShowCache[name] = data;
 
-                    var eps = tvshow.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                    var eps = data.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
                     if (eps.Count() != 0)
                     {
                         title = eps[0].Title;
@@ -149,20 +154,30 @@
                 }
             }
 
+            // extract quality and group
+
+            var quality = ParseQuality(file).GetAttribute<DescriptionAttribute>().Description;
+            var groupm  = Regexes.Group.Match(file);
+            var group   = groupm.Success
+                          ? groupm.Groups[1].Value
+                          : string.Empty;
+
             // if name or title was not found, try to improvise
 
-            if (!match)
-            {
-                name = name.ToLower().ToUppercaseWords();
-            }
             if (string.IsNullOrWhiteSpace(title))
             {
                 title = "Season {0}, Episode {1}".FormatWith(ep.Season, ep.Episode);
             }
 
-            var quality = ParseQuality(file).GetAttribute<DescriptionAttribute>().Description;
+            if (!match)
+            {
+                return new ShowFile(file, name.ToLower().ToUppercaseWords(), ep, title, quality, group, date, false)
+                    {
+                        ParseError = ShowFile.FailureReasons.ShowNotIdentified
+                    };
+            }
 
-            return new ShowFile(file, name, ep, title, quality, date, match);
+            return new ShowFile(file, name, ep, title, quality, group, date);
         }
 
         /// <summary>
@@ -263,27 +278,31 @@
                     },
                     {
 	                    "$seasonz",
-	                    file.Season.ToString("0")
+	                    file.Episode.Season.ToString("0")
                     },
                     {
 	                    "$season",
-	                    file.Season.ToString("00")
+	                    file.Episode.Season.ToString("00")
                     },
                     {
 	                    "$episodez",
-	                    file.SecondEpisode.HasValue ? file.Episode.ToString("0") + "-" + file.SecondEpisode.Value.ToString("0") : file.Episode.ToString("0")
+	                    file.Episode.SecondEpisode.HasValue ? file.Episode.Episode.ToString("0") + "-" + file.Episode.SecondEpisode.Value.ToString("0") : file.Episode.Episode.ToString("0")
                     },
                     {
 	                    "$episode",
-	                    file.SecondEpisode.HasValue ? file.Episode.ToString("00") + "-" + file.SecondEpisode.Value.ToString("00") : file.Episode.ToString("00")
+	                    file.Episode.SecondEpisode.HasValue ? file.Episode.Episode.ToString("00") + "-" + file.Episode.SecondEpisode.Value.ToString("00") : file.Episode.Episode.ToString("00")
                     },
                     {
 	                    "$title",
-	                    file.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title
+	                    file.Episode.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title
                     },
                     {
 	                    "$quality",
 	                    file.Quality
+                    },
+                    {
+	                    "$group",
+	                    file.Group
                     },
                     {
 	                    "$ext",

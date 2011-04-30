@@ -125,6 +125,7 @@
             show.Airing      = string.IsNullOrWhiteSpace(info.GetValue("enddate"));
             show.Runtime     = info.GetValue("length").ToInteger();
             show.TimeZone    = "Tokyo Standard Time";
+            show.Language    = language;
             show.URL         = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id;
             show.Episodes    = new List<TVShow.Episode>();
 

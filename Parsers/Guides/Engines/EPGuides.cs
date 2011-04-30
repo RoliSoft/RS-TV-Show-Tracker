@@ -125,6 +125,7 @@
             var show = new TVShow
                 {
                     AirTime  = "20:00",
+                    Language = "en",
                     URL      = id,
                     Episodes = new List<TVShow.Episode>()
                 };
