@@ -87,6 +87,11 @@
         public static readonly Regex Numbering     = new Regex(@"\s+((?:S[0-9]{2}E[0-9]{2})|(?:[0-9]{1,2}x[0-9]{1,2}))", RegexOptions.IgnoreCase);
 
         /// <summary>
+        /// Matches release names which are season packs.
+        /// </summary>
+        public static readonly Regex VolNumbering  = new Regex(@"\s*[\.\-_]*\s*(?:Complete|(?:S(?:e(?:ason|ries)?)?|Pa(?:rt|ck)|Disc)\s*.?\s*0?\d{1,2}).*$", RegexOptions.IgnoreCase);
+
+        /// <summary>
         /// More advanced regular expression to detect season and episode number in various forms in a string.
         /// </summary>
         public static readonly Regex AdvNumbering  = Parser.GenerateEpisodeRegexes(generateExtractor: true);

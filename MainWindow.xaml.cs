@@ -73,7 +73,7 @@
 
                 if (args.Length == 2 && args[1][0] != '-' && File.Exists(args[1]))
                 {
-                    var fid = FileNames.Parser.ParseFile(Path.GetFileName(args[1]));
+                    var fid = FileNames.Parser.ParseFile(Path.GetFileName(args[1]), Path.GetDirectoryName(args[1]).Split(Path.DirectorySeparatorChar));
 
                     if (fid.Success)
                     {
@@ -82,7 +82,7 @@
                                 CommonIcon  = VistaControls.TaskDialog.TaskDialogIcon.Information,
                                 Title       = Signature.Software + " " + Signature.Version,
                                 Instruction = Path.GetFileNameWithoutExtension(args[1]),
-                                Content     = fid + " [" + fid.Quality + "]"
+                                Content     = fid + " – " + ShowNames.Regexes.PartText.Replace(fid.Title, string.Empty) + " – " + fid.Quality
                             }.Show();
                     }
                     else

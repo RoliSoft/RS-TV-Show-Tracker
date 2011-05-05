@@ -18,7 +18,7 @@
         /// <summary>
         /// A list of uppercase keywords which will be removed if the file name starts with them.
         /// </summary>
-        public static readonly string[] Keywords = new[] { "AAF-" };
+        public static readonly string[] Keywords = new[] { "AAF-", "MED-" };
 
         /// <summary>
         /// A regular expression dynamically generated from the list of keywords above.
@@ -49,9 +49,10 @@
         /// Parses the name of the specified file.
         /// </summary>
         /// <param name="file">The file.</param>
-        /// <param name="askExternalGuide">if set to <c>true</c> lab.rolisoft.net's API will be asked to identify a show after the local database failed.</param>
+        /// <param name="parents">The name of the parent directories.</param>
+        /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked to identify a show after the local database failed.</param>
         /// <returns>Parsed file information.</returns>
-        public static ShowFile ParseFile(string file, bool askExternalGuide = true)
+        public static ShowFile ParseFile(string file, string[] parents = null, bool askRemote = true)
         {
             // split the name into two parts: before and after the episode numbering
 
@@ -74,15 +75,92 @@
             var name  = Regexes.SpecialChars.Replace(RemoveKeywords.Replace(fi[0].ToUpper(), string.Empty).Trim(), " ").Trim();
             var title = string.Empty;
             var date  = DateTime.MinValue;
+            var match = false;
 
-            if (string.IsNullOrWhiteSpace(name))
+            // try to identify show by file name
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                var info = IdentifyShow(name, ep, askRemote);
+
+                if (info != null)
+                {
+                    match = true;
+                    name  = info.Item1;
+                    title = info.Item2;
+                    date  = info.Item3;
+                }
+            }
+
+            // try to identify show by the name of the parent directories
+
+            if (!match && parents != null)
+            {
+                for (var i = 1; i < 6; i++) // limit traversal up to 5 directory names, because identification can be expensive
+                {
+                    var dir = Regexes.VolNumbering.Replace(Regexes.SpecialChars.Replace(RemoveKeywords.Replace(parents[parents.Length - i].ToUpper(), string.Empty).Trim(), " ").Trim(), string.Empty);
+                    var dirinfo = IdentifyShow(dir, ep);
+
+                    if (dirinfo != null)
+                    {
+                        match = true;
+                        name  = dirinfo.Item1;
+                        title = dirinfo.Item2;
+                        date  = dirinfo.Item3;
+
+                        break;
+                    }
+                }
+            }
+
+            // if no name was found and none of the directories match stop the identification
+
+            if (!match && string.IsNullOrWhiteSpace(name))
             {
                 return new ShowFile(file, ShowFile.FailureReasons.ShowNameNotFound);
             }
 
-            // try to find show in local database
+            // extract quality and group
 
+            var path    = parents != null ? string.Join(" ", parents) + " " + file : file; 
+            var quality = ParseQuality(path).GetAttribute<DescriptionAttribute>().Description;
+            var groupm  = Regexes.Group.Match(path);
+            var group   = groupm.Success
+                          ? groupm.Groups[1].Value
+                          : string.Empty;
+
+            // if name or title was not found, try to improvise
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                title = "Season {0}, Episode {1}".FormatWith(ep.Season, ep.Episode);
+            }
+
+            if (!match)
+            {
+                return new ShowFile(file, name.ToLower().ToUppercaseWords(), ep, title, quality, group, date, false)
+                    {
+                        ParseError = ShowFile.FailureReasons.ShowNotIdentified
+                    };
+            }
+
+            return new ShowFile(file, name, ep, title, quality, group, date);
+        }
+
+        /// <summary>
+        /// Identifies the name of the show.
+        /// </summary>
+        /// <param name="name">The name of the show.</param>
+        /// <param name="ep">The episode.</param>
+        /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked to identify a show after the local database failed.</param>
+        /// <returns></returns>
+        private static Tuple<string, string, DateTime> IdentifyShow(string name, ShowEpisode ep, bool askRemote = false)
+        {
+            var title = string.Empty;
+            var date  = DateTime.MinValue;
             var match = false;
+
+            // try to find show in local database
 
             if (LocalTVShows == null || LoadDate < Database.DataChange)
             {
@@ -90,12 +168,13 @@
                 LocalTVShows = Database.Query("select showid, name, release from tvshows");
             }
 
+            var fileParts = ShowNames.Parser.GetRoot(name);
+
             foreach (var show in LocalTVShows)
             {
                 var titleParts = string.IsNullOrWhiteSpace(show["release"])
                                ? ShowNames.Parser.GetRoot(show["name"])
                                : show["release"].Split(' ');
-                var fileParts  = ShowNames.Parser.GetRoot(name);
 
                 if (titleParts.SequenceEqual(fileParts))
                 {
@@ -114,7 +193,7 @@
 
             // try to find show in cache
 
-            if (!match && askExternalGuide && ShowIDCache.ContainsKey(name))
+            if (!match && askRemote && ShowIDCache.ContainsKey(name))
             {
                 match = true;
                 name  = ShowIDCache[name].Title;
@@ -129,7 +208,7 @@
 
             // try to identify show using lab.rolisoft.net's API
 
-            if (!match && askExternalGuide)
+            if (!match && askRemote)
             {
                 var req = Remote.API.GetShowInfo(name, new[] { "Title", "Source", "SourceID" });
 
@@ -154,30 +233,11 @@
                 }
             }
 
-            // extract quality and group
+            // return
 
-            var quality = ParseQuality(file).GetAttribute<DescriptionAttribute>().Description;
-            var groupm  = Regexes.Group.Match(file);
-            var group   = groupm.Success
-                          ? groupm.Groups[1].Value
-                          : string.Empty;
-
-            // if name or title was not found, try to improvise
-
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                title = "Season {0}, Episode {1}".FormatWith(ep.Season, ep.Episode);
-            }
-
-            if (!match)
-            {
-                return new ShowFile(file, name.ToLower().ToUppercaseWords(), ep, title, quality, group, date, false)
-                    {
-                        ParseError = ShowFile.FailureReasons.ShowNotIdentified
-                    };
-            }
-
-            return new ShowFile(file, name, ep, title, quality, group, date);
+            return match
+                   ? new Tuple<string, string, DateTime>(name, title, date)
+                   : null;
         }
 
         /// <summary>

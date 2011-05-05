@@ -128,6 +128,29 @@
             };
 
         /// <summary>
+        /// Contains a list of release names with season pack notations and how they're supposed to look after removal.
+        /// </summary>
+        public static Dictionary<string, string> PackNotations = new Dictionary<string, string>
+            {
+                {
+                    "Lost.COMPLETE.720p.BluRay.x264-TvT",
+                    "Lost"
+                },
+                {
+                    "Seinfeld.Season3.DVDR.NTSC.RO.BlueSky",
+                    "Seinfeld"
+                },
+                {
+                    "Grey's Anatomy - Season 1",
+                    "Grey's Anatomy"
+                },
+                {
+                    "Top Gear Series 11",
+                    "Top Gear"
+                },
+            };
+
+        /// <summary>
         /// Tests whether the show names are correctly cleaned.
         /// </summary>
         [Test]
@@ -150,6 +173,19 @@
             {
                 Console.WriteLine(show.Key + " -> " + show.Value);
                 Assert.AreEqual(show.Value, Parser.ExtractEpisode(show.Key));
+            }
+        }
+
+        /// <summary>
+        /// Tests the removal of season pack notations.
+        /// </summary>
+        [Test]
+        public void SeasonPackRemoval()
+        {
+            foreach (var show in PackNotations)
+            {
+                Console.WriteLine(show.Key + " -> " + show.Value);
+                Assert.AreEqual(show.Value, Regexes.VolNumbering.Replace(show.Key, string.Empty));
             }
         }
     }

@@ -216,7 +216,7 @@
             {
                 SetStatus("Identifying " + file.Information.Name + "...", true);
 
-                file.Information = FileNames.Parser.ParseFile(file.Information.Name);
+                file.Information = FileNames.Parser.ParseFile(file.Information.Name, Path.GetDirectoryName(file.Location).Split(Path.DirectorySeparatorChar));
                 file.Checked     = file.Recognized = file.Enabled = file.Information.Success;
                 file.Processed   = true;
 

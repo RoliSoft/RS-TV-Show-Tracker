@@ -106,13 +106,12 @@
             foreach (var file in Directory.GetFiles(path))
             {
                 var name = Path.GetFileName(file);
-                var dir  = Path.GetFileName(Path.GetDirectoryName(file));
+                var dirs = Path.GetDirectoryName(file) ?? string.Empty;
 
-                if (ShowNames.Parser.IsMatch(dir + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
+                if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
                 {
-                    var pf = FileNames.Parser.ParseFile(name);
-                    if ((pf.Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show))) || // is the show extracted from the file name the exact same?
-                        ((pf = FileNames.Parser.ParseFile(dir)).Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show)))) // or the one extracted from the directory name?
+                    var pf = FileNames.Parser.ParseFile(name, dirs.Split(Path.DirectorySeparatorChar), false);
+                    if (pf.Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show))) // or the one extracted from the directory name?
                     {
                         Files.Add(file);
                     }

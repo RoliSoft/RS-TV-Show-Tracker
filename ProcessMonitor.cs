@@ -77,11 +77,10 @@
 
                 foreach (var file in files)
                 {
-                    if (Parser.IsMatch(file.Directory.Name + @"\" + file.Name, parts))
+                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, parts))
                     {
-                        var pf = FileNames.Parser.ParseFile(file.Name);
-                        if ((pf.Success && parts.SequenceEqual(Parser.GetRoot(pf.Show))) || // is the show extracted from the file name the exact same?
-                            ((pf = FileNames.Parser.ParseFile(file.Directory.Name)).Success && parts.SequenceEqual(Parser.GetRoot(pf.Show)))) // or the one extracted from the directory name?
+                        var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
+                        if (pf.Success && parts.SequenceEqual(Parser.GetRoot(pf.Show))) // or the one extracted from the directory name?
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {
