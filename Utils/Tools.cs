@@ -530,9 +530,13 @@
 
             appkey.Close();
 
-            if (cmd.IndexOf("%1") != -1)
+            if (cmd.StartsWith("\""))
             {
-                cmd = Regex.Replace(cmd, @"\s*""?\s*%[0-9]\s*""?\s*", string.Empty);
+                var cmds = Regex.Split(cmd, "\"([^\"]+)");
+                if (cmds.Length > 1)
+                {
+                    cmd = cmds[1];
+                }
             }
 
             return cmd.Trim(" \"'".ToCharArray());
@@ -583,6 +587,19 @@
             var icon = ExtractIcon(path);
 
             return new Tuple<string, BitmapSource>(name, icon);
+        }
+
+        /// <summary>
+        /// Gets path of applications which are associated to common video extensions.
+        /// </summary>
+        /// <returns>List of default video players.</returns>
+        public static string[] GetDefaultVideoPlayers()
+        {
+            return new[] { ".avi", ".mkv", ".ts", ".mp4", ".wmv" }
+                   .Select(GetApplicationForExtension)
+                   .Where(app => !string.IsNullOrWhiteSpace(app))
+                   .Distinct()
+                   .ToArray();
         }
 
         /// <summary>

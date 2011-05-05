@@ -17,6 +17,7 @@
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using CheckBox       = System.Windows.Controls.CheckBox;
+    using Label          = System.Windows.Controls.Label;
     using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
     /// <summary>
@@ -56,7 +57,6 @@
             // general
 
             dlPathTextBox.Text  = Settings.Get("Download Path");
-            processTextBox.Text = string.Join(",", Settings.GetList("Processes to Monitor"));
 
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
@@ -69,7 +69,7 @@
 
             showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
             
-            // downloaders
+            // associations
 
             torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
             usenetPathTextBox.Text  = Settings.Get("Usenet Downloader");
@@ -113,6 +113,28 @@
             {
                 httpAssociationName.Text = "[no software associated with .htm files]";
             }
+
+            var viddef = Utils.GetDefaultVideoPlayers();
+            foreach (var app in viddef)
+            {
+                var info = Utils.GetExecutableInfo(app);
+
+                processesStackPanel.Children.Add(new Image
+                    {
+                        Source = info.Item2,
+                        Width  = 16,
+                        Height = 16,
+                        Margin = new Thickness(0, 0, 5, 0),
+                    });
+                processesStackPanel.Children.Add(new Label
+                    {
+                        Content = info.Item1,
+                        Margin  = new Thickness(0, 0, 7, 0),
+                        Padding = new Thickness(0)
+                    });
+            }
+
+            processTextBox.Text = string.Join(",", Settings.GetList("Processes to Monitor"));
 
             // parsers
 

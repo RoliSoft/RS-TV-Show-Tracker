@@ -39,18 +39,6 @@
 
                         <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/eye.png" Height="16" Width="16" Margin="0,1,5,0" />
-                                <Label Content="Processes to monitor" FontSize="16" Foreground="DarkBlue" Padding="0" />
-                            </StackPanel>
-                            <TextBlock TextWrapping="Wrap" Margin="3,5">
-                                Enter the file name (not the path) of the video player you're using to watch TV shows. If you're using more than one, enter each name separated by a comma.<LineBreak />
-                                For example: kmplayer.exe,wmplayer.exe
-                            </TextBlock>
-                            <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
-                        </StackPanel>
-
-                        <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                            <StackPanel Orientation="Horizontal">
                                 <Image Source="/RSTVShowTracker;component/Images/windows-7.png" Height="16" Width="16" Margin="0,1,5,0" />
                                 <CheckBox Content=" Start at system startup" Name="startAtStartup" Checked="StartAtStartupChecked" Unchecked="StartAtStartupUnchecked" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
@@ -84,8 +72,8 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Downloaders" Name="downloadersTabItem">
-                <Grid Name="downloadersGrid">
+            <TabItem Header="Associations" Name="associationsTabItem">
+                <Grid Name="associationsGrid">
                     <Rectangle Height="20" VerticalAlignment="Top">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -112,11 +100,23 @@
                                     <Image Name="httpAssociationIcon" Height="16" Width="16" Margin="3,3,3,0" />
                                 </StackPanel>
                                 <StackPanel Orientation="Vertical">
-                                    <TextBlock Name="torrentAssociationName" Height="16" Margin="3,0,3,3">µTorrent</TextBlock>
-                                    <TextBlock Name="usenetAssociationName" Height="16" Margin="3">NewsLeecher</TextBlock>
-                                    <TextBlock Name="httpAssociationName" Height="16" Margin="3,3,3,0">Opera</TextBlock>
+                                    <TextBlock Name="torrentAssociationName" Height="16" Margin="2,0,3,3">µTorrent</TextBlock>
+                                    <TextBlock Name="usenetAssociationName" Height="16" Margin="2,3,3,3">NewsLeecher</TextBlock>
+                                    <TextBlock Name="httpAssociationName" Height="16" Margin="2,3,3,0">Opera</TextBlock>
                                 </StackPanel>
                             </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Margin="10,-2,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/eye.png" Height="16" Width="16" Margin="0,1,5,0" />
+                                <Label Content="Monitored processes" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                            </StackPanel>
+                            <StackPanel Name="processesStackPanel" Orientation="Horizontal" Margin="0,5,3,0" />
+                            <TextBlock TextWrapping="Wrap" Margin="3,5">
+                                You can add additional processes to monitor by entering the executable names separated by a comma:
+                            </TextBlock>
+                            <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
                         </StackPanel>
                         
                         <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">

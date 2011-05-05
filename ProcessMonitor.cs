@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -32,7 +33,7 @@
         /// </summary>
         /// <param name="processes">The processes' executable name.</param>
         /// <returns>List of the open files.</returns>
-        public static List<FileInfo> GetHandleList(params string[] processes)
+        public static List<FileInfo> GetHandleList(IEnumerable<string> processes)
         {
             var sb = new StringBuilder();
 
@@ -44,7 +45,7 @@
             return Regex.Matches(sb.ToString(), @"(?:D|\-)\)\s+(.+)(?:\r|$)")
                    .Cast<Match>()
                    .Select(m => m.Groups[1].Value.Trim())
-                   .Distinct()
+                   .Distinct(StringComparer.CurrentCultureIgnoreCase)
                    .Select(f => new FileInfo(f))
                    .ToList();
         }
@@ -59,14 +60,16 @@
                 return;
             }
 
-            var procs = Settings.GetList("Processes to Monitor");
+            var procs = new List<string>();
+            procs.AddRange(Settings.GetList("Processes to Monitor"));
+            procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName));
 
-            if (procs == null || procs.Length == 0)
+            if (procs.Count() == 0)
             {
                 return;
             }
 
-            var files = GetHandleList(procs);
+            var files = GetHandleList(procs.Distinct(StringComparer.CurrentCultureIgnoreCase));
             var shows = Database.Query("select showid, name, release from tvshows order by rowid asc");
 
             foreach (var show in shows)
