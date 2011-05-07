@@ -84,6 +84,19 @@
             {
                 Keys["Active Subtitle Languages"] = new List<string> { "en" };
             }
+
+            // update download path to an array
+            // -> revision bd869ed9836a6d1c846a17586855d51b5ce092c2
+
+            if (Keys.ContainsKey("Download Path"))
+            {
+                Keys["Download Paths"] = new List<string>
+                    {
+                        (string)Keys["Download Path"]
+                    };
+
+                Keys.Remove("Download Path");
+            }
         }
         
         /// <summary>
@@ -106,9 +119,13 @@
         public static T Get<T>(string key, T defaultValue = default(T))
         {
             object value;
-            return Keys.TryGetValue(key, out value)
-                   ? (T)value
-                   : defaultValue;
+
+            if (Keys.TryGetValue(key, out value) && value != null)
+            {
+                return (T)value;
+            }
+
+            return defaultValue;
         }
 
         /// <summary>
@@ -129,22 +146,19 @@
         /// <returns>Stored value or list with 0 items.</returns>
         public static T[] GetList<T>(string key)
         {
-            // This is tricky, because the object reference is returned from the array for
-            // the specified key, so when ToList() or similar functions are called later in the
-            // code, the object will change in the Keys dictionary too! This makes the type of
-            // the array dynamic and hilarity ensues: we'll have to detect the type and
-            // cast it back to T[] every. fucking. time.
-
             object value;
-            return Keys.TryGetValue(key, out value)
-                   ? value is T[]
-                     ? (T[])value
-                     : value is List<T>
-                       ? ((List<T>)value).ToArray()
-                       : value is JArray
-                         ? ((JArray)value).Values<T>().ToArray()
-                         : null
-                   : new T[0];
+
+            if (Keys.TryGetValue(key, out value) && value != null)
+            {
+                if (value is JArray)
+                {
+                    value = ((JArray)value).Values<T>();
+                }
+
+                return ((IEnumerable<T>)value).ToArray();
+            }
+
+            return new T[0];
         }
 
         /// <summary>

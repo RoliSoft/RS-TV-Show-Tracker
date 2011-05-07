@@ -32,9 +32,9 @@
             _show    = show;
             _episode = episode;
 
-            var path = Settings.Get("Download Path");
+            var paths = Settings.GetList("Download Paths");
 
-            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            if (paths.Length == 0)
             {
                 new TaskDialog
                     {
@@ -70,7 +70,7 @@
                     }
                 }).Start();
             
-            _fs = new FileSearch(path, show, episode);
+            _fs = new FileSearch(paths, show, episode);
 
             _fs.FileSearchDone += FileSearchDone;
             _fs.BeginSearch();

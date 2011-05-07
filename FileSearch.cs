@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Security;
     using System.Text.RegularExpressions;
     using System.Threading;
 
@@ -18,10 +19,10 @@
         public event EventHandler<EventArgs> FileSearchDone;
 
         /// <summary>
-        /// Gets the path where the search begins.
+        /// Gets the paths where the search will begin.
         /// </summary>
-        /// <value>The start path.</value>
-        public string StartPath { get; internal set; }
+        /// <value>The start paths.</value>
+        public string[] StartPaths { get; internal set; }
 
         /// <summary>
         /// Gets the name of the show and the episode number.
@@ -47,17 +48,17 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
         /// </summary>
-        /// <param name="path">The path where to start the search.</param>
+        /// <param name="paths">The paths where to start the search.</param>
         /// <param name="show">The show name.</param>
         /// <param name="episode">The episode number.</param>
-        public FileSearch(string path, string show, string episode)
+        public FileSearch(string[] paths, string show, string episode)
         {
             _titleParts   = Database.GetReleaseName(show);
             _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode);
 
-            ShowQuery = show + " " + episode;
-            StartPath = path;
-            Files     = new List<string>();
+            ShowQuery  = show + " " + episode;
+            StartPaths = paths;
+            Files      = new List<string>();
         }
 
         /// <summary>
@@ -82,17 +83,11 @@
         /// </summary>
         private void Search()
         {
-            // start
-            try
+            foreach (var path in StartPaths)
             {
-                ScanDirectoryForFile(StartPath);
-            }
-            catch (Exception ex)
-            {
-                MainWindow.Active.HandleUnexpectedException(ex);
+                ScanDirectoryForFile(path);
             }
 
-            // fire event
             FileSearchDone.Fire(this);
         }
 
@@ -103,30 +98,50 @@
         private void ScanDirectoryForFile(string path)
         {
             // search for matching files
-            foreach (var file in Directory.GetFiles(path))
+            try
             {
-                var name = Path.GetFileName(file);
-                var dirs = Path.GetDirectoryName(file) ?? string.Empty;
-
-                if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
+                foreach (var file in Directory.EnumerateFiles(path))
                 {
-                    var pf = FileNames.Parser.ParseFile(name, dirs.Split(Path.DirectorySeparatorChar), false);
-                    if (pf.Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show))) // or the one extracted from the directory name?
+                    var name = Path.GetFileName(file);
+                    var dirs = Path.GetDirectoryName(file) ?? string.Empty;
+
+                    if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
                     {
-                        Files.Add(file);
+                        var pf = FileNames.Parser.ParseFile(name, dirs.Split(Path.DirectorySeparatorChar), false);
+                        if (pf.Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show)))
+                        {
+                            Files.Add(file);
+                        }
                     }
                 }
             }
-
-            // search for matching directory names
-            foreach (var dir in Directory.GetDirectories(path))
+            catch (PathTooLongException)        { }
+            catch (SecurityException)           { }
+            catch (UnauthorizedAccessException) { }
+            catch (Exception ex)
             {
-                if (string.IsNullOrWhiteSpace(dir))
-                {
-                    continue;
-                }
+                MainWindow.Active.HandleUnexpectedException(ex);
+            }
 
-                ScanDirectoryForFile(dir);
+            // WE MUST GO DEEPER!
+            try
+            {
+                foreach (var dir in Directory.EnumerateDirectories(path))
+                {
+                    if (string.IsNullOrWhiteSpace(dir))
+                    {
+                        continue;
+                    }
+
+                    ScanDirectoryForFile(dir);
+                }
+            }
+            catch (PathTooLongException)        { }
+            catch (SecurityException)           { }
+            catch (UnauthorizedAccessException) { }
+            catch (Exception ex)
+            {
+                MainWindow.Active.HandleUnexpectedException(ex);
             }
         }
     }

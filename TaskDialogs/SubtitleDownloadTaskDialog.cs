@@ -147,9 +147,9 @@
             _show    = show;
             _episode = episode;
 
-            var path = Settings.Get("Download Path");
+            var paths = Settings.GetList("Download Paths");
 
-            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            if (paths.Length == 0)
             {
                 new TaskDialog
                     {
@@ -176,7 +176,7 @@
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
-            _fs = new FileSearch(path, show, episode);
+            _fs = new FileSearch(paths, show, episode);
 
             _fs.FileSearchDone += NearVideoFileSearchDone;
             _fs.BeginSearch();

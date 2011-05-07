@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
@@ -40,7 +41,7 @@
         }
 
         private List<DownloadSearchEngine> _engines;
-        private List<string> _trackers, _excludes;
+        private List<string> _trackers, _includes;
 
         /// <summary>
         /// Handles the Loaded event of the Window control.
@@ -56,7 +57,10 @@
 
             // general
 
-            dlPathTextBox.Text  = Settings.Get("Download Path");
+            foreach (var path in Settings.GetList("Download Paths"))
+            {
+                dlPathsListBox.Items.Add(path);
+            }
 
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
@@ -64,8 +68,11 @@
             }
 
             convertTimezone.IsChecked = Settings.Get("Convert Timezone", true);
-            currentTimezone.Text      = "Your current timezone is " + TimeZoneInfo.Local.DisplayName + ".\r\n"
-                                      + "Your difference from Central Standard Time is {0} hours.".FormatWith(TimeZoneInfo.Local.BaseUtcOffset.Add(TimeSpan.FromHours(TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time").BaseUtcOffset.TotalHours * -1)).TotalHours);
+
+            var tzinfo = "Your current timezone is " + TimeZoneInfo.Local.DisplayName + ".\r\n"
+                       + "Your difference from Central Standard Time is {0} hours.".FormatWith(TimeZoneInfo.Local.BaseUtcOffset.Add(TimeSpan.FromHours(TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time").BaseUtcOffset.TotalHours * -1)).TotalHours);
+
+            currentTimezone.ContentEnd.InsertTextInRun(tzinfo);
 
             showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
             
@@ -124,7 +131,7 @@
                         Source = info.Item2,
                         Width  = 16,
                         Height = 16,
-                        Margin = new Thickness(0, 0, 5, 0),
+                        Margin = new Thickness(0, 0, 4, 0),
                     });
                 processesStackPanel.Children.Add(new Label
                     {
@@ -151,20 +158,19 @@
                                .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                .Select(engine => engine.Name));
 
-            _excludes = Settings.GetList("Tracker Exclusions").ToList();
+            _includes = Settings.GetList("Active Trackers").ToList();
 
             foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
             {
                 DownloadsListViewItemCollection.Add(new DownloadsListViewItem
                     {
-                        Enabled         = !_excludes.Contains(engine.Name),
+                        Enabled         = _includes.Contains(engine.Name),
                         Icon            = engine.Icon,
                         Site            = engine.Name,
                         Type            = engine.Type.ToString(),
                         RequiresCookies = engine.Private ? "Yes" : "No",
                         Developer       = engine.GetAttribute<ParserAttribute>().Developer,
-                        Revision        = engine.GetAttribute<ParserAttribute>().Revision.ToRelativeDate(),
-                        Assembly        = engine.GetType().Assembly.GetName().Name
+                        LastUpdate      = engine.GetAttribute<ParserAttribute>().Revision.ToRelativeDate()
                     });
             }
 
@@ -173,11 +179,11 @@
 
         #region General
         /// <summary>
-        /// Handles the Click event of the dlPathBrowseButton control.
+        /// Handles the Click event of the dlPathAddButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void DlPathBrowseButtonClick(object sender, RoutedEventArgs e)
+        private void DlPathAddButtonClick(object sender, RoutedEventArgs e)
         {
             var fbd = new FolderBrowserDialog
                 {
@@ -187,21 +193,76 @@
 
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                dlPathTextBox.Text = fbd.SelectedPath + Path.DirectorySeparatorChar;
+                dlPathsListBox.Items.Add(fbd.SelectedPath + Path.DirectorySeparatorChar);
+            }
+
+            SaveDlPaths();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the dlPathMoveUpButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DlPathMoveUpButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (dlPathsListBox.SelectedIndex == -1) return;
+
+            var idx = dlPathsListBox.SelectedIndex;
+            var sel = dlPathsListBox.Items[idx];
+
+            if (idx > 0)
+            {
+                dlPathsListBox.Items.Remove(sel);
+                dlPathsListBox.Items.Insert(idx - 1, sel);
+                dlPathsListBox.SelectedItem = sel;
+
+                SaveDlPaths();
             }
         }
 
         /// <summary>
-        /// Handles the TextChanged event of the dlPathTextBox control.
+        /// Handles the Click event of the dlPathMoveDownButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
-        private void DlPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DlPathMoveDownButtonClick(object sender, RoutedEventArgs e)
         {
-            if (dlPathTextBox.Text.Length == 0 || Directory.Exists(dlPathTextBox.Text))
+            if (dlPathsListBox.SelectedIndex == -1) return;
+
+            var idx = dlPathsListBox.SelectedIndex;
+            var sel = dlPathsListBox.Items[idx];
+
+            if (idx < dlPathsListBox.Items.Count - 1)
             {
-                Settings.Set("Download Path", dlPathTextBox.Text);
+                dlPathsListBox.Items.Remove(sel);
+                dlPathsListBox.Items.Insert(idx + 1, sel);
+                dlPathsListBox.SelectedItem = sel;
+
+                SaveDlPaths();
             }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the dlPathRemoveButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DlPathRemoveButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (dlPathsListBox.SelectedIndex == -1) return;
+
+            dlPathsListBox.Items.RemoveAt(dlPathsListBox.SelectedIndex);
+
+            SaveDlPaths();
+        }
+
+        /// <summary>
+        /// Saves the download paths to the XML settings file.
+        /// </summary>
+        public void SaveDlPaths()
+        {
+            Settings.Set("Download Paths", dlPathsListBox.Items.Cast<string>());
         }
 
         /// <summary>
@@ -211,7 +272,14 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void ProcessTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            Settings.Set("Processes to Monitor", processTextBox.Text.Trim(',').Split(','));
+            var proc = processTextBox.Text.Trim(',').Split(',');
+
+            if (proc.Length == 1 && string.IsNullOrWhiteSpace(proc[0]))
+            {
+                proc = new string[0];
+            }
+
+            Settings.Set("Processes to Monitor", proc);
         }
 
         /// <summary>
@@ -437,11 +505,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void EnabledChecked(object sender, RoutedEventArgs e)
         {
-            if (_excludes.Contains((sender as CheckBox).Tag as string))
+            if (!_includes.Contains((sender as CheckBox).Tag as string))
             {
-                _excludes.Remove((sender as CheckBox).Tag as string);
+                _includes.Add((sender as CheckBox).Tag as string);
 
-                SaveExclusions();
+                SaveInclusions();
             }
         }
 
@@ -452,20 +520,20 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void EnabledUnchecked(object sender, RoutedEventArgs e)
         {
-            if (!_excludes.Contains((sender as CheckBox).Tag as string))
+            if (_includes.Contains((sender as CheckBox).Tag as string))
             {
-                _excludes.Add((sender as CheckBox).Tag as string);
+                _includes.Remove((sender as CheckBox).Tag as string);
 
-                SaveExclusions();
+                SaveInclusions();
             }
         }
 
         /// <summary>
-        /// Saves the exclusions to the XML settings file.
+        /// Saves the active trackers to the XML settings file.
         /// </summary>
-        public void SaveExclusions()
+        public void SaveInclusions()
         {
-            Settings.Set("Tracker Exclusions", _excludes);
+            Settings.Set("Active Trackers", _includes);
         }
 
         /// <summary>

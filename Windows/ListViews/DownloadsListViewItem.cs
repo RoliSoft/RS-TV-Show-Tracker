@@ -42,15 +42,9 @@
         public string Developer { get; set; }
 
         /// <summary>
-        /// Gets or sets the revision.
+        /// Gets or sets the last update in relative time representation.
         /// </summary>
-        /// <value>The revision.</value>
-        public string Revision { get; set; }
-
-        /// <summary>
-        /// Gets or sets the assembly.
-        /// </summary>
-        /// <value>The assembly.</value>
-        public string Assembly { get; set; }
+        /// <value>The last update date.</value>
+        public string LastUpdate { get; set; }
     }
 }
