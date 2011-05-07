@@ -276,6 +276,30 @@
         }
         #endregion
 
+        #region Search for online videos
+        /// <summary>
+        /// Handles the Click event of the iTunes control.
+        /// </summary>
+        /// <param name="show">The show.</param>
+        /// <param name="episode">The episode.</param>
+        private void ITunesClick(string show, string episode)
+        {
+            var epnr = ShowNames.Parser.ExtractEpisode(episode);
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show + " intitle:\"season " + epnr.Season + "\" site:itunes.apple.com inurl:/tv-season/"));
+        }
+
+        /// <summary>
+        /// Handles the Click event of the Amazon control.
+        /// </summary>
+        /// <param name="show">The show.</param>
+        /// <param name="episode">The episode.</param>
+        private void AmazonClick(string show, string episode)
+        {
+            var epnr = ShowNames.Parser.ExtractEpisode(episode);
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show + " intitle:\"Season " + epnr.Season + ", Episode " + epnr.Episode + "\" site:amazon.com"));
+        }
+        #endregion
+
         #region ListView keys
         /// <summary>
         /// Handles the KeyUp event of the listView control.
@@ -416,7 +440,7 @@
             var show = (OverviewListViewItem)listView.SelectedValue;
 
             var spm = -55;
-            var lbw = 160;
+            var lbw = 115;
 
             if (show.NewEpisodes >= 2)
             {
@@ -436,7 +460,7 @@
                 
                 (pla.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Play next unseen episode",
+                        Content = "Play next unseen ep.",
                         Padding = new Thickness(0),
                         Width   = lbw
                     });
@@ -469,7 +493,7 @@
                     });
                 (sfd.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Search for download links",
+                        Content = "Download links",
                         Padding = new Thickness(0),
                         Width   = lbw - 15
                     });
@@ -496,7 +520,7 @@
                     });
                 (sfs.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Search for subtitles",
+                        Content = "Subtitles",
                         Padding = new Thickness(0),
                         Width   = lbw - 15
                     });
@@ -522,7 +546,7 @@
                     });
                 (sov.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Search for online videos",
+                        Content = "Online videos",
                         Padding = new Thickness(0),
                         Width   = lbw - 15
                     });
@@ -547,6 +571,28 @@
 
                 sov.Items.Add(ipl);
 
+                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+                // - iTunes
+
+                var itu    = new MenuItem();
+                itu.Header = "iTunes";
+                itu.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/apple.png")) };
+                itu.Click += (s, r) => ITunesClick(show.Name, nextep);
+
+                sov.Items.Add(itu);
+
+                // - Amazon
+
+                var amz    = new MenuItem();
+                amz.Header = "Amazon Instant Video";
+                amz.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/amazon.png")) };
+                amz.Click += (s, r) => AmazonClick(show.Name, nextep);
+
+                sov.Items.Add(amz);
+
+                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
                 // - SideReel
 
                 var srs    = new MenuItem();
@@ -564,6 +610,8 @@
                 gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + nextep));
 
                 sov.Items.Add(gls);
+
+                cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
             }
 
             if (show.Started)
@@ -581,7 +629,7 @@
                 
                 (pla.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Play last aired episode",
+                        Content = "Play last aired ep.",
                         Padding = new Thickness(0),
                         Width   = lbw
                     });
@@ -614,7 +662,7 @@
                     });
                 (sfd.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Search for download links",
+                        Content = "Download links",
                         Padding = new Thickness(0),
                         Width   = lbw - 15
                     });
@@ -641,7 +689,7 @@
                     });
                 (sfs.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Search for subtitles",
+                        Content = "Subtitles",
                         Padding = new Thickness(0),
                         Width   = lbw - 15
                     });
@@ -667,7 +715,7 @@
                     });
                 (sov.Header as StackPanel).Children.Add(new Label
                     {
-                        Content = "Search for online videos",
+                        Content = "Online videos",
                         Padding = new Thickness(0),
                         Width   = lbw - 15
                     });
@@ -692,6 +740,28 @@
 
                 sov.Items.Add(ipl);
 
+                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+                // - iTunes
+
+                var itu    = new MenuItem();
+                itu.Header = "iTunes";
+                itu.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/apple.png")) };
+                itu.Click += (s, r) => ITunesClick(show.Name, lastep);
+
+                sov.Items.Add(itu);
+
+                // - Amazon
+
+                var amz    = new MenuItem();
+                amz.Header = "Amazon Instant Video";
+                amz.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/amazon.png")) };
+                amz.Click += (s, r) => AmazonClick(show.Name, lastep);
+
+                sov.Items.Add(amz);
+
+                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
                 // - SideReel
 
                 var srs    = new MenuItem();
@@ -709,6 +779,8 @@
                 gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + lastep));
 
                 sov.Items.Add(gls);
+
+                cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
             }
 
             var vel    = new MenuItem();

@@ -3,7 +3,6 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Globalization;
-    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
@@ -11,9 +10,6 @@
     using System.Windows.Input;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
-
-    using Microsoft.WindowsAPICodePack.Dialogs;
-    using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
     using RoliSoft.TVShowTracker.TaskDialogs;
@@ -420,6 +416,36 @@
             var show = GetSelectedShow();
 
             new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show[0], show[1]);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the iTunes control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ITunesClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+
+            var show = GetSelectedShow();
+            var epnr = ShowNames.Parser.ExtractEpisode(show[1]);
+
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show[0] + " intitle:\"season " + epnr.Season + "\" site:itunes.apple.com inurl:/tv-season/"));
+        }
+
+        /// <summary>
+        /// Handles the Click event of the Amazon control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AmazonClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+
+            var show = GetSelectedShow();
+            var epnr = ShowNames.Parser.ExtractEpisode(show[1]);
+
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show[0] + " intitle:\"Season " + epnr.Season + ", Episode " + epnr.Episode + "\" site:amazon.com"));
         }
 
         /// <summary>

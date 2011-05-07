@@ -290,22 +290,22 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                     <Image Source="/RSTVShowTracker;component/Images/play.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Open details page" Click="OpenDetailsPageClick"  Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.OpenDetailsPageVisible}">
+                            <MenuItem Header="Details page" Click="OpenDetailsPageClick"  Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem.OpenDetailsPageVisible}">
                                 <MenuItem.Icon>
                                     <Image Source="/RSTVShowTracker;component/Images/page.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Search for download links" Click="SearchDownloadLinksClick">
+                            <MenuItem Header="Download links" Click="SearchDownloadLinksClick">
                                 <MenuItem.Icon>
                                     <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Search for subtitles" Click="SearchSubtitlesClick">
+                            <MenuItem Header="Subtitles" Click="SearchSubtitlesClick">
                                 <MenuItem.Icon>
                                     <Image Source="/RSTVShowTracker;component/Images/subtitles.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Search for online videos">
+                            <MenuItem Header="Online videos">
                                 <MenuItem.Icon>
                                     <Image Source="/RSTVShowTracker;component/Images/monitor.png" />
                                 </MenuItem.Icon>
@@ -319,6 +319,18 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                         <Image Source="/RSTVShowTracker;component/Images/bbc.png" Width="16" Height="16" />
                                     </MenuItem.Icon>
                                 </MenuItem>
+                                <Separator Margin="0,-5,0,-3" />
+                                <MenuItem Header="iTunes" Click="ITunesClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/apple.png" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Amazon Instant Video" Click="AmazonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/amazon.png" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator Margin="0,-5,0,-3" />
                                 <MenuItem Header="SideReel" Click="SideReelClick">
                                     <MenuItem.Icon>
                                         <Image Source="/RSTVShowTracker;component/Images/sidereel.png" Width="16" Height="16" />
