@@ -15,6 +15,19 @@
     /// </summary>
     public static class API
     {
+        /// <summary>
+        /// Gets the URL to the remote API endpoint.
+        /// </summary>
+        /// <value>The remote API endpoint.</value>
+        public static string EndPoint
+        {
+            get
+            {
+                //return "home.rolisoft.net/api/";
+                return "lab.rolisoft.net/api/";
+            }
+        }
+
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
@@ -88,9 +101,6 @@
             T obj;
             var sw = Stopwatch.StartNew();
 
-            var endpoint = "http" + (secure ? "s" : string.Empty) + "://lab.rolisoft.net/api/";
-            //endpoint = "http://home.rolisoft.net/api/";
-
             try
             {
                 var post = Utils.EscapeUTF8(JsonConvert.SerializeObject(new Request(func, args), Formatting.None, _settings));
@@ -111,7 +121,7 @@
                 }
 
                 var resp = Utils.GetURL(
-                    url:       endpoint,
+                    url:       "http{0}://{1}".FormatWith(secure ? "s" : string.Empty, EndPoint),
                     postData:  post,
                     userAgent: "{0}/{1}".FormatWith(Signature.Software, Signature.Version),
                     timeout:   120000,
@@ -210,6 +220,26 @@
         public static MultipleShowInfo GetMultipleShowInfo(IEnumerable<string> shows, IEnumerable<string> filter = null)
         {
             return InvokeRemoteMethod<MultipleShowInfo>("GetMultipleShowInfo", shows, filter);
+        }
+
+        /// <summary>
+        /// Gets a cover for the specified show.
+        /// </summary>
+        /// <param name="show">The name of the show.</param>
+        /// <returns>Cover of the show.</returns>
+        public static Generic<string> GetShowCover(string show)
+        {
+            return InvokeRemoteMethod<Generic<string>>("GetShowCover", show);
+        }
+
+        /// <summary>
+        /// Gets the favicon of the website which is the first result for the specified query.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns>Favicon of the query.</returns>
+        public static Generic<string> GetQueryFavicon(string query)
+        {
+            return InvokeRemoteMethod<Generic<string>>("GetQueryFavicon", query);
         }
 
         /// <summary>

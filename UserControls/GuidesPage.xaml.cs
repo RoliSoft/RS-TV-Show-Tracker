@@ -196,11 +196,7 @@
 
             var airing = bool.Parse(Database.ShowData(id, "airing"));
 
-            var url = Database.ShowData(id, "cover");
-            var pic = !string.IsNullOrWhiteSpace(url)
-                      ? new Uri(Utils.Coralify(url))
-                      : new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative);
-            showGeneralCover.Source = new BitmapImage(pic, new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
+            showGeneralCover.Source = new BitmapImage(new Uri("http://" + Remote.API.EndPoint + "?/GetShowCover/" + Uri.EscapeUriString(comboBox.SelectedValue.ToString())), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
             
             showGeneralName.Text = comboBox.SelectedValue.ToString();
 
