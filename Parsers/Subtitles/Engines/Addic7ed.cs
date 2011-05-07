@@ -94,5 +94,13 @@
                 yield return sub;
             }
         }
+
+        /// <summary>
+        /// Tests the parser by searching for "House" on the site.
+        /// </summary>
+        public override void TestSearchShow()
+        {
+            Assert.Inconclusive("Addic7ed only supports searching for specific episodes.");
+        }
     }
 }

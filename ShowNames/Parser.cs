@@ -125,7 +125,7 @@
         /// </returns>
         public static bool IsMatch(string name, string episode, string release)
         {
-            return IsMatch(release, Database.GetReleaseName(name), GenerateEpisodeRegexes(episode), false);
+            return IsMatch(release, Database.GetReleaseName(name), !string.IsNullOrEmpty(episode) ? GenerateEpisodeRegexes(episode) : null, false);
         }
 
         /// <summary>

@@ -85,11 +85,28 @@
         /// Tests the parser by searching for "House S07E01" on the site.
         /// </summary>
         [Test]
-        public virtual void TestSearch()
+        public virtual void TestSearchEpisode()
         {
             var list = Search("House S07E01").ToList();
 
             Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House S07E01 on {0}.".FormatWith(Name));
+
+            Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");
+            Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
+            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), item.URL.CutIfLonger(60))));
+            Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
+        }
+
+        /// <summary>
+        /// Tests the parser by searching for "House" on the site.
+        /// </summary>
+        [Test]
+        public virtual void TestSearchShow()
+        {
+            var list = Search("House").ToList();
+
+            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House on {0}.".FormatWith(Name));
 
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");

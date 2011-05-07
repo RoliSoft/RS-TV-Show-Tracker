@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
-    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Windows;
@@ -12,12 +10,9 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using Microsoft.Win32;
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Helpers;
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
     using RoliSoft.TVShowTracker.TaskDialogs;
 

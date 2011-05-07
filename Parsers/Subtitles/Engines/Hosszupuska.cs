@@ -91,28 +91,5 @@
                     return string.Empty;
             }
         }
-
-        /// <summary>
-        /// Tests the parser by searching for "House S07E01" on the site.
-        /// </summary>
-        [Test]
-        public override void TestSearch()
-        {
-            if (Dns.GetHostAddresses("hosszupuskasub.com")[0].Equals(IPAddress.Parse("127.0.0.1")))
-            {
-                Assert.Inconclusive("Your DNS resolver resolves hosszupuskasub.com to 127.0.0.1.");
-            }
-
-            try
-            {
-                Utils.GetHTML(Site);
-            }
-            catch (WebException ex)
-            {
-                Assert.Inconclusive("Hosszupuskasub.com seems to work only from within Hungary. Again.");
-            }
-
-            base.TestSearch();
-        }
     }
 }

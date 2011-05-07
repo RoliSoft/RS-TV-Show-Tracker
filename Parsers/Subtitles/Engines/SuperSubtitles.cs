@@ -31,19 +31,7 @@
         {
             get
             {
-                /*
-                 * The official site would be feliratok.hu, however that no longer works.
-                 * There are multiple mirrors which continue the work of the main site,
-                 * and they look like they share their data with each other.
-                 * 
-                 * These mirrors are:
-                 * - http://feliratok.ro.lt 
-                 * - http://feliratok.hs.vc
-                 * - http://feliratok.na.tl 
-                 * 
-                 * Source: http://freeforum.n4.hu/feliratok/index.php?topic=40.0 (2011-02-04)
-                 */
-                return "http://feliratok.na.tl/";
+                return "http://www.feliratok.info/";
             }
         }
 
@@ -66,9 +54,9 @@
             {
                 var sub = new Subtitle(this);
 
-                sub.Release  = node.GetTextValue("td[2]/a").Trim();
-                sub.Language = ParseLanguage(node.GetTextValue("td[4]").Trim());
-                sub.URL      = Site + node.GetNodeAttributeValue("td[6]/a", "href");
+                sub.Release  = node.GetTextValue("td[3]/div[2]").Trim();
+                sub.Language = ParseLanguage(node.GetTextValue("td[@class='lang']").Trim());
+                sub.URL      = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[6]/a", "href");
 
                 yield return sub;
             }

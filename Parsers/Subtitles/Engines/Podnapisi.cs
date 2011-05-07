@@ -59,10 +59,21 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var show = Uri.EscapeUriString(ShowNames.Parser.Split(query)[0]);
-            var epnr = ShowNames.Parser.ExtractEpisode(query);
+            string show, season = string.Empty, episode = string.Empty;
 
-            var html = Utils.GetHTML(Site + "en/ppodnapisi/search?tbsl=3&asdp=1&sK={0}&sM=&sJ=0&sO=asc&sS=time&submit=Search&sTS={1}&sTE={2}&sY=&sR=&sT=1".FormatWith(show, epnr.Season, epnr.Episode));
+            if (ShowNames.Regexes.Numbering.IsMatch(query))
+            {
+                show     = Uri.EscapeUriString(ShowNames.Parser.Split(query)[0]);
+                var epnr = ShowNames.Parser.ExtractEpisode(query);
+                season   = epnr.Season.ToString();
+                episode  = epnr.Episode.ToString();
+            }
+            else
+            {
+                show = Uri.EscapeUriString(query);
+            }
+
+            var html = Utils.GetHTML(Site + "en/ppodnapisi/search?tbsl=3&asdp=1&sK={0}&sM=&sJ=0&sO=asc&sS=time&submit=Search&sTS={1}&sTE={2}&sY=&sR=&sT=1".FormatWith(show, season, episode));
             var subs = html.DocumentNode.SelectNodes("//tr[@class='a' or @class='b']");
             
             if (subs == null)

@@ -9,6 +9,7 @@
     using System.Reflection;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Documents;
     using System.Windows.Forms;
     using System.Windows.Media.Imaging;
 
@@ -453,6 +454,16 @@
             {
                 Settings.Set("JDownloader", jDlPathTextBox.Text);
             }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the JDownloaderHyperlink control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void JDownloaderHyperlinkClick(object sender, RoutedEventArgs e)
+        {
+            Utils.Run((sender as Hyperlink).NavigateUri.ToString());
         }
         #endregion
 

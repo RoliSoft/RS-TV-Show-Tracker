@@ -166,7 +166,7 @@
                             </StackPanel>
                             <TextBlock TextWrapping="Wrap" Margin="3,5" FontSize="11" Padding="20,0,0,0">
                                 <Image Source="/RSTVShowTracker;component/Images/information.png" Height="12" Width="12" Margin="-20,0,0,-1" />JDownloader is an open source download manager, which allows the automatic download of files and split files from one-click hosting sites such as Rapidshare and Megaupload.<LineBreak />
-                                Download the official Windows binaries from <Hyperlink NavigateUri="http://jdownloader.org/">JDownloader.org</Hyperlink>
+                                Download the official Windows binaries from <Hyperlink NavigateUri="http://jdownloader.org/" Click="JDownloaderHyperlinkClick">JDownloader.org</Hyperlink>
                             </TextBlock>
                             <StackPanel Orientation="Horizontal">
                                 <TextBox Name="jDlPathTextBox" TextChanged="JDlPathTextBoxTextChanged" Margin="0,0,5,0" Width="427" />

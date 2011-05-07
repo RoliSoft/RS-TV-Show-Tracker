@@ -52,7 +52,7 @@
 
             Title           = "Login to {0}".FormatWith(Engine.Name);
             urlTextBox.Text = Engine.Site;
-            favicon.Source  = new BitmapImage(new Uri("http://www.google.com/s2/favicons?domain={0}".FormatWith(new Uri(Engine.Site).DnsSafeHost)));
+            favicon.Source  = new BitmapImage(new Uri("http://getfavicon.appspot.com/http://{0}/".FormatWith(new Uri(Engine.Site).DnsSafeHost)));
 
             _webBrowser = new WebBrowser { ScriptErrorsSuppressed = true };
             _webBrowser.DocumentCompleted += WebBrowserDocumentCompleted;
@@ -74,7 +74,7 @@
 
             if (urlTextBox.Text != _webBrowser.Url.ToString())
             {
-                favicon.Source = new BitmapImage(new Uri("http://www.google.com/s2/favicons?domain={0}".FormatWith(_webBrowser.Url.DnsSafeHost)));
+                favicon.Source = new BitmapImage(new Uri("http://getfavicon.appspot.com/http://{0}/".FormatWith(_webBrowser.Url.DnsSafeHost)));
             }
 
             urlTextBox.Text = _webBrowser.Url.ToString();
