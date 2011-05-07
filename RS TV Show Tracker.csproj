@@ -121,6 +121,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\Demonoid.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\IsoHunt.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
