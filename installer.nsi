@@ -54,9 +54,11 @@ InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
 !insertmacro MUI_PAGE_WELCOME
 
 !ifdef LICENSE_TXT
+!define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
 !insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
 !endif
 
+!define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
 !insertmacro MUI_PAGE_DIRECTORY
 
 !ifdef REG_START_MENU
@@ -64,9 +66,11 @@ InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_ROOT}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${UNINSTALL_PATH}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${REG_START_MENU}"
+!define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
 !insertmacro MUI_PAGE_STARTMENU Application $SM_Folder
 !endif
 
+!define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
 !insertmacro MUI_PAGE_INSTFILES
 
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}"
@@ -79,6 +83,18 @@ InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
 !insertmacro MUI_UNPAGE_FINISH
 
 !insertmacro MUI_LANGUAGE "English"
+
+######################################################################
+
+function HeaderChangeFonts
+GetDlgItem $1 $HWNDPARENT 1037
+CreateFont $0 "Segoe UI" "10" "700"
+SendMessage $1 ${WM_SETFONT} $0 0
+
+#GetDlgItem $1 $HWNDPARENT 1038
+#CreateFont $0 "Segoe UI" "9" "500"
+#SendMessage $1 ${WM_SETFONT} $0 0
+functionend
 
 ######################################################################
 
