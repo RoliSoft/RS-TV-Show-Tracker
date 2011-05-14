@@ -127,13 +127,19 @@
             {
                 var info = Utils.GetExecutableInfo(app);
 
-                processesStackPanel.Children.Add(new Image
-                    {
-                        Source = info.Item2,
-                        Width  = 16,
-                        Height = 16,
-                        Margin = new Thickness(0, 0, 4, 0),
-                    });
+                if (info == null || string.IsNullOrWhiteSpace(info.Item1)) continue;
+
+                if (info.Item2 != null)
+                {
+                    processesStackPanel.Children.Add(new Image
+                        {
+                            Source = info.Item2,
+                            Width  = 16,
+                            Height = 16,
+                            Margin = new Thickness(0, 0, 4, 0),
+                        });
+                }
+
                 processesStackPanel.Children.Add(new Label
                     {
                         Content = info.Item1,

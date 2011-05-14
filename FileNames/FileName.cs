@@ -146,7 +146,11 @@
             /// - asking TVRage's API
             /// - asking TheTVDB's API
             /// </summary>
-            ShowNotIdentified
+            ShowNotIdentified,
+            /// <summary>
+            /// An exception was thrown when the file was processed.
+            /// </summary>
+            ExceptionOccurred
         }
     }
 }

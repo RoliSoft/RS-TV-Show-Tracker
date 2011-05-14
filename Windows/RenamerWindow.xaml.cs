@@ -9,6 +9,7 @@
     using System.Timers;
     using System.Windows;
     using System.Collections.ObjectModel;
+    using System.Windows.Controls;
     using System.Windows.Forms;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
@@ -19,6 +20,7 @@
     using DataFormats    = System.Windows.DataFormats;
     using DragEventArgs  = System.Windows.DragEventArgs;
     using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+    using Orientation    = System.Windows.Controls.Orientation;
     using Timer          = System.Timers.Timer;
 
     /// <summary>
@@ -216,17 +218,27 @@
             {
                 SetStatus("Identifying " + file.Information.Name + "...", true);
 
-                file.Information = FileNames.Parser.ParseFile(file.Information.Name, Path.GetDirectoryName(file.Location).Split(Path.DirectorySeparatorChar));
-                file.Checked     = file.Recognized = file.Enabled = file.Information.Success;
-                file.Processed   = true;
+                try
+                {
+                    file.Information = FileNames.Parser.ParseFile(file.Information.Name, Path.GetDirectoryName(file.Location).Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries));
+                    file.Checked     = file.Recognized = file.Enabled = file.Information.Success;
+                    file.Processed   = true;
 
-                if (file.Information.Success)
-                {
-                    file.ShowStatusImage = "Collapsed";
-                    file.ShowCheckBox    = "Visible";
+                    if (file.Information.Success)
+                    {
+                        file.ShowStatusImage = "Collapsed";
+                        file.ShowCheckBox    = "Visible";
+                    }
+                    else
+                    {
+                        file.StatusImage = "/RSTVShowTracker;component/Images/exclamation-red.png";
+                    }
                 }
-                else
+                catch
                 {
+                    file.Information.ParseError = ShowFile.FailureReasons.ExceptionOccurred;
+                    file.Checked     = file.Recognized = file.Enabled = false;
+                    file.Processed   = true;
                     file.StatusImage = "/RSTVShowTracker;component/Images/exclamation-red.png";
                 }
 
@@ -580,7 +592,24 @@
                     try { WorkerThread.Abort(); } catch { }
                 }
 
-                startRenamingButton.Content   = "Start renaming";
+                startRenamingButton.Content = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(3,1,3,1)
+                    };
+                (startRenamingButton.Content as StackPanel).Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/pencil.png", UriKind.Relative)),
+                        Width  = 16,
+                        Height = 16,
+                        Margin = new Thickness(0, 0, 5, 0),
+                    });
+                (startRenamingButton.Content as StackPanel).Children.Add(new TextBlock
+                    {
+                        Text   = "Start renaming",
+                        Margin = new Thickness(0, 0, 3, 0),
+                    });
+
                 startRenamingButton.IsEnabled = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked) != 0;
                 settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
                 _parsing = _renaming = false;
@@ -589,7 +618,24 @@
             }
             else
             {
-                startRenamingButton.Content = "Stop renaming";
+                startRenamingButton.Content = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(3,1,3,1)
+                    };
+                (startRenamingButton.Content as StackPanel).Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cross.png", UriKind.Relative)),
+                        Width  = 16,
+                        Height = 16,
+                        Margin = new Thickness(0, 0, 5, 0),
+                    });
+                (startRenamingButton.Content as StackPanel).Children.Add(new TextBlock
+                    {
+                        Text   = "Stop renaming",
+                        Margin = new Thickness(0, 0, 3, 0),
+                    });
+
                 settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = false;
                 _parsing = _renaming = true;
 

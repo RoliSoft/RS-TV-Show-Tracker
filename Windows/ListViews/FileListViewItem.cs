@@ -122,6 +122,9 @@
                     case ShowFile.FailureReasons.ShowNotIdentified:
                         return "[could not identify the show in any databases]";
 
+                    case ShowFile.FailureReasons.ExceptionOccurred:
+                        return "[exception occurred while processing]";
+
                     default:
                         return "[unknown error]";
                 }
