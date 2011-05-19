@@ -98,7 +98,7 @@
             {
                 for (var i = 1; i < 6; i++) // limit traversal up to 5 directory names, because identification can be expensive
                 {
-                    if ((parents.Length - i) >= 0) break;
+                    if ((parents.Length - i) <= 0) break;
 
                     var dir = Regexes.VolNumbering.Replace(Regexes.SpecialChars.Replace(RemoveKeywords.Replace(parents[parents.Length - i].ToUpper(), string.Empty).Trim(), " ").Trim(), string.Empty);
                     var dirinfo = IdentifyShow(dir, ep);
