@@ -281,11 +281,11 @@
             var regexes = new List<string>
                 {
                     // S[0]2[.]E[P][13-]14
-                    @"S0?{0}.?EP?(?:(?<em>\d{{1,2}})[\-E_](?:EP?)?)?0?{1}(?:[E_].+)?".FormatWith(season, episode),
+                    @"S0?{0}[^0-9]?EP?(?:(?<em>\d{{1,2}})[\-E_](?:EP?)?)?0?{1}(?:[E_].+)?".FormatWith(season, episode),
                     // 2x[13-]14
                     @"{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
                     // [Season|Series] 1[ - ]E[p[isode]] [1 - ]2
-                    @"(?:Season|Series).?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?.?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
+                    @"(?:Season|Series)[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
                 };
 
             if (generateExtractor || season == "1")
@@ -297,9 +297,9 @@
                 regexes.AddRange(new[]
                     {
                         // E[P][13-]14
-                        @"EP?(?:(?<em>\d{{1,2}})\-(?:EP?)?)?0?{0}".FormatWith(episode),
+                        @"(?<!(?:Season|Series|S).*\d{{1,2}}.*)EP?(?:(?<em>\d{{1,2}})\-(?:EP?)?)?0?{0}".FormatWith(episode),
                         // [E[p[isode]]|P[ar]t|Vol[ume]][ ][9|IX]
-                        @"(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?(?:(?:0?(?<em>\d{{1,2}})|(?<em>[IVXLCDM]+))[^a-z0-9]{{1,3}})?(?:0?{0}|{1})".FormatWith(episode, roman)
+                        @"(?<!(?:Season|Series|S).*\d{{1,2}}.*)(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?(?:(?:0?(?<em>\d{{1,2}})|(?<em>[IVXLCDM]+))[^a-z0-9]{{1,3}})?(?:0?{0}|{1})".FormatWith(episode, roman)
                     });
             }
 
