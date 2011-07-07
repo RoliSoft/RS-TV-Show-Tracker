@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
@@ -98,6 +99,13 @@
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[9]").Trim(), node.GetTextValue("../../td[10]").Trim())
                              + (node.GetHtmlValue("../a/b/font[@color='blue']") != null ? ", Free" : string.Empty)
                              + (node.GetHtmlValue("../a/b/font[@color='green']") != null ? ", Neutral" : string.Empty);
+
+                link.Release = Regex.Replace(link.Release, @"\s\(\d{1,2}(?:st|nd|rd|th)? [A-Z][a-z]+ \d{4}\)", string.Empty);
+
+                if (link.Quality != Qualities.Unknown)
+                {
+                    link.Release = Regex.Replace(link.Release, @"\s\[.*\]$", string.Empty);
+                }
 
                 yield return link;
             }

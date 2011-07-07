@@ -122,6 +122,7 @@
     </ApplicationDefinition>
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TVVault.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TheBox.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\Demonoid.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\IsoHunt.cs" />
