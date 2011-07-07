@@ -58,6 +58,20 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this site is deprecated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
+        /// </value>
+        public virtual bool Deprecated
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Occurs when a download link search is done.
         /// </summary>
         public event EventHandler<EventArgs<List<Link>>> DownloadSearchDone;

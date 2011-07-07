@@ -206,11 +206,23 @@
                                 Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/" + (string.IsNullOrWhiteSpace(cookies) ? "lock" : "key") + ".png", UriKind.Relative)),
                                 Width   = 16,
                                 Height  = 16,
-                                Margin  = new Thickness(3, -2, -105, 0),
+                                Margin  = new Thickness(3, -2, -100, 0),
                                 ToolTip = "This is a private site and therefore cookies are required to search on it.\r\n" +
                                           (string.IsNullOrWhiteSpace(cookies)
                                            ? "Go to Settings, click on the Downloads tab, then select this site to enter the cookies."
                                            : "You have supplied the following cookies:" + tooltip)
+                            });
+                    }
+
+                    if (engine.Deprecated)
+                    {
+                        (mi.Header as StackPanel).Children.Add(new Image
+                            {
+                                Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cross.png", UriKind.Relative)),
+                                Width   = 16,
+                                Height  = 16,
+                                Margin  = new Thickness(3, -2, -70, 0),
+                                ToolTip = "This site has been marked as deprecated, which means\r\nit will be removed from the next version of the software.\r\nVisit the website of the application for more informations."
                             });
                     }
 

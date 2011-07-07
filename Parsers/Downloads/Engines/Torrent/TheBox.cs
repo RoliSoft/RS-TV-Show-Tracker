@@ -3,15 +3,13 @@
     using System;
     using System.Collections.Generic;
 
-    using HtmlAgilityPack;
-
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping BitMeTV.
+    /// Provides support for scraping TheBox.
     /// </summary>
-    [Parser("2011-02-13 6:13 AM"), TestFixture]
-    public class BitMeTV : DownloadSearchEngine
+    [Parser("2011-07-08 12:16 AM"), TestFixture]
+    public class TheBox : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -21,7 +19,7 @@
         {
             get
             {
-                return "BitMeTV";
+                return "TheBox";
             }
         }
 
@@ -33,7 +31,7 @@
         {
             get
             {
-                return "http://www.bitmetv.org/";
+                return "http://thebox.bz/";
             }
         }
 
@@ -57,7 +55,7 @@
         {
             get
             {
-                return new[] { "uid", "pass" };
+                return new[] { "uid", "pass", "session" };
             }
         }
 
@@ -74,28 +72,14 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether this site is deprecated.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
-        /// </value>
-        public override bool Deprecated
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "browse.php?search=" + Uri.EscapeUriString(query), cookies: Cookies);
-            var links = html.DocumentNode.SelectNodes("//table/tr/td/a[starts-with(@href, 'details.php')]");
+            var html  = Utils.GetHTML(Site + "browse.php?incldead=0&nonboolean=4&search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var links = html.DocumentNode.SelectNodes("//tr[@class='ttable']/td[2]/a[1]");
 
             if (links == null)
             {
@@ -106,12 +90,14 @@
             {
                 var link = new Link(this);
 
-                link.Release = HtmlEntity.DeEntitize(node.GetAttributeValue("title"));
-                link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetAttributeValue("href"));
-                link.FileURL = Site + node.GetNodeAttributeValue("../td[1]/a", "href");
-                link.Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " ");
+                link.Release = node.GetAttributeValue("title");
+                link.InfoURL = Site + node.GetAttributeValue("href");
+                link.FileURL = Site + node.GetNodeAttributeValue("../../td[3]/a[2]", "href");
+                link.Size    = node.GetHtmlValue("../../td[7]").Trim().Replace("<br>", " ");
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[8]").Trim(), node.GetTextValue("../../td[9]").Trim());
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[9]").Trim(), node.GetTextValue("../../td[10]").Trim())
+                             + (node.GetHtmlValue("../a/b/font[@color='blue']") != null ? ", Free" : string.Empty)
+                             + (node.GetHtmlValue("../a/b/font[@color='green']") != null ? ", Neutral" : string.Empty);
 
                 yield return link;
             }
