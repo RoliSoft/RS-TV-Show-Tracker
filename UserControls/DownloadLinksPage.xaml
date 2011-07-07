@@ -20,6 +20,26 @@
                     <MenuItem.Icon>
                         <Image Source="/RSTVShowTracker;component/Images/magnifier.png" />
                     </MenuItem.Icon>
+                    <MenuItem Header="BitTorrent" Name="availableTorrentEngines">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/torrent.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Usenet" Name="availableUsenetEngines">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/usenet.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="HTTP links" Name="availableHTTPEngines">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/filehoster.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="PreDB" Name="availablePreEngines">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/globe.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Filter results locally" Name="filterResults" IsCheckable="True" Checked="FilterResultsChecked" Unchecked="FilterResultsUnchecked">
                     <MenuItem.Icon>

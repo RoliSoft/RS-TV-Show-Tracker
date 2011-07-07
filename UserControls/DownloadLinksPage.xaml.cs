@@ -162,9 +162,12 @@
                 _actives = Settings.GetList("Active Trackers").ToList();
             }
 
-            if (reload || availableEngines.Items.Count == 0)
+            if (reload || availableTorrentEngines.Items.Count == 0)
             {
-                availableEngines.Items.Clear();
+                availableTorrentEngines.Items.Clear();
+                availableUsenetEngines.Items.Clear();
+                availableHTTPEngines.Items.Clear();
+                availablePreEngines.Items.Clear();
 
                 foreach (var engine in SearchEngines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
                 {
@@ -229,7 +232,25 @@
                     mi.Checked   += SearchEngineMenuItemChecked;
                     mi.Unchecked += SearchEngineMenuItemUnchecked;
 
-                    availableEngines.Items.Add(mi);
+                    switch (engine.Type)
+                    {
+                        case Types.Torrent:
+                            availableTorrentEngines.Items.Add(mi);
+                            break;
+
+                        case Types.Usenet:
+                            availableUsenetEngines.Items.Add(mi);
+                            break;
+
+                        case Types.HTTP:
+                        case Types.DirectHTTP:
+                            availableHTTPEngines.Items.Add(mi);
+                            break;
+
+                        case Types.PreDB:
+                            availablePreEngines.Items.Add(mi);
+                            break;
+                    }
                 }
             }
         }

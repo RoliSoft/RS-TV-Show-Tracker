@@ -87,15 +87,6 @@ namespace RoliSoft.TVShowTracker.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;RSAKeyValue&gt;&lt;Modulus&gt;06aq3Z11HvmCeXGFnqRvNXkjj+P3QzM/g88lq4TNC99lYnAYuX3MKUZtIWZu1rLcq0/DxaRp2FHOu478/yz178Wynx+3p9Ag5Sj0kEewzQHznkl336pkni1V8qT+ost0vNOcoQTkGpdL/RctzHmI9tIMTkImd+r/cTlXWZqZRq5s0tSpLP93qfTAAor+GhBvj6seKDcs4nOOTTjLHABSAFieM+p3nxJSgwhDpLvPY1Kq6CaDzYucHilMgazyHPIALXQ0v6JdrsULGygOelFgvFYVVYqvD+RQ2hnVukhk5kzWRHvQucseU2F4JMDp+BCr8GczxElc/0ptaIFFHdQ/OQ==&lt;/Modulus&gt;&lt;Exponent&gt;AQAB&lt;/Exponent&gt;&lt;/RSAKeyValue&gt;.
-        /// </summary>
-        internal static string APIPublicKey {
-            get {
-                return ResourceManager.GetString("APIPublicKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to /*
         ///	The TVShows table contains the name of the TV shows,
         ///	their ID and position when displayed by the software.
@@ -103,7 +94,8 @@ namespace RoliSoft.TVShowTracker.Properties {
         ///CREATE TABLE tvshows (
         ///	rowid INTEGER,
         ///	showid INTEGER PRIMARY KEY,
-        ///	name TEXT
+        ///	name TEXT,
+        ///	release TEXT
         ///)
         ///
         ////*
@@ -112,7 +104,7 @@ namespace RoliSoft.TVShowTracker.Properties {
         ///	The EpisodeId field is not random or auto incrementing,
         ///	it is calculated by concating Show ID with Season and Episode.
         ///	The AirDate field is a UNIX timestamp.
-        ///	The Pic field contains an UR [rest of string was truncated]&quot;;.
+        ///	The Pic fiel [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DatabaseStructure {
             get {
