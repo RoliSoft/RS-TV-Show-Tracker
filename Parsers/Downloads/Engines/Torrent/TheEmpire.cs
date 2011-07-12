@@ -7,10 +7,10 @@
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping TheBox.
+    /// Provides support for scraping TheEmpire.
     /// </summary>
-    [Parser("2011-07-08 12:16 AM"), TestFixture]
-    public class TheBox : DownloadSearchEngine
+    [Parser("2011-07-12 9:01 PM"), TestFixture]
+    public class TheEmpire : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -20,7 +20,7 @@
         {
             get
             {
-                return "TheBox";
+                return "TheEmpire";
             }
         }
 
@@ -32,7 +32,7 @@
         {
             get
             {
-                return "http://thebox.bz/";
+                return "http://theempire.bz/";
             }
         }
 
