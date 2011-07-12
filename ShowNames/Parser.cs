@@ -284,8 +284,8 @@
                     @"S0?{0}[^0-9]?EP?(?:(?<em>\d{{1,2}})[\-E_](?:EP?)?)?0?{1}(?:[E_].+)?".FormatWith(season, episode),
                     // 2x[13-]14
                     @"{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
-                    // [Season|Series] 1[ - ]E[p[isode]] [1 - ]2
-                    @"(?:Season|Series)[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
+                    // [S[e[ason|ries]]] 1[ - ]E[p[isode]] [1 - ]2
+                    @"S(?:e(?:ason|ries)?)?[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
                 };
 
             if (generateExtractor || season == "1")
