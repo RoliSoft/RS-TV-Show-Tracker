@@ -99,7 +99,7 @@
 
                 if (release.Success && !release.Groups[1].Value.Trim().Contains("Not Available"))
                 {
-                    link.Release = release.Groups[1].Value.Trim();
+                    link.Release = HtmlEntity.DeEntitize(release.Groups[1].Value.Trim());
                     link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 }
                 else
