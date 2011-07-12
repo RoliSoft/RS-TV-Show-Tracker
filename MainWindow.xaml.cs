@@ -162,7 +162,11 @@
                     };
             }
 
-            new Task(CheckForUpdate).Start();
+            new Task(() =>
+                {
+                    Thread.Sleep(5000);
+                    CheckForUpdate();
+                }).Start();
             //Synchronization.Enabled = true;
         }
 
