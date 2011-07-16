@@ -400,6 +400,7 @@
                     tr.Commit();
 
                     // fire data change event
+                    Database.CopyToMemory();
                     MainWindow.Active.DataChanged();
 
                     // asynchronously update lab.rolisoft.net's cache
@@ -461,6 +462,7 @@
                 //Synchronization.Status.Engine.MarkEpisodes(_dbid, Synchronization.Engines.RoliSoftDotNetAPI.SerializeMarkedEpisodes(_dbid));
             }
 
+            Database.CopyToMemory();
             MainWindow.Active.DataChanged();
         }
 

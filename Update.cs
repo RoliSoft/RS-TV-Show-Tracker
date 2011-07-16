@@ -165,6 +165,7 @@
             }
 
             // fire data change event
+            Database.CopyToMemory();
             MainWindow.Active.DataChanged();
 
             // fire event

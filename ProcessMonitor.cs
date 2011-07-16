@@ -126,6 +126,9 @@
                 if (Database.Query("select * from tracking where showid = ? and episodeid = ?", showid, epid).Count == 0)
                 {
                     Database.Execute("insert into tracking values (?, ?)", showid, epid);
+
+                    Database.Trackings.Add(epid);
+                    Database.Episodes.First(e => e.EpisodeID == epid).Watched = true;
                 }
             }
 
