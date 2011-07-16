@@ -283,6 +283,11 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Play episode" Click="PlayEpisodeClick">

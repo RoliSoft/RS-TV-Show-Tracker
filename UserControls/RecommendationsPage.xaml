@@ -87,6 +87,11 @@
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="View Wikipedia entry" Click="ViewWikipediaClick">

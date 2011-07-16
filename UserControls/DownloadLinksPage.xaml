@@ -100,6 +100,11 @@
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
         </ListView>
         <Label Grid.Row="1" Name="statusThrobber" Foreground="White" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="7,0" Width="12" Height="17" HorizontalAlignment="Left" Visibility="Hidden">
             <Label.Effect>

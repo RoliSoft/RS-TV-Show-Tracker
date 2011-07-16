@@ -63,6 +63,11 @@
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Download subtitle" Click="DownloadSubtitleClick">

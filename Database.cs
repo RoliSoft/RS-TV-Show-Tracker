@@ -429,14 +429,14 @@
         /// <returns>Stored value or empty string.</returns>
         public static string ShowData(int id, string key)
         {
-            if (ShowDatas[id].ContainsKey(key))
+            string value;
+
+            if (ShowDatas[id].TryGetValue(key, out value))
             {
-                return ShowDatas[id][key];
+                return value;
             }
-            else
-            {
-                return string.Empty;
-            }
+
+            return string.Empty;
         }
 
         /// <summary>
@@ -503,10 +503,8 @@
             {
                 return showid[0].ShowID;
             }
-            else
-            {
-                return int.MinValue;
-            }
+
+            return int.MinValue;
         }
         
         /// <summary>
@@ -524,10 +522,8 @@
             {
                 return episodeid[0].EpisodeID;
             }
-            else
-            {
-                return int.MinValue;
-            }
+
+            return int.MinValue;
         }
 
         /// <summary>
@@ -547,10 +543,8 @@
             {
                 return release[0].Release.Split(' ');
             }
-            else
-            {
-                return ShowNames.Parser.GetRoot(show, removeCommon);
-            }
+
+            return ShowNames.Parser.GetRoot(show, removeCommon);
         }
     }
 }

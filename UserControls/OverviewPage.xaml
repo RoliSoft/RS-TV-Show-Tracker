@@ -38,6 +38,11 @@
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
         </ListView>
         <TextBlock Name="NewHelp" Width="500" Height="80" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" Foreground="White" Text="Press Ctrl+N to add a new TV show. To order the list, select a TV show and press Ctrl+Up or Ctrl+Down to move it. To remove a TV show, select it and press Delete on the keyboard." />
         <Label Grid.Row="1" Name="statusThrobber" Foreground="White" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="7,0" Width="12" Height="17" HorizontalAlignment="Left" Visibility="Hidden">
