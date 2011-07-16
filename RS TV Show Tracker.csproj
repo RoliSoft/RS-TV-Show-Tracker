@@ -142,9 +142,6 @@
     <Compile Include="FileNames\Tests.cs" />
     <Compile Include="Synchronization\Engines\RoliSoftDotNetAPI.cs" />
     <Compile Include="Synchronization\SyncEngine.cs" />
-    <Compile Include="Tables\Setting.cs" />
-    <Compile Include="Tables\Tracking.cs" />
-    <Compile Include="Tables\ShowData.cs" />
     <Compile Include="Tables\Episode.cs" />
     <Compile Include="Tables\TVShow.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />

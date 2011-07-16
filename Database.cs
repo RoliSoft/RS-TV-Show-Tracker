@@ -53,7 +53,7 @@
         /// <value>
         /// The contents of the TV show key-value store table in the database.
         /// </value>
-        public static List<ShowData> ShowDatas { get; set; } 
+        public static Dictionary<int, Dictionary<string, string>> ShowDatas { get; set; } 
 
         /// <summary>
         /// Gets or sets the contents of the episodes table in the database.
@@ -143,6 +143,7 @@
         /// </summary>
         public static void CopyToMemory()
         {
+            ShowDatas = GetShowDatas();
             TVShows   = GetTVShows();
             Trackings = GetTrackings();
             Episodes  = GetEpisodes(true);
@@ -280,6 +281,44 @@
         }
 
         /// <summary>
+        /// Downloads all the TV show key-value store information from the database.
+        /// </summary>
+        /// <returns>
+        /// List of TV show key-value stores.
+        /// </returns>
+        public static Dictionary<int, Dictionary<string, string>> GetShowDatas()
+        {
+            lock (Connection)
+            {
+                using (var cmd = new SQLiteCommand("select showid, key, value from showdata", Connection))
+                using (var dr  = cmd.ExecuteReader())
+                {
+                    var keys = new Dictionary<int, Dictionary<string, string>>();
+
+                    while (dr.Read())
+                    {
+                        try
+                        {
+                            var showid = dr.GetInt32(0);
+
+                            if (!keys.ContainsKey(showid))
+                            {
+                                keys[showid] = new Dictionary<string, string>();
+                            }
+
+                            keys[showid][dr.GetString(1)] = dr.GetString(2);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    return keys;
+                }
+            }
+        }
+
+        /// <summary>
         /// Downloads all the episodes from the database.
         /// </summary>
         /// <param name="setWatched">if set to <c>true</c> the value of the <c>Watched</c> will be fetched from the <c>Database.Trackings</c> list.</param>
@@ -390,20 +429,13 @@
         /// <returns>Stored value or empty string.</returns>
         public static string ShowData(string id, string key)
         {
-            using (var cmd = new SQLiteCommand("select value from showdata where showid = ? and key = ?", Connection))
+            if (ShowDatas[int.Parse(id)].ContainsKey(key))
             {
-                cmd.Parameters.Add(new SQLiteParameter { Value = id  });
-                cmd.Parameters.Add(new SQLiteParameter { Value = key });
-
-                lock (Connection)
-                {
-                    using (var dr = cmd.ExecuteReader())
-                    {
-                        return dr.Read()
-                               ? dr["value"].ToString()
-                               : string.Empty;
-                    }
-                }
+                return ShowDatas[int.Parse(id)][key];
+            }
+            else
+            {
+                return string.Empty;
             }
         }
 
@@ -436,6 +468,8 @@
         /// <returns></returns>
         public static int ShowData(string id, string key, string value)
         {
+            ShowDatas[int.Parse(id)][key] = value;
+
             var data = (id + "|" + key).GetHashCode();
 
             using (var cmd = new SQLiteCommand("insert into showdata values (?, ?, ?, ?)", Connection))
@@ -459,11 +493,16 @@
         /// <returns>ID of the show or empty string.</returns>
         public static string GetShowID(string show)
         {
-            var showid = Query("select showid from tvshows where name = ? limit 1", show);
+            var showid = TVShows.Where(s => s.Name == show).Take(1).ToList();
 
-            return showid.Count != 0
-                   ? showid[0]["showid"]
-                   : string.Empty;
+            if (showid.Count != 0)
+            {
+                return showid[0].ShowID.ToString();
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -476,12 +515,7 @@
         /// <returns>ID of the show or empty string.</returns>
         public static string GetShowID(string show, string grabber, string grabberId, string grabberLang)
         {
-            var query  = Query("select showid, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where name = ?", show);
-            var filter = query.Where(sh => sh["grabber"] == grabber && ShowData(sh["showid"], sh["grabber"] + ".id") == grabberId && ShowData(sh["showid"], sh["grabber"] + ".lang") == grabberLang).ToList();
-
-            return filter.Count != 0
-                   ? filter[0]["showid"]
-                   : string.Empty;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -493,11 +527,16 @@
         /// <returns>ID of the show or empty string.</returns>
         public static string GetEpisodeID(string show, int season, int episode)
         {
-            var episodeid = Query("select episodeid from episodes where showid = ? and season = ? and episode = ? limit 1", show, season, episode);
+            var episodeid = Episodes.Where(ep => ep.ShowID.ToString() == show && ep.Season == season && ep.Number == episode).Take(1).ToList();
 
-            return episodeid.Count != 0
-                   ? episodeid[0]["episodeid"]
-                   : string.Empty;
+            if (episodeid.Count != 0)
+            {
+                return episodeid[0].EpisodeID.ToString();
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -511,11 +550,16 @@
         /// <returns>Name of the show used in scene releases.</returns>
         public static string[] GetReleaseName(string show, bool removeCommon = true)
         {
-            var release = Query("select release from tvshows where name = ? limit 1", show);
+            var release = TVShows.Where(s => s.Name == show).Take(1).ToList();
 
-            return release.Count != 0 && !string.IsNullOrWhiteSpace(release[0]["release"])
-                   ? release[0]["release"].Split(' ')
-                   : ShowNames.Parser.GetRoot(show, removeCommon);
+            if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0].Release))
+            {
+                return release[0].Release.Split(' ');
+            }
+            else
+            {
+                return ShowNames.Parser.GetRoot(show, removeCommon);
+            }
         }
     }
 }

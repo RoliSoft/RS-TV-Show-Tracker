@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.ObjectModel;
-    using System.Diagnostics;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Timers;
@@ -16,6 +15,7 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
+    using RoliSoft.TVShowTracker.Tables;
     using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
@@ -131,7 +131,6 @@
         /// </summary>
         public void LoadOverviewListView()
         {
-            var s = Stopwatch.StartNew();
             OverviewListViewItemCollection.Clear();
 
                  _eps = 0;
@@ -203,9 +202,6 @@
             // set status
 
             ResetStatus();
-
-            s.Stop();
-            MessageBox.Show(s.Elapsed.ToString());
 
         }
         #endregion
@@ -304,7 +300,7 @@
             if (listView.SelectedIndex != -1 && e.Key == Key.Up && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
                 var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var rowid  = Database.Query("select rowid from tvshows where name = ?", sel.Name).First()["rowid"].ToInteger();
+                var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
                 var listid = listView.SelectedIndex;
 
                 if (rowid == 1)
@@ -325,6 +321,7 @@
                     Synchronization.Status.Engine.ReorderList();
                 }
 
+                Database.TVShows = Database.GetTVShows();
                 MainWindow.Active.DataChanged(false);
             }
 
@@ -333,7 +330,7 @@
             if (listView.SelectedIndex != -1 && e.Key == Key.Down && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
                 var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var rowid  = Database.Query("select rowid from tvshows where name = ?", sel.Name).First()["rowid"].ToInteger();
+                var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
                 var listid = listView.SelectedIndex;
 
                 if (rowid == OverviewListViewItemCollection.Count)
@@ -354,6 +351,7 @@
                     Synchronization.Status.Engine.ReorderList();
                 }
 
+                Database.TVShows = Database.GetTVShows();
                 MainWindow.Active.DataChanged(false);
             }
 
@@ -369,7 +367,7 @@
             if (listView.SelectedIndex != -1 && e.Key == Key.Delete)
             {
                 var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var showid = Database.GetShowID(sel.Name);
+                var showid = Database.TVShows.First(s => s.Name == sel.Name).ShowID;
 
                 var td = new TaskDialog
                     {
@@ -384,7 +382,7 @@
                 {
                     if (Synchronization.Status.Enabled)
                     {
-                        Synchronization.Status.Engine.RemoveShow(showid);
+                        Synchronization.Status.Engine.RemoveShow(showid.ToString());
                     }
 
                     Database.Execute("delete from tvshows where showid = ?", showid);
@@ -407,6 +405,7 @@
                     tr.Commit();
 
                     Database.Execute("vacuum;");
+                    Database.CopyToMemory();
 
                     MainWindow.Active.DataChanged();
                 }
@@ -433,9 +432,9 @@
 
             if (show.NewEpisodes >= 2)
             {
-                var dbep   = Database.Query("select season, episode from episodes where showid = " + show.Show.ShowID + " and episodeid not in (select episodeid from tracking where showid = " + show.Show.ShowID + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
-                var nextep = "S{0:00}E{1:00}".FormatWith(dbep["season"].ToInteger(), dbep["episode"].ToInteger());
-
+                var dbep   = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderBy(ep => ep.Season * 1000 + ep.Number).First();
+                var nextep = "S{0:00}E{1:00}".FormatWith(dbep.Season, dbep.Number);
+                
                 // Play next unseen episode
 
                 var pla    = new MenuItem();
