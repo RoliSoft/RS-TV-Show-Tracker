@@ -6,6 +6,8 @@
     using System.IO;
     using System.Linq;
 
+    using RoliSoft.TVShowTracker.Tables;
+
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
 
     /// <summary>
@@ -36,6 +38,38 @@
                 return 2;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the contents of the TV shows table in the database.
+        /// </summary>
+        /// <value>
+        /// The contents of the TV shows table in the database.
+        /// </value>
+        public static List<TVShow> TVShows { get; set; }
+
+        /// <summary>
+        /// Gets or sets the contents of the TV show key-value store table in the database.
+        /// </summary>
+        /// <value>
+        /// The contents of the TV show key-value store table in the database.
+        /// </value>
+        public static List<ShowData> ShowDatas { get; set; } 
+
+        /// <summary>
+        /// Gets or sets the contents of the episodes table in the database.
+        /// </summary>
+        /// <value>
+        /// The contents of the episodes table in the database.
+        /// </value>
+        public static List<Episode> Episodes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the contents of the episode tracking table in the database.
+        /// </summary>
+        /// <value>
+        /// The contents of the episode tracking table in the database.
+        /// </value>
+        public static List<int> Trackings { get; set; }
 
         private static readonly string _dbFile;
 
@@ -99,6 +133,19 @@
                 ver++;
                 Setting("Version", ver.ToString());
             }
+
+            // copy the database to the memory
+            CopyToMemory();
+        }
+
+        /// <summary>
+        /// Copies the contents of the SQLite database to the memory.
+        /// </summary>
+        public static void CopyToMemory()
+        {
+            TVShows   = GetTVShows();
+            Trackings = GetTrackings();
+            Episodes  = GetEpisodes(true);
         }
 
         /// <summary>
@@ -190,6 +237,124 @@
                 lock (Connection)
                 {
                     return cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Downloads all the TV shows from the database.
+        /// </summary>
+        /// <returns>List of TV shows.</returns>
+        public static List<TVShow> GetTVShows()
+        {
+            lock (Connection)
+            {
+                using (var cmd = new SQLiteCommand("select rowid, showid, name, release from tvshows order by rowid asc", Connection))
+                using (var dr  = cmd.ExecuteReader())
+                {
+                    var shows = new List<TVShow>();
+
+                    while (dr.Read())
+                    {
+                        try
+                        {
+                            var show = new TVShow();
+
+                            show.RowID  = dr.GetInt32(0);
+                            show.ShowID = dr.GetInt32(1);
+                            show.Name   = dr.GetString(2);
+
+                            if (!(dr[3] is DBNull))
+                                show.Release = dr.GetString(3);
+
+                            shows.Add(show);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    return shows;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Downloads all the episodes from the database.
+        /// </summary>
+        /// <param name="setWatched">if set to <c>true</c> the value of the <c>Watched</c> will be fetched from the <c>Database.Trackings</c> list.</param>
+        /// <returns>
+        /// List of episodes.
+        /// </returns>
+        public static List<Episode> GetEpisodes(bool setWatched = false)
+        {
+            lock (Connection)
+            {
+                using (var cmd = new SQLiteCommand("select episodeid, showid, season, episode, airdate, name, descr, pic, url from episodes", Connection))
+                using (var dr  = cmd.ExecuteReader())
+                {
+                    var episodes = new List<Episode>();
+
+                    while (dr.Read())
+                    {
+                        try
+                        {
+                            var episode = new Episode();
+
+                            episode.EpisodeID = dr.GetInt32(0);
+                            episode.ShowID    = dr.GetInt32(1);
+                            episode.Season    = dr.GetInt32(2);
+                            episode.Number    = dr.GetInt32(3);
+
+                            if (setWatched)
+                                episode.Watched = Trackings.Contains(episode.EpisodeID);
+
+                            if (!(dr[4] is DBNull))
+                                episode.Airdate = Extensions.GetUnixTimestamp(dr.GetInt32(4));
+
+                            if (!(dr[5] is DBNull))
+                                episode.Name = dr.GetString(5);
+
+                            if (!(dr[6] is DBNull))
+                                episode.Description = dr.GetString(6);
+
+                            if (!(dr[7] is DBNull))
+                                episode.Picture = dr.GetString(7);
+
+                            if (!(dr[8] is DBNull))
+                                episode.URL = dr.GetString(8);
+
+                            episodes.Add(episode);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    return episodes;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Downloads all the episode tracking information from the database.
+        /// </summary>
+        /// <returns>List of episode trackings.</returns>
+        public static List<int> GetTrackings()
+        {
+            lock (Connection)
+            {
+                using (var cmd = new SQLiteCommand("select showid, episodeid from tracking", Connection))
+                using (var dr  = cmd.ExecuteReader())
+                {
+                    var trackings = new List<int>();
+
+                    while (dr.Read())
+                    {
+                        try { trackings.Add(dr.GetInt32(1)); } catch { }
+                    }
+
+                    return trackings;
                 }
             }
         }

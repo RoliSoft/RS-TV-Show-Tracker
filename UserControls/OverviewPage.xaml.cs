@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Timers;
@@ -130,36 +131,22 @@
         /// </summary>
         public void LoadOverviewListView()
         {
-            // TODO: This function was directly copied from v1 and it's a huge mess. Rewrite it later.
-
+            var s = Stopwatch.StartNew();
             OverviewListViewItemCollection.Clear();
 
-            var sep = '☃';
-
-            var shows = Database.Query("select showid, name, (select season || '" + sep + "' || episode || '" + sep + "' || name from episodes where tvshows.showid = episodes.showid and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0 order by (season * 1000 + episode) desc limit 1) as lastep, (select season || '" + sep + "' || episode || '" + sep + "' || name || '" + sep + "' || airdate from episodes where tvshows.showid = episodes.showid and airdate > " + DateTime.Now.ToUnixTimestamp() + " order by (season * 1000 + episode) asc limit 1) as nextep, (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') as airing from tvshows order by rowid asc");
                  _eps = 0;
             var ndate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0).AddDays(1);
 
-            NewHelp.Visibility = shows.Count != 0 ? Visibility.Collapsed : Visibility.Visible;
+            NewHelp.Visibility = Database.TVShows.Count != 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            foreach (var show in shows)
+            foreach (var show in Database.TVShows)
             {
-                var lastep = show["lastep"].Split(sep);
-                var nextep = show["nextep"].Split(sep);
+                var lastep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var last   = lastep.Count != 0
+                           ? "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].Season, lastep[0].Number, lastep[0].Name)
+                           : "This show hasn't started yet.";
 
-                var last = string.Empty;
-                var next = string.Empty;
-
-                if (lastep.Length == 3)
-                {
-                    last = "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].ToInteger(), lastep[1].ToInteger(), lastep[2]);
-                }
-                else
-                {
-                    last = "This show hasn't started yet.";
-                }
-
-                var count  = Database.Query("select count(episodeid) as count from episodes where showid = " + show["showid"] + " and episodeid not in (select episodeid from tracking where showid = " + show["showid"] + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0")[0]["count"].ToInteger();
+                var count  = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).Count();
                      _eps += count;
 
                 if (count == 1)
@@ -171,41 +158,39 @@
                     last += " · " + count + " NEW EPISODES!";
                 }
 
-                if (nextep.Length == 4)
-                {
-                    var nair = nextep[3].ToDouble().GetUnixTimestamp();
-                        next = "S{0:00}E{1:00} · {2} · {3}".FormatWith(nextep[0].ToInteger(), nextep[1].ToInteger(), nextep[2], nair.ToRelativeDate());
+                var nextep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                string next;
 
-                    if (nair < ndate)
-                    {
-                        ndate = nair;
-                    }
-                }
-                else if (show["airing"] == "True")
+                if (nextep.Count != 0)
                 {
-                    next = "No data available";
+                    next = "S{0:00}E{1:00} · {2} · {3}".FormatWith(nextep[0].Season, nextep[0].Number, nextep[0].Name, nextep[0].Airdate.ToRelativeDate());
+
+                    if (nextep[0].Airdate < ndate)
+                    {
+                        ndate = nextep[0].Airdate;
+                    }
                 }
                 else
                 {
-                    next = "This show has ended.";
+                    next = "No data available";
                 }
 
                 OverviewListViewItemCollection.Add(new OverviewListViewItem
                     {
-                        ShowID      = show["showid"],
-                        Name        = show["name"],
+                        Show        = show,
+                        Name        = show.Name,
                         Title       = last,
                         Next        = next,
                         TitleColor  = count != 0
                                       ? "Red"
-                                      : lastep.Length == 3
+                                      : lastep.Count != 0
                                         ? "White"
                                         : "#50FFFFFF",
-                        NextColor   = nextep.Length == 4
+                        NextColor   = nextep.Count != 0
                                       ? "White"
                                       : "#50FFFFFF",
                         NewEpisodes = count,
-                        Started     = lastep.Length == 3
+                        Started     = lastep.Count != 0
                     });
             }
 
@@ -218,6 +203,10 @@
             // set status
 
             ResetStatus();
+
+            s.Stop();
+            MessageBox.Show(s.Elapsed.ToString());
+
         }
         #endregion
 
@@ -444,7 +433,7 @@
 
             if (show.NewEpisodes >= 2)
             {
-                var dbep   = Database.Query("select season, episode from episodes where showid = " + show.ShowID + " and episodeid not in (select episodeid from tracking where showid = " + show.ShowID + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
+                var dbep   = Database.Query("select season, episode from episodes where showid = " + show.Show.ShowID + " and episodeid not in (select episodeid from tracking where showid = " + show.Show.ShowID + ") and airdate < " + DateTime.Now.ToUnixTimestamp() + " and airdate != 0  order by (season * 1000 + episode) asc limit 1")[0];
                 var nextep = "S{0:00}E{1:00}".FormatWith(dbep["season"].ToInteger(), dbep["episode"].ToInteger());
 
                 // Play next unseen episode

@@ -1,15 +1,17 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using RoliSoft.TVShowTracker.Tables;
+
     /// <summary>
     /// Represents a TV show on the overview list view.
     /// </summary>
     public class OverviewListViewItem
     {
         /// <summary>
-        /// Gets or sets the ID of the show in the database.
+        /// Gets or sets the TV show in the database.
         /// </summary>
-        /// <value>The ID of the show in the database.</value>
-        public string ShowID { get; set; }
+        /// <value>The TV show in the database.</value>
+        public TVShow Show { get; set; }
 
         /// <summary>
         /// Gets or sets the name.
