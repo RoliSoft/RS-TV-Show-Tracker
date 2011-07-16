@@ -5,7 +5,7 @@
     /// <summary>
     /// Represents an episode in the SQLite database.
     /// </summary>
-    public struct Episode
+    public class Episode
     {
         /// <summary>
         /// Gets or sets the row ID.

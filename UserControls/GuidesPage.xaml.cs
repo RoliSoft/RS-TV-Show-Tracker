@@ -127,7 +127,7 @@
         /// </summary>
         public void LoadShowList()
         {
-            comboBox.ItemsSource = Database.Query("select name from tvshows order by rowid asc").Select(r => r["name"]).ToList();
+            comboBox.ItemsSource = Database.TVShows.Select(s => s.Name).ToList();
         }
 
         /// <summary>
@@ -179,13 +179,13 @@
                 return;
             }
 
-            var qid = Database.Query("select showid from tvshows where name = ? limit 1", sel.ToString());
+            var qid = Database.TVShows.Where(s => s.Name == sel.ToString()).ToList();
             if (qid.Count == 0)
             {
                 return;
             }
 
-            var id = qid[0]["showid"];
+            var id = qid[0].ShowID.ToString();
             _activeShowID = id;
 
             // fill up general informations
@@ -253,14 +253,14 @@
 
             try
             {
-                var last = Database.Query("select name, airdate from episodes where showid = ? and airdate < ? and airdate != 0 order by (season * 1000 + episode) desc limit 1", id, DateTime.Now.ToUnixTimestamp());
-                var next = Database.Query("select name, airdate from episodes where showid = ? and airdate > ? order by (season * 1000 + episode) asc limit 1", id, DateTime.Now.ToUnixTimestamp());
+                var last = Database.Episodes.Where(ep => ep.ShowID.ToString() == id && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var next = Database.Episodes.Where(ep => ep.ShowID.ToString() == id && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
 
                 if (last.Count != 0)
                 {
                     showGeneralLastPanel.Visibility = Visibility.Visible;
-                    showGeneralLast.Text            = last[0]["name"];
-                    showGeneralLastDate.Text        = last[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true);
+                    showGeneralLast.Text            = last[0].Name;
+                    showGeneralLastDate.Text        = last[0].Airdate.ToRelativeDate(true);
                 }
                 else
                 {
@@ -270,8 +270,8 @@
                 if (next.Count != 0)
                 {
                     showGeneralNextPanel.Visibility = Visibility.Visible;
-                    showGeneralNext.Text            = next[0]["name"];
-                    showGeneralNextDate.Text        = next[0]["airdate"].ToDouble().GetUnixTimestamp().ToRelativeDate(true);
+                    showGeneralNext.Text            = next[0].Name;
+                    showGeneralNextDate.Text        = next[0].Airdate.ToRelativeDate(true);
                 }
                 else
                 {
@@ -291,24 +291,24 @@
 
             // fill up episode list
 
-            var shows = Database.Query("select (select tracking.episodeid from tracking where tracking.episodeid = episodes.episodeid) as seenit, (showid || '|' || episodeid) as id, season, episode, airdate, name, descr, pic, url from episodes where showid = ? order by (season * 1000 + episode) desc", id);
+            var shows = Database.Episodes.Where(ep => ep.ShowID.ToString() == id).OrderByDescending(ep => ep.Season * 1000 + ep.Number);
             var icon  = Updater.CreateGuide(Database.ShowData(id, "grabber")).Icon;
 
             foreach (var show in shows)
             {
                 GuideListViewItemCollection.Add(new GuideListViewItem
                     {
-                        SeenIt      = show["seenit"] != String.Empty,
-                        Id          = show["id"],
-                        Season      = "Season " + show["season"],
-                        Episode     = "S{0:00}E{1:00}".FormatWith(show["season"].ToInteger(), show["episode"].ToInteger()),
-                        Airdate     = show["airdate"] != "0"
-                                      ? show["airdate"].ToDouble().GetUnixTimestamp().ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show["airdate"].ToDouble().GetUnixTimestamp() > DateTime.Now ? "*" : string.Empty)
+                        SeenIt      = show.Watched,
+                        Id          = show.ShowID + "|" + show.EpisodeID,
+                        Season      = "Season " + show.Season,
+                        Episode     = "S{0:00}E{1:00}".FormatWith(show.Season, show.Number),
+                        Airdate     = show.Airdate != Utils.UnixEpoch
+                                      ? show.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show.Airdate > DateTime.Now ? "*" : string.Empty)
                                       : "Unaired episode",
-                        Title       = show["name"],
-                        Summary     = show["descr"],
-                        Picture     = show["pic"],
-                        URL         = show["url"],
+                        Title       = show.Name,
+                        Summary     = show.Description,
+                        Picture     = show.Picture,
+                        URL         = show.URL,
                         GrabberIcon = icon
                     });
             }
@@ -494,6 +494,8 @@
                     Synchronization.Status.Engine.MarkEpisodes(val[0], new[] { val[1].ToInteger() - (val[0].ToInteger() * 100000) }.ToList());
                 }
 
+                Database.Trackings.Add(int.Parse(val[1]));
+                Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = true;
                 MainWindow.Active.DataChanged(false);
             }
             catch
@@ -519,6 +521,8 @@
                     Synchronization.Status.Engine.UnmarkEpisodes(val[0], new[] { val[1].ToInteger() - (val[0].ToInteger() * 100000) }.ToList());
                 }
 
+                Database.Trackings.Remove(int.Parse(val[1]));
+                Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = false;
                 MainWindow.Active.DataChanged(false);
             }
             catch

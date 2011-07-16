@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a TV show in the SQLite database.
     /// </summary>
-    public struct TVShow
+    public class TVShow
     {
         /// <summary>
         /// Gets or sets the row ID.

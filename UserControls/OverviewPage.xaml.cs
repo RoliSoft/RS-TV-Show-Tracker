@@ -169,9 +169,13 @@
                         ndate = nextep[0].Airdate;
                     }
                 }
-                else
+                else if (Database.ShowData(show.ShowID.ToString(), "airing") == "True")
                 {
                     next = "No data available";
+                }
+                else
+                {
+                    next = "This show has ended.";
                 }
 
                 OverviewListViewItemCollection.Add(new OverviewListViewItem
