@@ -1,5 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker.Tables
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     /// Represents a TV show in the SQLite database.
     /// </summary>
@@ -36,6 +39,28 @@
         /// The release name used by the scene.
         /// </value>
         public string Release { get; set; }
+
+        /// <summary>
+        /// Gets the key-value store associated with this TV show.
+        /// </summary>
+        public Dictionary<string, string> Data
+        {
+            get
+            {
+                return Database.ShowDatas[ShowID];
+            }
+        }
+
+        /// <summary>
+        /// Gets the episodes associated with this TV show.
+        /// </summary>
+        public IEnumerable<Episode> Episodes
+        {
+            get
+            {
+                return Database.Episodes.Where(ep => ep.ShowID == ShowID);
+            }
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.

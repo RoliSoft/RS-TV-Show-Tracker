@@ -141,7 +141,7 @@
             rec.RecommendationDone  += RecommendationDone;
             rec.RecommendationError += RecommendationError;
 
-            rec.GetListAsync(Database.Query("select name from tvshows").Select(r => r["name"]).ToList());
+            rec.GetListAsync(Database.TVShows.Select(s => s.Name).ToList());
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }

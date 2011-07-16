@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.Linq;
     using System.Windows;
 
     /// <summary>
@@ -67,25 +68,26 @@
 
             var episodes = 0;
             var minutes  = new TimeSpan(0);
-            var shows = Database.Query("select name, (select value from showdata where showdata.showid = tvshows.showid and key = 'runtime') as runtime, (select count(episodeid) from tracking where tracking.showid = tvshows.showid) as count from tvshows order by rowid asc");
-            
-            foreach (var show in shows)
+
+            foreach (var show in Database.TVShows)
             {
-                episodes += show["count"].ToInteger();
-                minutes  += TimeSpan.FromMinutes(show["runtime"].ToDouble() * show["count"].ToDouble());
+                var count   = show.Episodes.Count();
+                var runtime = show.Data["runtime"].ToInteger();
+                  episodes += count;
+                  minutes  += TimeSpan.FromMinutes(runtime * count);
 
                 StatisticsListViewItemCollection.Add(new StatisticsListViewItem
                     {
-                        Name       = show["name"],
-                        Runtime    = show["runtime"] + " minutes",
-                        Episodes   = show["count"].ToInteger().ToString("#,###"),
-                        TimeWasted = TimeSpan.FromMinutes(show["runtime"].ToDouble() * show["count"].ToDouble()).ToFullRelativeTime()
+                        Name       = show.Name,
+                        Runtime    = runtime + " minutes",
+                        Episodes   = count.ToString("#,###"),
+                        TimeWasted = TimeSpan.FromMinutes(runtime * count).ToFullRelativeTime()
                     });
             }
 
             StatisticsListViewItemCollection.Add(new StatisticsListViewItem
                 {
-                    Name       = "— Total of " + Utils.FormatNumber(shows.Count, "TV show") + " —",
+                    Name       = "— Total of " + Utils.FormatNumber(Database.TVShows.Count, "TV show") + " —",
                     Episodes   = episodes.ToString("#,###"),
                     TimeWasted = minutes.ToFullRelativeTime()
                 });
