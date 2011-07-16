@@ -47,7 +47,7 @@
             var dbid = Database.GetShowID(show[0]);
             var adid = string.Empty;
 
-            if (!string.IsNullOrWhiteSpace(dbid))
+            if (dbid != int.MinValue)
             {
                 adid = Database.ShowData(dbid, "Addic7ed.ID");
             }
@@ -62,7 +62,7 @@
 
                 adid = Regex.Match(url[0].URL, @"/serie/([^/$]+)").Groups[1].Value;
 
-                if (!string.IsNullOrWhiteSpace(dbid))
+                if (dbid != int.MinValue)
                 {
                     Database.ShowData(dbid, "Addic7ed.ID", adid);
                 }

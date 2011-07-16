@@ -140,7 +140,6 @@
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />
     <Compile Include="FileNames\Tests.cs" />
-    <Compile Include="Synchronization\Engines\RoliSoftDotNetAPI.cs" />
     <Compile Include="Synchronization\SyncEngine.cs" />
     <Compile Include="Tables\Episode.cs" />
     <Compile Include="Tables\TVShow.cs" />
@@ -623,6 +622,9 @@
   <ItemGroup>
     <Resource Include="Images\amazon.png" />
     <Resource Include="Images\apple.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Synchronization\Engines\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

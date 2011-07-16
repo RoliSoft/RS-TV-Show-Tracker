@@ -169,7 +169,7 @@
                         ndate = nextep[0].Airdate;
                     }
                 }
-                else if (Database.ShowData(show.ShowID.ToString(), "airing") == "True")
+                else if (show.Data["airing"] == "True")
                 {
                     next = "No data available";
                 }

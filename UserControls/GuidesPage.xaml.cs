@@ -31,7 +31,8 @@
         /// <value>The guide list view item collection.</value>
         public ObservableCollection<GuideListViewItem> GuideListViewItemCollection { get; set; }
 
-        private string _activeShowUrl, _activeShowID;
+        private int _activeShowID;
+        private string _activeShowUrl;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GuidesPage"/> class.
@@ -179,14 +180,11 @@
                 return;
             }
 
-            var qid = Database.TVShows.Where(s => s.Name == sel.ToString()).ToList();
-            if (qid.Count == 0)
+            var id = _activeShowID = Database.GetShowID(sel.ToString());
+            if (id == int.MinValue)
             {
                 return;
             }
-
-            var id = qid[0].ShowID.ToString();
-            _activeShowID = id;
 
             // fill up general informations
 
@@ -253,8 +251,8 @@
 
             try
             {
-                var last = Database.Episodes.Where(ep => ep.ShowID.ToString() == id && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
-                var next = Database.Episodes.Where(ep => ep.ShowID.ToString() == id && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var last = Database.Episodes.Where(ep => ep.ShowID == id && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var next = Database.Episodes.Where(ep => ep.ShowID == id && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
 
                 if (last.Count != 0)
                 {
@@ -291,7 +289,7 @@
 
             // fill up episode list
 
-            var shows = Database.Episodes.Where(ep => ep.ShowID.ToString() == id).OrderByDescending(ep => ep.Season * 1000 + ep.Number);
+            var shows = Database.Episodes.Where(ep => ep.ShowID == id).OrderByDescending(ep => ep.Season * 1000 + ep.Number);
             var icon  = Updater.CreateGuide(Database.ShowData(id, "grabber")).Icon;
 
             foreach (var show in shows)

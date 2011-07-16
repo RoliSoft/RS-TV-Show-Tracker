@@ -73,16 +73,17 @@
                 }
 
                 // get ID on guide
+                var showid = int.Parse(r["showid"]);
                 string id, lang;
                 try
                 {
-                    id = Database.ShowData(r["showid"], gname + ".id");
+                    id = Database.ShowData(showid, gname + ".id");
                     if (string.IsNullOrWhiteSpace(id))
                     {
                         throw new ArgumentNullException();
                     }
 
-                    lang = Database.ShowData(r["showid"], gname + ".lang");
+                    lang = Database.ShowData(showid, gname + ".lang");
                     if (string.IsNullOrWhiteSpace(lang))
                     {
                         lang = "en";
@@ -107,26 +108,26 @@
                 }
 
                 // update showdata fields
-                Database.ShowData(r["showid"], "genre", tv.Genre);
-                Database.ShowData(r["showid"], "descr", tv.Description);
-                Database.ShowData(r["showid"], "cover", tv.Cover);
-                Database.ShowData(r["showid"], "airing", tv.Airing.ToString());
-                Database.ShowData(r["showid"], "airtime", tv.AirTime);
-                Database.ShowData(r["showid"], "airday", tv.AirDay);
-                Database.ShowData(r["showid"], "network", tv.Network);
-                Database.ShowData(r["showid"], "timezone", tv.TimeZone);
-                Database.ShowData(r["showid"], "runtime", tv.Runtime.ToString());
-                Database.ShowData(r["showid"], "url", tv.URL);
+                Database.ShowData(showid, "genre",    tv.Genre);
+                Database.ShowData(showid, "descr",    tv.Description);
+                Database.ShowData(showid, "cover",    tv.Cover);
+                Database.ShowData(showid, "airing",   tv.Airing.ToString());
+                Database.ShowData(showid, "airtime",  tv.AirTime);
+                Database.ShowData(showid, "airday",   tv.AirDay);
+                Database.ShowData(showid, "network",  tv.Network);
+                Database.ShowData(showid, "timezone", tv.TimeZone);
+                Database.ShowData(showid, "runtime",  tv.Runtime.ToString());
+                Database.ShowData(showid, "url",      tv.URL);
 
                 // remove current episodes
-                Database.ExecuteOnTransaction(tr, "delete from episodes where showid = ?", r["showid"]);
+                Database.ExecuteOnTransaction(tr, "delete from episodes where showid = ?", showid);
 
                 // update episodes
                 foreach (var ep in tv.Episodes)
                 {
                     try
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)", ep.Number + (ep.Season * 1000) + (r["showid"].ToInteger() * 100 * 1000), r["showid"], ep.Season, ep.Number, string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch ? ep.Airdate.ToUnixTimestamp() : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(), ep.Title, ep.Summary, ep.Picture, ep.URL);
+                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)", ep.Number + (ep.Season * 1000) + (showid * 100 * 1000), showid, ep.Season, ep.Number, string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch ? ep.Airdate.ToUnixTimestamp() : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(), ep.Title, ep.Summary, ep.Picture, ep.URL);
                     }
                     catch (Exception ex)
                     {

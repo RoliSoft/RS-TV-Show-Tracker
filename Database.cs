@@ -427,11 +427,11 @@
         /// <param name="id">The id of the show.</param>
         /// <param name="key">The key.</param>
         /// <returns>Stored value or empty string.</returns>
-        public static string ShowData(string id, string key)
+        public static string ShowData(int id, string key)
         {
-            if (ShowDatas[int.Parse(id)].ContainsKey(key))
+            if (ShowDatas[id].ContainsKey(key))
             {
-                return ShowDatas[int.Parse(id)][key];
+                return ShowDatas[id][key];
             }
             else
             {
@@ -444,7 +444,9 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Number of affected rows.
+        /// </returns>
         public static int Setting(string key, string value)
         {
             using (var cmd = new SQLiteCommand("insert into settings values (?, ?)", Connection))
@@ -465,10 +467,12 @@
         /// <param name="id">The id of the show.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public static int ShowData(string id, string key, string value)
+        /// <returns>
+        /// Number of affected rows.
+        /// </returns>
+        public static int ShowData(int id, string key, string value)
         {
-            ShowDatas[int.Parse(id)][key] = value;
+            ShowDatas[id][key] = value;
 
             var data = (id + "|" + key).GetHashCode();
 
@@ -490,52 +494,39 @@
         /// Gets the ID of a show in the database.
         /// </summary>
         /// <param name="show">The name of the show.</param>
-        /// <returns>ID of the show or empty string.</returns>
-        public static string GetShowID(string show)
+        /// <returns>ID of the show or -2^31.</returns>
+        public static int GetShowID(string show)
         {
             var showid = TVShows.Where(s => s.Name == show).Take(1).ToList();
 
             if (showid.Count != 0)
             {
-                return showid[0].ShowID.ToString();
+                return showid[0].ShowID;
             }
             else
             {
-                return string.Empty;
+                return int.MinValue;
             }
         }
-
-        /// <summary>
-        /// Gets the ID of a show in the database.
-        /// </summary>
-        /// <param name="show">The name of the show.</param>
-        /// <param name="grabber">The grabber.</param>
-        /// <param name="grabberId">The grabber id.</param>
-        /// <param name="grabberLang">The grabber language.</param>
-        /// <returns>ID of the show or empty string.</returns>
-        public static string GetShowID(string show, string grabber, string grabberId, string grabberLang)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         /// <summary>
         /// Gets the ID of an episode in the database.
         /// </summary>
-        /// <param name="show">The name of the show.</param>
+        /// <param name="id">The ID of the show.</param>
         /// <param name="season">The season of the episode.</param>
         /// <param name="episode">The number of the episode.</param>
-        /// <returns>ID of the show or empty string.</returns>
-        public static string GetEpisodeID(string show, int season, int episode)
+        /// <returns>ID of the show or -2^31.</returns>
+        public static int GetEpisodeID(int id, int season, int episode)
         {
-            var episodeid = Episodes.Where(ep => ep.ShowID.ToString() == show && ep.Season == season && ep.Number == episode).Take(1).ToList();
+            var episodeid = Episodes.Where(ep => ep.ShowID == id && ep.Season == season && ep.Number == episode).Take(1).ToList();
 
             if (episodeid.Count != 0)
             {
-                return episodeid[0].EpisodeID.ToString();
+                return episodeid[0].EpisodeID;
             }
             else
             {
-                return string.Empty;
+                return int.MinValue;
             }
         }
 

@@ -14,12 +14,13 @@
     public partial class EditShowWindow
     {
         private Guide _guide;
-        private string _show, _id, _lang;
+        private int _id;
+        private string _show, _lang;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
         /// </summary>
-        public EditShowWindow(string id, string show)
+        public EditShowWindow(int id, string show)
         {
             InitializeComponent();
 

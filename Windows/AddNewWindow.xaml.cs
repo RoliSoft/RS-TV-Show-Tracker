@@ -24,7 +24,7 @@
         private Guide _guide;
         private List<ShowID> _shows;
         private Thread _worker;
-        private string _dbid;
+        private int _dbid;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -288,7 +288,7 @@
                     }
 
                     // try to see if duplicate
-                    if (!string.IsNullOrWhiteSpace(Database.GetShowID(tv.Title)))
+                    if (Database.GetShowID(tv.Title) != int.MinValue)
                     {
                         Dispatcher.Invoke((Action)(() =>
                             {
@@ -378,7 +378,7 @@
                         try
                         {
                             Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                                          ep.Number + (ep.Season * 1000) + (_dbid.ToInteger() * 100 * 1000),
+                                                          ep.Number + (ep.Season * 1000) + (_dbid * 100 * 1000),
                                                           _dbid,
                                                           ep.Season,
                                                           ep.Number,
@@ -407,7 +407,7 @@
 
                     if (Synchronization.Status.Enabled)
                     {
-                        Synchronization.Status.Engine.AddShow(_dbid);
+                        Synchronization.Status.Engine.AddShow(_dbid.ToString());
                     }
 
                     // show finish page
@@ -454,11 +454,11 @@
             var episode = ((string)markUntil.SelectedValue).Substring(4, 2).ToInteger();
 
             Database.Execute("delete from tracking where showid = ?", _dbid);
-            Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and episodeid <= ?", _dbid, episode + (season * 1000) + (_dbid.ToInteger() * 100 * 1000));
+            Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and episodeid <= ?", _dbid, episode + (season * 1000) + (_dbid * 100 * 1000));
 
             if (Synchronization.Status.Enabled)
             {
-                Synchronization.Status.Engine.MarkEpisodes(_dbid, Synchronization.Engines.RoliSoftDotNetAPI.SerializeMarkedEpisodes(_dbid));
+                //Synchronization.Status.Engine.MarkEpisodes(_dbid, Synchronization.Engines.RoliSoftDotNetAPI.SerializeMarkedEpisodes(_dbid));
             }
 
             MainWindow.Active.DataChanged();

@@ -95,7 +95,7 @@
                             }
                             else
                             {
-                                MarkAsSeen(show["showid"], pf.Episode);
+                                MarkAsSeen(int.Parse(show["showid"]), pf.Episode);
                             }
                         }
                     }
@@ -108,7 +108,7 @@
         /// </summary>
         /// <param name="showid">The ID of the show.</param>
         /// <param name="ep">The episode.</param>
-        public static void MarkAsSeen(string showid, ShowEpisode ep)
+        public static void MarkAsSeen(int showid, ShowEpisode ep)
         {
             var eps = ep.SecondEpisode.HasValue
                       ? Enumerable.Range(ep.Episode, (ep.SecondEpisode.Value - ep.Episode + 1)).ToArray()
@@ -118,7 +118,7 @@
             {
                 var epid = Database.GetEpisodeID(showid, ep.Season, epnr);
 
-                if (string.IsNullOrEmpty(epid))
+                if (epid == int.MinValue)
                 {
                     continue;
                 }
@@ -131,7 +131,7 @@
 
             if (Synchronization.Status.Enabled)
             {
-                Synchronization.Status.Engine.MarkEpisodes(showid, eps.Select(x => x + (ep.Season * 1000)).ToList());
+                Synchronization.Status.Engine.MarkEpisodes(showid.ToString(), eps.Select(x => x + (ep.Season * 1000)).ToList());
             }
 
             MainWindow.Active.DataChanged();

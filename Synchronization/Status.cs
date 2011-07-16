@@ -40,8 +40,8 @@
         /// <param name="auth">The authentication token required for the engine.</param>
         public static void LoadEngine(string engine, string[] auth)
         {
-            Enabled = true;
-            Engine  = new Engines.RoliSoftDotNetAPI(auth[0], auth[1]);
+            //Enabled = true;
+            //Engine  = new Engines.RoliSoftDotNetAPI(auth[0], auth[1]);
         }
     }
 }
