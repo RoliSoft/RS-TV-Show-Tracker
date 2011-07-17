@@ -173,6 +173,16 @@
         }
 
         /// <summary>
+        /// Toggles the key's current boolean value in the XML settings.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        public static void Toggle(string key)
+        {
+            Keys[key] = !Get<bool>(key);
+            Save();
+        }
+
+        /// <summary>
         /// Saves the XML settings into the file.
         /// </summary>
         public static void Save()

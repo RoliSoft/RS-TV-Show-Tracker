@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:s="clr-namespace:System;assembly=mscorlib"
-             xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d" d:Height="450" d:Width="1069" Loaded="UserControlLoaded" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True">
     <UserControl.Resources>
         
@@ -127,18 +126,23 @@
                     <GroupStyle.ContainerStyle>
                         <Style TargetType="{x:Type GroupItem}">
                             <Setter Property="Foreground" Value="#FFFFFFFF" />
-                            <Setter Property="Margin" Value="0,0,0,5"/>
+                            <Setter Property="Margin" Value="0,0,0,0"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
-                                        <Expander IsExpanded="True" Style="{StaticResource ExpanderTemplate}">
-                                            <Expander.Header>
-                                                <TextBlock Foreground="#FFFFFFFF" FontWeight="Bold" Text="{Binding Path=Name}" Margin="3,0,0,0" />
-                                            </Expander.Header>
-                                            <Expander.Content>
-                                                <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" />
-                                            </Expander.Content>
-                                        </Expander>
+                                        <StackPanel Orientation="Vertical">
+                                            <Grid Height="20">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Separator Width="10" VerticalAlignment="Center" Opacity="0.3" />
+                                                <TextBlock Grid.Column="1" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                <Separator Grid.Column="2" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
+                                            </Grid>
+                                            <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" />
+                                        </StackPanel>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>

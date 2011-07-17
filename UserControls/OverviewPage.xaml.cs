@@ -42,6 +42,28 @@
         private Timer _timer;
 
         /// <summary>
+        /// Gets the list of supported sortings.
+        /// </summary>
+        public Dictionary<string, string> Sorting = new Dictionary<string, string>
+            {
+                { "Alphabetical",       "name"    },
+                { "Episode count",      "epcount" },
+                { "Last aired episode", "lastair" },
+                { "Next aired episode", "nextair" },
+            }; 
+
+        /// <summary>
+        /// Gets the list of supported groups.
+        /// </summary>
+        public Dictionary<string, string> Grouping = new Dictionary<string, string>
+            {
+                { "Air day",           "airday"   },
+                { "Upcoming episodes", "upcoming" },
+                { "Unseen episodes",   "unseen"   },
+                { "Network",           "network"  },
+            }; 
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OverviewPage"/> class.
         /// </summary>
         public OverviewPage()
@@ -141,11 +163,7 @@
             var sorting  = Settings.Get("Sorting");
             var sortdir  = Settings.Get("Sort Direction");
             var grouping = Settings.Get("Grouping");
-
-            if (!string.IsNullOrWhiteSpace(sorting))
-            {
-                ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Add(new SortDescription("Sort", sortdir == "descending" ? ListSortDirection.Descending : ListSortDirection.Ascending));
-            }
+            var hideend  = Settings.Get<bool>("Hide Ended");
 
             if (!string.IsNullOrWhiteSpace(grouping))
             {
@@ -158,6 +176,11 @@
 
             foreach (var show in Database.TVShows)
             {
+                if (hideend && show.Data["airing"] == "False")
+                {
+                    continue;
+                }
+
                 // last episode
 
                 var lastep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
@@ -212,6 +235,28 @@
 
                     case "epcount":
                         sort = show.Episodes.Count();
+                        break;
+
+                    case "lastair":
+                        if (lastep.Count != 0)
+                        {
+                            sort = lastep[0].Airdate;
+                        }
+                        else
+                        {
+                            sort = DateTime.MinValue;
+                        }
+                        break;
+
+                    case "nextair":
+                        if (nextep.Count != 0)
+                        {
+                            sort = nextep[0].Airdate;
+                        }
+                        else
+                        {
+                            sort = DateTime.MaxValue;
+                        }
                         break;
                 }
 
@@ -272,6 +317,26 @@
                             group = "Never";
                         }
                         break;
+
+                    case "unseen":
+                        if (count != 0)
+                        {
+                            if ((DateTime.Now - lastep[0].Airdate).TotalDays < 14)
+                            {
+                                group = "Recently aired new episodes";
+                                grpri = 0;
+                            }
+                            else
+                            {
+                                group = "New episodes";
+                                grpri = 1;
+                            }
+                        }
+                        else
+                        {
+                            group = "No new episodes";
+                        }
+                        break;
                 }
 
                 // insertion
@@ -298,16 +363,44 @@
                     });
             }
 
-            // sort items by group priorities
-            
+            // sort items
+
+            var eitems = items as IEnumerable<OverviewListViewItem>;
+
             if (!string.IsNullOrWhiteSpace(grouping))
             {
-                items = items.OrderBy(i => i.GroupPriority).ToList();
+                eitems = eitems.OrderBy(i => i.GroupPriority);
+            }
+
+            if (!string.IsNullOrWhiteSpace(sorting))
+            {
+                if (eitems is IOrderedEnumerable<OverviewListViewItem>)
+                {
+                    if (sortdir == "descending")
+                    {
+                        eitems = (eitems as IOrderedEnumerable<OverviewListViewItem>).ThenByDescending(i => i.Sort);
+                    }
+                    else
+                    {
+                        eitems = (eitems as IOrderedEnumerable<OverviewListViewItem>).ThenBy(i => i.Sort);
+                    }
+                }
+                else
+                {
+                    if (sortdir == "descending")
+                    {
+                        eitems = eitems.OrderByDescending(i => i.Sort);
+                    }
+                    else
+                    {
+                        eitems = eitems.OrderBy(i => i.Sort);
+                    }
+                }
             }
 
             // insert from 'items' to 'OverviewListViewItemCollection'
 
-            OverviewListViewItemCollection.AddRange(items);
+            OverviewListViewItemCollection.AddRange(eitems);
 
             // set timer to the next air date
 
@@ -892,12 +985,266 @@
             vel.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/guides.png")) };
             vel.Click += EpisodeListClick;
             cm.Items.Add(vel);
-            
+
+            BuildSettingsMenu(cm);
+
             TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
             TextOptions.SetTextRenderingMode(cm, TextRenderingMode.ClearType);
             RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
 
             cm.IsOpen = true;
+        }
+
+        /// <summary>
+        /// Builds the settings menu.
+        /// </summary>
+        /// <param name="cm">The context menu.</param>
+        public void BuildSettingsMenu(ContextMenu cm)
+        {
+            var spm = -55;
+            var lbw = 115;
+
+            var sorting  = Settings.Get("Sorting");
+            var sortdir  = Settings.Get("Sort Direction");
+            var grouping = Settings.Get("Grouping");
+            var hideend  = Settings.Get<bool>("Hide Ended");
+
+            cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // ../Settings
+
+            var sti    = new MenuItem();
+            sti.Header = "Settings";
+            sti.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/settings.png")) };
+            cm.Items.Add(sti);
+
+            // Sort by
+
+            var srt    = new MenuItem();
+            srt.Header = "Sort by";
+            srt.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/order.png")) };
+            sti.Items.Add(srt);
+
+            // - Custom
+
+            var mrt         = new MenuItem();
+            mrt.IsCheckable = true;
+            mrt.IsChecked   = string.IsNullOrEmpty(sorting);
+            mrt.Header      = "Custom";
+            mrt.Tag         = new[] { string.Empty, string.Empty };
+            mrt.Click      += SortBy_Click;
+            srt.Items.Add(mrt);
+
+            // --
+
+            srt.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // - ASC
+
+            foreach (var sort in Sorting)
+            {
+                var brt         = new MenuItem();
+                brt.IsCheckable = true;
+                brt.IsChecked   = sorting == sort.Value && (sortdir == "ascending" || string.IsNullOrEmpty(sortdir));
+                brt.Tag         = new[] { sort.Value, "ascending" };
+                brt.Click      += SortBy_Click;
+                brt.Header      = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+
+                (brt.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = sort.Key,
+                        Padding = new Thickness(0),
+                        Width   = lbw
+                    });
+                (brt.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "  ASC",
+                        Padding    = new Thickness(0)
+                    });
+                srt.Items.Add(brt);
+            }
+
+            // --
+
+            srt.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // - DESC
+
+            foreach (var sort in Sorting)
+            {
+                var brt         = new MenuItem();
+                brt.IsCheckable = true;
+                brt.IsChecked   = sorting == sort.Value && sortdir == "descending";
+                brt.Tag         = new[] { sort.Value, "descending" };
+                brt.Click      += SortBy_Click;
+                brt.Header      = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Margin      = new Thickness(0, 0, spm, 0)
+                    };
+
+                (brt.Header as StackPanel).Children.Add(new Label
+                    {
+                        Content = sort.Key,
+                        Padding = new Thickness(0),
+                        Width   = lbw
+                    });
+                (brt.Header as StackPanel).Children.Add(new Label
+                    {
+                        Foreground = Brushes.DarkGray,
+                        Content    = "DESC",
+                        Padding    = new Thickness(0)
+                    });
+                srt.Items.Add(brt);
+            }
+
+            // Group by
+
+            var grp    = new MenuItem();
+            grp.Header = "Group by";
+            grp.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/group.png")) };
+            sti.Items.Add(grp);
+
+            // - None
+
+            var nrt         = new MenuItem();
+            nrt.IsCheckable = true;
+            nrt.IsChecked   = string.IsNullOrEmpty(grouping);
+            nrt.Header      = "None";
+            nrt.Tag         = string.Empty;
+            nrt.Click      += GroupBy_Click;
+            grp.Items.Add(nrt);
+
+            // --
+            
+            grp.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // - Groups
+
+            foreach (var group in Grouping)
+            {
+                var brt         = new MenuItem();
+                brt.IsCheckable = true;
+                brt.IsChecked   = grouping == group.Value;
+                brt.Header      = group.Key;
+                brt.Tag         = group.Value;
+                brt.Click      += GroupBy_Click;
+                grp.Items.Add(brt);
+            }
+
+            // --
+
+            sti.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // Move up
+
+            var mvu       = new MenuItem();
+            mvu.IsEnabled = string.IsNullOrEmpty(sorting) && string.IsNullOrWhiteSpace(grouping);
+            mvu.Icon      = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/up.png")) };
+            mvu.Header    = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin      = new Thickness(0, 0, spm, 0)
+                };
+
+            (mvu.Header as StackPanel).Children.Add(new Label
+                {
+                    Content = "Move up",
+                    Padding = new Thickness(0),
+                    Width   = lbw
+                });
+            (mvu.Header as StackPanel).Children.Add(new Label
+                {
+                    Foreground = Brushes.DarkGray,
+                    Content    = "     Ctrl+Up",
+                    Padding    = new Thickness(0)
+                });
+            sti.Items.Add(mvu);
+
+            // Move down
+
+            var mvd       = new MenuItem();
+            mvd.IsEnabled = string.IsNullOrEmpty(sorting) && string.IsNullOrWhiteSpace(grouping);
+            mvd.Icon      = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/down.png")) };
+            mvd.Header    = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin      = new Thickness(0, 0, spm, 0)
+                };
+
+            (mvd.Header as StackPanel).Children.Add(new Label
+                {
+                    Content = "Move down",
+                    Padding = new Thickness(0),
+                    Width   = lbw
+                });
+            (mvd.Header as StackPanel).Children.Add(new Label
+                {
+                    Foreground = Brushes.DarkGray,
+                    Content    = "Ctrl+Down",
+                    Padding    = new Thickness(0)
+                });
+            sti.Items.Add(mvd);
+
+            // --
+
+            sti.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // Hide ended
+
+            var hed         = new MenuItem();
+            hed.IsCheckable = true;
+            hed.IsChecked   = hideend;
+            hed.Header      = "Hide ended shows";
+            hed.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/table-join-row.png")) };
+            hed.Click      += HideEnded_Click;
+            sti.Items.Add(hed);
+
+            // Remove
+
+            var rem    = new MenuItem();
+            rem.Header = "Remove";
+            rem.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/cross.png")) };
+            sti.Items.Add(rem);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the SortBy control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        public void SortBy_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Sorting", ((string[])((MenuItem)sender).Tag)[0]);
+            Settings.Set("Sort Direction", ((string[])((MenuItem)sender).Tag)[1]);
+            Refresh();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the GroupBy control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        public void GroupBy_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Grouping", (string)((MenuItem)sender).Tag);
+            Refresh();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the HideEnded control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        public void HideEnded_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Toggle("Hide Ended");
+            Refresh();
         }
         #endregion
     }

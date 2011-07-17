@@ -308,17 +308,17 @@
 
                 if (cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
                 {
-                    return "This " + nextdate.DayOfWeek;
+                    return "This week";
                 }
 
                 if (cal.GetWeekOfYear(DateTime.Now.AddDays(7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
                 {
-                    return "Next " + nextdate.DayOfWeek;
+                    return "Next week";
                 }
 
                 if (cal.GetWeekOfYear(DateTime.Now.AddDays(-7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
                 {
-                    return "Last " + nextdate.DayOfWeek;
+                    return "Last week";
                 }
 
                 var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
