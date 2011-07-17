@@ -99,7 +99,7 @@
             if (GuideListViewItemCollection == null)
             {
                 GuideListViewItemCollection = new ObservableCollection<GuideListViewItem>();
-                (FindResource("cvs") as CollectionViewSource).Source = GuideListViewItemCollection;
+                ((CollectionViewSource)FindResource("cvs")).Source = GuideListViewItemCollection;
             }
 
             if (MainWindow.Active != null && MainWindow.Active.IsActive && LoadDate < Database.DataChange)

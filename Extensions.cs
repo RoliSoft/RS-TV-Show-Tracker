@@ -281,6 +281,108 @@
         }
 
         /// <summary>
+        /// Extension method to DateTime to translate the date into a short relative date.
+        /// </summary>
+        /// <param name="nextdate">The next air.</param>
+        /// <returns>Short relative date.</returns>
+        public static string ToShortRelativeDate(this DateTime nextdate)
+        {
+            var cal = CultureInfo.InvariantCulture.Calendar;
+
+            if (DateTime.Now.Year == nextdate.Year)
+            {
+                if (DateTime.Now.ToShortDateString() == nextdate.ToShortDateString())
+                {
+                    return "Today";
+                }
+
+                if (DateTime.Now.AddDays(1).ToShortDateString() == nextdate.ToShortDateString())
+                {
+                    return "Tomorrow";
+                }
+
+                if (DateTime.Now.AddDays(-1).ToShortDateString() == nextdate.ToShortDateString())
+                {
+                    return "Yesterday";
+                }
+
+                if (cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                {
+                    return "This " + nextdate.DayOfWeek;
+                }
+
+                if (cal.GetWeekOfYear(DateTime.Now.AddDays(7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                {
+                    return "Next " + nextdate.DayOfWeek;
+                }
+
+                if (cal.GetWeekOfYear(DateTime.Now.AddDays(-7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                {
+                    return "Last " + nextdate.DayOfWeek;
+                }
+
+                var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : " until aires");
+            }
+            else
+            {
+                var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : " until aires");
+            }
+        }
+
+        /// <summary>
+        /// Extension method to DateTime to translate the date into a number representing how far it is from now.
+        /// </summary>
+        /// <param name="nextdate">The next air.</param>
+        /// <returns>Priority of the relative date.</returns>
+        public static int ToRelativeDatePriority(this DateTime nextdate)
+        {
+            var cal = CultureInfo.InvariantCulture.Calendar;
+
+            if (DateTime.Now.Year == nextdate.Year)
+            {
+                if (DateTime.Now.ToShortDateString() == nextdate.ToShortDateString())
+                {
+                    return 0;
+                }
+
+                if (DateTime.Now.AddDays(1).ToShortDateString() == nextdate.ToShortDateString())
+                {
+                    return 1;
+                }
+
+                if (DateTime.Now.AddDays(-1).ToShortDateString() == nextdate.ToShortDateString())
+                {
+                    return -1;
+                }
+
+                if (cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                {
+                    return ((int)nextdate.DayOfWeek + 1) * 10;
+                }
+
+                if (cal.GetWeekOfYear(DateTime.Now.AddDays(7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                {
+                    return ((int)nextdate.DayOfWeek + 1) * 100;
+                }
+
+                if (cal.GetWeekOfYear(DateTime.Now.AddDays(-7), CalendarWeekRule.FirstDay, DayOfWeek.Monday) == cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday))
+                {
+                    return ((int)nextdate.DayOfWeek + 1) * -10;
+                }
+
+                var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                return Math.Abs(weeks) * 1000;
+            }
+            else
+            {
+                var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                return Math.Abs(weeks) * 1000;
+            }
+        }
+
+        /// <summary>
         /// Extension method to DateTime to convert the date to local time zone.
         /// If the "Convert Timezone" setting is false, the function won't convert.
         /// </summary>

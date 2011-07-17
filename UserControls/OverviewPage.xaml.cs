@@ -1,12 +1,15 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Timers;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Data;
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
@@ -56,7 +59,7 @@
             if (OverviewListViewItemCollection == null)
             {
                 OverviewListViewItemCollection = new ObservableCollection<OverviewListViewItem>();
-                listView.ItemsSource           = OverviewListViewItemCollection;
+                ((CollectionViewSource)FindResource("cvs")).Source = OverviewListViewItemCollection;
 
                 _timer = new Timer { AutoReset = false };
                 _timer.Elapsed += (a, b) => MainWindow.Active.DataChanged();
@@ -132,14 +135,31 @@
         public void LoadOverviewListView()
         {
             OverviewListViewItemCollection.Clear();
+            ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Clear();
+            ((CollectionViewSource)FindResource("cvs")).GroupDescriptions.Clear();
 
-                 _eps = 0;
+            var sorting  = Settings.Get("Sorting");
+            var sortdir  = Settings.Get("Sort Direction");
+            var grouping = Settings.Get("Grouping");
+
+            if (!string.IsNullOrWhiteSpace(sorting))
+            {
+                ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Add(new SortDescription("Sort", sortdir == "descending" ? ListSortDirection.Descending : ListSortDirection.Ascending));
+            }
+
+            if (!string.IsNullOrWhiteSpace(grouping))
+            {
+                ((CollectionViewSource)FindResource("cvs")).GroupDescriptions.Add(new PropertyGroupDescription("Group"));
+            }
+
+            var items = new List<OverviewListViewItem>();
             var ndate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0).AddDays(1);
-
-            NewHelp.Visibility = Database.TVShows.Count != 0 ? Visibility.Collapsed : Visibility.Visible;
+                 _eps = 0;
 
             foreach (var show in Database.TVShows)
             {
+                // last episode
+
                 var lastep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
                 var last   = lastep.Count != 0
                            ? "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].Season, lastep[0].Number, lastep[0].Name)
@@ -156,6 +176,8 @@
                 {
                     last += " · " + count + " NEW EPISODES!";
                 }
+
+                // next episode
 
                 var nextep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
                 string next;
@@ -178,24 +200,114 @@
                     next = "This show has ended.";
                 }
 
-                OverviewListViewItemCollection.Add(new OverviewListViewItem
+                // sort
+
+                var sort = (object)null;
+
+                switch (sorting)
+                {
+                    case "name":
+                        sort = show.Name;
+                        break;
+
+                    case "epcount":
+                        sort = show.Episodes.Count();
+                        break;
+                }
+
+                // group
+
+                var group = string.Empty;
+                var grpri = int.MaxValue;
+
+                switch (grouping)
+                {
+                    case "network":
+                        group = show.Data["network"];
+
+                        if (string.IsNullOrWhiteSpace(group) || group == "Syndicated")
+                        {
+                            group = "Unknown";
+                        }
+
+                        grpri = group[0];
+                        break;
+
+                    case "airday":
+                        var ep = (Episode)null;
+
+                        if (lastep.Count != 0)
+                        {
+                            ep = lastep[0];
+                        }
+                        else if (show.Episodes.Count() != 0)
+                        {
+                            ep = show.Episodes.First();
+                        }
+
+                        if (ep != null)
+                        {
+                            group = ep.Airdate.DayOfWeek.ToString();
+                            grpri = (int)ep.Airdate.DayOfWeek;
+                        }
+                        else
+                        {
+                            group = "Unknown";
+                        }
+                        break;
+
+                    case "upcoming":
+                        if (nextep.Count != 0)
+                        {
+                            group = nextep[0].Airdate.ToShortRelativeDate();
+                            grpri = nextep[0].Airdate.ToRelativeDatePriority();
+                        }
+                        else if (show.Data["airing"] == "True")
+                        {
+                            group  = "Unknown";
+                            grpri -= 1;
+                        }
+                        else
+                        {
+                            group = "Never";
+                        }
+                        break;
+                }
+
+                // insertion
+
+                items.Add(new OverviewListViewItem
                     {
-                        Show        = show,
-                        Name        = show.Name,
-                        Title       = last,
-                        Next        = next,
-                        TitleColor  = count != 0
-                                      ? "Red"
-                                      : lastep.Count != 0
+                        Show          = show,
+                        Name          = show.Name,
+                        Title         = last,
+                        Next          = next,
+                        TitleColor    = count != 0
+                                        ? "Red"
+                                        : lastep.Count != 0
+                                          ? "White"
+                                          : "#50FFFFFF",
+                        NextColor     = nextep.Count != 0
                                         ? "White"
                                         : "#50FFFFFF",
-                        NextColor   = nextep.Count != 0
-                                      ? "White"
-                                      : "#50FFFFFF",
-                        NewEpisodes = count,
-                        Started     = lastep.Count != 0
+                        NewEpisodes   = count,
+                        Started       = lastep.Count != 0,
+                        Group         = group,
+                        GroupPriority = grpri,
+                        Sort          = sort
                     });
             }
+
+            // sort items by group priorities
+            
+            if (!string.IsNullOrWhiteSpace(grouping))
+            {
+                items = items.OrderBy(i => i.GroupPriority).ToList();
+            }
+
+            // insert from 'items' to 'OverviewListViewItemCollection'
+
+            OverviewListViewItemCollection.AddRange(items);
 
             // set timer to the next air date
 

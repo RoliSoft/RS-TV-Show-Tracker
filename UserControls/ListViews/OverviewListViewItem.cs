@@ -54,5 +54,23 @@
         /// </summary>
         /// <value><c>true</c> if started; otherwise, <c>false</c>.</value>
         public bool Started { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the group.
+        /// </summary>
+        /// <value>The name of the group.</value>
+        public string Group { get; set; }
+
+        /// <summary>
+        /// Gets or sets the priority of the group.
+        /// </summary>
+        /// <value>The priority of the group.</value>
+        public int GroupPriority { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the sort.
+        /// </summary>
+        /// <value>The name of the sort.</value>
+        public object Sort { get; set; }
     }
 }

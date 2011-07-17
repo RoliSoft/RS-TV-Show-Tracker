@@ -2,14 +2,150 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:s="clr-namespace:System;assembly=mscorlib"
+             xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d" d:Height="450" d:Width="1069" Loaded="UserControlLoaded" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        
+        <!-- listview grouping -->
+        <CollectionViewSource x:Key="cvs" />
+
+        <!-- toggle button -->
+        <ControlTemplate x:Key="ToggleButtonTemplate" TargetType="{x:Type ToggleButton}">
+            <Border Padding="{TemplateBinding Control.Padding}">
+                <Grid Background="#00FFFFFF" SnapsToDevicePixels="False" Margin="6,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="17" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Fill="#30000000" Name="circle" Width="17" Height="17" HorizontalAlignment="Center" VerticalAlignment="Center" StrokeThickness="2" />
+                    <Path Data="M1,1.5L4.5,5 8,1.5" Stroke="White" StrokeThickness="2" Name="arrow" HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="False" />
+                    <ContentPresenter RecognizesAccessKey="True" Content="{TemplateBinding ContentControl.Content}" ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" Margin="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" SnapsToDevicePixels="True" Grid.Column="1" />
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="ToggleButton.IsChecked">
+                    <Setter Property="Path.Data" TargetName="arrow">
+                        <Setter.Value>
+                            <StreamGeometry>
+                                M1,4.5L4.5,1 8,4.5</StreamGeometry>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <s:Boolean>
+                            True</s:Boolean>
+                    </Trigger.Value>
+                </Trigger>
+                <Trigger Property="UIElement.IsMouseOver">
+                    <Setter Property="Shape.Stroke" TargetName="circle">
+                        <Setter.Value>
+                            <SolidColorBrush>
+                                #50000000</SolidColorBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <s:Boolean>
+                            True</s:Boolean>
+                    </Trigger.Value>
+                </Trigger>
+                <Trigger Property="ButtonBase.IsPressed">
+                    <Setter Property="Shape.Stroke" TargetName="circle">
+                        <Setter.Value>
+                            <SolidColorBrush>
+                                #50000000</SolidColorBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <s:Boolean>
+                            True</s:Boolean>
+                    </Trigger.Value>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- expander -->
+        <Style x:Key="ExpanderTemplate" TargetType="{x:Type Expander}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Expander}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*" x:Name="ContentRow"/>
+                            </Grid.RowDefinitions>
+                            <Border
+                                x:Name="Border"
+                                Grid.Row="0"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2,2,0,0"
+                            >
+                                <StackPanel Orientation="Horizontal">
+                                    <ToggleButton
+                                        Template="{DynamicResource ToggleButtonTemplate}"
+                                        Background="{TemplateBinding Background}"
+                                        IsChecked="{Binding Path=IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                        OverridesDefaultStyle="True"
+                                    />
+                                    <ContentPresenter Grid.Column="1" Margin="4" RecognizesAccessKey="True" ContentSource="Header"/>
+                                </StackPanel>
+                            </Border>
+                            <Border
+                                x:Name="ExpandSite"
+                                Grid.Row="1"
+                                Visibility="Collapsed"
+                                BorderThickness="1,0,1,1"
+                                CornerRadius="0,0,2,2"
+                            >
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    Margin="{TemplateBinding Padding}"
+                                    Focusable="false"
+                                />
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter Property="Visibility" Value="Visible" TargetName="ExpandSite"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="17" />
         </Grid.RowDefinitions>
-        <ListView Grid.Row="0" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" MouseDoubleClick="ListViewMouseDoubleClick" KeyUp="ListViewKeyUp" ContextMenuOpening="ListViewItemContextMenuOpening">
+        <ListView Grid.Row="0" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs}}" MouseDoubleClick="ListViewMouseDoubleClick" KeyUp="ListViewKeyUp" ContextMenuOpening="ListViewItemContextMenuOpening">
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Foreground" Value="#FFFFFFFF" />
+                            <Setter Property="Margin" Value="0,0,0,5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <Expander IsExpanded="True" Style="{StaticResource ExpanderTemplate}">
+                                            <Expander.Header>
+                                                <TextBlock Foreground="#FFFFFFFF" FontWeight="Bold" Text="{Binding Path=Name}" Margin="3,0,0,0" />
+                                            </Expander.Header>
+                                            <Expander.Content>
+                                                <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" />
+                                            </Expander.Content>
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Width="240">
@@ -44,7 +180,6 @@
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
         </ListView>
-        <TextBlock Name="NewHelp" Width="500" Height="80" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" Foreground="White" Text="Press Ctrl+N to add a new TV show. To order the list, select a TV show and press Ctrl+Up or Ctrl+Down to move it. To remove a TV show, select it and press Delete on the keyboard." />
         <Label Grid.Row="1" Name="statusThrobber" Foreground="White" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="7,0" Width="12" Height="17" HorizontalAlignment="Left" Visibility="Hidden">
             <Label.Effect>
                 <DropShadowEffect Color="WhiteSmoke" ShadowDepth="0" />
