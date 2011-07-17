@@ -134,14 +134,12 @@
                                             <Grid Height="20">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Separator Width="10" VerticalAlignment="Center" Opacity="0.3" />
-                                                <TextBlock Grid.Column="1" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="5,0,5,0" />
-                                                <Separator Grid.Column="2" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
+                                                <TextBlock Grid.Column="0" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                <Separator Grid.Column="1" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
                                             </Grid>
-                                            <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" />
+                                            <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" Margin="5,0,0,0" />
                                         </StackPanel>
                                     </ControlTemplate>
                                 </Setter.Value>

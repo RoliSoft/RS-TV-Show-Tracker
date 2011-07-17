@@ -494,6 +494,141 @@
         }
         #endregion
 
+        #region ListView manipulation
+        /// <summary>
+        /// Moves the selected show up in the list.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void MoveUpShow(object sender = null, EventArgs e = null)
+        {
+            if (listView.SelectedIndex == -1 || !string.IsNullOrEmpty(Settings.Get("Sorting")) || !string.IsNullOrEmpty(Settings.Get("Grouping")))
+            {
+                return;
+            }
+            
+            var sel    = (OverviewListViewItem)listView.SelectedItem;
+            var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
+            var listid = listView.SelectedIndex;
+
+            if (rowid == 1)
+            {
+                return;
+            }
+
+            Database.Execute("update tvshows set rowid = ? where rowid = ?", Int16.MaxValue, rowid - 1);
+            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid - 1, rowid);
+            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid, Int16.MaxValue);
+
+            OverviewListViewItemCollection.Move(listid, listid - 1);
+            listView.SelectedIndex = listid - 1;
+            listView.ScrollIntoView(listView.SelectedItem);
+
+            if (Synchronization.Status.Enabled)
+            {
+                Synchronization.Status.Engine.ReorderList();
+            }
+
+            Database.TVShows = Database.GetTVShows();
+            MainWindow.Active.DataChanged(false);
+        }
+
+        /// <summary>
+        /// Moves the selected show down in the list.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void MoveDownShow(object sender = null, EventArgs e = null)
+        {
+            if (listView.SelectedIndex == -1 || !string.IsNullOrEmpty(Settings.Get("Sorting")) || !string.IsNullOrEmpty(Settings.Get("Grouping")))
+            {
+                return;
+            }
+            
+            var sel    = (OverviewListViewItem)listView.SelectedItem;
+            var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
+            var listid = listView.SelectedIndex;
+
+            if (rowid == OverviewListViewItemCollection.Count)
+            {
+                return;
+            }
+
+            Database.Execute("update tvshows set rowid = ? where rowid = ?", Int16.MaxValue, rowid + 1);
+            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid + 1, rowid);
+            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid, Int16.MaxValue);
+
+            OverviewListViewItemCollection.Move(listid, listid + 1);
+            listView.SelectedIndex = listid + 1;
+            listView.ScrollIntoView(listView.SelectedItem);
+
+            if (Synchronization.Status.Enabled)
+            {
+                Synchronization.Status.Engine.ReorderList();
+            }
+
+            Database.TVShows = Database.GetTVShows();
+            MainWindow.Active.DataChanged(false);
+        }
+
+        /// <summary>
+        /// Removes the selected show from the list.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void RemoveShow(object sender = null, EventArgs e = null)
+        {
+            if (listView.SelectedIndex == -1)
+            {
+                return;
+            }
+            
+            var sel    = (OverviewListViewItem)listView.SelectedItem;
+            var showid = Database.TVShows.First(s => s.Name == sel.Name).ShowID;
+
+            var td = new TaskDialog
+                {
+                    Caption         = "Remove " + sel.Name,
+                    Icon            = TaskDialogStandardIcon.Warning,
+                    InstructionText = sel.Name,
+                    Text            = "Are you sure you want to remove " + sel.Name + " from the database?\r\n\r\nYou should still leave TV shows on your list, even if they ended or are on some kind of pause.",
+                    StandardButtons = TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No
+                };
+
+            if (td.Show() == TaskDialogResult.Yes)
+            {
+                if (Synchronization.Status.Enabled)
+                {
+                    Synchronization.Status.Engine.RemoveShow(showid.ToString());
+                }
+
+                Database.Execute("delete from tvshows where showid = ?", showid);
+                Database.Execute("delete from showdata where showid = ?", showid);
+                Database.Execute("delete from episodes where showid = ?", showid);
+                Database.Execute("delete from tracking where showid = ?", showid);
+
+                Database.Execute("update tvshows set rowid = rowid * -1");
+
+                var tr = Database.Connection.BeginTransaction();
+
+                var shows = Database.Query("select showid from tvshows order by rowid desc");
+                var i = 1;
+                foreach (var show in shows)
+                {
+                    Database.ExecuteOnTransaction(tr, "update tvshows set rowid = ? where showid = ?", i, show["showid"]);
+                    i++;
+                }
+
+                tr.Commit();
+
+                Database.Execute("vacuum;");
+                Database.CopyToMemory();
+
+                MainWindow.Active.DataChanged();
+            }
+        }
+        #endregion
+
         #region ListView keys
         /// <summary>
         /// Handles the KeyUp event of the listView control.
@@ -508,60 +643,14 @@
 
             if (listView.SelectedIndex != -1 && e.Key == Key.Up && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
-                var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
-                var listid = listView.SelectedIndex;
-
-                if (rowid == 1)
-                {
-                    return;
-                }
-
-                Database.Execute("update tvshows set rowid = ? where rowid = ?", Int16.MaxValue, rowid - 1);
-                Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid - 1, rowid);
-                Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid, Int16.MaxValue);
-
-                OverviewListViewItemCollection.Move(listid, listid - 1);
-                listView.SelectedIndex = listid - 1;
-                listView.ScrollIntoView(listView.SelectedItem);
-
-                if (Synchronization.Status.Enabled)
-                {
-                    Synchronization.Status.Engine.ReorderList();
-                }
-
-                Database.TVShows = Database.GetTVShows();
-                MainWindow.Active.DataChanged(false);
+                MoveUpShow();
             }
 
             // move down
 
             if (listView.SelectedIndex != -1 && e.Key == Key.Down && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
             {
-                var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
-                var listid = listView.SelectedIndex;
-
-                if (rowid == OverviewListViewItemCollection.Count)
-                {
-                    return;
-                }
-
-                Database.Execute("update tvshows set rowid = ? where rowid = ?", Int16.MaxValue, rowid + 1);
-                Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid + 1, rowid);
-                Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid, Int16.MaxValue);
-
-                OverviewListViewItemCollection.Move(listid, listid + 1);
-                listView.SelectedIndex = listid + 1;
-                listView.ScrollIntoView(listView.SelectedItem);
-
-                if (Synchronization.Status.Enabled)
-                {
-                    Synchronization.Status.Engine.ReorderList();
-                }
-
-                Database.TVShows = Database.GetTVShows();
-                MainWindow.Active.DataChanged(false);
+                MoveDownShow();
             }
 
             // add new
@@ -575,49 +664,7 @@
 
             if (listView.SelectedIndex != -1 && e.Key == Key.Delete)
             {
-                var sel    = (OverviewListViewItem)listView.SelectedItem;
-                var showid = Database.TVShows.First(s => s.Name == sel.Name).ShowID;
-
-                var td = new TaskDialog
-                    {
-                        Caption         = "Remove " + sel.Name,
-                        Icon            = TaskDialogStandardIcon.Warning,
-                        InstructionText = sel.Name,
-                        Text            = "Are you sure you want to remove " + sel.Name + " from the database?\r\n\r\nYou should still leave TV shows on your list, even if they ended or are on some kind of pause.",
-                        StandardButtons = TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No
-                    };
-
-                if(td.Show() == TaskDialogResult.Yes)
-                {
-                    if (Synchronization.Status.Enabled)
-                    {
-                        Synchronization.Status.Engine.RemoveShow(showid.ToString());
-                    }
-
-                    Database.Execute("delete from tvshows where showid = ?", showid);
-                    Database.Execute("delete from showdata where showid = ?", showid);
-                    Database.Execute("delete from episodes where showid = ?", showid);
-                    Database.Execute("delete from tracking where showid = ?", showid);
-
-                    Database.Execute("update tvshows set rowid = rowid * -1");
-
-                    var tr = Database.Connection.BeginTransaction();
-
-                    var shows = Database.Query("select showid from tvshows order by rowid desc");
-                    var i = 1;
-                    foreach (var show in shows)
-                    {
-                        Database.ExecuteOnTransaction(tr, "update tvshows set rowid = ? where showid = ?", i, show["showid"]);
-                        i++;
-                    }
-
-                    tr.Commit();
-
-                    Database.Execute("vacuum;");
-                    Database.CopyToMemory();
-
-                    MainWindow.Active.DataChanged();
-                }
+                RemoveShow();
             }
         }
 
@@ -1146,6 +1193,7 @@
             var mvu       = new MenuItem();
             mvu.IsEnabled = string.IsNullOrEmpty(sorting) && string.IsNullOrWhiteSpace(grouping);
             mvu.Icon      = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/up.png")) };
+            mvu.Click    += MoveUpShow;
             mvu.Header    = new StackPanel
                 {
                     Orientation = Orientation.Horizontal,
@@ -1171,6 +1219,7 @@
             var mvd       = new MenuItem();
             mvd.IsEnabled = string.IsNullOrEmpty(sorting) && string.IsNullOrWhiteSpace(grouping);
             mvd.Icon      = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/down.png")) };
+            mvd.Click    += MoveDownShow;
             mvd.Header    = new StackPanel
                 {
                     Orientation = Orientation.Horizontal,
@@ -1210,6 +1259,7 @@
             var rem    = new MenuItem();
             rem.Header = "Remove";
             rem.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/cross.png")) };
+            rem.Click += RemoveShow;
             sti.Items.Add(rem);
         }
 
