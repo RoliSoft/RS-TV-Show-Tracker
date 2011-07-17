@@ -174,7 +174,7 @@
             var ndate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0).AddDays(1);
                  _eps = 0;
 
-            foreach (var show in Database.TVShows)
+            foreach (var show in Database.TVShows.Values)
             {
                 if (hideend && show.Data["airing"] == "False")
                 {
@@ -508,7 +508,7 @@
             }
             
             var sel    = (OverviewListViewItem)listView.SelectedItem;
-            var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
+            var rowid  = Database.TVShows.Values.First(s => s.Name == sel.Name).RowID;
             var listid = listView.SelectedIndex;
 
             if (rowid == 1)
@@ -546,7 +546,7 @@
             }
             
             var sel    = (OverviewListViewItem)listView.SelectedItem;
-            var rowid  = Database.TVShows.First(s => s.Name == sel.Name).RowID;
+            var rowid  = Database.TVShows.Values.First(s => s.Name == sel.Name).RowID;
             var listid = listView.SelectedIndex;
 
             if (rowid == OverviewListViewItemCollection.Count)
@@ -584,7 +584,7 @@
             }
             
             var sel    = (OverviewListViewItem)listView.SelectedItem;
-            var showid = Database.TVShows.First(s => s.Name == sel.Name).ShowID;
+            var showid = Database.TVShows.Values.First(s => s.Name == sel.Name).ShowID;
 
             var td = new TaskDialog
                 {

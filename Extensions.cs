@@ -271,12 +271,12 @@
                 }
 
                 var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until aires" : String.Empty);
+                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until airs" : String.Empty);
             }
             else
             {
                 var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until aires" : String.Empty);
+                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : detailed ? " until airs" : String.Empty);
             }
         }
 
@@ -322,12 +322,12 @@
                 }
 
                 var weeks = cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : " until aires");
+                return Math.Abs(weeks) + " week" + (Math.Abs(weeks) == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : " until airs");
             }
             else
             {
                 var weeks = (cal.GetWeekOfYear(nextdate, CalendarWeekRule.FirstDay, DayOfWeek.Monday) + 52 * (nextdate.Year - DateTime.Now.Year)) - cal.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : " until aires");
+                return Math.Abs(weeks) + " week" + (weeks == 1 ? String.Empty : "s") + (weeks < 0 ? " ago" : " until airs");
             }
         }
 

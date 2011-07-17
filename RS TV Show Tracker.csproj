@@ -189,6 +189,7 @@
     <Compile Include="ShowNames\ShowEpisode.cs" />
     <Compile Include="ShowNames\ShowEqualityComparer.cs" />
     <Compile Include="ShowNames\Tests.cs" />
+    <Compile Include="UserControls\ListViews\UpcomingListViewItem.cs" />
     <Compile Include="UserControls\ListViews\SubtitleItem.cs" />
     <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
     <Compile Include="UserControls\ListViews\LinkItem.cs" />

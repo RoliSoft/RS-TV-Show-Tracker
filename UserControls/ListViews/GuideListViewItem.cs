@@ -1,8 +1,5 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using System;
-    using System.Windows.Media.Imaging;
-
     /// <summary>
     /// Represents a TV show episode on the list view.
     /// </summary>

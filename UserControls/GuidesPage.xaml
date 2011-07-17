@@ -49,6 +49,11 @@
                 <PropertyGroupDescription PropertyName="Season"/>
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
+        <CollectionViewSource x:Key="cvs2">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="RelativeDate"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
 
         <!-- toggle button -->
         <ControlTemplate x:Key="ToggleButtonTemplate" TargetType="{x:Type ToggleButton}">
@@ -162,15 +167,77 @@
         </Grid.RowDefinitions>
         <ComboBox Grid.Row="0" Height="23" Margin="0,0,0,0" Name="comboBox" VerticalAlignment="Top" Background="Transparent" Foreground="White" FontWeight="Bold" SelectionChanged="ComboBoxSelectionChanged" DropDownOpened="ComboBoxDropDownOpened" DropDownClosed="ComboBoxDropDownClosed" />
 
+        <!-- upcoming episodes -->
+
+        <ListView Visibility="Collapsed" Name="upcomingListView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs2}}" Margin="0,25,0,0" MouseDoubleClick="UpcomingListViewMouseDoubleClick">
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Foreground" Value="#FFFFFFFF" />
+                            <Setter Property="Margin" Value="0,0,0,0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <StackPanel Orientation="Vertical">
+                                            <Grid Height="20">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                <Separator Grid.Column="1" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
+                                            </Grid>
+                                            <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" Margin="5,0,0,0" />
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Width="600">
+                        <GridViewColumnHeader Margin="-3,0,0,0" Content="Title" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Show}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Name}" FontWeight="Normal" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="250">
+                        <GridViewColumnHeader Content="Air date" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Airdate}" FontWeight="Normal" Width="250" Margin="-7,0" TextAlignment="Right" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <!-- show tab control -->
+        
         <TabControl Grid.Row="0" Name="tabControl" ContentTemplate="{StaticResource TabTemplate}" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0">
 
             <!-- general tab -->
-            
-            <TabItem Name="generalTab">
+
+            <TabItem Name="generalTab" Visibility="Collapsed">
                 <TabItem.Header>
                     <Image Source="/RSTVShowTracker;component/Images/television-image.png" Margin="0,-1,0,0" Height="16" Width="16"></Image>
                 </TabItem.Header>
-                <Grid Name="showGeneral" Visibility="Hidden">
+                <Grid Name="showGeneral" Visibility="Collapsed">
                     <Image Source="/RSTVShowTracker;component/Images/cd.png" Name="showGeneralCover" Height="278" Width="195" ImageFailed="ShowGeneralCoverImageFailed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="49,20,0,0" Stretch="UniformToFill" />
                     <Image Source="/RSTVShowTracker;component/Images/case.png" Height="300" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10,0,0" />
                     <StackPanel Orientation="Horizontal" Margin="270,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -203,13 +270,12 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
             </TabItem>
             
             <!-- episode list -->
-            
-            <TabItem Name="episodeListTab">
+
+            <TabItem Name="episodeListTab" Visibility="Collapsed">
                 <TabItem.Header>
                     <Image Source="/RSTVShowTracker;component/Images/list.png" Margin="0,-1,0,0" Height="16" Width="16"></Image>
                 </TabItem.Header>
-
-                <ListView Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs}}" MouseDoubleClick="ListViewMouseDoubleClick">
+                <ListView Visibility="Collapsed" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs}}" MouseDoubleClick="ListViewMouseDoubleClick">
                     <ListView.GroupStyle>
                         <GroupStyle>
                             <GroupStyle.ContainerStyle>

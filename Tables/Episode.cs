@@ -8,6 +8,17 @@
     public class Episode
     {
         /// <summary>
+        /// Gets the TV show associated with this episode.
+        /// </summary>
+        public TVShow Show
+        {
+            get
+            {
+                return Database.TVShows[ShowID];
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the row ID.
         /// </summary>
         /// <value>
@@ -95,7 +106,7 @@
         /// </returns>
         public override string ToString()
         {
-            return string.Format("Show#{0} S{1:00}E{2:00} {3} {4}", ShowID, Season, Number, Name, Watched ? "✓" : "✗");
+            return string.Format("{0} S{1:00}E{2:00} {3} {4}", Show.Name, Season, Number, Name, Watched ? "✓" : "✗");
         }
     }
 }

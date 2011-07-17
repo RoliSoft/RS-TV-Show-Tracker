@@ -45,7 +45,7 @@
         /// <value>
         /// The contents of the TV shows table in the database.
         /// </value>
-        public static List<TVShow> TVShows { get; set; }
+        public static Dictionary<int, TVShow> TVShows { get; set; }
 
         /// <summary>
         /// Gets or sets the contents of the TV show key-value store table in the database.
@@ -246,14 +246,14 @@
         /// Downloads all the TV shows from the database.
         /// </summary>
         /// <returns>List of TV shows.</returns>
-        public static List<TVShow> GetTVShows()
+        public static Dictionary<int, TVShow> GetTVShows()
         {
             lock (Connection)
             {
                 using (var cmd = new SQLiteCommand("select rowid, showid, name, release from tvshows order by rowid asc", Connection))
                 using (var dr  = cmd.ExecuteReader())
                 {
-                    var shows = new List<TVShow>();
+                    var shows = new Dictionary<int, TVShow>();
 
                     while (dr.Read())
                     {
@@ -268,7 +268,7 @@
                             if (!(dr[3] is DBNull))
                                 show.Release = dr.GetString(3);
 
-                            shows.Add(show);
+                            shows.Add(show.ShowID, show);
                         }
                         catch
                         {
@@ -497,7 +497,7 @@
         /// <returns>ID of the show or -2^31.</returns>
         public static int GetShowID(string show)
         {
-            var showid = TVShows.Where(s => s.Name == show).Take(1).ToList();
+            var showid = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
 
             if (showid.Count != 0)
             {
@@ -537,7 +537,7 @@
         /// <returns>Name of the show used in scene releases.</returns>
         public static string[] GetReleaseName(string show, bool removeCommon = true)
         {
-            var release = TVShows.Where(s => s.Name == show).Take(1).ToList();
+            var release = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
 
             if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0].Release))
             {

@@ -31,6 +31,12 @@
         /// <value>The guide list view item collection.</value>
         public ObservableCollection<GuideListViewItem> GuideListViewItemCollection { get; set; }
 
+        /// <summary>
+        /// Gets or sets the upcoming list view item collection.
+        /// </summary>
+        /// <value>The upcoming list view item collection.</value>
+        public ObservableCollection<UpcomingListViewItem> UpcomingListViewItemCollection { get; set; }
+
         private int _activeShowID;
         private string _activeShowUrl;
 
@@ -102,9 +108,20 @@
                 ((CollectionViewSource)FindResource("cvs")).Source = GuideListViewItemCollection;
             }
 
+            if (UpcomingListViewItemCollection == null)
+            {
+                UpcomingListViewItemCollection = new ObservableCollection<UpcomingListViewItem>();
+                ((CollectionViewSource)FindResource("cvs2")).Source = UpcomingListViewItemCollection;
+            }
+
             if (MainWindow.Active != null && MainWindow.Active.IsActive && LoadDate < Database.DataChange)
             {
                 Refresh();
+            }
+
+            if (comboBox.SelectedIndex == -1)
+            {
+                comboBox.SelectedIndex = 0;
             }
         }
 
@@ -128,7 +145,10 @@
         /// </summary>
         public void LoadShowList()
         {
-            comboBox.ItemsSource = Database.TVShows.Select(s => s.Name).ToList();
+            var items = Database.TVShows.Values.OrderBy(s => s.Name).Select(s => s.Name).ToList();
+            items.Insert(0, "— Upcoming episodes —");
+
+            comboBox.ItemsSource = items;
         }
 
         /// <summary>
@@ -151,7 +171,7 @@
             // the dropdown's background is transparent and if it opens while the guide listview
             // is populated, then you won't be able to read the show names due to the mess
 
-            tabControl.Visibility = statusLabel.Visibility = Visibility.Hidden;
+            upcomingListView.Visibility = tabControl.Visibility = statusLabel.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -161,7 +181,15 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void ComboBoxDropDownClosed(object sender, EventArgs e)
         {
-            tabControl.Visibility = statusLabel.Visibility = Visibility.Visible;
+            if (comboBox.SelectedIndex <= 0)
+            {
+                upcomingListView.Visibility = statusLabel.Visibility = Visibility.Visible;
+            }
+
+            if (comboBox.SelectedIndex >= 1)
+            {
+                tabControl.Visibility = statusLabel.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -171,28 +199,65 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            showGeneral.Visibility = Visibility.Hidden;
+            upcomingListView.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
             GuideListViewItemCollection.Clear();
+            UpcomingListViewItemCollection.Clear();
 
-            var sel = comboBox.SelectedValue;
-            if (sel == null)
+            if (comboBox.SelectedIndex <= 0)
             {
-                return;
+                LoadUpcomingEpisodes();
             }
 
-            var id = _activeShowID = Database.GetShowID(sel.ToString());
-            if (id == int.MinValue)
+            if (comboBox.SelectedIndex >= 1)
             {
-                return;
+                LoadSelectedShow();
             }
+        }
+
+        /// <summary>
+        /// Loads the upcoming episodes.
+        /// </summary>
+        public void LoadUpcomingEpisodes()
+        {
+            var episodes = Database.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Airdate).Take(100);
+
+            foreach (var episode in episodes)
+            {
+                var network = string.Empty;
+                if (episode.Show.Data.TryGetValue("network", out network))
+                {
+                    network = " / " + network;
+                }
+
+                UpcomingListViewItemCollection.Add(new UpcomingListViewItem
+                    {
+                        Episode      = episode,
+                        Show         = "{0} S{1:00}E{2:00}".FormatWith(episode.Show.Name, episode.Season, episode.Number),
+                        Name         = " · " + episode.Name,
+                        Airdate      = episode.Airdate.DayOfWeek + " / " + episode.Airdate.ToString("h:mm tt") + network,
+                        RelativeDate = episode.Airdate.ToShortRelativeDate()
+                    });
+            }
+
+            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
+            upcomingListView.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Loads the selected show.
+        /// </summary>
+        public void LoadSelectedShow()
+        {
+            var show = Database.TVShows.Values.First(s => s.Name == comboBox.SelectedValue.ToString());
+            var id = _activeShowID = show.ShowID;
 
             // fill up general informations
 
-            var airing = bool.Parse(Database.ShowData(id, "airing"));
+            var airing = bool.Parse(show.Data["airing"]);
 
             showGeneralCover.Source = new BitmapImage(new Uri("http://" + Remote.API.EndPoint + "?/GetShowCover/" + Uri.EscapeUriString(comboBox.SelectedValue.ToString())), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
             
-            showGeneralName.Text = comboBox.SelectedValue.ToString();
+            showGeneralName.Text = show.Name;
 
             showGeneralSub.Text = string.Empty;
             string genre;
@@ -251,8 +316,8 @@
 
             try
             {
-                var last = Database.Episodes.Where(ep => ep.ShowID == id && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
-                var next = Database.Episodes.Where(ep => ep.ShowID == id && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var last = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var next = show.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
 
                 if (last.Count != 0)
                 {
@@ -285,31 +350,32 @@
                 showGeneralNextDate.Text = airing ? "no data available" : "this show has ended";
             }
 
-            showGeneral.Visibility = Visibility.Visible;
-
             // fill up episode list
 
-            var shows = Database.Episodes.Where(ep => ep.ShowID == id).OrderByDescending(ep => ep.Season * 1000 + ep.Number);
-            var icon  = Updater.CreateGuide(Database.ShowData(id, "grabber")).Icon;
+            var episodes = show.Episodes.OrderByDescending(ep => ep.Season * 1000 + ep.Number);
+            var icon     = Updater.CreateGuide(show.Data["grabber"]).Icon;
 
-            foreach (var show in shows)
+            foreach (var episode in episodes)
             {
                 GuideListViewItemCollection.Add(new GuideListViewItem
                     {
-                        SeenIt      = show.Watched,
-                        Id          = show.ShowID + "|" + show.EpisodeID,
-                        Season      = "Season " + show.Season,
-                        Episode     = "S{0:00}E{1:00}".FormatWith(show.Season, show.Number),
-                        Airdate     = show.Airdate != Utils.UnixEpoch
-                                      ? show.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (show.Airdate > DateTime.Now ? "*" : string.Empty)
+                        SeenIt      = episode.Watched,
+                        Id          = show.ShowID + "|" + episode.EpisodeID,
+                        Season      = "Season " + episode.Season,
+                        Episode     = "S{0:00}E{1:00}".FormatWith(episode.Season, episode.Number),
+                        Airdate     = episode.Airdate != Utils.UnixEpoch
+                                      ? episode.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (episode.Airdate > DateTime.Now ? "*" : string.Empty)
                                       : "Unaired episode",
-                        Title       = show.Name,
-                        Summary     = show.Description,
-                        Picture     = show.Picture,
-                        URL         = show.URL,
+                        Title       = episode.Name,
+                        Summary     = episode.Description,
+                        Picture     = episode.Picture,
+                        URL         = episode.URL,
                         GrabberIcon = icon
                     });
             }
+
+            upcomingListView.Visibility = Visibility.Collapsed;
+            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Visible;
         }
         #endregion
 
@@ -351,6 +417,17 @@
             OpenDetailsPageClick(null, null);
         }
         #endregion
+
+        /// <summary>
+        /// Handles the MouseDoubleClick event of the upcomingListView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void UpcomingListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (upcomingListView.SelectedIndex == -1) return;
+            SelectShow(((UpcomingListViewItem)upcomingListView.SelectedValue).Episode.Show.Name);
+        }
 
         #region Search for download links
         /// <summary>
