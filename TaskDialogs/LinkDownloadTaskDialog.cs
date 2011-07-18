@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.TaskDialogs
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading;
 
@@ -28,6 +29,12 @@
         /// <param name="token">The token.</param>
         public void Download(LinkItem link, string token)
         {
+            if (link.FileURL.StartsWith("magnet:"))
+            {
+                DownloadFileCompleted(null, new EventArgs<string, string, string>(link.FileURL, null, token));
+                return;
+            }
+
             _td = new TaskDialog
                 {
                     Title           = "Downloading...",

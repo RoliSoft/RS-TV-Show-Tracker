@@ -122,6 +122,7 @@
     </ApplicationDefinition>
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\BTDigg.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TheEmpire.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\ScienceHD.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\UKNova.cs" />

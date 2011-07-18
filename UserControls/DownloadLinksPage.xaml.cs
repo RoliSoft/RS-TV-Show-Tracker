@@ -568,16 +568,16 @@
                 cm.Items.Add(oib);
             }
 
-            if (!string.IsNullOrWhiteSpace(link.FileURL))
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && !link.FileURL.StartsWith("magnet:"))
             {
-                var oib = new MenuItem();
+                var oib    = new MenuItem();
                 oib.Header = "Download file in browser";
-                oib.Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
+                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
                 oib.Click += (s, r) => Utils.Run(link.FileURL);
                 cm.Items.Add(oib);
             }
 
-            if (!string.IsNullOrWhiteSpace(link.FileURL) && !(link.Source.Downloader is ExternalDownloader))
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && !(link.Source.Downloader is ExternalDownloader) && !link.FileURL.StartsWith("magnet:"))
             {
                 var df    = new MenuItem();
                 df.Header = "Download file";
