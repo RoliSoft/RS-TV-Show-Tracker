@@ -55,16 +55,20 @@
                     database.SelectedIndex = 3;
                     break;
 
-                case "IMDb":
+                case "EPisodeWorld":
                     database.SelectedIndex = 4;
                     break;
 
-                case "AniDB":
+                case "IMDb":
                     database.SelectedIndex = 5;
                     break;
 
+                case "AniDB":
+                    database.SelectedIndex = 6;
+                    break;
+
                 case "EPGuides":
-                    database.SelectedIndex = 7;
+                    database.SelectedIndex = 8;
                     break;
             }
 

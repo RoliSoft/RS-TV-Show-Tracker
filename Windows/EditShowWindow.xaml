@@ -48,6 +48,13 @@
                                     </ComboBoxItem>
                                     <ComboBoxItem Margin="10,0">
                                         <StackPanel Orientation="Horizontal">
+                                            <Image Source="/RSTVShowTracker;component/Images/episodeworld.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Label Content=" EPisodeWorld " Padding="0" />
+                                            <Label Content="beta" Foreground="#50000000" Padding="0" />
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem Margin="10,0">
+                                        <StackPanel Orientation="Horizontal">
                                             <Image Source="/RSTVShowTracker;component/Images/imdb.png" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" IMDb " Padding="0" />
                                             <Label Content="beta" Foreground="#50000000" Padding="0" />

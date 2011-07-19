@@ -507,6 +507,9 @@
                 case "TV.com":
                     return new TVcom();
 
+                case "EPisodeWorld":
+                    return new EPisodeWorld();
+
                 case "IMDb":
                     return new IMDb();
 

@@ -130,6 +130,7 @@
     <Compile Include="Parsers\Downloads\Engines\Torrent\TheBox.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\Demonoid.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\IsoHunt.cs" />
+    <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />
@@ -634,6 +635,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\table-join-row.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\episodeworld.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\flag-cy.png" />
+    <Resource Include="Images\flag-lt.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

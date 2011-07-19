@@ -143,7 +143,7 @@
             show.URL         = "http://thetvdb.com/?tab=series&id=" + info.GetValue("id");
             show.Episodes    = new List<TVShow.Episode>();
 
-            if (show.Network.Contains("BBC"))
+            if (show.Network.StartsWith("BBC") || show.Network.StartsWith("ITV"))
             {
                 show.TimeZone = "GMT+0";
             }

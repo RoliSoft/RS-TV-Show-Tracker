@@ -45,6 +45,8 @@
                 { "he", "Hebrew"     },
                 { "id", "Indonesian" },
                 { "fa", "Persian"    },
+                { "lt", "Lithuanian" },
+                { "cy", "Welsh"      }
             };
 
         /// <summary>
