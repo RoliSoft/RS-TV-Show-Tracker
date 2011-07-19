@@ -30,14 +30,24 @@
 
             foreach (var result in json)
             {
-                var url = result["u"];
+                try
+                {
+                    if (result["t"].Value<string>() == "EOF")
+                    {
+                        yield break;
+                    }
+                }
+                catch
+                {
+                    yield break;
+                }
 
-                if (url != null)
+                if (result["u"] != null)
                 {
                     yield return new SearchResult
                         {
-                            Title = Regex.Replace(HtmlEntity.DeEntitize(result["t"].Value<string>()), @"(\s+\(a Titles (&|and) Air Dates Guide\)|<.*?>)", string.Empty),
-                            URL   = url.Value<string>()
+                            Title = Regex.Replace(HtmlEntity.DeEntitize(result["t"].Value<string>()), "<[^>]+>", string.Empty),
+                            URL   = result["u"].Value<string>()
                         };
                 }
             }

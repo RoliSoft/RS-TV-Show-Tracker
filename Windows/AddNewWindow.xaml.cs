@@ -521,6 +521,9 @@
 
                 case "AniDB":
                     return new AniDB();
+
+                case "Anime News Network":
+                    return new AnimeNewsNetwork();
             }
         }
     }

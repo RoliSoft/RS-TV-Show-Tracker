@@ -67,8 +67,12 @@
                     database.SelectedIndex = 6;
                     break;
 
+                case "Anime News Network":
+                    database.SelectedIndex = 7;
+                    break;
+
                 case "EPGuides":
-                    database.SelectedIndex = 8;
+                    database.SelectedIndex = 10;
                     break;
             }
 

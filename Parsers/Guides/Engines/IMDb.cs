@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
@@ -55,6 +56,7 @@
         /// Gets the ID of a TV show in the database.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
@@ -84,6 +86,7 @@
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
@@ -125,8 +128,10 @@
             foreach (var node in nodes)
             {
                 var number = Regex.Match(HtmlEntity.DeEntitize(node.InnerText), @"Season (?<season>\d+), Episode (?<episode>\d+): (?<title>.+)");
-
-                if (!number.Success) { continue; }
+                if (!number.Success)
+                {
+                    continue;
+                }
 
                 var ep = new TVShow.Episode();
 
@@ -143,10 +148,15 @@
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParseExact(node.GetTextValue("../span/strong") ?? string.Empty, "d MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
-                             ? dt
-                             : Utils.UnixEpoch;
+                           ? dt
+                           : Utils.UnixEpoch;
 
                 show.Episodes.Add(ep);
+            }
+
+            if (show.Episodes.Count != 0)
+            {
+                show.AirDay = show.Episodes.Last().Airdate.DayOfWeek.ToString();
             }
 
             return show;

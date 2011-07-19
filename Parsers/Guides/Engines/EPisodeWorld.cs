@@ -124,6 +124,7 @@
         /// Gets the ID of a TV show in the database.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
@@ -165,6 +166,7 @@
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
@@ -172,7 +174,7 @@
             var show    = new TVShow();
 
             show.Title       = HtmlEntity.DeEntitize(listing.DocumentNode.GetTextValue("//div[@class='orangecorner_content']//h1"));
-            show.Description = HtmlEntity.DeEntitize((listing.DocumentNode.GetTextValue("//table/tr/td[1]/table[1]/tr[@class='centerbox_orange']/td[@class='centerbox_orange']") ?? string.Empty)).Trim();
+            show.Description = HtmlEntity.DeEntitize(listing.DocumentNode.GetTextValue("//table/tr/td[1]/table[1]/tr[@class='centerbox_orange']/td[@class='centerbox_orange']") ?? string.Empty).Trim();
             show.Cover       = listing.DocumentNode.GetNodeAttributeValue("//table/tr/td[1]/table[1]/tr[@class='centerbox_orange']/td[@class='centerbox_orange_l']//img", "src");
             show.Airing      = !Regex.IsMatch(listing.DocumentNode.GetTextValue("//div[@class='orangecorner_content']//th[4]") ?? string.Empty, "(Canceled|Ended)");
             show.AirTime     = "20:00";
@@ -180,15 +182,11 @@
             show.URL         = "http://www.episodeworld.com/show/" + id + "/season=all/" + Languages.List[language].ToLower() + "/episodeguide";
             show.Episodes    = new List<TVShow.Episode>();
 
-            var runtxt = listing.DocumentNode.GetTextValue("//td[@class='centerbox_orange']/b[text() = 'Runtime:']/following-sibling::text()[1]");
-            if (!string.IsNullOrWhiteSpace(runtxt))
-            {
-                int runtime;
-                show.Runtime = int.TryParse(runtxt.Trim(), out runtime)
-                             ? runtime
-                             : 30;
-            }
-
+            var runtxt   = Regex.Match(listing.DocumentNode.GetTextValue("//td[@class='centerbox_orange']/b[text() = 'Runtime:']/following-sibling::text()[1]") ?? string.Empty, "([0-9]+)");
+            show.Runtime = runtxt.Success
+                         ? int.Parse(runtxt.Groups[1].Value)
+                         : 30;
+            
             var genre = listing.DocumentNode.SelectNodes("//td[@class='centerbox_orange']/a[starts-with(@href, '/browse/')]");
             if (genre != null)
             {
@@ -215,8 +213,10 @@
             foreach (var node in nodes)
             {
                 var episode = Regex.Match(node.GetTextValue("td[2]") ?? string.Empty, "([0-9]{1,2})x([0-9]{1,3})");
-                
-                if (!episode.Success) { continue; }
+                if (!episode.Success)
+                {
+                    continue;
+                }
 
                 var ep = new TVShow.Episode();
 
@@ -232,8 +232,8 @@
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParse(HtmlEntity.DeEntitize(node.GetTextValue("td[7]") ?? string.Empty).Trim(), out dt)
-                             ? dt
-                             : Utils.UnixEpoch;
+                           ? dt
+                           : Utils.UnixEpoch;
 
                 show.Episodes.Add(ep);
             }

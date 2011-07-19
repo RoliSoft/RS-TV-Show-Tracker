@@ -61,6 +61,13 @@
                                 <Label Content=" AniDB" Padding="0" />
                             </StackPanel>
                         </ComboBoxItem>
+                        <ComboBoxItem Margin="10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/RSTVShowTracker;component/Images/animenewsnetwork.png" Height="16" Width="16" Margin="0,1,0,0" />
+                                <Label Content=" Anime News Network " Padding="0" />
+                                <Label Content="beta" Foreground="#50000000" Padding="0" />
+                            </StackPanel>
+                        </ComboBoxItem>
                         <ComboBoxItem Content="Episode Listing Only" IsEnabled="False" />
                         <ComboBoxItem Margin="10,0">
                             <StackPanel Orientation="Horizontal">

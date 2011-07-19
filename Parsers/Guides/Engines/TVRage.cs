@@ -56,6 +56,7 @@
         /// Gets the ID of a TV show in the database.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
@@ -79,6 +80,7 @@
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
@@ -109,7 +111,11 @@
             foreach (var node in list.Descendants("episode"))
             {
                 int sn;
-                try { sn = node.Parent.Attribute("no").Value.ToInteger(); } catch { continue; }
+                try { sn = node.Parent.Attribute("no").Value.ToInteger(); }
+                catch
+                {
+                    continue;
+                }
 
                 var ep = new TVShow.Episode();
 
@@ -122,8 +128,8 @@
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParse(node.GetValue("airdate"), out dt)
-                             ? dt
-                             : Utils.UnixEpoch;
+                           ? dt
+                           : Utils.UnixEpoch;
 
                 show.Episodes.Add(ep);
             }

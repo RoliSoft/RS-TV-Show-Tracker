@@ -221,6 +221,9 @@
                 case "AniDB":
                     return new AniDB();
 
+                case "AnimeNewsNetwork":
+                    return new AnimeNewsNetwork();
+
                 default:
                     throw new NotSupportedException();
             }

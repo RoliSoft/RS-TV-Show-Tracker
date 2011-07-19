@@ -87,17 +87,18 @@
         /// Gets the ID of a TV show in the database.
         /// </summary>
         /// <param name="name">The name.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = WebSearch.Engines.DuckDuckGo("intitle:{0} site:epguides.com".FormatWith(name)).ToList();
+            var list = WebSearch.Engines.DuckDuckGo("{0} site:epguides.com".FormatWith(name)).ToList();
 
             foreach (var result in list)
             {
                 yield return new ShowID
                     {
                         ID       = result.URL,
-                        Title    = result.Title.Replace(" (a Titles & Air Dates Guide)", string.Empty),
+                        Title    = result.Title.Replace(" (a Titles & Air Dates Guide)", string.Empty).Replace(" (a Titles and Air Dates Guide)", string.Empty),
                         Language = "en",
                         URL      = result.URL
                     };
@@ -108,6 +109,7 @@
         /// Extracts the data available in the database.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
+        /// <param name="language">The preferred language of the data.</param>
         /// <returns>TV show data.</returns>
         /// <exception cref="Exception">Failed to extract the listing. Maybe the EPGuides.com regex is out of date.</exception>
         public override TVShow GetData(string id, string language = "en")
@@ -175,10 +177,15 @@
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
-                             ? dt
-                             : Utils.UnixEpoch;
+                           ? dt
+                           : Utils.UnixEpoch;
 
                 show.Episodes.Add(ep);
+            }
+
+            if (show.Episodes.Count != 0)
+            {
+                show.AirDay = show.Episodes.Last().Airdate.DayOfWeek.ToString();
             }
 
             return show;
