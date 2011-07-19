@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -175,10 +176,25 @@
                 ep.Number = m.Groups["episode"].Value.Trim().ToInteger();
                 ep.Title = HtmlEntity.DeEntitize(m.Groups["title"].Value);
 
-                DateTime dt;
-                ep.Airdate = DateTime.TryParse(m.Groups["airdate"].Value, out dt)
-                           ? dt
-                           : Utils.UnixEpoch;
+                var dt = DateTime.MinValue;
+
+                switch (db)
+                {
+                    case "tvrage.com":
+                        DateTime.TryParseExact(m.Groups["airdate"].Value.Trim(), "dd/MMM/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+                        break;
+
+                    case "tv.com":
+                        DateTime.TryParseExact(m.Groups["airdate"].Value.Trim(), "d MMM yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+                        break;
+                }
+
+                if (dt == DateTime.MinValue && !DateTime.TryParse(m.Groups["airdate"].Value.Trim(), out dt))
+                {
+                    dt = Utils.UnixEpoch;
+                }
+
+                ep.Airdate = dt;
 
                 show.Episodes.Add(ep);
             }
