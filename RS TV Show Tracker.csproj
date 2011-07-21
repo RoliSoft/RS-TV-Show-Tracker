@@ -69,6 +69,7 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.7.4137.9688, Culture=neutral, PublicKeyToken=a4292a325f69b123, processorArchitecture=MSIL" />
     <Reference Include="CookComputing.XmlRpcV2">
       <HintPath>.\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
@@ -120,6 +121,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BTDigg.cs" />
@@ -646,6 +648,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\animenewsnetwork.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
