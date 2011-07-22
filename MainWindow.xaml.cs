@@ -58,7 +58,7 @@
 
             if (!Utils.Is7)
             {
-                MessageBox.Show("This software currently doesn't support " + Utils.OS + ", only Windows 7 or newer. Because the underlying code would run on any operating system which can run CLI code, a universal interface will be developed sometime in the future.", Utils.OS + " is not supported", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("This software doesn't support " + Utils.OS + ", only Windows 7 or newer.", Utils.OS + " is not supported", MessageBoxButton.OK, MessageBoxImage.Error);
                 Process.GetCurrentProcess().Kill();
             }
 

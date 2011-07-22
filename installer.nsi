@@ -46,6 +46,17 @@ InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
 
 ######################################################################
 
+Function .onInit
+ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
+IntCmp $R0 6 ok notok ok
+notok:
+  MessageBox MB_OK|MB_ICONSTOP "This software doesn't support systems older than Windows 7."
+  Quit
+ok:
+FunctionEnd
+
+######################################################################
+
 !include "MUI.nsh"
 
 !define MUI_ABORTWARNING
@@ -75,6 +86,10 @@ InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
 !insertmacro MUI_PAGE_INSTFILES
 
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}"
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION FinishCreateDesktopShortcut
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -104,12 +119,17 @@ SendMessage $1 ${WM_SETFONT} $0 0
 #SendMessage $1 ${WM_SETFONT} $0 0
 functionend
 
+Function FinishCreateDesktopShortcut
+CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
+FunctionEnd
+
 ######################################################################
 
 Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
+File "bin\Release\BouncyCastle.Crypto.dll"
 File "bin\Release\CookComputing.XmlRpcV2.dll"
 File "bin\Release\handle.exe"
 File "bin\Release\HtmlAgilityPack.dll"
@@ -175,6 +195,7 @@ SectionEnd
 
 Section Uninstall
 ${INSTALL_TYPE}
+Delete "$INSTDIR\BouncyCastle.Crypto.dll"
 Delete "$INSTDIR\CookComputing.XmlRpcV2.dll"
 Delete "$INSTDIR\handle.exe"
 Delete "$INSTDIR\HtmlAgilityPack.dll"
@@ -217,7 +238,7 @@ Delete "$SMPROGRAMS\RS TV Show Tracker\Website.lnk"
 !endif
 Delete "$DESKTOP\${APP_NAME}.lnk"
 
-RmDir "$SMPROGRAMS\RS TV Show Tracker"
+RMDir /r "$SMPROGRAMS\RS TV Show Tracker"
 !endif
 
 DeleteRegKey ${REG_ROOT} "${REG_APP_PATH}"
