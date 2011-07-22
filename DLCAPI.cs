@@ -12,7 +12,7 @@
     using Org.BouncyCastle.Crypto.Parameters;
 
     /// <summary>
-    /// Provides methods for encapsulating HTTP links into DLC/RSDF containers.
+    /// Provides methods for encapsulating HTTP links into DLC, CCF and RSDF containers.
     /// </summary>
     public static class DLCAPI
     {
