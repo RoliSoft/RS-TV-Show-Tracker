@@ -78,7 +78,8 @@
                        TVDB      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"Series Info\" site:thetvdb.com"),
                        TVcom     = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"on TV.com\" inurl:summary.html site:tv.com"),
                        Epguides  = item.Attribute("epguides").Value,
-                       Imdb      = item.Attribute("imdb").Value
+                       Imdb      = item.Attribute("imdb").Value,
+                       TVTropes  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " site:tvtropes.org")
                    });
         }
     }

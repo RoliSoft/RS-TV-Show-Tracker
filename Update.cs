@@ -244,7 +244,7 @@
                             {
                                 Title       = tv.Title,
                                 Description = tv.Description,
-                                Genre       = (tv.Genre ?? string.Empty).Split(new[] {", "}, StringSplitOptions.RemoveEmptyEntries),
+                                Genre       = tv.Genre,
                                 Cover       = tv.Cover,
                                 Started     = (long)tv.Episodes[0].Airdate.ToUnixTimestamp(),
                                 Airing      = tv.Airing,

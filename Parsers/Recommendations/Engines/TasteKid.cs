@@ -60,6 +60,7 @@
                        TVRage    = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"TV Show\" site:tvrage.com"),
                        TVDB      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"Series Info\" site:thetvdb.com"),
                        TVcom     = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " intitle:\"on TV.com\" inurl:summary.html site:tv.com"),
+                       TVTropes  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Descendants("name").First().Value + " site:tvtropes.org")
                    });
         }
     }

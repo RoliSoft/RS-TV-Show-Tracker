@@ -29,7 +29,7 @@
                                     <Grid.ToolTip>
                                         <StackPanel Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="{Binding Picture}" MaxHeight="92" MaxWidth="150" VerticalAlignment="Top" Margin="0,3,5,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                <Image Source="{Binding Picture}" Height="92" Width="62" VerticalAlignment="Top" Margin="0,3,5,0" RenderOptions.BitmapScalingMode="HighQuality" />
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="0,3,0,3" />
                                                     <TextBlock Text="{Binding Info}" />
@@ -94,6 +94,27 @@
             </ListView.ItemsPanel>
             <ListView.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="Add show to your list" Click="AddShowClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/plus.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Search for first episode" Click="SearchFirstEpisodeClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Search videos on YouTube" Click="SearchYouTubeClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/youtube.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Search on Google" Click="SearchGoogleClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/google.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator Margin="0,-5,0,-3" />
                     <MenuItem Header="View Wikipedia entry" Click="ViewWikipediaClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/wikipedia.png" />
@@ -129,19 +150,9 @@
                             <Image Source="/RSTVShowTracker;component/Images/epg.png" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Search for first episode" Click="SearchFirstEpisodeClick">
+                    <MenuItem Header="View TV Tropes page" Click="ViewTvTropesClick">
                         <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Search videos on YouTube" Click="SearchYouTubeClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/youtube.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Search on Google" Click="SearchGoogleClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/google.png" />
+                            <Image Source="/RSTVShowTracker;component/Images/tvtropes.gif" />
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>

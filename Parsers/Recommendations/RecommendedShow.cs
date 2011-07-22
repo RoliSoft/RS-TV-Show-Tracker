@@ -87,6 +87,12 @@
         /// <value>The IMDb page.</value>
         public string Imdb { get; set; }
 
+        /// <summary>
+        /// Gets or sets the TV Tropes page.
+        /// </summary>
+        /// <value>The TV Tropes page.</value>
+        public string TVTropes { get; set; }
+
         /*
          * ToolTip
          */

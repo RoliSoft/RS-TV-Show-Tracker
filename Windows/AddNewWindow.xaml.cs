@@ -29,9 +29,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
         /// </summary>
-        public AddNewWindow()
+        /// <param name="name">The name of the show to put into the textbox.</param>
+        public AddNewWindow(string name = null)
         {
             InitializeComponent();
+
+            if (name != null)
+            {
+                textBox.Text = name;
+            }
         }
 
         /// <summary>

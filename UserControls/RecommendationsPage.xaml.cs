@@ -201,17 +201,12 @@
 
                                         show.Tagline     = infos[show.Name].Tagline ?? Regex.Replace(infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
                                         show.Description = infos[show.Name].Description;
-                                        show.Picture     = infos[show.Name].Cover;
+                                        show.Picture     = "http://" + API.EndPoint + "?/GetShowCover/" + Uri.EscapeUriString(show.Name);
                                         show.InfoSource  = infos[show.Name].Source;
 
-                                        if (infos[show.Name].Genre != null && infos[show.Name].Genre.Count() != 0)
+                                        if (!string.IsNullOrWhiteSpace(infos[show.Name].Genre))
                                         {
-                                            foreach (var genre in infos[show.Name].Genre)
-                                            {
-                                                show.Genre += genre + ", ";
-                                            }
-
-                                            show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
+                                            show.Genre = infos[show.Name].Genre;
                                             show.Info  = show.Genre + " show; ";
                                         }
 
@@ -363,6 +358,17 @@
         }
 
         /// <summary>
+        /// Handles the Click event of the ViewTvTropes control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ViewTvTropesClick(object sender, RoutedEventArgs e)
+        {
+            if (listView.SelectedIndex == -1) return;
+            Utils.Run(((RecommendedShow)listView.SelectedValue).TVTropes);
+        }
+
+        /// <summary>
         /// Handles the Click event of the SearchYouTube control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -395,6 +401,16 @@
 
             MainWindow.Active.tabControl.SelectedIndex = 2;
             MainWindow.Active.activeDownloadLinksPage.Search(((RecommendedShow)listView.SelectedValue).Name + " S01E01");
+        }
+
+        /// <summary>
+        /// Handles the Click event of the AddShow control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AddShowClick(object sender, RoutedEventArgs e)
+        {
+            new AddNewWindow(((RecommendedShow)listView.SelectedValue).Name).ShowDialog();
         }
         #endregion
     }

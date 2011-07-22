@@ -216,7 +216,7 @@
         public string Title { get; set; }
         public string Description { get; set; }
         public string Tagline { get; set; }
-        public IEnumerable<string> Genre { get; set; }
+        public string Genre { get; set; }
         public string Cover { get; set; }
         public long Started { get; set; }
         public bool Airing { get; set; }
