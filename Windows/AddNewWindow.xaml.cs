@@ -357,7 +357,7 @@
                     Database.Execute("insert into tvshows values (1, null, ?, ?)", tv.Title, show.Title != tv.Title ? string.Join(" ", ShowNames.Parser.GetRoot(show.Title)) : string.Empty);
 
                     // then get that showid
-                    _dbid = Database.GetShowID(tv.Title);
+                    _dbid = Database.Query("select showid from tvshows where name = ? limit 1", tv.Title)[0]["showid"].ToInteger();
 
                     // insert guide fields
                     var gname = _guide.GetType().Name;

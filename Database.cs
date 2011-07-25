@@ -472,6 +472,11 @@
         /// </returns>
         public static int ShowData(int id, string key, string value)
         {
+            if (!ShowDatas.ContainsKey(id))
+            {
+                ShowDatas[id] = new Dictionary<string, string>();
+            }
+
             ShowDatas[id][key] = value;
 
             var data = (id + "|" + key).GetHashCode();
