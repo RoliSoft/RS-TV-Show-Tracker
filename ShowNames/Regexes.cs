@@ -13,7 +13,8 @@
         /// </summary>
         public static readonly Dictionary<string, string> Exclusions = new Dictionary<string, string>
             {
-                { "Sci-Fi Science: Physics of the Impossible", "Sci Fi Science" },
+                { "Sci-Fi Science: Physics of the Impossible", "Sci Fi Science"   },
+                { "$#*! My Dad Says",                          "Shit My Dad Says" },
             };
 
         /// <summary>

@@ -40,11 +40,8 @@
                 show = Regexes.NewYear.Replace(show, string.Empty);
             }
 
-            // remove country
-            if (Regexes.Countries.IsMatch(show))
-            {
-                show = Regexes.Countries.Replace(show, string.Empty);
-            }
+            // remove parentheses
+            show = show.Replace("(", string.Empty).Replace(")", string.Empty);
 
             // remove common words and single characters
             if (removeCommon)

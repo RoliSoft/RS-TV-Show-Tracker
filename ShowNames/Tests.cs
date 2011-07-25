@@ -30,7 +30,7 @@
                     "How I met your mother",
                     new[] { "HOW", "I", "MET", "YOUR", "MOTHER" }
                 },
-    
+                
                 // test to see how years are handled
                 // if the show is newer than 2000, the year is removed
                 {
@@ -43,19 +43,25 @@
                 },
                 {
                     "V (1965)",
-                    new[] { "V", "(1965)" }
+                    new[] { "V", "1965" }
                 },
                 {
                     "The V (1965)",
-                    new[] { "V", "(1965)" }
+                    new[] { "V", "1965" }
                 },
-    
+                
+                // test to see whether irrevelant single characters are removed
+                {
+                    "Top Gear (US)",
+                    new[] { "TOP", "GEAR", "US" }
+                },
+
                 // test the use of dictionary lookup-based cleaning
                 {
                     "Sci-Fi Science: Physics of the Impossible",
                     new[] { "SCI", "FI", "SCIENCE" }
                 },
-    
+                
                 // test wierd names
                 {
                     "Tosh.0",
@@ -85,6 +91,10 @@
                 {
                     "top_gear.16x01.real.720p_hdtv_x264-fov.mkv",
                     new ShowEpisode(16, 1)
+                },
+                {
+                    "top.gear.us.s02e01.720p.hdtv.x264-momentum.mkv",
+                    new ShowEpisode(2, 1)
                 },
                 {
                     "Archer.1x10.Dial.M.for.Mother.720p.WEB-DL.DD5.1.AVC-DON.mkv",
