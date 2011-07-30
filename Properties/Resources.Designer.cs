@@ -61,32 +61,6 @@ namespace RoliSoft.TVShowTracker.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
-        ///&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
-        ///    &lt;head&gt;
-        ///        &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
-        ///        &lt;style type=&quot;text/css&quot;&gt;
-        ///            body 
-        ///            {
-        ///                font-family: Verdana;
-        ///                font-size: 12px;
-        ///                color: white;
-        ///                background: black;
-        ///                padding-top: 0px;
-        ///                margin-top: 5px;
-        ///            }
-        ///            a
-        ///            {
-        ///                color: green;
-        ///        [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string AboutPage {
-            get {
-                return ResourceManager.GetString("AboutPage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to /*
         ///	The TVShows table contains the name of the TV shows,
         ///	their ID and position when displayed by the software.
@@ -109,6 +83,15 @@ namespace RoliSoft.TVShowTracker.Properties {
         internal static string DatabaseStructure {
             get {
                 return ResourceManager.GetString("DatabaseStructure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string GitRevision {
+            get {
+                return ResourceManager.GetString("GitRevision", resourceCulture);
             }
         }
     }

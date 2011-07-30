@@ -539,9 +539,6 @@
     <Resource Include="Images\funnel.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\AboutPage.html" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\page-dl.png" />
   </ItemGroup>
   <ItemGroup>
@@ -651,9 +648,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
+    <Resource Include="Resources\Git Revision.txt" />
     <Resource Include="Images\tvtropes.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>git rev-parse HEAD &gt; "$(ProjectDir)\Resources\Git Revision.txt"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

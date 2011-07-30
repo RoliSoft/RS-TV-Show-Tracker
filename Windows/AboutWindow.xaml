@@ -1,26 +1,322 @@
-﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AboutWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" Title="About RS TV Show Tracker" Loaded="GlassWindowLoaded" Icon="/RSTVShowTracker;component/Images/information.png" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Height="290" Width="408">
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AboutWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" Height="290" Width="408" Icon="/RSTVShowTracker;component/Images/information.png" Loaded="GlassWindowLoaded" ResizeMode="NoResize" Title="About RS TV Show Tracker" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        
+        <!-- hyperlink style -->
+        <Style TargetType="{x:Type Hyperlink}">
+            <Setter Property="Foreground" Value="Yellow" />
+            <Setter Property="TextDecorations" Value="None" />
+            <EventSetter Event="MouseEnter" Handler="HyperlinkMouseEnter" />
+            <EventSetter Event="MouseLeave" Handler="HyperlinkMouseLeave" />
+            <EventSetter Event="Click" Handler="HyperlinkClick" />
+        </Style>
+
+        <!-- scrollbar style -->
+        <Style x:Key="ScrollBarLineButton" TargetType="{x:Type RepeatButton}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Name="Border" Margin="1" CornerRadius="2" Background="#30FFFFFF" BorderBrush="Transparent" BorderThickness="1">
+                            <Path HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Black" Data="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#50ffffff" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="Transparent" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ScrollBarPageButton" TargetType="{x:Type RepeatButton}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border CornerRadius="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition MaxHeight="18" />
+                    <RowDefinition Height="0.00001*" />
+                    <RowDefinition MaxHeight="18" />
+                </Grid.RowDefinitions>
+                <Border Grid.RowSpan="3" CornerRadius="2" Background="Transparent" />
+                <RepeatButton Grid.Row="0" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineUpCommand" Content="M 0 4 L 8 4 L 4 0 Z" />
+                <Track Name="PART_Track" Grid.Row="1" IsDirectionReversed="true">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageUpCommand" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollBarThumb}" Margin="1,0,1,0" Background="#30FFFFFF" BorderBrush="Transparent" />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageDownCommand" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+                <RepeatButton Grid.Row="3" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineDownCommand" Content="M 0 0 L 4 4 L 8 0 Z" />
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MaxWidth="18" />
+                    <ColumnDefinition Width="0.00001*" />
+                    <ColumnDefinition MaxWidth="18" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.ColumnSpan="3" CornerRadius="2" Background="Transparent" />
+                <RepeatButton Grid.Column="0" Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineLeftCommand" Content="M 4 0 L 4 8 L 0 4 Z" />
+                <Track Name="PART_Track" Grid.Column="1" IsDirectionReversed="False">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageLeftCommand" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollBarThumb}" Margin="0,1,0,1" Background="#30FFFFFF" BorderBrush="Transparent" />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageRightCommand" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+                <RepeatButton Grid.Column="3" Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineRightCommand" Content="M 0 0 L 4 4 L 0 8 Z" />
+            </Grid>
+        </ControlTemplate>
+        <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Width" Value="Auto" />
+                    <Setter Property="Height" Value="18" />
+                    <Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
+                </Trigger>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="18" />
+                    <Setter Property="Height" Value="Auto" />
+                    <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
     <Grid Margin="10">
-        <Image Name="logo" Height="64" HorizontalAlignment="Left" Margin="0,-13,0,0" VerticalAlignment="Top" Source="/RSTVShowTracker;component/tv.ico">
+        <Image Height="64" Margin="0,-13,0,0" HorizontalAlignment="Left" Name="logo" Source="/RSTVShowTracker;component/tv.ico" VerticalAlignment="Top">
             <Image.Effect>
-                <DropShadowEffect ShadowDepth="0" Opacity="0.7" />
+                <DropShadowEffect Opacity="0.7" ShadowDepth="0" />
             </Image.Effect>
         </Image>
-        <Label Name="name" Content="RS TV Show Tracker" FontSize="32" Foreground="White" Cursor="Hand" Height="50" Margin="70,-19,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
+        <Label Height="50" Margin="70,-19,0,0" Content="RS TV Show Tracker" Cursor="Hand" FontSize="32" Foreground="White" HorizontalAlignment="Left" MouseLeftButtonUp="LabelMouseLeftButtonUp" Name="name" VerticalAlignment="Top">
             <Label.Effect>
-                <DropShadowEffect ShadowDepth="2" Color="Black" BlurRadius="5" />
+                <DropShadowEffect BlurRadius="5" Color="Black" ShadowDepth="2" />
             </Label.Effect>
         </Label>
-        <Label Name="site" FontSize="18" Foreground="White" Cursor="Hand" Margin="70,18,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonUp="LabelMouseLeftButtonUp">
+        <Label Margin="70,18,0,0" Cursor="Hand" FontSize="18" Foreground="White" HorizontalAlignment="Left" MouseLeftButtonUp="LabelMouseLeftButtonUp" Name="site" VerticalAlignment="Top">
             <Label.Effect>
-                <DropShadowEffect ShadowDepth="2" Color="Black" BlurRadius="5" />
+                <DropShadowEffect BlurRadius="5" Color="Black" ShadowDepth="2" />
             </Label.Effect>
         </Label>
-        <WebBrowser Name="webBrowser" Margin="0,58,0,0">
-            <WebBrowser.Effect>
+        <FlowDocumentScrollViewer Margin="0,55,0,0">
+            <FlowDocumentScrollViewer.Effect>
                 <DropShadowEffect ShadowDepth="0" />
-            </WebBrowser.Effect>
-        </WebBrowser>
+            </FlowDocumentScrollViewer.Effect>
+            <FlowDocument PagePadding="5,5,5,15">
+                <Section FontFamily="Verdana" FontSize="12" Foreground="White" TextAlignment="Center" Margin="0,200,0,0" Padding="0">
+                    <Paragraph Margin="0">
+                        v<Run Name="version">2</Run> / rev <Run Name="revision">00000000</Run>
+                        <LineBreak />
+                        Compiled on <Run Name="compile">2011</Run>
+                    </Paragraph>
+                    <Paragraph Margin="0,10,0,0">
+                        This software is licensed under the
+                        <LineBreak />
+                        <Hyperlink NavigateUri="http://www.microsoft.com/en-us/openness/resources/licenses.aspx#MRL">Microsoft Reciprocal License</Hyperlink>
+                    </Paragraph>
+                    <Paragraph Margin="0,10,0,0" FontWeight="Bold">
+                        Libraries
+                    </Paragraph>
+                    <List Margin="0,10,0,0" Padding="0" MarkerStyle="None">
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://system.data.sqlite.org/">System.Data.SQLite</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://htmlagilitypack.codeplex.com/">Html Agility Pack</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://json.codeplex.com/">Json.NET</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.xml-rpc.net/">XML-RPC.NET</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://dotnetzip.codeplex.com/">DotNetZip</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.nunit.org/">NUnit</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://windowsformsaero.codeplex.com/">Windows Forms Aero</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://code.msdn.microsoft.com/WindowsAPICodePack">Windows® API Code Pack for Microsoft® .NET Framework</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://code.msdn.microsoft.com/WPFShell">WPF Shell Integration Library</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://transitionals.codeplex.com/">Transitionals</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://technet.microsoft.com/en-us/sysinternals/bb896655">SysInternals Handle</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://nsis.sourceforge.net/Main_Page">Nullsoft Scriptable Install System</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                    </List>
+                    <Paragraph Margin="0,10,0,0" FontWeight="Bold">
+                        Icons
+                    </Paragraph>
+                    <List Margin="0,10,0,0" Padding="0" MarkerStyle="None">
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://p.yusukekamiyamane.com/">Fugue</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.icondrawer.com/">Icon Drawer</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.oxygen-icons.org/">Oxygen</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.fatcow.com/free-icons">FatCow</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                    </List>
+                    <Paragraph Margin="0,10,0,0" FontWeight="Bold">
+                        Services
+                    </Paragraph>
+                    <List Margin="0,10,0,0" Padding="0" MarkerStyle="None">
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.tvrage.com/">TVRage</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.thetvdb.com/">The TVDB</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.tv.com/">TV.com</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.episodeworld.com/">EPisodeWorld</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.imdb.com/">IMDb</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.epguides.com/">EPGuides</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.anidb.net/">AniDB</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.animenewsnetwork.com/">Anime News Network</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.google.com/">Google</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.bing.com/">Bing</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.duckduckgo.com/">DuckDuckGo</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.tastekid.com/">TasteKid</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://lab.rolisoft.net/tv/">RS TV Show Recommendation</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                    </List>
+                </Section>
+            </FlowDocument>
+        </FlowDocumentScrollViewer>
     </Grid>
 </Shell:GlassWindow>
