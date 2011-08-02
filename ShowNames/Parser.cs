@@ -31,6 +31,9 @@
             // the CLR is optimized for uppercase string matching
             show = show.ToUpper();
 
+            // remove apostrophes which occur in contractions
+            show = Regexes.Contractions.Replace(show, string.Empty);
+
             // remove special characters
             show = Regexes.SpecialChars.Replace(show, " ").Trim();
 

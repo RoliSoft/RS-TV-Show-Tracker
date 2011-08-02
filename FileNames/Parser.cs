@@ -72,7 +72,11 @@
 
             // clean name
 
-            var name  = Regexes.SpecialChars.Replace(RemoveKeywords.Replace(fi[0].ToUpper(), string.Empty).Trim(), " ").Trim();
+            var name = fi[0].ToUpper();
+                name = Regexes.Contractions.Replace(name, string.Empty);
+                name = RemoveKeywords.Replace(name, string.Empty).Trim();
+                name = Regexes.SpecialChars.Replace(name, " ").Trim();
+
             var title = string.Empty;
             var date  = DateTime.MinValue;
             var match = false;
@@ -335,60 +339,60 @@
             var variables = new Dictionary<string, string>
                 {
                     {
-	                    "$show",
-	                    file.Show
+                        "$show",
+                        file.Show
                     },
                     {
-	                    "$seasonz",
-	                    file.Episode.Season.ToString("0")
+                        "$seasonz",
+                        file.Episode.Season.ToString("0")
                     },
                     {
-	                    "$season",
-	                    file.Episode.Season.ToString("00")
+                        "$season",
+                        file.Episode.Season.ToString("00")
                     },
                     {
-	                    "$episodez",
-	                    file.Episode.SecondEpisode.HasValue ? file.Episode.Episode.ToString("0") + "-" + file.Episode.SecondEpisode.Value.ToString("0") : file.Episode.Episode.ToString("0")
+                        "$episodez",
+                        file.Episode.SecondEpisode.HasValue ? file.Episode.Episode.ToString("0") + "-" + file.Episode.SecondEpisode.Value.ToString("0") : file.Episode.Episode.ToString("0")
                     },
                     {
-	                    "$episode",
-	                    file.Episode.SecondEpisode.HasValue ? file.Episode.Episode.ToString("00") + "-" + file.Episode.SecondEpisode.Value.ToString("00") : file.Episode.Episode.ToString("00")
+                        "$episode",
+                        file.Episode.SecondEpisode.HasValue ? file.Episode.Episode.ToString("00") + "-" + file.Episode.SecondEpisode.Value.ToString("00") : file.Episode.Episode.ToString("00")
                     },
                     {
-	                    "$title",
-	                    file.Episode.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title
+                        "$title",
+                        file.Episode.SecondEpisode.HasValue ? Regexes.PartText.Replace(file.Title, string.Empty) : file.Title
                     },
                     {
-	                    "$quality",
-	                    file.Quality
+                        "$quality",
+                        file.Quality
                     },
                     {
-	                    "$group",
-	                    file.Group
+                        "$group",
+                        file.Group
                     },
                     {
-	                    "$ext",
-	                    file.Extension
+                        "$ext",
+                        file.Extension
                     },
                     {
-	                    "$year",
-	                    file.Airdate.Year.ToString()
+                        "$year",
+                        file.Airdate.Year.ToString()
                     },
                     {
-	                    "$monthz",
-	                    file.Airdate.Month.ToString()
+                        "$monthz",
+                        file.Airdate.Month.ToString()
                     },
                     {
-	                    "$month",
-	                    file.Airdate.Month.ToString("00")
+                        "$month",
+                        file.Airdate.Month.ToString("00")
                     },
                     {
-	                    "$dayz",
-	                    file.Airdate.Day.ToString()
+                        "$dayz",
+                        file.Airdate.Day.ToString()
                     },
                     {
-	                    "$day",
-	                    file.Airdate.Day.ToString("00")
+                        "$day",
+                        file.Airdate.Day.ToString("00")
                     }
                 };
 

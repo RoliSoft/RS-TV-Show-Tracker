@@ -30,6 +30,14 @@
                     "How I met your mother",
                     new[] { "HOW", "I", "MET", "YOUR", "MOTHER" }
                 },
+                {
+                    "Penn & Teller: Bullshit!",
+                    new[] { "PENN", "TELLER", "BULLSHIT" }
+                },
+                {
+                    "It's Always Sunny in Philadelphia",
+                    new[] { "ITS", "ALWAYS", "SUNNY", "IN", "PHILADELPHIA" }
+                },
                 
                 // test to see how years are handled
                 // if the show is newer than 2000, the year is removed
@@ -50,7 +58,7 @@
                     new[] { "V", "1965" }
                 },
                 
-                // test to see whether irrevelant single characters are removed
+                // test to see whether the year is removed
                 {
                     "Top Gear (US)",
                     new[] { "TOP", "GEAR", "US" }
