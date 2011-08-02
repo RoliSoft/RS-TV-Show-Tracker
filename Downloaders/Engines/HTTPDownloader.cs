@@ -62,7 +62,13 @@
             _wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
             _wc.DownloadProgressChanged           += (s, e) => DownloadProgressChanged.Fire(this, e.ProgressPercentage);
             _wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
-            
+
+            var proxy = Settings.Get(uri.Host.Replace("www.", string.Empty) + " proxy");
+            if (!string.IsNullOrEmpty(proxy))
+            {
+                _wc.Proxy = new WebProxy(proxy);
+            }
+
             _wc.DownloadFileAsync(uri, target);
         }
 

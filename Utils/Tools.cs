@@ -278,6 +278,12 @@
 
             req.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
 
+            var proxy = Settings.Get(new Uri(url).Host.Replace("www.", string.Empty) + " proxy");
+            if (!string.IsNullOrEmpty(proxy))
+            {
+                req.Proxy = new WebProxy(proxy);
+            }
+
             if (!string.IsNullOrWhiteSpace(postData))
             {
                 req.Method                    = "POST";
