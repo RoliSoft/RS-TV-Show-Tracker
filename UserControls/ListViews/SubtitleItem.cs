@@ -13,9 +13,33 @@
         /// <param name="subtitle">The subtitle.</param>
         public SubtitleItem(Subtitle subtitle) : base(subtitle.Source)
         {
-            Release  = subtitle.Release;
-            URL      = subtitle.URL;
-            Language = subtitle.Language;
+            Release     = subtitle.Release;
+            URL         = subtitle.URL;
+            HINotations = subtitle.HINotations;
+            Corrected   = subtitle.Corrected;
+            Language    = subtitle.Language;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the HI notation icon is visible.
+        /// </summary>
+        public string HINotationVisible
+        {
+            get
+            {
+                return HINotations ? "Visible" : "Collapsed";
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the corrected icon is visible.
+        /// </summary>
+        public string CorrectedVisible
+        {
+            get
+            {
+                return Corrected ? "Visible" : "Collapsed";
+            }
         }
 
         /// <summary>

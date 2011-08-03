@@ -277,7 +277,7 @@
       <DependentUpon>SubtitlesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Update.cs" />
-    <Compile Include="Utils\Tools.cs" />
+    <Compile Include="Utils\Utils.cs" />
     <Page Include="Windows\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -648,6 +648,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
+    <Resource Include="Images\hearing-impaired.png" />
+    <Resource Include="Images\spell-check.png" />
     <Resource Include="Resources\Git Revision.txt" />
     <Resource Include="Images\tvtropes.gif" />
   </ItemGroup>

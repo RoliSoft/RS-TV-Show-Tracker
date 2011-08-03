@@ -277,6 +277,7 @@
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
 
             req.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+            req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             var proxy = Settings.Get(new Uri(url).Host.Replace("www.", string.Empty) + " proxy");
             if (!string.IsNullOrEmpty(proxy))
@@ -323,15 +324,6 @@
 
             var resp = (HttpWebResponse)req.GetResponse();
             var rstr = resp.GetResponseStream();
-
-            if (resp.ContentEncoding.ToUpper().Contains("GZIP"))
-            {
-                rstr = new GZipStream(rstr, CompressionMode.Decompress);
-            }
-            else if (resp.ContentEncoding.ToUpper().Contains("DEFLATE"))
-            {
-                rstr = new DeflateStream(rstr, CompressionMode.Decompress);
-            }
 
             if (!autoDetectEncoding)
             {

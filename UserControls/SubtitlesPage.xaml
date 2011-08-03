@@ -42,15 +42,19 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="400">
+                    <GridViewColumn Width="500">
                         <GridViewColumnHeader Content="Release name" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" Margin="-7,0" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" Margin="-7,0,0,0" />
+                                    <Image Source="/RSTVShowTracker;component/Images/hearing-impaired.png" ToolTip="This subtitle contains hearing impaired notations." Visibility="{Binding HINotationVisible}" Width="16" Height="16" Margin="7,0,0,0" />
+                                    <Image Source="/RSTVShowTracker;component/Images/spell-check.png" ToolTip="This subtitle was corrected." Visibility="{Binding CorrectedVisible}" Width="16" Height="16" Margin="7,0,0,0" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="100">
+                    <GridViewColumn Width="100"> 
                         <GridViewColumnHeader Content="Language" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>

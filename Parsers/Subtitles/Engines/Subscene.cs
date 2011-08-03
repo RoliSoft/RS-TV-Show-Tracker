@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
@@ -63,6 +64,11 @@
         }
 
         /// <summary>
+        /// A regular expression to match the HI notation tag in the release names.
+        /// </summary>
+        public static Regex HINotationRegex = new Regex(@"[\.\-_]HI\b", RegexOptions.IgnoreCase);
+
+        /// <summary>
         /// Searches for subtitles on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
@@ -86,9 +92,21 @@
 
                 var sub = new Subtitle(this);
 
-                sub.Release  = node.GetTextValue("span[2]").Trim();
-                sub.Language = Languages.Parse(node.GetTextValue("span[1]").Trim());
-                sub.URL      = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                sub.Release     = node.GetTextValue("span[2]").Trim();
+                sub.HINotations = HINotationRegex.IsMatch(sub.Release);
+                sub.Corrected   = Regex.IsMatch(sub.Release, @"\bcorrec(?:ted|\.{3})\)", RegexOptions.IgnoreCase);
+                sub.Language    = Languages.Parse(node.GetTextValue("span[1]").Trim());
+                sub.URL         = Site.TrimEnd('/') + node.GetAttributeValue("href");
+
+                if (sub.HINotations)
+                {
+                    sub.Release = HINotationRegex.Replace(sub.Release, string.Empty);
+                }
+
+                if (sub.Corrected)
+                {
+                    sub.Release = Regex.Replace(sub.Release, @"\s+\((?:sync,?)?\s*correc(?:ted|\.{3})\)", string.Empty, RegexOptions.IgnoreCase);
+                }
 
                 yield return sub;
             }

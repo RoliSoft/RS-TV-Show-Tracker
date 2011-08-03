@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using CookComputing.XmlRpc;
 
@@ -85,9 +86,15 @@
 
                 var sub = new Subtitle(this);
 
-                sub.Release  = data["SubFileName"].ToString().Replace("." + data["SubFormat"], string.Empty);
-                sub.Language = Languages.Parse(data["LanguageName"].ToString());
-                sub.URL      = data["ZipDownloadLink"].ToString();
+                sub.Release     = data["SubFileName"].ToString().Replace("." + data["SubFormat"], string.Empty);
+                sub.HINotations = Subscene.HINotationRegex.IsMatch(sub.Release);
+                sub.Language    = Languages.Parse(data["LanguageName"].ToString());
+                sub.URL         = data["ZipDownloadLink"].ToString();
+
+                if (sub.HINotations)
+                {
+                    sub.Release = Subscene.HINotationRegex.Replace(sub.Release, string.Empty);
+                }
 
                 yield return sub;
             }

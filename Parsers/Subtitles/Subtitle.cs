@@ -24,6 +24,22 @@
         public string Language { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this subtitle is corrected.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if corrected; otherwise, <c>false</c>.
+        /// </value>
+        public bool Corrected { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this subtitle contains hearing impaired notations.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if contains hearing impaired notations; otherwise, <c>false</c>.
+        /// </value>
+        public bool HINotations { get; set; }
+
+        /// <summary>
         /// Gets or sets the URL to the subtitle.
         /// </summary>
         /// <value>The URL.</value>

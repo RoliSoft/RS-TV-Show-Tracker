@@ -119,7 +119,8 @@
 
                 if (node.SelectSingleNode("td[1]/img[contains(@src, 'n.gif')]") != null)
                 {
-                    sub.Release += " - HI";
+                    sub.Release = Subscene.HINotationRegex.Replace(sub.Release, string.Empty);
+                    sub.HINotations = true;
                 }
 
                 sub.Language = Languages.Parse(node.GetNodeAttributeValue("td[1]/a/img", "title"));
