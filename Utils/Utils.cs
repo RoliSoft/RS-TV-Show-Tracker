@@ -16,6 +16,7 @@
     using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Interop;
     using System.Windows.Media.Imaging;
@@ -282,8 +283,23 @@
             var proxy = Settings.Get(new Uri(url).Host.Replace("www.", string.Empty) + " proxy");
             if (!string.IsNullOrEmpty(proxy))
             {
-                req.Proxy = new WebProxy(proxy);
+                var proxyUri = new Uri(proxy);
+
+                switch(proxyUri.Scheme.ToLower())
+                {
+                    case "http":
+                        req.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
+                        break;
+
+                    case "socks5":
+                        var tunnel = new HttpToSocks { RemoteProxy = proxyUri.Host + ":" + proxyUri.Port };
+                        tunnel.Listen();
+
+                        req.Proxy = tunnel.LocalProxy;
+                        break;
+                }
             }
+
 
             if (!string.IsNullOrWhiteSpace(postData))
             {

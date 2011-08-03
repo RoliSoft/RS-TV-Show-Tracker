@@ -92,6 +92,7 @@
       <HintPath>.\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="Starksoft.Net.Proxy, Version=1.0.130.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
@@ -123,6 +124,7 @@
     </ApplicationDefinition>
     <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
+    <Compile Include="HttpToSocks.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BTDigg.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TheEmpire.cs" />
@@ -648,6 +650,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
+    <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
     <Resource Include="Images\hearing-impaired.png" />
     <Resource Include="Images\spell-check.png" />
     <Resource Include="Resources\Git Revision.txt" />
