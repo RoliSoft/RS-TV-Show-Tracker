@@ -15,9 +15,9 @@
     public class HttpToSocks
     {
         /// <summary>
-        /// A regular expression to parse the first line of the HTTP request.
+        /// A regular expression to find the URL in the HTTP request.
         /// </summary>
-        public static Regex FirstLineRegex = new Regex(@"^(?<method>[A-Z]{3,6}) https?://(?<host>[^/:]+)(?:\:(?<port>[0-9]+))?");
+        public static Regex URLRegex = new Regex(@"https?://(?<host>[^/:]+)(?:\:(?<port>[0-9]+))?(?<path>/[^\s$]+)");
 
         /// <summary>
         /// Gets the local HTTP proxy.
@@ -39,7 +39,7 @@
         public string RemoteProxy { get; set; }
 
         private TcpListener _server;
-
+        
         /// <summary>
         /// Starts listening for incoming connections at 127.0.0.1 on a random port.
         /// </summary>
@@ -60,34 +60,11 @@
             {
                 using (var client = _server.EndAcceptTcpClient(asyncResult))
                 {
-                    client.ReceiveTimeout = 100;
+                    client.ReceiveTimeout = 250;
 
                     using (var stream = client.GetStream())
                     {
-                        // read HTTP request
-
-                        var requestData = new byte[0];
-
-                        using (var ms = new MemoryStream())
-                        {
-                            CopyStreamToStream(stream, ms);
-                            requestData = ms.ToArray();
-                        }
-
-                        // parse request data
-
-                        var line  = Encoding.UTF8.GetString(requestData, 0, requestData.Length > 1024 ? 1024 : requestData.Length).Split('\n')[0];
-                        var match = FirstLineRegex.Match(line);
-                        var proxy = RemoteProxy.Split(':');
-
-                        if (!match.Success)
-                        {
-                            throw new WebException("Unable to parse request.");
-                        }
-
-                        // forward request to SOCKS proxy
-
-                        TunnelRequest(requestData, stream, match.Groups["host"].Value, match.Groups["port"].Success ? match.Groups["port"].Value.ToInteger() : 80, proxy[0], proxy[1].ToInteger());
+                        ProcessHTTPRequest(stream);
 
                         stream.Close();
                         client.Close();
@@ -102,6 +79,90 @@
                     _server = null;
                 }
             }
+        }
+
+        /// <summary>
+        /// Reads and processes the HTTP request from the stream.
+        /// </summary>
+        /// <param name="requestStream">The request stream.</param>
+        private void ProcessHTTPRequest(NetworkStream requestStream)
+        {
+            var request = new string[3];
+            var headers = new StringBuilder();
+            var postData = string.Empty;
+            var host = string.Empty;
+            var path = string.Empty;
+            var port = 80;
+
+            using (var ms = new MemoryStream())
+            {
+                CopyStreamToStream(requestStream, ms);
+
+                ms.Position = 0;
+
+                using (var sr = new StreamReader(ms, Encoding.UTF8, false))
+                {
+                    // [0]GET [1]/index.php [2]HTTP/1.1
+                    request = (sr.ReadLine() ?? string.Empty).Split(' ');
+
+                    if (request[0] == "CONNECT")
+                    {
+                        throw new Exception();
+                    }
+
+                    var m = URLRegex.Match(request[1]);
+
+                    host = m.Groups["host"].Value;
+                    path = m.Groups["path"].Value;
+
+                    if (m.Groups["port"].Success)
+                    {
+                        port = m.Groups["port"].Value.ToInteger();
+                    }
+
+                    // read headers
+
+                    while (true)
+                    {
+                        var header = (sr.ReadLine() ?? string.Empty).Trim();
+                        
+                        if (string.IsNullOrWhiteSpace(header))
+                        {
+                            break;
+                        }
+
+                        if (header.StartsWith("Connection:") || header.StartsWith("Proxy-Connection:"))
+                        {
+                            continue;
+                        }
+
+                        headers.AppendLine(header);
+                    }
+
+                    headers.AppendLine("Connection: close");
+
+                    // read post data
+
+                    if (request[0] == "POST")
+                    {
+                        postData = sr.ReadToEnd();
+                    }
+                }
+            }
+
+            var proxy = RemoteProxy.Split(':');
+            var finalRequest = new StringBuilder();
+
+            finalRequest.AppendLine(request[0] + " " + path + " " + request[2]);
+            finalRequest.Append(headers);
+            finalRequest.AppendLine();
+
+            if (postData != string.Empty)
+            {
+                finalRequest.Append(postData);
+            }
+
+            TunnelRequest(Encoding.UTF8.GetBytes(finalRequest.ToString()), requestStream, host, port, proxy[0], proxy[1].ToInteger());
         }
 
         /// <summary>
@@ -128,16 +189,16 @@
         }
 
         /// <summary>
-        /// Copies the first stream's content to the second stream.
+        /// Copies the first stream's content from the current position to the second stream.
         /// </summary>
         /// <param name="source">The source stream.</param>
         /// <param name="destionation">The destionation stream.</param>
         /// <param name="bufferLength">Length of the buffer.</param>
-        private void CopyStreamToStream(Stream source, Stream destionation, int bufferLength = 256)
+        private void CopyStreamToStream(NetworkStream source, Stream destionation, int bufferLength = 4096)
         {
             var buffer = new byte[bufferLength];
 
-            while (true)
+            do
             {
                 int i;
 
@@ -157,6 +218,7 @@
 
                 destionation.Write(buffer, 0, i);
             }
+            while (source.DataAvailable);
         }
     }
 }
