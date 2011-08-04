@@ -284,21 +284,21 @@
             {
                 var proxyUri = new Uri(proxy);
 
-                switch(proxyUri.Scheme.ToLower())
+                switch (proxyUri.Scheme.ToLower())
                 {
                     case "http":
                         req.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
                         break;
 
+                    case "socks4":
+                    case "socks4a":
                     case "socks5":
-                        var tunnel = new HttpToSocks { RemoteProxy = proxyUri.Host + ":" + proxyUri.Port };
+                        var tunnel = new HttpToSocks { RemoteProxy = HttpToSocks.Proxy.ParseUri(proxyUri) };
                         tunnel.Listen();
-
-                        req.Proxy = tunnel.LocalProxy;
+                        req.Proxy = (WebProxy)tunnel.LocalProxy;
                         break;
                 }
             }
-
 
             if (!string.IsNullOrWhiteSpace(postData))
             {
@@ -389,8 +389,6 @@
         /// <returns>A Boolean value that determines whether the specified certificate is accepted for authentication.</returns>
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            return true;
-            // TODO
             return sslPolicyErrors == SslPolicyErrors.None;
         }
 

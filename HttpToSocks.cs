@@ -6,6 +6,7 @@
     using System.Net.Sockets;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
 
     using Starksoft.Net.Proxy;
 
@@ -17,16 +18,26 @@
         /// <summary>
         /// A regular expression to find the URL in the HTTP request.
         /// </summary>
-        public static Regex URLRegex = new Regex(@"https?://(?<host>[^/:]+)(?:\:(?<port>[0-9]+))?(?<path>/[^\s$]+)");
-
+        public static Regex URLRegex = new Regex(@"https?://(?<host>[^/:]+)(?:\:(?<port>[0-9]+))?(?<path>/[^\s$]*)");
+        
         /// <summary>
         /// Gets the local HTTP proxy.
         /// </summary>
-        public WebProxy LocalProxy
+        public Proxy LocalProxy
         {
             get
             {
-                return new WebProxy("127.0.0.1:" + ((IPEndPoint)_server.LocalEndpoint).Port);
+                if (_server == null)
+                {
+                    return null;
+                }
+
+                return new Proxy
+                    {
+                        Type = ProxyType.Http,
+                        Host = "[::1]",
+                        Port = ((IPEndPoint)_server.LocalEndpoint).Port
+                    };
             }
         }
 
@@ -36,16 +47,16 @@
         /// <value>
         /// The remote SOCKS proxy.
         /// </value>
-        public string RemoteProxy { get; set; }
+        public Proxy RemoteProxy { get; set; }
 
         private TcpListener _server;
         
         /// <summary>
-        /// Starts listening for incoming connections at 127.0.0.1 on a random port.
+        /// Starts listening for incoming connections at ::1 on a random port.
         /// </summary>
         public void Listen()
         {
-            _server = new TcpListener(IPAddress.Loopback, 0);
+            _server = new TcpListener(IPAddress.IPv6Loopback, 0);
             _server.Start();
             _server.BeginAcceptSocket(AcceptClient, null);
         }
@@ -59,17 +70,10 @@
             try
             {
                 using (var client = _server.EndAcceptTcpClient(asyncResult))
+                using (var stream = client.GetStream())
                 {
-                    client.NoDelay = true;
-                    client.ReceiveTimeout = 250;
-
-                    using (var stream = client.GetStream())
-                    {
-                        ProcessHTTPRequest(stream);
-
-                        stream.Close();
-                        client.Close();
-                    }
+                    client.ReceiveTimeout = 500;
+                    ProcessHTTPRequest(stream);
                 }
             }
             finally
@@ -88,13 +92,11 @@
         /// <param name="requestStream">The request stream.</param>
         private void ProcessHTTPRequest(NetworkStream requestStream)
         {
-            var request = new string[3];
+            string host, path, postData;
+            string[] request;
+
             var headers = new StringBuilder();
-            var postData = string.Empty;
-            var host = string.Empty;
-            var path = string.Empty;
-            var port = 80;
-            var proxy = RemoteProxy.Split(':');
+            var port    = 80;
 
             using (var ms = new MemoryStream())
             {
@@ -111,7 +113,7 @@
                     {
                         sr.Close();
                         var dest = request[1].Split(':');
-                        TunnelRequest(requestStream, dest[0], dest[1].ToInteger(), proxy[0], proxy[1].ToInteger());
+                        TunnelRequest(requestStream, dest[0], dest[1].ToInteger());
                         return;
                     }
 
@@ -152,6 +154,10 @@
                     {
                         postData = sr.ReadToEnd();
                     }
+                    else
+                    {
+                        postData = null;
+                    }
                 }
             }
 
@@ -161,12 +167,12 @@
             finalRequest.Append(headers);
             finalRequest.AppendLine();
 
-            if (postData != string.Empty)
+            if (postData != null)
             {
                 finalRequest.Append(postData);
             }
 
-            ForwardRequest(Encoding.UTF8.GetBytes(finalRequest.ToString()), requestStream, host, port, proxy[0], proxy[1].ToInteger());
+            ForwardRequest(Encoding.UTF8.GetBytes(finalRequest.ToString()), requestStream, host, port);
         }
 
         /// <summary>
@@ -176,18 +182,12 @@
         /// <param name="responseStream">The stream to write the SOCKS proxy's response to.</param>
         /// <param name="destHost">The destination host.</param>
         /// <param name="destPort">The destination port.</param>
-        /// <param name="proxyHost">The proxy host.</param>
-        /// <param name="proxyPort">The proxy port.</param>
-        private void ForwardRequest(byte[] requestData, NetworkStream responseStream, string destHost, int destPort, string proxyHost, int proxyPort)
+        private void ForwardRequest(byte[] requestData, NetworkStream responseStream, string destHost, int destPort)
         {
-            var proxy = new Socks5ProxyClient(proxyHost, proxyPort);
-
-            using (var client = proxy.CreateConnection(destHost, destPort))
+            using (var client = RemoteProxy.CreateProxy().CreateConnection(destHost, destPort))
             using (var stream = client.GetStream())
             {
-                stream.Write(requestData, 0, requestData.Length);
-                stream.Flush();
-
+                CopyBytesToStream(requestData, stream);
                 CopyStreamToStream(stream, responseStream);
             }
         }
@@ -198,27 +198,28 @@
         /// <param name="responseStream">The stream to write the SOCKS proxy's response to.</param>
         /// <param name="destHost">The destination host.</param>
         /// <param name="destPort">The destination port.</param>
-        /// <param name="proxyHost">The proxy host.</param>
-        /// <param name="proxyPort">The proxy port.</param>
-        private void TunnelRequest(NetworkStream responseStream, string destHost, int destPort, string proxyHost, int proxyPort)
+        private void TunnelRequest(NetworkStream responseStream, string destHost, int destPort)
         {
-            var estmsg = Encoding.ASCII.GetBytes("HTTP/1.1 200 Tunnel established\r\n\r\n");
-            responseStream.Write(estmsg, 0, estmsg.Length);
+            CopyStringToStream("HTTP/1.1 200 Tunnel established\r\n\r\n", responseStream);
 
-            var proxy = new Socks5ProxyClient(proxyHost, proxyPort);
-
-            using (var client = proxy.CreateConnection(destHost, destPort))
+            using (var client = RemoteProxy.CreateProxy().CreateConnection(destHost, destPort))
             using (var stream = client.GetStream())
             {
-                client.NoDelay = true;
-                client.ReceiveTimeout = 250;
-
                 while (true)
                 {
                     try
                     {
-                        CopyStreamToStream(responseStream, stream);
-                        CopyStreamToStream(stream, responseStream);
+                        if (responseStream.DataAvailable)
+                        {
+                            CopyStreamToStream(responseStream, stream);
+                        }
+
+                        if (stream.DataAvailable)
+                        {
+                            CopyStreamToStream(stream, responseStream);
+                        }
+
+                        Thread.Sleep(100);
                     }
                     catch
                     {
@@ -233,12 +234,13 @@
         /// </summary>
         /// <param name="source">The source stream.</param>
         /// <param name="destionation">The destionation stream.</param>
+        /// <param name="flush">if set to <c>true</c>, <c>Flush()</c> will be called on the destination stream after finish.</param>
         /// <param name="bufferLength">Length of the buffer.</param>
-        private void CopyStreamToStream(NetworkStream source, Stream destionation, int bufferLength = 4096)
+        public static void CopyStreamToStream(Stream source, Stream destionation, bool flush = true, int bufferLength = 4096)
         {
             var buffer = new byte[bufferLength];
 
-            do
+            while (true)
             {
                 int i;
 
@@ -258,7 +260,146 @@
 
                 destionation.Write(buffer, 0, i);
             }
-            while (source.DataAvailable);
+
+            if (flush)
+            {
+                destionation.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Copies the specified byte array to the destination stream.
+        /// </summary>
+        /// <param name="source">The source byte array.</param>
+        /// <param name="destionation">The destionation stream.</param>
+        /// <param name="flush">if set to <c>true</c>, <c>Flush()</c> will be called on the destination stream after finish.</param>
+        public static void CopyBytesToStream(byte[] source, Stream destionation, bool flush = true)
+        {
+            destionation.Write(source, 0, source.Length);
+
+            if (flush)
+            {
+                destionation.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Copies the specified string to the destination stream.
+        /// </summary>
+        /// <param name="source">The source string.</param>
+        /// <param name="destionation">The destionation stream.</param>
+        /// <param name="flush">if set to <c>true</c>, <c>Flush()</c> will be called on the destination stream after finish.</param>
+        /// <param name="encoding">The encoding to use for conversion.</param>
+        public static void CopyStringToStream(string source, Stream destionation, bool flush = true, Encoding encoding = null)
+        {
+            CopyBytesToStream((encoding ?? Encoding.UTF8).GetBytes(source), destionation, flush);
+        }
+
+        /// <summary>
+        /// Represents a proxy.
+        /// </summary>
+        public class Proxy
+        {
+            /// <summary>
+            /// Gets or sets the host name.
+            /// </summary>
+            /// <value>
+            /// The host name.
+            /// </value>
+            public string Host { get; set; }
+
+            /// <summary>
+            /// Gets or sets the port number.
+            /// </summary>
+            /// <value>
+            /// The port number.
+            /// </value>
+            public int Port { get; set; }
+
+            /// <summary>
+            /// Gets or sets the proxy type.
+            /// </summary>
+            /// <value>
+            /// The proxy type.
+            /// </value>
+            public ProxyType Type { get; set; }
+
+            /// <summary>
+            /// Gets or sets the name of the user.
+            /// </summary>
+            /// <value>
+            /// The name of the user.
+            /// </value>
+            public string UserName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the password.
+            /// </summary>
+            /// <value>
+            /// The password.
+            /// </value>
+            public string Password { get; set; }
+
+            /// <summary>
+            /// Parses the proxy URL and creates a new <c>Proxy</c> object.
+            /// </summary>
+            /// <param name="uri">The proxy's URI.</param>
+            /// <returns>
+            /// The parsed <c>Proxy</c> object.
+            /// </returns>
+            public static Proxy ParseUri(Uri uri)
+            {
+                var proxy = new Proxy();
+
+                proxy.Host = uri.Host;
+                proxy.Port = uri.Port;
+
+                ProxyType type;
+                if (ProxyType.TryParse(uri.Scheme, true, out type))
+                {
+                    proxy.Type = type;
+                }
+
+                if (!string.IsNullOrEmpty(uri.UserInfo) && uri.UserInfo.IndexOf(':') != -1)
+                {
+                    var auth = uri.UserInfo.Split(":".ToCharArray(), 2);
+
+                    proxy.UserName = auth[0];
+                    proxy.Password = auth[1];
+                }
+
+                return proxy;
+            }
+
+            /// <summary>
+            /// Creates the proxy from the values within this object.
+            /// </summary>
+            /// <returns>
+            /// The proxy.
+            /// </returns>
+            public IProxyClient CreateProxy()
+            {
+                var pcf = new ProxyClientFactory();
+
+                if (string.IsNullOrWhiteSpace(UserName))
+                {
+                    return pcf.CreateProxyClient(Type, Host, Port);
+                }
+
+                return pcf.CreateProxyClient(Type, Host, Port, UserName, Password ?? string.Empty);
+            }
+
+            /// <summary>
+            /// Performs an implicit conversion from <see cref="RoliSoft.TVShowTracker.HttpToSocks.Proxy"/> to <see cref="System.Net.WebProxy"/>.
+            /// </summary>
+            /// <param name="proxy">The proxy.</param>
+            /// <returns>
+            /// The result of the conversion.
+            /// </returns>
+            public static implicit operator WebProxy(Proxy proxy)
+            {
+                return new WebProxy(proxy.Host + ":" + proxy.Port);
+            }
         }
     }
 }

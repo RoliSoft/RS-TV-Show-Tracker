@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.TaskDialogs
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
     using System.Threading;
 

@@ -62,11 +62,26 @@
             _wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
             _wc.DownloadProgressChanged           += (s, e) => DownloadProgressChanged.Fire(this, e.ProgressPercentage);
             _wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
-
+            
             var proxy = Settings.Get(uri.Host.Replace("www.", string.Empty) + " proxy");
             if (!string.IsNullOrEmpty(proxy))
             {
-                _wc.Proxy = new WebProxy(proxy);
+                var proxyUri = new Uri(proxy);
+
+                switch (proxyUri.Scheme.ToLower())
+                {
+                    case "http":
+                        _wc.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
+                        break;
+
+                    case "socks4":
+                    case "socks4a":
+                    case "socks5":
+                        var tunnel = new HttpToSocks { RemoteProxy = HttpToSocks.Proxy.ParseUri(proxyUri) };
+                        tunnel.Listen();
+                        _wc.Proxy = (WebProxy)tunnel.LocalProxy;
+                        break;
+                }
             }
 
             _wc.DownloadFileAsync(uri, target);
