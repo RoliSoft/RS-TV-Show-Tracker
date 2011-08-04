@@ -60,6 +60,7 @@
             {
                 using (var client = _server.EndAcceptTcpClient(asyncResult))
                 {
+                    client.NoDelay = true;
                     client.ReceiveTimeout = 250;
 
                     using (var stream = client.GetStream())
@@ -93,6 +94,7 @@
             var host = string.Empty;
             var path = string.Empty;
             var port = 80;
+            var proxy = RemoteProxy.Split(':');
 
             using (var ms = new MemoryStream())
             {
@@ -107,7 +109,10 @@
 
                     if (request[0] == "CONNECT")
                     {
-                        throw new Exception();
+                        sr.Close();
+                        var dest = request[1].Split(':');
+                        TunnelRequest(requestStream, dest[0], dest[1].ToInteger(), proxy[0], proxy[1].ToInteger());
+                        return;
                     }
 
                     var m = URLRegex.Match(request[1]);
@@ -150,7 +155,6 @@
                 }
             }
 
-            var proxy = RemoteProxy.Split(':');
             var finalRequest = new StringBuilder();
 
             finalRequest.AppendLine(request[0] + " " + path + " " + request[2]);
@@ -162,7 +166,7 @@
                 finalRequest.Append(postData);
             }
 
-            TunnelRequest(Encoding.UTF8.GetBytes(finalRequest.ToString()), requestStream, host, port, proxy[0], proxy[1].ToInteger());
+            ForwardRequest(Encoding.UTF8.GetBytes(finalRequest.ToString()), requestStream, host, port, proxy[0], proxy[1].ToInteger());
         }
 
         /// <summary>
@@ -174,7 +178,7 @@
         /// <param name="destPort">The destination port.</param>
         /// <param name="proxyHost">The proxy host.</param>
         /// <param name="proxyPort">The proxy port.</param>
-        private void TunnelRequest(byte[] requestData, NetworkStream responseStream, string destHost, int destPort, string proxyHost, int proxyPort)
+        private void ForwardRequest(byte[] requestData, NetworkStream responseStream, string destHost, int destPort, string proxyHost, int proxyPort)
         {
             var proxy = new Socks5ProxyClient(proxyHost, proxyPort);
 
@@ -185,6 +189,42 @@
                 stream.Flush();
 
                 CopyStreamToStream(stream, responseStream);
+            }
+        }
+
+        /// <summary>
+        /// Opens a connection through the proxy and creates a tunnel between the two streams.
+        /// </summary>
+        /// <param name="responseStream">The stream to write the SOCKS proxy's response to.</param>
+        /// <param name="destHost">The destination host.</param>
+        /// <param name="destPort">The destination port.</param>
+        /// <param name="proxyHost">The proxy host.</param>
+        /// <param name="proxyPort">The proxy port.</param>
+        private void TunnelRequest(NetworkStream responseStream, string destHost, int destPort, string proxyHost, int proxyPort)
+        {
+            var estmsg = Encoding.ASCII.GetBytes("HTTP/1.1 200 Tunnel established\r\n\r\n");
+            responseStream.Write(estmsg, 0, estmsg.Length);
+
+            var proxy = new Socks5ProxyClient(proxyHost, proxyPort);
+
+            using (var client = proxy.CreateConnection(destHost, destPort))
+            using (var stream = client.GetStream())
+            {
+                client.NoDelay = true;
+                client.ReceiveTimeout = 250;
+
+                while (true)
+                {
+                    try
+                    {
+                        CopyStreamToStream(responseStream, stream);
+                        CopyStreamToStream(stream, responseStream);
+                    }
+                    catch
+                    {
+                        break;
+                    }
+                }
             }
         }
 

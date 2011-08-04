@@ -154,7 +154,7 @@
             CryptoRand = new RNGCryptoServiceProvider();
 
             ServicePointManager.Expect100Continue = false;
-            //ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
+          //ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
         }
 
         /// <summary>
@@ -277,7 +277,6 @@
             req.Timeout   = timeout;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
 
-            req.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
             req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             var proxy = Settings.Get(new Uri(url).Host.Replace("www.", string.Empty) + " proxy");
@@ -390,6 +389,7 @@
         /// <returns>A Boolean value that determines whether the specified certificate is accepted for authentication.</returns>
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
+            return true;
             // TODO
             return sslPolicyErrors == SslPolicyErrors.None;
         }
