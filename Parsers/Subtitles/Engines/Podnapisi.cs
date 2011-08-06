@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
@@ -102,14 +103,25 @@
                 var sub = new Subtitle(this);
 
                 sub.Release = node.GetNodeAttributeValue("td[1]/span/span", "title");
-                if (!string.IsNullOrWhiteSpace(sub.Release))
+                if (!string.IsNullOrWhiteSpace(sub.Release) && Regex.IsMatch(sub.Release, @"[^A-Za-z]"))
                 {
                     sub.Release = sub.Release.Trim().Split(' ')[0];
                 }
                 else
                 {
-                    sub.Release = node.GetTextValue("td[1]/a[2]") + " "
-                                + node.GetTextValue("td[1]/span[@class='opis']").Replace("&nbsp;", string.Empty).Trim(new[] { ' ', ',' });
+                    sub.Release = node.GetTextValue("td[1]/a[2]") + " ";
+
+                    var epinfo = node.GetTextValue("td[1]/span[@class='opis']").Replace("&nbsp;", string.Empty);
+                    if (Regex.IsMatch(epinfo, @"[^A-Za-z]"))
+                    {
+                        sub.Release += epinfo;
+                    }
+                    else
+                    {
+                        sub.Release += node.GetTextValue("td[1]/span[@class='opis'][2]").Replace("&nbsp;", string.Empty);
+                    }
+
+                    sub.Release = Regex.Replace(sub.Release, @"\s*Season: (\d{1,2}) Episode: (\d{1,2}),?\s*", m => string.Format(" S{0:00}E{1:00}", m.Groups[1].Value.ToInteger(), m.Groups[2].Value.ToInteger()));
                 }
 
                 if (node.SelectSingleNode("td[1]/img[contains(@src, 'h.gif')]") != null)
