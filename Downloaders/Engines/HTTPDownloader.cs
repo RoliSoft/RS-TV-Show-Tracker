@@ -71,7 +71,14 @@
                 switch (proxyUri.Scheme.ToLower())
                 {
                     case "http":
-                        _wc.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
+                        if (proxy.Contains("$url"))
+                        {
+                            uri = new Uri(proxy.Replace("$url", Uri.EscapeUriString(uri.ToString())));
+                        }
+                        else
+                        {
+                            _wc.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
+                        }
                         break;
 
                     case "socks4":

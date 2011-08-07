@@ -273,11 +273,7 @@
         /// <returns>Remote page's content.</returns>
         public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
         {
-            var req       = (HttpWebRequest)WebRequest.Create(url);
-            req.Timeout   = timeout;
-            req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
-
-            req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            var req = (HttpWebRequest)WebRequest.Create(url);
 
             var proxy = Settings.Get(new Uri(url).Host.Replace("www.", string.Empty) + " proxy");
             if (!string.IsNullOrEmpty(proxy))
@@ -287,7 +283,14 @@
                 switch (proxyUri.Scheme.ToLower())
                 {
                     case "http":
-                        req.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
+                        if (proxy.Contains("$url"))
+                        {
+                            req = (HttpWebRequest)WebRequest.Create(proxy.Replace("$url", Uri.EscapeUriString(url)));
+                        }
+                        else
+                        {
+                            req.Proxy = new WebProxy(proxyUri.Host + ":" + proxyUri.Port);
+                        }
                         break;
 
                     case "socks4":
@@ -299,6 +302,10 @@
                         break;
                 }
             }
+
+            req.Timeout   = timeout;
+            req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
+            req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             if (!string.IsNullOrWhiteSpace(postData))
             {
@@ -316,7 +323,7 @@
                                    .Where(cookie => cookie != null)
                                    .Select(cookie => cookie.Split('=')))
                 {
-                    req.CookieContainer.Add(new Cookie(kv[0], kv[1], "/", new Uri(url).Host));
+                    req.CookieContainer.Add(new Cookie(kv[0], kv[1], "/", req.Address.Host));
                 }
             }
 
