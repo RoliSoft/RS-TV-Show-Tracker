@@ -651,6 +651,15 @@
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\calendar-select-days.png" />
+    <Resource Include="Images\layer.png" />
+    <Resource Include="Images\layers-stack.png" />
+    <Resource Include="Images\sort-pencil.png" />
+    <Resource Include="Images\sort-alphabet.png" />
+    <Resource Include="Images\sort-date-descending.png" />
+    <Resource Include="Images\sort-date.png" />
+    <Resource Include="Images\sort-number-descending.png" />
+    <Resource Include="Images\sort-number.png" />
     <Resource Include="Images\hearing-impaired.png" />
     <Resource Include="Images\spell-check.png" />
     <Resource Include="Resources\Git Revision.txt" />
