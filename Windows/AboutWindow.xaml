@@ -181,6 +181,11 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://www.starksoft.com/prod_proxy.html">Starksoft Proxy Library</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://dotnetzip.codeplex.com/">DotNetZip</Hyperlink>
                             </Paragraph>
                         </ListItem>
