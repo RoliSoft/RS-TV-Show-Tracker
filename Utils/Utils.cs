@@ -146,6 +146,17 @@
         }
 
         /// <summary>
+        /// A list of certificates trusted by this software, even if the operating system's validation failed.
+        /// </summary>
+        public static Dictionary<string, string> TrustedCertificates = new Dictionary<string, string>
+            {
+                {
+                    "E=support@cacert.org, CN=CA Cert Signing Authority, OU=http://www.cacert.org, O=Root CA",
+                    "3082020A0282020100CE22C0E2467DEC3628075096F2A033408C4BF13B663F31E56B0236DBD67CF6F1888F4E7736054195F909F012CF46867360B76E7EE8C05864AECDB0AD45170C63FA670AE8D6D2BF3EE798C4F04CFAE003BB355D6C21DE9E20D9BACD66323772FAF708F5C7CD58C98EE70E5EEA3EFE1CA1140A156C86845B64662A7AA94B5379F588A27BEE2F0A612B8DB27E4D56A513ECEADA929EAC44411E5860650566F8C044BDCB94F7427E0BF76568985105F0F30591041D1B1782ECC857BBC36B7A88F1B072CC255B2091EC1602128F32E9171848D0C7052E023042B8259C056B3FAA3AA7EB5348F7E8D2B60798DC1BC6347F7FC91C827A05582B085BF338A2AB175D66C998D79E108BA2D2DD749AF7710C7260DFCD6F98339D9634763E247A92B00E951E6FE6A0453847AAD741ED4AB712F6D71B838A0F2ED809B659D7AA04FFD2937D682EDD8B4BAB58BA2F8DEA95A7A0C35489A5FBDB8B51229DB2C3BE11BE2C91868B9678AD20D38A2F1A3FC6D051658721B11901657F451C87F57CD0414C4F299821FD331F750C0451FA1977DBD4141CEE81C31DF598B769069122DD0050CC8131AC12077B38DA685BE62BD47EC95FADE8EB724CF301E54B20BF9AA657CA9100018BA1752137B5630D673E464F702067CEC5D659DB02E0F0D2CBCDBA62B79041E8DD20E429BC642942C822DC789AFF43EC981B09514B5A5AC271F1C4CB73A9E5A10B0203010001"
+                }
+            };
+
+        /// <summary>
         /// Initializes the <see cref="Utils"/> class.
         /// </summary>
         static Utils()
@@ -154,7 +165,7 @@
             CryptoRand = new RNGCryptoServiceProvider();
 
             ServicePointManager.Expect100Continue = false;
-          //ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
+            ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
         }
 
         /// <summary>
@@ -307,6 +318,11 @@
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
             req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
+            if (!string.IsNullOrEmpty(proxy))
+            {
+                req.Timeout += 20000;
+            }
+
             if (!string.IsNullOrWhiteSpace(postData))
             {
                 req.Method                    = "POST";
@@ -396,7 +412,21 @@
         /// <returns>A Boolean value that determines whether the specified certificate is accepted for authentication.</returns>
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            return sslPolicyErrors == SslPolicyErrors.None;
+            if (sslPolicyErrors == SslPolicyErrors.None)
+            {
+                return true;
+            }
+
+            foreach (var element in chain.ChainElements)
+            {
+                if (TrustedCertificates.ContainsKey(element.Certificate.Subject)
+                 && TrustedCertificates[element.Certificate.Subject] == element.Certificate.GetPublicKeyString())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

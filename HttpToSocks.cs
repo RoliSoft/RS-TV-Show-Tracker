@@ -50,6 +50,7 @@
         public Proxy RemoteProxy { get; set; }
 
         private TcpListener _server;
+        private Thread _timeout;
         
         /// <summary>
         /// Starts listening for incoming connections at ::1 on a random port.
@@ -59,6 +60,23 @@
             _server = new TcpListener(IPAddress.IPv6Loopback, 0);
             _server.Start();
             _server.BeginAcceptSocket(AcceptClient, null);
+
+            _timeout = new Thread(Timeout);
+            _timeout.Start();
+        }
+
+        /// <summary>
+        /// Kills the server after a minute.
+        /// </summary>
+        private void Timeout()
+        {
+            Thread.Sleep(TimeSpan.FromMinutes(1));
+
+            if (_server != null)
+            {
+                try { _server.Stop(); } catch { }
+                _server = null;
+            }
         }
 
         /// <summary>
@@ -67,22 +85,13 @@
         /// <param name="asyncResult">The async result.</param>
         private void AcceptClient(IAsyncResult asyncResult)
         {
-            try
+            _server.BeginAcceptSocket(AcceptClient, null);
+
+            using (var client = _server.EndAcceptTcpClient(asyncResult))
+            using (var stream = client.GetStream())
             {
-                using (var client = _server.EndAcceptTcpClient(asyncResult))
-                using (var stream = client.GetStream())
-                {
-                    client.ReceiveTimeout = 500;
-                    ProcessHTTPRequest(stream);
-                }
-            }
-            finally
-            {
-                if (_server != null)
-                {
-                    try { _server.Stop(); } catch { }
-                    _server = null;
-                }
+                stream.ReadTimeout = 100;
+                ProcessHTTPRequest(stream);
             }
         }
 
@@ -187,6 +196,8 @@
             using (var client = RemoteProxy.CreateProxy().CreateConnection(destHost, destPort))
             using (var stream = client.GetStream())
             {
+                stream.ReadTimeout = 100;
+
                 CopyBytesToStream(requestData, stream);
                 CopyStreamToStream(stream, responseStream);
             }
@@ -200,11 +211,13 @@
         /// <param name="destPort">The destination port.</param>
         private void TunnelRequest(NetworkStream responseStream, string destHost, int destPort)
         {
-            CopyStringToStream("HTTP/1.1 200 Tunnel established\r\n\r\n", responseStream);
+            CopyStringToStream("HTTP/1.1 200 Tunnel established\r\nProxy-Connection: Keep-Alive\r\n\r\n", responseStream);
 
             using (var client = RemoteProxy.CreateProxy().CreateConnection(destHost, destPort))
             using (var stream = client.GetStream())
             {
+                stream.ReadTimeout = 100;
+
                 while (true)
                 {
                     try
@@ -218,8 +231,6 @@
                         {
                             CopyStreamToStream(stream, responseStream);
                         }
-
-                        Thread.Sleep(100);
                     }
                     catch
                     {
