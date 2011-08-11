@@ -19,7 +19,7 @@
         /// Gets or sets the key-value container.
         /// </summary>
         /// <value>The key-value container.</value>
-        public static Dictionary<string, object> Keys { get; set; }
+        public static Dictionary<string, dynamic> Keys { get; set; }
 
         private static readonly string _jsFile;
 
@@ -43,8 +43,10 @@
 
             try
             {
-                Keys = JsonConvert.DeserializeObject<Dictionary<string, object>>(
-                    File.ReadAllText(_jsFile)
+                Keys = ConvertJToNet(
+                    JObject.Parse(
+                        File.ReadAllText(_jsFile)
+                    )
                 );
             }
             catch
@@ -98,9 +100,90 @@
                 Keys.Remove("Download Path");
             }
         }
-        
+
         /// <summary>
-        /// Retrieves the key from the XML settings.
+        /// Converts a <c>JObject</c> to a CLR object marked as dynamic.
+        /// Consult the source code for the list of supported <c>JTokenType</c>s.
+        /// </summary>
+        /// <param name="obj">The deserialized JavaScript object.</param>
+        /// <returns>
+        /// Matching CLR object.
+        /// </returns>
+        private static dynamic ConvertJToNet(JToken obj)
+        {
+            switch (obj.Type)
+            {
+                case JTokenType.String:
+                    return (string)obj;
+
+                case JTokenType.Boolean:
+                    return (bool)obj;
+
+                case JTokenType.Integer:
+                    return (int)obj;
+
+                case JTokenType.Float:
+                    return (double)obj;
+
+                case JTokenType.Array:
+                    Type lastType = null;
+                    bool typeDiff = false;
+
+                    var array = new List<dynamic>();
+
+                    foreach (var item in (JArray)obj)
+                    {
+                        var nitem = ConvertJToNet(item);
+                        var ntype = nitem.GetType();
+                        array.Add(nitem);
+
+                        if (lastType != null && lastType != ntype)
+                        {
+                            typeDiff = true;
+                        }
+
+                        lastType = ntype;
+                    }
+
+                    if (!typeDiff && lastType != null)
+                    {
+                        switch (lastType.FullName)
+                        {
+                            case "System.String":
+                                return array.Cast<string>().ToList();
+
+                            case "System.Integer":
+                                return array.Cast<int>().ToList();
+
+                            case "System.Double":
+                                return array.Cast<double>().ToList();
+                        }
+                    }
+                    
+                    return array;
+
+                case JTokenType.Object:
+                    var dict = new Dictionary<string, dynamic>();
+
+                    foreach (var item in (JObject)obj)
+                    {
+                        dict.Add(item.Key, ConvertJToNet(item.Value));
+                    }
+
+                    return dict;
+
+                case JTokenType.None:
+                case JTokenType.Null:
+                case JTokenType.Undefined:
+                    return null;
+
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the key from the JSON settings.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns>Stored value or empty string.</returns>
@@ -110,12 +193,16 @@
         }
 
         /// <summary>
-        /// Retrieves the key from the XML settings casting it to type <c>T</c>.
+        /// Retrieves the key from the JSON settings casting it to type <c>T</c>,
+        /// or if the key doesn't exist, the default value will be returned for value types
+        /// and a new instance will be returned for reference types.
         /// </summary>
         /// <typeparam name="T">The type in which to return the setting's value.</typeparam>
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value to return if key was not found.</param>
-        /// <returns>Stored value or default type value.</returns>
+        /// <returns>
+        /// Stored value or default value/new instance.
+        /// </returns>
         public static T Get<T>(string key, T defaultValue = default(T))
         {
             object value;
@@ -125,40 +212,12 @@
                 return (T)value;
             }
 
-            return defaultValue;
-        }
-
-        /// <summary>
-        /// Retrieves the list from the XML settings.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <returns>Stored value or list with 0 items.</returns>
-        public static string[] GetList(string key)
-        {
-            return GetList<string>(key);
-        }
-
-        /// <summary>
-        /// Retrieves the list from the XML settings casting it to type <c>T[]</c>.
-        /// </summary>
-        /// <typeparam name="T">The list type.</typeparam>
-        /// <param name="key">The key.</param>
-        /// <returns>Stored value or list with 0 items.</returns>
-        public static T[] GetList<T>(string key)
-        {
-            object value;
-
-            if (Keys.TryGetValue(key, out value) && value != null)
+            if (!typeof(T).IsValueType && !(defaultValue is string) && defaultValue != null)
             {
-                if (value is JArray)
-                {
-                    value = ((JArray)value).Values<T>();
-                }
-
-                return ((IEnumerable<T>)value).ToArray();
+                return Activator.CreateInstance<T>();
             }
 
-            return new T[0];
+            return defaultValue;
         }
 
         /// <summary>

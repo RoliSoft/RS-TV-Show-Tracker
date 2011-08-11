@@ -146,7 +146,7 @@
 
             if (reload || _trackers == null)
             {
-                _trackers = Settings.GetList("Tracker Order").ToList();
+                _trackers = Settings.Get<IEnumerable<string>>("Tracker Order").ToList();
                 _trackers.AddRange(SearchEngines
                                    .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                    .Select(engine => engine.Name));
@@ -159,7 +159,7 @@
 
             if (reload || _actives == null)
             {
-                _actives = Settings.GetList("Active Trackers").ToList();
+                _actives = Settings.Get<IEnumerable<string>>("Active Trackers").ToList();
             }
 
             if (reload || availableTorrentEngines.Items.Count == 0)

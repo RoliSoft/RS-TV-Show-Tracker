@@ -1,5 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker.Synchronization
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     /// Provides status information for the synchronization.
     /// </summary>
@@ -24,9 +27,9 @@
         {
             if (Settings.Get<bool>("Synchronization Enabled"))
             {
-                var auth = Settings.GetList("Synchronization Authentication");
+                var auth = Settings.Get<IEnumerable<string>>("Synchronization Authentication").ToArray();
 
-                if (auth != null && auth.Length == 2)
+                if (auth.Length == 2)
                 {
                     LoadEngine("RoliSoftDotNetAPI", auth);
                 }

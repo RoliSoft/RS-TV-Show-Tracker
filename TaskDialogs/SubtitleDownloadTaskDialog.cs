@@ -1,8 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker.TaskDialogs
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
+    using System.Linq;
     using System.Threading;
 
     using Ionic.Zip;
@@ -147,7 +149,7 @@
             _show    = show;
             _episode = episode;
 
-            var paths = Settings.GetList("Download Paths");
+            var paths = Settings.Get<IEnumerable<string>>("Download Paths").ToArray();
 
             if (paths.Length == 0)
             {

@@ -58,7 +58,7 @@
 
             // general
 
-            foreach (var path in Settings.GetList("Download Paths"))
+            foreach (var path in Settings.Get<IEnumerable<string>>("Download Paths"))
             {
                 dlPathsListBox.Items.Add(path);
             }
@@ -148,7 +148,7 @@
                     });
             }
 
-            processTextBox.Text = string.Join(",", Settings.GetList("Processes to Monitor"));
+            processTextBox.Text = string.Join(",", Settings.Get<IEnumerable<string>>("Processes to Monitor"));
 
             // parsers
 
@@ -160,12 +160,12 @@
                        .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
                        .ToList();
 
-            _trackers = Settings.GetList("Tracker Order").ToList();
+            _trackers = Settings.Get<IEnumerable<string>>("Tracker Order").ToList();
             _trackers.AddRange(_engines
                                .Where(engine => _trackers.IndexOf(engine.Name) == -1)
                                .Select(engine => engine.Name));
 
-            _includes = Settings.GetList("Active Trackers").ToList();
+            _includes = Settings.Get<IEnumerable<string>>("Active Trackers").ToList();
 
             foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
             {
