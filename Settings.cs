@@ -19,7 +19,7 @@
         /// Gets or sets the key-value container.
         /// </summary>
         /// <value>The key-value container.</value>
-        public static Dictionary<string, dynamic> Keys { get; set; }
+        public static Dictionary<string, object> Keys { get; set; }
 
         private static readonly string _jsFile;
 
@@ -43,7 +43,7 @@
 
             try
             {
-                Keys = ConvertJToNet(
+                Keys = (Dictionary<string, object>)ConvertJToNet(
                     JObject.Parse(
                         File.ReadAllText(_jsFile)
                     )
@@ -102,14 +102,14 @@
         }
 
         /// <summary>
-        /// Converts a <c>JObject</c> to a CLR object marked as dynamic.
+        /// Converts a <c>JObject</c> to a CLR object.
         /// Consult the source code for the list of supported <c>JTokenType</c>s.
         /// </summary>
         /// <param name="obj">The deserialized JavaScript object.</param>
         /// <returns>
         /// Matching CLR object.
         /// </returns>
-        private static dynamic ConvertJToNet(JToken obj)
+        private static object ConvertJToNet(JToken obj)
         {
             switch (obj.Type)
             {
@@ -129,7 +129,7 @@
                     Type lastType = null;
                     bool typeDiff = false;
 
-                    var array = new List<dynamic>();
+                    var array = new List<object>();
 
                     foreach (var item in (JArray)obj)
                     {
@@ -163,7 +163,7 @@
                     return array;
 
                 case JTokenType.Object:
-                    var dict = new Dictionary<string, dynamic>();
+                    var dict = new Dictionary<string, object>();
 
                     foreach (var item in (JObject)obj)
                     {

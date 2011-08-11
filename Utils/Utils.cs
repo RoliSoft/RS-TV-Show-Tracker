@@ -287,10 +287,10 @@
             var req = (HttpWebRequest)WebRequest.Create(url);
             var domain = new Uri(url).Host.Replace("www.", string.Empty);
 
-            dynamic proxyId;
-            if (Settings.Get<Dictionary<string, dynamic>>("Proxied Domains").TryGetValue(domain, out proxyId))
+            object proxyId;
+            if (Settings.Get<Dictionary<string, object>>("Proxied Domains").TryGetValue(domain, out proxyId))
             {
-                var proxy = (string)Settings.Get<Dictionary<string, dynamic>>("Proxies")[proxyId];
+                var proxy = (string)Settings.Get<Dictionary<string, object>>("Proxies")[(string)proxyId];
                 var proxyUri = new Uri(proxy);
 
                 switch (proxyUri.Scheme.ToLower())
