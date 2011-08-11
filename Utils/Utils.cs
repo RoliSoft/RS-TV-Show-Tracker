@@ -285,10 +285,12 @@
         public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
         {
             var req = (HttpWebRequest)WebRequest.Create(url);
+            var domain = new Uri(url).Host.Replace("www.", string.Empty);
 
-            var proxy = Settings.Get(new Uri(url).Host.Replace("www.", string.Empty) + " proxy");
-            if (!string.IsNullOrEmpty(proxy))
+            dynamic proxyId;
+            if (Settings.Get<Dictionary<string, dynamic>>("Proxied Domains").TryGetValue(domain, out proxyId))
             {
+                var proxy = (string)Settings.Get<Dictionary<string, dynamic>>("Proxies")[proxyId];
                 var proxyUri = new Uri(proxy);
 
                 switch (proxyUri.Scheme.ToLower())
@@ -313,12 +315,12 @@
                         break;
                 }
             }
-
+            
             req.Timeout   = timeout;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
             req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
-            if (!string.IsNullOrEmpty(proxy))
+            if (proxyId != null)
             {
                 req.Timeout += 20000;
             }
