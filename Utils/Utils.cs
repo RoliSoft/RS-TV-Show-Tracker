@@ -6,7 +6,6 @@
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
-    using System.IO.Compression;
     using System.Linq;
     using System.Net;
     using System.Net.Security;
@@ -16,7 +15,6 @@
     using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
-    using System.Threading;
     using System.Windows;
     using System.Windows.Interop;
     using System.Windows.Media.Imaging;

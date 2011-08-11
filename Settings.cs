@@ -145,6 +145,11 @@
                         lastType = ntype;
                     }
 
+                    if (array.Count == 0)
+                    {
+                        return new List<string>();
+                    }
+
                     if (!typeDiff && lastType != null)
                     {
                         switch (lastType.FullName)

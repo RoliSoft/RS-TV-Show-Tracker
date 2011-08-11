@@ -127,6 +127,56 @@
                 MOVE_FILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
             }
             #endregion
+
+            #region Aero
+            /// <summary>
+            /// Extends the window frame into the client area.
+            /// </summary>
+            /// <param name="hWnd">The handle to the window in which the frame will be extended into the client area.</param>
+            /// <param name="pMargins">A pointer to a <c>MARGINS</c> structure that describes the margins to use when extending the frame into the client area.</param>
+            /// <returns>
+            /// If this function succeeds, it returns <c>S_OK</c>. Otherwise, it returns an <c>HRESULT</c> error code.
+            /// </returns>
+            [DllImport("dwmapi.dll")]
+            public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMargins);
+
+            /// <summary>
+            /// Obtains a value that indicates whether Desktop Window Manager (DWM) composition is enabled.
+            /// Applications can listen for composition state changes by handling the <c>WM_DWMCOMPOSITIONCHANGED</c> notification.
+            /// </summary>
+            /// <returns>
+            /// A pointer to a value that, when this function returns successfully, receives <c>TRUE</c> if DWM composition is enabled; otherwise, <c>FALSE</c>.
+            /// </returns>
+            [DllImport("dwmapi.dll", PreserveSig = false)]
+            public static extern bool DwmIsCompositionEnabled();
+
+            /// <summary>
+            /// Returned by the <c>GetThemeMargins</c> function to define the margins of windows that have visual styles applied.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MARGINS
+            {
+                /// <summary>
+                /// Width of the left border that retains its size.
+                /// </summary>
+                public int cxLeftWidth;
+
+                /// <summary>
+                /// Width of the right border that retains its size.
+                /// </summary>
+                public int cxRightWidth;
+
+                /// <summary>
+                /// Width of the top border that retains its size.
+                /// </summary>
+                public int cyTopHeight;
+
+                /// <summary>
+                /// Width of the bottom border that retains its size.
+                /// </summary>
+                public int cyBottomHeight;
+            }
+            #endregion
         }
         // ReSharper restore InconsistentNaming
     }

@@ -27,7 +27,7 @@
                                 <Image Source="/RSTVShowTracker;component/Images/information.png" Height="12" Width="12" Margin="-20,0,0,-1" />Point to the directories where you store your downloaded TV show episodes. The "Play episode" feature will search these directories recursively for matching video files.
                             </TextBlock>
                             <StackPanel Orientation="Horizontal">
-                                <ListBox Name="dlPathsListBox" Margin="0,0,5,0" Width="477" />
+                                <ListBox Name="dlPathsListBox" Margin="0,0,5,0" Width="481" />
                                 <StackPanel Orientation="Vertical">
                                     <Button Name="dlPathAddButton" Click="DlPathAddButtonClick">
                                         <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
@@ -278,6 +278,107 @@
                                         <TextBlock Text="Grab cookies" Margin="0,0,3,0" />
                                     </StackPanel>
                                 </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Proxy" Name="proxyTabItem">
+                <Grid Name="proxyGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Image Source="/RSTVShowTracker;component/Images/server-cast.png" Height="16" Width="16" Margin="0,1,5,0" />
+                                <Label Content="Proxies" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ListView Name="proxiesListView" Margin="0,0,5,0" Width="481" Height="100">
+                                    <ListView.View>
+                                        <GridView AllowsColumnReorder="False">
+                                            <GridViewColumn Width="180">
+                                                <GridViewColumnHeader Content="Name" />
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}" Width="180" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Width="270">
+                                                <GridViewColumnHeader Content="Address" />
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Address}" Width="270" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                                <StackPanel Orientation="Vertical">
+                                    <Button Name="proxyAddButton" Click="ProxyAddButtonClick">
+                                        <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
+                                    <Button Name="proxyEditButton" Click="ProxyEditButtonClick">
+                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
+                                    <Button Name="proxyRemoveButton" Click="ProxyRemoveButtonClick">
+                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                <Image Source="/RSTVShowTracker;component/Images/servers-network.png" Height="16" Width="16" Margin="0,1,5,0" />
+                                <Label Content="Proxied Domains" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <ListView Name="proxiedDomainsListView" Margin="0,0,5,0" Width="481" Height="250">
+                                    <ListView.View>
+                                        <GridView AllowsColumnReorder="False">
+                                            <GridViewColumn Width="270">
+                                                <GridViewColumnHeader Content="Domain" />
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Image Source="{Binding Icon}" Height="16" Width="16" />
+                                                            <TextBlock Text="{Binding Domain}" Padding="5,0,0,0" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Width="180">
+                                                <GridViewColumnHeader Content="Proxy" />
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Proxy}" Width="180" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                                <StackPanel Orientation="Vertical">
+                                    <Button Name="proxyDomainAddButton" Click="ProxyDomainAddButtonClick">
+                                        <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
+                                    <Button Name="proxyDomainEditButton" Click="ProxyDomainEditButtonClick">
+                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
+                                    <Button Name="proxyDomainRemoveButton" Click="ProxyDomainRemoveButtonClick">
+                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

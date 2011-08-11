@@ -10,7 +10,6 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
-    using System.Windows.Forms;
     using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
@@ -32,6 +31,18 @@
         /// </summary>
         /// <value>The downloads list view item collection.</value>
         public ObservableCollection<DownloadsListViewItem> DownloadsListViewItemCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the proxies list view item collection.
+        /// </summary>
+        /// <value>The proxies list view item collection.</value>
+        public ObservableCollection<ProxiesListViewItem> ProxiesListViewItemCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the proxied domains list view item collection.
+        /// </summary>
+        /// <value>The proxied domains list view item collection.</value>
+        public ObservableCollection<ProxiedDomainsListViewItem> ProxiedDomainsListViewItemCollection { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsWindow"/> class.
@@ -182,6 +193,16 @@
             }
 
             listView.SelectedIndex = 0;
+
+            // proxies
+
+            ProxiesListViewItemCollection = new ObservableCollection<ProxiesListViewItem>();
+            proxiesListView.ItemsSource   = ProxiesListViewItemCollection;
+            
+            ProxiedDomainsListViewItemCollection = new ObservableCollection<ProxiedDomainsListViewItem>();
+            proxiedDomainsListView.ItemsSource   = ProxiedDomainsListViewItemCollection;
+
+            ReloadProxies();
         }
 
         #region General
@@ -192,7 +213,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DlPathAddButtonClick(object sender, RoutedEventArgs e)
         {
-            var fbd = new FolderBrowserDialog
+            var fbd = new System.Windows.Forms.FolderBrowserDialog
                 {
                     Description         = "Select the directory where you download your TV shows:",
                     ShowNewFolderButton = false
@@ -619,5 +640,150 @@
         {
             Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
         }
+
+        #region Proxies
+        /// <summary>
+        /// Reloads the proxy-related list views.
+        /// </summary>
+        private void ReloadProxies()
+        {
+            ProxiesListViewItemCollection.Clear();
+
+            foreach (var proxy in Settings.Get<Dictionary<string, object>>("Proxies"))
+            {
+                ProxiesListViewItemCollection.Add(new ProxiesListViewItem
+                    {
+                        Name    = proxy.Key,
+                        Address = (string)proxy.Value
+                    });
+            }
+
+            ProxiedDomainsListViewItemCollection.Clear();
+
+            foreach (var proxy in Settings.Get<Dictionary<string, object>>("Proxied Domains"))
+            {
+                ProxiedDomainsListViewItemCollection.Add(new ProxiedDomainsListViewItem
+                    {
+                        Icon   = "http://g.etfv.co/http://www." + proxy.Key + "?defaulticon=lightpng",
+                        Domain = proxy.Key,
+                        Proxy  = (string)proxy.Value
+                    });
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyAddButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyAddButtonClick(object sender, RoutedEventArgs e)
+        {
+            new ProxyWindow().ShowDialog();
+            ReloadProxies();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyEditButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyEditButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiesListView.SelectedIndex == -1) return;
+
+            var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
+
+            new ProxyWindow(sel.Name, sel.Address).ShowDialog();
+            ReloadProxies();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyRemoveButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyRemoveButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiesListView.SelectedIndex == -1) return;
+
+            var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
+
+            if (MessageBox.Show("Are you sure you want to remove " + sel.Name + " and all the proxied domains associated with it?", "Remove " + sel.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                var dict = Settings.Get<Dictionary<string, object>>("Proxied Domains");
+
+                foreach (var prdmn in dict.ToDictionary(k => k.Key, v => v.Value))
+                {
+                    if ((string)prdmn.Value == sel.Name)
+                    {
+                        dict.Remove(prdmn.Key);
+                    }
+                }
+
+                Settings.Get<Dictionary<string, object>>("Proxies").Remove(sel.Name);
+                Settings.Save();
+
+                ReloadProxies();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyDomainAddButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyDomainAddButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiesListView.Items.Count == 0)
+            {
+                MessageBox.Show("You need to add a new proxy before adding domains.", "No proxies", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            new ProxiedDomainWindow().ShowDialog();
+            ReloadProxies();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyDomainEditButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyDomainEditButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiedDomainsListView.SelectedIndex == -1) return;
+
+            if (proxiesListView.Items.Count == 0)
+            {
+                MessageBox.Show("You need to add a new proxy before adding domains.", "No proxies", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var sel = (ProxiedDomainsListViewItem)proxiedDomainsListView.SelectedItem;
+
+            new ProxiedDomainWindow(sel.Domain, sel.Proxy).ShowDialog();
+            ReloadProxies();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyDomainRemoveButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyDomainRemoveButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiedDomainsListView.SelectedIndex == -1) return;
+
+            var sel = (ProxiedDomainsListViewItem)proxiedDomainsListView.SelectedItem;
+
+            if (MessageBox.Show("Are you sure you want to remove " + sel.Domain + "?", "Remove " + sel.Domain, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                Settings.Get<Dictionary<string, object>>("Proxied Domains").Remove(sel.Domain);
+                Settings.Save();
+
+                ReloadProxies();
+            }
+        }
+        #endregion
     }
 }

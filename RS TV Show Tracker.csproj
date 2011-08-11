@@ -62,11 +62,10 @@
     <ApplicationIcon>tv.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>RoliSoft.TVShowTracker.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.Crypto, Version=1.7.4137.9688, Culture=neutral, PublicKeyToken=a4292a325f69b123, processorArchitecture=MSIL" />
@@ -232,7 +231,15 @@
     <Compile Include="Windows\CookieCatcherWindow.xaml.cs">
       <DependentUpon>CookieCatcherWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ProxiedDomainWindow.xaml.cs">
+      <DependentUpon>ProxiedDomainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ListViews\ProxiedDomainsListViewItem.cs" />
+    <Compile Include="Windows\ListViews\ProxiesListViewItem.cs" />
     <Compile Include="Windows\ListViews\FileListViewItem.cs" />
+    <Compile Include="Windows\ProxyWindow.xaml.cs">
+      <DependentUpon>ProxyWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\RenamerWindow.xaml.cs">
       <DependentUpon>RenamerWindow.xaml</DependentUpon>
     </Compile>
@@ -320,6 +327,14 @@
     <Page Include="Windows\CookieCatcherWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ProxiedDomainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ProxyWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\RenamerWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -547,6 +562,7 @@
     <Resource Include="Images\inbox-download.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="RoliSoft.TVShowTracker.snk" />
     <None Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -651,6 +667,8 @@
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\server-cast.png" />
+    <Resource Include="Images\servers-network.png" />
     <Resource Include="Images\calendar-select-days.png" />
     <Resource Include="Images\layer.png" />
     <Resource Include="Images\layers-stack.png" />
