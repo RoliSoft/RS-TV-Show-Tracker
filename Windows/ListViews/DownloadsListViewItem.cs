@@ -24,27 +24,17 @@
         public string Site { get; set; }
 
         /// <summary>
-        /// Gets or sets the type.
+        /// Gets or sets the login status.
         /// </summary>
-        /// <value>The type.</value>
-        public string Type { get; set; }
+        /// <value>
+        /// The login status.
+        /// </value>
+        public string Login { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance requires cookies.
+        /// Gets or sets the version.
         /// </summary>
-        /// <value>The string boolean.</value>
-        public string RequiresCookies { get; set; }
-
-        /// <summary>
-        /// Gets or sets the developer.
-        /// </summary>
-        /// <value>The developer.</value>
-        public string Developer { get; set; }
-
-        /// <summary>
-        /// Gets or sets the last update in relative time representation.
-        /// </summary>
-        /// <value>The last update date.</value>
-        public string LastUpdate { get; set; }
+        /// <value>The version.</value>
+        public string Version { get; set; }
     }
 }

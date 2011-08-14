@@ -1,9 +1,9 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.RenamerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
-        Title="File renamer" Height="395" Width="800" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/folder-rename.png" Loaded="WindowLoaded" Closing="GlassWindowClosing" ResizeMode="NoResize">
+        Title="File renamer" Height="389" Width="800" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/folder-rename.png" Loaded="WindowLoaded" Closing="GlassWindowClosing" ResizeMode="NoResize">
     <Grid>
-        <TabControl Padding="0" Margin="10,10" Name="tabControl" SelectionChanged="TabControlSelectionChanged" Background="White">
+        <TabControl Padding="0" Margin="10,4,10,10" Name="tabControl" SelectionChanged="TabControlSelectionChanged" Background="White">
             <TabControl.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
@@ -189,7 +189,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Label FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="#CDFFFFFF" Content="RS TV Show Tracker" Margin="0,5,8,0">
+        <Label FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="#CDFFFFFF" Content="RS TV Show Tracker" Margin="0,-1,8,0">
             <Label.Effect>
                 <DropShadowEffect BlurRadius="5" Color="#CD000000" Direction="0" ShadowDepth="0" />
             </Label.Effect>

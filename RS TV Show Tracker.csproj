@@ -231,6 +231,9 @@
     <Compile Include="Windows\CookieCatcherWindow.xaml.cs">
       <DependentUpon>CookieCatcherWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ParserWindow.xaml.cs">
+      <DependentUpon>ParserWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\ProxiedDomainWindow.xaml.cs">
       <DependentUpon>ProxiedDomainWindow.xaml</DependentUpon>
     </Compile>
@@ -325,6 +328,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\CookieCatcherWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ParserWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -667,6 +674,10 @@
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\cookie-bite.png" />
+    <Resource Include="Images\external-small.png" />
+    <Resource Include="Images\ui-check-boxes.png" />
+    <Resource Include="Images\na.png" />
     <Resource Include="Images\server-cast.png" />
     <Resource Include="Images\servers-network.png" />
     <Resource Include="Images\calendar-select-days.png" />

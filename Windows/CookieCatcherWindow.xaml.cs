@@ -21,8 +21,18 @@
         /// <summary>
         /// Gets or sets the engine edited on this window.
         /// </summary>
-        /// <value>The engine.</value>
+        /// <value>
+        /// The engine.
+        /// </value>
         public DownloadSearchEngine Engine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cookies.
+        /// </summary>
+        /// <value>
+        /// The cookies.
+        /// </value>
+        public string Cookies { get; set; }
 
         private WebBrowser _webBrowser;
 
@@ -87,9 +97,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void GrabButtonClick(object sender, RoutedEventArgs e)
         {
-            var cookies = _webBrowser.Document.Cookie ?? string.Empty;
+            Cookies = _webBrowser.Document.Cookie ?? string.Empty;
 
-            if (Engine.RequiredCookies != null && Engine.RequiredCookies.Length != 0 && !Engine.RequiredCookies.All(req => Regex.IsMatch(cookies, @"(?:^|[\s;]){0}=".FormatWith(req), RegexOptions.IgnoreCase)))
+            if (Engine.RequiredCookies != null && Engine.RequiredCookies.Length != 0 && !Engine.RequiredCookies.All(req => Regex.IsMatch(Cookies, @"(?:^|[\s;]){0}=".FormatWith(req), RegexOptions.IgnoreCase)))
             {
                 var td = new TaskDialog
                     {
@@ -112,7 +122,6 @@
                 td.Show();
             }
 
-            Settings.Set(Engine.Name + " Cookies", cookies);
             DialogResult = true;
         }
     }

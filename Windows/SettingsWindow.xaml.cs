@@ -178,21 +178,7 @@
 
             _includes = Settings.Get<IEnumerable<string>>("Active Trackers").ToList();
 
-            foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
-            {
-                DownloadsListViewItemCollection.Add(new DownloadsListViewItem
-                    {
-                        Enabled         = _includes.Contains(engine.Name),
-                        Icon            = engine.Icon,
-                        Site            = engine.Name,
-                        Type            = engine.Type.ToString(),
-                        RequiresCookies = engine.Private ? "Yes" : "No",
-                        Developer       = engine.GetAttribute<ParserAttribute>().Developer,
-                        LastUpdate      = engine.GetAttribute<ParserAttribute>().Revision.ToRelativeDate()
-                    });
-            }
-
-            listView.SelectedIndex = 0;
+            ReloadParsers();
 
             // proxies
 
@@ -496,44 +482,29 @@
 
         #region Parsers
         /// <summary>
-        /// Handles the SelectionChanged event of the listView control.
+        /// Reloads the parsers list view.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
-        private void ListViewSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ReloadParsers()
         {
-            var sel    = listView.SelectedItem as DownloadsListViewItem;
-            var engine = _engines.Single(en => en.Name == sel.Site);
-
-            engineIcon.Source   = new BitmapImage(new Uri(sel.Icon));
-            engineTitle.Content = sel.Site;
-
-            if (engine.Private)
+            foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
             {
-                cookiesLabel.IsEnabled = cookiesTextBox.IsEnabled = grabCookiesButton.IsEnabled = true;
-                cookiesTextBox.Text = Settings.Get(engine.Name + " Cookies");
-            }
-            else
-            {
-                cookiesLabel.IsEnabled = cookiesTextBox.IsEnabled = grabCookiesButton.IsEnabled = false;
-                cookiesTextBox.Text = "not required";
-            }
-        }
+                var revdiff = engine.GetAttribute<ParserAttribute>().Revision - new DateTime(2000, 1, 1, 1, 0, 0);
 
-        /// <summary>
-        /// Handles the TextChanged event of the cookiesTextBox control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
-        private void CookiesTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            var sel    = listView.SelectedItem as DownloadsListViewItem;
-            var engine = _engines.Single(en => en.Name == sel.Site);
-
-            if (engine.Private)
-            {
-                Settings.Set(engine.Name + " Cookies", cookiesTextBox.Text.Trim());
+                DownloadsListViewItemCollection.Add(new DownloadsListViewItem
+                    {
+                        Enabled = _includes.Contains(engine.Name),
+                        Icon    = engine.Icon,
+                        Site    = engine.Name,
+                        Login   = engine.Private
+                                  ? Settings.Get(engine.Name + " Cookies") != null
+                                    ? "/RSTVShowTracker;component/Images/tick.png"
+                                    : "/RSTVShowTracker;component/Images/cross.png"
+                                  : "/RSTVShowTracker;component/Images/na.png",
+                        Version = "2.0." + Math.Floor(revdiff.TotalDays).ToString("0000") + "." + ((revdiff.Subtract(TimeSpan.FromDays(Math.Floor(revdiff.TotalDays)))).TotalSeconds / 2).ToString("00000")
+                    });
             }
+
+            listView.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -575,6 +546,29 @@
         }
 
         /// <summary>
+        /// Handles the Click event of the parserEditButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ParserEditButtonClick(object sender, RoutedEventArgs e)
+        {
+            var sel = listView.SelectedItem as DownloadsListViewItem;
+            var prs = _engines.Single(en => en.Name == sel.Site);
+
+            if (prs.Private)
+            {
+                if (new ParserWindow(prs).ShowDialog() == true) // Nullable<bool> vs true
+                {
+                    ReloadParsers();
+                }
+            }
+            else
+            {
+                MessageBox.Show(prs.Name + " does not require authentication to search the site.", "Login not required", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
         /// Handles the Click event of the moveUpButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -612,22 +606,6 @@
         public void SaveOrder()
         {
             Settings.Set("Tracker Order", _trackers);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the grabCookiesButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void GrabCookiesButtonClick(object sender, RoutedEventArgs e)
-        {
-            var sel    = listView.SelectedItem as DownloadsListViewItem;
-            var engine = _engines.Single(en => en.Name == sel.Site);
-
-            if (engine.Private && new CookieCatcherWindow(engine).ShowDialog() == true) // yes, == true, because ShowDialog() returns Nullable<bool> not bool directly
-            {
-                cookiesTextBox.Text = Settings.Get(engine.Name + " Cookies");
-            }
         }
         #endregion
 
