@@ -311,6 +311,11 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://getfavicon.appspot.com/">getFavicon</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://www.tastekid.com/">TasteKid</Hyperlink>
                             </Paragraph>
                         </ListItem>

@@ -126,6 +126,7 @@
     <Compile Include="HttpToSocks.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BTDigg.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\iPlay.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TheEmpire.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\ScienceHD.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\UKNova.cs" />
@@ -223,7 +224,7 @@
     <Compile Include="Parsers\Downloads\Engines\Usenet\BinSearch.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHUmen.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\FileList.cs" />
-    <Compile Include="Parsers\Downloads\Engines\Torrent\NCore.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\nCore.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseLog.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\SceneReleases.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TvStore.cs" />

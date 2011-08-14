@@ -11,7 +11,7 @@
     /// Provides support for scraping nCore.
     /// </summary>
     [Parser("2011-02-13 5:52 PM"), TestFixture]
-    public class NCore : DownloadSearchEngine
+    public class nCore : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
