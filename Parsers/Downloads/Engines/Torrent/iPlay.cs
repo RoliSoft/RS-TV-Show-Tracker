@@ -62,6 +62,24 @@
         }
 
         /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
+                        { "returnto", LoginFieldTypes.ReturnTo },
+                        { "take_login", "1" },
+                    };
+            }
+        }
+
+        /// <summary>
         /// Gets the type of the link.
         /// </summary>
         /// <value>The type of the link.</value>

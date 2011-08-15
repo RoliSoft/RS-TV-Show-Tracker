@@ -3,7 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
+    using System.Text;
     using System.Threading;
+
+    using HtmlAgilityPack;
 
     using NUnit.Framework;
 
@@ -38,6 +42,12 @@
         /// </summary>
         /// <value>The required cookies for authentication.</value>
         public virtual string[] RequiredCookies { get; internal set; }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public virtual Dictionary<string, object> LoginFields { get; internal set; }
 
         /// <summary>
         /// Gets the type of the link.
@@ -150,6 +160,122 @@
             Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼────────────┼──────────────────────────────────────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┤");
             list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-10} │ {3,-40} │ {4,-60} │ {5,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), (item.Size ?? string.Empty).CutIfLonger(10), item.Quality, (item.Infos ?? string.Empty).CutIfLonger(40), (item.InfoURL ?? string.Empty).CutIfLonger(60), (item.FileURL ?? string.Empty).CutIfLonger(60))));
             Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴────────────┴──────────────────────────────────────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┘");
+        }
+
+        /// <summary>
+        /// Checks if a Gazelle or TBSource-based tracker requires authentication.
+        /// </summary>
+        /// <param name="node">The HTML document node.</param>
+        /// <returns>
+        ///   <c>true</c> if login is required; otherwise, <c>false</c>.
+        /// </returns>
+        internal virtual bool TrackerLoginRequired(HtmlNode node)
+        {
+            return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login.php')]//input[@type = 'hidden' and (@name = 'returnto' or @name = 'return' or @name = 'back' or @name = 'honnan')]") == null;
+        }
+        
+        /// <summary>
+        /// Initiates a login on a Gazelle or TBSource-based tracker.
+        /// </summary>
+        /// <param name="url">The URL of the login action.</param>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="returnto">The URL to return to after login.</param>
+        /// <returns>
+        /// Parsed HTML document.
+        /// </returns>
+        internal virtual HtmlDocument TrackerDoHTMLLogin(string url, string username, string password, string returnto = null)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(
+                TrackerDoLogin(url, username, password, returnto)
+            );
+
+            return doc;
+        }
+
+        /// <summary>
+        /// Initiates a login on a Gazelle or TBSource-based tracker.
+        /// </summary>
+        /// <param name="url">The URL of the login action.</param>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="returnto">The URL to return to after login.</param>
+        /// <returns>
+        /// HTML document.
+        /// </returns>
+        internal virtual string TrackerDoLogin(string url, string username, string password, string returnto = null)
+        {
+            var post = new StringBuilder();
+
+            foreach (var field in LoginFields)
+            {
+                post.Append(field.Key + "=");
+                var value = string.Empty;
+
+                if (field.Value is string)
+                {
+                    value = (string)field.Value;
+                }
+                else if (field.Value is LoginFieldTypes)
+                {
+                    switch ((LoginFieldTypes)field.Value)
+                    {
+                        case LoginFieldTypes.UserName:
+                            value = username;
+                            break;
+
+                        case LoginFieldTypes.Password:
+                            value = password;
+                            break;
+
+                        case LoginFieldTypes.ReturnTo:
+                            value = returnto ?? "/";
+                            break;
+                    }
+                }
+
+                post.Append(Uri.EscapeUriString(value) + "; ");
+            }
+
+            var req = Utils.GetURL(url, post.ToString(), response: resp =>
+                {
+                    if (resp.Cookies == null || resp.Cookies.Count == 0)
+                    {
+                        return;
+                    }
+
+                    var cookies = new StringBuilder();
+
+                    foreach (Cookie cookie in resp.Cookies)
+                    {
+                        cookies.Append(cookie.Name + "=" + cookie.Value + "; ");
+                    }
+
+                    SetCookies(cookies.ToString());
+                });
+
+            return req;
+        }
+
+        /// <summary>
+        /// Gets the cookies for this parser.
+        /// </summary>
+        /// <returns>
+        /// The specified cookies for this parser.
+        /// </returns>
+        internal virtual string GetCookies()
+        {
+            return Settings.Get(Name + " Cookies");
+        }
+
+        /// <summary>
+        /// Sets the cookies for this parser.
+        /// </summary>
+        /// <param name="value">The cookies.</param>
+        internal virtual void SetCookies(string value)
+        {
+            Settings.Set(Name + " Cookies", value);
         }
     }
 }

@@ -257,12 +257,16 @@
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
-        /// <returns>Remote page's parsed content.</returns>
-        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
+        /// <param name="request">The method to call with the request object before the request is made.</param>
+        /// <param name="response">The method to call with the response object after the request was made.</param>
+        /// <returns>
+        /// Remote page's parsed content.
+        /// </returns>
+        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(
-                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers)
+                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, request, response)
             );
 
             return doc;
@@ -279,8 +283,12 @@
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The requrest timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
-        /// <returns>Remote page's content.</returns>
-        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null)
+        /// <param name="request">The method to call with the request object before the request is made.</param>
+        /// <param name="response">The method to call with the response object after the request was made.</param>
+        /// <returns>
+        /// Remote page's content.
+        /// </returns>
+        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var req = (HttpWebRequest)WebRequest.Create(url);
             var domain = new Uri(url).Host.Replace("www.", string.Empty);
@@ -360,8 +368,18 @@
                 }
             }
 
+            if (request != null)
+            {
+                request(req);
+            }
+
             var resp = (HttpWebResponse)req.GetResponse();
             var rstr = resp.GetResponseStream();
+
+            if (response != null)
+            {
+                response(resp);
+            }
 
             if (!autoDetectEncoding)
             {
