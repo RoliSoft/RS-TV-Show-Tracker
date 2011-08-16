@@ -111,7 +111,7 @@
 
                 if (link.Quality != Qualities.Unknown)
                 {
-                    link.Release = Regex.Replace(link.Release, @"\s\[.*\]\s?", string.Empty);
+                    link.Release = Regex.Replace(link.Release, @"\s?\[.*\]\s?", string.Empty);
                 }
 
                 yield return link;

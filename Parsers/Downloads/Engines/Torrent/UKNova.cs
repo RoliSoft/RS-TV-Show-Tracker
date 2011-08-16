@@ -138,7 +138,7 @@
             var split = Regex.Replace(ShowNames.Parser.ReplaceEpisode(query, "{0}", true, true), @"[^A-Za-z0-9\s]", string.Empty).Replace(' ', ',').TrimEnd(',');
             var html  = Utils.GetHTML(Site + "wsgi/torrent/find?title=" + Uri.EscapeUriString(split), cookies: Cookies);
 
-            if (GazelleTrackerLoginRequired(html.DocumentNode))
+            if (html.DocumentNode.SelectSingleNode("//form[@id = 'login']") != null)
             {
                 throw new InvalidCredentialException();
             }
