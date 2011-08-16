@@ -799,5 +799,63 @@
 
             return value;
         }
+
+        /// <summary>
+        /// Encrypts the specified text with AES-256.
+        /// </summary>
+        /// <param name="secret">The text to be encrypted.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>
+        /// Base64-encoded encrypted text.
+        /// </returns>
+        public static string Encrypt(string secret, string password)
+        {
+            var raw = Encoding.UTF8.GetBytes(secret);
+            var pdb = new Rfc2898DeriveBytes(password, BitConverter.GetBytes(Math.PI));
+
+            using (var ms  = new MemoryStream())
+            using (var alg = Rijndael.Create())
+            {
+                alg.Mode = CipherMode.CBC;
+                alg.Key  = pdb.GetBytes(32);
+                alg.IV   = pdb.GetBytes(16);
+
+                using (var cs = new CryptoStream(ms, alg.CreateEncryptor(), CryptoStreamMode.Write))
+                {
+                    cs.Write(raw, 0, raw.Length);
+                }
+
+                return Convert.ToBase64String(ms.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Decrypts the specified text with AES-256.
+        /// </summary>
+        /// <param name="secret">The Base64-encoded encrypted text.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>
+        /// Decrypted text.
+        /// </returns>
+        public static string Decrypt(string secret, string password)
+        {
+            var enc = Convert.FromBase64String(secret);
+            var pdb = new Rfc2898DeriveBytes(password, BitConverter.GetBytes(Math.PI));
+
+            using (var ms  = new MemoryStream())
+            using (var alg = Rijndael.Create())
+            {
+                alg.Mode = CipherMode.CBC;
+                alg.Key  = pdb.GetBytes(32);
+                alg.IV   = pdb.GetBytes(16);
+
+                using (var cs = new CryptoStream(ms, alg.CreateDecryptor(), CryptoStreamMode.Write))
+                {
+                    cs.Write(enc, 0, enc.Length);
+                }
+
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Authentication;
 
     using NUnit.Framework;
 
@@ -60,6 +61,20 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this search engine can login using a username and password.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this search engine can login; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanLogin
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the login page.
         /// </summary>
         /// <value>The URL to the login page.</value>
@@ -106,7 +121,13 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "browse.php?searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, userAgent: Settings.Get("FileList User Agent"));
+            var html = Utils.GetHTML(Site + "browse.php?searchin=0&sort=0&search=" + Uri.EscapeUriString(query), cookies: Cookies);
+
+            if (GazelleTrackerLoginRequired(html.DocumentNode))
+            {
+                throw new InvalidCredentialException();
+            }
+
             var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
             
             if (links == null)
@@ -128,6 +149,17 @@
                 
                 yield return link;
             }
+        }
+
+        /// <summary>
+        /// Authenticates with the site and returns the cookies.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
+        public override string Login(string username, string password)
+        {
+            return GazelleTrackerLogin(username, password);
         }
     }
 }

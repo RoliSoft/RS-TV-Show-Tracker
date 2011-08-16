@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Authentication;
     using System.Text.RegularExpressions;
 
     using NUnit.Framework;
@@ -79,7 +80,13 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "browse.php?incldead=0&nonboolean=1&search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "browse.php?incldead=0&nonboolean=1&search=" + Uri.EscapeUriString(query), cookies: Cookies);
+
+            if (GazelleTrackerLoginRequired(html.DocumentNode))
+            {
+                throw new InvalidCredentialException();
+            }
+
             var links = html.DocumentNode.SelectNodes("//tr[@class='ttable']/td[2]/a[1]");
 
             if (links == null)

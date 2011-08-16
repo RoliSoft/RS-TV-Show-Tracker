@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Authentication;
     using System.Text.RegularExpressions;
 
     using NUnit.Framework;
@@ -73,6 +74,20 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this search engine can login using a username and password.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this search engine can login; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanLogin
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the login page.
         /// </summary>
         /// <value>The URL to the login page.</value>
@@ -122,6 +137,12 @@
             var ep    = ShowNames.Parser.ExtractEpisode(query);
             var split = Regex.Replace(ShowNames.Parser.ReplaceEpisode(query, "{0}", true, true), @"[^A-Za-z0-9\s]", string.Empty).Replace(' ', ',').TrimEnd(',');
             var html  = Utils.GetHTML(Site + "wsgi/torrent/find?title=" + Uri.EscapeUriString(split), cookies: Cookies);
+
+            if (GazelleTrackerLoginRequired(html.DocumentNode))
+            {
+                throw new InvalidCredentialException();
+            }
+
             var links = html.DocumentNode.SelectNodes("//table[@class='torrents']/tr/td[4]/a");
 
             if (links == null)
@@ -156,14 +177,12 @@
         }
 
         /// <summary>
-        /// Initiates a login on a Gazelle or TBSource-based tracker.
+        /// Authenticates with the site and returns the cookies.
         /// </summary>
         /// <param name="username">The username.</param>
         /// <param name="password">The password.</param>
-        /// <returns>
-        /// Cookies.
-        /// </returns>
-        internal override string TrackerDoLogin(string username, string password)
+        /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
+        public override string Login(string username, string password)
         {
             var cookie = "username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password);
             var login  = Utils.GetURL(LoginURL, cookie);

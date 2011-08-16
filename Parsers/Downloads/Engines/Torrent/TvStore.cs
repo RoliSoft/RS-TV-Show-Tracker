@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Security.Authentication;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -81,6 +82,20 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this search engine can login using a username and password.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this search engine can login; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanLogin
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the login page.
         /// </summary>
         /// <value>The URL to the login page.</value>
@@ -135,7 +150,13 @@
         public override IEnumerable<Link> Search(string query)
         {
             var gyors = Utils.GetURL(Site + "torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.Parser.ReplaceEpisode(query, "{0:0}x{1:00}"))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
-            var arr   = gyors.Split('\\');
+
+            if (string.IsNullOrWhiteSpace(gyors))
+            {
+                throw new InvalidCredentialException();
+            }
+            
+            var arr = gyors.Split('\\');
 
             if (arr[0] == "0")
             {
@@ -176,6 +197,17 @@
 
                 yield return link;
             }
+        }
+
+        /// <summary>
+        /// Authenticates with the site and returns the cookies.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
+        public override string Login(string username, string password)
+        {
+            return GazelleTrackerLogin(username, password);
         }
 
         /// <summary>

@@ -68,8 +68,8 @@
                 {
                     engine.Cookies = Settings.Get(engine.Name + " Cookies");
 
-                    // if requires cookies and no cookies were provided, ignore the engine
-                    if (string.IsNullOrWhiteSpace(engine.Cookies))
+                    // if requires authentication and no cookies or login information were provided, ignore the engine
+                    if (string.IsNullOrWhiteSpace(engine.Cookies) && string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login")))
                     {
                         remove.Add(engine);
                     }

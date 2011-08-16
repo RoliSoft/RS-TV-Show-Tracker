@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Security.Authentication;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
@@ -43,6 +44,20 @@
         /// </summary>
         /// <value>The required cookies for authentication.</value>
         public virtual string[] RequiredCookies { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this search engine can login using a username and password.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this search engine can login; otherwise, <c>false</c>.
+        /// </value>
+        public virtual bool CanLogin
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Gets the URL to the login page.
@@ -111,6 +126,17 @@
         /// <returns>List of found download links.</returns>
         public abstract IEnumerable<Link> Search(string query);
 
+        /// <summary>
+        /// Authenticates with the site and returns the cookies.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
+        public virtual string Login(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
+
         private Thread _job;
 
         /// <summary>
@@ -127,6 +153,35 @@
                     {
                         var list = Search(query);
                         DownloadSearchDone.Fire(this, list.ToList());
+                    }
+                    catch (InvalidCredentialException)
+                    {
+                        var info = Settings.Get(Name + " Login");
+
+                        if (!CanLogin || string.IsNullOrWhiteSpace(info))
+                        {
+                            DownloadSearchDone.Fire(this, new List<Link>());
+                            return;
+                        }
+
+                        try
+                        {
+                            var usrpwd  = Utils.Decrypt(info, GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+                            var cookies = Login(usrpwd[0], usrpwd[1]);
+
+                            Settings.Set(Name + " Cookies", cookies);
+
+                            var list = Search(query);
+                            DownloadSearchDone.Fire(this, list.ToList());
+                        }
+                        catch (InvalidCredentialException)
+                        {
+                            DownloadSearchDone.Fire(this, new List<Link>());
+                        }
+                        catch (Exception ex)
+                        {
+                            DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -181,17 +236,22 @@
         [Test]
         public virtual void TestLogin()
         {
-            if (!Private || LoginFields == null)
+            if (!CanLogin)
             {
                 Assert.Inconclusive("This parser does not support authentication.");
             }
 
-            var user = "RoliSoft";
-            var pass = string.Empty;
+            var info = Settings.Get(Name + " Login");
+            if (string.IsNullOrWhiteSpace(info))
+            {
+                Assert.Inconclusive("Login information is required to test the authentication.");
+            }
 
-            Console.WriteLine("Logging in as '" + user + "':");
+            var usrpwd = Utils.Decrypt(info, GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
 
-            var cookies = TrackerDoLogin(user, pass);
+            Console.WriteLine("Logging in as '" + usrpwd[0] + "':");
+
+            var cookies = Login(usrpwd[0], usrpwd[1]);
 
             Assert.IsNotNullOrEmpty(cookies, "Didn't receive any cookies from the login page.");
 
@@ -217,9 +277,9 @@
         /// <returns>
         ///   <c>true</c> if login is required; otherwise, <c>false</c>.
         /// </returns>
-        internal virtual bool TrackerLoginRequired(HtmlNode node)
+        internal virtual bool GazelleTrackerLoginRequired(HtmlNode node)
         {
-            return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login.php')]//input[@type = 'hidden' and (@name = 'returnto' or @name = 'return' or @name = 'back' or @name = 'honnan')]") == null;
+            return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login.')]") != null;
         }
         
         /// <summary>
@@ -230,7 +290,7 @@
         /// <returns>
         /// Cookies.
         /// </returns>
-        internal virtual string TrackerDoLogin(string username, string password)
+        internal virtual string GazelleTrackerLogin(string username, string password)
         {
             var post = new StringBuilder();
 
@@ -291,32 +351,17 @@
                                 continue;
                             }
 
-                            cookies.Append(cookie.Name + "=" + cookie.Value + "; ");
+                            if (cookies.Length != 0)
+                            {
+                                cookies.Append("; ");
+                            }
+
+                            cookies.Append(cookie.Name + "=" + cookie.Value);
                         }
                     }
             );
 
             return cookies.ToString();
-        }
-
-        /// <summary>
-        /// Gets the cookies for this parser.
-        /// </summary>
-        /// <returns>
-        /// The specified cookies for this parser.
-        /// </returns>
-        internal virtual string GetCookies()
-        {
-            return Settings.Get(Name + " Cookies");
-        }
-
-        /// <summary>
-        /// Sets the cookies for this parser.
-        /// </summary>
-        /// <param name="value">The cookies.</param>
-        internal virtual void SetCookies(string value)
-        {
-            Settings.Set(Name + " Cookies", value);
         }
     }
 }

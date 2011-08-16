@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Authentication;
     using System.Text;
 
     using NUnit.Framework;
@@ -61,6 +62,20 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this search engine can login using a username and password.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this search engine can login; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanLogin
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Gets the URL to the login page.
         /// </summary>
         /// <value>The URL to the login page.</value>
@@ -109,7 +124,13 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html = Utils.GetHTML(Site + "browse.php?c7=1&c26=1&genre=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
+
+            if (GazelleTrackerLoginRequired(html.DocumentNode))
+            {
+                throw new InvalidCredentialException();
+            }
+
             var links = html.DocumentNode.SelectNodes("//table[@id='torrenttable']/tr/td[2]/a[1]/b");
 
             if (links == null)
@@ -130,6 +151,17 @@
 
                 yield return link;
             }
+        }
+
+        /// <summary>
+        /// Authenticates with the site and returns the cookies.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
+        public override string Login(string username, string password)
+        {
+            return GazelleTrackerLogin(username, password);
         }
     }
 }
