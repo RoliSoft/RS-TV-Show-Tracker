@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping FileList.ro.
     /// </summary>
-    [Parser("2011-02-13 6:03 PM"), TestFixture]
+    [Parser("2011-08-16 16:12 PM"), TestFixture]
     public class FileList : DownloadSearchEngine
     {
         /// <summary>
@@ -56,6 +56,34 @@
             get
             {
                 return new[] { "uid", "pass" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public override string LoginURL
+        {
+            get
+            {
+                return Site + "takelogin.php";
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
+                    };
             }
         }
 

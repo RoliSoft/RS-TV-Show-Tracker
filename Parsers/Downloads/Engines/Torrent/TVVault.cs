@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping TV Vault.
     /// </summary>
-    [Parser("2011-07-08 12:53 AM"), TestFixture]
+    [Parser("2011-08-16 16:31 PM"), TestFixture]
     public class TVVault : DownloadSearchEngine
     {
         /// <summary>
@@ -59,6 +59,24 @@
             get
             {
                 return new[] { "keeplogged" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username",   LoginFieldTypes.UserName },
+                        { "password",   LoginFieldTypes.Password },
+                        { "keeplogged", "1"                      },
+                        { "login",      "Log In!"                },
+                    };
             }
         }
 

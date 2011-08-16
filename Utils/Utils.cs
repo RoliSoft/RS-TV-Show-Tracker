@@ -338,10 +338,10 @@
                 req.AllowWriteStreamBuffering = true;
             }
 
+            req.CookieContainer = new CookieContainer();
+
             if (!string.IsNullOrWhiteSpace(cookies))
             {
-                req.CookieContainer = new CookieContainer();
-
                 foreach (var kv in Regex.Replace(cookies.TrimEnd(';'), @";\s*", ";")
                                    .Split(';')
                                    .Where(cookie => cookie != null)

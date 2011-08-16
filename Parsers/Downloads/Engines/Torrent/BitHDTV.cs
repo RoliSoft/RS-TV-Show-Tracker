@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping BiT-HDTV.
     /// </summary>
-    [Parser("2011-05-08 1:09 AM"), TestFixture]
+    [Parser("2011-08-16 16:07 PM"), TestFixture]
     public class BitHDTV : DownloadSearchEngine
     {
         /// <summary>
@@ -57,6 +57,34 @@
             get
             {
                 return new[] { "h_sl", "h_sp", "h_su" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public override string LoginURL
+        {
+            get
+            {
+                return Site + "takelogin.php";
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
+                    };
             }
         }
 

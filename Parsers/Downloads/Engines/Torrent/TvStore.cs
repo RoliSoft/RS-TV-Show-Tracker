@@ -17,7 +17,7 @@
     /// <summary>
     /// Provides support for scraping tvstore.me.
     /// </summary>
-    [Parser("2011-01-29 9:32 PM"), TestFixture]
+    [Parser("2011-08-16 16:20 PM"), TestFixture]
     public class TvStore : DownloadSearchEngine
     {
         /// <summary>
@@ -77,6 +77,35 @@
             get
             {
                 return new[] { "id", "pass" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public override string LoginURL
+        {
+            get
+            {
+                return Site + "takelogin.php";
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
+                        { "back",     LoginFieldTypes.ReturnTo },
+                    };
             }
         }
 

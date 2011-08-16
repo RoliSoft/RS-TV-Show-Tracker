@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping UKNova.
     /// </summary>
-    [Parser("2011-07-12 6:15 PM"), TestFixture]
+    [Parser("2011-08-16 16:50 PM"), TestFixture]
     public class UKNova : DownloadSearchEngine
     {
         /// <summary>
@@ -73,6 +73,34 @@
         }
 
         /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public override string LoginURL
+        {
+            get
+            {
+                return Site + "wsgi/auth";
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
+                    };
+            }
+        }
+
+        /// <summary>
         /// Gets the type of the link.
         /// </summary>
         /// <value>The type of the link.</value>
@@ -125,6 +153,28 @@
 
                 yield return link;
             }
+        }
+
+        /// <summary>
+        /// Initiates a login on a Gazelle or TBSource-based tracker.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>
+        /// Cookies.
+        /// </returns>
+        internal override string TrackerDoLogin(string username, string password)
+        {
+            var cookie = "username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password);
+            var login  = Utils.GetURL(LoginURL, cookie);
+            var auth   = Regex.Match(login, @"'cookie':\s*'([^']+)");
+
+            if (auth.Success)
+            {
+                return "auth=" + auth.Groups[1].Value;
+            }
+
+            return string.Empty;
         }
     }
 }

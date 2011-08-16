@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping tvtorrents.com.
     /// </summary>
-    [Parser("2011-02-13 6:31 PM"), TestFixture]
+    [Parser("2011-08-16 16:27 PM"), TestFixture]
     public class TvTorrents : DownloadSearchEngine
     {
         /// <summary>
@@ -58,6 +58,36 @@
             get
             {
                 return new[] { "cookie_login" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public override string LoginURL
+        {
+            get
+            {
+                return Site + "login.do";
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "posted",   "true"                   },
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
+                        { "cookie",   "Y"                      },
+                    };
             }
         }
 

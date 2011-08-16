@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping nCore.
     /// </summary>
-    [Parser("2011-02-13 5:52 PM"), TestFixture]
+    [Parser("2011-08-16 15:59 PM"), TestFixture]
     public class nCore : DownloadSearchEngine
     {
         /// <summary>
@@ -70,6 +70,26 @@
             get
             {
                 return new[] { "nick", "pass", "nyelv", "stilus" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "set_lang",        "hu"                     },
+                        { "submitted",       "1"                      },
+                        { "submit",          "Belépés!"               },
+                        { "nev",             LoginFieldTypes.UserName },
+                        { "pass",            LoginFieldTypes.Password },
+                        { "ne_leptessen_ki", "1"                      },
+                    };
             }
         }
 

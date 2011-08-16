@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping iPlay.
     /// </summary>
-    [Parser("2011-08-15 12:46 AM"), TestFixture]
+    [Parser("2011-08-16 15:39 PM"), TestFixture]
     public class iPlay : DownloadSearchEngine
     {
         /// <summary>
@@ -71,10 +71,10 @@
             {
                 return new Dictionary<string, object>
                     {
-                        { "username", LoginFieldTypes.UserName },
-                        { "password", LoginFieldTypes.Password },
-                        { "returnto", LoginFieldTypes.ReturnTo },
-                        { "take_login", "1" },
+                        { "take_login", "1"                      },
+                        { "username",   LoginFieldTypes.UserName },
+                        { "password",   LoginFieldTypes.Password },
+                        { "returnto",   LoginFieldTypes.ReturnTo },
                     };
             }
         }

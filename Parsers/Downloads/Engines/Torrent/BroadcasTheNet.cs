@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping BroadcasTheNet.
     /// </summary>
-    [Parser("2011-02-13 6:22 PM"), TestFixture]
+    [Parser("2011-08-16 16:09 PM"), TestFixture]
     public class BroadcasTheNet : DownloadSearchEngine
     {
         /// <summary>
@@ -60,6 +60,24 @@
             get
             {
                 return new[] { "keeplogged" };
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "username",   LoginFieldTypes.UserName },
+                        { "password",   LoginFieldTypes.Password },
+                        { "keeplogged", "1"                      },
+                        { "login",      "Log In!"                },
+                    };
             }
         }
 

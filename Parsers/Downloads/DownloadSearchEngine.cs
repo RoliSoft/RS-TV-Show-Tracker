@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Net;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading;
 
     using HtmlAgilityPack;
@@ -42,6 +43,18 @@
         /// </summary>
         /// <value>The required cookies for authentication.</value>
         public virtual string[] RequiredCookies { get; internal set; }
+
+        /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public virtual string LoginURL
+        {
+            get
+            {
+                return Site + "login.php";
+            }
+        }
 
         /// <summary>
         /// Gets the input fields of the login form.
@@ -163,6 +176,41 @@
         }
 
         /// <summary>
+        /// Tests the login.
+        /// </summary>
+        [Test]
+        public virtual void TestLogin()
+        {
+            if (!Private || LoginFields == null)
+            {
+                Assert.Inconclusive("This parser does not support authentication.");
+            }
+
+            var user = "RoliSoft";
+            var pass = string.Empty;
+
+            Console.WriteLine("Logging in as '" + user + "':");
+
+            var cookies = TrackerDoLogin(user, pass);
+
+            Assert.IsNotNullOrEmpty(cookies, "Didn't receive any cookies from the login page.");
+
+            Console.WriteLine("┌────────────────────────────────┬────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Cookie name                    │ Cookie value                                       │");
+            Console.WriteLine("├────────────────────────────────┼────────────────────────────────────────────────────┤");
+
+            foreach (var cookie in Regex.Split(cookies, @";\s"))
+            {
+                var kv = cookie.Split(new[] { '=' }, 2);
+                if (kv.Length < 2) continue;
+
+                Console.WriteLine("│ {0,-30} │ {1,-50} │".FormatWith(kv[0].CutIfLonger(30), kv[1].CutIfLonger(50)));
+            }
+            
+            Console.WriteLine("└────────────────────────────────┴────────────────────────────────────────────────────┘");
+        }
+
+        /// <summary>
         /// Checks if a Gazelle or TBSource-based tracker requires authentication.
         /// </summary>
         /// <param name="node">The HTML document node.</param>
@@ -177,39 +225,22 @@
         /// <summary>
         /// Initiates a login on a Gazelle or TBSource-based tracker.
         /// </summary>
-        /// <param name="url">The URL of the login action.</param>
         /// <param name="username">The username.</param>
         /// <param name="password">The password.</param>
-        /// <param name="returnto">The URL to return to after login.</param>
         /// <returns>
-        /// Parsed HTML document.
+        /// Cookies.
         /// </returns>
-        internal virtual HtmlDocument TrackerDoHTMLLogin(string url, string username, string password, string returnto = null)
-        {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(
-                TrackerDoLogin(url, username, password, returnto)
-            );
-
-            return doc;
-        }
-
-        /// <summary>
-        /// Initiates a login on a Gazelle or TBSource-based tracker.
-        /// </summary>
-        /// <param name="url">The URL of the login action.</param>
-        /// <param name="username">The username.</param>
-        /// <param name="password">The password.</param>
-        /// <param name="returnto">The URL to return to after login.</param>
-        /// <returns>
-        /// HTML document.
-        /// </returns>
-        internal virtual string TrackerDoLogin(string url, string username, string password, string returnto = null)
+        internal virtual string TrackerDoLogin(string username, string password)
         {
             var post = new StringBuilder();
 
             foreach (var field in LoginFields)
             {
+                if (post.Length != 0)
+                {
+                    post.Append("&");
+                }
+
                 post.Append(field.Key + "=");
                 var value = string.Empty;
 
@@ -230,32 +261,42 @@
                             break;
 
                         case LoginFieldTypes.ReturnTo:
-                            value = returnto ?? "/";
+                            value = "/";
                             break;
                     }
                 }
 
-                post.Append(Uri.EscapeUriString(value) + "; ");
+                post.Append(Uri.EscapeDataString(value));
             }
 
-            var req = Utils.GetURL(url, post.ToString(), response: resp =>
-                {
-                    if (resp.Cookies == null || resp.Cookies.Count == 0)
+            var cookies = new StringBuilder();
+            
+            Utils.GetURL(LoginURL, post.ToString(),
+                request: req =>
                     {
-                        return;
-                    }
-
-                    var cookies = new StringBuilder();
-
-                    foreach (Cookie cookie in resp.Cookies)
+                        req.Referer = Site;
+                        req.AllowAutoRedirect = false;
+                    },
+                response: resp =>
                     {
-                        cookies.Append(cookie.Name + "=" + cookie.Value + "; ");
+                        if (resp.Cookies == null || resp.Cookies.Count == 0)
+                        {
+                            return;
+                        }
+
+                        foreach (Cookie cookie in resp.Cookies)
+                        {
+                            if (cookie.Name == "PHPSESSID" || cookie.Name == "JSESSIONID" || cookie.Value == "deleted")
+                            {
+                                continue;
+                            }
+
+                            cookies.Append(cookie.Name + "=" + cookie.Value + "; ");
+                        }
                     }
+            );
 
-                    SetCookies(cookies.ToString());
-                });
-
-            return req;
+            return cookies.ToString();
         }
 
         /// <summary>
