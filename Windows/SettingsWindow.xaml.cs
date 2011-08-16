@@ -1,21 +1,22 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
-    using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
 
     using RoliSoft.TVShowTracker.Parsers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
+
+    using VistaControls.TaskDialog;
 
     using CheckBox       = System.Windows.Controls.CheckBox;
     using Label          = System.Windows.Controls.Label;
@@ -673,6 +674,63 @@
 
             new ProxyWindow(sel.Name, sel.Address).ShowDialog();
             ReloadProxies();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxySearchButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxySearchButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiesListView.SelectedIndex == -1) return;
+
+            var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
+            var uri = new Uri(sel.Address);
+
+            new Thread(() =>
+                {
+                    if (uri.Host == "localhost" || uri.Host == "127.0.0.1" || uri.Host == "::1")
+                    {
+                        new TaskDialog
+                            {
+                                CommonIcon  = TaskDialogIcon.SecurityWarning,
+                                Title       = "Public proxy detection",
+                                Instruction = sel.Name,
+                                Content     = "This proxy points to local loopback address, which means you requests will go to a local application, which will most likely forward them to an external server."
+                            }.Show();
+                        return;
+                    }
+
+                    var res = new List<Parsers.WebSearch.SearchResult>();
+                    res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxy"));
+                    res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxies"));
+                    
+                    if (res.Count == 0)
+                    {
+                        new TaskDialog
+                            {
+                                CommonIcon  = TaskDialogIcon.SecuritySuccess,
+                                Title       = "Public proxy detection",
+                                Instruction = sel.Name,
+                                Content     = uri.Host + " does not seem to be a known public proxy." + Environment.NewLine + Environment.NewLine +
+                                              "If your goal is to trick proxy detectors, you're probably safe for now. However, you shouldn't use public proxies if you don't want to potentially compromise your account."
+                            }.Show();
+                        return;
+                    }
+                    else
+                    {
+                        new TaskDialog
+                            {
+                                CommonIcon  = TaskDialogIcon.SecurityError,
+                                Title       = "Public proxy detection",
+                                Instruction = sel.Name,
+                                Content     = uri.Host + " is a known public proxy." + Environment.NewLine + Environment.NewLine +
+                                              "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using a public proxy is not such a good idea, because you could compromise your account as public proxy operators are known to be evil sometimes."
+                            }.Show();
+                        return;
+                    }
+                }).Start();
         }
 
         /// <summary>

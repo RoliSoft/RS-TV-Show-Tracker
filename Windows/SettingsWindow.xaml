@@ -305,6 +305,9 @@
                                     <Button Name="proxyEditButton" Click="ProxyEditButtonClick" ToolTip="Edit the selected proxy">
                                         <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
+                                    <Button Name="proxySearchButton" Click="ProxySearchButtonClick" ToolTip="Determine whether this is a known public proxy">
+                                        <Image Source="/RSTVShowTracker;component/Images/magnifier.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
                                     <Button Name="proxyRemoveButton" Click="ProxyRemoveButtonClick" ToolTip="Remove the selected proxy">
                                         <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
