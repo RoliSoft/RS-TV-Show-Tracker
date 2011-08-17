@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -684,53 +685,225 @@
         private void ProxySearchButtonClick(object sender, RoutedEventArgs e)
         {
             if (proxiesListView.SelectedIndex == -1) return;
+            
+            Thread action = null;
+            var done = false;
 
             var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
             var uri = new Uri(sel.Address);
 
-            new Thread(() =>
-                {
-                    if (uri.Host == "localhost" || uri.Host == "127.0.0.1" || uri.Host == "::1")
+            if (uri.Host == "localhost" || uri.Host == "127.0.0.1" || uri.Host == "::1")
+            {
+                new Thread(() => new TaskDialog
                     {
-                        new TaskDialog
-                            {
-                                CommonIcon  = TaskDialogIcon.SecurityWarning,
-                                Title       = "Public proxy detection",
-                                Instruction = sel.Name,
-                                Content     = "This proxy points to local loopback address, which means you requests will go to a local application, which will most likely forward them to an external server."
-                            }.Show();
-                        return;
-                    }
+                        CommonIcon  = TaskDialogIcon.SecurityWarning,
+                        Title       = sel.Name,
+                        Instruction = "Potentially dangerous",
+                        Content     = "This proxy points to local loopback address, which means you requests will go to a local application, which will most likely forward them to an external server."
+                    }.Show()).Start();
+                return;
+            }
 
-                    var res = new List<Parsers.WebSearch.SearchResult>();
-                    res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxy"));
-                    res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxies"));
-                    
-                    if (res.Count == 0)
+            var td  = new TaskDialog
+                {
+                    Title           = sel.Name,
+                    Instruction     = "Testing proxy",
+                    Content         = "Testing whether " + uri.Host + " is a known proxy...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
+            td.ButtonClick += (s, v) =>
+                {
+                    if (!done)
                     {
+                        try { action.Abort(); } catch { }
+                    }
+                };
+            td.SetMarqueeProgressBar(true);
+            new Thread(() => td.Show()).Start();
+
+            action = new Thread(() =>
+                {
+                    try
+                    { 
+                        var res = new List<Parsers.WebSearch.SearchResult>();
+                        res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxy"));
+
+                        if (res.Count == 0)
+                        {
+                            res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxies"));
+                        }
+
+                        done = true;
+
+                        if (td.IsShowing)
+                        {
+                            td.SimulateButtonClick(-1);
+                        }
+
+                        if (res.Count == 0)
+                        {
+                            new TaskDialog
+                                {
+                                    CommonIcon  = TaskDialogIcon.SecuritySuccess,
+                                    Title       = sel.Name,
+                                    Instruction = "Not a known public proxy",
+                                    Content     = uri.Host + " does not seem to be a known public proxy." + Environment.NewLine + Environment.NewLine +
+                                                  "If your goal is to trick proxy detectors, you're probably safe for now. However, you shouldn't use public proxies if you don't want to potentially compromise your account."
+                                }.Show();
+                            return;
+                        }
+                        else
+                        {
+                            new TaskDialog
+                                {
+                                    CommonIcon  = TaskDialogIcon.SecurityError,
+                                    Title       = sel.Name,
+                                    Instruction = "Known public proxy",
+                                    Content     = uri.Host + " is a known public proxy according to " + new Uri(res[0].URL).Host.Replace("www.", string.Empty) + Environment.NewLine + Environment.NewLine +
+                                                  "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using a public proxy is not such a good idea, because you could compromise your account as public proxy operators are known to be evil sometimes."
+                                }.Show();
+                            return;
+                        }
+                    }
+                    catch (ThreadAbortException) { }
+                    catch (Exception ex)
+                    {
+                        done = true;
+
+                        if (td.IsShowing)
+                        {
+                            td.SimulateButtonClick(-1);
+                        }
+
+                        new TaskDialog
+                        {
+                            CommonIcon = TaskDialogIcon.Stop,
+                            Title = sel.Name,
+                            Instruction = "Connection error",
+                            Content = "An error occured while connecting to the proxy.",
+                            ExpandedControlText = "Show exception message",
+                            ExpandedInformation = ex.Message
+                        }.Show();
+                    }
+                });
+            action.Start();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the proxyTestButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ProxyTestButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (proxiesListView.SelectedIndex == -1) return;
+
+            Thread action = null;
+            var done = false;
+
+            var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
+            var uri = new Uri(sel.Address);
+            var td  = new TaskDialog
+                {
+                    Title           = sel.Name,
+                    Instruction     = "Testing proxy",
+                    Content         = "Testing connection through " + uri.Host + ":" + uri.Port + "...",
+                    CommonButtons   = TaskDialogButton.Cancel,
+                    ShowProgressBar = true
+                };
+            td.ButtonClick += (s, v) =>
+                {
+                    if (!done)
+                    {
+                        try { action.Abort(); } catch { }
+                    }
+                };
+            td.SetMarqueeProgressBar(true);
+            new Thread(() => td.Show()).Start();
+
+            action = new Thread(() =>
+                {
+                    var s = Stopwatch.StartNew();
+
+                    try
+                    {
+                        var b = Utils.GetHTML("http://rolisoft.net/b", proxy: sel.Address);
+                        s.Stop();
+
+                        done = true;
+
+                        if (td.IsShowing)
+                        {
+                            td.SimulateButtonClick(-1);
+                        }
+
+                        var tor  = b.DocumentNode.SelectSingleNode("//img[@class='tor']");
+                        var ip   = b.DocumentNode.GetTextValue("//span[@class='ip'][1]");
+                        var host = b.DocumentNode.GetTextValue("//span[@class='host'][1]");
+                        var geo  = b.DocumentNode.GetTextValue("//span[@class='geoip'][1]");
+
+                        if (tor != null)
+                        {
+                            new TaskDialog
+                                {
+                                    CommonIcon  = TaskDialogIcon.SecurityError,
+                                    Title       = sel.Name,
+                                    Instruction = "TOR detected",
+                                    Content     = ip + " is a TOR exit node." + Environment.NewLine + Environment.NewLine +
+                                                  "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using TOR is not such a good idea, because you could compromise your account as TOR exit node operators are known to be evil sometimes."
+                                }.Show();
+                        }
+
+                        if (ip == null)
+                        {
+                            new TaskDialog
+                                {
+                                    CommonIcon  = TaskDialogIcon.Stop,
+                                    Title       = sel.Name,
+                                    Instruction = "Proxy error",
+                                    Content     = "The proxy did not return the requested resource, or greatly modified the structure of the page. Either way, it is not suitable for use with this software.",
+                                }.Show();
+                            return;
+                        }
+
                         new TaskDialog
                             {
-                                CommonIcon  = TaskDialogIcon.SecuritySuccess,
-                                Title       = "Public proxy detection",
-                                Instruction = sel.Name,
-                                Content     = uri.Host + " does not seem to be a known public proxy." + Environment.NewLine + Environment.NewLine +
-                                              "If your goal is to trick proxy detectors, you're probably safe for now. However, you shouldn't use public proxies if you don't want to potentially compromise your account."
+                                CommonIcon  = TaskDialogIcon.Information,
+                                Title       = sel.Name,
+                                Instruction = "Test results",
+                                Content     = "Total time to get rolisoft.net/b: " + s.Elapsed + "\r\n\r\nIP address: " + ip + "\r\nHost name: " + host + "\r\nGeoIP lookup: " + geo,
                             }.Show();
-                        return;
                     }
-                    else
+                    catch (ThreadAbortException) { }
+                    catch (Exception ex)
                     {
+                        done = true;
+
+                        if (td.IsShowing)
+                        {
+                            td.SimulateButtonClick(-1);
+                        }
+
                         new TaskDialog
                             {
-                                CommonIcon  = TaskDialogIcon.SecurityError,
-                                Title       = "Public proxy detection",
-                                Instruction = sel.Name,
-                                Content     = uri.Host + " is a known public proxy." + Environment.NewLine + Environment.NewLine +
-                                              "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using a public proxy is not such a good idea, because you could compromise your account as public proxy operators are known to be evil sometimes."
+                                CommonIcon          = TaskDialogIcon.Stop,
+                                Title               = sel.Name,
+                                Instruction         = "Connection error",
+                                Content             = "An error occured while connecting to the proxy.",
+                                ExpandedControlText = "Show exception message",
+                                ExpandedInformation = ex.Message
                             }.Show();
-                        return;
                     }
-                }).Start();
+                    finally
+                    {
+                        if (s.IsRunning)
+                        {
+                            s.Stop();
+                        }
+                    }
+                });
+            action.Start();
         }
 
         /// <summary>

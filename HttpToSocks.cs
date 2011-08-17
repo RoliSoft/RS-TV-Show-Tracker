@@ -85,7 +85,14 @@
         /// <param name="asyncResult">The async result.</param>
         private void AcceptClient(IAsyncResult asyncResult)
         {
-            _server.BeginAcceptSocket(AcceptClient, null);
+            try
+            {
+                _server.BeginAcceptSocket(AcceptClient, null);
+            }
+            catch
+            {
+                return;
+            }
 
             using (var client = _server.EndAcceptTcpClient(asyncResult))
             using (var stream = client.GetStream())

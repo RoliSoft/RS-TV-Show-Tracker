@@ -276,7 +276,7 @@
                                 <Label Content="Proxies" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <ListView Name="proxiesListView" Margin="0,0,5,0" Width="481" Height="100" Padding="-2,-1">
+                                <ListView Name="proxiesListView" Margin="0,0,5,0" Width="481" Height="110" Padding="-2,-1">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridViewColumn Width="180">
@@ -308,6 +308,9 @@
                                     <Button Name="proxySearchButton" Click="ProxySearchButtonClick" ToolTip="Determine whether this is a known public proxy">
                                         <Image Source="/RSTVShowTracker;component/Images/magnifier.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
+                                    <Button Name="proxyTestButton" Click="ProxyTestButtonClick" ToolTip="Test the proxy connection">
+                                        <Image Source="/RSTVShowTracker;component/Images/clock.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                    </Button>
                                     <Button Name="proxyRemoveButton" Click="ProxyRemoveButtonClick" ToolTip="Remove the selected proxy">
                                         <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
@@ -321,7 +324,7 @@
                                 <Label Content="Proxied Domains" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <ListView Name="proxiedDomainsListView" Margin="0,0,5,0" Width="481" Height="250" Padding="-2,-1">
+                                <ListView Name="proxiedDomainsListView" Margin="0,0,5,0" Width="481" Height="240" Padding="-2,-1">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridViewColumn Width="270">
