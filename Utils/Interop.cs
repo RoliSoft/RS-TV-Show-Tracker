@@ -1,6 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Net;
+    using System.Net.NetworkInformation;
     using System.Runtime.InteropServices;
 
     /// <summary>
@@ -175,6 +177,69 @@
                 /// Width of the bottom border that retains its size.
                 /// </summary>
                 public int cyBottomHeight;
+            }
+            #endregion
+
+            #region IP Helper
+            /// <summary>
+            /// The <c>GetExtendedTcpTable</c> function retrieves a table that contains a list of TCP endpoints available to the application.
+            /// </summary>
+            /// <param name="pTcpTable">A pointer to the table structure that contains the filtered TCP endpoints available to the application. For information about how to determine the type of table returned based on specific input parameter combinations, see the Remarks section later in this document.</param>
+            /// <param name="pdwSize">The estimated size of the structure returned in pTcpTable, in bytes. If this value is set too small, ERROR_INSUFFICIENT_BUFFER is returned by this function, and this field will contain the correct size of the structure.</param>
+            /// <param name="bOrder">A value that specifies whether the TCP connection table should be sorted. If this parameter is set to TRUE, the TCP endpoints in the table are sorted in ascending order, starting with the lowest local IP address. If this parameter is set to FALSE, the TCP endpoints in the table appear in the order in which they were retrieved.</param>
+            /// <param name="ulAf">The version of IP used by the TCP endpoints.</param>
+            /// <param name="TableClass">The type of the TCP table structure to retrieve. This parameter can be one of the values from the TCP_TABLE_CLASS enumeration.</param>
+            /// <param name="Reserved">Reserved. This value must be zero.</param>
+            /// <returns>
+            /// If the call is successful, the value NO_ERROR is returned.
+            /// </returns>
+            [DllImport("iphlpapi.dll", SetLastError = true)]
+            public static extern uint GetExtendedTcpTable(IntPtr pTcpTable, ref int pdwSize, bool bOrder, int ulAf, TcpTableType TableClass, int Reserved);
+
+            /// <summary>
+            /// The <c>TCP_TABLE_CLASS</c> enumeration defines the set of values used to indicate the type of table returned by calls to <c>GetExtendedTcpTable</c>.
+            /// </summary>
+            public enum TcpTableType
+            {
+                BasicListener,
+                BasicConnections,
+                BasicAll,
+                OwnerPidListener,
+                OwnerPidConnections,
+                OwnerPidAll,
+                OwnerModuleListener,
+                OwnerModuleConnections,
+                OwnerModuleAll,
+            }
+
+            /// <summary>
+            /// The <c>MIB_TCPTABLE_OWNER_PID</c> structure contains a table of process IDs (PIDs) and the IPv4 TCP links that are context bound to these PIDs.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct TcpTable
+            {
+                public uint length;
+                public TcpRow row;
+            }
+
+            /// <summary>
+            /// The <c>MIB_TCPROW_OWNER_PID</c> structure contains information that describes an IPv4 TCP connection with IPv4 addresses, ports used by the TCP connection, and the specific process ID (PID) associated with connection.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct TcpRow
+            {
+                public TcpState state;
+                public uint localAddr;
+                public byte localPort1;
+                public byte localPort2;
+                public byte localPort3;
+                public byte localPort4;
+                public uint remoteAddr;
+                public byte remotePort1;
+                public byte remotePort2;
+                public byte remotePort3;
+                public byte remotePort4;
+                public int owningPid;
             }
             #endregion
         }

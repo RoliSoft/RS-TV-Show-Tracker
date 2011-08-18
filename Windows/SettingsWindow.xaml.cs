@@ -694,12 +694,28 @@
 
             if (uri.Host == "localhost" || uri.Host == "127.0.0.1" || uri.Host == "::1")
             {
+                var app = "a local application";
+
+                try
+                {
+                    var tcpRows = Utils.GetExtendedTCPTable();
+                    foreach (var row in tcpRows)
+                    {
+                        if (((row.localPort1 << 8) + (row.localPort2) + (row.localPort3 << 24) + (row.localPort4 << 16)) == uri.Port)
+                        {
+                            app = "PID " + row.owningPid + " (" + Process.GetProcessById(row.owningPid).Modules[0].FileName + ")";
+                            break;
+                        }
+                    }
+                }
+                catch { }
+
                 new Thread(() => new TaskDialog
                     {
                         CommonIcon  = TaskDialogIcon.SecurityWarning,
                         Title       = sel.Name,
                         Instruction = "Potentially dangerous",
-                        Content     = "This proxy points to local loopback address, which means you requests will go to a local application, which will most likely forward them to an external server."
+                        Content     = "This proxy points to a local loopback address on port " + uri.Port + ".\r\nYour requests will go to " + app + ", which will most likely forward them to an external server."
                     }.Show()).Start();
                 return;
             }
@@ -778,10 +794,10 @@
 
                         new TaskDialog
                         {
-                            CommonIcon = TaskDialogIcon.Stop,
-                            Title = sel.Name,
-                            Instruction = "Connection error",
-                            Content = "An error occured while connecting to the proxy.",
+                            CommonIcon          = TaskDialogIcon.Stop,
+                            Title               = sel.Name,
+                            Instruction         = "Connection error",
+                            Content             = "An error occured while checking the proxy.",
                             ExpandedControlText = "Show exception message",
                             ExpandedInformation = ex.Message
                         }.Show();

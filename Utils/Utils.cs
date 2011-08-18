@@ -9,6 +9,7 @@
     using System.Linq;
     using System.Net;
     using System.Net.Security;
+    using System.Runtime.InteropServices;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
@@ -859,6 +860,48 @@
 
                 return Encoding.UTF8.GetString(ms.ToArray());
             }
+        }
+
+        /// <summary>
+        /// Retrieves a table that contains a list of TCP endpoints available to the application.
+        /// </summary>
+        /// <returns>
+        /// List of raw TCP endpoints.
+        /// </returns>
+        public static List<Interop.TcpRow> GetExtendedTCPTable()
+        {
+            var rows = new List<Interop.TcpRow>();
+            var tcpTable = IntPtr.Zero;
+            var tcpTableLength = 0;
+
+            if (Interop.GetExtendedTcpTable(tcpTable, ref tcpTableLength, false, 2, Interop.TcpTableType.OwnerPidAll, 0) != 0)
+            {
+                try
+                {
+                    tcpTable = Marshal.AllocHGlobal(tcpTableLength);
+
+                    if (Interop.GetExtendedTcpTable(tcpTable, ref tcpTableLength, true, 2, Interop.TcpTableType.OwnerPidAll, 0) == 0)
+                    {
+                        var table = (Interop.TcpTable)Marshal.PtrToStructure(tcpTable, typeof(Interop.TcpTable));
+                        var rowPtr = (IntPtr)((long)tcpTable + Marshal.SizeOf(table.length));
+
+                        for (int i = 0; i < table.length; ++i)
+                        {
+                            rows.Add((Interop.TcpRow)Marshal.PtrToStructure(rowPtr, typeof(Interop.TcpRow)));
+                            rowPtr = (IntPtr)((long)rowPtr + Marshal.SizeOf(typeof(Interop.TcpRow)));
+                        }
+                    }
+                }
+                finally
+                {
+                    if (tcpTable != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(tcpTable);
+                    }
+                }
+            }
+
+            return rows;
         }
     }
 }
