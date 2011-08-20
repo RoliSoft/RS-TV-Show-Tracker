@@ -120,7 +120,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="17" />
         </Grid.RowDefinitions>
-        <ListView Grid.Row="0" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs}}" MouseDoubleClick="ListViewMouseDoubleClick" KeyUp="ListViewKeyUp" ContextMenuOpening="ListViewItemContextMenuOpening">
+        <ListView Grid.Row="0" Margin="0" Name="listView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs}}" MouseDoubleClick="ListViewMouseDoubleClick" KeyUp="ListViewKeyUp" GridViewColumnHeader.Click="ListViewSortClick" ContextMenuOpening="ListViewItemContextMenuOpening">
             <ListView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.ContainerStyle>
@@ -151,7 +151,7 @@
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Width="240">
-                        <GridViewColumnHeader Content="Show name" Margin="-3,0,0,0" Padding="6,3,3,3" />
+                        <GridViewColumnHeader Content="Show name" Cursor="Hand" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{Binding NameColor}" />
@@ -159,7 +159,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="300">
-                        <GridViewColumnHeader Content="Last episode" />
+                        <GridViewColumnHeader Content="Last episode" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Title}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Foreground="{Binding TitleColor}" />
@@ -167,7 +167,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="300">
-                        <GridViewColumnHeader Content="Next episode" />
+                        <GridViewColumnHeader Content="Next episode" Cursor="Hand" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Next}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Foreground="{Binding NextColor}" />

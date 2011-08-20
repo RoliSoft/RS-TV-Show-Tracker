@@ -668,6 +668,43 @@
                 RemoveShow();
             }
         }
+        
+        /// <summary>
+        /// Handles the Click event of the listView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ListViewSortClick(object sender, RoutedEventArgs e)
+        {
+            var header = e.OriginalSource as GridViewColumnHeader;
+            if (header == null || header.Role == GridViewColumnHeaderRole.Padding)
+            {
+                return;
+            }
+
+            switch (header.Content.ToString())
+            {
+                case "Show name":
+                    Settings.Set("Sorting", "name");
+                    Settings.Set("Sort Direction", "ascending");
+                    break;
+
+                case "Last episode":
+                    Settings.Set("Sorting", "lastair");
+                    Settings.Set("Sort Direction", "descending");
+                    break;
+
+                case "Next episode":
+                    Settings.Set("Sorting", "nextair");
+                    Settings.Set("Sort Direction", "ascending");
+                    break;
+
+                default:
+                    return;
+            }
+
+            Refresh();
+        }
 
         /// <summary>
         /// Handles the ContextMenuOpening event of the ListViewItem control.
