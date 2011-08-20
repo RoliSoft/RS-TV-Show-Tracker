@@ -1,10 +1,17 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System.ComponentModel;
+
     /// <summary>
     /// Represents a TV show episode on the list view.
     /// </summary>
-    public class GuideListViewItem
+    public class GuideListViewItem : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
         /// <summary>
         /// Gets or sets a value indicating whether this episode was already seen.
         /// </summary>
@@ -110,6 +117,17 @@
             get
             {
                 return string.IsNullOrWhiteSpace(URL) ? "Collapsed" : "Visible";
+            }
+        }
+
+        /// <summary>
+        /// Fires a property changed event for the <c>SeenIt</c> field.
+        /// </summary>
+        public void RefreshSeenIt()
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs("SeenIt"));
             }
         }
     }

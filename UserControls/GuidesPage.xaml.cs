@@ -559,23 +559,56 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SeenItChecked(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var val = ((CheckBox)e.OriginalSource).Tag.ToString().Split('|');
-                Database.Execute("insert into tracking values (" + val[0] + ", '" + val[1] + "')");
+            var id = ((CheckBox)e.OriginalSource).Tag.ToString();
 
-                if (Synchronization.Status.Enabled)
+            if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.Id == id))
+            {
+                // check all selected
+
+                try
                 {
-                    Synchronization.Status.Engine.MarkEpisodes(val[0], new[] { val[1].ToInteger() - (val[0].ToInteger() * 100000) }.ToList());
-                }
+                    var tr = Database.Connection.BeginTransaction();
 
-                Database.Trackings.Add(int.Parse(val[1]));
-                Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = true;
-                MainWindow.Active.DataChanged(false);
+                    foreach (GuideListViewItem item in listView.SelectedItems)
+                    {
+                        var val = item.Id.Split('|');
+                        Database.ExecuteOnTransaction(tr, "insert into tracking values (" + val[0] + ", '" + val[1] + "')");
+                        Database.Trackings.Add(int.Parse(val[1]));
+                        Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = true;
+                        item.SeenIt = true;
+                        item.RefreshSeenIt();
+                    }
+
+                    tr.Commit();
+                }
+                catch
+                {
+                    SetStatus("Couldn't mark the selected episodes as seen due to a database error.");
+                }
+                finally
+                {
+                    MainWindow.Active.DataChanged(false);
+                }
             }
-            catch
+            else
             {
-                SetStatus("Couldn't mark episode as seen due to a database error.");
+                // check only one
+
+                try
+                {
+                    var val = id.Split('|');
+                    Database.Execute("insert into tracking values (" + val[0] + ", '" + val[1] + "')");
+                    Database.Trackings.Add(int.Parse(val[1]));
+                    Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = true;
+                }
+                catch
+                {
+                    SetStatus("Couldn't mark the episode as seen due to a database error.");
+                }
+                finally
+                {
+                    MainWindow.Active.DataChanged(false);
+                }
             }
         }
 
@@ -586,23 +619,56 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SeenItUnchecked(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var val = ((CheckBox)e.OriginalSource).Tag.ToString().Split('|');
-                Database.Execute("delete from tracking where showid = " + val[0] + " and episodeid = '" + val[1] + "'");
+            var id = ((CheckBox)e.OriginalSource).Tag.ToString();
 
-                if (Synchronization.Status.Enabled)
+            if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.Id == id))
+            {
+                // check all selected
+
+                try
                 {
-                    Synchronization.Status.Engine.UnmarkEpisodes(val[0], new[] { val[1].ToInteger() - (val[0].ToInteger() * 100000) }.ToList());
-                }
+                    var tr = Database.Connection.BeginTransaction();
 
-                Database.Trackings.Remove(int.Parse(val[1]));
-                Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = false;
-                MainWindow.Active.DataChanged(false);
+                    foreach (GuideListViewItem item in listView.SelectedItems)
+                    {
+                        var val = item.Id.Split('|');
+                        Database.ExecuteOnTransaction(tr, "delete from tracking where showid = " + val[0] + " and episodeid = '" + val[1] + "'");
+                        Database.Trackings.Remove(int.Parse(val[1]));
+                        Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = false;
+                        item.SeenIt = false;
+                        item.RefreshSeenIt();
+                    }
+
+                    tr.Commit();
+                }
+                catch
+                {
+                    SetStatus("Couldn't mark the selected episodes as not seen due to a database error.");
+                }
+                finally
+                {
+                    MainWindow.Active.DataChanged(false);
+                }
             }
-            catch
+            else
             {
-                SetStatus("Couldn't mark episode as not seen due to a database error.");
+                // check only one
+
+                try
+                {
+                    var val = id.Split('|');
+                    Database.Execute("delete from tracking where showid = " + val[0] + " and episodeid = '" + val[1] + "'");
+                    Database.Trackings.Remove(int.Parse(val[1]));
+                    Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = false;
+                }
+                catch
+                {
+                    SetStatus("Couldn't mark the episode as not seen due to a database error.");
+                }
+                finally
+                {
+                    MainWindow.Active.DataChanged(false);
+                }
             }
         }
         #endregion
