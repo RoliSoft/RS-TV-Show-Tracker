@@ -154,7 +154,7 @@
                         <GridViewColumnHeader Content="Show name" Margin="-3,0,0,0" Padding="6,3,3,3" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{Binding NameColor}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

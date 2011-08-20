@@ -32,6 +32,12 @@
         public string Next { get; set; }
 
         /// <summary>
+        /// Gets or sets the color of the name.
+        /// </summary>
+        /// <value>The color of the name.</value>
+        public string NameColor { get; set; }
+
+        /// <summary>
         /// Gets or sets the color of the title.
         /// </summary>
         /// <value>The color of the title.</value>

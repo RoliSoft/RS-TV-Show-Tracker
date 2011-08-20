@@ -169,6 +169,7 @@
             var sortdir  = Settings.Get("Sort Direction");
             var grouping = Settings.Get("Grouping");
             var hideend  = Settings.Get<bool>("Hide Ended");
+            var fadeend  = Settings.Get<bool>("Fade Ended");
 
             if (!string.IsNullOrWhiteSpace(grouping))
             {
@@ -352,14 +353,9 @@
                         Name          = show.Name,
                         Title         = last,
                         Next          = next,
-                        TitleColor    = count != 0
-                                        ? "Red"
-                                        : lastep.Count != 0
-                                          ? "White"
-                                          : "#50FFFFFF",
-                        NextColor     = nextep.Count != 0
-                                        ? "White"
-                                        : "#50FFFFFF",
+                        NameColor     = fadeend && show.Data["airing"] == "False" ? "#50FFFFFF" : "White",
+                        TitleColor    = count != 0 ? "Red" : (lastep.Count != 0 ? (fadeend && show.Data["airing"] == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF"),
+                        NextColor     = nextep.Count != 0 ? (fadeend && show.Data["airing"] == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF",
                         NewEpisodes   = count,
                         Started       = lastep.Count != 0,
                         Group         = group,
@@ -1060,6 +1056,7 @@
             var sortdir  = Settings.Get("Sort Direction", string.Empty);
             var grouping = Settings.Get("Grouping", string.Empty);
             var hideend  = Settings.Get<bool>("Hide Ended");
+            var fadeend  = Settings.Get<bool>("Fade Ended");
 
             cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
 
@@ -1339,6 +1336,16 @@
             hed.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/table-join-row.png")) };
             hed.Click      += HideEnded_Click;
             sti.Items.Add(hed);
+            
+            // Hide ended
+
+            var fed         = new MenuItem();
+            fed.IsCheckable = true;
+            fed.IsChecked   = fadeend;
+            fed.Header      = "Fade ended shows";
+            fed.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/table-select-row.png")) };
+            fed.Click      += FadeEnded_Click;
+            sti.Items.Add(fed);
 
             // Remove
 
@@ -1393,6 +1400,17 @@
         public void HideEnded_Click(object sender, RoutedEventArgs e)
         {
             Settings.Toggle("Hide Ended");
+            Refresh();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the FadeEnded control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        public void FadeEnded_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Toggle("Fade Ended");
             Refresh();
         }
         #endregion

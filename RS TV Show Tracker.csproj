@@ -676,6 +676,7 @@
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\table-select-row.png" />
     <Resource Include="Images\clock.png" />
     <Resource Include="Images\cookie-bite.png" />
     <Resource Include="Images\external-small.png" />
