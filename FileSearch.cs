@@ -108,7 +108,7 @@
                     if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
                     {
                         var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
-                        if (pf.Success && _titleParts.SequenceEqual(ShowNames.Parser.GetRoot(pf.Show)))
+                        if (pf.Success && _titleParts.SequenceEqual(Database.GetReleaseName(pf.Show)))
                         {
                             Files.Add(file);
                         }

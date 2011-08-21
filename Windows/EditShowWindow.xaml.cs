@@ -168,14 +168,19 @@
         {
             if (customReleaseName.IsChecked.Value && !string.IsNullOrWhiteSpace(releaseTextBox.Text))
             {
-                Database.Execute("update tvshows set release = ? where showid = ?", Regex.Replace(releaseTextBox.Text.ToUpper().Trim(), @"\s+", " "), _id);
+                var rel = Regex.Replace(releaseTextBox.Text.ToUpper().Trim(), @"\s+", " ");
+                Database.Execute("update tvshows set release = ? where showid = ?", rel, _id);
+                Database.TVShows[_id].Release = rel;
             }
             else
             {
                 Database.Execute("update tvshows set release = ? where showid = ?", string.Empty, _id);
+                Database.TVShows[_id].Release = string.Empty;
             }
 
             Database.ShowData(_id, _guide.GetType().Name + ".lang", (language.SelectedItem as StackPanel).Tag as string);
+
+            DialogResult = true;
         }
     }
 }

@@ -16,7 +16,7 @@
         /// </returns>
         public bool Equals(string x, string y)
         {
-            return Parser.GetRoot(x).SequenceEqual(Parser.GetRoot(y));
+            return Parser.NameSequenceEquals(Parser.GetRoot(x), Parser.GetRoot(y));
         }
 
         /// <summary>

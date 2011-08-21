@@ -36,16 +36,6 @@
         public static readonly Dictionary<string, TVShow> TVShowCache = new Dictionary<string, TVShow>();
 
         /// <summary>
-        /// Contains a list of show names and their IDs from the local database.
-        /// </summary>
-        public static List<Dictionary<string, string>> LocalTVShows;
-
-        /// <summary>
-        /// Contains the date when the <c>LocalTVShows</c> list was loaded.
-        /// </summary>
-        public static DateTime LoadDate;
-
-        /// <summary>
         /// Parses the name of the specified file.
         /// </summary>
         /// <param name="file">The file.</param>
@@ -168,29 +158,22 @@
 
             // try to find show in local database
 
-            if (LocalTVShows == null || LoadDate < Database.DataChange)
-            {
-                LoadDate     = DateTime.Now;
-                LocalTVShows = Database.Query("select showid, name, release from tvshows");
-            }
-
             var fileParts = ShowNames.Parser.GetRoot(name);
 
-            foreach (var show in LocalTVShows)
+            foreach (var show in Database.TVShows)
             {
-                var titleParts = string.IsNullOrWhiteSpace(show["release"])
-                               ? ShowNames.Parser.GetRoot(show["name"])
-                               : show["release"].Split(' ');
+                var titleParts   = ShowNames.Parser.GetRoot(show.Value.Name);
+                var releaseParts = !string.IsNullOrWhiteSpace(show.Value.Release) ? show.Value.Release.Split(' ') : null;
 
-                if (titleParts.SequenceEqual(fileParts))
+                if (ShowNames.Parser.NameSequenceEquals(fileParts, titleParts) || (releaseParts != null && ShowNames.Parser.NameSequenceEquals(fileParts, releaseParts)))
                 {
-                    var episode = Database.Query("select name, airdate from episodes where episodeid = ?", ep.Episode + (ep.Season * 1000) + (show["showid"].ToInteger() * 100 * 1000));
+                    var episode = Database.Episodes.Where(x => x.EpisodeID == ep.Episode + (ep.Season * 1000) + (show.Value.ShowID * 100 * 1000)).ToList();
                     if (episode.Count != 0)
                     {
                         match = true;
-                        name  = show["name"];
-                        title = episode[0]["name"];
-                        date  = episode[0]["airdate"].ToDouble().GetUnixTimestamp();
+                        name  = show.Value.Name;
+                        title = episode[0].Name;
+                        date  = episode[0].Airdate;
 
                         break;
                     }

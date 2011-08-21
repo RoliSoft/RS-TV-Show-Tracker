@@ -70,20 +70,18 @@
             }
 
             var files = GetHandleList(procs.Distinct(StringComparer.CurrentCultureIgnoreCase));
-            var shows = Database.Query("select showid, name, release from tvshows order by rowid asc");
 
-            foreach (var show in shows)
+            foreach (var show in Database.TVShows)
             {
-                var parts = string.IsNullOrWhiteSpace(show["release"])
-                          ? Parser.GetRoot(show["name"])
-                          : show["release"].Split(' ');
+                var titleParts   = Parser.GetRoot(show.Value.Name);
+                var releaseParts = !string.IsNullOrWhiteSpace(show.Value.Release) ? show.Value.Release.Split(' ') : null;
 
                 foreach (var file in files)
                 {
-                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, parts))
+                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleParts) || (releaseParts != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseParts)))
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
-                        if (pf.Success && parts.SequenceEqual(Parser.GetRoot(pf.Show))) // or the one extracted from the directory name?
+                        if (pf.Success && Database.GetReleaseName(show.Value.Name).SequenceEqual(Database.GetReleaseName(pf.Show))) // or the one extracted from the directory name?
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {
@@ -95,7 +93,7 @@
                             }
                             else
                             {
-                                MarkAsSeen(int.Parse(show["showid"]), pf.Episode);
+                                MarkAsSeen(show.Value.ShowID, pf.Episode);
                             }
                         }
                     }
