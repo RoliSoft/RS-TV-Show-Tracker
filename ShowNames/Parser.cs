@@ -338,11 +338,17 @@
                         return false;
                     }
 
+                compare:
                     if (e1.Current != e2.Current.Trim('[', ']'))
                     {
                         if (e2.Current.First() == '[' && e2.Current.Last() == ']')
                         {
-                            continue;
+                            if (!e2.MoveNext())
+                            {
+                                return false;
+                            }
+
+                            goto compare;
                         }
                         
                         return false;
