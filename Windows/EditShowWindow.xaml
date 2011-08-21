@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.EditShowWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
-        Title="Edit TV show" Height="375" Width="565" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Edit TV show" Height="453" Width="565" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
             <TabControl.Effect>
@@ -103,15 +103,19 @@
                                 <Image Source="/RSTVShowTracker;component/Images/magnifier-pencil.png" Height="16" Width="16" Margin="0,1,5,0" />
                                 <CheckBox Content=" Custom release name" Name="customReleaseName" Checked="CustomReleaseNameChecked" Unchecked="CustomReleaseNameUnchecked" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
-                            <TextBlock TextWrapping="Wrap" Margin="3,5">
+                            <TextBox Name="releaseTextBox" Margin="0,5,0,0" />
+                            <TextBlock TextWrapping="Wrap" Margin="3,5,3,0">
                                 If the software can't find the video files for this show, enable this option then enter the name which is used in the scene releases.<LineBreak />
                                 - Convert dots and other separators to a space.<LineBreak />
                                 - Discard all the special characters, including dots, commas, underscores, etc.<LineBreak />
                                 - Include country or year notations, if they're present, but don't write them into parentheses.<LineBreak />
-                                For example:
-                                <Underline>The.Big.Bang.Theory</Underline>.S04E20.720p.HDTV.x264-IMMERSE <Image Source="/RSTVShowTracker;component/Images/play.png" Height="16" Width="16" Margin="0,0,0,-3" /> The Big Bang Theory
+                                - Optional words, such as ending country code, can be specified between <Bold>[ ]</Bold><LineBreak />
+                                For example <Italic>Childrens Hospital [US]</Italic> will match:<LineBreak />
+                                <Image Source="/RSTVShowTracker;component/Images/tick.png" Height="16" Width="16" Margin="0,0,0,-3" /> <Underline>Childrens.Hospital</Underline>.S03E05.720p.WEB-DL.AAC2.0.H.264-HoodBag<LineBreak />
+                                <Image Source="/RSTVShowTracker;component/Images/tick.png" Height="16" Width="16" Margin="0,0,0,-3" /> <Underline>Childrens.Hospital<Span Foreground="DarkGreen">.US</Span></Underline>.S02E12.720p.WEB-DL.AAC2.0.H264-KiNGS<LineBreak />
+                                <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="0,0,0,-3" /> <Underline>Childrens.Hospital<Span Foreground="DarkRed">.UK</Span></Underline>.S02E10.WS.PDTV.XviD-C4TV<LineBreak />
+                                Without <Italic>[US]</Italic> it would only match the first one. With <Italic>[US] [UK]</Italic> it would match all three.
                             </TextBlock>
-                            <TextBox Name="releaseTextBox" Margin="0,0,5,0" />
                         </StackPanel>
                     </StackPanel>
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">

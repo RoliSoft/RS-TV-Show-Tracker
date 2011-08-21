@@ -29,16 +29,16 @@
 
             nameTextBox.Text = _show;
 
-            var release = Database.Query("select release from tvshows where name = ? limit 1", show);
-            if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0]["release"]))
+            var release = Database.TVShows[_id];
+            if (!string.IsNullOrWhiteSpace(release.Release))
             {
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = true;
-                releaseTextBox.Text = string.Join(" ", release[0]["release"]).ToLower().ToUppercaseWords();
+                releaseTextBox.Text = string.Join(" ", release.Release).ToLower();
             }
             else
             {
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = false;
-                releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(show)).ToLower().ToUppercaseWords();
+                releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(show)).ToLower();
             }
 
             switch (Database.ShowData(_id, "grabber"))
