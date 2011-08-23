@@ -283,7 +283,7 @@
             if (generateExtractor)
             {
                 season  = @"(?<s>\d{1,2})";
-                episode = @"(?<e>\d{1,2})";
+                episode = @"(?<e>\d{1,3})";
             }
 
             var regexes = new List<string>

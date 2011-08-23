@@ -306,7 +306,7 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                 <GridViewColumnHeader Margin="-3,0,0,0" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox Name="SeenIt" Tag="{Binding Id}" IsChecked="{Binding SeenIt}" Checked="SeenItChecked" Unchecked="SeenItUnchecked" />
+                                        <CheckBox Name="SeenIt" Tag="{Binding ID}" IsChecked="{Binding SeenIt}" Checked="SeenItChecked" Unchecked="SeenItUnchecked" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

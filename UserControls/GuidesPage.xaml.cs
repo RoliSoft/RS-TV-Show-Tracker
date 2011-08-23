@@ -1,7 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
     using System.Windows;
@@ -12,6 +12,7 @@
     using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
+    using RoliSoft.TVShowTracker.Tables;
     using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
@@ -29,13 +30,13 @@
         /// Gets or sets the guide list view item collection.
         /// </summary>
         /// <value>The guide list view item collection.</value>
-        public ObservableCollection<GuideListViewItem> GuideListViewItemCollection { get; set; }
+        public BindingList<GuideListViewItem> GuideListViewItemCollection { get; set; }
 
         /// <summary>
         /// Gets or sets the upcoming list view item collection.
         /// </summary>
         /// <value>The upcoming list view item collection.</value>
-        public ObservableCollection<UpcomingListViewItem> UpcomingListViewItemCollection { get; set; }
+        public BindingList<UpcomingListViewItem> UpcomingListViewItemCollection { get; set; }
 
         private int _activeShowID;
         private string _activeShowUrl;
@@ -83,19 +84,6 @@
         }
 
         /// <summary>
-        /// Gets the selected show name and episode on the list view.
-        /// </summary>
-        /// <returns>An array with the name as the first item and episode number as second.</returns>
-        public string[] GetSelectedShow()
-        {
-            return new[]
-                {
-                    comboBox.SelectedValue.ToString(),
-                    ((GuideListViewItem)listView.SelectedValue).Episode
-                };
-        }
-
-        /// <summary>
         /// Handles the Loaded event of the UserControl control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -104,13 +92,13 @@
         {
             if (GuideListViewItemCollection == null)
             {
-                GuideListViewItemCollection = new ObservableCollection<GuideListViewItem>();
+                GuideListViewItemCollection = new BindingList<GuideListViewItem>();
                 ((CollectionViewSource)FindResource("cvs")).Source = GuideListViewItemCollection;
             }
 
             if (UpcomingListViewItemCollection == null)
             {
-                UpcomingListViewItemCollection = new ObservableCollection<UpcomingListViewItem>();
+                UpcomingListViewItemCollection = new BindingList<UpcomingListViewItem>();
                 ((CollectionViewSource)FindResource("cvs2")).Source = UpcomingListViewItemCollection;
             }
 
@@ -221,6 +209,8 @@
         {
             var episodes = Database.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Airdate).Take(100);
 
+            UpcomingListViewItemCollection.RaiseListChangedEvents = false;
+
             foreach (var episode in episodes)
             {
                 var network = string.Empty;
@@ -238,6 +228,9 @@
                         RelativeDate = episode.Airdate.ToShortRelativeDate()
                     });
             }
+
+            UpcomingListViewItemCollection.RaiseListChangedEvents = true;
+            UpcomingListViewItemCollection.ResetBindings();
 
             tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
             upcomingListView.Visibility = Visibility.Visible;
@@ -355,12 +348,14 @@
             var episodes = show.Episodes.OrderByDescending(ep => ep.Season * 1000 + ep.Number);
             var icon     = Updater.CreateGuide(show.Data["grabber"]).Icon;
 
+            GuideListViewItemCollection.RaiseListChangedEvents = false;
+
             foreach (var episode in episodes)
             {
                 GuideListViewItemCollection.Add(new GuideListViewItem
                     {
+                        ID          = episode,
                         SeenIt      = episode.Watched,
-                        Id          = show.ShowID + "|" + episode.EpisodeID,
                         Season      = "Season " + episode.Season,
                         Episode     = "S{0:00}E{1:00}".FormatWith(episode.Season, episode.Number),
                         Airdate     = episode.Airdate != Utils.UnixEpoch
@@ -373,6 +368,9 @@
                         GrabberIcon = icon
                     });
             }
+
+            GuideListViewItemCollection.RaiseListChangedEvents = true;
+            GuideListViewItemCollection.ResetBindings();
 
             upcomingListView.Visibility = Visibility.Collapsed;
             tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Visible;
@@ -389,9 +387,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new FileSearchTaskDialog().Search(show[0], show[1]);
+            new FileSearchTaskDialog().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
         }
         #endregion
 
@@ -439,10 +437,10 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
             MainWindow.Active.tabControl.SelectedIndex = 2;
-            MainWindow.Active.activeDownloadLinksPage.Search(show[0] + " " + show[1]);
+            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
         }
         #endregion
 
@@ -456,10 +454,10 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
             MainWindow.Active.tabControl.SelectedIndex = 3;
-            MainWindow.Active.activeSubtitlesPage.Search(show[0] + " " + show[1]);
+            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
         }
         #endregion
 
@@ -473,10 +471,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show  = GetSelectedShow();
-            var title = ((GuideListViewItem)listView.SelectedValue).Title;
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show[0], show[1], title);
+            new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number), ep.Name);
         }
 
         /// <summary>
@@ -488,9 +485,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show[0], show[1]);
+            new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
         }
 
         /// <summary>
@@ -502,10 +499,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
-            var epnr = ShowNames.Parser.ExtractEpisode(show[1]);
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show[0] + " intitle:\"season " + epnr.Season + "\" site:itunes.apple.com inurl:/tv-season/"));
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + ep.Show.Name + " intitle:\"season " + ep.Season + "\" site:itunes.apple.com inurl:/tv-season/"));
         }
 
         /// <summary>
@@ -517,10 +513,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
-            var epnr = ShowNames.Parser.ExtractEpisode(show[1]);
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show[0] + " intitle:\"Season " + epnr.Season + ", Episode " + epnr.Episode + "\" site:amazon.com"));
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + ep.Show.Name + " intitle:\"Season " + ep.Season + ", Episode " + ep.Number + "\" site:amazon.com"));
         }
 
         /// <summary>
@@ -532,9 +527,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show[0], show[1]);
+            new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
         }
 
         /// <summary>
@@ -546,8 +541,9 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var show = GetSelectedShow();
-            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show[0] + " " + show[1]));
+            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
+
+            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(ep.Show.Name + " " + string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 
@@ -559,9 +555,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SeenItChecked(object sender, RoutedEventArgs e)
         {
-            var id = ((CheckBox)e.OriginalSource).Tag.ToString();
+            var episode = (Episode)((CheckBox)e.OriginalSource).Tag;
 
-            if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.Id == id))
+            if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.ID == episode))
             {
                 // check all selected
 
@@ -571,11 +567,9 @@
 
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
-                        var val = item.Id.Split('|');
-                        Database.ExecuteOnTransaction(tr, "insert into tracking values (" + val[0] + ", '" + val[1] + "')");
-                        Database.Trackings.Add(int.Parse(val[1]));
-                        Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = true;
-                        item.SeenIt = true;
+                        Database.ExecuteOnTransaction(tr, "insert into tracking values (" + item.ID.ShowID + ", '" + item.ID.EpisodeID + "')");
+                        Database.Trackings.Add(item.ID.EpisodeID);
+                        item.ID.Watched = item.SeenIt = true;
                         item.RefreshSeenIt();
                     }
 
@@ -596,10 +590,9 @@
 
                 try
                 {
-                    var val = id.Split('|');
-                    Database.Execute("insert into tracking values (" + val[0] + ", '" + val[1] + "')");
-                    Database.Trackings.Add(int.Parse(val[1]));
-                    Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = true;
+                    Database.Execute("insert into tracking values (" + episode.ShowID + ", '" + episode.EpisodeID + "')");
+                    Database.Trackings.Add(episode.EpisodeID);
+                    episode.Watched = true;
                 }
                 catch
                 {
@@ -619,9 +612,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SeenItUnchecked(object sender, RoutedEventArgs e)
         {
-            var id = ((CheckBox)e.OriginalSource).Tag.ToString();
+            var episode = (Episode)((CheckBox)e.OriginalSource).Tag;
 
-            if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.Id == id))
+            if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.ID == episode))
             {
                 // check all selected
 
@@ -631,11 +624,9 @@
 
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
-                        var val = item.Id.Split('|');
-                        Database.ExecuteOnTransaction(tr, "delete from tracking where showid = " + val[0] + " and episodeid = '" + val[1] + "'");
-                        Database.Trackings.Remove(int.Parse(val[1]));
-                        Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = false;
-                        item.SeenIt = false;
+                        Database.ExecuteOnTransaction(tr, "delete from tracking where showid = " + item.ID.ShowID + " and episodeid = '" + item.ID.EpisodeID + "'");
+                        Database.Trackings.Remove(item.ID.EpisodeID);
+                        item.ID.Watched = item.SeenIt = false;
                         item.RefreshSeenIt();
                     }
 
@@ -656,10 +647,9 @@
 
                 try
                 {
-                    var val = id.Split('|');
-                    Database.Execute("delete from tracking where showid = " + val[0] + " and episodeid = '" + val[1] + "'");
-                    Database.Trackings.Remove(int.Parse(val[1]));
-                    Database.Episodes.First(ep => ep.EpisodeID.ToString() == val[1]).Watched = false;
+                    Database.Execute("delete from tracking where showid = " + episode.ShowID + " and episodeid = '" + episode.EpisodeID + "'");
+                    Database.Trackings.Remove(episode.EpisodeID);
+                    episode.Watched = false;
                 }
                 catch
                 {

@@ -40,7 +40,7 @@
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = false;
                 releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(show)).ToLower();
             }
-
+            
             switch (Database.ShowData(_id, "grabber"))
             {
                 case "TVRage":
@@ -135,7 +135,7 @@
         private void CustomReleaseNameChecked(object sender, RoutedEventArgs e)
         {
             releaseTextBox.IsEnabled = true;
-            releaseTextBox.Text = string.Join(" ", Database.GetReleaseName(_show)).ToLower().ToUppercaseWords();
+            releaseTextBox.Text = string.Join(" ", Database.GetReleaseName(_show)).ToLower();
         }
 
         /// <summary>
@@ -146,7 +146,7 @@
         private void CustomReleaseNameUnchecked(object sender, RoutedEventArgs e)
         {
             releaseTextBox.IsEnabled = false;
-            releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(_show)).ToLower().ToUppercaseWords();
+            releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(_show)).ToLower();
         }
 
         /// <summary>

@@ -2,6 +2,8 @@
 {
     using System.ComponentModel;
 
+    using RoliSoft.TVShowTracker.Tables;
+
     /// <summary>
     /// Represents a TV show episode on the list view.
     /// </summary>
@@ -13,16 +15,18 @@
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
+        /// Gets or sets the underlying episode object in the database.
+        /// </summary>
+        /// <value>
+        /// The underlying episode object in the database.
+        /// </value>
+        public Episode ID { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether this episode was already seen.
         /// </summary>
         /// <value><c>true</c> if it was seen; otherwise, <c>false</c>.</value>
         public bool SeenIt { get; set; }
-
-        /// <summary>
-        /// Gets or sets the id.
-        /// </summary>
-        /// <value>The id.</value>
-        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the season.

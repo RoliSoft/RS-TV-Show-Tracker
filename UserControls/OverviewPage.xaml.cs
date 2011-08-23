@@ -142,19 +142,6 @@
             Dispatcher.Invoke((Action)(() => SetStatus(_eps == 0 ? "No new episodes." : Utils.FormatNumber(_eps, "new episode") + "!")));
         }
 
-        /// <summary>
-        /// Gets the selected show name and episode on the list view.
-        /// </summary>
-        /// <returns>An array with the name as the first item and episode number as second.</returns>
-        public string[] GetSelectedShow()
-        {
-            return new[]
-                {
-                    ((OverviewListViewItem)listView.SelectedValue).Name,
-                    ((OverviewListViewItem)listView.SelectedValue).Title.Substring(0, 6)
-                };
-        }
-
         #region Loading
         /// <summary>
         /// Loads the TV shows into the list view.
@@ -898,8 +885,9 @@
 
             if (show.Started)
             {
-                var lastep = show.Title.Substring(0, 6);
-
+                var dbep2  = Database.Episodes.Where(ep => ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).First();
+                var lastep = "S{0:00}E{1:00}".FormatWith(dbep2.Season, dbep2.Number);
+                
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
                 pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, lastep);
