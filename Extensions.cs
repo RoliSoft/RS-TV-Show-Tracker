@@ -413,6 +413,36 @@
         }
 
         /// <summary>
+        /// Extension method to DateTime to convert the date back to its original time zone.
+        /// If the "Convert Timezone" setting is false, the function won't convert.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <param name="source">The time zone of the specified date.</param>
+        /// <returns>DateTime in original timezone.</returns>
+        public static DateTime ToOriginalTimeZone(this DateTime date, string source)
+        {
+            if (!Settings.Get("Convert Timezone", true))
+            {
+                return date;
+            }
+
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                source = "Central Standard Time";
+            }
+
+            if (source.StartsWith("GMT"))
+            {
+                var offset = Regex.Match(source, @"(\-?\d{1,2})").Groups[1].Value.ToInteger();
+                return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.Local, TimeZoneInfo.Utc).AddHours(offset);
+            }
+            else
+            {
+                return TimeZoneInfo.ConvertTime(date, TimeZoneInfo.Local, TimeZoneInfo.FindSystemTimeZoneById(source));
+            }
+        }
+
+        /// <summary>
         /// Extension method to DateTime to convert it into an Unix timestamp.
         /// </summary>
         /// <param name="date">The date.</param>

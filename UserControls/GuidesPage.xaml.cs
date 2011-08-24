@@ -389,7 +389,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new FileSearchTaskDialog().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
+            new FileSearchTaskDialog().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number), ep.Airdate.ToOriginalTimeZone(ep.Show.Data["timezone"]));
         }
         #endregion
 

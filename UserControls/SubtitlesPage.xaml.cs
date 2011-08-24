@@ -467,7 +467,19 @@
             var sub  = (Subtitle)listView.SelectedValue;
             var show = ShowNames.Parser.Split(textBox.Text);
 
-            new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, show[0], show[1]);
+            var airdate = (DateTime?)null;
+
+            try
+            {
+                var sf = FileNames.Parser.ParseFile(textBox.Text, null, false);
+                if (sf.Success)
+                {
+                    airdate = sf.Airdate.ToOriginalTimeZone(Database.TVShows.Values.First(x => x.Name == sf.Show).Data["timezone"]);
+                }
+            }
+            catch { }
+
+            new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, show[0], show[1], airdate);
         }
     }
 }

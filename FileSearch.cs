@@ -51,10 +51,11 @@
         /// <param name="paths">The paths where to start the search.</param>
         /// <param name="show">The show name.</param>
         /// <param name="episode">The episode number.</param>
-        public FileSearch(string[] paths, string show, string episode)
+        /// <param name="airdate">The airdate.</param>
+        public FileSearch(string[] paths, string show, string episode, DateTime? airdate = null)
         {
             _titleParts   = Database.GetReleaseName(show);
-            _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode);
+            _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode, airdate);
 
             ShowQuery  = show + " " + episode;
             StartPaths = paths;

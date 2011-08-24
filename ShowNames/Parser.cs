@@ -165,6 +165,11 @@
 
             if (m.Success)
             {
+                if (m.Groups["y"].Success)
+                {
+                    return new ShowEpisode(new DateTime(m.Groups["y"].Value.ToInteger(), m.Groups["m"].Value.ToInteger(), m.Groups["d"].Value.ToInteger()));
+                }
+
                 int e;
                 var se = new ShowEpisode();
 
@@ -264,11 +269,26 @@
         /// <summary>
         /// Generates regular expressions for matching a huge variety of episode numberings.
         /// </summary>
+        /// <param name="episode">The raw episode.</param>
+        /// <param name="airdate">The airdate.</param>
+        /// <returns>
+        /// List of regular expressions.
+        /// </returns>
+        public static Regex GenerateEpisodeRegexes(string episode, DateTime? airdate = null)
+        {
+            var ep = ExtractEpisode(episode);
+            ep.AirDate = airdate;
+            return GenerateEpisodeRegexes(ep);
+        }
+
+        /// <summary>
+        /// Generates regular expressions for matching a huge variety of episode numberings.
+        /// </summary>
         /// <param name="episode">The extracted episode.</param>
         /// <returns>List of regular expressions.</returns>
         public static Regex GenerateEpisodeRegexes(ShowEpisode episode)
         {
-            return GenerateEpisodeRegexes(episode.Season.ToString(), episode.Episode.ToString());
+            return GenerateEpisodeRegexes(episode.Season.ToString(), episode.Episode.ToString(), episode.AirDate);
         }
 
         /// <summary>
@@ -276,9 +296,12 @@
         /// </summary>
         /// <param name="season">The season number or expression.</param>
         /// <param name="episode">The episode number or expression.</param>
+        /// <param name="airdate">The airdate.</param>
         /// <param name="generateExtractor">if set to <c>true</c> generates an expression which universally matches any season/episode.</param>
-        /// <returns>List of regular expressions.</returns>
-        public static Regex GenerateEpisodeRegexes(string season = null, string episode = null, bool generateExtractor = false)
+        /// <returns>
+        /// List of regular expressions.
+        /// </returns>
+        public static Regex GenerateEpisodeRegexes(string season = null, string episode = null, DateTime? airdate = null, bool generateExtractor = false)
         {
             if (generateExtractor)
             {
@@ -297,6 +320,18 @@
                     // 213; must be followed by quality notation
                     @"(?:{0}0{1}|{0}{1})[\.\s_](?:\d{{3,4}}[ip]|hdtv|xvid)".FormatWith(season, episode)
                 };
+
+            if (airdate.HasValue)
+            {
+                regexes.Add(
+                    // 2011-03-14
+                    @"(?:{0}\.0?{1}\.0?{2}|{0}\-0?{1}\-0?{2}|{0}_0?{1}_0?{2}|{0}\s0?{1}\s0?{2})".FormatWith(airdate.Value.Year, airdate.Value.Month, airdate.Value.Day)
+                );
+            }
+            else if (generateExtractor)
+            {
+                regexes.Add(@"(?:(?<y>\d{4})\.(?<m>\d{1,2})\.(?<d>\d{1,2})|(?<y>\d{4})\-(?<m>\d{1,2})\-(?<d>\d{1,2})|(?<y>\d{4})_(?<m>\d{1,2})_(?<d>\d{1,2})|(?<y>\d{4})\s(?<m>\d{1,2})\s(?<d>\d{1,2}))");
+            }
 
             if (generateExtractor || season == "1")
             {

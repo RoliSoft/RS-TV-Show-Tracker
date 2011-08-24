@@ -720,7 +720,7 @@
 
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/next.png")) };
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, nextep);
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, nextep, dbep.Airdate.ToOriginalTimeZone(dbep.Show.Data["timezone"]));
                 pla.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -890,7 +890,7 @@
                 
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, lastep);
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, lastep, dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.Data["timezone"]));
                 pla.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,

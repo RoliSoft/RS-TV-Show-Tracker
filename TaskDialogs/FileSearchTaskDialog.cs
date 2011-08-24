@@ -29,7 +29,8 @@
         /// </summary>
         /// <param name="show">The show.</param>
         /// <param name="episode">The episode.</param>
-        public void Search(string show, string episode)
+        /// <param name="airdate">The airdate.</param>
+        public void Search(string show, string episode, DateTime? airdate = null)
         {
             _show    = show;
             _episode = episode;
@@ -72,7 +73,7 @@
                     }
                 }).Start();
             
-            _fs = new FileSearch(paths, show, episode);
+            _fs = new FileSearch(paths, show, episode, airdate);
 
             _fs.FileSearchDone += FileSearchDone;
             _fs.BeginSearch();

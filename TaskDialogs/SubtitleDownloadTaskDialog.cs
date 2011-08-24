@@ -143,7 +143,8 @@
         /// <param name="link">The link.</param>
         /// <param name="show">The show.</param>
         /// <param name="episode">The episode.</param>
-        public void DownloadNearVideo(Subtitle link, string show, string episode)
+        /// <param name="airdate">The airdate.</param>
+        public void DownloadNearVideo(Subtitle link, string show, string episode, DateTime? airdate = null)
         {
             _link    = link;
             _show    = show;
@@ -178,7 +179,7 @@
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
-            _fs = new FileSearch(paths, show, episode);
+            _fs = new FileSearch(paths, show, episode, airdate);
 
             _fs.FileSearchDone += NearVideoFileSearchDone;
             _fs.BeginSearch();

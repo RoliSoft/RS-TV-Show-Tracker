@@ -167,15 +167,34 @@
 
                 if (ShowNames.Parser.NameSequenceEquals(fileParts, titleParts) || (releaseParts != null && ShowNames.Parser.NameSequenceEquals(fileParts, releaseParts)))
                 {
-                    var episode = Database.Episodes.Where(x => x.EpisodeID == ep.Episode + (ep.Season * 1000) + (show.Value.ShowID * 100 * 1000)).ToList();
-                    if (episode.Count != 0)
+                    if (ep.AirDate != null)
                     {
-                        match = true;
-                        name  = show.Value.Name;
-                        title = episode[0].Name;
-                        date  = episode[0].Airdate;
+                        var episode = Database.Episodes.Where(x => x.ShowID == show.Value.ShowID && x.Airdate.ToOriginalTimeZone(x.Show.Data["timezone"]).Date == ep.AirDate.Value.Date).ToList();
+                        if (episode.Count != 0)
+                        {
+                            match = true;
+                            name  = show.Value.Name;
+                            title = episode[0].Name;
+                            date  = episode[0].Airdate;
 
-                        break;
+                            ep.Season  = episode[0].Season;
+                            ep.Episode = episode[0].Number;
+
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        var episode = Database.Episodes.Where(x => x.EpisodeID == ep.Episode + (ep.Season * 1000) + (show.Value.ShowID * 100 * 1000)).ToList();
+                        if (episode.Count != 0)
+                        {
+                            match = true;
+                            name  = show.Value.Name;
+                            title = episode[0].Name;
+                            date  = episode[0].Airdate;
+
+                            break;
+                        }
                     }
                 }
             }
@@ -187,11 +206,26 @@
                 match = true;
                 name  = ShowIDCache[name].Title;
 
-                var eps = TVShowCache[name].Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
-                if (eps.Count() != 0)
+                if (ep.AirDate != null)
                 {
-                    title = eps[0].Title;
-                    date  = eps[0].Airdate;
+                    var eps = TVShowCache[name].Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                    if (eps.Count() != 0)
+                    {
+                        title = eps[0].Title;
+                        date  = eps[0].Airdate;
+
+                        ep.Season  = eps[0].Season;
+                        ep.Episode = eps[0].Number;
+                    }
+                }
+                else
+                {
+                    var eps = TVShowCache[name].Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                    if (eps.Count() != 0)
+                    {
+                        title = eps[0].Title;
+                        date  = eps[0].Airdate;
+                    }
                 }
             }
 
@@ -212,12 +246,27 @@
                     name  = data.Title;
 
                     TVShowCache[name] = data;
-
-                    var eps = data.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
-                    if (eps.Count() != 0)
+                    
+                    if (ep.AirDate != null)
                     {
-                        title = eps[0].Title;
-                        date  = eps[0].Airdate;
+                        var eps = data.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                        if (eps.Count() != 0)
+                        {
+                            title = eps[0].Title;
+                            date  = eps[0].Airdate;
+
+                            ep.Season  = eps[0].Season;
+                            ep.Episode = eps[0].Number;
+                        }
+                    }
+                    else
+                    {
+                        var eps = data.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                        if (eps.Count() != 0)
+                        {
+                            title = eps[0].Title;
+                            date  = eps[0].Airdate;
+                        }
                     }
                 }
             }

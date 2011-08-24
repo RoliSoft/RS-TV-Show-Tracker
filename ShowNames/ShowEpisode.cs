@@ -1,5 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.ShowNames
 {
+    using System;
+
     /// <summary>
     /// Represents an episode.
     /// </summary>
@@ -23,6 +25,12 @@
         /// </summary>
         /// <value>The second episode.</value>
         public int? SecondEpisode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the air date.
+        /// </summary>
+        /// <value>The air date.</value>
+        public DateTime? AirDate { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ShowEpisode"/> class.
@@ -56,6 +64,14 @@
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ShowEpisode"/> class.
+        /// </summary>
+        public ShowEpisode(DateTime airdate)
+        {
+            AirDate = airdate;
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>
@@ -63,9 +79,16 @@
         /// </returns>
         public override string ToString()
         {
-            return SecondEpisode.HasValue
-                   ? "S{0:00}E{1:00}-{2:00}".FormatWith(Season, Episode, SecondEpisode)
-                   : "S{0:00}E{1:00}".FormatWith(Season, Episode);
+            if (AirDate.HasValue && Season == 0 && Episode == 0)
+            {
+                return AirDate.Value.ToString("yyyy-MM-dd");
+            }
+            else
+            {
+                return SecondEpisode.HasValue
+                       ? "S{0:00}E{1:00}-{2:00}".FormatWith(Season, Episode, SecondEpisode)
+                       : "S{0:00}E{1:00}".FormatWith(Season, Episode);
+            }
         }
 
         /// <summary>
@@ -81,7 +104,8 @@
             return ep != null
                 && Season == ep.Season
                 && Episode == ep.Episode
-                && SecondEpisode == ep.SecondEpisode;
+                && SecondEpisode == ep.SecondEpisode
+                && AirDate == ep.AirDate;
         }
     }
 }
