@@ -488,6 +488,9 @@
         /// </summary>
         private void ReloadParsers()
         {
+            var idx = listView.SelectedIndex;
+            DownloadsListViewItemCollection.Clear();
+
             foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
             {
                 var revdiff = engine.GetAttribute<ParserAttribute>().Revision - new DateTime(2000, 1, 1, 1, 0, 0);
@@ -498,15 +501,17 @@
                         Icon    = engine.Icon,
                         Site    = engine.Name,
                         Login   = engine.Private
-                                  ? Settings.Get(engine.Name + " Cookies") != null
+                                  ? Settings.Get(engine.Name + " Login") != null
                                     ? "/RSTVShowTracker;component/Images/tick.png"
-                                    : "/RSTVShowTracker;component/Images/cross.png"
+                                    : Settings.Get(engine.Name + " Cookies") != null
+                                      ? "/RSTVShowTracker;component/Images/cookie.png"
+                                      : "/RSTVShowTracker;component/Images/cross.png"
                                   : "/RSTVShowTracker;component/Images/na.png",
                         Version = "2.0." + Math.Floor(revdiff.TotalDays).ToString("0000") + "." + ((revdiff.Subtract(TimeSpan.FromDays(Math.Floor(revdiff.TotalDays)))).TotalSeconds / 2).ToString("00000")
                     });
             }
 
-            listView.SelectedIndex = 0;
+            listView.SelectedIndex = idx;
         }
 
         /// <summary>

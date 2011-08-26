@@ -226,7 +226,7 @@
         }
 
         /// <summary>
-        /// Stores the key and value into the XML settings.
+        /// Stores the key and value into the JSON settings.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
@@ -237,12 +237,22 @@
         }
 
         /// <summary>
-        /// Toggles the key's current boolean value in the XML settings.
+        /// Toggles the key's current boolean value in the JSON settings.
         /// </summary>
         /// <param name="key">The key.</param>
         public static void Toggle(string key)
         {
             Keys[key] = !Get<bool>(key);
+            Save();
+        }
+
+        /// <summary>
+        /// Removes the key and value from the JSON settings.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        public static void Remove(string key)
+        {
+            Keys.Remove(key);
             Save();
         }
 
