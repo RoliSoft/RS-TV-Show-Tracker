@@ -169,7 +169,7 @@
                 {
                     if (ep.AirDate != null)
                     {
-                        var episode = Database.Episodes.Where(x => x.ShowID == show.Value.ShowID && x.Airdate.ToOriginalTimeZone(x.Show.Data["timezone"]).Date == ep.AirDate.Value.Date).ToList();
+                        var episode = Database.Episodes.Where(x => x.ShowID == show.Value.ShowID && x.Airdate.ToOriginalTimeZone(x.Show.Data.Get("timezone")).Date == ep.AirDate.Value.Date).ToList();
                         if (episode.Count != 0)
                         {
                             match = true;

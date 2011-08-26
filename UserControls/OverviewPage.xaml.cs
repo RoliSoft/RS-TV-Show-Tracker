@@ -174,7 +174,7 @@
                 var count  = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).Count();
                      _eps += count;
                 
-                if (hideend && show.Data["airing"] == "False" && count == 0)
+                if (hideend && show.Data.Get("airing", "False") == "False" && count == 0)
                 {
                     continue;
                 }
@@ -207,7 +207,7 @@
                         ndate = nextep[0].Airdate;
                     }
                 }
-                else if (show.Data["airing"] == "True")
+                else if (show.Data.Get("airing", "False") == "True")
                 {
                     next = "No data available";
                 }
@@ -261,7 +261,7 @@
                 switch (grouping)
                 {
                     case "network":
-                        group = show.Data["network"];
+                        group = show.Data.Get("network", "Syndicated");
 
                         if (string.IsNullOrWhiteSpace(group) || group == "Syndicated")
                         {
@@ -300,7 +300,7 @@
                             group = nextep[0].Airdate.ToShortRelativeDate();
                             grpri = nextep[0].Airdate.ToRelativeDatePriority();
                         }
-                        else if (show.Data["airing"] == "True")
+                        else if (show.Data.Get("airing", "False") == "True")
                         {
                             group  = "Unknown";
                             grpri -= 1;
@@ -340,9 +340,9 @@
                         Name          = show.Name,
                         Title         = last,
                         Next          = next,
-                        NameColor     = fadeend && show.Data["airing"] == "False" ? "#50FFFFFF" : "White",
-                        TitleColor    = count != 0 ? "Red" : (lastep.Count != 0 ? (fadeend && show.Data["airing"] == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF"),
-                        NextColor     = nextep.Count != 0 ? (fadeend && show.Data["airing"] == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF",
+                        NameColor     = fadeend && show.Data.Get("airing", "False") == "False" ? "#50FFFFFF" : "White",
+                        TitleColor    = count != 0 ? "Red" : (lastep.Count != 0 ? (fadeend && show.Data.Get("airing", "False") == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF"),
+                        NextColor     = nextep.Count != 0 ? (fadeend && show.Data.Get("airing", "False") == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF",
                         NewEpisodes   = count,
                         Started       = lastep.Count != 0,
                         Group         = group,
@@ -720,7 +720,7 @@
 
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/next.png")) };
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, nextep, dbep.Airdate.ToOriginalTimeZone(dbep.Show.Data["timezone"]));
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, nextep, dbep.Airdate.ToOriginalTimeZone(dbep.Show.Data.Get("timezone")));
                 pla.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -890,7 +890,7 @@
                 
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, lastep, dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.Data["timezone"]));
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(show.Name, lastep, dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.Data.Get("timezone")));
                 pla.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,

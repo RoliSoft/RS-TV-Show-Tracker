@@ -211,6 +211,38 @@
         }
         #endregion
 
+        #region Dictionary<TKey, TValue>
+        /// <summary>
+        /// Retrieves the key from the dictionary, or if the key doesn't exist,
+        /// the default value will be returned for value types
+        /// and a new instance will be returned for reference types.
+        /// </summary>
+        /// <typeparam name="TKey">The type of the key.</typeparam>
+        /// <typeparam name="TValue">The type of the value.</typeparam>
+        /// <param name="dict">The dict.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value to return if key was not found.</param>
+        /// <returns>
+        /// Stored value or default value/new instance.
+        /// </returns>
+        public static TValue Get<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, TValue defaultValue = default(TValue))
+        {
+            TValue value;
+
+            if (dict.TryGetValue(key, out value) && value != null)
+            {
+                return value;
+            }
+
+            if (!typeof(TValue).IsValueType && !(defaultValue is string) && defaultValue != null)
+            {
+                return Activator.CreateInstance<TValue>();
+            }
+
+            return defaultValue;
+        }
+        #endregion
+
         #region ObservableCollection<T>
         /// <summary>
         /// Extension method to ObservableCollection to add support for AddRange.

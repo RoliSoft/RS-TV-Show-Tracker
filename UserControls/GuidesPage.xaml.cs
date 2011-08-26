@@ -246,7 +246,7 @@
 
             // fill up general informations
 
-            var airing = bool.Parse(show.Data["airing"]);
+            var airing = bool.Parse(show.Data.Get("airing", "False"));
 
             showGeneralCover.Source = new BitmapImage(new Uri("http://" + Remote.API.EndPoint + "?/GetShowCover/" + Uri.EscapeUriString(comboBox.SelectedValue.ToString())), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
             
@@ -346,7 +346,7 @@
             // fill up episode list
 
             var episodes = show.Episodes.OrderByDescending(ep => ep.Season * 1000 + ep.Number);
-            var icon     = Updater.CreateGuide(show.Data["grabber"]).Icon;
+            var icon     = Updater.CreateGuide(show.Data.Get("grabber", "TVRage")).Icon;
 
             GuideListViewItemCollection.RaiseListChangedEvents = false;
 
@@ -389,7 +389,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new FileSearchTaskDialog().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number), ep.Airdate.ToOriginalTimeZone(ep.Show.Data["timezone"]));
+            new FileSearchTaskDialog().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number), ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")));
         }
         #endregion
 
