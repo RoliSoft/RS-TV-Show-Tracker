@@ -24,7 +24,7 @@
                                 <Label Content="Name and source" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox Name="nameTextBox" Foreground="Black" IsEnabled="False" Margin="0,5,0,0" Width="370" />
+                                <TextBox Name="nameTextBox" Foreground="Black" Margin="0,5,0,0" Width="370" GotFocus="NameTextBoxGotFocus" />
                                 <ComboBox  Margin="0,5,0,0" Name="database" IsEnabled="False" Width="145">
                                     <ComboBoxItem Content="Fully Featured Databases" IsEnabled="False" />
                                     <ComboBoxItem Margin="10,0">

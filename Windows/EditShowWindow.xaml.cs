@@ -8,6 +8,8 @@
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
 
+    using VistaControls.TaskDialog;
+
     /// <summary>
     /// Interaction logic for EditShowWindow.xaml
     /// </summary>
@@ -16,6 +18,7 @@
         private Guide _guide;
         private int _id;
         private string _show, _lang;
+        private bool _editWarn;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -115,6 +118,26 @@
         }
 
         /// <summary>
+        /// Handles the GotFocus event of the nameTextBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void NameTextBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+            if (!_editWarn)
+            {
+                _editWarn = true;
+                new TaskDialog
+                    {
+                        CommonIcon  = TaskDialogIcon.Warning,
+                        Title       = "Possible name mismatch after edit",
+                        Instruction = "Possible name mismatch after edit",
+                        Content     = "Don't edit the name for other purposes than capitalization, punctuation, country and year notations!\r\n\r\nIf you alter the words in the title, the software will use the new title to search for files, download links, subtitles, etc, and since you've altered the words, it might not find anything."
+                    }.Show();
+            }
+        }
+
+        /// <summary>
         /// Handles the Loaded event of the Window control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -166,6 +189,12 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SaveButtonClick(object sender, RoutedEventArgs e)
         {
+            if (nameTextBox.Text != _show && !string.IsNullOrWhiteSpace(nameTextBox.Text))
+            {
+                Database.Execute("update tvshows set name = ? where showid = ?", nameTextBox.Text.Trim(), _id);
+                Database.TVShows[_id].Name = nameTextBox.Text.Trim();
+            }
+
             if (customReleaseName.IsChecked.Value && !string.IsNullOrWhiteSpace(releaseTextBox.Text))
             {
                 var rel = Regex.Replace(releaseTextBox.Text.ToUpper().Trim(), @"\s+", " ");
