@@ -157,11 +157,6 @@
                     link.Quality = ParseQuality(link.Release);
                     link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("td[6]").Trim(), node.GetTextValue("td[7]").Trim());
 
-                    if (link.Quality != Qualities.Unknown)
-                    {
-                        link.Release = Regex.Replace(link.Release, @"\s\(.*\)$", string.Empty);
-                    }
-
                     yield return link;
                 }
             }

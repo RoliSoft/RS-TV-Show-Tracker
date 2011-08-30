@@ -307,7 +307,7 @@
             {
                 return Qualities.BluRay720p;
             }
-            if (IsMatch(release, @"\b720p\b", @"\bHDTV\b"))
+            if (IsMatch(release, @"\b720p\b"))
             {
                 return Qualities.HDTV720p;
             }

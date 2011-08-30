@@ -157,12 +157,8 @@
                 link.InfoURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("a", "href");
                 link.FileURL = "http://torrent.tvtorrents.com/FetchTorrentServlet?info_hash=" + node.GetNodeAttributeValue("a", "href").Split('=').Last() + "&digest=" + digest + "&hash=" + hash;
                 link.Size    = node.GetNodeAttributeValue("../td[5]", "title").Replace("Torrent is ", string.Empty).Replace("b", "B");
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../td[4]/br/preceding-sibling::text()").Trim(), node.GetTextValue("../td[4]/br/following-sibling::text()"));
-                link.Quality = node.GetTextValue("a").Contains("(720p .mkv)")
-                               ? Qualities.HDTV720p
-                               : node.GetTextValue("a").Contains(" .mkv)")
-                                 ? Qualities.HRx264
-                                 : Qualities.HDTVXviD;
 
                 yield return link;
             }

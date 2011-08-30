@@ -5,21 +5,20 @@
     using System.IO;
     using System.Linq;
     using System.Security.Authentication;
-    using System.Text;
     using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
+    using NUnit.Framework;
+
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
-    using NUnit.Framework;
-
     /// <summary>
-    /// Provides support for scraping tvstore.me.
+    /// Provides support for scraping TVTorrentz.
     /// </summary>
-    [Parser("2011-08-16 16:20 PM"), TestFixture]
-    public class TvStore : DownloadSearchEngine
+    [Parser("2011-08-30 11:55 AM"), TestFixture]
+    public class TVTorrentz : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -29,7 +28,7 @@
         {
             get
             {
-                return "TvStore";
+                return "TVTorrentz";
             }
         }
 
@@ -41,19 +40,7 @@
         {
             get
             {
-                return "http://tvstore.me/";
-            }
-        }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
-        {
-            get
-            {
-                return "http://tvstore.me/pic/favicon.ico";
+                return "http://tvtorrentz.org/";
             }
         }
 
@@ -77,10 +64,10 @@
         {
             get
             {
-                return new[] { "id", "pass" };
+                return new[] { "uid", "pass" };
             }
         }
-
+        
         /// <summary>
         /// Gets a value indicating whether this search engine can login using a username and password.
         /// </summary>
@@ -119,7 +106,7 @@
                     {
                         { "username", LoginFieldTypes.UserName },
                         { "password", LoginFieldTypes.Password },
-                        { "back",     LoginFieldTypes.ReturnTo },
+                        { "returnto", LoginFieldTypes.ReturnTo },
                     };
             }
         }
@@ -149,51 +136,54 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var gyors = Utils.GetURL(Site + "torrent/br_process.php?gyors=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(ShowNames.Parser.ReplaceEpisode(query, "{0:0}x{1:00}"))).Replace('=', '_') + "&now=" + DateTime.Now.ToUnixTimestamp(), cookies: Cookies);
+            var id = GetIDForShow(ShowNames.Parser.Split(query)[0]);
 
-            if (string.IsNullOrWhiteSpace(gyors))
-            {
-                throw new InvalidCredentialException();
-            }
-            
-            var arr = gyors.Split('\\');
-
-            if (arr[0] == "0")
+            if (!id.HasValue)
             {
                 yield break;
             }
 
-            var idx = 4;
+            var html = Utils.GetHTML(Site + "browse.php?cat=" + id.Value, cookies: Cookies);
 
-            for (;idx <= (arr.Length - 10);)
+            if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
+                throw new InvalidCredentialException();
+            }
+
+            var links = html.DocumentNode.SelectNodes("//table[@class='torrent_table']/tr/td[3]/a");
+
+            if (links == null)
+            {
+                yield break;
+            }
+
+            var episode = ShowNames.Parser.ExtractEpisode(query, "{0:0}x{1:00}");
+
+            foreach (var node in links)
+            {
+                if (!string.IsNullOrWhiteSpace(episode) && !node.InnerText.Contains(episode))
+                {
+                    continue;
+                }
+
                 var link = new Link(this);
-                var name = GetShowForID(arr[idx].Trim().ToInteger());
 
-                idx++;
+                var dl = node.GetNodeAttributeValue("../../td[4]/a[1]", "href");
+                if (!string.IsNullOrEmpty(dl))
+                {
+                    link.FileURL = Site + dl;
+                }
+                else
+                {
+                    link.Infos = "N/A for your class, ";
+                }
 
-                link.InfoURL = Site + "torrent/browse.php?id=" + arr[idx].Trim();
-                link.FileURL = Site + "torrent/download.php?id=" + arr[idx].Trim();
-
-                idx++;
-
-                link.Release = HtmlEntity.DeEntitize(name + " " + Regex.Replace(arr[idx].Trim(), @"(?:\b|_)([0-9]{1,2})x([0-9]{1,2})(?:\b|_)", me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00"), RegexOptions.IgnoreCase));
-
-                idx++;
-
-                var quality   = arr[idx].Trim();
-                link.Quality  = ParseQuality(quality);
-                link.Release += " " + quality.Replace("[", string.Empty).Replace("]", string.Empty).Replace(" - ", " ");
-
-                idx += 7;
-
-                link.Size = Utils.GetFileSize(long.Parse(arr[idx].Trim()));
-
-                idx += 10;
-
-                link.Infos = Link.SeedLeechFormat.FormatWith(arr[idx + 1].Trim(), arr[idx].Trim());
-
-                idx += 7;
+                link.Release = node.GetTextValue("../../td[2]/a") + " " + Regex.Replace(node.InnerText, @"(?:\b|_)([0-9]{1,2})x([0-9]{1,2})(?:\b|_)(\s-)?", me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00"), RegexOptions.IgnoreCase);
+                link.InfoURL = Site + node.GetAttributeValue("href");
+                link.Size    = node.GetTextValue("../../td[7]").Trim();
+                link.Quality = FileNames.Parser.ParseQuality(link.Release);
+                link.Infos  += Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[8]").Trim(), node.GetTextValue("../../td[9]").Trim()) + " / " + node.GetTextValue("../../td[10]").Trim() + " adoption"
+                             + (node.GetHtmlValue("../../td[11]/img[starts-with(@title, 'Free')]") != null ? ", Free" : string.Empty);
 
                 yield return link;
             }
@@ -211,76 +201,18 @@
         }
 
         /// <summary>
-        /// Parses the quality of the file.
-        /// </summary>
-        /// <param name="release">The release name.</param>
-        /// <returns>Extracted quality or Unknown.</returns>
-        public static Qualities ParseQuality(string release)
-        {
-            var q = Regex.Match(release, @"\[(?:(?:PROPER|REPACK)(?:\s\-)?)?\s*(.*?)\s\-").Groups[1].Value;
-
-            if (IsMatch("Blu-ray-1080p", q))
-            {
-                return Qualities.BluRay1080p;
-            }
-            if (IsMatch("HDTV-1080(p|i)", q))
-            {
-                return Qualities.HDTV1080i;
-            }
-            if (IsMatch("Web-Dl-720p", q))
-            {
-                return Qualities.WebDL720p;
-            }
-            if (IsMatch("Blu-ray-720p", q))
-            {
-                return Qualities.BluRay720p;
-            }
-            if (IsMatch("HDTV-720p", q))
-            {
-                return Qualities.HDTV720p;
-            }
-            if (IsMatch("HR-HDTV", q))
-            {
-                return Qualities.HRx264;
-            }
-            if (IsMatch("TvRip", q))
-            {
-                return Qualities.TVRip;
-            }
-            if (IsMatch("(PDTV|DVDSRC|Rip$)", q))
-            {
-                return Qualities.HDTVXviD;
-            }
-
-            return Qualities.Unknown;
-        }
-
-        /// <summary>
-        /// Determines whether the specified pattern is a match.
-        /// </summary>
-        /// <param name="pattern">The pattern.</param>
-        /// <param name="input">The input.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified pattern is a match; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsMatch(string pattern, string input)
-        {
-            return Regex.IsMatch(input, pattern.Replace("-", @"(\-|\s)?"), RegexOptions.IgnoreCase);
-        }
-
-        /// <summary>
         /// Gets the IDs from the browse page.
         /// </summary>
         public void GetIDs()
         {
-            var browse  = Utils.GetURL(Site + "torrent/browse.php", cookies: Cookies);
-            var matches = Regex.Matches(browse, @"catse\[(?<id>\d+)\]\s*=\s*'(?<name>[^']+)';");
+            var cache   = Utils.GetURL(Site + "searchCache.js", cookies: Cookies);
+            var matches = Regex.Matches(cache, @"\{text:""(?<name>[^""]+)"",url:""(?<id>\d+)""\}");
 
             ShowIDs = matches.Cast<Match>()
                      .ToDictionary(match => match.Groups["id"].Value.ToInteger(),
                                    match => HtmlEntity.DeEntitize(match.Groups["name"].Value));
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TvStore-IDs")))
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TVTorrentz-IDs")))
             using (var bson = new BsonWriter(file))
             {
                 new JsonSerializer().Serialize(bson, ShowIDs);
@@ -288,13 +220,13 @@
         }
 
         /// <summary>
-        /// Gets the show name for an ID.
+        /// Gets the ID for a show name.
         /// </summary>
-        /// <param name="id">The ID.</param>
-        /// <returns>Corresponding show name.</returns>
-        public string GetShowForID(int id)
+        /// <param name="name">The show name.</param>
+        /// <returns>Corresponding ID.</returns>
+        public int? GetIDForShow(string name)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "TvStore-IDs");
+            var fn = Path.Combine(Path.GetTempPath(), "TVTorrentz-IDs");
 
             if (ShowIDs == null)
             {
@@ -314,10 +246,13 @@
                 }
             }
 
-            string show;
-            if (ShowIDs != null && ShowIDs.TryGetValue(id, out show))
+            if (ShowIDs != null)
             {
-                return show;
+                var id = SearchForID(name);
+                if (id.HasValue)
+                {
+                    return id;
+                }
             }
 
             // try to refresh if the cache is older than an hour
@@ -325,13 +260,38 @@
             {
                 GetIDs();
 
-                if (ShowIDs != null && ShowIDs.TryGetValue(id, out show))
+                if (ShowIDs != null)
                 {
-                    return show;
+                    var id = SearchForID(name);
+                    if (id.HasValue)
+                    {
+                        return id;
+                    }
                 }
             }
 
-            return "ID-" + id;
+            return null;
+        }
+
+        /// <summary>
+        /// Searches for the specified show in the local cache.
+        /// </summary>
+        /// <param name="name">The show name.</param>
+        /// <returns>Corresponding ID.</returns>
+        private int? SearchForID(string name)
+        {
+            var parts = Database.GetReleaseName(name);
+
+            foreach (var show in ShowIDs)
+            {
+                if (ShowNames.Parser.IsMatch(show.Value, parts, null, false) &&
+                    ShowNames.Parser.IsMatch(name, Database.GetReleaseName(show.Value), null, false))
+                {
+                    return show.Key;
+                }
+            }
+
+            return null;
         }
     }
 }

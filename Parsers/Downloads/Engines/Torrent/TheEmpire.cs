@@ -109,11 +109,6 @@
 
                 link.Release = Regex.Replace(link.Release, @"\s\(\d{1,2}(?:st|nd|rd|th)? [A-Z][a-z]+ \d{4}\)", string.Empty);
 
-                if (link.Quality != Qualities.Unknown)
-                {
-                    link.Release = Regex.Replace(link.Release, @"\s\[.*\]\s?", string.Empty);
-                }
-
                 yield return link;
             }
         }

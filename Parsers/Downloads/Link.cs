@@ -55,7 +55,7 @@
         {
             get
             {
-                return "{0:0000} seed / {1:0000} leech";
+                return "{0} seed / {1} leech";
             }
         }
 
