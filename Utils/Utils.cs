@@ -490,7 +490,7 @@
         /// <returns>Full path to random file.</returns>
         public static string GetRandomFileName(string extension = null)
         {
-            return Path.GetTempPath() + Path.PathSeparator + Path.GetRandomFileName() + (extension != null ? "." + extension : string.Empty);
+            return Path.Combine(Path.GetTempPath(), Path.ChangeExtension(Path.GetRandomFileName(), extension));
         }
 
         /// <summary>
