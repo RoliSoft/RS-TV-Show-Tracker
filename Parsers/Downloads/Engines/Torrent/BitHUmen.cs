@@ -138,6 +138,8 @@
                 yield break;
             }
 
+            var fl = html.DocumentNode.GetHtmlValue("//font[@color='red']/h2[contains(translate(text(), 'FRELCH ', 'frelch'), 'freeleech')]") != null; 
+
             foreach (var node in links)
             {
                 var link = new Link(this);
@@ -147,7 +149,8 @@
                 link.FileURL = Site + node.GetNodeAttributeValue("../../a[starts-with(@title, 'Let')]", "href");
                 link.Size    = node.GetHtmlValue("../../../td[6]/u").Replace("<br>", " ");
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[8]").Trim(), node.GetTextValue("../../../td[9]").Trim().Split('/')[1].Trim());
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[8]").Trim(), node.GetTextValue("../../../td[9]").Trim().Split('/')[1].Trim())
+                             + (fl ? ", Global Freeleech" : string.Empty);
 
                 yield return link;
             }
