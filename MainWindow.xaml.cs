@@ -117,15 +117,11 @@
         {
             if (SystemParameters2.Current.IsGlassEnabled)
             {
-                WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
-                Background = Brushes.Transparent;
+                ActivateAero();
             }
             else
             {
-                Background         = new SolidColorBrush(Color.FromArgb(Drawing.SystemColors.ControlDark.A, Drawing.SystemColors.ControlDark.R, Drawing.SystemColors.ControlDark.G, Drawing.SystemColors.ControlDark.B));
-                mainBorder.Padding = logoMenu.Margin = new Thickness(0);
-                logoMenu.Width     = SystemParameters.PrimaryScreenWidth;
-                logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Collapsed;
+                ActivateNonAero();
             }
 
             SystemParameters2.Current.PropertyChanged += AeroChanged;
@@ -167,7 +163,6 @@
                     Thread.Sleep(5000);
                     CheckForUpdate();
                 }).Start();
-            //Synchronization.Enabled = true;
         }
 
         /// <summary>
@@ -183,22 +178,41 @@
                     {
                         if (SystemParameters2.Current.IsGlassEnabled)
                         {
-                            WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
-                            Background = Brushes.Transparent;
-
-                            mainBorder.Padding = new Thickness(5);
-                            logoMenu.Margin    = new Thickness(6, -1, 0, 0);
-                            logoMenu.Width     = 157;
-                            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
+                            ActivateAero();
                         }
                         else
                         {
-                            // I couldn't figure out how to remove the WindowChrome from the window,
-                            // so we'll just restart the application for that. (TODO)
-                            Restart();
+                            ActivateNonAero();
                         }
                     }));
             }
+        }
+
+        /// <summary>
+        /// Activates the aero interface.
+        /// </summary>
+        public void ActivateAero()
+        {
+            WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
+
+            Background         = Brushes.Transparent;
+            mainBorder.Padding = new Thickness(5);
+            logoMenu.Margin    = new Thickness(6, -1, 0, 0);
+            logoMenu.Width     = 157;
+            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Activates the non-aero interface.
+        /// </summary>
+        public void ActivateNonAero()
+        {
+            WindowChrome.SetWindowChrome(this, null);
+
+            Background         = new SolidColorBrush(Color.FromArgb(Drawing.SystemColors.ControlDark.A, Drawing.SystemColors.ControlDark.R, Drawing.SystemColors.ControlDark.G, Drawing.SystemColors.ControlDark.B));
+            mainBorder.Padding = logoMenu.Margin = new Thickness(0);
+            logoMenu.Width     = SystemParameters.PrimaryScreenWidth;
+            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
