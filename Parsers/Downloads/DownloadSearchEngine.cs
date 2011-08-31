@@ -169,6 +169,7 @@
                             var usrpwd  = Utils.Decrypt(info, GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
                             var cookies = Login(usrpwd[0], usrpwd[1]);
 
+                            Cookies = cookies;
                             Settings.Set(Name + " Cookies", cookies);
 
                             var list = Search(query);

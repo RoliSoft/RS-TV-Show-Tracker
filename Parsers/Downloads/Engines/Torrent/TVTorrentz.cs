@@ -175,7 +175,7 @@
                 }
                 else
                 {
-                    link.Infos = "N/A for your class, ";
+                    link.Infos = "N/A for you, ";
                 }
 
                 link.Release = node.GetTextValue("../../td[2]/a") + " " + Regex.Replace(node.InnerText, @"(?:\b|_)([0-9]{1,2})x([0-9]{1,2})(?:\b|_)(\s-)?", me => "S" + me.Groups[1].Value.ToInteger().ToString("00") + "E" + me.Groups[2].Value.ToInteger().ToString("00"), RegexOptions.IgnoreCase);
@@ -184,6 +184,11 @@
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos  += Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[8]").Trim(), node.GetTextValue("../../td[9]").Trim()) + " / " + node.GetTextValue("../../td[10]").Trim() + " adoption"
                              + (node.GetHtmlValue("../../td[11]/img[starts-with(@title, 'Free')]") != null ? ", Free" : string.Empty);
+
+                if (link.Quality == Qualities.Unknown)
+                {
+                    link.Quality = Qualities.HDTVXviD;
+                }
 
                 yield return link;
             }

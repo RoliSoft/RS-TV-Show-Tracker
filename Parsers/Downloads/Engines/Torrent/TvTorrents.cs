@@ -160,6 +160,11 @@
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../td[4]/br/preceding-sibling::text()").Trim(), node.GetTextValue("../td[4]/br/following-sibling::text()"));
 
+                if (link.Quality == Qualities.Unknown)
+                {
+                    link.Quality = Qualities.HDTVXviD;
+                }
+
                 yield return link;
             }
         }

@@ -153,14 +153,6 @@
                         }
 
                         Dispatcher.Invoke((Action)(() => cookiesTextBox.Text = cookies));
-
-                        new TaskDialog
-                            {
-                                CommonIcon  = TaskDialogIcon.Information,
-                                Title       = Parser.Name,
-                                Instruction = "Success",
-                                Content     = "The newly received cookies will be inserted into the cookies field.",
-                            }.Show();
                     }
                     catch (ThreadAbortException) { }
                     catch (Exception ex)
