@@ -340,8 +340,8 @@
                 {
                     using (var mstream = new MemoryStream())
                     {
-                        subtitle = Utils.SanitizeFileName(zip.Entries[0].FileName);
-                        zip.Entries[0].Extract(mstream);
+                        subtitle = Utils.SanitizeFileName(zip.Entries.First().FileName);
+                        zip.Entries.First().Extract(mstream);
                         
                         try { zip.Dispose();     } catch { }
                         try { File.Delete(temp); } catch { }
@@ -366,8 +366,10 @@
                             {
                                 using (var mstream = new MemoryStream())
                                 {
-                                    subtitle = Utils.SanitizeFileName(zip.Entries[c.ButtonID].FileName);
-                                    zip.Entries[c.ButtonID].Extract(mstream);
+                                    var ent = zip.Entries.ToList();
+
+                                    subtitle = Utils.SanitizeFileName(ent[c.ButtonID].FileName);
+                                    ent[c.ButtonID].Extract(mstream);
 
                                     try { zip.Dispose();     } catch { }
                                     try { File.Delete(temp); } catch { }

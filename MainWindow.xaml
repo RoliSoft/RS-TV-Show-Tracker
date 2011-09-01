@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:TVShowTracker="clr-namespace:RoliSoft.TVShowTracker" xmlns:Transitionals="clr-namespace:Transitionals.Controls;assembly=Transitionals" xmlns:Transitions="clr-namespace:Transitionals.Transitions;assembly=Transitionals" xmlns:Shell="clr-namespace:Microsoft.Windows.Shell;assembly=Microsoft.Windows.Shell" Title="RS TV Show Tracker" WindowStartupLocation="CenterScreen"
         Height="490" Width="900" MinWidth="900" MinHeight="300" Margin="0" Padding="0" TextOptions.TextFormattingMode="Display" RenderOptions.BitmapScalingMode="HighQuality"
-        UseLayoutRounding="True" SourceInitialized="WindowSourceInitialized" Loaded="WindowLoaded" KeyUp="WindowKeyUp" Closing="WindowClosing" Icon="/RSTVShowTracker;component/tv.ico">
+        UseLayoutRounding="True" SourceInitialized="WindowSourceInitialized" Loaded="WindowLoaded" IsVisibleChanged="WindowIsVisibleChanged" KeyUp="WindowKeyUp" Closing="WindowClosing" Icon="/RSTVShowTracker;component/tv.ico">
     <Window.Resources>
         
         <!-- head gradient -->
@@ -686,15 +686,11 @@
             <!-- update -->
 
             <Border Name="updateOuter" Margin="0,-5,106,0" Shell:WindowChrome.IsHitTestVisibleInChrome="True" HorizontalAlignment="Right" VerticalAlignment="Top" BorderThickness="1,0,1,1" BorderBrush="#7DFFFFFF" CornerRadius="0,0,4,4" MouseLeftButtonUp="UpdateMouseLeftButtonUp" MouseEnter="UpdateMouseEnter" MouseLeave="UpdateMouseLeave" Visibility="Collapsed">
-                <Border Name="update" Cursor="Hand" BorderThickness="1,0,1,1" BorderBrush="DimGray" CornerRadius="0,0,4,4" Background="{StaticResource UpdateGradient}">
+                <Border Name="update" BorderThickness="1,0,1,1" BorderBrush="DimGray" CornerRadius="0,0,4,4" Background="{StaticResource UpdateGradient}">
                     <Border.ToolTip>
-                        <StackPanel Orientation="Horizontal">
-                            <Image Source="/RSTVShowTracker;component/Images/new.png" Height="16" Width="16" VerticalAlignment="Top" Margin="0,3,5,0" />
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Name="updateToolTipTitle" FontWeight="Bold" Margin="0,3,0,3" />
-                                <TextBlock Name="updateToolTipText" Margin="0,0,0,3" TextWrapping="Wrap" />
-                                <TextBlock FontStyle="Italic" Text="Click to initiate update." TextWrapping="Wrap" />
-                            </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Name="updateToolTipTitle" FontWeight="Bold" />
+                            <TextBlock Name="updateToolTipText" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border.ToolTip>
                     <Grid>

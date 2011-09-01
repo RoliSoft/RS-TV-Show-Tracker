@@ -6,6 +6,7 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
@@ -21,12 +22,15 @@
 
     using RoliSoft.TVShowTracker.Remote;
 
+    using VistaControls.TaskDialog;
+
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
     using ContextMenu = System.Windows.Forms.ContextMenu;
     using WinMenuItem = System.Windows.Forms.MenuItem;
     using Timer       = System.Timers.Timer;
     using Application = System.Windows.Application;
+    using TaskDialog  = Microsoft.WindowsAPICodePack.Dialogs.TaskDialog;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -47,6 +51,7 @@
 
         private Timer _statusTimer;
         private bool _hideOnStart;
+        private bool _askUpdate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -79,7 +84,7 @@
                     {
                         new VistaControls.TaskDialog.TaskDialog
                             {
-                                CommonIcon  = VistaControls.TaskDialog.TaskDialogIcon.Information,
+                                CommonIcon  = TaskDialogIcon.Information,
                                 Title       = Signature.Software + " " + Signature.Version,
                                 Instruction = Path.GetFileNameWithoutExtension(args[1]),
                                 Content     = fid + " – " + ShowNames.Regexes.PartText.Replace(fid.Title, string.Empty) + " – " + fid.Quality
@@ -89,7 +94,7 @@
                     {
                         new VistaControls.TaskDialog.TaskDialog
                             {
-                                CommonIcon  = VistaControls.TaskDialog.TaskDialogIcon.Stop,
+                                CommonIcon  = TaskDialogIcon.Stop,
                                 Title       = Signature.Software + " " + Signature.Version,
                                 Instruction = Path.GetFileNameWithoutExtension(args[1]),
                                 Content     = "Couldn't identify the specified file."
@@ -160,6 +165,23 @@
 
             new Task(() =>
                 {
+                    var uf = Directory.GetFiles(Signature.FullPath).Where(f => Path.GetFileName(f).StartsWith("update_") && f.EndsWith(".exe")).ToList();
+
+                    if (uf.Count != 0)
+                    {
+                        var ver = Path.GetFileNameWithoutExtension(uf[0]).Replace("update_", string.Empty);
+
+                        if (Version.Parse(ver) <= Version.Parse(Signature.Version))
+                        {
+                            try { File.Delete(Path.Combine(Signature.FullPath, uf[0])); } catch { }
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke((Action)(() => UpdateDownloaded(ver, true)));
+                            return;
+                        }
+                    }
+
                     Thread.Sleep(5000);
                     CheckForUpdate();
                 }).Start();
@@ -232,6 +254,20 @@
             if (tabControl.SelectedIndex == 0)
             {
                 activeOverviewPage.ListViewKeyUp(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Handles the IsVisibleChanged event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.DependencyPropertyChangedEventArgs"/> instance containing the event data.</param>
+        private void WindowIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (IsVisible && _askUpdate && updateOuter.Visibility == Visibility.Visible)
+            {
+                _askUpdate = false;
+                UpdateDownloaded((string)update.Tag, true);
             }
         }
 
@@ -615,11 +651,71 @@
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
+                        update.Tag              = upd.Version;
                         updateOuter.Visibility  = Visibility.Visible;
-                        updateToolTipTitle.Text = "Version {0} is available!".FormatWith(upd.Version);
-                        updateToolTipText.Text  = upd.Description;
-                        update.Tag              = upd.URL;
+                        updateToolTipTitle.Text = "v" + upd.Version + " is available";
+                        updateToolTipText.Text  = "Downloading update...";
                     }));
+
+                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")))
+                {
+                    return;
+                }
+
+                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp")))
+                {
+                    try { File.Delete(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp")); } catch { }
+                }
+
+                var wc = new WebClient();
+
+                wc.DownloadProgressChanged += (s, e) => Dispatcher.Invoke((Action)(() => updateToolTipText.Text = "Downloading update... (" + e.ProgressPercentage + "%)"));
+                wc.DownloadFileCompleted   += (s, e) =>
+                    {
+                        File.Move(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
+                        Dispatcher.Invoke((Action)(() => UpdateDownloaded(upd.Version, true)));
+                    };
+
+                wc.DownloadFileAsync(new Uri(upd.URL), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"));
+            }
+        }
+
+        /// <summary>
+        /// Called when an update was downloaded.
+        /// </summary>
+        /// <param name="version">The new version.</param>
+        /// <param name="ask">if set to <c>true</c> a TaskDialog will be displayed asking the user to update.</param>
+        public void UpdateDownloaded(string version, bool ask)
+        {
+            update.Tag              = version;
+            updateOuter.Visibility  = Visibility.Visible;
+            updateToolTipTitle.Text = "v" + version + " is available";
+            updateToolTipText.Text  = "Click here to install update!";
+
+            if (ask && IsVisible && Top != -999)
+            {
+                var td = new VistaControls.TaskDialog.TaskDialog
+                    {
+                        CommonIcon      = TaskDialogIcon.SecurityWarning,
+                        UseCommandLinks = true,
+                        Title           = Signature.Software,
+                        Instruction     = "Update available",
+                        Content         = "Version " + version + " has been downloaded and is ready to be installed!",
+                        CustomButtons   = new[]
+                            {
+                                new CustomButton(Result.Yes, "Install now\nIt won't take more than 10 seconds."),
+                                new CustomButton(Result.No,  "Remind me later")
+                            }
+                    };
+
+                if (td.Show().CommonButton == Result.Yes)
+                {
+                    UpdateMouseLeftButtonUp();
+                }
+            }
+            else if (ask && (!IsVisible || Top == -999))
+            {
+                _askUpdate = true;
             }
         }
 
@@ -648,10 +744,13 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void UpdateMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void UpdateMouseLeftButtonUp(object sender = null, System.Windows.Input.MouseButtonEventArgs e = null)
         {
-            Utils.Run(update.Tag as string);
-            NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+            if (File.Exists(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")))
+            {
+                Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/S /AR /D=" + Signature.FullPath);
+                NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+            }
         }
         #endregion
 
