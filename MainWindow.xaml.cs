@@ -703,8 +703,8 @@
                         Content         = "Version " + version + " has been downloaded and is ready to be installed!",
                         CustomButtons   = new[]
                             {
-                                new CustomButton(Result.Yes, "Install now\nIt won't take more than 10 seconds."),
-                                new CustomButton(Result.No,  "Remind me later")
+                                new CustomButton(Result.Yes, "Install now\nIt won't take more than 5 seconds."),
+                                new CustomButton(Result.No,  "Postpone")
                             }
                     };
 

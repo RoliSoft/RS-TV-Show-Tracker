@@ -37,7 +37,7 @@
         {
             get
             {
-                return "http://zunox.com/";
+                return "http://zunox.co/";
             }
         }
 
@@ -49,7 +49,7 @@
         {
             get
             {
-                return "http://static.zunox.com/img/favicon.ico";
+                return "http://media.zunox.co/favicon.png";
             }
         }
 
@@ -85,7 +85,7 @@
         public override IEnumerable<Link> Search(string query)
         {
             var html  = Utils.GetHTML(Site, "q=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//table[@id='downloads-table']/tr");
+            var links = html.DocumentNode.SelectNodes("//div[@class='dllist']/dl");
 
             if (links == null)
             {
@@ -96,14 +96,14 @@
             {
                 var link = new Link(this);
 
-                var site = node.GetTextValue("td[6]/a");
-                var star = node.GetTextValue("td[6]/img/preceding-sibling::text()");
-                var list = node.SelectNodes("td[3]/span");
+                var site = node.GetTextValue("dd[@class='pro']/a");
+                var star = node.GetTextValue("dd[@class='pro']/img/preceding-sibling::text()");
+                var list = node.SelectNodes("dd[@class='fh']/abbr");
 
-                link.Release = HtmlEntity.DeEntitize(node.GetTextValue("td[2]/a")).Trim()
+                link.Release = HtmlEntity.DeEntitize(node.GetTextValue("dt/a")).Trim()
                              + (!string.IsNullOrWhiteSpace(site) ? " @ " + site : string.Empty)
                              + (!string.IsNullOrWhiteSpace(star) && Regex.IsMatch(star, @"\s*\d") ? " " + star.Trim() + "✩" : string.Empty);
-                link.InfoURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[2]/a", "href");
+                link.InfoURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("dt/a", "href");
                 link.Quality = Regex.IsMatch(link.Release, @"(720p|x264)", RegexOptions.IgnoreCase)
                              ? Qualities.HDTV720p
                              : Qualities.HDTVXviD;

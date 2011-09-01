@@ -101,12 +101,14 @@
             show.URL         = "http://www.imdb.com/title/tt{0}/".FormatWith(id);
             show.Episodes    = new List<TVShow.Episode>();
 
-            var runtime  = summary.DocumentNode.GetTextValue("//h4[text()='Runtime:']/following-sibling::text()");
-            show.Runtime = runtime != null
-                           ? Regex.Match(runtime, @"\d{2,3}").Value.ToInteger()
+            var infobar = summary.DocumentNode.GetTextValue("//div[@class='infobar']");
+            var runtime = Regex.Match(infobar, @"(\d{2,3})\smin");
+
+            show.Runtime = runtime.Success
+                           ? runtime.Groups[1].Value.ToInteger()
                            : 30;
 
-            var genres = summary.DocumentNode.SelectNodes("//h4[text()='Genres:']/following-sibling::a");
+            var genres = summary.DocumentNode.SelectNodes("//div[@class='infobar']/a[contains(@href, '/genre/')]");
             if (genres != null)
             {
                 foreach (var genre in genres)
