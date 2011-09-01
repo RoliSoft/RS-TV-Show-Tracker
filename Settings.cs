@@ -232,7 +232,15 @@
         /// <param name="value">The value.</param>
         public static void Set<T>(string key, T value)
         {
-            Keys[key] = value;
+            if (value is string && string.IsNullOrWhiteSpace(value as string))
+            {
+                Keys.Remove(key);
+            }
+            else
+            {
+                Keys[key] = value;
+            }
+
             Save();
         }
 

@@ -501,9 +501,9 @@
                         Icon    = engine.Icon,
                         Site    = engine.Name,
                         Login   = engine.Private
-                                  ? Settings.Get(engine.Name + " Login") != null
+                                  ? !string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login"))
                                     ? "/RSTVShowTracker;component/Images/tick.png"
-                                    : Settings.Get(engine.Name + " Cookies") != null
+                                    : !string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Cookies"))
                                       ? "/RSTVShowTracker;component/Images/cookie.png"
                                       : "/RSTVShowTracker;component/Images/cross.png"
                                   : "/RSTVShowTracker;component/Images/na.png",
