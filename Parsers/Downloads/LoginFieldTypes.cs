@@ -16,6 +16,10 @@
         /// <summary>
         /// Represents an URL to return to after login.
         /// </summary>
-        ReturnTo
+        ReturnTo,
+        /// <summary>
+        /// Represents a CAPTCHA entry.
+        /// </summary>
+        Captcha
     }
 }

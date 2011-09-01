@@ -387,25 +387,47 @@
 
             if (!autoDetectEncoding)
             {
-                using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
+                if (encoding is Base64Encoding)
                 {
-                    return sr.ReadToEnd();
+                    using (var ms = new MemoryStream())
+                    {
+                        int read;
+                        do
+                        {
+                            var bs = new byte[8192];
+                            read = rstr.Read(bs, 0, bs.Length);
+                            ms.Write(bs, 0, read);
+                        }
+                        while (read > 0);
+
+                        return Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+                else
+                {
+                    using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
+                    {
+                        return sr.ReadToEnd();
+                    }
                 }
             }
             else
             {
-                var ms = new MemoryStream();
                 byte[] bs;
 
-                int read;
-                do
+                using (var ms = new MemoryStream())
                 {
-                    bs = new byte[8192];
-                    read = rstr.Read(bs, 0, bs.Length);
-                    ms.Write(bs, 0, read);
-                } while (read > 0);
+                    int read;
+                    do
+                    {
+                        bs = new byte[8192];
+                        read = rstr.Read(bs, 0, bs.Length);
+                        ms.Write(bs, 0, read);
+                    }
+                    while (read > 0);
 
-                bs = ms.ToArray();
+                    bs = ms.ToArray();
+                }
 
                 var rgx = Regex.Match(Encoding.ASCII.GetString(bs), @"charset=([^""]+)", RegexOptions.IgnoreCase);
                 var eenc = "utf-8";
@@ -902,6 +924,13 @@
             }
 
             return rows;
+        }
+
+        /// <summary>
+        /// A custom encoding to denote Base64-encoded content.
+        /// </summary>
+        public class Base64Encoding : ASCIIEncoding
+        {
         }
     }
 }
