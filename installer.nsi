@@ -168,6 +168,7 @@ Section -MainProgram
 	File "Dependencies\Starksoft.Net.Proxy.dll"
 	File "Dependencies\System.Data.SQLite.dll"
 	File "Dependencies\Transitionals.dll"
+	File "Dependencies\Twitterizer2.dll"
 	File "Dependencies\VistaControls.dll"
 SectionEnd
 
@@ -224,6 +225,7 @@ Section Uninstall
 	Delete "$INSTDIR\Starksoft.Net.Proxy.dll"
 	Delete "$INSTDIR\System.Data.SQLite.dll"
 	Delete "$INSTDIR\Transitionals.dll"
+	Delete "$INSTDIR\Twitterizer2.dll"
 	Delete "$INSTDIR\VistaControls.dll"
 	Delete "$INSTDIR\uninstall.exe"
 	

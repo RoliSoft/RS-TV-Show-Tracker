@@ -105,7 +105,6 @@
                 }
             }
 
-
             InitializeComponent();
 
             Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
@@ -566,6 +565,16 @@
         private void RenameVideoFilesClick(object sender, RoutedEventArgs e)
         {
             new RenamerWindow().Show();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the SocialNetworks control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SocialNetworksClick(object sender, RoutedEventArgs e)
+        {
+            new SocialWindow().Show();
         }
 
         /// <summary>

@@ -107,6 +107,7 @@
     <Reference Include="Transitionals">
       <HintPath>.\Transitionals.dll</HintPath>
     </Reference>
+    <Reference Include="Twitterizer2, Version=2.3.3.21964, Culture=neutral, PublicKeyToken=69d1469eac671567, processorArchitecture=MSIL" />
     <Reference Include="UIAutomationProvider" />
     <Reference Include="VistaControls, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="WindowsBase" />
@@ -143,6 +144,7 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
+    <Compile Include="Social\Twitter.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />
@@ -234,6 +236,9 @@
     </Compile>
     <Compile Include="Windows\CaptchaWindow.xaml.cs">
       <DependentUpon>CaptchaWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\SocialWindow.xaml.cs">
+      <DependentUpon>SocialWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\ParserWindow.xaml.cs">
       <DependentUpon>ParserWindow.xaml</DependentUpon>
@@ -336,6 +341,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\CaptchaWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\SocialWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -682,6 +691,10 @@
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Content Include="Dependencies\Twitterizer2.dll" />
+    <Resource Include="Images\facebook.png" />
+    <Resource Include="Images\twitter.png" />
+    <Resource Include="Images\bird.png" />
     <Resource Include="Images\robot.png" />
     <Resource Include="Images\table-select-row.png" />
     <Resource Include="Images\clock.png" />

@@ -636,6 +636,11 @@
                             <Image Source="/RSTVShowTracker;component/Images/folder-rename.png" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Social networks" Click="SocialNetworksClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/bird.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="Minimize to tray" Click="MinimizeToTrayClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/minimize.png" />

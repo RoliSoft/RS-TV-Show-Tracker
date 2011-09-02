@@ -798,14 +798,14 @@
                         }
 
                         new TaskDialog
-                        {
-                            CommonIcon          = TaskDialogIcon.Stop,
-                            Title               = sel.Name,
-                            Instruction         = "Connection error",
-                            Content             = "An error occured while checking the proxy.",
-                            ExpandedControlText = "Show exception message",
-                            ExpandedInformation = ex.Message
-                        }.Show();
+                            {
+                                CommonIcon          = TaskDialogIcon.Stop,
+                                Title               = sel.Name,
+                                Instruction         = "Connection error",
+                                Content             = "An error occured while checking the proxy.",
+                                ExpandedControlText = "Show exception message",
+                                ExpandedInformation = ex.Message
+                            }.Show();
                     }
                 });
             action.Start();

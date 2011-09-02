@@ -7,7 +7,10 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
-    using RoliSoft.TVShowTracker.ShowNames;
+    using RoliSoft.TVShowTracker.FileNames;
+    using RoliSoft.TVShowTracker.Social;
+
+    using Parser = RoliSoft.TVShowTracker.ShowNames.Parser;
 
     /// <summary>
     /// Provides methods to monitor a given process for open file handles.
@@ -93,7 +96,7 @@
                             }
                             else
                             {
-                                MarkAsSeen(show.Value.ShowID, pf.Episode);
+                                MarkAsSeen(show.Value.ShowID, pf);
                             }
                         }
                     }
@@ -105,16 +108,17 @@
         /// Marks the specified episode as seen.
         /// </summary>
         /// <param name="showid">The ID of the show.</param>
-        /// <param name="ep">The episode.</param>
-        public static void MarkAsSeen(int showid, ShowEpisode ep)
+        /// <param name="file">The identified file.</param>
+        public static void MarkAsSeen(int showid, ShowFile file)
         {
-            var eps = ep.SecondEpisode.HasValue
-                      ? Enumerable.Range(ep.Episode, (ep.SecondEpisode.Value - ep.Episode + 1)).ToArray()
-                      : new[] { ep.Episode };
+            var newEp = false;
+            var eps = file.Episode.SecondEpisode.HasValue
+                      ? Enumerable.Range(file.Episode.Episode, (file.Episode.SecondEpisode.Value - file.Episode.Episode + 1)).ToArray()
+                      : new[] { file.Episode.Episode };
 
             foreach (var epnr in eps)
             {
-                var epid = Database.GetEpisodeID(showid, ep.Season, epnr);
+                var epid = Database.GetEpisodeID(showid, file.Episode.Season, epnr);
 
                 if (epid == int.MinValue)
                 {
@@ -127,15 +131,44 @@
 
                     Database.Trackings.Add(epid);
                     Database.Episodes.First(e => e.EpisodeID == epid).Watched = true;
+
+                    newEp = true;
                 }
             }
 
             if (Synchronization.Status.Enabled)
             {
-                Synchronization.Status.Engine.MarkEpisodes(showid.ToString(), eps.Select(x => x + (ep.Season * 1000)).ToList());
+                Synchronization.Status.Engine.MarkEpisodes(showid.ToString(), eps.Select(x => x + (file.Episode.Season * 1000)).ToList());
+            }
+
+            if (newEp)
+            {
+                PostToSocial(file);
             }
 
             MainWindow.Active.DataChanged();
+        }
+
+        /// <summary>
+        /// Updates the status message on configures social networks.
+        /// </summary>
+        /// <param name="file">The identified file.</param>
+        public static void PostToSocial(ShowFile file)
+        {
+            if (!Settings.Get<bool>("Post to Twitter")
+             || !Twitter.OAuthTokensAvailable()
+             || (Settings.Get("Post to Twitter only new", true) && (DateTime.Now - file.Airdate).TotalDays > 21))
+            {
+                return;
+            }
+
+            var format = Settings.Get("Twitter Status Format", Twitter.DefaultStatusFormat);
+            if (string.IsNullOrWhiteSpace(format))
+            {
+                return;
+            }
+
+            try { Twitter.PostMessage(FileNames.Parser.FormatFileName(format, file).CutIfLonger(140)); } catch { }
         }
     }
 }
