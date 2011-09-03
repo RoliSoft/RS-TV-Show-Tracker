@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Social
+﻿namespace RoliSoft.TVShowTracker.Parsers.Social.Engines
 {
     using System;
     using System.Collections.Generic;
@@ -9,34 +9,78 @@
     using Hammock.Authentication.OAuth;
     using Hammock.Web;
 
+    using Newtonsoft.Json.Linq;
+
     /// <summary>
-    /// Provides support for posting status updates to Twitter.
+    /// Provides support for posting status updates to Identi.ca.
     /// </summary>
-    public static class Twitter
+    public class Identica : OAuthEngine
     {
+        /// <summary>
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "Identi.ca";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://identi.ca/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "/RSTVShowTracker;component/Images/identica.png";
+            }
+        }
+
+        /// <summary>
+        /// Gets the default status format.
+        /// </summary>
+        public override string DefaultStatusFormat
+        {
+            get
+            {
+                return "Watching $show S$seasonE$episode - $title";
+            }
+        }
+
         /// <summary>
         /// The consumer key of the application.
         /// </summary>
-        public static string ConsumerKey = "4e8qhi2hiCQXO84kijKBg";
+        public static string ConsumerKey = "27a28acc5da8c9f80ca04190f372a954";
 
         /// <summary>
         /// The consumer secret of the application.
         /// </summary>
-        public static string ConsumerSecret = "AoUTWWKkVnHALa00M1TEoSzvIHaaWN18MKvqqX2Tiic";
-
-        /// <summary>
-        /// The default status format.
-        /// </summary>
-        public static string DefaultStatusFormat = "Watching $show S$seasonE$episode - $title";
+        public static string ConsumerSecret = "3dcd02846970bc4881312f598859f046";
 
         private static string _tempAuthToken;
         private static string _tempAuthTokenSecret;
         private static RestClient _restClient;
 
         /// <summary>
-        /// Initializes the <see cref="Twitter"/> class.
+        /// Initializes the <see cref="Identica"/> class.
         /// </summary>
-        static Twitter()
+        public Identica()
         {
             ServicePointManager.Expect100Continue = false;
 
@@ -45,28 +89,27 @@
                     QueryHandling        = QueryHandling.AppendToParameters,
                     DecompressionMethods = DecompressionMethods.GZip,
                     UserAgent            = Signature.Software + "/" + Signature.Version,
-                    FollowRedirects      = true,
+                    FollowRedirects      = true
                 };
         }
 
         /// <summary>
-        /// Checks whether the software has authorization to use Twitter.
+        /// Gets or sets the OAuth tokens.
         /// </summary>
-        /// <returns></returns>
-        public static bool OAuthTokensAvailable()
-        {
-            return Settings.Get("Twitter OAuth", new List<string>()).Count == 4;
-        }
+        /// <value>
+        /// The OAuth tokens.
+        /// </value>
+        public override List<string> Tokens { get; set; }
 
         /// <summary>
-        /// Generates an URL which will be opened in the users web browser to authorize the application.
+        /// Generates an URL which will be opened in the user's web browser to authorize the application.
         /// </summary>
         /// <returns>
         /// Authorization URL.
         /// </returns>
-        public static string GenerateAuthorizationLink()
+        public override string GenerateAuthorizationLink()
         {
-            _restClient.Authority   = "https://api.twitter.com/oauth";
+            _restClient.Authority   = "https://identi.ca/api/oauth";
             _restClient.Credentials = new OAuthCredentials
                 {
                     Type              = OAuthType.RequestToken,
@@ -74,7 +117,7 @@
                     ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
                     ConsumerKey       = ConsumerKey,
                     ConsumerSecret    = ConsumerSecret,
-                    CallbackUrl       = "oob",
+                    CallbackUrl       = "oob"
                 };
 
             var response = _restClient.Request(new RestRequest { Path = "/request_token" });
@@ -86,16 +129,19 @@
                 throw new Exception("Invalid response from server. (No tokens were returned.)");
             }
 
-            return "https://api.twitter.com/oauth/authorize?oauth_token=" + _tempAuthToken;
+            return "https://identi.ca/api/oauth/authorize?oauth_token=" + _tempAuthToken;
         }
 
         /// <summary>
-        /// Finishes the authorization by using the user-specified PIN and saves the token to the settings.
+        /// Finishes the authorization by using the user-specified PIN.
         /// </summary>
         /// <param name="pin">The PIN.</param>
-        public static void FinishAuthorizationWithPin(string pin)
+        /// <returns>
+        /// List of tokens required for further communication with the server.
+        /// </returns>
+        public override List<string> FinishAuthorizationWithPin(string pin)
         {
-            _restClient.Authority   = "https://api.twitter.com/oauth";
+            _restClient.Authority   = "https://identi.ca/api/oauth";
             _restClient.Credentials = new OAuthCredentials
                 {
                     Type              = OAuthType.AccessToken,
@@ -116,32 +162,8 @@
             {
                 throw new Exception("Invalid response from server. (No tokens were returned.)");
             }
-
-            Settings.Set("Twitter OAuth", new List<string>
-                {
-                    parsed["user_id"],
-                    parsed["screen_name"],
-                    parsed["oauth_token"],
-                    parsed["oauth_token_secret"]
-                });
-        }
-
-        /// <summary>
-        /// Posts the specified message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <returns>
-        /// Server response.
-        /// </returns>
-        public static void PostMessage(string message)
-        {
-            var oauth = Settings.Get<List<string>>("Twitter OAuth");
-            if (oauth == null || oauth.Count != 4)
-            {
-                throw new InvalidCredentialException();
-            }
-
-            _restClient.Authority   = "http://api.twitter.com";
+            
+            _restClient.Authority   = "http://identi.ca/api";
             _restClient.Credentials = new OAuthCredentials
                 {
                     Type              = OAuthType.ProtectedResource,
@@ -149,8 +171,43 @@
                     ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
                     ConsumerKey       = ConsumerKey,
                     ConsumerSecret    = ConsumerSecret,
-                    Token             = oauth[2],
-                    TokenSecret       = oauth[3],
+                    Token             = parsed["oauth_token"],
+                    TokenSecret       = parsed["oauth_token_secret"]
+                };
+
+            var response2 = _restClient.Request(new RestRequest { Path = "/account/verify_credentials.json" });
+            var user      = JObject.Parse(response2.Content);
+
+            return new List<string>
+                {
+                    user["id"].Value<int>().ToString(),
+                    user["name"].Value<string>(),
+                    parsed["oauth_token"],
+                    parsed["oauth_token_secret"]
+                };
+        }
+
+        /// <summary>
+        /// Posts the specified message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public override void PostMessage(string message)
+        {
+            if (Tokens == null || Tokens.Count != 4)
+            {
+                throw new InvalidCredentialException();
+            }
+
+            _restClient.Authority   = "http://identi.ca/api";
+            _restClient.Credentials = new OAuthCredentials
+                {
+                    Type              = OAuthType.ProtectedResource,
+                    SignatureMethod   = OAuthSignatureMethod.HmacSha1,
+                    ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                    ConsumerKey       = ConsumerKey,
+                    ConsumerSecret    = ConsumerSecret,
+                    Token             = Tokens[2],
+                    TokenSecret       = Tokens[3]
                 };
 
             var request = new RestRequest
@@ -159,7 +216,7 @@
                     Method = WebMethod.Post
                 };
 
-            request.AddParameter("status", message);
+            request.AddParameter("status", message.CutIfLonger(140));
 
             _restClient.Request(request);
         }

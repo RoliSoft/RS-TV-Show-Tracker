@@ -1,12 +1,14 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using System.Windows;
+    using System.Windows.Documents;
     using System.Windows.Media;
     using System.Windows.Media.Effects;
 
-    using RoliSoft.TVShowTracker.Social;
+    using RoliSoft.TVShowTracker.Parsers.Social.Engines;
 
     using VistaControls.TaskDialog;
 
@@ -23,6 +25,9 @@
             InitializeComponent();
         }
 
+        private Twitter _twitter;
+        private Identica _identica;
+
         /// <summary>
         /// Handles the Loaded event of the Window control.
         /// </summary>
@@ -37,33 +42,58 @@
 
             // Twitter
 
+            _twitter = new Twitter
+                {
+                    Tokens = Settings.Get("Twitter OAuth", new List<string>())
+                };
+
             postToTwitter.IsChecked  = Settings.Get<bool>("Post to Twitter");
             twitterOnlyNew.IsChecked = Settings.Get("Post to Twitter only new", true);
 
-            if (Twitter.OAuthTokensAvailable())
+            if (_twitter.Tokens.Count == 4)
             {
+                twitterUserName.Text = _twitter.Tokens[1];
+                twitterUserLink.NavigateUri = new Uri("http://twitter.com/" + _twitter.Tokens[1]);
                 twitterNoAuthMsg.Visibility = Visibility.Collapsed;
                 twitterOkAuthMsg.Visibility = Visibility.Visible;
                 twitterAuthStackPanel.Effect = new BlurEffect();
                 twitterAuthStackPanel.IsHitTestVisible = twitterPinTextBox.IsTabStop = twitterFinishAuthButton.IsTabStop = false;
             }
 
-            twitterStatusFormat.Text = Settings.Get("Twitter Status Format", Twitter.DefaultStatusFormat);
+            twitterStatusFormat.Text = Settings.Get("Twitter Status Format", _twitter.DefaultStatusFormat);
 
             // Identi.ca
+
+            _identica = new Identica
+                {
+                    Tokens = Settings.Get("Identi.ca OAuth", new List<string>())
+                };
+
 
             postToIdentica.IsChecked = Settings.Get<bool>("Post to Identi.ca");
             identicaOnlyNew.IsChecked = Settings.Get("Post to Identi.ca only new", true);
 
-            if (Identica.OAuthTokensAvailable())
+            if (_twitter.Tokens.Count == 4)
             {
+                identicaUserName.Text = _identica.Tokens[1];
+                identicaUserLink.NavigateUri = new Uri("http://identi.ca/" + _identica.Tokens[1]);
                 identicaNoAuthMsg.Visibility = Visibility.Collapsed;
                 identicaOkAuthMsg.Visibility = Visibility.Visible;
                 identicaAuthStackPanel.Effect = new BlurEffect();
                 identicaAuthStackPanel.IsHitTestVisible = identicaPinTextBox.IsTabStop = identicaFinishAuthButton.IsTabStop = false;
             }
 
-            identicaStatusFormat.Text = Settings.Get("Identi.ca Status Format", Identica.DefaultStatusFormat);
+            identicaStatusFormat.Text = Settings.Get("Identi.ca Status Format", _identica.DefaultStatusFormat);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the Hyperlink control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void HyperlinkClick(object sender, RoutedEventArgs e)
+        {
+            Utils.Run((sender as Hyperlink).NavigateUri.ToString());
         }
 
         #region Twitter
@@ -99,7 +129,7 @@
 
             try
             {
-                Utils.Run(Twitter.GenerateAuthorizationLink());
+                Utils.Run(_twitter.GenerateAuthorizationLink());
             }
             catch (Exception ex)
             {
@@ -124,10 +154,14 @@
         {
             try
             {
-                Twitter.FinishAuthorizationWithPin(twitterPinTextBox.Text.Trim());
+                var tokens = _twitter.FinishAuthorizationWithPin(twitterPinTextBox.Text.Trim());
 
-                if (Twitter.OAuthTokensAvailable())
+                Settings.Set("Twitter OAuth", _twitter.Tokens = tokens);
+
+                if (_twitter.Tokens.Count == 4)
                 {
+                    twitterUserName.Text = _twitter.Tokens[1];
+                    twitterUserLink.NavigateUri = new Uri("http://twitter.com/" + _twitter.Tokens[1]);
                     twitterNoAuthMsg.Visibility = Visibility.Collapsed;
                     twitterOkAuthMsg.Visibility = Visibility.Visible;
                     twitterAuthStackPanel.Effect = new BlurEffect();
@@ -257,7 +291,7 @@
 
             try
             {
-                Utils.Run(Identica.GenerateAuthorizationLink());
+                Utils.Run(_identica.GenerateAuthorizationLink());
             }
             catch (Exception ex)
             {
@@ -282,10 +316,14 @@
         {
             try
             {
-                Identica.FinishAuthorizationWithPin(identicaPinTextBox.Text.Trim());
+                var tokens = _identica.FinishAuthorizationWithPin(identicaPinTextBox.Text.Trim());
 
-                if (Identica.OAuthTokensAvailable())
+                Settings.Set("Identi.ca OAuth", _identica.Tokens = tokens);
+
+                if (_identica.Tokens.Count == 4)
                 {
+                    identicaUserName.Text = _identica.Tokens[1];
+                    identicaUserLink.NavigateUri = new Uri("http://identi.ca/" + _identica.Tokens[1]);
                     identicaNoAuthMsg.Visibility = Visibility.Collapsed;
                     identicaOkAuthMsg.Visibility = Visibility.Visible;
                     identicaAuthStackPanel.Effect = new BlurEffect();

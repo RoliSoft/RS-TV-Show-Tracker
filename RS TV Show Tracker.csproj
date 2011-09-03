@@ -143,9 +143,11 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\PhazeDDL.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
+    <Compile Include="Parsers\Social\OAuthEngine.cs" />
+    <Compile Include="Parsers\Social\SocialEngine.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
-    <Compile Include="Social\Identica.cs" />
-    <Compile Include="Social\Twitter.cs" />
+    <Compile Include="Parsers\Social\Engines\Identica.cs" />
+    <Compile Include="Parsers\Social\Engines\Twitter.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\FileName.cs" />

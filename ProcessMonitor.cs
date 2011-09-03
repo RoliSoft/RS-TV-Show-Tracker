@@ -8,7 +8,7 @@
     using System.Text.RegularExpressions;
 
     using RoliSoft.TVShowTracker.FileNames;
-    using RoliSoft.TVShowTracker.Social;
+    using RoliSoft.TVShowTracker.Parsers.Social;
 
     using Parser = RoliSoft.TVShowTracker.ShowNames.Parser;
 
@@ -155,20 +155,40 @@
         /// <param name="file">The identified file.</param>
         public static void PostToSocial(ShowFile file)
         {
-            if (!Settings.Get<bool>("Post to Twitter")
-             || !Twitter.OAuthTokensAvailable()
-             || (Settings.Get("Post to Twitter only new", true) && (DateTime.Now - file.Airdate).TotalDays > 21))
+            foreach (var engine in typeof(SocialEngine).GetDerivedTypes().Select(type => Activator.CreateInstance(type) as SocialEngine))
             {
-                return;
-            }
+                if (!Settings.Get<bool>("Post to " + engine.Name))
+                {
+                    continue;
+                }
 
-            var format = Settings.Get("Twitter Status Format", Twitter.DefaultStatusFormat);
-            if (string.IsNullOrWhiteSpace(format))
-            {
-                return;
-            }
+                if (engine is OAuthEngine)
+                {
+                    var tokens = Settings.Get<List<string>>(engine.Name + " OAuth");
 
-            try { Twitter.PostMessage(FileNames.Parser.FormatFileName(format, file).CutIfLonger(140)); } catch { }
+                    if (tokens != null && tokens.Count != 0)
+                    {
+                        ((OAuthEngine)engine).Tokens = tokens;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                if (Settings.Get("Post to " + engine.Name + " only new", true) && (DateTime.Now - file.Airdate).TotalDays > 21)
+                {
+                    continue;
+                }
+
+                var format = Settings.Get(engine.Name + " Status Format", engine.DefaultStatusFormat);
+                if (string.IsNullOrWhiteSpace(format))
+                {
+                    return;
+                }
+
+                try { engine.PostMessage(FileNames.Parser.FormatFileName(format, file)); } catch { }
+            }
         }
     }
 }
