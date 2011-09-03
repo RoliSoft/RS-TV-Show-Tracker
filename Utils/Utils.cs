@@ -927,6 +927,26 @@
         }
 
         /// <summary>
+        /// Extracts the key-values in a query string into a dictionary.
+        /// </summary>
+        /// <param name="qs">The query string.</param>
+        /// <returns>
+        /// Extracted key-values.
+        /// </returns>
+        public static Dictionary<string, string> ParseQueryString(string qs)
+        {
+            var dic = new Dictionary<string, string>();
+            var mc  = Regex.Matches(qs, @"&?(?<key>[^=]+)=(?<value>[^&$]+)");
+
+            foreach (Match m in mc)
+            {
+                dic[m.Groups["key"].Value] = Uri.UnescapeDataString(m.Groups["value"].Value);
+            }
+
+            return dic;
+        } 
+
+        /// <summary>
         /// A custom encoding to denote Base64-encoded content.
         /// </summary>
         public class Base64Encoding : ASCIIEncoding

@@ -181,7 +181,7 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://www.twitterizer.net/">Twitterizer</Hyperlink>
+                                <Hyperlink NavigateUri="http://github.com/danielcrenna/hammock">Hammock</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>
@@ -327,6 +327,16 @@
                         <ListItem>
                             <Paragraph>
                                 <Hyperlink NavigateUri="http://lab.rolisoft.net/tv/">RS TV Show Recommendation</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://twitter.com/">Twitter</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://identi.ca/">Identi.ca</Hyperlink>
                             </Paragraph>
                         </ListItem>
                     </List>

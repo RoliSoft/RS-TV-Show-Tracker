@@ -9,20 +9,22 @@
     using Hammock.Authentication.OAuth;
     using Hammock.Web;
 
+    using Newtonsoft.Json.Linq;
+
     /// <summary>
-    /// Provides support for posting status updates to Twitter.
+    /// Provides support for posting status updates to Identi.ca.
     /// </summary>
-    public static class Twitter
+    public static class Identica
     {
         /// <summary>
         /// The consumer key of the application.
         /// </summary>
-        public static string ConsumerKey = "4e8qhi2hiCQXO84kijKBg";
+        public static string ConsumerKey = "27a28acc5da8c9f80ca04190f372a954";
 
         /// <summary>
         /// The consumer secret of the application.
         /// </summary>
-        public static string ConsumerSecret = "AoUTWWKkVnHALa00M1TEoSzvIHaaWN18MKvqqX2Tiic";
+        public static string ConsumerSecret = "3dcd02846970bc4881312f598859f046";
 
         /// <summary>
         /// The default status format.
@@ -34,9 +36,9 @@
         private static RestClient _restClient;
 
         /// <summary>
-        /// Initializes the <see cref="Twitter"/> class.
+        /// Initializes the <see cref="Identica"/> class.
         /// </summary>
-        static Twitter()
+        static Identica()
         {
             ServicePointManager.Expect100Continue = false;
 
@@ -50,12 +52,12 @@
         }
 
         /// <summary>
-        /// Checks whether the software has authorization to use Twitter.
+        /// Checks whether the software has authorization to use Identi.ca.
         /// </summary>
         /// <returns></returns>
         public static bool OAuthTokensAvailable()
         {
-            return Settings.Get("Twitter OAuth", new List<string>()).Count == 4;
+            return Settings.Get("Identi.ca OAuth", new List<string>()).Count == 4;
         }
 
         /// <summary>
@@ -66,7 +68,7 @@
         /// </returns>
         public static string GenerateAuthorizationLink()
         {
-            _restClient.Authority   = "https://api.twitter.com/oauth";
+            _restClient.Authority   = "https://identi.ca/api/oauth";
             _restClient.Credentials = new OAuthCredentials
                 {
                     Type              = OAuthType.RequestToken,
@@ -86,7 +88,7 @@
                 throw new Exception("Invalid response from server. (No tokens were returned.)");
             }
 
-            return "https://api.twitter.com/oauth/authorize?oauth_token=" + _tempAuthToken;
+            return "https://identi.ca/api/oauth/authorize?oauth_token=" + _tempAuthToken;
         }
 
         /// <summary>
@@ -95,7 +97,7 @@
         /// <param name="pin">The PIN.</param>
         public static void FinishAuthorizationWithPin(string pin)
         {
-            _restClient.Authority   = "https://api.twitter.com/oauth";
+            _restClient.Authority   = "https://identi.ca/api/oauth";
             _restClient.Credentials = new OAuthCredentials
                 {
                     Type              = OAuthType.AccessToken,
@@ -116,11 +118,26 @@
             {
                 throw new Exception("Invalid response from server. (No tokens were returned.)");
             }
-
-            Settings.Set("Twitter OAuth", new List<string>
+            
+            _restClient.Authority   = "http://identi.ca/api";
+            _restClient.Credentials = new OAuthCredentials
                 {
-                    parsed["user_id"],
-                    parsed["screen_name"],
+                    Type              = OAuthType.ProtectedResource,
+                    SignatureMethod   = OAuthSignatureMethod.HmacSha1,
+                    ParameterHandling = OAuthParameterHandling.HttpAuthorizationHeader,
+                    ConsumerKey       = ConsumerKey,
+                    ConsumerSecret    = ConsumerSecret,
+                    Token             = parsed["oauth_token"],
+                    TokenSecret       = parsed["oauth_token_secret"],
+                };
+
+            var response2 = _restClient.Request(new RestRequest { Path = "/account/verify_credentials.json" });
+            var user      = JObject.Parse(response2.Content);
+
+            Settings.Set("Identi.ca OAuth", new List<string>
+                {
+                    user["id"].Value<int>().ToString(),
+                    user["name"].Value<string>(),
                     parsed["oauth_token"],
                     parsed["oauth_token_secret"]
                 });
@@ -135,13 +152,13 @@
         /// </returns>
         public static void PostMessage(string message)
         {
-            var oauth = Settings.Get<List<string>>("Twitter OAuth");
+            var oauth = Settings.Get<List<string>>("Identi.ca OAuth");
             if (oauth == null || oauth.Count != 4)
             {
                 throw new InvalidCredentialException();
             }
 
-            _restClient.Authority   = "http://api.twitter.com";
+            _restClient.Authority   = "http://identi.ca/api";
             _restClient.Credentials = new OAuthCredentials
                 {
                     Type              = OAuthType.ProtectedResource,

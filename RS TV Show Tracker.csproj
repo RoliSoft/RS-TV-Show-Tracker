@@ -72,6 +72,7 @@
     <Reference Include="CookComputing.XmlRpcV2">
       <HintPath>.\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
+    <Reference Include="Hammock.ClientProfile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL" />
     <Reference Include="HtmlAgilityPack">
       <HintPath>.\HtmlAgilityPack.dll</HintPath>
     </Reference>
@@ -107,7 +108,6 @@
     <Reference Include="Transitionals">
       <HintPath>.\Transitionals.dll</HintPath>
     </Reference>
-    <Reference Include="Twitterizer2, Version=2.3.3.21964, Culture=neutral, PublicKeyToken=69d1469eac671567, processorArchitecture=MSIL" />
     <Reference Include="UIAutomationProvider" />
     <Reference Include="VistaControls, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="WindowsBase" />
@@ -144,6 +144,7 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
+    <Compile Include="Social\Identica.cs" />
     <Compile Include="Social\Twitter.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
@@ -690,8 +691,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
+    <Content Include="Dependencies\Hammock.ClientProfile.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
     <Content Include="Dependencies\Twitterizer2.dll" />
+    <Resource Include="Images\identica.png" />
     <Resource Include="Images\facebook.png" />
     <Resource Include="Images\twitter.png" />
     <Resource Include="Images\bird.png" />
