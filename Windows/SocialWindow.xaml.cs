@@ -27,6 +27,7 @@
 
         private Twitter _twitter;
         private Identica _identica;
+        private Facebook _facebook;
 
         /// <summary>
         /// Handles the Loaded event of the Window control.
@@ -69,11 +70,10 @@
                     Tokens = Settings.Get("Identi.ca OAuth", new List<string>())
                 };
 
-
             postToIdentica.IsChecked = Settings.Get<bool>("Post to Identi.ca");
             identicaOnlyNew.IsChecked = Settings.Get("Post to Identi.ca only new", true);
 
-            if (_twitter.Tokens.Count == 4)
+            if (_identica.Tokens.Count == 4)
             {
                 identicaUserName.Text = _identica.Tokens[1];
                 identicaUserLink.NavigateUri = new Uri("http://identi.ca/" + _identica.Tokens[1]);
@@ -84,6 +84,26 @@
             }
 
             identicaStatusFormat.Text = Settings.Get("Identi.ca Status Format", _identica.DefaultStatusFormat);
+
+            // Facebook
+
+            _facebook = new Facebook
+                {
+                    Tokens = Settings.Get("Facebook OAuth", new List<string>())
+                };
+
+            postToFacebook.IsChecked = Settings.Get<bool>("Post to Facebook");
+            facebookOnlyNew.IsChecked = Settings.Get("Post to Facebook only new", true);
+
+            if (_facebook.Tokens.Count == 4)
+            {
+                facebookUserName.Text = _facebook.Tokens[1];
+                facebookUserLink.NavigateUri = new Uri("http://facebook.com/profile.php?id=" + _facebook.Tokens[0]);
+                facebookNoAuthMsg.Visibility = Visibility.Collapsed;
+                facebookOkAuthMsg.Visibility = Visibility.Visible;
+            }
+
+            facebookStatusFormat.Text = Settings.Get("Facebook Status Format", _facebook.DefaultStatusFormat);
         }
 
         /// <summary>
@@ -417,6 +437,164 @@
         private void IdenticaOnlyNewUnchecked(object sender, RoutedEventArgs e)
         {
             Settings.Set("Post to Identi.ca only new", false);
+        }
+        #endregion
+
+        #region Facebook
+        /// <summary>
+        /// Handles the Checked event of the postToFacebook control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void PostToFacebookChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Post to Facebook", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the postToFacebook control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void PostToFacebookUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Post to Facebook", false);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the facebookAuthInBrowserButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FacebookAuthInBrowserButtonClick(object sender, RoutedEventArgs e)
+        {
+            string code;
+
+            try
+            {
+                var faw = new FacebookAuthWindow(_facebook);
+                faw.ShowDialog();
+
+                if (string.IsNullOrWhiteSpace(faw.Code))
+                {
+                    throw new Exception("Invalid response from server. (No tokens were returned.)");
+                }
+                else
+                {
+                    code = faw.Code;
+                }
+            }
+            catch (Exception ex)
+            {
+                new TaskDialog
+                    {
+                        CommonIcon          = TaskDialogIcon.Stop,
+                        Title               = "Facebook OAuth",
+                        Instruction         = "Error",
+                        Content             = "An error occured while generating an authorization link.",
+                        ExpandedControlText = "Show exception message",
+                        ExpandedInformation = ex.Message
+                    }.Show();
+                return;
+            }
+
+            try
+            {
+                var tokens = _facebook.FinishAuthorizationWithPin(code);
+
+                Settings.Set("Facebook OAuth", _facebook.Tokens = tokens);
+
+                if (_facebook.Tokens.Count == 4)
+                {
+                    facebookUserName.Text = _facebook.Tokens[1];
+                    facebookUserLink.NavigateUri = new Uri("http://facebook.com/profile.php?id=" + _facebook.Tokens[0]);
+                    facebookNoAuthMsg.Visibility = Visibility.Collapsed;
+                    facebookOkAuthMsg.Visibility = Visibility.Visible;
+                }
+            }
+            catch (Exception ex)
+            {
+                new TaskDialog
+                    {
+                        CommonIcon          = TaskDialogIcon.Stop,
+                        Title               = "Facebook OAuth",
+                        Instruction         = "Error",
+                        Content             = "An error occured while getting the tokens for the specified PIN.",
+                        ExpandedControlText = "Show exception message",
+                        ExpandedInformation = ex.Message
+                    }.Show();
+            }
+        }
+
+        /*/// <summary>
+        /// Handles the Click event of the facebookFinishAuthButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FacebookFinishAuthButtonClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var tokens = _facebook.FinishAuthorizationWithPin(facebookPinTextBox.Text.Trim());
+
+                Settings.Set("Facebook OAuth", _facebook.Tokens = tokens);
+
+                if (_facebook.Tokens.Count == 4)
+                {
+                    facebookUserName.Text = _facebook.Tokens[1];
+                    facebookUserLink.NavigateUri = new Uri("http://facebook.com/" + _facebook.Tokens[1]);
+                    facebookNoAuthMsg.Visibility = Visibility.Collapsed;
+                    facebookOkAuthMsg.Visibility = Visibility.Visible;
+                    facebookAuthStackPanel.Effect = new BlurEffect();
+                    facebookAuthStackPanel.IsHitTestVisible = facebookPinTextBox.IsTabStop = facebookFinishAuthButton.IsTabStop = false;
+                    facebookPinTextBox.Foreground = Brushes.Gray;
+                    facebookPinTextBox.Text = "Enter PIN here";
+                    facebookFinishAuthButton.IsEnabled = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                new TaskDialog
+                {
+                    CommonIcon = TaskDialogIcon.Stop,
+                    Title = "Facebook OAuth",
+                    Instruction = "Error",
+                    Content = "An error occured while getting the tokens for the specified PIN.",
+                    ExpandedControlText = "Show exception message",
+                    ExpandedInformation = ex.Message
+                }.Show();
+            }
+        }*/
+        
+        /// <summary>
+        /// Handles the TextChanged event of the facebookStatusFormat control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
+        private void FacebookStatusFormatTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            Settings.Set("Facebook Status Format", facebookStatusFormat.Text);
+            facebookStatusFormatExample.Text = FileNames.Parser.FormatFileName(facebookStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the facebookOnlyNew control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FacebookOnlyNewChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Post to Facebook only new", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the facebookOnlyNew control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FacebookOnlyNewUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Post to Facebook only new", false);
         }
         #endregion
     }

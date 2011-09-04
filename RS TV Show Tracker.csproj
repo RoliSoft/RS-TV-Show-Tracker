@@ -143,6 +143,7 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\PhazeDDL.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
+    <Compile Include="Parsers\Social\Engines\Facebook.cs" />
     <Compile Include="Parsers\Social\OAuthEngine.cs" />
     <Compile Include="Parsers\Social\SocialEngine.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
@@ -239,6 +240,9 @@
     </Compile>
     <Compile Include="Windows\CaptchaWindow.xaml.cs">
       <DependentUpon>CaptchaWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\FacebookAuthWindow.xaml.cs">
+      <DependentUpon>FacebookAuthWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\SocialWindow.xaml.cs">
       <DependentUpon>SocialWindow.xaml</DependentUpon>
@@ -346,6 +350,10 @@
     <Page Include="Windows\CaptchaWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\FacebookAuthWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\SocialWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

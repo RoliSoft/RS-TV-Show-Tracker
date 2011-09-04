@@ -1,0 +1,8 @@
+﻿<Window x:Class="RoliSoft.TVShowTracker.FacebookAuthWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
+        Title="Facebook OAuth" Height="391" Width="546" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/facebook.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+    <Grid>
+        <WebBrowser Name="webBrowser" Navigating="WebBrowserNavigating" />
+    </Grid>
+</Window>
