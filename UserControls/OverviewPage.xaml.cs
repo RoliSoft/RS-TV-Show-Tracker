@@ -512,11 +512,6 @@
             listView.SelectedIndex = listid - 1;
             listView.ScrollIntoView(listView.SelectedItem);
 
-            if (Synchronization.Status.Enabled)
-            {
-                Synchronization.Status.Engine.ReorderList();
-            }
-
             Database.TVShows = Database.GetTVShows();
             MainWindow.Active.DataChanged(false);
         }
@@ -550,11 +545,6 @@
             listView.SelectedIndex = listid + 1;
             listView.ScrollIntoView(listView.SelectedItem);
 
-            if (Synchronization.Status.Enabled)
-            {
-                Synchronization.Status.Engine.ReorderList();
-            }
-
             Database.TVShows = Database.GetTVShows();
             MainWindow.Active.DataChanged(false);
         }
@@ -585,11 +575,6 @@
 
             if (td.Show() == TaskDialogResult.Yes)
             {
-                if (Synchronization.Status.Enabled)
-                {
-                    Synchronization.Status.Engine.RemoveShow(showid.ToString());
-                }
-
                 Database.Execute("delete from tvshows where showid = ?", showid);
                 Database.Execute("delete from showdata where showid = ?", showid);
                 Database.Execute("delete from episodes where showid = ?", showid);

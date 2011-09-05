@@ -43,14 +43,6 @@
             try { CheckSoftwareUpdate(); }           catch { }
             try { CheckUpdate(); }                   catch { }
             try { ProcessMonitor.CheckOpenFiles(); } catch { }
-            try
-            {
-                if (Synchronization.Status.Enabled)
-                {
-                    Synchronization.Status.Engine.GetRemoteChanges();
-                }
-            }
-            catch { }
         }
 
         /// <summary>

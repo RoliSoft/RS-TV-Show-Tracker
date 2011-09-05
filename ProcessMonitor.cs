@@ -111,37 +111,29 @@
         /// <param name="file">The identified file.</param>
         public static void MarkAsSeen(int showid, ShowFile file)
         {
-            var newEp = false;
-            var eps = file.Episode.SecondEpisode.HasValue
-                      ? Enumerable.Range(file.Episode.Episode, (file.Episode.SecondEpisode.Value - file.Episode.Episode + 1)).ToArray()
-                      : new[] { file.Episode.Episode };
+            var @new = false;
+            var eps  = file.Episode.SecondEpisode.HasValue
+                       ? Enumerable.Range(file.Episode.Episode, (file.Episode.SecondEpisode.Value - file.Episode.Episode + 1)).ToArray()
+                       : new[] { file.Episode.Episode };
 
             foreach (var epnr in eps)
             {
                 var epid = Database.GetEpisodeID(showid, file.Episode.Season, epnr);
-
                 if (epid == int.MinValue)
                 {
                     continue;
                 }
 
-                if (Database.Query("select * from tracking where showid = ? and episodeid = ?", showid, epid).Count == 0)
+                if (@new = (Database.Query("select * from tracking where showid = ? and episodeid = ?", showid, epid).Count == 0))
                 {
                     Database.Execute("insert into tracking values (?, ?)", showid, epid);
 
                     Database.Trackings.Add(epid);
                     Database.Episodes.First(e => e.EpisodeID == epid).Watched = true;
-
-                    newEp = true;
                 }
             }
 
-            if (Synchronization.Status.Enabled)
-            {
-                Synchronization.Status.Engine.MarkEpisodes(showid.ToString(), eps.Select(x => x + (file.Episode.Season * 1000)).ToList());
-            }
-
-            if (newEp)
+            if (@new)
             {
                 PostToSocial(file);
             }

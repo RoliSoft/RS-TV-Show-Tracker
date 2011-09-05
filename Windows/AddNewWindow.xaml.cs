@@ -411,12 +411,7 @@
 
                     // asynchronously update lab.rolisoft.net's cache
                     Updater.UpdateRemoteCache(new Tuple<string, string>(_guide.GetType().Name, show.ID), tv);
-
-                    if (Synchronization.Status.Enabled)
-                    {
-                        Synchronization.Status.Engine.AddShow(_dbid.ToString());
-                    }
-
+                    
                     // show finish page
                     Dispatcher.Invoke((Action)(() =>
                         {
@@ -462,11 +457,6 @@
 
             Database.Execute("delete from tracking where showid = ?", _dbid);
             Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and episodeid <= ?", _dbid, episode + (season * 1000) + (_dbid * 100 * 1000));
-
-            if (Synchronization.Status.Enabled)
-            {
-                //Synchronization.Status.Engine.MarkEpisodes(_dbid, Synchronization.Engines.RoliSoftDotNetAPI.SerializeMarkedEpisodes(_dbid));
-            }
 
             Database.CopyToMemory();
             MainWindow.Active.DataChanged();
