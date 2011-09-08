@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Documents;
@@ -48,8 +49,7 @@
                     Tokens = Settings.Get("Twitter OAuth", new List<string>())
                 };
 
-            postToTwitter.IsChecked  = Settings.Get<bool>("Post to Twitter");
-            twitterOnlyNew.IsChecked = Settings.Get("Post to Twitter only new", true);
+            postToTwitter.IsChecked = Settings.Get<bool>("Post to Twitter");
 
             if (_twitter.Tokens.Count == 4)
             {
@@ -71,7 +71,6 @@
                 };
 
             postToIdentica.IsChecked = Settings.Get<bool>("Post to Identi.ca");
-            identicaOnlyNew.IsChecked = Settings.Get("Post to Identi.ca only new", true);
 
             if (_identica.Tokens.Count == 4)
             {
@@ -93,7 +92,6 @@
                 };
 
             postToFacebook.IsChecked = Settings.Get<bool>("Post to Facebook");
-            facebookOnlyNew.IsChecked = Settings.Get("Post to Facebook only new", true);
 
             if (_facebook.Tokens.Count == 4)
             {
@@ -104,6 +102,41 @@
             }
 
             facebookStatusFormat.Text = Settings.Get("Facebook Status Format", _facebook.DefaultStatusFormat);
+
+            // Settings
+
+            onlyNew.IsChecked = Settings.Get("Post only recent", true);
+
+            switch (Settings.Get("Post restrictions list type", "black"))
+            {
+                default:
+                case "black":
+                    blackListRadioButton.IsChecked = true;
+                    listTypeText.Text = "Specify TV shows to block from being posted:";
+                    break;
+
+                case "white":
+                    whiteListRadioButton.IsChecked = true;
+                    listTypeText.Text = "Specify TV shows to allow to be posted:";
+                    break;
+            }
+
+            foreach (var show in Settings.Get("Post restrictions list", new List<int>()))
+            {
+                if (Database.TVShows.ContainsKey(show))
+                {
+                    listBox.Items.Add(Database.TVShows[show].Name);
+                }
+                else
+                {
+                    listBox.Items.Add("Unknown show #" + show);
+                }
+            }
+
+            foreach (var show in Database.TVShows.Values.OrderBy(x => x.Name))
+            {
+                listComboBox.Items.Add(show.Name);
+            }
         }
 
         /// <summary>
@@ -256,26 +289,6 @@
             Settings.Set("Twitter Status Format", twitterStatusFormat.Text);
             twitterStatusFormatExample.Text = FileNames.Parser.FormatFileName(twitterStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
         }
-
-        /// <summary>
-        /// Handles the Checked event of the twitterOnlyNew control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void TwitterOnlyNewChecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Post to Twitter only new", true);
-        }
-
-        /// <summary>
-        /// Handles the Unchecked event of the twitterOnlyNew control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void TwitterOnlyNewUnchecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Post to Twitter only new", false);
-        }
         #endregion
 
         #region Identica
@@ -418,26 +431,6 @@
             Settings.Set("Identi.ca Status Format", identicaStatusFormat.Text);
             identicaStatusFormatExample.Text = FileNames.Parser.FormatFileName(identicaStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
         }
-
-        /// <summary>
-        /// Handles the Checked event of the identicaOnlyNew control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void IdenticaOnlyNewChecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Post to Identi.ca only new", true);
-        }
-
-        /// <summary>
-        /// Handles the Unchecked event of the identicaOnlyNew control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void IdenticaOnlyNewUnchecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Post to Identi.ca only new", false);
-        }
         #endregion
 
         #region Facebook
@@ -525,47 +518,6 @@
                     }.Show();
             }
         }
-
-        /*/// <summary>
-        /// Handles the Click event of the facebookFinishAuthButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void FacebookFinishAuthButtonClick(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var tokens = _facebook.FinishAuthorizationWithPin(facebookPinTextBox.Text.Trim());
-
-                Settings.Set("Facebook OAuth", _facebook.Tokens = tokens);
-
-                if (_facebook.Tokens.Count == 4)
-                {
-                    facebookUserName.Text = _facebook.Tokens[1];
-                    facebookUserLink.NavigateUri = new Uri("http://facebook.com/" + _facebook.Tokens[1]);
-                    facebookNoAuthMsg.Visibility = Visibility.Collapsed;
-                    facebookOkAuthMsg.Visibility = Visibility.Visible;
-                    facebookAuthStackPanel.Effect = new BlurEffect();
-                    facebookAuthStackPanel.IsHitTestVisible = facebookPinTextBox.IsTabStop = facebookFinishAuthButton.IsTabStop = false;
-                    facebookPinTextBox.Foreground = Brushes.Gray;
-                    facebookPinTextBox.Text = "Enter PIN here";
-                    facebookFinishAuthButton.IsEnabled = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                new TaskDialog
-                {
-                    CommonIcon = TaskDialogIcon.Stop,
-                    Title = "Facebook OAuth",
-                    Instruction = "Error",
-                    Content = "An error occured while getting the tokens for the specified PIN.",
-                    ExpandedControlText = "Show exception message",
-                    ExpandedInformation = ex.Message
-                }.Show();
-            }
-        }*/
-        
         /// <summary>
         /// Handles the TextChanged event of the facebookStatusFormat control.
         /// </summary>
@@ -576,26 +528,92 @@
             Settings.Set("Facebook Status Format", facebookStatusFormat.Text);
             facebookStatusFormatExample.Text = FileNames.Parser.FormatFileName(facebookStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
         }
+        #endregion
 
+        #region Settings
         /// <summary>
-        /// Handles the Checked event of the facebookOnlyNew control.
+        /// Handles the Checked event of the onlyNew control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void FacebookOnlyNewChecked(object sender, RoutedEventArgs e)
+        private void OnlyNewChecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Post to Facebook only new", true);
+            Settings.Set("Post only recent", true);
         }
 
         /// <summary>
-        /// Handles the Unchecked event of the facebookOnlyNew control.
+        /// Handles the Unchecked event of the onlyNew control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void FacebookOnlyNewUnchecked(object sender, RoutedEventArgs e)
+        private void OnlyNewUnchecked(object sender, RoutedEventArgs e)
         {
-            Settings.Set("Post to Facebook only new", false);
+            Settings.Set("Post only recent", false);
         }
         #endregion
+
+        /// <summary>
+        /// Handles the Click event of the whiteListRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void WhiteListRadioButtonClick(object sender, RoutedEventArgs e)
+        {
+            listTypeText.Text = "Specify TV shows to allow to be posted:";
+            Settings.Set("Post restrictions list type", "white");
+        }
+
+        /// <summary>
+        /// Handles the Click event of the blackListRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void BlackListRadioButtonClick(object sender, RoutedEventArgs e)
+        {
+            listTypeText.Text = "Specify TV shows to block from being posted:";
+            Settings.Set("Post restrictions list type", "black");
+        }
+
+        /// <summary>
+        /// Handles the Click event of the listAddButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ListAddButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (listComboBox.SelectedIndex == -1) return;
+
+            var list = Settings.Get("Post restrictions list", new List<int>());
+            var shid = Database.TVShows.Values.First(x => x.Name == (string)listComboBox.SelectedValue).ShowID;
+
+            if (!list.Contains(shid))
+            {
+                listBox.Items.Add(listComboBox.SelectedValue);
+                list.Add(shid);
+                Settings.Set("Post restrictions list", list);
+            }
+
+            listComboBox.SelectedIndex = -1;
+        }
+
+        /// <summary>
+        /// Handles the Click event of the listRemoveButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ListRemoveButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (listBox.SelectedIndex == -1) return;
+
+            var list = Settings.Get("Post restrictions list", new List<int>());
+            var shid = Database.TVShows.Values.First(x => x.Name == (string)listBox.SelectedValue).ShowID;
+
+            if (list.Contains(shid))
+            {
+                listBox.Items.RemoveAt(listBox.SelectedIndex);
+                list.Remove(shid);
+                Settings.Set("Post restrictions list", list);
+            }
+        }
     }
 }

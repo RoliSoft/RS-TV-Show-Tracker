@@ -147,7 +147,7 @@
 
                     if (array.Count == 0)
                     {
-                        return new List<string>();
+                        return null;
                     }
 
                     if (!typeDiff && lastType != null)
@@ -157,7 +157,7 @@
                             case "System.String":
                                 return array.Cast<string>().ToList();
 
-                            case "System.Integer":
+                            case "System.Int32":
                                 return array.Cast<int>().ToList();
 
                             case "System.Double":

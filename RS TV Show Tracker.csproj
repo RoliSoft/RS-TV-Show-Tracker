@@ -704,6 +704,10 @@
     <Content Include="Dependencies\Hammock.ClientProfile.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
     <Content Include="Dependencies\Twitterizer2.dll" />
+    <Resource Include="Images\flag-black.png" />
+    <Resource Include="Images\flag-white.png" />
+    <Resource Include="Images\flag.png" />
+    <Resource Include="Images\buzz.png" />
     <Resource Include="Images\identica.png" />
     <Resource Include="Images\facebook.png" />
     <Resource Include="Images\twitter.png" />
