@@ -944,7 +944,28 @@
             }
 
             return dic;
-        } 
+        }
+
+        /// <summary>
+        /// Creates a slug from the specified title.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        /// <returns>
+        /// Slug.
+        /// </returns>
+        public static string CreateSlug(string title)
+        {
+            // remove HTML entities
+            title = HtmlEntity.DeEntitize(title);
+
+            // remove diacritics. don't ask why this works, it just does.
+            title = Encoding.ASCII.GetString(Encoding.GetEncoding("Cyrillic").GetBytes(title));
+
+            // remove stopwords, year, and special characters including spaces.
+            title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|\b(and|the|of|a)\b|[^a-z0-9])", string.Empty).Trim();
+
+            return title;
+        }
 
         /// <summary>
         /// A custom encoding to denote Base64-encoded content.

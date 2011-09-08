@@ -23,7 +23,7 @@
         {
             get
             {
-                //return "home.rolisoft.net/api/";
+                return "home.rolisoft.net/api/";
                 return "lab.rolisoft.net/api/";
             }
         }
@@ -182,9 +182,9 @@
         /// Gets a list of known shows on the server.
         /// </summary>
         /// <returns>List of shows.</returns>
-        public static Generic<List<string>> GetListOfShows()
+        public static Generic<List<string[]>> GetListOfShows()
         {
-            return InvokeRemoteMethod<Generic<List<string>>>("GetListOfShows");
+            return InvokeRemoteMethod<Generic<List<string[]>>>("GetListOfShows");
         }
 
         /// <summary>

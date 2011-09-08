@@ -151,7 +151,7 @@
     <Compile Include="Parsers\Social\Engines\Twitter.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
-    <Compile Include="FileNames\FileName.cs" />
+    <Compile Include="FileNames\ShowFile.cs" />
     <Compile Include="FileNames\Tests.cs" />
     <Compile Include="Synchronization\SyncEngine.cs" />
     <Compile Include="Tables\Episode.cs" />

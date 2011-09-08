@@ -11,7 +11,6 @@
     using HtmlAgilityPack;
 
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Bson;
 
     using NUnit.Framework;
 
@@ -280,11 +279,7 @@
                      .ToDictionary(match => match.Groups["id"].Value.ToInteger(),
                                    match => HtmlEntity.DeEntitize(match.Groups["name"].Value));
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TvStore-IDs")))
-            using (var bson = new BsonWriter(file))
-            {
-                new JsonSerializer().Serialize(bson, ShowIDs);
-            }
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), "TvStore-IDs.js"), JsonConvert.SerializeObject(ShowIDs));
         }
 
         /// <summary>
@@ -294,19 +289,13 @@
         /// <returns>Corresponding show name.</returns>
         public string GetShowForID(int id)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "TvStore-IDs");
+            var fn = Path.Combine(Path.GetTempPath(), "TvStore-IDs.js");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    using (var file = File.OpenRead(fn))
-                    using (var bson = new BsonReader(file))
-                    {
-                        var js = new JsonSerializer();
-                        ShowIDs = js.Deserialize<Dictionary<int, string>>(bson);
-                        file.Close();
-                    }
+                    ShowIDs = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(fn));
                 }
                 else
                 {

@@ -3,8 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+
+    using Newtonsoft.Json;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -34,6 +37,11 @@
         /// Contains a list of previously seen names associated to their <c>TVShow</c> information.
         /// </summary>
         public static readonly Dictionary<string, TVShow> TVShowCache = new Dictionary<string, TVShow>();
+
+        /// <summary>
+        /// Contains a list of all the known TV show names on lab.rolisoft.net.
+        /// </summary>
+        public static List<string[]> AllKnownTVShows = new List<string[]>(); 
 
         /// <summary>
         /// Parses the name of the specified file.
@@ -194,6 +202,115 @@
                             date  = episode[0].Airdate;
 
                             break;
+                        }
+                    }
+                }
+            }
+
+            // try to find show in the local cache of the list over at lab.rolisoft.net
+
+            if (!match)
+            {
+                if (AllKnownTVShows.Count == 0)
+                {
+                    var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js");
+
+                    if (File.Exists(fn))
+                    {
+                        AllKnownTVShows = JsonConvert.DeserializeObject<List<string[]>>(File.ReadAllText(fn));
+                    }
+                    else
+                    {
+                        GetAllKnownTVShows();
+                    }
+                }
+
+                var slug    = Utils.CreateSlug(name);
+                var matches = new List<string[]>();
+
+                foreach (var show in AllKnownTVShows)
+                {
+                    if (show[1] == slug)
+                    {
+                        matches.Add(show);
+                    }
+                }
+
+                if (matches.Count != 0)
+                {
+                    Tables.TVShow local = null;
+
+                    foreach (var mtch in matches)
+                    {
+                        foreach (var show in Database.TVShows.Values)
+                        {
+                            if (show.Data.Get("grabber") == mtch[2] && show.Data.Get(mtch[2] + ".id") == mtch[3])
+                            {
+                                local = show;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (local != null)
+                    {
+                        match = true;
+                        name  = local.Name;
+
+                        if (ep.AirDate != null)
+                        {
+                            var eps = local.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Name;
+                                date  = eps[0].Airdate;
+
+                                ep.Season  = eps[0].Season;
+                                ep.Episode = eps[0].Number;
+                            }
+                        }
+                        else
+                        {
+                            var eps = local.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Name;
+                                date  = eps[0].Airdate;
+                            }
+                        }
+                    }
+                    else if (askRemote)
+                    {
+                        var guide = Updater.CreateGuide(matches[0][2]);
+                        var data  = guide.GetData(matches[0][3]);
+
+                        ShowIDCache[name] = new ShowID { Title = data.Title };
+
+                        match = true;
+                        name  = data.Title;
+
+                        TVShowCache[name] = data;
+                    
+                        if (ep.AirDate != null)
+                        {
+                            var eps = data.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+
+                                ep.Season  = eps[0].Season;
+                                ep.Episode = eps[0].Number;
+                            }
+                        }
+                        else
+                        {
+                            var eps = data.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+                            }
                         }
                     }
                 }
@@ -434,6 +551,28 @@
             }
 
             return format;
+        }
+
+        /// <summary>
+        /// Gets the title of all known TV shows from lab.rolisoft.net.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if the operation was successful; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool GetAllKnownTVShows()
+        {
+            var req = Remote.API.GetListOfShows();
+
+            if (!req.Success || req.Result.Count == 0)
+            {
+                return false;
+            }
+
+            AllKnownTVShows = req.Result;
+
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js"), JsonConvert.SerializeObject(req.Result));
+
+            return true;
         }
     }
 }

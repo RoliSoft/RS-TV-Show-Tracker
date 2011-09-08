@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.IO;
     using System.Timers;
 
     /// <summary>
@@ -41,7 +42,8 @@
         private static void Tasks(object sender, ElapsedEventArgs e)
         {
             try { CheckSoftwareUpdate(); }           catch { }
-            try { CheckUpdate(); }                   catch { }
+            try { CheckDatabaseUpdate(); }           catch { }
+            try { CheckShowListUpdate(); }           catch { }
             try { ProcessMonitor.CheckOpenFiles(); } catch { }
         }
 
@@ -60,11 +62,24 @@
         /// <summary>
         /// Checks if update is required and runs it if it is.
         /// </summary>
-        public static void CheckUpdate()
+        public static void CheckDatabaseUpdate()
         {
             if ((DateTime.Now - (Database.Setting("last update") ?? "0").ToDouble().GetUnixTimestamp()).TotalHours > 10)
             {
                 MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.UpdateDatabaseClick()));
+            }
+        }
+
+        /// <summary>
+        /// Checks if the list of known TV shows is older than a day.
+        /// </summary>
+        public static void CheckShowListUpdate()
+        {
+            var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js");
+
+            if ((DateTime.Now - File.GetLastWriteTime(fn)).TotalDays > 1)
+            {
+                FileNames.Parser.GetAllKnownTVShows();
             }
         }
     }
