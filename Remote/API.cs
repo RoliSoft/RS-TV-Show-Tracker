@@ -23,7 +23,7 @@
         {
             get
             {
-                return "home.rolisoft.net/api/";
+                //return "home.rolisoft.net/api/";
                 return "lab.rolisoft.net/api/";
             }
         }
