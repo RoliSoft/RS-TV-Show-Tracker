@@ -109,7 +109,6 @@
 
             switch (Settings.Get("Post restrictions list type", "black"))
             {
-                default:
                 case "black":
                     blackListRadioButton.IsChecked = true;
                     listTypeText.Text = "Specify TV shows to block from being posted:";
@@ -550,7 +549,6 @@
         {
             Settings.Set("Post only recent", false);
         }
-        #endregion
 
         /// <summary>
         /// Handles the Click event of the whiteListRadioButton control.
@@ -615,5 +613,6 @@
                 Settings.Set("Post restrictions list", list);
             }
         }
+        #endregion
     }
 }

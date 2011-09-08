@@ -147,6 +147,31 @@
         /// <param name="file">The identified file.</param>
         public static void PostToSocial(ShowFile file)
         {
+            if (Settings.Get("Post only recent", true) && (DateTime.Now - file.Airdate).TotalDays > 21)
+            {
+                return;
+            }
+
+            var listed = Settings.Get("Post restrictions list", new List<int>())
+                                 .Contains(Database.TVShows.Values.First(x => x.Name == file.Name).ShowID);
+
+            switch (Settings.Get("Post restrictions list type", "black"))
+            {
+                case "black":
+                    if (listed)
+                    {
+                        return;
+                    }
+                    break;
+
+                case "white":
+                    if (!listed)
+                    {
+                        return;
+                    }
+                    break;
+            }
+
             foreach (var engine in typeof(SocialEngine).GetDerivedTypes().Select(type => Activator.CreateInstance(type) as SocialEngine))
             {
                 if (!Settings.Get<bool>("Post to " + engine.Name))
@@ -168,10 +193,6 @@
                     }
                 }
 
-                if (Settings.Get("Post to " + engine.Name + " only new", true) && (DateTime.Now - file.Airdate).TotalDays > 21)
-                {
-                    continue;
-                }
 
                 var format = Settings.Get(engine.Name + " Status Format", engine.DefaultStatusFormat);
                 if (string.IsNullOrWhiteSpace(format))
