@@ -856,6 +856,15 @@
 
                 sov.Items.Add(srs);
 
+                // - Tube+
+
+                var tbp    = new MenuItem();
+                tbp.Header = "Tube+";
+                tbp.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/tubeplus.png")) };
+                tbp.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<TubePlus>().Search(show.Name, nextep);
+
+                sov.Items.Add(tbp);
+
                 // - Google search
 
                 var gls    = new MenuItem();
@@ -1025,6 +1034,15 @@
                 srs.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show.Name, lastep);
 
                 sov.Items.Add(srs);
+
+                // - Tube+
+
+                var tbp    = new MenuItem();
+                tbp.Header = "Tube+";
+                tbp.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/tubeplus.png")) };
+                tbp.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<TubePlus>().Search(show.Name, lastep);
+
+                sov.Items.Add(tbp);
 
                 // - Google search
 

@@ -221,7 +221,7 @@
                     }
                     else
                     {
-                        GetAllKnownTVShows();
+                        try { GetAllKnownTVShows(); } catch { }
                     }
                 }
 

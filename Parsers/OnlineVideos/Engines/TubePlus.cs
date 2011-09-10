@@ -2,12 +2,11 @@
 {
     using System;
     using System.Linq;
-    using System.Text.RegularExpressions;
 
     /// <summary>
-    /// Provides support for searching videos on SideReel.
+    /// Provides support for searching videos on Tube+.
     /// </summary>
-    public class SideReel : OnlineVideoSearchEngine
+    public class TubePlus : OnlineVideoSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -17,7 +16,7 @@
         {
             get
             {
-                return "SideReel";
+                return "Tube+";
             }
         }
 
@@ -29,7 +28,7 @@
         {
             get
             {
-                return "http://www.sidereel.com/";
+                return "http://tubeplus.me/";
             }
         }
 
@@ -42,16 +41,16 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Engines.Google("intitle:Watch {0} online site:sidereel.com".FormatWith(name)).ToList();
+            var g = WebSearch.Engines.Google("intitle:{0} intitle:\"{1}\" site:tubeplus.me/player/".FormatWith(name, episode)).ToList();
 
-            if (g.Count == 0)
+            if (g.Count != 0)
             {
-                throw new OnlineVideoNotFoundException("No videos could be found on SideReel using Google." + Environment.NewLine + "You can try to use SideReel's internal search engine.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(name)));
+                return g[0].URL;
             }
-
-            var id = Regex.Match(g[0].URL, @"sidereel\.com/([^/$]+)", RegexOptions.IgnoreCase);
-
-            return "http://www.sidereel.com/{0}/{1}/search".FormatWith(id.Groups[1].Value, ShowNames.Parser.ExtractEpisode(episode, "season-{0}/episode-{1}"));
+            else
+            {
+                throw new OnlineVideoNotFoundException("No videos could be found on Tube+ using Google." + Environment.NewLine + "You can try to use Tube+'s internal search engine.", "Open Tube+ search page", "http://tubeplus.me/search/tv-shows/{0}/0/".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(name))));
+            }
         }
     }
 }

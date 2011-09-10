@@ -407,6 +407,11 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                         <Image Source="/RSTVShowTracker;component/Images/sidereel.png" Width="16" Height="16" />
                                     </MenuItem.Icon>
                                 </MenuItem>
+                                <MenuItem Header="Tube+" Click="TubePlusClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/tubeplus.png" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
                                 <MenuItem Header="Google search" Click="GoogleSearchClick">
                                     <MenuItem.Icon>
                                         <Image Source="/RSTVShowTracker;component/Images/google.png" Width="16" Height="16" />
