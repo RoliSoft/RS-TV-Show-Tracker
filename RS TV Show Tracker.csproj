@@ -123,6 +123,8 @@
     <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="HttpToSocks.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TVScene.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TVChaosUK.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVTorrentz.cs" />
     <Compile Include="Parsers\Downloads\LoginFieldTypes.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
