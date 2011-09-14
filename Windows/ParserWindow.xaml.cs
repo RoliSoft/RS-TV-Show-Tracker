@@ -239,5 +239,15 @@
         {
             Utils.Run(((Hyperlink)sender).NavigateUri.ToString());
         }
+
+        /// <summary>
+        /// Handles the TextChanged event of the usernameTextBox and passwordTextBox controls.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void UsernamePasswordTextBoxTextChanged(object sender, EventArgs e)
+        {
+            testLoginButton.IsEnabled = !string.IsNullOrWhiteSpace(usernameTextBox.Text) && !string.IsNullOrWhiteSpace(passwordTextBox.Password);
+        }
     }
 }

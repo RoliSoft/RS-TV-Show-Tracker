@@ -76,6 +76,8 @@
                 dlPathsListBox.Items.Add(path);
             }
 
+            DlPathsListBoxSelectionChanged();
+
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
                 startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
@@ -194,6 +196,18 @@
         }
 
         #region General
+        /// <summary>
+        /// Handles the SelectionChanged event of the dlPathsListBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void DlPathsListBoxSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
+        {
+            dlPathRemoveButton.IsEnabled   = dlPathsListBox.SelectedIndex != -1;
+            dlPathMoveUpButton.IsEnabled   = dlPathsListBox.SelectedIndex > 0;
+            dlPathMoveDownButton.IsEnabled = dlPathsListBox.SelectedIndex != -1 && dlPathsListBox.SelectedIndex < dlPathsListBox.Items.Count - 1;
+        }
+
         /// <summary>
         /// Handles the Click event of the dlPathAddButton control.
         /// </summary>
@@ -484,6 +498,18 @@
 
         #region Parsers
         /// <summary>
+        /// Handles the SelectionChanged event of the listView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void ListViewSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
+        {
+            parserEditButton.IsEnabled = listView.SelectedIndex != -1;
+            moveUpButton.IsEnabled     = listView.SelectedIndex > 0;
+            moveDownButton.IsEnabled   = listView.SelectedIndex != -1 && listView.SelectedIndex < listView.Items.Count - 1;
+        }
+
+        /// <summary>
         /// Reloads the parsers list view.
         /// </summary>
         private void ReloadParsers()
@@ -512,6 +538,7 @@
             }
 
             listView.SelectedIndex = idx;
+            ListViewSelectionChanged();
         }
 
         /// <summary>
@@ -616,17 +643,27 @@
         }
         #endregion
 
+        #region Proxies
         /// <summary>
-        /// Handles the Closing event of the GlassWindow control.
+        /// Handles the SelectionChanged event of the proxiesListView control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
-        private void GlassWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void ProxiesListViewSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
         {
-            Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
+            proxyEditButton.IsEnabled = proxySearchButton.IsEnabled = proxyTestButton.IsEnabled = proxyRemoveButton.IsEnabled = proxiesListView.SelectedIndex != -1;
         }
 
-        #region Proxies
+        /// <summary>
+        /// Handles the SelectionChanged event of the proxiedDomainsListView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void ProxiedDomainsListViewSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
+        {
+            proxyDomainEditButton.IsEnabled = proxyDomainRemoveButton.IsEnabled = proxiedDomainsListView.SelectedIndex != -1;
+        }
+
         /// <summary>
         /// Reloads the proxy-related list views.
         /// </summary>
@@ -643,6 +680,8 @@
                     });
             }
 
+            ProxiesListViewSelectionChanged();
+
             ProxiedDomainsListViewItemCollection.Clear();
 
             foreach (var proxy in Settings.Get<Dictionary<string, object>>("Proxied Domains"))
@@ -654,6 +693,8 @@
                         Proxy  = (string)proxy.Value
                     });
             }
+
+            ProxiedDomainsListViewSelectionChanged();
         }
 
         /// <summary>
@@ -1015,5 +1056,15 @@
             }
         }
         #endregion
+
+        /// <summary>
+        /// Handles the Closing event of the GlassWindow control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
+        private void GlassWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
+        }
     }
 }

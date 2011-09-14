@@ -1,6 +1,6 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
         Title="Settings" Height="492" Width="560" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize" Closing="GlassWindowClosing">
     <Grid>
         <TabControl Margin="10,4,10,10" Padding="0" Name="tabControl" Background="White">
@@ -27,19 +27,19 @@
                                 <Image Source="/RSTVShowTracker;component/Images/information.png" Height="12" Width="12" Margin="-20,0,0,-1" />Point to the directories where you store your downloaded TV show episodes. The "Play episode" feature will search these directories recursively for matching video files.
                             </TextBlock>
                             <StackPanel Orientation="Horizontal">
-                                <ListBox Name="dlPathsListBox" Margin="0,0,5,0" Width="481" />
+                                <ListBox Name="dlPathsListBox" Margin="0,0,5,0" Width="481" SelectionChanged="DlPathsListBoxSelectionChanged" />
                                 <StackPanel Orientation="Vertical">
                                     <Button Name="dlPathAddButton" Click="DlPathAddButtonClick" ToolTip="Add a new path">
                                         <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="dlPathMoveUpButton" Click="DlPathMoveUpButtonClick" ToolTip="Move up the selected path in the list">
-                                        <Image Source="/RSTVShowTracker;component/Images/up.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/up.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="dlPathMoveDownButton" Click="DlPathMoveDownButtonClick" ToolTip="Move down the selected path in the list">
-                                        <Image Source="/RSTVShowTracker;component/Images/down.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/down.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="dlPathRemoveButton" Click="DlPathRemoveButtonClick" ToolTip="Remove the selected path">
-                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
@@ -199,7 +199,7 @@
                                 <Label Content="Available parsers" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <ListView Name="listView" Margin="0,0,5,0" Width="481" Height="383" Padding="-2,-1">
+                                <ListView Name="listView" SelectionChanged="ListViewSelectionChanged" Margin="0,0,5,0" Width="481" Height="383" Padding="-2,-1">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridViewColumn>
@@ -244,13 +244,13 @@
                                 </ListView>
                                 <StackPanel Orientation="Vertical">
                                     <Button Name="parserEditButton" Click="ParserEditButtonClick" ToolTip="Edit the login information for the selected parser">
-                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="moveUpButton" Click="MoveUpButtonClick" ToolTip="Move up the selected parser in the list and increase its priority">
-                                        <Image Source="/RSTVShowTracker;component/Images/up.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/up.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="moveDownButton" Click="MoveDownButtonClick" ToolTip="Move down the selected parser in the list and decrease its priority">
-                                        <Image Source="/RSTVShowTracker;component/Images/down.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/down.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
@@ -276,7 +276,7 @@
                                 <Label Content="Proxies" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <ListView Name="proxiesListView" Margin="0,0,5,0" Width="481" Height="110" Padding="-2,-1">
+                                <ListView Name="proxiesListView" SelectionChanged="ProxiesListViewSelectionChanged" Margin="0,0,5,0" Width="481" Height="110" Padding="-2,-1">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridViewColumn Width="180">
@@ -303,16 +303,16 @@
                                         <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="proxyEditButton" Click="ProxyEditButtonClick" ToolTip="Edit the selected proxy">
-                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="proxySearchButton" Click="ProxySearchButtonClick" ToolTip="Determine whether this is a known public proxy">
-                                        <Image Source="/RSTVShowTracker;component/Images/magnifier.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/magnifier.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="proxyTestButton" Click="ProxyTestButtonClick" ToolTip="Test the proxy connection">
-                                        <Image Source="/RSTVShowTracker;component/Images/clock.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/clock.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="proxyRemoveButton" Click="ProxyRemoveButtonClick" ToolTip="Remove the selected proxy">
-                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
@@ -324,7 +324,7 @@
                                 <Label Content="Proxied Domains" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <ListView Name="proxiedDomainsListView" Margin="0,0,5,0" Width="481" Height="240" Padding="-2,-1">
+                                <ListView Name="proxiedDomainsListView" SelectionChanged="ProxiedDomainsListViewSelectionChanged" Margin="0,0,5,0" Width="481" Height="240" Padding="-2,-1">
                                     <ListView.View>
                                         <GridView AllowsColumnReorder="False">
                                             <GridViewColumn Width="270">
@@ -354,10 +354,10 @@
                                         <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="proxyDomainEditButton" Click="ProxyDomainEditButtonClick" ToolTip="Edit the selected proxied domain">
-                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/pencil.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                     <Button Name="proxyDomainRemoveButton" Click="ProxyDomainRemoveButtonClick" ToolTip="Remove the selected proxied domain">
-                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="1,0,0,0" />
+                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
                                     </Button>
                                 </StackPanel>
                             </StackPanel>

@@ -132,10 +132,14 @@
                 }
             }
 
+            ListBoxSelectionChanged();
+
             foreach (var show in Database.TVShows.Values.OrderBy(x => x.Name))
             {
                 listComboBox.Items.Add(show.Name);
             }
+
+            ListComboBoxSelectionChanged();
         }
 
         /// <summary>
@@ -530,6 +534,26 @@
         #endregion
 
         #region Settings
+        /// <summary>
+        /// Handles the SelectionChanged event of the listBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void ListBoxSelectionChanged(object sender = null, System.Windows.Controls.SelectionChangedEventArgs e = null)
+        {
+            listRemoveButton.IsEnabled = listBox.SelectedIndex != -1;
+        }
+
+        /// <summary>
+        /// Handles the SelectionChanged event of the listComboBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void ListComboBoxSelectionChanged(object sender = null, System.Windows.Controls.SelectionChangedEventArgs e = null)
+        {
+            listAddButton.IsEnabled = listComboBox.SelectedIndex != -1;
+        }
+
         /// <summary>
         /// Handles the Checked event of the onlyNew control.
         /// </summary>
