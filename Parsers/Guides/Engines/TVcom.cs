@@ -60,8 +60,8 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var html  = Utils.GetHTML("http://www.tv.com/search.php?type=Search&stype=ajax_search&search_type=program&pg_results=0&sort=&qs=" + Uri.EscapeUriString(name));
-            var shows = html.DocumentNode.SelectNodes("//li//h2/a");
+            var html  = Utils.GetHTML("http://www.tv.com/search?type=11&stype=all&tag=search%3Bfrontdoor&q=" + Uri.EscapeUriString(name));
+            var shows = html.DocumentNode.SelectNodes("//div/h4/a");
 
             if (shows == null)
             {
@@ -72,10 +72,10 @@
             {
                 var id  = new ShowID();
                 
-                id.URL      = HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
-                id.ID       = Regex.Match(id.URL, @"[a-z]/([0-9]+)/[a-z]").Groups[1].Value + '\0' + Regex.Match(id.URL, @"tv\.com/([^/]*)/").Groups[1].Value;
+                id.URL      = Site.TrimEnd('/') + HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
+                id.ID       = Regex.Match(id.URL, @"/shows/([^/]+)/").Groups[1].Value;
                 id.Title    = HtmlEntity.DeEntitize(show.InnerText);
-                id.Cover    = Regex.Match(show.GetNodeAttributeValue("../../../a/img", "style"), @"""(?>http://)([^""]+)").Groups[1].Value;
+                id.Cover    = show.GetNodeAttributeValue("../../../a/img", "src");
                 id.Language = "en";
 
                 yield return id;
@@ -90,17 +90,17 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            var summary = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0')));
+            var summary = Utils.GetHTML("http://www.tv.com/shows/{0}/".FormatWith(id));
             var show    = new TVShow();
 
             show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:title']", "content"));
             show.Genre       = Regex.Replace(summary.DocumentNode.GetTextValue("//h4[text()='Genre']/following-sibling::p[1]") ?? string.Empty, @"\s+", string.Empty).Replace(",", ", ");
-            show.Description = HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//p[starts-with(@class, 'show_description')]") ?? string.Empty).Replace("&hellip; More", string.Empty));
+            show.Description = HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//div[starts-with(@class, 'show_description')]") ?? string.Empty).Replace("&hellip; More", string.Empty));
             show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:image']", "content");
             show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//h4[text()='Status']/following-sibling::p[1]") ?? string.Empty, "(Canceled|Ended)");
             show.Runtime     = 30;
             show.Language    = "en";
-            show.URL         = "http://www.tv.com/{1}/show/{0}/summary.html".FormatWith(id.Split('\0'));
+            show.URL         = "http://www.tv.com/shows/{0}/".FormatWith(id);
             show.Episodes    = new List<TVShow.Episode>();
 
             var airinfo = summary.DocumentNode.GetTextValue("//span[@class='tagline']");
@@ -127,8 +127,8 @@
                 }
             }
 
-            var listing  = Utils.GetHTML("http://www.tv.com/{1}/show/{0}/episode.html?tag=list_header;paginator;All&season=All".FormatWith(id.Split('\0')));
-            var nodes    = listing.DocumentNode.SelectNodes("//li[starts-with(@class, 'episode')]");
+            var listing = Utils.GetHTML("http://www.tv.com/shows/{0}/season/?season=all".FormatWith(id));
+            var nodes   = listing.DocumentNode.SelectNodes("//li[starts-with(@class, 'episode')]");
 
             if (nodes == null)
             {
@@ -152,6 +152,11 @@
                 ep.Summary = HtmlEntity.DeEntitize(node.GetTextValue(".//p[@class='synopsis']").Trim());
                 ep.Picture = node.GetNodeAttributeValue(".//div[@class='THUMBNAIL']/a/img", "src");
                 ep.URL     = node.GetNodeAttributeValue("div/h3/a", "href");
+
+                if (ep.Summary == "No synopsis available. Write a synopsis.")
+                {
+                    ep.Summary = null;
+                }
 
                 DateTime dt;
                 ep.Airdate = DateTime.TryParseExact(aired.Groups[1].Value, "M/d/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
