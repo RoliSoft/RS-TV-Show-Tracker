@@ -217,7 +217,7 @@
                 return (T)value;
             }
 
-            if (!typeof(T).IsValueType && !(defaultValue is string) && defaultValue != null)
+            if (!typeof(T).IsValueType && typeof(T) != typeof(string) && defaultValue == null)
             {
                 return Activator.CreateInstance<T>();
             }

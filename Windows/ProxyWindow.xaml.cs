@@ -112,7 +112,7 @@
             }
 
             dict.Add(nameTextBox.Text, addressTextBox.Text);
-            Settings.Save();
+            Settings.Set("Proxies", dict);
 
             DialogResult = true;
         }

@@ -150,7 +150,7 @@
             _show    = show;
             _episode = episode;
 
-            var paths = Settings.Get<IEnumerable<string>>("Download Paths").ToArray();
+            var paths = Settings.Get<List<string>>("Download Paths").ToArray();
 
             if (paths.Length == 0)
             {

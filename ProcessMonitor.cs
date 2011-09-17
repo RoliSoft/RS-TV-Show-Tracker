@@ -64,7 +64,7 @@
             }
 
             var procs = new List<string>();
-            procs.AddRange(Settings.Get<IEnumerable<string>>("Processes to Monitor"));
+            procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
             procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName));
 
             if (procs.Count() == 0)

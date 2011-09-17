@@ -113,7 +113,7 @@
             }
 
             dict.Add(nameTextBox.Text, (string)proxyComboBox.SelectedItem);
-            Settings.Save();
+            Settings.Set("Proxied Domains", dict);
 
             DialogResult = true;
         }

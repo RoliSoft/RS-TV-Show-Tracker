@@ -101,12 +101,12 @@
 
             if (_actives == null)
             {
-                _actives = Settings.Get<IEnumerable<string>>("Active Subtitle Sites").ToList();
+                _actives = Settings.Get<List<string>>("Active Subtitle Sites");
             }
 
             if (_langs == null)
             {
-                _langs = Settings.Get<IEnumerable<string>>("Active Subtitle Languages").ToList();
+                _langs = Settings.Get<List<string>>("Active Subtitle Languages");
             }
 
             if (availableEngines.Items.Count == 0)

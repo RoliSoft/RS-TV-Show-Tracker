@@ -27,7 +27,7 @@
         {
             if (Settings.Get<bool>("Synchronization Enabled"))
             {
-                var auth = Settings.Get<IEnumerable<string>>("Synchronization Authentication").ToArray();
+                var auth = Settings.Get<List<string>>("Synchronization Authentication").ToArray();
 
                 if (auth.Length == 2)
                 {
