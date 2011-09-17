@@ -153,7 +153,7 @@
             }
 
             var listed = Settings.Get("Post restrictions list", new List<int>())
-                                 .Contains(Database.TVShows.Values.First(x => x.Name == file.Name).ShowID);
+                                 .Contains(Database.TVShows.Values.First(x => x.Name == file.Show).ShowID);
 
             switch (Settings.Get("Post restrictions list type", "black"))
             {
