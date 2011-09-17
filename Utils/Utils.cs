@@ -568,15 +568,19 @@
                         return;
                     }
 
-                    if (state.HasValue)
+                    try
                     {
-                        TaskbarManager.Instance.SetProgressState(state.Value, MainWindow.Active);
-                    }
+                        if (state.HasValue)
+                        {
+                            TaskbarManager.Instance.SetProgressState(state.Value, MainWindow.Active);
+                        }
 
-                    if (progress.HasValue)
-                    {
-                        TaskbarManager.Instance.SetProgressValue(progress.Value, 100, MainWindow.Active);
+                        if (progress.HasValue)
+                        {
+                            TaskbarManager.Instance.SetProgressValue(progress.Value, 100, MainWindow.Active);
+                        }
                     }
+                    catch (PlatformNotSupportedException) { }
                 }));
         }
 
