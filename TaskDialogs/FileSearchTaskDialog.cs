@@ -35,9 +35,9 @@
             _show    = show;
             _episode = episode;
 
-            var paths = Settings.Get<List<string>>("Download Paths").ToArray();
+            var paths = Settings.Get<List<string>>("Download Paths");
 
-            if (paths.Length == 0)
+            if (paths.Count == 0)
             {
                 new TaskDialog
                     {

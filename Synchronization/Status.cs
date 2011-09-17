@@ -27,9 +27,9 @@
         {
             if (Settings.Get<bool>("Synchronization Enabled"))
             {
-                var auth = Settings.Get<List<string>>("Synchronization Authentication").ToArray();
+                var auth = Settings.Get<List<string>>("Synchronization Authentication");
 
-                if (auth.Length == 2)
+                if (auth.Count == 2)
                 {
                     LoadEngine("RoliSoftDotNetAPI", auth);
                 }
@@ -41,7 +41,7 @@
         /// </summary>
         /// <param name="engine">The name of the engine.</param>
         /// <param name="auth">The authentication token required for the engine.</param>
-        public static void LoadEngine(string engine, string[] auth)
+        public static void LoadEngine(string engine, IEnumerable<string> auth)
         {
             //Enabled = true;
             //Engine  = new Engines.RoliSoftDotNetAPI(auth[0], auth[1]);

@@ -292,7 +292,7 @@
         /// </summary>
         public void SaveDlPaths()
         {
-            Settings.Set("Download Paths", dlPathsListBox.Items.Cast<string>());
+            Settings.Set("Download Paths", dlPathsListBox.Items.Cast<string>().ToList());
         }
 
         /// <summary>
