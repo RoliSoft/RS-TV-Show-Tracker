@@ -11,6 +11,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
+    using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
 
@@ -71,128 +72,153 @@
 
             // general
 
-            foreach (var path in Settings.Get<List<string>>("Download Paths"))
+            try
+            { 
+                foreach (var path in Settings.Get<List<string>>("Download Paths"))
+                {
+                    dlPathsListBox.Items.Add(path);
+                }
+
+                DlPathsListBoxSelectionChanged();
+
+                using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+                {
+                    startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
+                }
+
+                convertTimezone.IsChecked = Settings.Get("Convert Timezone", true);
+
+                var tzinfo = "Your current timezone is " + TimeZoneInfo.Local.DisplayName + ".\r\n"
+                           + "Your difference from Central Standard Time is {0} hours.".FormatWith(TimeZoneInfo.Local.BaseUtcOffset.Add(TimeSpan.FromHours(TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time").BaseUtcOffset.TotalHours * -1)).TotalHours);
+
+                currentTimezone.ContentEnd.InsertTextInRun(tzinfo);
+
+                showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
+            }
+            catch (Exception ex)
             {
-                dlPathsListBox.Items.Add(path);
+                MainWindow.Active.HandleUnexpectedException(ex);
             }
 
-            DlPathsListBoxSelectionChanged();
-
-            using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
-            {
-                startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
-            }
-
-            convertTimezone.IsChecked = Settings.Get("Convert Timezone", true);
-
-            var tzinfo = "Your current timezone is " + TimeZoneInfo.Local.DisplayName + ".\r\n"
-                       + "Your difference from Central Standard Time is {0} hours.".FormatWith(TimeZoneInfo.Local.BaseUtcOffset.Add(TimeSpan.FromHours(TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time").BaseUtcOffset.TotalHours * -1)).TotalHours);
-
-            currentTimezone.ContentEnd.InsertTextInRun(tzinfo);
-
-            showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
-            
             // associations
 
-            torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
-            usenetPathTextBox.Text  = Settings.Get("Usenet Downloader");
-            jDlPathTextBox.Text     = Settings.Get("JDownloader");
-
-            var atr = Utils.GetApplicationForExtension(".torrent");
-            if (!string.IsNullOrWhiteSpace(atr))
+            try
             {
-                var tri = Utils.GetExecutableInfo(atr);
+                torrentPathTextBox.Text = Settings.Get("Torrent Downloader");
+                usenetPathTextBox.Text  = Settings.Get("Usenet Downloader");
+                jDlPathTextBox.Text     = Settings.Get("JDownloader");
 
-                torrentAssociationName.Text   = tri.Item1;
-                torrentAssociationIcon.Source = tri.Item2;
-            }
-            else
-            {
-                torrentAssociationName.Text = "[no software associated with .torrent files]";
-            }
-
-            var anz = Utils.GetApplicationForExtension(".nzb");
-            if (!string.IsNullOrWhiteSpace(anz))
-            {
-                var nzi = Utils.GetExecutableInfo(anz);
-
-                usenetAssociationName.Text   = nzi.Item1;
-                usenetAssociationIcon.Source = nzi.Item2;
-            }
-            else
-            {
-                usenetAssociationName.Text = "[no software associated with .nzb files]";
-            }
-
-            var htz = Utils.GetApplicationForExtension(".htm");
-            if (!string.IsNullOrWhiteSpace(htz))
-            {
-                var hti = Utils.GetExecutableInfo(htz);
-
-                httpAssociationName.Text   = hti.Item1;
-                httpAssociationIcon.Source = hti.Item2;
-            }
-            else
-            {
-                httpAssociationName.Text = "[no software associated with .htm files]";
-            }
-
-            var viddef = Utils.GetDefaultVideoPlayers();
-            foreach (var app in viddef)
-            {
-                var info = Utils.GetExecutableInfo(app);
-
-                if (info == null || string.IsNullOrWhiteSpace(info.Item1)) continue;
-
-                if (info.Item2 != null)
+                var atr = Utils.GetApplicationForExtension(".torrent");
+                Tuple<string, BitmapSource> tri;
+                if (!string.IsNullOrWhiteSpace(atr) && (tri = Utils.GetExecutableInfo(atr)) != null)
                 {
-                    processesStackPanel.Children.Add(new Image
+                    torrentAssociationName.Text   = tri.Item1;
+                    torrentAssociationIcon.Source = tri.Item2;
+                }
+                else
+                {
+                    torrentAssociationName.Text = "[no software associated with .torrent files]";
+                }
+
+                var anz = Utils.GetApplicationForExtension(".nzb");
+                Tuple<string, BitmapSource> nzi;
+                if (!string.IsNullOrWhiteSpace(anz) && (nzi = Utils.GetExecutableInfo(anz)) != null)
+                {
+                    usenetAssociationName.Text   = nzi.Item1;
+                    usenetAssociationIcon.Source = nzi.Item2;
+                }
+                else
+                {
+                    usenetAssociationName.Text = "[no software associated with .nzb files]";
+                }
+
+                var htz = Utils.GetApplicationForExtension(".htm");
+                Tuple<string, BitmapSource> hti;
+                if (!string.IsNullOrWhiteSpace(htz) && (hti = Utils.GetExecutableInfo(htz)) != null)
+                {
+                    httpAssociationName.Text   = hti.Item1;
+                    httpAssociationIcon.Source = hti.Item2;
+                }
+                else
+                {
+                    httpAssociationName.Text = "[no software associated with .htm files]";
+                }
+
+                var viddef = Utils.GetDefaultVideoPlayers();
+                foreach (var app in viddef)
+                {
+                    var info = Utils.GetExecutableInfo(app);
+
+                    if (info == null || string.IsNullOrWhiteSpace(info.Item1)) continue;
+
+                    if (info.Item2 != null)
+                    {
+                        processesStackPanel.Children.Add(new Image
+                            {
+                                Source = info.Item2,
+                                Width  = 16,
+                                Height = 16,
+                                Margin = new Thickness(0, 0, 4, 0),
+                            });
+                    }
+
+                    processesStackPanel.Children.Add(new Label
                         {
-                            Source = info.Item2,
-                            Width  = 16,
-                            Height = 16,
-                            Margin = new Thickness(0, 0, 4, 0),
+                            Content = info.Item1,
+                            Margin  = new Thickness(0, 0, 7, 0),
+                            Padding = new Thickness(0)
                         });
                 }
 
-                processesStackPanel.Children.Add(new Label
-                    {
-                        Content = info.Item1,
-                        Margin  = new Thickness(0, 0, 7, 0),
-                        Padding = new Thickness(0)
-                    });
+                processTextBox.Text = string.Join(",", Settings.Get<List<string>>("Processes to Monitor"));
             }
-
-            processTextBox.Text = string.Join(",", Settings.Get<List<string>>("Processes to Monitor"));
+            catch (Exception ex)
+            {
+                MainWindow.Active.HandleUnexpectedException(ex);
+            }
 
             // parsers
 
-            DownloadsListViewItemCollection = new ObservableCollection<DownloadsListViewItem>();
-            listView.ItemsSource            = DownloadsListViewItemCollection;
+            try
+            {
+                DownloadsListViewItemCollection = new ObservableCollection<DownloadsListViewItem>();
+                listView.ItemsSource = DownloadsListViewItemCollection;
 
-            _engines = typeof(DownloadSearchEngine)
-                       .GetDerivedTypes()
-                       .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
-                       .ToList();
+                _engines = typeof(DownloadSearchEngine)
+                           .GetDerivedTypes()
+                           .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
+                           .ToList();
 
-            _trackers = Settings.Get<List<string>>("Tracker Order");
-            _trackers.AddRange(_engines
-                               .Where(engine => _trackers.IndexOf(engine.Name) == -1)
-                               .Select(engine => engine.Name));
+                _trackers = Settings.Get<List<string>>("Tracker Order");
+                _trackers.AddRange(_engines
+                                   .Where(engine => _trackers.IndexOf(engine.Name) == -1)
+                                   .Select(engine => engine.Name));
 
-            _includes = Settings.Get<List<string>>("Active Trackers");
+                _includes = Settings.Get<List<string>>("Active Trackers");
 
-            ReloadParsers();
+                ReloadParsers();
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Active.HandleUnexpectedException(ex);
+            }
 
             // proxies
 
-            ProxiesListViewItemCollection = new ObservableCollection<ProxiesListViewItem>();
-            proxiesListView.ItemsSource   = ProxiesListViewItemCollection;
+            try
+            { 
+                ProxiesListViewItemCollection = new ObservableCollection<ProxiesListViewItem>();
+                proxiesListView.ItemsSource   = ProxiesListViewItemCollection;
             
-            ProxiedDomainsListViewItemCollection = new ObservableCollection<ProxiedDomainsListViewItem>();
-            proxiedDomainsListView.ItemsSource   = ProxiedDomainsListViewItemCollection;
+                ProxiedDomainsListViewItemCollection = new ObservableCollection<ProxiedDomainsListViewItem>();
+                proxiedDomainsListView.ItemsSource   = ProxiedDomainsListViewItemCollection;
 
-            ReloadProxies();
+                ReloadProxies();
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Active.HandleUnexpectedException(ex);
+            }
         }
 
         #region General
@@ -302,11 +328,11 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void ProcessTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            var proc = processTextBox.Text.Trim(',').Split(',');
+            var proc = processTextBox.Text.Trim(',').Split(',').ToList();
 
-            if (proc.Length == 1 && string.IsNullOrWhiteSpace(proc[0]))
+            if (proc.Count == 1 && string.IsNullOrWhiteSpace(proc[0]))
             {
-                proc = new string[0];
+                proc.RemoveAt(0);
             }
 
             Settings.Set("Processes to Monitor", proc);
