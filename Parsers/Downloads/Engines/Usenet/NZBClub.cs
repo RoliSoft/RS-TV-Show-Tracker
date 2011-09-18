@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping NZBClub.
     /// </summary>
-    [Parser("2011-02-12 1:23 AM"), TestFixture]
+    [Parser("2011-09-19 1:21 AM"), TestFixture]
     public class NZBClub : DownloadSearchEngine
     {
         /// <summary>
@@ -82,9 +82,27 @@
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
+                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
                 link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../..//span[contains(@id, 'sizelabel')]/a", "href");
                 link.Size    = Regex.Match(node.GetHtmlValue("../../..//span[contains(@id, 'sizecolumnlabel')]"), @"^(?:<b>)?([^<]+)").Groups[1].Value;
                 link.Quality = FileNames.Parser.ParseQuality(link.Release.Replace(' ', '.'));
+
+                var age = node.GetTextValue("../../..//span[contains(@id, 'agecolumnlabel')]").Trim();
+
+                if (age.EndsWith("m"))
+                {
+                    age += "inutes";
+                }
+                else if (age.EndsWith("h"))
+                {
+                    age += "ours";
+                }
+                else if (age.EndsWith("d"))
+                {
+                    age += "ays";
+                }
+
+                link.Infos = age + " old";
 
                 yield return link;
             }
