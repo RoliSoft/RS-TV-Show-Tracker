@@ -383,7 +383,38 @@
                 _statusTimer.Stop();
             }
 
-            var last = Database.Setting("last update");
+            var last = string.Empty;
+
+            try
+            {
+                last = Database.Setting("last update");
+            }
+            catch (FileNotFoundException)
+            {
+                Hide();
+
+                var td = new VistaControls.TaskDialog.TaskDialog
+                    {
+                        CommonIcon      = TaskDialogIcon.SecurityError,
+                        UseCommandLinks = true,
+                        Title           = Signature.Software,
+                        Instruction     = "Dependency failure",
+                        Content         = "The SQLite database library couldn't be loaded.\r\nYou'll need to download it and install it manually.\r\n\r\nAfter installation if the problem still presists, remove the System.Data.SQLite.dll file from the directory where you've installed this application.",
+                        CustomButtons   = new[]
+                            {
+                                new CustomButton(Result.Yes, "Download"),
+                                new CustomButton(Result.No,  "Exit")
+                            }
+                    };
+
+                if (td.Show().CommonButton == Result.Yes)
+                {
+                    Utils.Run("http://system.data.sqlite.org/sqlite-netFx40-setup-bundle-x86-2010-1.0.74.0.exe");
+                }
+
+                Process.GetCurrentProcess().Kill();
+            }
+
             if (string.IsNullOrEmpty(last))
             {
                 Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = string.Empty; }));
