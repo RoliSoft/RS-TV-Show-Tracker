@@ -105,7 +105,7 @@
             }
 
             _remaining = SearchEngines.Select(engine => engine.Name).ToList();
-            query      = ShowNames.Parser.Normalize(query, false);
+            query      = ShowNames.Parser.Normalize(query, false, "'");
 
             SearchEngines.ForEach(engine => engine.SearchAsync(query));
         }

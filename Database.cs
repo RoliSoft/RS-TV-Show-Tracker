@@ -539,8 +539,9 @@
         /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
         /// otherwise, only "the" and any one character word that is other than "a" will be removed.
         /// </param>
+        /// <param name="replaceApostrophes">The character to replace apostrophe to.</param>
         /// <returns>Name of the show used in scene releases.</returns>
-        public static string[] GetReleaseName(string show, bool removeCommon = true)
+        public static string[] GetReleaseName(string show, bool removeCommon = true, string replaceApostrophes = null)
         {
             var release = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
 
@@ -549,7 +550,7 @@
                 return release[0].Release.Split(' ');
             }
 
-            return ShowNames.Parser.GetRoot(show, removeCommon);
+            return ShowNames.Parser.GetRoot(show, removeCommon, replaceApostrophes);
         }
     }
 }

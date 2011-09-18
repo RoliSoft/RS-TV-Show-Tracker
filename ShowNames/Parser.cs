@@ -18,8 +18,11 @@
         /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
         /// otherwise, only "the" and any one character word that is other than "a" will be removed.
         /// </param>
-        /// <returns>List of the required words.</returns>
-        public static string[] GetRoot(string show, bool removeCommon = true)
+        /// <param name="replaceApostrophes">The character to replace apostrophes to.</param>
+        /// <returns>
+        /// List of the required words.
+        /// </returns>
+        public static string[] GetRoot(string show, bool removeCommon = true, string replaceApostrophes = null)
         {
             // see if the show has a different name
             show = show.Trim();
@@ -32,7 +35,7 @@
             show = show.ToUpper();
 
             // remove apostrophes which occur in contractions
-            show = Regexes.Contractions.Replace(show, string.Empty);
+            show = Regexes.Contractions.Replace(show, replaceApostrophes ?? string.Empty);
 
             // remove special characters
             show = Regexes.SpecialChars.Replace(show, " ").Trim();
@@ -72,8 +75,9 @@
         /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
         /// otherwise, only "the" and any one character word that is other than "a" will be removed.
         /// </param>
+        /// <param name="replaceApostrophes">The character to replace apostrophe to.</param>
         /// <returns>Normalized name.</returns>
-        public static string Normalize(string show, bool removeCommon = true)
+        public static string Normalize(string show, bool removeCommon = true, string replaceApostrophes = null)
         {
             var episode = string.Empty;
 
@@ -84,7 +88,7 @@
                 episode = tmp[1];
             }
 
-            var parts = String.Join(" ", Database.GetReleaseName(show, removeCommon)).ToLower();
+            var parts = String.Join(" ", Database.GetReleaseName(show, removeCommon, replaceApostrophes)).ToLower();
 
             return episode.Length != 0
                    ? parts + " " + episode
