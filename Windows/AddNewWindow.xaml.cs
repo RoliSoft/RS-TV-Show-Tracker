@@ -482,6 +482,8 @@
             finishTabItem.Visibility = Visibility.Collapsed;
             addTabItem.Visibility    = Visibility.Visible;
             tabControl.SelectedIndex = 0;
+            textBox.Text             = string.Empty;
+            textBox.Focus();
         }
 
         /// <summary>
