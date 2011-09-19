@@ -49,7 +49,12 @@
                    .Cast<Match>()
                    .Select(m => m.Groups[1].Value.Trim())
                    .Distinct(StringComparer.CurrentCultureIgnoreCase)
-                   .Select(f => new FileInfo(f))
+                   .Select(f =>
+                       {
+                           try   { return new FileInfo(f); }
+                           catch { return null; }
+                       })
+                   .Where(f => f != null)
                    .ToList();
         }
 
@@ -66,6 +71,11 @@
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
             procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName));
+
+            if (Settings.Get<bool>("Monitor Network Shares"))
+            {
+                procs.Add("4"); // PID 4, System
+            }
 
             if (procs.Count() == 0)
             {

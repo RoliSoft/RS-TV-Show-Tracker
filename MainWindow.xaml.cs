@@ -119,7 +119,7 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WindowSourceInitialized(object sender, EventArgs e)
         {
-            if (SystemParameters2.Current.IsGlassEnabled)
+            if (Settings.Get("Enable Aero", true) && SystemParameters2.Current.IsGlassEnabled)
             {
                 ActivateAero();
             }
@@ -129,6 +129,15 @@
             }
 
             SystemParameters2.Current.PropertyChanged += AeroChanged;
+
+            if (Settings.Get("Enable Animations", true))
+            {
+                ActivateAnimation();
+            }
+            else
+            {
+                DeactivateAnimation();
+            }
         }
 
         /// <summary>
@@ -193,7 +202,7 @@
         /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
         public void AeroChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "IsGlassEnabled")
+            if (e.PropertyName == "IsGlassEnabled" && Settings.Get("Enable Aero", true))
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
@@ -234,6 +243,22 @@
             mainBorder.Padding = logoMenu.Margin = new Thickness(0);
             logoMenu.Width     = SystemParameters.PrimaryScreenWidth;
             logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Activates the animation of tab controls.
+        /// </summary>
+        public void ActivateAnimation()
+        {
+            tabControl.ContentTemplate = activeGuidesPage.tabControl.ContentTemplate = (DataTemplate)FindResource("TabTemplate");
+        }
+
+        /// <summary>
+        /// Deactivates the animation of tab controls.
+        /// </summary>
+        public void DeactivateAnimation()
+        {
+            tabControl.ContentTemplate = activeGuidesPage.tabControl.ContentTemplate = null;
         }
 
         /// <summary>

@@ -710,7 +710,7 @@
 
             <!-- tabs -->
             
-            <TabControl Name="tabControl" ContentTemplate="{StaticResource TabTemplate}" Background="#82000000" BorderBrush="Transparent" Margin="0,25,0,6" BorderThickness="0" FocusVisualStyle="{x:Null}">
+            <TabControl Name="tabControl" Background="#82000000" BorderBrush="Transparent" Margin="0,25,0,6" BorderThickness="0" FocusVisualStyle="{x:Null}">
                 
                 <!-- overview -->
                 <TabItem Name="overviewTab" Style="{StaticResource MainTabItem}">

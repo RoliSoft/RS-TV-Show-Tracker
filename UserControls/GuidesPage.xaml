@@ -34,15 +34,6 @@
             </Setter>
         </Style>
 
-        <!-- tab control animation -->
-        <DataTemplate x:Key="TabTemplate">
-            <Transitionals:TransitionElement Content="{Binding}">
-                <Transitionals:TransitionElement.Transition>
-                    <Transitions:FadeAndGrowTransition />
-                </Transitionals:TransitionElement.Transition>
-            </Transitionals:TransitionElement>
-        </DataTemplate>
-
         <!-- listview grouping -->
         <CollectionViewSource x:Key="cvs">
             <CollectionViewSource.GroupDescriptions>
@@ -229,7 +220,7 @@
 
         <!-- show tab control -->
         
-        <TabControl Grid.Row="0" Name="tabControl" ContentTemplate="{StaticResource TabTemplate}" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0">
+        <TabControl Grid.Row="0" Name="tabControl" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0">
 
             <!-- general tab -->
 

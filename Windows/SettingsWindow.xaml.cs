@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -93,6 +94,8 @@
 
                 currentTimezone.ContentEnd.InsertTextInRun(tzinfo);
 
+                disableAero.IsChecked         = !Settings.Get("Enable Aero", true);
+                disableAnimations.IsChecked   = !Settings.Get("Enable Animations", true);
                 showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
             }
             catch (Exception ex)
@@ -171,6 +174,8 @@
                 }
 
                 processTextBox.Text = string.Join(",", Settings.Get<List<string>>("Processes to Monitor"));
+
+                monitorNetworkShare.IsChecked = Settings.Get<bool>("Monitor Network Shares");
             }
             catch (Exception ex)
             {
@@ -385,6 +390,54 @@
         }
 
         /// <summary>
+        /// Handles the Checked event of the disableAero control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DisableAeroChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Enable Aero", false);
+
+            MainWindow.Active.ActivateNonAero();
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the disableAero control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DisableAeroUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Enable Aero", true);
+
+            MainWindow.Active.AeroChanged(sender, new PropertyChangedEventArgs("IsGlassEnabled"));
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the disableAnimations control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DisableAnimationsChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Enable Animations", false);
+
+            MainWindow.Active.DeactivateAnimation();
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the disableAnimations control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DisableAnimationsUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Enable Animations", true);
+
+            MainWindow.Active.ActivateAnimation();
+        }
+
+        /// <summary>
         /// Handles the Checked event of the showUnhandledErrors control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -406,6 +459,26 @@
         #endregion
 
         #region Downloaders
+        /// <summary>
+        /// Handles the Checked event of the monitorNetworkShare control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void MonitorNetworkShareChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Monitor Network Shares", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the monitorNetworkShare control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void MonitorNetworkShareUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Monitor Network Shares", false);
+        }
+
         /// <summary>
         /// Handles the Click event of the torrentPathBrowseButton control.
         /// </summary>
