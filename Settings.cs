@@ -60,7 +60,7 @@
             {
                 Keys["Active Trackers"] = new List<string>
                     {
-                        "The Pirate Bay", "DirectDownload.tv", "Zunox", "BinSearch", "NZBClub"
+                        "The Pirate Bay", "DirectDownload.tv", "Zunox", "NBIndex", "NZBClub"
                     };
             }
 
@@ -70,7 +70,7 @@
                     {
                         "BroadcasTheNet", "Tv Torrents Ro", "TvStore", "BitMeTV", "TvTorrents", "FileList",
                         "nCore", "bitHUmen", "The Pirate Bay", "DirectDownload.tv", "Zunox", "SceneReleases",
-                        "ReleaseLog", "BinSearch", "NZBClub", "Twilight", "PhazeDDL"
+                        "ReleaseLog", "NZBIndex", "NZBClub", "Twilight", "PhazeDDL"
                     };
             }
 

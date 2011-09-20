@@ -70,7 +70,8 @@
 
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
-            procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName));
+
+            try { procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName)); } catch { }
 
             if (Settings.Get<bool>("Monitor Network Shares"))
             {
