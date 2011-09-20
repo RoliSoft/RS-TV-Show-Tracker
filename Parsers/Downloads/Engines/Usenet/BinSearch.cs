@@ -40,7 +40,21 @@
                 return "http://binsearch.info/";
             }
         }
-        
+
+        /// <summary>
+        /// Gets a value indicating whether this site is deprecated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
+        /// </value>
+        public override bool Deprecated
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         /// <summary>
         /// Gets the type of the link.
         /// </summary>
@@ -72,7 +86,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "index.php?q=" + Uri.EscapeUriString(query) + "&m=&max=25&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=200&maxsize=&font=&postdate=");
+            var html  = Utils.GetHTML(Site + "index.php?q=" + Uri.EscapeUriString(query) + "&max=25&adv_age=999&adv_sort=date&adv_col=on&minsize=100");
             var links = html.DocumentNode.SelectNodes("//td/span[@class='s']");
 
             if (links == null)

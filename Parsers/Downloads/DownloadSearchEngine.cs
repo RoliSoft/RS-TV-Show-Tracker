@@ -309,6 +309,10 @@
                 {
                     value = (string)field.Value;
                 }
+                else if (field.Value is Func<string>)
+                {
+                    value = ((Func<string>)field.Value)();
+                }
                 else if (field.Value is LoginFieldTypes)
                 {
                     switch ((LoginFieldTypes)field.Value)
