@@ -3,17 +3,16 @@
     using System;
     using System.Collections.Generic;
     using System.Security.Authentication;
-    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping Newzbin.
+    /// Provides support for scraping NZB.su.
     /// </summary>
-    [Parser("2011-09-19 12:08 AM"), TestFixture]
-    public class Newzbin : DownloadSearchEngine
+    [Parser("2011-09-20 12:16 PM"), TestFixture]
+    public class NZBsu : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -23,7 +22,7 @@
         {
             get
             {
-                return "Newzbin";
+                return "NZB.su";
             }
         }
 
@@ -35,7 +34,7 @@
         {
             get
             {
-                return "http://newzbin.com/";
+                return "http://nzb.su/";
             }
         }
 
@@ -59,7 +58,7 @@
         {
             get
             {
-                return new[] { "NzbSessionID", "NzbSmoke" };
+                return new[] { "uid", "idh" };
             }
         }
 
@@ -85,7 +84,7 @@
         {
             get
             {
-                return Site + "account/login/";
+                return Site + "login";
             }
         }
 
@@ -99,9 +98,10 @@
             {
                 return new Dictionary<string, object>
                     {
-                        { "ret_url",  LoginFieldTypes.ReturnTo },
-                        { "username", LoginFieldTypes.UserName },
-                        { "password", LoginFieldTypes.Password },
+                        { "username",   LoginFieldTypes.UserName },
+                        { "password",   LoginFieldTypes.Password },
+                        { "redirect",   LoginFieldTypes.ReturnTo },
+                        { "rememberme", "on"                     },
                     };
             }
         }
@@ -125,42 +125,30 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "search/query/?area=c.8&fpn=p&searchaction=Go&btnG_x=10&btnG_y=6&category=8&areadone=c.8&q=" + Uri.EscapeUriString(ShowNames.Parser.ReplaceEpisode(query, "{0}x{1:00}", false, false)), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "search/" + Uri.EscapeUriString(query) + "?t=5000", cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
                 throw new InvalidCredentialException();
             }
 
-            var links = html.DocumentNode.SelectNodes("//table/tbody/tr/td[@class='title']/strong/a");
+            var links = html.DocumentNode.SelectNodes("//table/tr/td[@class='item']/label/a[@class='title']");
 
             if (links == null)
             {
                 yield break;
             }
 
-            var premium = html.DocumentNode.SelectSingleNode("//li[@class='message-warning']/a[contains(@href, '/account/topup/')]") == null;
-
             foreach (var node in links)
             {
                 var link = new Link(this);
 
-                link.Release = HtmlEntity.DeEntitize(node.InnerText) + (node.GetNodeAttributeValue("../../../following-sibling::tr[1]/td/a/img[@alt='NFO']", "title") ?? string.Empty).Replace("View Report NFO", string.Empty);
+                link.Release = HtmlEntity.DeEntitize(node.InnerText);
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../../td[@class='icons']/div[contains(@class, 'icon_nzb')]/a", "href");
+                link.Size    = node.GetHtmlValue("../../../td[@class='less right']").Trim().Split(new[] { "<br>" }, StringSplitOptions.None)[0];
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Utils.ParseAge(node.GetTextValue("../../../td[5]/span").Trim());
-
-                if (premium)
-                {
-                    link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../../following-sibling::tr[1]/td/a[starts-with(@title, 'Download')]", "href");
-                }
-
-                var size = Regex.Match(node.GetTextValue("../../../following-sibling::tr[1]/td[3]") ?? string.Empty, @"(\d+(?:\.\d+)?)([KMG]B)");
-
-                if (size.Success)
-                {
-                    link.Size = size.Groups[1].Value + " " + size.Groups[2].Value;
-                }
+                link.Infos   = Utils.ParseAge(node.GetTextValue("../../../td[@class='less mid'][1]"));
 
                 yield return link;
             }

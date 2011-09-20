@@ -86,23 +86,7 @@
                 link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../..//span[contains(@id, 'sizelabel')]/a", "href");
                 link.Size    = Regex.Match(node.GetHtmlValue("../../..//span[contains(@id, 'sizecolumnlabel')]"), @"^(?:<b>)?([^<]+)").Groups[1].Value;
                 link.Quality = FileNames.Parser.ParseQuality(link.Release.Replace(' ', '.'));
-
-                var age = node.GetTextValue("../../..//span[contains(@id, 'agecolumnlabel')]").Trim();
-
-                if (age.EndsWith("m"))
-                {
-                    age += "inutes";
-                }
-                else if (age.EndsWith("h"))
-                {
-                    age += "ours";
-                }
-                else if (age.EndsWith("d"))
-                {
-                    age += "ays";
-                }
-
-                link.Infos = age + " old";
+                link.Infos   = Utils.ParseAge(node.GetTextValue("../../..//span[contains(@id, 'agecolumnlabel')]").Trim());
 
                 yield return link;
             }

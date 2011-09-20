@@ -972,6 +972,45 @@
         }
 
         /// <summary>
+        /// Parses the age string returned by a Usenet indexer.
+        /// </summary>
+        /// <param name="age">The age string as returned by the indexer.</param>
+        /// <returns>
+        /// Normalized age string.
+        /// </returns>
+        public static string ParseAge(string age)
+        {
+            var res = Regex.Match(age, @"(\d+(?:\.\d+)?)\s*([mhdwy])", RegexOptions.IgnoreCase);
+            double nr;
+
+            if (!res.Success || !double.TryParse(res.Groups[1].Value, out nr))
+            {
+                return age;
+            }
+
+            switch (res.Groups[2].Value.ToLower())
+            {
+                case "m":
+                    return FormatNumber((int)nr, "minute") + " old";
+
+                case "h":
+                    return FormatNumber((int)nr, "hour") + " old";
+
+                case "d":
+                    return FormatNumber((int)nr, "day") + " old";
+
+                case "w":
+                    return FormatNumber((int)(nr * 7), "day") + " old";
+
+                case "y":
+                    return FormatNumber((int)(nr * 365.242199), "day") + " old";
+
+                default:
+                    return age;
+            }
+        }
+
+        /// <summary>
         /// A custom encoding to denote Base64-encoded content.
         /// </summary>
         public class Base64Encoding : ASCIIEncoding

@@ -148,23 +148,7 @@
                 link.FileURL = HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../../../../../../../..//img[@alt='Download " + (vip ? "NZB" : "ZIP") + "']/..", "href"));
                 link.Size    = node.GetTextValue("../../../../../../../../td[4]").Trim();
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-
-                var age = node.GetTextValue("../../../../../../../../td[8]").Trim();
-
-                if (age.EndsWith("m"))
-                {
-                    age += "inutes";
-                }
-                else if (age.EndsWith("hr"))
-                {
-                    age = age.Replace("hr", "hours");
-                }
-                else if (age.EndsWith("d"))
-                {
-                    age += "ays";
-                }
-
-                link.Infos = age + " old";
+                link.Infos   = Utils.ParseAge(node.GetTextValue("../../../../../../../../td[8]").Trim());
 
                 yield return link;
             }
