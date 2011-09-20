@@ -125,6 +125,7 @@
     <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="HttpToSocks.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\DailyTvTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TokyoToshokan.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\NyaaTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TorrentLeech.cs" />
