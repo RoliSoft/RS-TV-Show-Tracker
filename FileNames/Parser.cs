@@ -41,7 +41,17 @@
         /// <summary>
         /// Contains a list of all the known TV show names on lab.rolisoft.net.
         /// </summary>
-        public static List<string[]> AllKnownTVShows = new List<string[]>(); 
+        public static List<string[]> AllKnownTVShows = new List<string[]>();
+
+        /// <summary>
+        /// Contains a small list of popular TV shows with airdate notation in their file name.
+        /// </summary>
+        public static List<string> AirdateNotationShows = new List<string>
+            {
+                "dailyshow", "colbertreport", "tonightshowwithjayleno", "jayleno", "conan", "latelateshowwithcraigferguson",
+                "craigferguson", "jimmykimmellive", "jimmykimmel", "realtimewithbillmaher", "latenightwithjimmyfallon",
+                "jimmyfallon", "lateshowwithdavidletterman", "davidletterman", "sundayfootyshow", "sundayroast", "attackshow"
+            };
 
         /// <summary>
         /// Parses the name of the specified file.
@@ -573,6 +583,46 @@
             File.WriteAllText(Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js"), JsonConvert.SerializeObject(req.Result));
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the type of the episode notation for the specified show.
+        /// </summary>
+        /// <param name="id">The ID of the show.</param>
+        /// <returns>
+        /// Episode notation type.
+        /// </returns>
+        public static string GetEpisodeNotationType(int id)
+        {
+            if (AirdateNotationShows.Contains(Utils.CreateSlug(Database.TVShows[id].Name)))
+            {
+                return "airdate";
+            }
+
+            return Database.TVShows[id].Data.Get("notation", "standard");
+        }
+
+        /// <summary>
+        /// Gets the type of the episode notation for the specified show.
+        /// </summary>
+        /// <param name="show">The show.</param>
+        /// <returns>
+        /// Episode notation type.
+        /// </returns>
+        public static string GetEpisodeNotationType(string show)
+        {
+            if (AirdateNotationShows.Contains(Utils.CreateSlug(show)))
+            {
+                return "airdate";
+            }
+
+            var ids = Database.TVShows.Values.Where(x => x.Name == show).ToList();
+            if (ids.Count != 0)
+            {
+                return ids[0].Data.Get("notation", "standard");
+            }
+
+            return "standard";
         }
     }
 }

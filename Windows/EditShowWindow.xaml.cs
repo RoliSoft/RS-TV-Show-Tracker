@@ -115,6 +115,36 @@
             }
 
             language.SelectedIndex = sel;
+
+            switch (FileNames.Parser.GetEpisodeNotationType(_id))
+            {
+                default:
+                case "standard":
+                    standardRadioButton.IsChecked = true;
+                    break;
+
+                case "airdate":
+                    dateRadioButton.IsChecked = true;
+
+                    if (FileNames.Parser.AirdateNotationShows.Contains(Utils.CreateSlug(show)))
+                    {
+                        standardRadioButton.IsEnabled = false;
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Handles the Loaded event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+            if (AeroGlassCompositionEnabled)
+            {
+                SetAeroGlassTransparency();
+            }
         }
 
         /// <summary>
@@ -138,16 +168,23 @@
         }
 
         /// <summary>
-        /// Handles the Loaded event of the Window control.
+        /// Handles the Checked event of the standardRadioButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void WindowLoaded(object sender, RoutedEventArgs e)
+        private void StandardRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            if (AeroGlassCompositionEnabled)
-            {
-                SetAeroGlassTransparency();
-            }
+            Database.ShowData(_id, "notation", "standard");
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the dateRadioButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DateRadioButtonChecked(object sender, RoutedEventArgs e)
+        {
+            Database.ShowData(_id, "notation", "airdate");
         }
 
         /// <summary>

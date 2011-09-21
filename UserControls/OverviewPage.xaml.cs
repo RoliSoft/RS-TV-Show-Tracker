@@ -699,6 +699,8 @@
             if (show.NewEpisodes >= 2)
             {
                 var dbep   = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderBy(ep => ep.Season * 1000 + ep.Number).First();
+                var nextnt = dbep.Show.Data.Get("notation") == "airdate";
+                var nextdt = dbep.Airdate.ToOriginalTimeZone(dbep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd");
                 var nextep = "S{0:00}E{1:00}".FormatWith(dbep.Season, dbep.Number);
                 
                 // Play next unseen episode
@@ -731,7 +733,7 @@
 
                 var sfd    = new MenuItem();
                 sfd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
-                sfd.Click += (s, r) => SearchDownloadLinksClick(show.Name, nextep);
+                sfd.Click += (s, r) => SearchDownloadLinksClick(show.Name, nextnt ? nextdt : nextep);
                 sfd.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -758,7 +760,7 @@
 
                 var sfs    = new MenuItem();
                 sfs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/subtitles.png")) };
-                sfs.Click += (s, r) => SearchSubtitlesClick(show.Name, nextep);
+                sfs.Click += (s, r) => SearchSubtitlesClick(show.Name, nextnt ? nextdt : nextep);
                 sfs.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -870,7 +872,7 @@
                 var gls    = new MenuItem();
                 gls.Header = "Google search";
                 gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + nextep));
+                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + (nextnt ? nextdt : nextep)));
 
                 sov.Items.Add(gls);
 
@@ -880,6 +882,8 @@
             if (show.Started)
             {
                 var dbep2  = Database.Episodes.Where(ep => ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).First();
+                var lastnt = dbep2.Show.Data.Get("notation") == "airdate";
+                var lastdt = dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.Data.Get("timezone")).ToString("yyyy.MM.dd");
                 var lastep = "S{0:00}E{1:00}".FormatWith(dbep2.Season, dbep2.Number);
                 
                 var pla    = new MenuItem();
@@ -910,7 +914,7 @@
 
                 var sfd    = new MenuItem();
                 sfd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
-                sfd.Click += (s, r) => SearchDownloadLinksClick(show.Name, lastep);
+                sfd.Click += (s, r) => SearchDownloadLinksClick(show.Name, lastnt ? lastdt : lastep);
                 sfd.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -937,7 +941,7 @@
 
                 var sfs    = new MenuItem();
                 sfs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/subtitles.png")) };
-                sfs.Click += (s, r) => SearchSubtitlesClick(show.Name, lastep);
+                sfs.Click += (s, r) => SearchSubtitlesClick(show.Name, lastnt ? lastdt : lastep);
                 sfs.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -1049,7 +1053,7 @@
                 var gls    = new MenuItem();
                 gls.Header = "Google search";
                 gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + lastep));
+                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + (lastnt ? lastdt : lastep)));
 
                 sov.Items.Add(gls);
 

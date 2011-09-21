@@ -440,7 +440,7 @@
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
             MainWindow.Active.tabControl.SelectedIndex = 2;
-            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
+            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 
@@ -457,7 +457,7 @@
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
             MainWindow.Active.tabControl.SelectedIndex = 3;
-            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
+            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 
@@ -557,7 +557,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(ep.Show.Name + " " + string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number))));
         }
         #endregion
 
