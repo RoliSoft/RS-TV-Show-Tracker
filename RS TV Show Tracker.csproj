@@ -126,6 +126,7 @@
     <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="HttpToSocks.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\ev0.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\DailyTvTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TokyoToshokan.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\NyaaTorrents.cs" />
@@ -152,6 +153,9 @@
     <Compile Include="Parsers\Guides\Engines\AnimeNewsNetwork.cs" />
     <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Netload.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Megaupload.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Hotfile.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\FileSonic.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadstation.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\WUpload.cs" />

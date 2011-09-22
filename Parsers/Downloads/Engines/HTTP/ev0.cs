@@ -4,18 +4,16 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
-    using HtmlAgilityPack;
-
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping DirectDownload.tv.
+    /// Provides support for scraping ev0.in.
     /// </summary>
-    [Parser("2011-03-26 4:56 PM"), TestFixture]
-    public class DirectDownload : DownloadSearchEngine
+    [Parser("2011-09-23 1:57 AM"), TestFixture]
+    public class ev0 : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -25,7 +23,7 @@
         {
             get
             {
-                return "DirectDownload.tv";
+                return "ev0.in";
             }
         }
 
@@ -37,19 +35,7 @@
         {
             get
             {
-                return "http://directdownload.tv/";
-            }
-        }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
-        {
-            get
-            {
-                return "http://directdownload.tv/favicon.png";
+                return "http://ev0.in/";
             }
         }
 
@@ -84,8 +70,8 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "ajaxSearch.php?keyword=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//dl");
+            var html  = Utils.GetHTML(Site, "name=" + Uri.EscapeUriString(query));
+            var links = html.DocumentNode.SelectNodes("//div[@class='rlsrow']/a[@class='rls']");
 
             if (links == null)
             {
@@ -94,31 +80,20 @@
 
             foreach (var node in links)
             {
-                var release = HtmlEntity.DeEntitize(node.GetTextValue("dd[@class='title']/strong")).Trim();
+                var release = node.GetAttributeValue("title");
+                var infourl = node.GetNodeAttributeValue("..//input[@name='links2']", "value");
                 var quality = FileNames.Parser.ParseQuality(release);
-                var size    = Regex.Match(node.GetTextValue("dd[@class='title']"), @"(\d+\.\d+ MB)").Groups[1].Value;
-                var sites   = node.SelectNodes("dd[@class='links']/a");
+                var sites   = node.GetHtmlValue("../following-sibling::div[1]/span[@class='links']").Split(new[] { "<br><br>" }, StringSplitOptions.RemoveEmptyEntries);
 
-                for (var i = 0; i < sites.Count; i++)
+                foreach (var site in sites)
                 {
                     var link = new Link(this);
 
                     link.Release = release;
-                    link.InfoURL = Site + "s/" + release;
-                    link.FileURL = sites[i].GetAttributeValue("href");
+                    link.InfoURL = infourl;
+                    link.FileURL = site.Replace("<br>", "\0");
                     link.Quality = quality;
-                    link.Size    = size;
-                    link.Infos   = Regex.Replace(sites[i].GetNodeAttributeValue("img", "title"), @"Download (?:file \d+ )?on ", string.Empty).ToLower().ToUppercaseFirst();
-
-                    var first = new Uri(sites[i].GetAttributeValue("href"));
-
-                tryNext:
-                    if (i + 1 < sites.Count && first.Host == new Uri(sites[i + 1].GetAttributeValue("href")).Host)
-                    {
-                        i++;
-                        link.FileURL += "\0" + sites[i].GetAttributeValue("href");
-                        goto tryNext;
-                    }
+                    link.Infos   = Regex.Match(link.FileURL, @"http://(?:www\.)?([^\.]+)").Groups[1].Value.ToUppercaseFirst();
 
                     yield return link;
                 }
