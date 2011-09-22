@@ -99,15 +99,25 @@
                 var size    = Regex.Match(node.GetTextValue("dd[@class='title']"), @"(\d+\.\d+ MB)").Groups[1].Value;
                 var sites   = node.SelectNodes("dd[@class='links']/a");
 
-                foreach (var site in sites)
+                for (var i = 0; i < sites.Count; i++)
                 {
                     var link = new Link(this);
 
                     link.Release = release;
                     link.Quality = quality;
                     link.Size    = size;
-                    link.FileURL = site.GetAttributeValue("href");
-                    link.Infos   = site.GetNodeAttributeValue("img", "title").Replace("Download on ", string.Empty);
+                    link.FileURL = sites[i].GetAttributeValue("href");
+                    link.Infos   = Regex.Replace(sites[i].GetNodeAttributeValue("img", "title"), @"Download (?:file \d+ )?on ", string.Empty).ToLower().ToUppercaseFirst();
+
+                    var first = new Uri(sites[i].GetAttributeValue("href"));
+
+                tryNext:
+                    if (i + 1 < sites.Count && first.Host == new Uri(sites[i + 1].GetAttributeValue("href")).Host)
+                    {
+                        i++;
+                        link.FileURL += "\0" + sites[i].GetAttributeValue("href");
+                        goto tryNext;
+                    }
 
                     yield return link;
                 }

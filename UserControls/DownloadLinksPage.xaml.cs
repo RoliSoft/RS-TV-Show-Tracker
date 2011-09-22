@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Text.RegularExpressions;
@@ -619,7 +620,13 @@
                 var oib    = new MenuItem();
                 oib.Header = "Download file in browser";
                 oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
-                oib.Click += (s, r) => Utils.Run(link.FileURL);
+                oib.Click += (s, r) =>
+                    {
+                        foreach (var url in link.FileURL.Split('\0'))
+                        {
+                            Utils.Run(url);
+                        }
+                    };
                 cm.Items.Add(oib);
             }
 
@@ -661,7 +668,7 @@
                 var jd    = new MenuItem();
                 jd.Header = "Send to JDownloader";
                 jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")) };
-                jd.Click += (s, r) => Utils.Run(_jDlPath, link.FileURL);
+                jd.Click += (s, r) => SendToJDownloader(link.FileURL.Split('\0'));
                 cm.Items.Add(jd);
             }
 
@@ -697,16 +704,30 @@
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL) && !string.IsNullOrWhiteSpace(_jDlPath) && link.Source.Type == Types.DirectHTTP)
             {
-                Utils.Run(_jDlPath, link.FileURL);
+                SendToJDownloader(link.FileURL.Split('\0'));
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL))
             {
-                Utils.Run(link.FileURL);
+                foreach (var url in link.FileURL.Split('\0'))
+                {
+                    Utils.Run(url);
+                }
             }
             else if (!string.IsNullOrWhiteSpace(link.InfoURL))
             {
                 Utils.Run(link.InfoURL);
             }
+        }
+
+        /// <summary>
+        /// Creates a temporary container and sends it to jDownloader.
+        /// </summary>
+        /// <param name="urls">The links.</param>
+        private void SendToJDownloader(string[] urls)
+        {
+            var tmp = Utils.GetRandomFileName("rsdf");
+            File.WriteAllText(tmp, DLCAPI.CreateRSDF(urls));
+            Utils.Run(_jDlPath, tmp);
         }
         #endregion
 

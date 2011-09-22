@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
@@ -13,7 +15,7 @@
     /// <summary>
     /// Provides support for scraping SceneReleases.
     /// </summary>
-    [Parser("2011-01-29 9:51 PM"), TestFixture]
+    [Parser("2011-09-22 11:51 PM"), TestFixture]
     public class SceneReleases : DownloadSearchEngine
     {
         /// <summary>
@@ -48,7 +50,7 @@
         {
             get
             {
-                return Types.HTTP;
+                return Types.DirectHTTP;
             }
         }
 
@@ -71,7 +73,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "?s=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "category/tv-shows?s=" + Uri.EscapeUriString(query));
             var links = html.DocumentNode.SelectNodes("//h2/a");
 
             if (links == null)
@@ -81,13 +83,35 @@
 
             foreach (var node in links)
             {
-                var link = new Link(this);
+                var info   = node.GetAttributeValue("href");
+                var size   = (node.GetTextValue("../..//span[text() = 'Size:']/following-sibling::text()") ?? string.Empty).Trim();
+                var titles = HtmlEntity.DeEntitize(node.InnerText).Split(new[] { " & " }, StringSplitOptions.RemoveEmptyEntries);
+                var groups = node.SelectNodes("../..//div[@class='meta' and contains(text(), 'Download Links')]/following-sibling::p");
 
-                link.Release = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & ");
-                link.InfoURL = node.GetAttributeValue("href");
-                link.Quality = FileNames.Parser.ParseQuality(link.Release);
+                var i = 0;
+                foreach (var group in groups)
+                {
+                    var title = (i < titles.Length ? titles[i] : titles.Last()).Trim();
+                    var files = group.SelectNodes(".//a");
 
-                yield return link;
+                    foreach (var file in files)
+                    {
+                        var link = new Link(this);
+
+                        link.Release = title;
+                        link.InfoURL = info;
+                        link.FileURL = file.GetAttributeValue("href");
+                        link.Size    = size;
+                        link.Infos   = file.InnerText.ToLower().ToUppercaseFirst();
+                        link.Quality = Regex.IsMatch(group.InnerText, "xvid", RegexOptions.IgnoreCase)
+                                       ? Qualities.HDTVXviD
+                                       : FileNames.Parser.ParseQuality(title);
+
+                        yield return link;
+                    }
+
+                    i++;
+                }
             }
         }
     }

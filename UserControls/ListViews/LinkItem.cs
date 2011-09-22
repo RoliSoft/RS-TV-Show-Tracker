@@ -125,7 +125,7 @@
 
             try
             {
-                var result = ((LinkCheckerEngine)Activator.CreateInstance(checker[0])).Check(FileURL);
+                var result = ((LinkCheckerEngine)Activator.CreateInstance(checker[0])).Check(FileURL.Split('\0').First());
 
                 if (!result)
                 {
