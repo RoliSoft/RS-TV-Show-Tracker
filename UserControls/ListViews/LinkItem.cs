@@ -1,13 +1,16 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using System;
     using System.ComponentModel;
+    using System.Linq;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.LinkCheckers;
 
     /// <summary>
     /// Extended class of the original Link class to handle the context menu items.
     /// </summary>
-    public class LinkItem : Link
+    public class LinkItem : Link, INotifyPropertyChanged
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LinkItem"/> class.
@@ -21,7 +24,19 @@
             InfoURL = link.InfoURL;
             FileURL = link.FileURL;
             Infos   = link.Infos;
+            Color   = "White";
         }
+
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the color.
+        /// </summary>
+        /// <value>The color.</value>
+        public string Color { get; set; }
 
         /// <summary>
         /// Gets the image of the link type.
@@ -83,6 +98,54 @@
                     default:
                         return "/RSTVShowTracker;component/Images/empty.png";
                 }
+            }
+        }
+
+        /// <summary>
+        /// Checks whether this link is available.
+        /// </summary>
+        public void CheckLink()
+        {
+            var checker = typeof(LinkCheckerEngine).GetDerivedTypes().Where(x => FileURL.Contains(x.Name.ToLower())).ToList();
+
+            if (checker.Count == 0)
+            {
+                return;
+            }
+
+            var inf = Infos;
+
+            if (!string.IsNullOrWhiteSpace(inf))
+            {
+                inf += ", ";
+            }
+
+            Infos = inf + "Checking...";
+            MainWindow.Active.Dispatcher.Invoke((Action)(() => { try { PropertyChanged(this, new PropertyChangedEventArgs("Infos")); } catch { } }));
+
+            try
+            {
+                var result = ((LinkCheckerEngine)Activator.CreateInstance(checker[0])).Check(FileURL);
+
+                if (!result)
+                {
+                    Color = "#50FFFFFF";
+                }
+
+                Infos = inf + "Link is " + (result ? "online" : "broken");
+                MainWindow.Active.Dispatcher.Invoke((Action)(() =>
+                    {
+                        try
+                        {
+                            PropertyChanged(this, new PropertyChangedEventArgs("Infos"));
+                            PropertyChanged(this, new PropertyChangedEventArgs("Color"));
+                        } catch { }
+                    }));
+            }
+            catch
+            {
+                Infos = inf + "Check error";
+                MainWindow.Active.Dispatcher.Invoke((Action)(() => { try { PropertyChanged(this, new PropertyChangedEventArgs("Infos")); } catch { } }));
             }
         }
     }

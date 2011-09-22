@@ -152,6 +152,12 @@
     <Compile Include="Parsers\Guides\Engines\AnimeNewsNetwork.cs" />
     <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\FileSonic.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Uploadstation.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\WUpload.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\FileFactory.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\FileServe.cs" />
+    <Compile Include="Parsers\LinkCheckers\LinkCheckerEngine.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\TubePlus.cs" />
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />

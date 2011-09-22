@@ -67,7 +67,7 @@
                         <GridViewColumnHeader Content="Release name" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" Margin="-7,0" />
+                                <TextBlock FontWeight="Bold" Text="{Binding Release}" TextTrimming="CharacterEllipsis" Margin="-7,0" Foreground="{Binding Color}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -75,7 +75,7 @@
                         <GridViewColumnHeader Content="Size" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Size}" Width="60" Margin="-7,0" TextAlignment="Center" />
+                                <TextBlock FontWeight="Normal" Text="{Binding Size}" Width="60" Margin="-7,0" TextAlignment="Center" Foreground="{Binding Color}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -84,7 +84,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="-10,0,0,0">
-                                    <TextBlock FontWeight="Normal" Text="{Binding QualityText}" Width="94" Margin="-7,0" TextAlignment="Center" />
+                                    <TextBlock FontWeight="Normal" Text="{Binding QualityText}" Width="94" Margin="-7,0" TextAlignment="Center" Foreground="{Binding Color}" />
                                     <Image Source="{Binding HDIcon}" Width="16" Height="16" />
                                 </StackPanel>
                             </DataTemplate>
@@ -94,7 +94,7 @@
                         <GridViewColumnHeader Content="Details" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock FontWeight="Normal" Text="{Binding Infos}" TextTrimming="CharacterEllipsis" Margin="-7,0" />
+                                <TextBlock FontWeight="Normal" Text="{Binding Infos}" TextTrimming="CharacterEllipsis" Margin="-7,0" Foreground="{Binding Color}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

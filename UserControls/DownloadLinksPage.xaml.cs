@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Net;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
@@ -476,6 +477,16 @@
                 {
                     textBox.IsEnabled    = true;
                     searchButton.Content = "Search";
+
+                    var dhttp = DownloadLinksListViewItemCollection.Where(x => x.Source.Type == Types.DirectHTTP).ToList();
+
+                    if (dhttp.Count != 0)
+                    {
+                        foreach (var item in dhttp)
+                        {
+                            new Thread(item.CheckLink).Start();
+                        }
+                    }
 
                     if (DownloadLinksListViewItemCollection.Count != 0)
                     {
