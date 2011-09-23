@@ -94,12 +94,12 @@
                 if (ShowNames.Regexes.Numbering.IsMatch(query))
                 {
                     var tmp       = ShowNames.Parser.Split(query);
-                    _titleParts   = Database.GetReleaseName(tmp[0]);
+                    _titleParts   = Database.GetReleaseName(tmp[0], replaceApostrophes: @"(?:\\?['`’\._])?");
                     _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(tmp[1]);
                 }
                 else
                 {
-                    _titleParts   = Database.GetReleaseName(query);
+                    _titleParts   = Database.GetReleaseName(query, replaceApostrophes: @"(?:\\?['`’\._])?");
                     _episodeRegex = null;
                 }
             }

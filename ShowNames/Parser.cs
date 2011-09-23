@@ -34,8 +34,8 @@
             // the CLR is optimized for uppercase string matching
             show = show.ToUpper();
 
-            // remove apostrophes which occur in contractions
-            show = Regexes.Contractions.Replace(show, replaceApostrophes ?? string.Empty);
+            // remove apostrophes which occur in contractions or replace them to a null placeholder
+            show = Regexes.Contractions.Replace(show, replaceApostrophes != null ? "\0" : string.Empty);
 
             // remove special characters
             show = Regexes.SpecialChars.Replace(show, " ").Trim();
@@ -59,6 +59,12 @@
             {
                 show = Regexes.StrictCommon.Replace(show, string.Empty);
                 show = Regexes.StrictOneChar.Replace(show.Trim(), string.Empty);
+            }
+
+            // replace null placeholder for apostrophes
+            if (replaceApostrophes != null)
+            {
+                show = show.Replace("\0", replaceApostrophes);
             }
 
             // split it up

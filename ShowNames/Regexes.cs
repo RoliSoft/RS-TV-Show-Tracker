@@ -20,7 +20,7 @@
         /// <summary>
         /// Removes everything except letters, numbers and parentheses.
         /// </summary>
-        public static readonly Regex SpecialChars  = new Regex(@"([^A-Z0-9\s\(\)])");
+        public static readonly Regex SpecialChars  = new Regex(@"([^A-Z0-9\s\(\)\0])");
 
         /// <summary>
         /// Matches 2000-2099 in brackets with leading space.
@@ -43,9 +43,9 @@
         public static readonly Regex Common        = new Regex(@"\b(AND|THE|OF|A)\b");
 
         /// <summary>
-        /// Matches a single character surrounded by word boundaries, except if it is the first character.
+        /// Matches a single character surrounded by word boundaries, except if it is the first character or has a null placeholder.
         /// </summary>
-        public static readonly Regex OneChar       = new Regex(@"(?<!^)\b[A-Z]\b");
+        public static readonly Regex OneChar       = new Regex(@"(?<!^)\b(?<!\0)[A-Z]\b");
 
         /// <summary>
         /// Matches strings starting with "the".
@@ -55,7 +55,7 @@
         /// <summary>
         /// Matches any single letter with the exclusion of "a" and "i".
         /// </summary>
-        public static readonly Regex StrictOneChar = new Regex(@"(?<!^)\b[B-HJ-Z]\b");
+        public static readonly Regex StrictOneChar = new Regex(@"(?<!^)\b(?<!\0)[B-HJ-Z]\b");
 
         /// <summary>
         /// Matches any whitespace.

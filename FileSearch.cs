@@ -54,7 +54,7 @@
         /// <param name="airdate">The airdate.</param>
         public FileSearch(IEnumerable<string> paths, string show, string episode, DateTime? airdate = null)
         {
-            _titleParts   = Database.GetReleaseName(show);
+            _titleParts   = Database.GetReleaseName(show, replaceApostrophes: @"['`’\._]?");
             _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode, airdate);
 
             ShowQuery  = show + " " + episode;
@@ -109,7 +109,7 @@
                     if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
                     {
                         var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
-                        if (pf.Success && _titleParts.SequenceEqual(Database.GetReleaseName(pf.Show)))
+                        if (pf.Success && _titleParts.SequenceEqual(Database.GetReleaseName(pf.Show, replaceApostrophes: @"['`’\._]?")))
                         {
                             Files.Add(file);
                         }

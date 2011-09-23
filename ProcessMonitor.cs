@@ -87,7 +87,7 @@
 
             foreach (var show in Database.TVShows)
             {
-                var titleParts   = Parser.GetRoot(show.Value.Name);
+                var titleParts   = Parser.GetRoot(show.Value.Name, replaceApostrophes: @"['`’\._]?");
                 var releaseParts = !string.IsNullOrWhiteSpace(show.Value.Release) ? show.Value.Release.Split(' ') : null;
 
                 foreach (var file in files)
