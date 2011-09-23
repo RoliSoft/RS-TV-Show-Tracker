@@ -80,7 +80,7 @@
 
             foreach (var node in links)
             {
-                var release = node.GetAttributeValue("title");
+                var release = node.GetAttributeValue("title").Replace("Expand ", string.Empty);
                 var infourl = node.GetNodeAttributeValue("..//input[@name='links2']", "value");
                 var quality = FileNames.Parser.ParseQuality(release);
                 var sites   = node.GetHtmlValue("../following-sibling::div[1]/span[@class='links']").Split(new[] { "<br><br>" }, StringSplitOptions.RemoveEmptyEntries);

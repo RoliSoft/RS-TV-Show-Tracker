@@ -88,6 +88,17 @@
                 var titles = HtmlEntity.DeEntitize(node.InnerText).Split(new[] { " & " }, StringSplitOptions.RemoveEmptyEntries);
                 var groups = node.SelectNodes("../..//div[@class='meta' and contains(text(), 'Download Links')]/following-sibling::p");
 
+                if (groups == null)
+                {
+                    // try the markup for older posts
+                    groups = node.SelectNodes("../..//div[@class='ddet_div']/p/span[contains(@style, '#99cc00')]");
+                }
+
+                if (groups == null)
+                {
+                    yield break;
+                }
+
                 var i = 0;
                 foreach (var group in groups)
                 {

@@ -266,6 +266,18 @@
                             });
                     }
 
+                    if (engine.Type == Types.DirectHTTP)
+                    {
+                        (mi.Header as StackPanel).Children.Add(new Image
+                            {
+                                Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/jdownloader.png", UriKind.Relative)),
+                                Width   = 16,
+                                Height  = 16,
+                                Margin  = new Thickness(3, -2, -100, 0),
+                                ToolTip = "This parser extracts direct links which can be passed to jDownloader."
+                            });
+                    }
+
                     mi.Checked   += SearchEngineMenuItemChecked;
                     mi.Unchecked += SearchEngineMenuItemUnchecked;
 
