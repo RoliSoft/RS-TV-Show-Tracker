@@ -94,7 +94,7 @@
                 episode = tmp[1];
             }
 
-            var parts = String.Join(" ", Database.GetReleaseName(show, removeCommon, replaceApostrophes)).ToLower();
+            var parts = String.Join(" ", GetRoot(show, removeCommon, replaceApostrophes)).ToLower();
 
             return episode.Length != 0
                    ? parts + " " + episode

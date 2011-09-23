@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
@@ -13,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
-    [Parser("2011-01-29 9:50 PM"), TestFixture]
+    [Parser("2011-09-24 2:17 AM"), TestFixture]
     public class ReleaseLog : DownloadSearchEngine
     {
         /// <summary>
@@ -36,7 +37,7 @@
         {
             get
             {
-                return "http://www.rlslog.net/";
+                return "http://rlslog.net/";
             }
         }
 
@@ -48,7 +49,7 @@
         {
             get
             {
-                return "http://www.rlslog.net/wp-content/favicon.ico";
+                return "http://rlslog.net/wp-content/favicon.ico";
             }
         }
 
@@ -60,7 +61,7 @@
         {
             get
             {
-                return Types.HTTP;
+                return Types.DirectHTTP;
             }
         }
 
@@ -83,8 +84,16 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "?s=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//h3[starts-with(@id, 'post-')]/a");
+            var req  = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Uri.EscapeUriString(query))
+                            .Replace("content:encoded", "content") // HtmlAgilityPack doesn't like tags with colons in their names
+                            .Replace("<![CDATA[", string.Empty)
+                            .Replace("]]>", string.Empty)
+                            .Replace("×", "x");
+
+            var html = new HtmlDocument();
+            html.LoadHtml(req);
+
+            var links = html.DocumentNode.SelectNodes("//item");
 
             if (links == null)
             {
@@ -93,13 +102,52 @@
 
             foreach (var node in links)
             {
-                var link = new Link(this);
+                if (node.SelectSingleNode("category[contains(text(), 'TV Packs')]") != null)
+                {
+                    continue;
+                }
 
-                link.Release = HtmlEntity.DeEntitize(node.InnerText).Trim().Replace(' ', '.').Replace(".&.", " & ");
-                link.InfoURL = node.GetAttributeValue("href");
-                link.Quality = FileNames.Parser.ParseQuality(link.Release);
+                var infourl  = node.GetTextValue("comments").Replace("#comments", string.Empty); // can't get <link>
+                var releases = node.SelectNodes("content/p[contains(@style, 'center') or @align='center']/strong/..");
 
-                yield return link;
+                if (releases == null)
+                {
+                    continue;
+                }
+
+                foreach (var relnode in releases)
+                {
+                    var release = relnode.GetTextValue("strong").Trim();
+                    var quality = FileNames.Parser.ParseQuality(release);
+                    var sizergx = Regex.Match(relnode.InnerText, @"(\d+(?:\.\d+)?)\s*([KMG]B)", RegexOptions.IgnoreCase);
+                    var size    = string.Empty;
+
+                    if (sizergx.Success)
+                    {
+                        size = sizergx.Groups[1].Value + " " + sizergx.Groups[2].Value.ToUpper();
+                    }
+
+                    var sites = relnode.SelectNodes("a");
+
+                    foreach (var site in sites)
+                    {
+                        if (Regex.IsMatch(site.InnerText, @"(NTi|NFO)"))
+                        {
+                            continue;
+                        }
+
+                        var link = new Link(this);
+
+                        link.Release = release;
+                        link.InfoURL = infourl;
+                        link.FileURL = site.GetAttributeValue("href");
+                        link.Size    = size;
+                        link.Infos   = site.InnerText.ToLower().ToUppercaseFirst();
+                        link.Quality = quality;
+
+                        yield return link;
+                    }
+                }
             }
         }
     }

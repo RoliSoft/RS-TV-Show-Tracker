@@ -274,7 +274,7 @@
                                 Width   = 16,
                                 Height  = 16,
                                 Margin  = new Thickness(3, -2, -100, 0),
-                                ToolTip = "This parser extracts direct links which can be passed to jDownloader."
+                                ToolTip = "This parser extracts direct links which can be passed to JDownloader."
                             });
                     }
 
