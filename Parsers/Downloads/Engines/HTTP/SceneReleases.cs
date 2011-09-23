@@ -84,14 +84,20 @@
             foreach (var node in links)
             {
                 var info   = node.GetAttributeValue("href");
-                var size   = (node.GetTextValue("../..//span[text() = 'Size:']/following-sibling::text()") ?? string.Empty).Trim();
                 var titles = HtmlEntity.DeEntitize(node.InnerText).Split(new[] { " & " }, StringSplitOptions.RemoveEmptyEntries);
                 var groups = node.SelectNodes("../..//div[@class='meta' and contains(text(), 'Download Links')]/following-sibling::p");
+                var size   = (node.GetTextValue("../..//span[text() = 'Size:']/following-sibling::text()") ?? string.Empty);
+                var sizerg = Regex.Match(size, @"(\d+(?:\.\d+)?)\s*([KMG]B)", RegexOptions.IgnoreCase);
+
+                if (sizerg.Success)
+                {
+                    size = sizerg.Groups[1].Value + " " + sizerg.Groups[2].Value.ToUpper();
+                }
 
                 if (groups == null)
                 {
                     // try the markup for older posts
-                    groups = node.SelectNodes("../..//div[@class='ddet_div']/p/span[contains(@style, '#99cc00')]");
+                    groups = node.SelectNodes("../..//p/span[contains(@style, '#99cc00')]");
                 }
 
                 if (groups == null)
@@ -102,8 +108,18 @@
                 var i = 0;
                 foreach (var group in groups)
                 {
+                    if (Regex.IsMatch(group.InnerHtml, @"(TV\.com|TVRage|NFO|TPB)</a>"))
+                    {
+                        continue;
+                    }
+
                     var title = (i < titles.Length ? titles[i] : titles.Last()).Trim();
                     var files = group.SelectNodes(".//a");
+
+                    if (files == null)
+                    {
+                        continue;
+                    }
 
                     foreach (var file in files)
                     {
