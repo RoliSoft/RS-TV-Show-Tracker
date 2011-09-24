@@ -45,19 +45,16 @@
         private Regex _episodeRegex;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SubtitleSearch"/> class.
+        /// Initializes a new instance of the <see cref="DownloadSearch"/> class.
         /// </summary>
         /// <param name="engines">The engines to use for searching.</param>
-        public DownloadSearch(IEnumerable<Type> engines = null)
+        /// <param name="filter">if set to <c>true</c> the search results will be filtered.</param>
+        public DownloadSearch(IEnumerable<DownloadSearchEngine> engines = null, bool filter = false)
         {
-            if (engines == null)
-            {
-                engines = typeof(DownloadSearchEngine).GetDerivedTypes();
-            }
+            SearchEngines = (engines ?? AutoDownloader.ActiveSearchEngines).ToList();
+            Filter = filter;
 
             var remove = new List<DownloadSearchEngine>();
-
-            SearchEngines = engines.Select(type => Activator.CreateInstance(type) as DownloadSearchEngine).ToList();
 
             foreach (var engine in SearchEngines)
             {

@@ -35,13 +35,6 @@
         /// <value>The download links list view item collection.</value>
         public ObservableCollection<LinkItem> DownloadLinksListViewItemCollection { get; set; }
 
-        /// <summary>
-        /// Gets or sets the search engines active in this application.
-        /// </summary>
-        /// <value>The search engines.</value>
-        public List<DownloadSearchEngine> SearchEngines { get; set; }
-
-        private List<string> _trackers, _qualities, _actives;
         private List<LinkItem> _results;
 
         private ListSortDirection _lastSortDirection;
@@ -139,32 +132,6 @@
         /// <param name="reload">if set to <c>true</c> it will reload all variables; otherwise, it will just load the variables which are null.</param>
         public void LoadEngines(bool reload = false)
         {
-            if (reload || SearchEngines == null)
-            {
-                SearchEngines = typeof(DownloadSearchEngine)
-                                .GetDerivedTypes()
-                                .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
-                                .ToList();
-            }
-
-            if (reload || _trackers == null)
-            {
-                _trackers = Settings.Get<List<string>>("Tracker Order");
-                _trackers.AddRange(SearchEngines
-                                   .Where(engine => _trackers.IndexOf(engine.Name) == -1)
-                                   .Select(engine => engine.Name));
-            }
-
-            if (reload || _qualities == null)
-            {
-                _qualities = Enum.GetNames(typeof(Qualities)).Reverse().ToList();
-            }
-
-            if (reload || _actives == null)
-            {
-                _actives = Settings.Get<List<string>>("Active Trackers");
-            }
-
             if (reload || availableTorrentEngines.Items.Count == 0)
             {
                 availableTorrentEngines.Items.Clear();
@@ -172,13 +139,13 @@
                 availableHTTPEngines.Items.Clear();
                 availablePreEngines.Items.Clear();
 
-                foreach (var engine in SearchEngines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
+                foreach (var engine in AutoDownloader.SearchEngines.OrderBy(engine => AutoDownloader.Parsers.IndexOf(engine.Name)))
                 {
                     var mi = new MenuItem
                         {
                             Header           = new StackPanel { Orientation = Orientation.Horizontal },
                             IsCheckable      = true,
-                            IsChecked        = _actives.Contains(engine.Name),
+                            IsChecked        = AutoDownloader.Actives.Contains(engine.Name),
                             StaysOpenOnClick = true,
                             Tag              = engine.Name
                         };
@@ -311,9 +278,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemChecked(object sender, RoutedEventArgs e)
         {
-            if (!_actives.Contains((sender as MenuItem).Tag as string))
+            if (!AutoDownloader.Actives.Contains((sender as MenuItem).Tag as string))
             {
-                _actives.Add((sender as MenuItem).Tag as string);
+                AutoDownloader.Actives.Add((sender as MenuItem).Tag as string);
 
                 SaveActivated();
             }
@@ -326,9 +293,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemUnchecked(object sender, RoutedEventArgs e)
         {
-            if (_actives.Contains((sender as MenuItem).Tag as string))
+            if (AutoDownloader.Actives.Contains((sender as MenuItem).Tag as string))
             {
-                _actives.Remove((sender as MenuItem).Tag as string);
+                AutoDownloader.Actives.Remove((sender as MenuItem).Tag as string);
 
                 SaveActivated();
             }
@@ -359,7 +326,7 @@
         /// </summary>
         public void SaveActivated()
         {
-            Settings.Set("Active Trackers", _actives);
+            Settings.Set("Active Trackers", AutoDownloader.Actives);
         }
         #endregion
 
@@ -419,10 +386,7 @@
             textBox.IsEnabled    = false;
             searchButton.Content = "Cancel";
 
-            ActiveSearch = new DownloadSearch(SearchEngines
-                                              .Where(engine => _actives.Contains(engine.Name))
-                                              .Select(engine => engine.GetType()))
-                                              { Filter = filterResults.IsChecked };
+            ActiveSearch = new DownloadSearch(AutoDownloader.ActiveSearchEngines, filterResults.IsChecked);
 
             ActiveSearch.DownloadSearchDone            += DownloadSearchDone;
             ActiveSearch.DownloadSearchProgressChanged += DownloadSearchProgressChanged;
@@ -463,8 +427,8 @@
                     {
                         DownloadLinksListViewItemCollection.Clear();
                         DownloadLinksListViewItemCollection.AddRange(_results
-                                                                     .OrderBy(link => _qualities.IndexOf(link.Quality.ToString()))
-                                                                     .ThenBy(link => _trackers.IndexOf(link.Source.Name)));
+                                                                     .OrderBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                                                                     .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name)));
                     }));
             }
         }
@@ -562,15 +526,15 @@
                     if (direction == ListSortDirection.Ascending)
                     {
                         links = links
-                            .OrderBy(link => this._trackers.IndexOf(link.Source.Name))
-                            .ThenBy(link => this._qualities.IndexOf(link.Quality.ToString()))
+                            .OrderBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
+                            .ThenBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
                             .ToList();
                     }
                     else
                     {
                         links = links
-                            .OrderByDescending(link => this._trackers.IndexOf(link.Source.Name))
-                            .ThenBy(link => this._qualities.IndexOf(link.Quality.ToString()))
+                            .OrderByDescending(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
+                            .ThenBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
                             .ToList();
                     }
                     break;
@@ -579,15 +543,15 @@
                     if (direction == ListSortDirection.Ascending)
                     {
                         links = links
-                            .OrderBy(link => this._qualities.IndexOf(link.Quality.ToString()))
-                            .ThenBy(link => this._trackers.IndexOf(link.Source.Name))
+                            .OrderBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
                             .ToList();
                     }
                     else
                     {
                         links = links
-                            .OrderByDescending(link => this._qualities.IndexOf(link.Quality.ToString()))
-                            .ThenBy(link => this._trackers.IndexOf(link.Source.Name))
+                            .OrderByDescending(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
                             .ToList();
                     }
                     break;

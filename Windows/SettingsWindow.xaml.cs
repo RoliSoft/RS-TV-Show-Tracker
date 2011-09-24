@@ -17,7 +17,6 @@
     using Microsoft.Win32;
 
     using RoliSoft.TVShowTracker.Parsers;
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     using VistaControls.TaskDialog;
 
@@ -55,9 +54,6 @@
         {
             InitializeComponent();
         }
-
-        private List<DownloadSearchEngine> _engines;
-        private List<string> _trackers, _includes;
 
         /// <summary>
         /// Handles the Loaded event of the Window control.
@@ -188,18 +184,6 @@
             {
                 DownloadsListViewItemCollection = new ObservableCollection<DownloadsListViewItem>();
                 listView.ItemsSource = DownloadsListViewItemCollection;
-
-                _engines = typeof(DownloadSearchEngine)
-                           .GetDerivedTypes()
-                           .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine)
-                           .ToList();
-
-                _trackers = Settings.Get<List<string>>("Tracker Order");
-                _trackers.AddRange(_engines
-                                   .Where(engine => _trackers.IndexOf(engine.Name) == -1)
-                                   .Select(engine => engine.Name));
-
-                _includes = Settings.Get<List<string>>("Active Trackers");
 
                 ReloadParsers();
             }
@@ -616,13 +600,13 @@
             var idx = listView.SelectedIndex;
             DownloadsListViewItemCollection.Clear();
 
-            foreach (var engine in _engines.OrderBy(engine => _trackers.IndexOf(engine.Name)))
+            foreach (var engine in AutoDownloader.SearchEngines.OrderBy(engine => AutoDownloader.Parsers.IndexOf(engine.Name)))
             {
                 var revdiff = engine.GetAttribute<ParserAttribute>().Revision - new DateTime(2000, 1, 1, 1, 0, 0);
 
                 DownloadsListViewItemCollection.Add(new DownloadsListViewItem
                     {
-                        Enabled = _includes.Contains(engine.Name),
+                        Enabled = AutoDownloader.Actives.Contains(engine.Name),
                         Icon    = engine.Icon,
                         Site    = engine.Name,
                         Login   = engine.Private
@@ -647,11 +631,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void EnabledChecked(object sender, RoutedEventArgs e)
         {
-            if (!_includes.Contains((sender as CheckBox).Tag as string))
+            if (!AutoDownloader.Actives.Contains((sender as CheckBox).Tag as string))
             {
-                _includes.Add((sender as CheckBox).Tag as string);
+                AutoDownloader.Actives.Add((sender as CheckBox).Tag as string);
 
-                SaveInclusions();
+                Settings.Set("Active Trackers", AutoDownloader.Actives);
             }
         }
 
@@ -662,20 +646,12 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void EnabledUnchecked(object sender, RoutedEventArgs e)
         {
-            if (_includes.Contains((sender as CheckBox).Tag as string))
+            if (AutoDownloader.Actives.Contains((sender as CheckBox).Tag as string))
             {
-                _includes.Remove((sender as CheckBox).Tag as string);
+                AutoDownloader.Actives.Remove((sender as CheckBox).Tag as string);
 
-                SaveInclusions();
+                Settings.Set("Active Trackers", AutoDownloader.Actives);
             }
-        }
-
-        /// <summary>
-        /// Saves the active trackers to the XML settings file.
-        /// </summary>
-        public void SaveInclusions()
-        {
-            Settings.Set("Active Trackers", _includes);
         }
 
         /// <summary>
@@ -686,7 +662,7 @@
         private void ParserEditButtonClick(object sender, RoutedEventArgs e)
         {
             var sel = listView.SelectedItem as DownloadsListViewItem;
-            var prs = _engines.Single(en => en.Name == sel.Site);
+            var prs = AutoDownloader.SearchEngines.Single(en => en.Name == sel.Site);
 
             if (prs.Private)
             {
@@ -708,12 +684,17 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MoveUpButtonClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex != 0)
-            {
-                _trackers.MoveUp(listView.SelectedIndex);
-                DownloadsListViewItemCollection.Move(listView.SelectedIndex, listView.SelectedIndex - 1);
+            if (listView.SelectedIndex == -1) return;
 
-                SaveOrder();
+            var idx = AutoDownloader.Parsers.IndexOf((listView.SelectedItem as DownloadsListViewItem).Site);
+
+            if (idx != 0)
+            {
+                AutoDownloader.Parsers.MoveUp(idx);
+                DownloadsListViewItemCollection.Move(listView.SelectedIndex, listView.SelectedIndex - 1);
+                ListViewSelectionChanged();
+
+                Settings.Set("Tracker Order", AutoDownloader.Parsers);
             }
         }
 
@@ -724,21 +705,18 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MoveDownButtonClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex != _trackers.Count - 1)
+            if (listView.SelectedIndex == -1) return;
+
+            var idx = AutoDownloader.Parsers.IndexOf((listView.SelectedItem as DownloadsListViewItem).Site);
+
+            if (idx != AutoDownloader.Parsers.Count - 1)
             {
-                _trackers.MoveDown(listView.SelectedIndex);
+                AutoDownloader.Parsers.MoveDown(idx);
                 DownloadsListViewItemCollection.Move(listView.SelectedIndex, listView.SelectedIndex + 1);
+                ListViewSelectionChanged();
 
-                SaveOrder();
+                Settings.Set("Tracker Order", AutoDownloader.Parsers);
             }
-        }
-
-        /// <summary>
-        /// Saves the order to the XML settings file.
-        /// </summary>
-        public void SaveOrder()
-        {
-            Settings.Set("Tracker Order", _trackers);
         }
         #endregion
 
@@ -1161,7 +1139,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
-        private void GlassWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void GlassWindowClosing(object sender, CancelEventArgs e)
         {
             Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
         }
