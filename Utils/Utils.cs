@@ -267,9 +267,8 @@
         public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var doc = new HtmlDocument();
-            doc.LoadHtml(
-                GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response)
-            );
+            var htm = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            doc.LoadHtml(htm);
 
             return doc;
         }

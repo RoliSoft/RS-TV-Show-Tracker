@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
-    [Parser("2011-02-12 1:46 AM"), TestFixture]
+    [Parser("2011-09-24 1:39 PM"), TestFixture]
     public class ORLYDB : DownloadSearchEngine
     {
         /// <summary>
@@ -68,11 +68,21 @@
 
                 link.Release = node.InnerText;
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
+                link.Infos   = node.GetTextValue("../span[@class='timestamp']").Trim();
 
-                var info  = node.GetTextValue("..//span[@class='info']");
-                link.Size = info != null
-                            ? info.Replace("MB", " MB").Split('|')[0].Trim()
-                            : null;
+                var info = node.GetTextValue("..//span[@class='info']");
+
+                if (info != null)
+                {
+                    link.Size = info.Replace("MB", " MB").Split('|')[0].Trim();
+                }
+
+                var nuke = node.GetTextValue("..//span[@class='nuke']");
+
+                if (nuke != null)
+                {
+                    link.Infos += ", Nuked: " + nuke;
+                }
 
                 yield return link;
             }

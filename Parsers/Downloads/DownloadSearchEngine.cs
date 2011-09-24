@@ -280,7 +280,7 @@
         /// </returns>
         internal virtual bool GazelleTrackerLoginRequired(HtmlNode node)
         {
-            return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login.')]") != null;
+            return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login')]") != null;
         }
         
         /// <summary>

@@ -2,6 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
+    using System.Text.RegularExpressions;
+
+    using HtmlAgilityPack;
 
     using NUnit.Framework;
 
@@ -9,10 +13,10 @@
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping ReleaseLog.
+    /// Provides support for scraping CorruptNET PreDB.
     /// </summary>
-    [Parser("2011-02-12 3:58 AM"), TestFixture]
-    public class PreScene : DownloadSearchEngine
+    [Parser("2011-09-24 12:58 PM"), TestFixture]
+    public class CorruptNET : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -22,7 +26,7 @@
         {
             get
             {
-                return "PreScene";
+                return "CorruptNET";
             }
         }
 
@@ -34,7 +38,7 @@
         {
             get
             {
-                return "http://prescene.com/";
+                return "http://pre.corrupt-net.org/";
             }
         }
 
@@ -69,8 +73,15 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site, "q=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//h4/a");
+            var html = Utils.GetHTML(Site + "search.php?search=" + Uri.EscapeUriString(query),
+                request: req =>
+                    {
+                        req.Accept = "*/*";
+                        req.Headers[HttpRequestHeader.AcceptLanguage] = "en";
+                        req.AutomaticDecompression = DecompressionMethods.None;
+                    });
+
+            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]");
 
             if (links == null)
             {
@@ -81,9 +92,22 @@
             {
                 var link = new Link(this);
 
-                link.Release = node.InnerText;
-                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                link.Release = HtmlEntity.DeEntitize(node.InnerText).Trim();
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
+                link.Size    = HtmlEntity.DeEntitize(node.GetTextValue("../td[4]")).Trim().Replace("M", " MB");
+                link.Infos   = HtmlEntity.DeEntitize(node.GetTextValue("../td[5]")).Trim();
+
+                var tdt = node.GetAttributeValue("title");
+
+                if (tdt.Contains("Nuked"))
+                {
+                    var rgx = Regex.Match(HtmlEntity.DeEntitize(tdt), "<font color='red'>([^<]+)");
+
+                    if (rgx.Success)
+                    {
+                        link.Infos += ", Nuked: " + rgx.Groups[1].Value;
+                    }
+                }
 
                 yield return link;
             }
