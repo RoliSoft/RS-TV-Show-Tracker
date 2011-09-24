@@ -627,7 +627,7 @@
                 cm.Items.Add(oib);
             }
 
-            if (!string.IsNullOrWhiteSpace(link.FileURL) && !link.FileURL.StartsWith("magnet:"))
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && !link.FileURL.StartsWith("magnet:") && !(link.Source.Downloader is BinSearchDownloader))
             {
                 var oib    = new MenuItem();
                 oib.Header = "Download file in browser";

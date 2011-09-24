@@ -124,6 +124,7 @@
     <Compile Include="Dependencies\GreyableImage\GreyableImage.cs" />
     <Compile Include="Dependencies\GreyableImage\ImageGreyer.cs" />
     <Compile Include="DLCAPI.cs" />
+    <Compile Include="Downloaders\Engines\BinSearchDownloader.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="HttpToSocks.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ev0.cs" />
