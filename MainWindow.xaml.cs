@@ -584,6 +584,16 @@
         }
 
         /// <summary>
+        /// Handles the Click event of the SupportSoftware control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SupportSoftwareClick(object sender, RoutedEventArgs e)
+        {
+            Utils.Run("http://lab.rolisoft.net/tvshowtracker/donate.html");
+        }
+
+        /// <summary>
         /// Handles the Click event of the AboutSoftware control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>

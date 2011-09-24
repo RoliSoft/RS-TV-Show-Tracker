@@ -656,6 +656,11 @@
                             <Image Source="/RSTVShowTracker;component/Images/smiley.png" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Support the software" Click="SupportSoftwareClick">
+                        <MenuItem.Icon>
+                            <Image Source="/RSTVShowTracker;component/Images/heart.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="About the software" Click="AboutSoftwareClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/information.png" />

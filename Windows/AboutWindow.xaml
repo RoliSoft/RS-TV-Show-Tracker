@@ -345,6 +345,9 @@
                             </Paragraph>
                         </ListItem>
                     </List>
+                    <Paragraph Margin="0,10,0,0">
+                        Special thanks to all the users who have supported the development of the software!
+                    </Paragraph>
                 </Section>
             </FlowDocument>
         </FlowDocumentScrollViewer>
