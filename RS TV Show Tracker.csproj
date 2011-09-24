@@ -127,6 +127,7 @@
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="HttpToSocks.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ev0.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\SceneAccess.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\RevolutionTT.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\DailyTvTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TokyoToshokan.cs" />
