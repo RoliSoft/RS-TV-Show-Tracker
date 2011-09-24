@@ -39,14 +39,9 @@
         /// Initializes a new instance of the <see cref="SubtitleSearch"/> class.
         /// </summary>
         /// <param name="engines">The engines to use for searching.</param>
-        public SubtitleSearch(IEnumerable<Type> engines = null)
+        public SubtitleSearch(IEnumerable<SubtitleSearchEngine> engines = null)
         {
-            if (engines == null)
-            {
-                engines = typeof(SubtitleSearchEngine).GetDerivedTypes();
-            }
-
-            SearchEngines = engines.Select(type => Activator.CreateInstance(type) as SubtitleSearchEngine).ToList();
+            SearchEngines = (engines ?? SubtitlesPage.SearchEngines).ToList();
 
             foreach (var engine in SearchEngines)
             {

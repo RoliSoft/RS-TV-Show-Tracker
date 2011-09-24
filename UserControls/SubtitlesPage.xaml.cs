@@ -22,20 +22,44 @@
     public partial class SubtitlesPage
     {
         /// <summary>
+        /// Gets or sets the search engines loaded in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public static IEnumerable<SubtitleSearchEngine> SearchEngines { get; set; }
+
+        /// <summary>
+        /// Gets the search engines activated in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public static IEnumerable<SubtitleSearchEngine> ActiveSearchEngines
+        {
+            get
+            {
+                return SearchEngines.Where(engine => Actives.Contains(engine.Name));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the list of activated parsers.
+        /// </summary>
+        /// <value>
+        /// The activated parsers.
+        /// </value>
+        public static List<string> Actives { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of activated languages.
+        /// </summary>
+        /// <value>
+        /// The activated languages.
+        /// </value>
+        public static List<string> ActiveLangs { get; set; }
+
+        /// <summary>
         /// Gets or sets the subtitles list view item collection.
         /// </summary>
         /// <value>The subtitles list view item collection.</value>
         public ObservableCollection<SubtitleItem> SubtitlesListViewItemCollection { get; set; }
-
-        /// <summary>
-        /// Gets or sets the search engines active in this application.
-        /// </summary>
-        /// <value>The search engines.</value>
-        public List<SubtitleSearchEngine> SearchEngines { get; set; }
-
-        private List<string> _actives, _langs;
-
-        private volatile bool _searching;
 
         /// <summary>
         /// Gets or sets the active search.
@@ -43,12 +67,28 @@
         /// <value>The active search.</value>
         public SubtitleSearch ActiveSearch { get; set; }
 
+        private volatile bool _searching;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitlesPage"/> class.
         /// </summary>
         public SubtitlesPage()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Initializes the <see cref="SubtitlesPage"/> class.
+        /// </summary>
+        static SubtitlesPage()
+        {
+            SearchEngines = typeof(SubtitleSearchEngine)
+                            .GetDerivedTypes()
+                            .Select(type => Activator.CreateInstance(type) as SubtitleSearchEngine)
+                            .OrderBy(engine => engine.Name);
+
+            Actives     = Settings.Get<List<string>>("Active Subtitle Sites");
+            ActiveLangs = Settings.Get<List<string>>("Active Subtitle Languages");
         }
 
         /// <summary>
@@ -90,25 +130,6 @@
                 listView.ItemsSource            = SubtitlesListViewItemCollection;
             }
 
-            if (SearchEngines == null)
-            {
-                SearchEngines = typeof(SubtitleSearchEngine)
-                                .GetDerivedTypes()
-                                .Select(type => Activator.CreateInstance(type) as SubtitleSearchEngine)
-                                .OrderBy(engine => engine.Name)
-                                .ToList();
-            }
-
-            if (_actives == null)
-            {
-                _actives = Settings.Get<List<string>>("Active Subtitle Sites");
-            }
-
-            if (_langs == null)
-            {
-                _langs = Settings.Get<List<string>>("Active Subtitle Languages");
-            }
-
             if (availableEngines.Items.Count == 0)
             {
                 foreach (var engine in SearchEngines)
@@ -117,7 +138,7 @@
                     {
                         Header           = new StackPanel { Orientation = Orientation.Horizontal },
                         IsCheckable      = true,
-                        IsChecked        = _actives.Contains(engine.Name),
+                        IsChecked        = Actives.Contains(engine.Name),
                         StaysOpenOnClick = true,
                         Tag              = engine.Name
                     };
@@ -150,7 +171,7 @@
                         {
                             Header           = new StackPanel { Orientation = Orientation.Horizontal },
                             IsCheckable      = true,
-                            IsChecked        = _langs.Contains(lang.Key),
+                            IsChecked        = ActiveLangs.Contains(lang.Key),
                             StaysOpenOnClick = true,
                             Tag              = lang.Key
                         };
@@ -178,7 +199,7 @@
                     {
                         Header           = new StackPanel { Orientation = Orientation.Horizontal },
                         IsCheckable      = true,
-                        IsChecked        = _langs.Contains("null"),
+                        IsChecked        = ActiveLangs.Contains("null"),
                         StaysOpenOnClick = true,
                         Tag              = "null"
                     };
@@ -210,11 +231,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemChecked(object sender, RoutedEventArgs e)
         {
-            if (!_actives.Contains((sender as MenuItem).Tag as string))
+            if (!Actives.Contains((sender as MenuItem).Tag as string))
             {
-                _actives.Add((sender as MenuItem).Tag as string);
+                Actives.Add((sender as MenuItem).Tag as string);
 
-                SaveActiveSites();
+                Settings.Set("Active Subtitle Sites", Actives);
             }
         }
 
@@ -225,20 +246,12 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchEngineMenuItemUnchecked(object sender, RoutedEventArgs e)
         {
-            if (_actives.Contains((sender as MenuItem).Tag as string))
+            if (Actives.Contains((sender as MenuItem).Tag as string))
             {
-                _actives.Remove((sender as MenuItem).Tag as string);
+                Actives.Remove((sender as MenuItem).Tag as string);
 
-                SaveActiveSites();
+                Settings.Set("Active Subtitle Sites", Actives);
             }
-        }
-
-        /// <summary>
-        /// Saves the active sites to the XML settings file.
-        /// </summary>
-        public void SaveActiveSites()
-        {
-            Settings.Set("Active Subtitle Sites", _actives);
         }
 
         /// <summary>
@@ -248,11 +261,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void LanguageMenuItemChecked(object sender, RoutedEventArgs e)
         {
-            if (!_langs.Contains((sender as MenuItem).Tag as string))
+            if (!ActiveLangs.Contains((sender as MenuItem).Tag as string))
             {
-                _langs.Add((sender as MenuItem).Tag as string);
+                ActiveLangs.Add((sender as MenuItem).Tag as string);
 
-                SaveActiveLanguages();
+                Settings.Set("Active Subtitle Languages", ActiveLangs);
             }
         }
 
@@ -263,20 +276,12 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void LanguageMenuItemUnchecked(object sender, RoutedEventArgs e)
         {
-            if (_langs.Contains((sender as MenuItem).Tag as string))
+            if (ActiveLangs.Contains((sender as MenuItem).Tag as string))
             {
-                _langs.Remove((sender as MenuItem).Tag as string);
+                ActiveLangs.Remove((sender as MenuItem).Tag as string);
 
-                SaveActiveLanguages();
+                Settings.Set("Active Subtitle Languages", ActiveLangs);
             }
-        }
-
-        /// <summary>
-        /// Saves the active languages to the XML settings file.
-        /// </summary>
-        public void SaveActiveLanguages()
-        {
-            Settings.Set("Active Subtitle Languages", _langs);
         }
 
         /// <summary>
@@ -333,9 +338,7 @@
             textBox.IsEnabled    = false;
             searchButton.Content = "Cancel";
 
-            ActiveSearch = new SubtitleSearch(SearchEngines
-                                              .Where(engine => _actives.Contains(engine.Name))
-                                              .Select(engine => engine.GetType()));
+            ActiveSearch = new SubtitleSearch(ActiveSearchEngines);
 
             ActiveSearch.SubtitleSearchDone            += SubtitleSearchDone;
             ActiveSearch.SubtitleSearchProgressChanged += SubtitleSearchProgressChanged;
@@ -368,7 +371,7 @@
             if (e.First != null)
             {
                 Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(e.First
-                                                                                           .Where(sub => _langs.Contains(sub.Language))
+                                                                                           .Where(sub => ActiveLangs.Contains(sub.Language))
                                                                                            .Select(sub => new SubtitleItem(sub)))));
             }
         }
