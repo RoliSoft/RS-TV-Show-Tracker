@@ -54,6 +54,22 @@
             };
 
         /// <summary>
+        /// Gets the number of supported qualities.
+        /// </summary>
+        /// <value>
+        /// The number of supported qualities.
+        /// </value>
+        public static int QualityCount { get; internal set; }
+
+        /// <summary>
+        /// Initializes the <see cref="Parser"/> class.
+        /// </summary>
+        static Parser()
+        {
+            QualityCount = Enum.GetValues(typeof(Qualities)).Length - 1;
+        }
+
+        /// <summary>
         /// Parses the name of the specified file.
         /// </summary>
         /// <param name="file">The file.</param>

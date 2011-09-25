@@ -42,20 +42,36 @@
         public static List<string> Parsers { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of qualities in decreasing order.
-        /// </summary>
-        /// <value>
-        /// The qualities.
-        /// </value>
-        public static List<string> Qualities { get; set; }
-
-        /// <summary>
         /// Gets or sets the list of activated parsers.
         /// </summary>
         /// <value>
         /// The activated parsers.
         /// </value>
         public static List<string> Actives { get; set; }
+
+        /// <summary>
+        /// Gets or sets the preferred quality.
+        /// </summary>
+        /// <value>
+        /// The preferred quality.
+        /// </value>
+        public static Qualities PreferredQuality { get; set; }
+
+        /// <summary>
+        /// Gets or sets the second preferred quality.
+        /// </summary>
+        /// <value>
+        /// The second preferred quality.
+        /// </value>
+        public static Qualities SecondPreferredQuality { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time to wait for the preferred quality.
+        /// </summary>
+        /// <value>
+        /// The time to wait for the preferred quality.
+        /// </value>
+        public static TimeSpan WaitForPreferred { get; set; }
 
         /// <summary>
         /// Initializes the <see cref="AutoDownloader"/> class.
@@ -80,7 +96,35 @@
                              .Where(engine => Parsers.IndexOf(engine.Name) == -1)
                              .Select(engine => engine.Name));
 
-            Qualities = Enum.GetNames(typeof(Qualities)).Reverse().ToList();
+            WaitForPreferred = TimeSpan.FromSeconds(Settings.Get("Wait for Preferred Quality", TimeSpan.FromDays(2).TotalSeconds));
+            PreferredQuality = (Qualities)Enum.Parse(typeof(Qualities), Settings.Get("Preferred Download Quality", Qualities.HDTV720p.ToString()));
+            SecondPreferredQuality = (Qualities)Enum.Parse(typeof(Qualities), Settings.Get("Second Preferred Download Quality", Qualities.HDTVXviD.ToString()));
+        }
+
+        /// <summary>
+        /// Searches for the missing episodes.
+        /// </summary>
+        public static void SearchForMissingEpisodes()
+        {
+            var list = GetMissingEpisodes();
+
+            foreach (var episode in list)
+            {
+                var links = SearchForEpisode(episode);
+
+                if (links.Count == 0)
+                {
+                    continue;
+                }
+
+                var link = SelectBestLink(links);
+
+                if (link.Quality == PreferredQuality
+                 || (DateTime.Now - episode.Airdate) > WaitForPreferred)
+                {
+                    DownloadFile(link);
+                }
+            }
         }
 
         /// <summary>
@@ -89,9 +133,9 @@
         /// <returns>
         /// List of missing episodes.
         /// </returns>
-        public static List<Episode> GetMissingEpisodes()
+        public static IEnumerable<Episode> GetMissingEpisodes()
         {
-            return Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21).ToList();
+            return Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21);
         }
 
         /// <summary>
@@ -135,12 +179,38 @@
                 return null;
             }
 
-            var prefer  = Settings.Get("Preferred Download Quality", TVShowTracker.Parsers.Downloads.Qualities.HDTV720p);
+            if (links.Count == 1)
+            {
+                return links[0];
+            }
+
+            // order links to decrease by site priority and quality
+
             var ordered = links
-                          .OrderBy(link => Qualities.IndexOf(link.Quality.ToString()))
+                          .OrderBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
                           .ThenBy(link => Parsers.IndexOf(link.Source.Name));
 
-            return ordered.FirstOrDefault(link => link.Quality == prefer) ?? ordered.First();
+            // get the preferred quality from the highest priority site
+
+            var best = ordered.FirstOrDefault(link => link.Quality == PreferredQuality);
+
+            if (best != null)
+            {
+                return best;
+            }
+
+            // get the second preferred quality from the highest priority site
+
+            var sbest = ordered.FirstOrDefault(link => link.Quality == SecondPreferredQuality);
+
+            if (sbest != null)
+            {
+                return sbest;
+            }
+
+            // return the highest found quality from the highest priority site
+
+            return ordered.First();
         }
 
         /// <summary>

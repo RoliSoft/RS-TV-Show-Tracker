@@ -427,7 +427,7 @@
                     {
                         DownloadLinksListViewItemCollection.Clear();
                         DownloadLinksListViewItemCollection.AddRange(_results
-                                                                     .OrderBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                                                                     .OrderBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
                                                                      .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name)));
                     }));
             }
@@ -527,14 +527,14 @@
                     {
                         links = links
                             .OrderBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
-                            .ThenBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
                             .ToList();
                     }
                     else
                     {
                         links = links
                             .OrderByDescending(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
-                            .ThenBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                            .ThenBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
                             .ToList();
                     }
                     break;
@@ -543,14 +543,14 @@
                     if (direction == ListSortDirection.Ascending)
                     {
                         links = links
-                            .OrderBy(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                            .OrderBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
                             .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
                             .ToList();
                     }
                     else
                     {
                         links = links
-                            .OrderByDescending(link => AutoDownloader.Qualities.IndexOf(link.Quality.ToString()))
+                            .OrderByDescending(link => FileNames.Parser.QualityCount - (int)link.Quality)
                             .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name))
                             .ToList();
                     }
