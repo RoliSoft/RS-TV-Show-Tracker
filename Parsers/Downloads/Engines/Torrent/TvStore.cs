@@ -10,9 +10,9 @@
 
     using HtmlAgilityPack;
 
-    using Newtonsoft.Json;
-
     using NUnit.Framework;
+
+    using ProtoBuf;
 
     /// <summary>
     /// Provides support for scraping tvstore.me.
@@ -279,7 +279,10 @@
                      .ToDictionary(match => match.Groups["id"].Value.ToInteger(),
                                    match => HtmlEntity.DeEntitize(match.Groups["name"].Value));
 
-            File.WriteAllText(Path.Combine(Path.GetTempPath(), "TvStore-IDs.js"), JsonConvert.SerializeObject(ShowIDs));
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TvStore-IDs.bin")))
+            {
+                Serializer.Serialize(file, ShowIDs);
+            }
         }
 
         /// <summary>
@@ -289,13 +292,16 @@
         /// <returns>Corresponding show name.</returns>
         public string GetShowForID(int id)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "TvStore-IDs.js");
+            var fn = Path.Combine(Path.GetTempPath(), "TvStore-IDs.bin");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    ShowIDs = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(fn));
+                    using (var file = File.OpenRead(fn))
+                    {
+                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
+                    }
                 }
                 else
                 {

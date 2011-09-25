@@ -11,7 +11,7 @@
 
     using NUnit.Framework;
 
-    using Newtonsoft.Json;
+    using ProtoBuf;
 
     /// <summary>
     /// Provides support for scraping TVTorrentz.
@@ -216,7 +216,10 @@
                      .ToDictionary(match => match.Groups["id"].Value.ToInteger(),
                                    match => HtmlEntity.DeEntitize(match.Groups["name"].Value));
 
-            File.WriteAllText(Path.Combine(Path.GetTempPath(), "TVTorrentz-IDs.js"), JsonConvert.SerializeObject(ShowIDs));
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TVTorrentz-IDs.bin")))
+            {
+                Serializer.Serialize(file, ShowIDs);
+            }
         }
 
         /// <summary>
@@ -226,13 +229,16 @@
         /// <returns>Corresponding ID.</returns>
         public int? GetIDForShow(string name)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "TVTorrentz-IDs.js");
+            var fn = Path.Combine(Path.GetTempPath(), "TVTorrentz-IDs.bin");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    ShowIDs = JsonConvert.DeserializeObject<Dictionary<int, string>>(File.ReadAllText(fn));
+                    using (var file = File.OpenRead(fn))
+                    {
+                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
+                    }
                 }
                 else
                 {

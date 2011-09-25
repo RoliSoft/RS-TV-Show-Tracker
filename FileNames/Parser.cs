@@ -7,7 +7,7 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using Newtonsoft.Json;
+    using ProtoBuf;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -239,11 +239,14 @@
             {
                 if (AllKnownTVShows.Count == 0)
                 {
-                    var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js");
+                    var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin");
 
                     if (File.Exists(fn))
                     {
-                        AllKnownTVShows = JsonConvert.DeserializeObject<List<string[]>>(File.ReadAllText(fn));
+                        using (var file = File.OpenRead(fn))
+                        {
+                            AllKnownTVShows = Serializer.Deserialize<List<string[]>>(file);
+                        }
                     }
                     else
                     {
@@ -596,7 +599,10 @@
 
             AllKnownTVShows = req.Result;
 
-            File.WriteAllText(Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js"), JsonConvert.SerializeObject(req.Result));
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin")))
+            {
+                Serializer.Serialize(file, req.Result);
+            }
 
             return true;
         }
