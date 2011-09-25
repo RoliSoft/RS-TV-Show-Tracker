@@ -137,6 +137,7 @@
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVScene.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVChaosUK.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVTorrentz.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsorg.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBIndex.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsu.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsRus.cs" />

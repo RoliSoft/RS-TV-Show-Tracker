@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading;
 
@@ -134,10 +135,37 @@
                 return null;
             }
 
-            return links
-                   .OrderBy(link => Qualities.IndexOf(link.Quality.ToString()))
-                   .ThenBy(link => Parsers.IndexOf(link.Source.Name))
-                   .First();
+            var prefer  = Settings.Get("Preferred Download Quality", TVShowTracker.Parsers.Downloads.Qualities.HDTV720p);
+            var ordered = links
+                          .OrderBy(link => Qualities.IndexOf(link.Quality.ToString()))
+                          .ThenBy(link => Parsers.IndexOf(link.Source.Name));
+
+            return ordered.FirstOrDefault(link => link.Quality == prefer) ?? ordered.First();
+        }
+
+        /// <summary>
+        /// Downloads the specified file to the default download path.
+        /// </summary>
+        /// <param name="link">The link.</param>
+        public static void DownloadFile(Link link)
+        {
+            var file = Path.Combine(Settings.Get("Automatic Download Path"), Utils.SanitizeFileName(link.Release.CutIfLonger(200)).Replace('/', '-'));
+
+            switch (link.Source.Type)
+            {
+                case Types.Torrent:
+                case Types.Usenet:
+                    link.Source.Downloader.Download(link, file + (link.Source.Type == Types.Torrent ? ".torrent" : link.Source.Type == Types.Usenet ? ".nzb" : string.Empty));
+                    break;
+
+                case Types.DirectHTTP:
+                    File.WriteAllText(file + ".rsdf", DLCAPI.CreateRSDF(link.FileURL.Split('\0')));
+                    break;
+
+                case Types.HTTP:
+                    File.WriteAllText(file + ".url", "[InternetShortcut]\r\nURL=" + (link.FileURL ?? link.InfoURL));
+                    return;
+            }
         }
     }
 }
