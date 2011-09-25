@@ -75,7 +75,7 @@
         /// </summary>
         public static void CheckShowListUpdate()
         {
-            var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.js");
+            var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin");
 
             if ((DateTime.Now - File.GetLastWriteTime(fn)).TotalDays > 1)
             {

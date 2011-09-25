@@ -41,7 +41,7 @@
         /// <summary>
         /// Contains a list of all the known TV show names on lab.rolisoft.net.
         /// </summary>
-        public static List<string[]> AllKnownTVShows = new List<string[]>();
+        public static List<KnownTVShow> AllKnownTVShows = new List<KnownTVShow>();
 
         /// <summary>
         /// Contains a small list of popular TV shows with airdate notation in their file name.
@@ -241,11 +241,11 @@
                 {
                     var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin");
 
-                    if (File.Exists(fn))
+                    if (File.Exists(fn) && new FileInfo(fn).Length != 0)
                     {
                         using (var file = File.OpenRead(fn))
                         {
-                            AllKnownTVShows = Serializer.Deserialize<List<string[]>>(file);
+                            try { AllKnownTVShows = Serializer.Deserialize<List<KnownTVShow>>(file); } catch { }
                         }
                     }
                     else
@@ -255,11 +255,11 @@
                 }
 
                 var slug    = Utils.CreateSlug(name);
-                var matches = new List<string[]>();
+                var matches = new List<KnownTVShow>();
 
                 foreach (var show in AllKnownTVShows)
                 {
-                    if (show[1] == slug)
+                    if (show.Slug == slug)
                     {
                         matches.Add(show);
                     }
@@ -273,7 +273,7 @@
                     {
                         foreach (var show in Database.TVShows.Values)
                         {
-                            if (show.Data.Get("grabber") == mtch[2] && show.Data.Get(mtch[2] + ".id") == mtch[3])
+                            if (show.Data.Get("grabber") == mtch.Database && show.Data.Get(mtch.Database + ".id") == mtch.DatabaseID)
                             {
                                 local = show;
                                 break;
@@ -308,10 +308,37 @@
                             }
                         }
                     }
+                    else if (ShowIDCache.ContainsKey(name))
+                    {
+                        match = true;
+                        name  = ShowIDCache[name].Title;
+
+                        if (ep.AirDate != null)
+                        {
+                            var eps = TVShowCache[name].Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+
+                                ep.Season  = eps[0].Season;
+                                ep.Episode = eps[0].Number;
+                            }
+                        }
+                        else
+                        {
+                            var eps = TVShowCache[name].Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+                            }
+                        }
+                    }
                     else if (askRemote)
                     {
-                        var guide = Updater.CreateGuide(matches[0][2]);
-                        var data  = guide.GetData(matches[0][3]);
+                        var guide = Updater.CreateGuide(matches[0].Database);
+                        var data  = guide.GetData(matches[0].DatabaseID);
 
                         ShowIDCache[name] = new ShowID { Title = data.Title };
 
@@ -347,7 +374,7 @@
 
             // try to find show in cache
 
-            if (!match && askRemote && ShowIDCache.ContainsKey(name))
+            if (!match && ShowIDCache.ContainsKey(name))
             {
                 match = true;
                 name  = ShowIDCache[name].Title;
@@ -597,11 +624,22 @@
                 return false;
             }
 
-            AllKnownTVShows = req.Result;
+            AllKnownTVShows = new List<KnownTVShow>();
+
+            foreach (var item in req.Result)
+            {
+                AllKnownTVShows.Add(new KnownTVShow
+                    {
+                        Title      = item[0],
+                        Slug       = item[1],
+                        Database   = item[2],
+                        DatabaseID = item[3]
+                    });
+            }
 
             using (var file = File.Create(Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin")))
             {
-                Serializer.Serialize(file, req.Result);
+                Serializer.Serialize(file, AllKnownTVShows);
             }
 
             return true;
@@ -645,6 +683,49 @@
             }
 
             return "standard";
+        }
+
+        /// <summary>
+        /// Represents a known TV show.
+        /// </summary>
+        [ProtoContract]
+        public class KnownTVShow
+        {
+            /// <summary>
+            /// Gets or sets the title of the TV show.
+            /// </summary>
+            /// <value>
+            /// The title of the TV show.
+            /// </value>
+            [ProtoMember(1)]
+            public string Title { get; set; }
+
+            /// <summary>
+            /// Gets or sets the slug name of the TV show.
+            /// </summary>
+            /// <value>
+            /// The slug name of the TV show.
+            /// </value>
+            [ProtoMember(2)]
+            public string Slug { get; set; }
+
+            /// <summary>
+            /// Gets or sets the database.
+            /// </summary>
+            /// <value>
+            /// The database.
+            /// </value>
+            [ProtoMember(3)]
+            public string Database { get; set; }
+
+            /// <summary>
+            /// Gets or sets the ID on the database.
+            /// </summary>
+            /// <value>
+            /// The ID on the database.
+            /// </value>
+            [ProtoMember(4)]
+            public string DatabaseID { get; set; }
         }
     }
 }
