@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Threading;
 
+    using ProtoBuf;
+
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Tables;
@@ -74,11 +76,20 @@
         public static TimeSpan WaitForPreferred { get; set; }
 
         /// <summary>
+        /// Gets or sets the missing episodes.
+        /// </summary>
+        /// <value>
+        /// The missing episodes.
+        /// </value>
+        public static List<MissingEpisode> MissingEpisodes { get; set; }
+
+        /// <summary>
         /// Initializes the <see cref="AutoDownloader"/> class.
         /// </summary>
         static AutoDownloader()
         {
             LoadParsers();
+            LoadMissingEpisodes();
         }
 
         /// <summary>
@@ -106,36 +117,52 @@
         /// </summary>
         public static void SearchForMissingEpisodes()
         {
-            var list = GetMissingEpisodes();
+            RefreshMissingEpisodes();
 
-            foreach (var episode in list)
+            foreach (var ep in MissingEpisodes)
             {
-                var links = SearchForEpisode(episode);
+                if (ep.Downloaded)
+                {
+                    continue;
+                }
+
+                ep.LastSearch = DateTime.Now;
+
+                var links = SearchForEpisode(ep.Episode);
 
                 if (links.Count == 0)
                 {
+                    ep.LastBestMatch = null;
                     continue;
                 }
 
                 var link = SelectBestLink(links);
 
+                ep.LastBestMatch = new[] { link.Release, link.Quality.ToString(), link.Size, link.Source.Name };
+
                 if (link.Quality == PreferredQuality
-                 || (DateTime.Now - episode.Airdate) > WaitForPreferred)
+                 || (DateTime.Now - ep.Episode.Airdate) > WaitForPreferred)
                 {
+                    ep.Downloaded = true;
+
                     DownloadFile(link);
                 }
             }
+
+            SaveMissingEpisodes();
         }
 
         /// <summary>
-        /// Gets a list of episodes which have aired but aren't yet downloaded.
+        /// Refreshes the list of missing episodes.
         /// </summary>
-        /// <returns>
-        /// List of missing episodes.
-        /// </returns>
-        public static IEnumerable<Episode> GetMissingEpisodes()
+        public static void RefreshMissingEpisodes()
         {
-            return Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21);
+            MissingEpisodes.RemoveAll(ep => ep.Episode == null || (DateTime.Now - ep.Episode.Airdate).TotalDays > 21);
+
+            foreach (var ep in Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21 && MissingEpisodes.Count(y => y.EpisodeID == x.EpisodeID) == 0))
+            {
+                MissingEpisodes.Add(new MissingEpisode(ep));
+            }
         }
 
         /// <summary>
@@ -235,6 +262,109 @@
                 case Types.HTTP:
                     File.WriteAllText(file + ".url", "[InternetShortcut]\r\nURL=" + (link.FileURL ?? link.InfoURL));
                     return;
+            }
+        }
+
+        /// <summary>
+        /// Loads the list of missing episodes and their current states.
+        /// </summary>
+        public static void LoadMissingEpisodes()
+        {
+            var path = Path.Combine(Signature.FullPath, "AutoDownloader.bin");
+
+            if (File.Exists(path))
+            {
+                using (var file = File.OpenRead(path))
+                {
+                    MissingEpisodes = Serializer.Deserialize<List<MissingEpisode>>(file);
+                }
+            }
+            else
+            {
+                MissingEpisodes = new List<MissingEpisode>();
+            }
+        }
+
+        /// <summary>
+        /// Saves the list of missing episodes and their current states.
+        /// </summary>
+        public static void SaveMissingEpisodes()
+        {
+            using (var file = File.Create(Path.Combine(Signature.FullPath, "AutoDownloader.bin")))
+            {
+                Serializer.Serialize(file, MissingEpisodes);
+            }
+        }
+
+        /// <summary>
+        /// Represents a missing episode.
+        /// </summary>
+        [ProtoContract]
+        public class MissingEpisode
+        {
+            /// <summary>
+            /// Gets or sets the episode ID.
+            /// </summary>
+            /// <value>
+            /// The episode ID.
+            /// </value>
+            [ProtoMember(1)]
+            public int EpisodeID { get; set; }
+
+            private Episode _episode;
+
+            /// <summary>
+            /// Gets the episode.
+            /// </summary>
+            public Episode Episode
+            {
+                get
+                {
+                    return _episode ?? (_episode = Database.Episodes.FirstOrDefault(ep => ep.EpisodeID == EpisodeID));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether this <see cref="MissingEpisode"/> has been downloaded.
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if it's been downloaded; otherwise, <c>false</c>.
+            /// </value>
+            [ProtoMember(2)]
+            public bool Downloaded { get; set; }
+
+            /// <summary>
+            /// Gets or sets the date of the last search.
+            /// </summary>
+            /// <value>
+            /// The date of the last search.
+            /// </value>
+            [ProtoMember(3)]
+            public DateTime LastSearch { get; set; }
+
+            /// <summary>
+            /// Gets or sets the last best match.
+            /// </summary>
+            /// <value>
+            /// The last best match.
+            /// </value>
+            [ProtoMember(4)]
+            public string[] LastBestMatch { get; set; }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="MissingEpisode"/> class.
+            /// </summary>
+            public MissingEpisode()
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="MissingEpisode"/> class.
+            /// </summary>
+            /// <param name="ep">The episode.</param>
+            public MissingEpisode(Episode ep)
+            {
+                EpisodeID = ep.EpisodeID;
             }
         }
     }
