@@ -45,7 +45,7 @@ BrandingText "${APP_NAME}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
 InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
-RequestExecutionLevel user
+RequestExecutionLevel admin
 
 ######################################################################
 
