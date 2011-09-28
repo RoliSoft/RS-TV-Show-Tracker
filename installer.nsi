@@ -142,13 +142,18 @@ Function HeaderChangeFonts
 FunctionEnd
 
 Function CheckDotNetInstallation
-	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done warn
+	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\Systema.Web.dll" done warn
 	
 warn:
 	MessageBox MB_YESNO|MB_ICONEXCLAMATION "You don't have Microsoft .Net Framework 4 Extended Profile installed, which is required to run this software. $\n$\nWould you like to download and install it?" /SD IDNO IDYES install IDNO done
 	
 install:
-	ExecShell "open" "http://www.microsoft.com/download/en/details.aspx?id=17851"
+	#NSISdl::download http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe dotNetFx40_Full_setup.exe
+	#NSISdl::download http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe dotNetFx40_Full_x86_x64.exe
+	inetc::get /POPUP "" /CAPTION "Microsoft .Net Framework 4 Web Installer" http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe dotNetFx40_Full_setup.exe
+	Banner::show /NOUNLOAD /set 76 "Microsoft .Net Framework 4" "Waiting for installation to finish..."
+	ExecWait dotNetFx40_Full_setup.exe
+	Banner::destroy
 	
 done:
 FunctionEnd
