@@ -85,8 +85,8 @@ FunctionEnd
 !define MUI_UNABORTWARNING
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW WelcomeChangeFonts
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE CheckDotNetInstallation
 !insertmacro MUI_PAGE_WELCOME
-
 !ifdef LICENSE_TXT
 	!define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
 	!insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
@@ -124,14 +124,14 @@ FunctionEnd
 
 ######################################################################
 
-function WelcomeChangeFonts
+Function WelcomeChangeFonts
 	FindWindow $1 "#32770" "" $HWNDPARENT
 	GetDlgItem $2 $1 1201
 	CreateFont $0 "Segoe UI" "13" "700"
 	SendMessage $2 ${WM_SETFONT} $0 0
-functionend
+FunctionEnd
 
-function HeaderChangeFonts
+Function HeaderChangeFonts
 	GetDlgItem $1 $HWNDPARENT 1037
 	CreateFont $0 "Segoe UI" "10" "700"
 	SendMessage $1 ${WM_SETFONT} $0 0
@@ -139,7 +139,19 @@ function HeaderChangeFonts
 	#GetDlgItem $1 $HWNDPARENT 1038
 	#CreateFont $0 "Segoe UI" "9" "500"
 	#SendMessage $1 ${WM_SETFONT} $0 0
-functionend
+FunctionEnd
+
+Function CheckDotNetInstallation
+	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done warn
+	
+warn:
+	MessageBox MB_YESNO|MB_ICONEXCLAMATION "You don't have Microsoft .Net Framework 4 Extended Profile installed, which is required to run this software. $\n$\nWould you like to download and install it?" /SD IDNO IDYES install IDNO done
+	
+install:
+	ExecShell "open" "http://www.microsoft.com/download/en/details.aspx?id=17851"
+	
+done:
+FunctionEnd
 
 Function FinishCreateDesktopShortcut
 	CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
