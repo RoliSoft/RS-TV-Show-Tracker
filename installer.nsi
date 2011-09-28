@@ -142,7 +142,7 @@ Function HeaderChangeFonts
 FunctionEnd
 
 Function CheckDotNetInstallation
-	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\Systema.Web.dll" done warn
+	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done warn
 	
 warn:
 	MessageBox MB_YESNO|MB_ICONEXCLAMATION "You don't have Microsoft .Net Framework 4 Extended Profile installed, which is required to run this software. $\n$\nWould you like to download and install it?" /SD IDNO IDYES install IDNO done
