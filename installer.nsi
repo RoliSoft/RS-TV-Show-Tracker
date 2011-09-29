@@ -85,7 +85,6 @@ FunctionEnd
 !define MUI_UNABORTWARNING
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW WelcomeChangeFonts
-!define MUI_PAGE_CUSTOMFUNCTION_LEAVE CheckDotNetInstallation
 !insertmacro MUI_PAGE_WELCOME
 !ifdef LICENSE_TXT
 	!define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
@@ -141,23 +140,6 @@ Function HeaderChangeFonts
 	#SendMessage $1 ${WM_SETFONT} $0 0
 FunctionEnd
 
-Function CheckDotNetInstallation
-	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done warn
-	
-warn:
-	MessageBox MB_YESNO|MB_ICONEXCLAMATION "You don't have Microsoft .Net Framework 4 Extended Profile installed, which is required to run this software. $\n$\nWould you like to download and install it?" /SD IDNO IDYES install IDNO done
-	
-install:
-	#NSISdl::download http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe dotNetFx40_Full_setup.exe
-	#NSISdl::download http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe dotNetFx40_Full_x86_x64.exe
-	inetc::get /POPUP "" /CAPTION "Microsoft .Net Framework 4 Web Installer" http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe dotNetFx40_Full_setup.exe
-	Banner::show /NOUNLOAD /set 76 "Microsoft .Net Framework 4" "Waiting for installation to finish..."
-	ExecWait dotNetFx40_Full_setup.exe
-	Banner::destroy
-	
-done:
-FunctionEnd
-
 Function FinishCreateDesktopShortcut
 	CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
 FunctionEnd
@@ -188,6 +170,39 @@ Section -MainProgram
 	File "Dependencies\System.Data.SQLite.dll"
 	File "Dependencies\Transitionals.dll"
 	File "Dependencies\VistaControls.dll"
+SectionEnd
+
+######################################################################
+
+Section -Prerequisites
+	SetOutPath "$INSTDIR"
+	
+	; Check Visual C++ 2010 SP1 Redistributable
+	
+	ClearErrors
+	ReadRegDword $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{196BB40D-1578-3D01-B289-BEFC77A11A1E}" "Version"
+	IfErrors installVCRedist done1
+	
+installVCRedist:
+	Banner::show /NOUNLOAD /set 76 "Visual C++ 2010 SP1 Redistributable" "Waiting for installation to finish..."
+	File "Dependencies\vcredist_x86_2010_SP1.exe"
+	ExecWait "$INSTDIR\vcredist_x86_2010_SP1.exe /passive /norestart" 
+	Delete "$INSTDIR\vcredist_x86_2010_SP1.exe"
+	Banner::destroy
+	
+	; Check .Net Framework 4 Extended Profile
+	
+done1:
+	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done2 installNetFx4
+	
+installNetFx4:
+	Banner::show /NOUNLOAD /set 76 ".Net Framework 4 Extended Profile" "Waiting for installation to finish..."
+	File "Dependencies\dotNetFx40_Full_setup.exe"
+	ExecWait "$INSTDIR\dotNetFx40_Full_setup.exe /passive /norestart" 
+	Delete "$INSTDIR\dotNetFx40_Full_setup.exe"
+	Banner::destroy
+	
+done2:
 SectionEnd
 
 ######################################################################
