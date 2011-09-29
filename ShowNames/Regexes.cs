@@ -85,7 +85,12 @@
         /// <summary>
         /// Matches a group name in a release name.
         /// </summary>
-        public static readonly Regex Group         = new Regex(@"\-(?<group>[a-z0-9&]+)(?:\.[a-z0-9]+)?$", RegexOptions.IgnoreCase);
+        public static readonly Regex Group         = new Regex(@"\-\s?(?<group>[a-z0-9&]+)(?:\.[a-z0-9]+)?$", RegexOptions.IgnoreCase);
+        
+        /// <summary>
+        /// Matches a group name if a release name starts with it.
+        /// </summary>
+        public static readonly Regex StartGroup    = new Regex(@"^(?<group>[a-z0-9&]+\-)", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Simple regular expression to detect S00E00 and 0x00 at the end of a query.

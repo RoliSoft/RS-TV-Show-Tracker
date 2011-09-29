@@ -19,16 +19,6 @@
     public static class Parser
     {
         /// <summary>
-        /// A list of uppercase keywords which will be removed if the file name starts with them.
-        /// </summary>
-        public static readonly string[] Keywords = new[] { "AAF-", "MED-" };
-
-        /// <summary>
-        /// A regular expression dynamically generated from the list of keywords above.
-        /// </summary>
-        public static readonly Regex RemoveKeywords = new Regex("^(" + Keywords.Aggregate((str, keyword) => Regex.Escape(keyword) + "|").TrimEnd('|') + ")");
-
-        /// <summary>
         /// Contains a list of previously seen names associated to their <c>ShowID</c> information.
         /// </summary>
         public static readonly Dictionary<string, ShowID> ShowIDCache = new Dictionary<string, ShowID>();
@@ -98,7 +88,7 @@
 
             var name = fi[0].ToUpper();
                 name = Regexes.Contractions.Replace(name, string.Empty);
-                name = RemoveKeywords.Replace(name, string.Empty).Trim();
+                name = Regexes.StartGroup.Replace(name, string.Empty);
                 name = Regexes.SpecialChars.Replace(name, " ").Trim();
 
             var title = string.Empty;
@@ -128,7 +118,7 @@
                 {
                     if ((parents.Length - i) <= 0) break;
 
-                    var dir = Regexes.VolNumbering.Replace(Regexes.SpecialChars.Replace(RemoveKeywords.Replace(parents[parents.Length - i].ToUpper(), string.Empty).Trim(), " ").Trim(), string.Empty);
+                    var dir = Regexes.VolNumbering.Replace(Regexes.SpecialChars.Replace(parents[parents.Length - i].ToUpper(), " ").Trim(), string.Empty);
                     var dirinfo = IdentifyShow(dir, ep);
 
                     if (dirinfo != null)
