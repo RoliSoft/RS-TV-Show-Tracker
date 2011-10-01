@@ -4,18 +4,16 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
-    using HtmlAgilityPack;
-
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping ReleaseLog.
+    /// Provides support for scraping ReleaseBB.
     /// </summary>
-    [Parser("2011-09-24 2:17 AM"), TestFixture]
-    public class ReleaseLog : DownloadSearchEngine
+    [Parser("2011-10-01 6:33 AM"), TestFixture]
+    public class ReleaseBB : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -25,7 +23,7 @@
         {
             get
             {
-                return "ReleaseLog";
+                return "Release BB";
             }
         }
 
@@ -37,19 +35,7 @@
         {
             get
             {
-                return "http://rlslog.net/";
-            }
-        }
-
-        /// <summary>
-        /// Gets the URL to the favicon of the site.
-        /// </summary>
-        /// <value>The icon location.</value>
-        public override string Icon
-        {
-            get
-            {
-                return "http://rlslog.net/wp-content/favicon.ico";
+                return "http://rlsbb.com/";
             }
         }
 
@@ -84,16 +70,8 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var req  = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Uri.EscapeUriString(query))
-                            .Replace("content:encoded", "content") // HtmlAgilityPack doesn't like tags with colons in their names
-                            .Replace("<![CDATA[", string.Empty)
-                            .Replace("]]>", string.Empty)
-                            .Replace("×", "x");
-
-            var html = new HtmlDocument();
-            html.LoadHtml(req);
-
-            var links = html.DocumentNode.SelectNodes("//item");
+            var html  = Utils.GetHTML(Site + "category/tv-shows/?s=" + Uri.EscapeUriString(query));
+            var links = html.DocumentNode.SelectNodes("//div[@class='postContent']");
 
             if (links == null)
             {
@@ -102,13 +80,8 @@
 
             foreach (var node in links)
             {
-                if (node.SelectSingleNode("category[contains(text(), 'TV Packs')]") != null)
-                {
-                    continue;
-                }
-
-                var infourl  = (node.GetTextValue("comments") ?? string.Empty).Replace("#comments", string.Empty); // can't get <link>
-                var releases = node.SelectNodes("content/p[contains(@style, 'center') or @align='center']/strong/..");
+                var infourl  = node.GetNodeAttributeValue("..//a[1]", "href");
+                var releases = node.SelectNodes("p[contains(@style, 'center') or @align='center']/strong/..");
 
                 if (releases == null)
                 {
@@ -131,7 +104,7 @@
 
                     foreach (var site in sites)
                     {
-                        if (Regex.IsMatch(site.InnerText, @"(NTi|NFO)"))
+                        if (Regex.IsMatch(site.InnerText, @"(NFO|Torrent Search)"))
                         {
                             continue;
                         }

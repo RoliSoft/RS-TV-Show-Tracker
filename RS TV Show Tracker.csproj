@@ -128,6 +128,8 @@
     <Compile Include="Downloaders\Engines\BinSearchDownloader.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="HttpToSocks.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\Mukki.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ev0.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\SceneAccess.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\RevolutionTT.cs" />
@@ -158,6 +160,8 @@
     <Compile Include="Parsers\Guides\Engines\AnimeNewsNetwork.cs" />
     <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\DepositFiles.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\FileJungle.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Netload.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Megaupload.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Hotfile.cs" />
