@@ -26,6 +26,11 @@
                         <Image Source="/RSTVShowTracker;component/Images/language.png" />
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Append language to file" Name="appendLanguage" ToolTip="Appends the ISO 639-2/B language code to the file name when it was downloaded with &quot;Download near video&quot;." IsCheckable="True" Checked="AppendLanguageChecked"  Unchecked="AppendLanguageUnchecked">
+                    <MenuItem.Icon>
+                        <Image Source="/RSTVShowTracker;component/Images/document-insert.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
         <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="DownloadSubtitleClick" ContextMenuOpening="ListViewContextMenuOpening">

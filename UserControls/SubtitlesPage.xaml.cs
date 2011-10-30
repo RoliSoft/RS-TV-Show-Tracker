@@ -128,6 +128,8 @@
             {
                 SubtitlesListViewItemCollection = new ObservableCollection<SubtitleItem>();
                 listView.ItemsSource            = SubtitlesListViewItemCollection;
+
+                appendLanguage.IsChecked = Settings.Get<bool>("Append Language to Subtitle");
             }
 
             if (availableEngines.Items.Count == 0)
@@ -483,6 +485,26 @@
             catch { }
             
             new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, show[0], show[1], airdate);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the appendLanguage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AppendLanguageUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Append Language to Subtitle", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the appendLanguage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AppendLanguageChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Append Language to Subtitle", true);
         }
     }
 }

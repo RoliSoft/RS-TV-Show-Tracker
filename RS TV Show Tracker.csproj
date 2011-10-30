@@ -739,6 +739,7 @@
     <Content Include="Dependencies\Hammock.ClientProfile.dll" />
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\document-insert.png" />
     <Resource Include="Images\film-timeline.png" />
     <Resource Include="Images\drive-share.png" />
     <Resource Include="Images\tubeplus.png" />

@@ -396,7 +396,14 @@
                 }
             }
 
-            var dest = Path.ChangeExtension(video, new FileInfo(subtitle).Extension);
+            var ext = new FileInfo(subtitle).Extension;
+
+            if (Settings.Get<bool>("Append Language to Subtitle") && Languages.List.ContainsKey(_link.Language))
+            {
+                ext = "." + Languages.List[_link.Language].Substring(0, 3).ToLower() + ext;
+            }
+
+            var dest = Path.ChangeExtension(video, ext);
 
             if (File.Exists(dest))
             {
