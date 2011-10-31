@@ -4,6 +4,8 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+
     /// <summary>
     /// Provides support for searching videos on SideReel.
     /// </summary>
@@ -56,7 +58,7 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Engines.Google("intitle:Watch {0} online site:sidereel.com".FormatWith(name)).ToList();
+            var g = new Google().Search("intitle:Watch {0} online site:sidereel.com".FormatWith(name)).ToList();
 
             if (g.Count == 0)
             {

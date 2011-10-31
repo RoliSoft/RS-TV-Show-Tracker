@@ -185,6 +185,7 @@
     <Compile Include="Parsers\Subtitles\Engines\Podnapisi.cs" />
     <Compile Include="Parsers\Social\Engines\Identica.cs" />
     <Compile Include="Parsers\Social\Engines\Twitter.cs" />
+    <Compile Include="Parsers\WebSearch\WebSearchEngine.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\ShowFile.cs" />
@@ -200,7 +201,6 @@
     <Compile Include="Parsers\WebSearch\Engines\Google.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Bing.cs" />
     <Compile Include="Parsers\WebSearch\SearchResult.cs" />
-    <Compile Include="Parsers\WebSearch\Tests.cs" />
     <Compile Include="Parsers\WebSearch\Engines\DuckDuckGo.cs" />
     <Compile Include="Downloaders\Engines\SubsceneDownloader.cs" />
     <Compile Include="Downloaders\Engines\ExternalDownloader.cs" />

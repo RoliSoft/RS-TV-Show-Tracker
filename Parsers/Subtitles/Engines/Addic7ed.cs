@@ -6,6 +6,8 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+
     /// <summary>
     /// Provides support for scraping Addic7ed.
     /// </summary>
@@ -54,7 +56,7 @@
 
             if (string.IsNullOrWhiteSpace(adid))
             {
-                var url = WebSearch.Engines.Google(show[0] + " site:addic7ed.com/serie/").ToList();
+                var url = new Google().Search(show[0] + " site:addic7ed.com/serie/").ToList();
                 if (url.Count == 0)
                 {
                     yield break;

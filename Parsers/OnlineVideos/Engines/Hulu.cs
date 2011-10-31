@@ -6,6 +6,8 @@
     using System.Xml.Linq;
     using System.Xml.XPath;
 
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+
     /// <summary>
     /// Provides support for searching videos on Hulu.
     /// </summary>
@@ -44,7 +46,7 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Engines.Google("intitle:{0}: {1} \"{2}\" site:hulu.com/watch/".FormatWith(ShowNames.Parser.Normalize(name), extra as string, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Season $1 Ep. $2", RegexOptions.IgnoreCase))).ToList();
+            var g = new Google().Search("intitle:{0}: {1} \"{2}\" site:hulu.com/watch/".FormatWith(ShowNames.Parser.Normalize(name), extra as string, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Season $1 Ep. $2", RegexOptions.IgnoreCase))).ToList();
 
             if (g.Count != 0)
             {

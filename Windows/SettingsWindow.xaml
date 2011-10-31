@@ -406,7 +406,7 @@
                                 <Image Source="/RSTVShowTracker;component/Images/dll.gif" Height="16" Width="16" Margin="0,1,5,0" />
                                 <Label Content="Loaded plugins" FontSize="16" Foreground="DarkBlue" Padding="0" />
                             </StackPanel>
-                            <ListView Name="pluginsListView" Margin="0,0,5,0" Padding="-2,-1" Height="413">
+                            <ListView Name="pluginsListView" Margin="0,0,5,0" Padding="-2,-1" Height="417">
                                 <ListView.View>
                                     <GridView AllowsColumnReorder="False">
                                         <GridViewColumn Width="200">

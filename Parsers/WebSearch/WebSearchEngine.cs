@@ -3,48 +3,28 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
     using NUnit.Framework;
 
     /// <summary>
-    /// Tests the web search methods.
+    /// Represents a web search engine.
     /// </summary>
-    [TestFixture]
-    public class SearchingTests
+    public abstract class WebSearchEngine : ParserEngine
     {
         /// <summary>
-        /// Tests the Google API.
+        /// Searches for the specified query with this service.
         /// </summary>
-        [Test]
-        public void GoogleTest()
-        {
-            TestEngine(Engines.Google);
-        }
+        /// <param name="query">The query.</param>
+        /// <returns>First link on the search result or empty string.</returns>
+        public abstract IEnumerable<SearchResult> Search(string query);
 
         /// <summary>
-        /// Tests the Bing API.
+        /// Tests the parser by searching for "RS TV Show Tracker" with this service.
         /// </summary>
         [Test]
-        public void BingTest()
+        public virtual void TestSearch()
         {
-            TestEngine(Engines.Bing);
-        }
-
-        /// <summary>
-        /// Tests the DuckDuckGo API.
-        /// </summary>
-        [Test]
-        public void DuckDuckGoTest()
-        {
-            TestEngine(Engines.DuckDuckGo);
-        }
-
-        /// <summary>
-        /// Tests the specified web search engine.
-        /// </summary>
-        /// <param name="method">The method.</param>
-        public void TestEngine(Func<string, IEnumerable<SearchResult>> method)
-        {
-            var list = method("RS TV Show Tracker").ToList();
+            var list = Search("RS TV Show Tracker").ToList();
 
             Assert.Greater(list.Count, 0, "The search didn't return any results.");
 

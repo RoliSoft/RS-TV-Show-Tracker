@@ -10,6 +10,8 @@
 
     using NUnit.Framework;
 
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+
     /// <summary>
     /// Provides support for scraping EPGuides pages.
     /// </summary>
@@ -92,7 +94,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = WebSearch.Engines.DuckDuckGo("{0} site:epguides.com".FormatWith(name)).ToList();
+            var list = new DuckDuckGo().Search("{0} site:epguides.com".FormatWith(name)).ToList();
 
             foreach (var result in list)
             {

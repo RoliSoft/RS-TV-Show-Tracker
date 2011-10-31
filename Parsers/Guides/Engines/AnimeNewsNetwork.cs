@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
     using NUnit.Framework;
+
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
 
     /// <summary>
     /// Provides support for scraping Anime News Network pages.
@@ -60,7 +61,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var results = WebSearch.Engines.DuckDuckGo(name + " intitle:\"episode titles\" site:animenewsnetwork.com/encyclopedia/").ToList();
+            var results = new DuckDuckGo().Search(name + " intitle:\"episode titles\" site:animenewsnetwork.com/encyclopedia/").ToList();
 
             if (results.Count == 0)
             {

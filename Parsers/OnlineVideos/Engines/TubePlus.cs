@@ -3,6 +3,8 @@
     using System;
     using System.Linq;
 
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+
     /// <summary>
     /// Provides support for searching videos on Tube+.
     /// </summary>
@@ -41,7 +43,7 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Engines.Google("intitle:{0} intitle:\"{1}\" site:tubeplus.me/player/".FormatWith(name, episode)).ToList();
+            var g = new Google().Search("intitle:{0} intitle:\"{1}\" site:tubeplus.me/player/".FormatWith(name, episode)).ToList();
 
             if (g.Count != 0)
             {

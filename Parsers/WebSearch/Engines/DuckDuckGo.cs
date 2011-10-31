@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.WebSearch
+﻿namespace RoliSoft.TVShowTracker.Parsers.WebSearch.Engines
 {
     using System;
     using System.Collections.Generic;
@@ -6,21 +6,48 @@
 
     using HtmlAgilityPack;
 
+    using NUnit.Framework;
+
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// Provides access to web search services.
+    /// Provides support for searching on DuckDuckGo.
     /// </summary>
-    public static partial class Engines
+    [TestFixture]
+    public class DuckDuckGo : WebSearchEngine
     {
         /// <summary>
-        /// Searches DuckDuckGo with the specified query.
+        /// Gets the name of the site.
+        /// </summary>
+        /// <value>The name.</value>
+        public override string Name
+        {
+            get
+            {
+                return "DuckDuckGo";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL of the site.
+        /// </summary>
+        /// <value>The site location.</value>
+        public override string Site
+        {
+            get
+            {
+                return "http://duckduckgo.com/";
+            }
+        }
+
+        /// <summary>
+        /// Searches for the specified query with this service.
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns>First link on the search result or empty string.</returns>
-        public static IEnumerable<SearchResult> DuckDuckGo(string query)
+        public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetURL("http://duckduckgo.com/d.js?q={0}&l=us-en&s=0".FormatWith(Uri.EscapeUriString(query)));
+            var search = Utils.GetURL(Site + "d.js?q={0}&l=us-en&s=0".FormatWith(Uri.EscapeUriString(query)));
             var json   = JArray.Parse(search.Substring(search.IndexOf('[')));
 
             if (json[0]["t"].Value<string>() == "EOF")

@@ -1,4 +1,4 @@
-﻿/*namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
@@ -244,4 +244,3 @@
         }
     }
 }
-*/

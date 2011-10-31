@@ -4,6 +4,8 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+
     /// <summary>
     /// Provides support for searching videos on BBC iPlayer.
     /// </summary>
@@ -42,7 +44,7 @@
         /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
         public override string Search(string name, string episode, object extra = null)
         {
-            var g = WebSearch.Engines.Google("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/".FormatWith(name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase))).ToList();
+            var g = new Google().Search("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/".FormatWith(name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase))).ToList();
 
             if (g.Count != 0)
             {

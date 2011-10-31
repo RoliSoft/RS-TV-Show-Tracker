@@ -24,6 +24,8 @@
     using RoliSoft.TVShowTracker.Parsers.Recommendations;
     using RoliSoft.TVShowTracker.Parsers.Social;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.Parsers.WebSearch;
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
 
     using VistaControls.TaskDialog;
 
@@ -901,13 +903,14 @@
             action = new Thread(() =>
                 {
                     try
-                    { 
+                    {
+                        var src = new Bing();
                         var res = new List<Parsers.WebSearch.SearchResult>();
-                        res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxy"));
+                        res.AddRange(src.Search(uri.Host + " intitle:proxy"));
 
                         if (res.Count == 0)
                         {
-                            res.AddRange(Parsers.WebSearch.Engines.Bing(uri.Host + " intitle:proxies"));
+                            res.AddRange(src.Search(uri.Host + " intitle:proxies"));
                         }
 
                         done = true;
@@ -1189,6 +1192,7 @@
                     typeof(OnlineVideoSearchEngine),
                     typeof(RecommendationEngine), 
                     typeof(SocialEngine),
+                    typeof(WebSearchEngine),
                     typeof(ParserEngine)
                 };
 
@@ -1201,6 +1205,7 @@
                     "/RSTVShowTracker;component/Images/monitor.png",
                     "/RSTVShowTracker;component/Images/information.png",
                     "/RSTVShowTracker;component/Images/bird.png",
+                    "/RSTVShowTracker;component/Images/magnifier.png",
                     "/RSTVShowTracker;component/Images/dll.gif"
                 };
 
