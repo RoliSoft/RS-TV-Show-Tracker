@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
+﻿/*namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
@@ -190,7 +190,7 @@
 
             // show captcha to user
 
-            MainWindow.Active.Dispatcher.Invoke((Action)(() =>
+            MainWindow.Active.Run(() =>
                 {
                     var cw  = new CaptchaWindow(Name, Convert.FromBase64String(captcha), 160, 20);
                     var res = cw.ShowDialog();
@@ -199,7 +199,7 @@
                     {
                         sectext = cw.Solution;
                     }
-                }));
+                });
 
             if (string.IsNullOrWhiteSpace(sectext))
             {
@@ -244,3 +244,4 @@
         }
     }
 }
+*/

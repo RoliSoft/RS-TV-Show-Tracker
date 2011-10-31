@@ -66,7 +66,7 @@
         {
             if ((DateTime.Now - (Database.Setting("last update") ?? "0").ToDouble().GetUnixTimestamp()).TotalHours > 10)
             {
-                MainWindow.Active.Dispatcher.Invoke((Action)(() => MainWindow.Active.UpdateDatabaseClick()));
+                MainWindow.Active.Run(() => MainWindow.Active.UpdateDatabaseClick());
             }
         }
 

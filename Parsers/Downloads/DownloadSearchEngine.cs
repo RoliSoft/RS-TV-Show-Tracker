@@ -278,7 +278,7 @@
         /// <returns>
         ///   <c>true</c> if login is required; otherwise, <c>false</c>.
         /// </returns>
-        internal virtual bool GazelleTrackerLoginRequired(HtmlNode node)
+        protected bool GazelleTrackerLoginRequired(HtmlNode node)
         {
             return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login')]") != null;
         }
@@ -291,7 +291,7 @@
         /// <returns>
         /// Cookies.
         /// </returns>
-        internal virtual string GazelleTrackerLogin(string username, string password)
+        protected string GazelleTrackerLogin(string username, string password)
         {
             var post = new StringBuilder();
 

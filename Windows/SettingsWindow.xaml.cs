@@ -17,6 +17,13 @@
     using Microsoft.Win32;
 
     using RoliSoft.TVShowTracker.Parsers;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.LinkCheckers;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Parsers.Recommendations;
+    using RoliSoft.TVShowTracker.Parsers.Social;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     using VistaControls.TaskDialog;
 
@@ -46,6 +53,12 @@
         /// </summary>
         /// <value>The proxied domains list view item collection.</value>
         public ObservableCollection<ProxiedDomainsListViewItem> ProxiedDomainsListViewItemCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the plugins list view item collection.
+        /// </summary>
+        /// <value>The plugins list view item collection.</value>
+        public ObservableCollection<PluginsListViewItem> PluginsListViewItemCollection { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsWindow"/> class.
@@ -208,6 +221,30 @@
             {
                 MainWindow.Active.HandleUnexpectedException(ex);
             }
+
+            // plugins
+
+            try
+            {
+                PluginsListViewItemCollection = new ObservableCollection<PluginsListViewItem>();
+                pluginsListView.ItemsSource   = PluginsListViewItemCollection;
+
+                ReloadPlugins();
+            }
+            catch (Exception ex)
+            {
+                MainWindow.Active.HandleUnexpectedException(ex);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Closing event of the GlassWindow control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
+        private void GlassWindowClosing(object sender, CancelEventArgs e)
+        {
+            Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
         }
 
         #region General
@@ -1134,14 +1171,88 @@
         }
         #endregion
 
+        #region Plugins
         /// <summary>
-        /// Handles the Closing event of the GlassWindow control.
+        /// Reloads the plugins list view.
+        /// </summary>
+        /// <param name="inclInternal">if set to <c>true</c> internal classes will be included too.</param>
+        private void ReloadPlugins(bool inclInternal = false)
+        {
+            PluginsListViewItemCollection.Clear();
+
+            var types = new[]
+                {
+                    typeof(Guide),
+                    typeof(DownloadSearchEngine),
+                    typeof(SubtitleSearchEngine),
+                    typeof(LinkCheckerEngine),
+                    typeof(OnlineVideoSearchEngine),
+                    typeof(RecommendationEngine), 
+                    typeof(SocialEngine),
+                    typeof(ParserEngine)
+                };
+
+            var icons = new[]
+                {
+                    "/RSTVShowTracker;component/Images/guides.png",
+                    "/RSTVShowTracker;component/Images/torrents.png",
+                    "/RSTVShowTracker;component/Images/subtitles.png",
+                    "/RSTVShowTracker;component/Images/tick.png",
+                    "/RSTVShowTracker;component/Images/monitor.png",
+                    "/RSTVShowTracker;component/Images/information.png",
+                    "/RSTVShowTracker;component/Images/bird.png",
+                    "/RSTVShowTracker;component/Images/dll.gif"
+                };
+
+            foreach (var engine in Extensibility.GetNewInstances<ParserEngine>(inclInternal: inclInternal).OrderBy(engine => engine.Name))
+            {
+                var type   = engine.GetType();
+                var parent = string.Empty;
+                var picon  = string.Empty;
+                var i      = 0;
+
+                foreach (var ptype in types)
+                {
+                    if (type.IsSubclassOf(ptype))
+                    {
+                        parent = ptype.Name;
+                        picon  = icons[i];
+                        break;
+                    }
+
+                    i++;
+                }
+
+                PluginsListViewItemCollection.Add(new PluginsListViewItem
+                    {
+                        Icon  = engine.Icon,
+                        Name  = engine.Name,
+                        Type  = parent,
+                        Icon2 = picon,
+                        File  = type.Assembly.GetName(false).Name
+                    });
+            }
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the showInternal control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
-        private void GlassWindowClosing(object sender, CancelEventArgs e)
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ShowInternalChecked(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
+            ReloadPlugins(true);
         }
+
+        /// <summary>
+        /// Handles the Unchecked event of the showInternal control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ShowInternalUnchecked(object sender, RoutedEventArgs e)
+        {
+            ReloadPlugins();
+        }
+        #endregion
     }
 }

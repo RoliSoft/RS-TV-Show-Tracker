@@ -48,7 +48,7 @@
         {
             get
             {
-                return "/RSTVShowTracker;component/Images/epguides.png";
+                return "/RSTVShowTracker;component/Images/epg.png";
             }
         }
 

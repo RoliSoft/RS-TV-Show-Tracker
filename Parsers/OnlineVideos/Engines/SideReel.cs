@@ -34,6 +34,20 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>
+        /// The icon location.
+        /// </value>
+        public override string Icon
+        {
+            get
+            {
+                return Site + "images/favicon.ico";
+            }
+        }
+
+        /// <summary>
         /// Searches for videos on SideReel.
         /// </summary>
         /// <param name="name">The name of the show.</param>

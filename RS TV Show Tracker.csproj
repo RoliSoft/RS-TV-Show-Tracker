@@ -127,6 +127,7 @@
     <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\BinSearchDownloader.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
+    <Compile Include="Extensibility.cs" />
     <Compile Include="HttpToSocks.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Mukki.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />
@@ -279,6 +280,7 @@
     <Compile Include="Windows\FacebookAuthWindow.xaml.cs">
       <DependentUpon>FacebookAuthWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ListViews\PluginsListViewItem.cs" />
     <Compile Include="Windows\SocialWindow.xaml.cs">
       <DependentUpon>SocialWindow.xaml</DependentUpon>
     </Compile>
@@ -739,6 +741,7 @@
     <Content Include="Dependencies\Hammock.ClientProfile.dll" />
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\dll.gif" />
     <Resource Include="Images\document-insert.png" />
     <Resource Include="Images\film-timeline.png" />
     <Resource Include="Images\drive-share.png" />

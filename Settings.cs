@@ -76,9 +76,8 @@
 
             if (!Keys.ContainsKey("Active Subtitle Sites"))
             {
-                Keys["Active Subtitle Sites"] = typeof(SubtitleSearchEngine)
-                                                .GetDerivedTypes()
-                                                .Select(type => (Activator.CreateInstance(type) as SubtitleSearchEngine).Name)
+                Keys["Active Subtitle Sites"] = Extensibility.GetNewInstances<SubtitleSearchEngine>(inclExternal: false)
+                                                .Select(inst => inst.Name)
                                                 .ToList();
             }
 

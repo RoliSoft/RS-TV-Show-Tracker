@@ -97,9 +97,7 @@
         /// </summary>
         public static void LoadParsers()
         {
-            SearchEngines = typeof(DownloadSearchEngine)
-                            .GetDerivedTypes()
-                            .Select(type => Activator.CreateInstance(type) as DownloadSearchEngine);
+            SearchEngines = Extensibility.GetNewInstances<DownloadSearchEngine>();
 
             Actives = Settings.Get<List<string>>("Active Trackers");
             Parsers = Settings.Get<List<string>>("Tracker Order");

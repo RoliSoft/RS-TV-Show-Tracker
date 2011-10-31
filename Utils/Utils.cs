@@ -560,7 +560,7 @@
         /// <param name="state">The state of the progress bar behind the icon.</param>
         public static void Win7Taskbar(int? progress = null, TaskbarProgressBarState? state = null)
         {
-            MainWindow.Active.Dispatcher.Invoke((Action)(() =>
+            MainWindow.Active.Run(() =>
                 {
                     if (!MainWindow.Active.IsVisible)
                     {
@@ -580,7 +580,7 @@
                         }
                     }
                     catch (PlatformNotSupportedException) { }
-                }));
+                });
         }
 
         /// <summary>

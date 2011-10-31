@@ -183,7 +183,7 @@
                     break;
             }
 
-            foreach (var engine in typeof(SocialEngine).GetDerivedTypes().Select(type => Activator.CreateInstance(type) as SocialEngine))
+            foreach (var engine in Extensibility.GetNewInstances<SocialEngine>())
             {
                 if (!Settings.Get<bool>("Post to " + engine.Name))
                 {

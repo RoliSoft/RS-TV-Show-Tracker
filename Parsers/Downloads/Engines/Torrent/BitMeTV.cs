@@ -203,7 +203,7 @@
 
             // show captcha to user
 
-            MainWindow.Active.Dispatcher.Invoke((Action)(() =>
+            MainWindow.Active.Run(() =>
                 {
                     var cw  = new CaptchaWindow(Name, Convert.FromBase64String(captcha), 200, 50);
                     var res = cw.ShowDialog();
@@ -212,7 +212,7 @@
                     {
                         sectext = cw.Solution;
                     }
-                }));
+                });
 
             if (string.IsNullOrWhiteSpace(sectext))
             {

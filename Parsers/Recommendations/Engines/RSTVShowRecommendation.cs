@@ -37,6 +37,20 @@
             }
         }
 
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>
+        /// The icon location.
+        /// </value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://rolisoft.net/favicon.ico";
+            }
+        }
+
         private readonly int _type;
         private readonly string _key  = "S2qNfbCFCWoQ8RoL1S0FTbjbW",
                                 _uuid = Utils.GetUUID();

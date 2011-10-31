@@ -35,6 +35,20 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>
+        /// The icon location.
+        /// </value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://wwwstatic.megaupload.com/images/icon.ico";
+            }
+        }
+
+        /// <summary>
         /// Checks the availability of the link on the service.
         /// </summary>
         /// <param name="url">The link to check.</param>

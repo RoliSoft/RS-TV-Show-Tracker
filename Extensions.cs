@@ -138,21 +138,6 @@
         }
         #endregion
 
-        #region Type
-        /// <summary>
-        /// Extension method to Type to get the derived classes of a class.
-        /// </summary>
-        /// <param name="baseClass">The base class.</param>
-        /// <param name="inclAbstract">if set to <c>true</c> abstract classes will not be filtered.</param>
-        /// <returns>
-        /// List of derived classes.
-        /// </returns>
-        public static IEnumerable<Type> GetDerivedTypes(this Type baseClass, bool inclAbstract = false)
-        {
-            return Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsClass && type.IsSubclassOf(baseClass) && (inclAbstract || !type.IsAbstract));
-        }
-        #endregion
-
         #region Attribute
         /// <summary>
         /// Extension method to Attribute to get all the classes on which it is present.

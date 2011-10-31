@@ -111,6 +111,15 @@
             AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
         }
 
+        /// <summary>
+        /// Runs the specified action in the UI thread.
+        /// </summary>
+        /// <param name="func">The action.</param>
+        public void Run(Action func)
+        {
+            Dispatcher.Invoke(func);
+        }
+
         #region Window events
         /// <summary>
         /// Handles the SourceInitialized event of the Window control.
@@ -167,7 +176,7 @@
                         ShowInTaskbar = ShowActivated = true;
 
                         var t = new Timer { Interval = 1000, AutoReset = false, Enabled = true };
-                        t.Elapsed += (d, y) => Dispatcher.Invoke((Action)(() => { Top = top; }));
+                        t.Elapsed += (d, y) => Run(() => { Top = top; });
                     };
             }
 
@@ -185,7 +194,7 @@
                         }
                         else
                         {
-                            Dispatcher.Invoke((Action)(() => UpdateDownloaded(ver, true)));
+                            Run(() => UpdateDownloaded(ver, true));
                             return;
                         }
                     }
@@ -204,7 +213,7 @@
         {
             if (e.PropertyName == "IsGlassEnabled" && Settings.Get("Enable Aero", true))
             {
-                Dispatcher.Invoke((Action)(() =>
+                Run(() =>
                     {
                         if (SystemParameters2.Current.IsGlassEnabled)
                         {
@@ -214,7 +223,7 @@
                         {
                             ActivateNonAero();
                         }
-                    }));
+                    });
             }
         }
 
@@ -318,13 +327,13 @@
 
             if (invokeRefresh)
             {
-                Dispatcher.Invoke((Action)(() =>
+                Run(() =>
                     {
                         if (tabControl.SelectedContent is IRefreshable)
                         {
                             (tabControl.SelectedContent as IRefreshable).Refresh();
                         }
-                    }));
+                    });
             }
         }
 
@@ -442,13 +451,13 @@
 
             if (string.IsNullOrEmpty(last))
             {
-                Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = string.Empty; }));
+                Run(() => { lastUpdatedLabel.Content = string.Empty; });
                 return;
             }
 
             var ts = DateTime.Now - last.ToDouble().GetUnixTimestamp();
 
-            Dispatcher.Invoke((Action)(() => { lastUpdatedLabel.Content = "last updated " + ts.ToShortRelativeTime() + " ago"; }));
+            Run(() => { lastUpdatedLabel.Content = "last updated " + ts.ToShortRelativeTime() + " ago"; });
 
             if (ts.TotalMinutes < 1) // if under a minute, update by seconds
             {
@@ -674,11 +683,11 @@
         {
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-            Dispatcher.Invoke((Action)(() =>
+            Run(() =>
                 {
                     SetLastUpdated();
                     SetHeaderProgress(-1);
-                }));
+                });
         }
 
         /// <summary>
@@ -692,11 +701,11 @@
             {
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-                Dispatcher.Invoke((Action)(() =>
+                Run(() =>
                     {
                         lastUpdatedLabel.Content = "update failed";
                         SetHeaderProgress(-1);
-                    }));
+                    });
             }
         }
 
@@ -707,11 +716,11 @@
         {
             Utils.Win7Taskbar((int)e.Second, TaskbarProgressBarState.Normal);
 
-            Dispatcher.Invoke((Action)(() =>
+            Run(() =>
                 {
                     lastUpdatedLabel.Content = "updating " + e.First + " (" + e.Second.ToString("0.00") + "%)";
                     SetHeaderProgress(e.Second);
-                }));
+                });
         }
         #endregion
 
@@ -724,13 +733,13 @@
             var upd = API.CheckForUpdate();
             if (upd.Success && upd.New)
             {
-                Dispatcher.Invoke((Action)(() =>
+                Run(() =>
                     {
                         update.Tag              = upd.Version;
                         updateOuter.Visibility  = Visibility.Visible;
                         updateToolTipTitle.Text = "v" + upd.Version + " is available";
                         updateToolTipText.Text  = "Downloading update...";
-                    }));
+                    });
 
                 if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")))
                 {
@@ -744,11 +753,11 @@
 
                 var wc = new WebClient();
 
-                wc.DownloadProgressChanged += (s, e) => Dispatcher.Invoke((Action)(() => updateToolTipText.Text = "Downloading update... (" + e.ProgressPercentage + "%)"));
+                wc.DownloadProgressChanged += (s, e) => Run(() => updateToolTipText.Text = "Downloading update... (" + e.ProgressPercentage + "%)");
                 wc.DownloadFileCompleted   += (s, e) =>
                     {
                         File.Move(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
-                        Dispatcher.Invoke((Action)(() => UpdateDownloaded(upd.Version, true)));
+                        Run(() => UpdateDownloaded(upd.Version, true));
                     };
 
                 wc.DownloadFileAsync(new Uri(upd.URL), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"));

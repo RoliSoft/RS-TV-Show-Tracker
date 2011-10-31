@@ -82,9 +82,7 @@
         /// </summary>
         static SubtitlesPage()
         {
-            SearchEngines = typeof(SubtitleSearchEngine)
-                            .GetDerivedTypes()
-                            .Select(type => Activator.CreateInstance(type) as SubtitleSearchEngine)
+            SearchEngines = Extensibility.GetNewInstances<SubtitleSearchEngine>()
                             .OrderBy(engine => engine.Name);
 
             Actives     = Settings.Get<List<string>>("Active Subtitle Sites");

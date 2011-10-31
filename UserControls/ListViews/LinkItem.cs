@@ -106,7 +106,7 @@
         /// </summary>
         public void CheckLink()
         {
-            var checker = typeof(LinkCheckerEngine).GetDerivedTypes().Where(x => FileURL.Contains(x.Name.ToLower())).ToList();
+            var checker = Extensibility.GetDerivedTypes<LinkCheckerEngine>().Where(x => FileURL.Contains(x.Name.ToLower())).ToList();
 
             if (checker.Count == 0)
             {
@@ -121,7 +121,7 @@
             }
 
             Infos = inf + "Checking...";
-            MainWindow.Active.Dispatcher.Invoke((Action)(() => { try { PropertyChanged(this, new PropertyChangedEventArgs("Infos")); } catch { } }));
+            MainWindow.Active.Run(() => { try { PropertyChanged(this, new PropertyChangedEventArgs("Infos")); } catch { } });
 
             try
             {
@@ -133,19 +133,19 @@
                 }
 
                 Infos = inf + "Link is " + (result ? "online" : "broken");
-                MainWindow.Active.Dispatcher.Invoke((Action)(() =>
+                MainWindow.Active.Run(() =>
                     {
                         try
                         {
                             PropertyChanged(this, new PropertyChangedEventArgs("Infos"));
                             PropertyChanged(this, new PropertyChangedEventArgs("Color"));
                         } catch { }
-                    }));
+                    });
             }
             catch
             {
                 Infos = inf + "Check error";
-                MainWindow.Active.Dispatcher.Invoke((Action)(() => { try { PropertyChanged(this, new PropertyChangedEventArgs("Infos")); } catch { } }));
+                MainWindow.Active.Run(() => { try { PropertyChanged(this, new PropertyChangedEventArgs("Infos")); } catch { } });
             }
         }
     }
