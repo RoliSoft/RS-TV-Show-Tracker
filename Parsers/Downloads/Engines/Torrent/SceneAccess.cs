@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping SceneAccess.
     /// </summary>
-    [Parser("2011-09-24 3:38 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-24 3:38 AM"), TestFixture]
     public class SceneAccess : DownloadSearchEngine
     {
         /// <summary>

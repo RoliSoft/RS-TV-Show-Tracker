@@ -16,7 +16,7 @@
     /// <summary>
     /// Provides support for scraping TVTorrentz.
     /// </summary>
-    [Parser("2011-08-30 11:55 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-30 11:55 AM"), TestFixture]
     public class TVTorrentz : DownloadSearchEngine
     {
         /// <summary>

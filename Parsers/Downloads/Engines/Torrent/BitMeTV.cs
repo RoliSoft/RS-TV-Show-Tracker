@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping BitMeTV.
     /// </summary>
-    [Parser("2011-09-01 2:45 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-01 2:45 PM"), TestFixture]
     public class BitMeTV : DownloadSearchEngine
     {
         /// <summary>

@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping nCore.
     /// </summary>
-    [Parser("2011-08-16 15:59 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 15:59 PM"), TestFixture]
     public class nCore : DownloadSearchEngine
     {
         /// <summary>

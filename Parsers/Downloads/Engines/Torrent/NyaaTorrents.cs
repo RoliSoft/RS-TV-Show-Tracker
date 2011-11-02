@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping NyaaTorrents.
     /// </summary>
-    [Parser("2011-09-18 11:22 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-18 11:22 AM"), TestFixture]
     public class NyaaTorrents : DownloadSearchEngine
     {
         /// <summary>

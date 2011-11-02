@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping TheEmpire.
     /// </summary>
-    [Parser("2011-09-01 3:48 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-01 3:48 PM"), TestFixture]
     public class TheEmpire : DownloadSearchEngine
     {
         /// <summary>

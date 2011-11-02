@@ -409,6 +409,18 @@
                             <ListView Name="pluginsListView" Margin="0,0,5,0" Padding="-2,-1" Height="417">
                                 <ListView.View>
                                     <GridView AllowsColumnReorder="False">
+                                        <GridViewColumn Width="30">
+                                            <GridViewColumnHeader>
+                                                <Image Source="/RSTVShowTracker;component/Images/pubclass.gif" Margin="0,0,0,-2" Height="16" Width="16" />
+                                            </GridViewColumnHeader>
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid Width="30" Margin="0" HorizontalAlignment="Center">
+                                                        <Image Source="{Binding Icon2}" ToolTip="{Binding Type}" Height="16" Width="16" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
                                         <GridViewColumn Width="200">
                                             <GridViewColumnHeader Content="Name" />
                                             <GridViewColumn.CellTemplate>
@@ -420,13 +432,11 @@
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Width="45">
-                                            <GridViewColumnHeader Content="Type" />
+                                        <GridViewColumn>
+                                            <GridViewColumnHeader Content="Version" />
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Grid Width="45" Margin="0" HorizontalAlignment="Center">
-                                                        <Image Source="{Binding Icon2}" ToolTip="{Binding Type}" Height="16" Width="16" />
-                                                    </Grid>
+                                                    <TextBlock Text="{Binding Version}" TextAlignment="Center" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>

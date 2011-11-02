@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping NZB.su.
     /// </summary>
-    [Parser("2011-09-20 12:16 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-20 12:16 PM"), TestFixture]
     public class NZBsu : DownloadSearchEngine
     {
         /// <summary>

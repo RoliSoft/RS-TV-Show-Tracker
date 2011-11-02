@@ -1010,6 +1010,39 @@
         }
 
         /// <summary>
+        /// Converts a date and time to a version number.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <param name="major">The major version number to use.</param>
+        /// <param name="minor">The minor version number to use.</param>
+        /// <returns>
+        /// A date-based version number.
+        /// </returns>
+        public static Version DateTimeToVersion(DateTime date, int major = 2, int minor = 0)
+        {
+            var diff = date - new DateTime(2000, 1, 1, 1, 0, 0);
+
+            return new Version(
+                major,
+                minor,
+                (int)Math.Floor(diff.TotalDays),
+                (int)Math.Round((diff.Subtract(TimeSpan.FromDays(Math.Floor(diff.TotalDays)))).TotalSeconds / 2)
+            );
+        }
+
+        /// <summary>
+        /// Converts a version number to a date and time.
+        /// </summary>
+        /// <param name="version">The date-based version number.</param>
+        /// <returns>
+        /// Date and time extracted from the versio number.
+        /// </returns>
+        public static DateTime VersionToDateTime(Version version)
+        {
+            return new DateTime(2000, 1, 1, 1, 0, 0).AddDays(version.Build).AddSeconds(version.Revision * 2);
+        }
+
+        /// <summary>
         /// A custom encoding to denote Base64-encoded content.
         /// </summary>
         public class Base64Encoding : ASCIIEncoding

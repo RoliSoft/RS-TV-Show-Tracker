@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping ev0.in.
     /// </summary>
-    [Parser("2011-09-23 1:57 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-23 1:57 AM"), TestFixture]
     public class ev0 : DownloadSearchEngine
     {
         /// <summary>

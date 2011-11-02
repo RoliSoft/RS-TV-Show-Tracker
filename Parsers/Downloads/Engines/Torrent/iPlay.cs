@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping iPlay.
     /// </summary>
-    [Parser("2011-08-16 15:39 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 15:39 PM"), TestFixture]
     public class iPlay : DownloadSearchEngine
     {
         /// <summary>

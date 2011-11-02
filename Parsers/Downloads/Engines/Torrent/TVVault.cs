@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping TV Vault.
     /// </summary>
-    [Parser("2011-08-16 16:31 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 16:31 PM"), TestFixture]
     public class TVVault : DownloadSearchEngine
     {
         /// <summary>

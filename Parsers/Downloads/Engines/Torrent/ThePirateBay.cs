@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides support for scraping The Pirate Bay.
     /// </summary>
-    [Parser("2011-02-13 4:46 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-02-13 4:46 PM"), TestFixture]
     public class ThePirateBay : DownloadSearchEngine
     {
         /// <summary>

@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping NZBs'R'US.
     /// </summary>
-    [Parser("2011-09-20 7:47 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-20 7:47 PM"), TestFixture]
     public class NZBsRus : DownloadSearchEngine
     {
         /// <summary>

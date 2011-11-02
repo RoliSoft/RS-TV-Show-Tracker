@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping TorrentLeech.
     /// </summary>
-    [Parser("2011-08-16 16:30 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 16:30 PM"), TestFixture]
     public class TorrentLeech : DownloadSearchEngine
     {
         /// <summary>

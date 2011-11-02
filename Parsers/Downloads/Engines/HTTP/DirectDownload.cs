@@ -14,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping DirectDownload.tv.
     /// </summary>
-    [Parser("2011-03-26 4:56 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-03-26 4:56 PM"), TestFixture]
     public class DirectDownload : DownloadSearchEngine
     {
         /// <summary>

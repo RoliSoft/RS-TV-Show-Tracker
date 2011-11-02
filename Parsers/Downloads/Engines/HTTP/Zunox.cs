@@ -14,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping Zunox.
     /// </summary>
-    [Parser("2011-03-26 3:51 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-03-26 3:51 PM"), TestFixture]
     public class Zunox : DownloadSearchEngine
     {
         /// <summary>

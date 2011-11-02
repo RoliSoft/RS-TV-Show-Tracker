@@ -641,8 +641,6 @@
 
             foreach (var engine in AutoDownloader.SearchEngines.OrderBy(engine => AutoDownloader.Parsers.IndexOf(engine.Name)))
             {
-                var revdiff = engine.GetAttribute<ParserAttribute>().Revision - new DateTime(2000, 1, 1, 1, 0, 0);
-
                 DownloadsListViewItemCollection.Add(new DownloadsListViewItem
                     {
                         Enabled = AutoDownloader.Actives.Contains(engine.Name),
@@ -655,7 +653,7 @@
                                       ? "/RSTVShowTracker;component/Images/cookie.png"
                                       : "/RSTVShowTracker;component/Images/cross.png"
                                   : "/RSTVShowTracker;component/Images/na.png",
-                        Version = "2.0." + Math.Floor(revdiff.TotalDays).ToString("0000") + "." + ((revdiff.Subtract(TimeSpan.FromDays(Math.Floor(revdiff.TotalDays)))).TotalSeconds / 2).ToString("00000")
+                        Version = engine.GetAttribute<ParserAttribute>().Version.ToString().PadRight(14, '0')
                     });
             }
 
@@ -1228,13 +1226,28 @@
                     i++;
                 }
 
+                var ver  = string.Empty;
+                var attr = engine.GetAttribute<ParserAttribute>();
+
+                if (attr != null && attr.Version != null)
+                {
+                    ver = attr.Version.ToString();
+                }
+                else
+                {
+                    ver = type.Assembly.GetName(false).Version.ToString();
+                }
+
+                ver = ver.PadRight(14, '0');
+
                 PluginsListViewItemCollection.Add(new PluginsListViewItem
                     {
-                        Icon  = engine.Icon,
-                        Name  = engine.Name,
-                        Type  = parent,
-                        Icon2 = picon,
-                        File  = type.Assembly.GetName(false).Name
+                        Icon    = engine.Icon,
+                        Name    = engine.Name,
+                        Type    = parent,
+                        Icon2   = picon,
+                        Version = ver,
+                        File    = type.Assembly.ManifestModule.Name
                     });
             }
         }

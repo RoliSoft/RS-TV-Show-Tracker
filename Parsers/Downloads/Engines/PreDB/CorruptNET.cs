@@ -15,7 +15,7 @@
     /// <summary>
     /// Provides support for scraping CorruptNET PreDB.
     /// </summary>
-    [Parser("2011-09-24 12:58 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-24 12:58 PM"), TestFixture]
     public class CorruptNET : DownloadSearchEngine
     {
         /// <summary>

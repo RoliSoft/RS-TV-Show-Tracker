@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseBB.
     /// </summary>
-    [Parser("2011-10-01 6:33 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-10-01 6:33 AM"), TestFixture]
     public class ReleaseBB : DownloadSearchEngine
     {
         /// <summary>

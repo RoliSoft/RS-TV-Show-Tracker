@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping Tokyo Toshokan.
     /// </summary>
-    [Parser("2011-09-18 11:31 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-18 11:31 AM"), TestFixture]
     public class TokyoToshokan : DownloadSearchEngine
     {
         /// <summary>

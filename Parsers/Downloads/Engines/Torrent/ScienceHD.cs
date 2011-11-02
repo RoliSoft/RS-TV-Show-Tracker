@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping ScienceHD.
     /// </summary>
-    [Parser("2011-08-16 16:15 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 16:15 PM"), TestFixture]
     public class ScienceHD : DownloadSearchEngine
     {
         /// <summary>

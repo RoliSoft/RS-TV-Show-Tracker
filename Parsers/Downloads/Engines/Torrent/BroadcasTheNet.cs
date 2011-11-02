@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping BroadcasTheNet.
     /// </summary>
-    [Parser("2011-08-16 16:09 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 16:09 PM"), TestFixture]
     public class BroadcasTheNet : DownloadSearchEngine
     {
         /// <summary>

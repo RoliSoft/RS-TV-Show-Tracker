@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping isoHunt.
     /// </summary>
-    [Parser("2011-04-17 6:42 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-04-17 6:42 PM"), TestFixture]
     public class IsoHunt : DownloadSearchEngine
     {
         /// <summary>

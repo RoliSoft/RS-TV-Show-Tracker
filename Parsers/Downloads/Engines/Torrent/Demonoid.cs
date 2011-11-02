@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping Demonoid.
     /// </summary>
-    [Parser("2011-04-17 7:08 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-04-17 7:08 PM"), TestFixture]
     public class Demonoid : DownloadSearchEngine
     {
         /// <summary>

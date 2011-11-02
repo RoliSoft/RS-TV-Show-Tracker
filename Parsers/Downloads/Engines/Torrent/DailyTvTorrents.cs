@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for Daily TV Torrents' API.
     /// </summary>
-    [Parser("2011-09-20 9:00 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-20 9:00 PM"), TestFixture]
     public class DailyTvTorrents : DownloadSearchEngine
     {
         /// <summary>

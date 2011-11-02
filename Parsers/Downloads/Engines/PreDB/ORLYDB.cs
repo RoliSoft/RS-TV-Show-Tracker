@@ -8,7 +8,7 @@
     /// <summary>
     /// Provides support for scraping ReleaseLog.
     /// </summary>
-    [Parser("2011-09-24 1:39 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-24 1:39 PM"), TestFixture]
     public class ORLYDB : DownloadSearchEngine
     {
         /// <summary>

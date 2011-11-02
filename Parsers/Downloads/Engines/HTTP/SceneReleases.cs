@@ -15,7 +15,7 @@
     /// <summary>
     /// Provides support for scraping SceneReleases.
     /// </summary>
-    [Parser("2011-09-22 11:51 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-22 11:51 PM"), TestFixture]
     public class SceneReleases : DownloadSearchEngine
     {
         /// <summary>

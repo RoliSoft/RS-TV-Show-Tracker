@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping Newzbin.
     /// </summary>
-    [Parser("2011-09-19 12:08 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-19 12:08 AM"), TestFixture]
     public class Newzbin : DownloadSearchEngine
     {
         /// <summary>

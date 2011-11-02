@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping UKNova.
     /// </summary>
-    [Parser("2011-08-16 16:50 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-08-16 16:50 PM"), TestFixture]
     public class UKNova : DownloadSearchEngine
     {
         /// <summary>

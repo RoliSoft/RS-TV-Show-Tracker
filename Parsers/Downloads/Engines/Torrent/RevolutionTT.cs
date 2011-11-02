@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping RevolutionTT.
     /// </summary>
-    [Parser("2011-09-24 2:34 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-24 2:34 AM"), TestFixture]
     public class RevolutionTT : DownloadSearchEngine
     {
         /// <summary>

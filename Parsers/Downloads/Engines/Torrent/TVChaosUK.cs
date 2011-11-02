@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping TV Chaos UK.
     /// </summary>
-    [Parser("2011-09-12 16:35 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-12 16:35 PM"), TestFixture]
     public class TVChaosUK : DownloadSearchEngine
     {
         /// <summary>

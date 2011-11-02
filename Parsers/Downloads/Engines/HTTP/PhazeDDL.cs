@@ -14,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping PhazeDDL.
     /// </summary>
-    [Parser("2011-03-26 4:32 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-03-26 4:32 PM"), TestFixture]
     public class PhazeDDL : DownloadSearchEngine
     {
         /// <summary>

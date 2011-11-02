@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers
 {
     using System;
-    using System.Reflection;
 
     /// <summary>
     /// Provides metadata information for the parser engines.
@@ -14,40 +13,53 @@
         /// </summary>
         /// <value>The developer.</value>
         public string Developer { get; set; }
-        
+
         /// <summary>
-        /// Gets or sets the revision date.
+        /// Gets or sets the version number.
         /// </summary>
-        /// <value>The revision date.</value>
-        public DateTime Revision { get; set; }
+        /// <value>The version number.</value>
+        public Version Version { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParserAttribute"/> class.
         /// </summary>
         public ParserAttribute()
         {
-            Developer = ((AssemblyCompanyAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), true)[0]).Company;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserAttribute"/> class.
-        /// </summary>
-        /// <param name="revision">The revision date.</param>
-        public ParserAttribute(string revision)
-        {
-            Developer = ((AssemblyCompanyAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), true)[0]).Company;
-            Revision  = DateTime.Parse(revision);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParserAttribute"/> class.
         /// </summary>
         /// <param name="developer">The developer.</param>
-        /// <param name="revision">The revision date.</param>
+        /// <param name="revision">The version number or date time.</param>
         public ParserAttribute(string developer, string revision)
         {
             Developer = developer;
-            Revision  = DateTime.Parse(revision);
+            Version   = ParseRevision(revision);
+        }
+
+        /// <summary>
+        /// Parses the revision string in the attribute.
+        /// </summary>
+        /// <param name="revision">The revision containing a version number or a date time.</param>
+        /// <returns>
+        /// Extracted version number.
+        /// </returns>
+        private Version ParseRevision(string revision)
+        {
+            Version ver;
+            if (Version.TryParse(revision, out ver))
+            {
+                return ver;
+            }
+
+            DateTime dt;
+            if (DateTime.TryParse(revision, out dt))
+            {
+                return Utils.DateTimeToVersion(dt);
+            }
+
+            return null;
         }
     }
 }

@@ -12,7 +12,7 @@
     /// <summary>
     /// Provides support for scraping TheBox.
     /// </summary>
-    [Parser("2011-09-01 3:42 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-01 3:42 PM"), TestFixture]
     public class TheBox : DownloadSearchEngine
     {
         /// <summary>

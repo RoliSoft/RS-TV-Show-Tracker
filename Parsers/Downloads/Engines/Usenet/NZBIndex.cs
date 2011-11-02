@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping NZBIndex.
     /// </summary>
-    [Parser("2011-09-20 8:39 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-20 8:39 PM"), TestFixture]
     public class NZBIndex : DownloadSearchEngine
     {
         /// <summary>

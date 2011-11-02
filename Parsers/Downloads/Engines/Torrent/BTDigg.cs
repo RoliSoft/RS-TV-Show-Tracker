@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping BTDigg.
     /// </summary>
-    [Parser("2011-07-19 12:00 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-07-19 12:00 AM"), TestFixture]
     public class BTDigg : DownloadSearchEngine
     {
         /// <summary>

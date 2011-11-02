@@ -15,7 +15,7 @@
     /// <summary>
     /// Provides support for scraping Mukki.org.
     /// </summary>
-    [Parser("2011-10-01 6:51 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-10-01 6:51 AM"), TestFixture]
     public class Mukki : DownloadSearchEngine
     {
         /// <summary>

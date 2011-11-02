@@ -10,7 +10,7 @@
     /// <summary>
     /// Provides support for scraping TV-Scene.
     /// </summary>
-    [Parser("2011-09-12 17:25 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-12 17:25 PM"), TestFixture]
     public class TVScene : DownloadSearchEngine
     {
         /// <summary>

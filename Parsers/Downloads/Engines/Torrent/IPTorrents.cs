@@ -13,7 +13,7 @@
     /// <summary>
     /// Provides support for scraping IPTorrents.
     /// </summary>
-    [Parser("2011-10-30 18:15 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-10-30 18:15 PM"), TestFixture]
     public class IPTorrents : DownloadSearchEngine
     {
         /// <summary>

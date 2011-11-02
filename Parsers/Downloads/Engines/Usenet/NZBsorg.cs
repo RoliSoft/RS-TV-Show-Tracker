@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping NZBs.org.
     /// </summary>
-    [Parser("2011-09-25 3:36 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-25 3:36 PM"), TestFixture]
     public class NZBsorg : DownloadSearchEngine
     {
         /// <summary>

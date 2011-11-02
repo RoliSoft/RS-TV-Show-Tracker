@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping NZBMatrix.
     /// </summary>
-    [Parser("2011-09-18 11:56 AM"), TestFixture]
+    [Parser("RoliSoft", "2011-09-18 11:56 AM"), TestFixture]
     public class NZBMatrix : DownloadSearchEngine
     {
         /// <summary>
