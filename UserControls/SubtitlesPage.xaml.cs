@@ -22,10 +22,17 @@
     public partial class SubtitlesPage
     {
         /// <summary>
-        /// Gets or sets the search engines loaded in this application.
+        /// Gets the search engines loaded in this application.
         /// </summary>
         /// <value>The search engines.</value>
-        public static IEnumerable<SubtitleSearchEngine> SearchEngines { get; set; }
+        public static IEnumerable<SubtitleSearchEngine> SearchEngines
+        {
+            get
+            {
+                return Extensibility.GetNewInstances<SubtitleSearchEngine>()
+                                    .OrderBy(engine => engine.Name);
+            }
+        }
 
         /// <summary>
         /// Gets the search engines activated in this application.
@@ -82,9 +89,6 @@
         /// </summary>
         static SubtitlesPage()
         {
-            SearchEngines = Extensibility.GetNewInstances<SubtitleSearchEngine>()
-                            .OrderBy(engine => engine.Name);
-
             Actives     = Settings.Get<List<string>>("Active Subtitle Sites");
             ActiveLangs = Settings.Get<List<string>>("Active Subtitle Languages");
         }

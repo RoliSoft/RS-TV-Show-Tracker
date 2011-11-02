@@ -89,22 +89,24 @@
         /// </returns>
         public static IEnumerable<Type> GetDerivedTypes<T>(bool inclAbstract = false, bool inclInternal = true, bool inclExternal = true)
         {
-            var types = new List<Type>();
-
             if (inclInternal)
             {
-                types.AddRange(GetDerivedTypesFromAssembly(Assembly.GetExecutingAssembly(), typeof(T), inclAbstract));
+                foreach (var type in GetDerivedTypesFromAssembly(Assembly.GetExecutingAssembly(), typeof(T), inclAbstract))
+                {
+                    yield return type;
+                }
             }
 
             if (inclExternal)
             {
                 foreach (var asm in Plugins)
                 {
-                    types.AddRange(GetDerivedTypesFromAssembly(asm, typeof(T), inclAbstract));
+                    foreach (var type in GetDerivedTypesFromAssembly(asm, typeof(T), inclAbstract))
+                    {
+                        yield return type;
+                    }
                 }
             }
-
-            return types;
         }
 
         /// <summary>
@@ -119,14 +121,10 @@
         /// </returns>
         public static IEnumerable<T> GetNewInstances<T>(bool inclAbstract = false, bool inclInternal = true, bool inclExternal = true)
         {
-            var objects = new List<T>();
-
             foreach (var type in GetDerivedTypes<T>(inclAbstract, inclInternal, inclExternal))
             {
-                objects.Add((T)Activator.CreateInstance(type));
+                yield return (T)Activator.CreateInstance(type);
             }
-
-            return objects;
         }
     }
 }

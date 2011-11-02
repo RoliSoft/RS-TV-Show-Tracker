@@ -18,10 +18,16 @@
     public static class AutoDownloader
     {
         /// <summary>
-        /// Gets or sets the search engines loaded in this application.
+        /// Gets the search engines loaded in this application.
         /// </summary>
         /// <value>The search engines.</value>
-        public static IEnumerable<DownloadSearchEngine> SearchEngines { get; set; }
+        public static IEnumerable<DownloadSearchEngine> SearchEngines
+        {
+            get
+            {
+                return Extensibility.GetNewInstances<DownloadSearchEngine>();
+            }
+        }
 
         /// <summary>
         /// Gets the search engines activated in this application.
@@ -97,8 +103,6 @@
         /// </summary>
         public static void LoadParsers()
         {
-            SearchEngines = Extensibility.GetNewInstances<DownloadSearchEngine>();
-
             Actives = Settings.Get<List<string>>("Active Trackers");
             Parsers = Settings.Get<List<string>>("Tracker Order");
             Parsers.AddRange(SearchEngines
