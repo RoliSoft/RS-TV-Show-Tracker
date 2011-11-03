@@ -129,9 +129,11 @@
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="Extensibility.cs" />
     <Compile Include="HttpToSocks.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\FreshWap.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Mukki.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ev0.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\First.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\IPTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\SceneAccess.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\RevolutionTT.cs" />

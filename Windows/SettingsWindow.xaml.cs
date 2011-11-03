@@ -903,7 +903,7 @@
                     try
                     {
                         var src = new Bing();
-                        var res = new List<Parsers.WebSearch.SearchResult>();
+                        var res = new List<SearchResult>();
                         res.AddRange(src.Search(uri.Host + " intitle:proxy"));
 
                         if (res.Count == 0)

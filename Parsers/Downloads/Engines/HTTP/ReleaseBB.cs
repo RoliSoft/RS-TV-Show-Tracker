@@ -104,7 +104,7 @@
 
                     foreach (var site in sites)
                     {
-                        if (Regex.IsMatch(site.InnerText, @"(NFO|Torrent Search)"))
+                        if (Regex.IsMatch(site.InnerText, @"(NFO|Torrr?ent Search)"))
                         {
                             continue;
                         }
