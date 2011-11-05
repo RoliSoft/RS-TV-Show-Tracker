@@ -82,6 +82,11 @@
 
             foreach (var node in subs)
             {
+                if (Regex.IsMatch(node.GetTextValue("../.."), @"\d{1,3}(?:\.\d{1,2})?% Completed"))
+                {
+                    continue;
+                }
+
                 var sub = new Subtitle(this);
 
                 sub.Corrected   = node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null;
