@@ -76,7 +76,6 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>.\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Windows.Shell">
       <HintPath>.\Microsoft.Windows.Shell.dll</HintPath>
     </Reference>
@@ -91,6 +90,7 @@
     </Reference>
     <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="protobuf-net, Version=2.0.0.431, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL" />
+    <Reference Include="SharpCompress, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Starksoft.Net.Proxy, Version=1.0.130.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -652,7 +652,6 @@
     <None Include="Dependencies\CookComputing.XmlRpcV2.dll" />
     <None Include="Dependencies\handle.exe" />
     <None Include="Dependencies\HtmlAgilityPack.dll" />
-    <None Include="Dependencies\Ionic.Zip.Reduced.dll" />
     <None Include="Dependencies\Microsoft.Windows.Shell.dll" />
     <None Include="Dependencies\Microsoft.WindowsAPICodePack.dll" />
     <None Include="Dependencies\Microsoft.WindowsAPICodePack.Shell.dll" />
@@ -742,6 +741,7 @@
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Hammock.ClientProfile.dll" />
     <Content Include="Dependencies\protobuf-net.dll" />
+    <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
     <Resource Include="Images\pubclass.gif" />
     <Resource Include="Images\dll.gif" />

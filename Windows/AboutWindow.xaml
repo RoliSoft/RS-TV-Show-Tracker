@@ -196,7 +196,7 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://dotnetzip.codeplex.com/">DotNetZip</Hyperlink>
+                                <Hyperlink NavigateUri="http://sharpcompress.codeplex.com/">SharpCompress</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>

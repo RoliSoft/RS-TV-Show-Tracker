@@ -7,14 +7,14 @@
     using System.Linq;
     using System.Threading;
 
-    using Ionic.Zip;
-
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.FileNames;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
+
+    using SharpCompress.Archive;
 
     using VistaControls.TaskDialog;
 
@@ -30,6 +30,17 @@
         private Subtitle _link;
         private string _show, _episode;
         private bool _play;
+
+        /// <summary>
+        /// Gets a list of supported archive file extensions.
+        /// </summary>
+        public static string[] SupportedArchives
+        {
+            get
+            {
+                return new[] { ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2" };
+            }
+        }
 
         #region Download subtitle
         /// <summary>
@@ -332,18 +343,19 @@
         /// <param name="subtitle">The original file name of the subtitle.</param>
         private void NearVideoFinishMove(string video, string temp, string subtitle)
         {
-            if (new FileInfo(subtitle).Extension == ".zip")
+            if (SupportedArchives.Contains(new FileInfo(subtitle).Extension.ToLower()))
             {
-                var zip = ZipFile.Read(temp);
+                var archive = ArchiveFactory.Open(temp);
+                var files   = archive.Entries.Where(f => !f.IsDirectory).ToList();
 
-                if (zip.Entries.Count == 1)
+                if (files.Count == 1)
                 {
                     using (var mstream = new MemoryStream())
                     {
-                        subtitle = Utils.SanitizeFileName(zip.Entries.First().FileName);
-                        zip.Entries.First().Extract(mstream);
+                        subtitle = Utils.SanitizeFileName(files.First().FilePath.Split('\\').Last());
+                        files.First().WriteTo(mstream);
                         
-                        try { zip.Dispose();     } catch { }
+                        try { archive.Dispose(); } catch { }
                         try { File.Delete(temp); } catch { }
                         File.WriteAllBytes(temp, mstream.ToArray());
                     }
@@ -356,22 +368,20 @@
                             Instruction     = _link.Release,
                             Content         = "The downloaded subtitle was a ZIP package with more than one files.\r\nSelect the matching subtitle file to extract it from the package:",
                             CommonButtons   = TaskDialogButton.Cancel,
-                            CustomButtons   = new CustomButton[zip.Count],
+                            CustomButtons   = new CustomButton[files.Count],
                             UseCommandLinks = true
                         };
 
                     dlsnvtd.ButtonClick += (s, c) =>
                         {
-                            if (c.ButtonID < zip.Count)
+                            if (c.ButtonID < files.Count)
                             {
                                 using (var mstream = new MemoryStream())
                                 {
-                                    var ent = zip.Entries.ToList();
+                                    subtitle = Utils.SanitizeFileName(files[c.ButtonID].FilePath.Split('\\').Last());
+                                    files[c.ButtonID].WriteTo(mstream);
 
-                                    subtitle = Utils.SanitizeFileName(ent[c.ButtonID].FileName);
-                                    ent[c.ButtonID].Extract(mstream);
-
-                                    try { zip.Dispose();     } catch { }
+                                    try { archive.Dispose(); } catch { }
                                     try { File.Delete(temp); } catch { }
                                     File.WriteAllBytes(temp, mstream.ToArray());
                                 }
@@ -385,9 +395,9 @@
                         };
 
                     var i = 0;
-                    foreach (var c in zip.Entries)
+                    foreach (var c in files)
                     {
-                        dlsnvtd.CustomButtons[i] = new CustomButton(i, c.FileName + "\n" + Utils.GetFileSize(c.UncompressedSize) + "   –   " + c.LastModified);
+                        dlsnvtd.CustomButtons[i] = new CustomButton(i, c.FilePath + "\n" + Utils.GetFileSize(c.Size) + "   –   " + c.LastModifiedTime);
                         i++;
                     }
 
