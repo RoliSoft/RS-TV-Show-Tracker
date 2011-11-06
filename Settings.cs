@@ -76,7 +76,7 @@
 
             if (!Keys.ContainsKey("Active Subtitle Sites"))
             {
-                Keys["Active Subtitle Sites"] = Extensibility.GetNewInstances<SubtitleSearchEngine>(inclExternal: false)
+                Keys["Active Subtitle Sites"] = Extensibility.GetNewInstances<SubtitleSearchEngine>(inclExternal: false, inclScripts: false)
                                                 .Select(inst => inst.Name)
                                                 .ToList();
             }

@@ -1,4 +1,11 @@
-﻿namespace RoliSoft.TVShowTracker
+﻿[assembly: Microsoft.Scripting.Runtime.ExtensionType(typeof(System.DateTime), typeof(RoliSoft.TVShowTracker.Extensions))]
+[assembly: Microsoft.Scripting.Runtime.ExtensionType(typeof(System.TimeSpan), typeof(RoliSoft.TVShowTracker.Extensions))]
+[assembly: Microsoft.Scripting.Runtime.ExtensionType(typeof(System.Double), typeof(RoliSoft.TVShowTracker.Extensions))]
+[assembly: Microsoft.Scripting.Runtime.ExtensionType(typeof(System.String), typeof(RoliSoft.TVShowTracker.Extensions))]
+[assembly: Microsoft.Scripting.Runtime.ExtensionType(typeof(System.Xml.Linq.XContainer), typeof(RoliSoft.TVShowTracker.Extensions))]
+[assembly: Microsoft.Scripting.Runtime.ExtensionType(typeof(HtmlAgilityPack.HtmlNode), typeof(RoliSoft.TVShowTracker.Extensions))]
+
+namespace RoliSoft.TVShowTracker
 {
     using System;
     using System.Collections.ObjectModel;
@@ -735,6 +742,7 @@
         #endregion
 
         #region HtmlNode
+
         /// <summary>
         /// Extension method to HtmlNode to get the value of a tag or null if it doesn't exist.
         /// </summary>

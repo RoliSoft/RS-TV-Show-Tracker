@@ -653,7 +653,7 @@
                                       ? "/RSTVShowTracker;component/Images/cookie.png"
                                       : "/RSTVShowTracker;component/Images/cross.png"
                                   : "/RSTVShowTracker;component/Images/na.png",
-                        Version = engine.GetAttribute<ParserAttribute>().Version.ToString().PadRight(14, '0')
+                        Version = (engine.GetAttribute<ParserAttribute>() ?? new ParserAttribute() { Version = engine.GetType().Assembly.GetName(false).Version }).Version.ToString().PadRight(14, '0')
                     });
             }
 
