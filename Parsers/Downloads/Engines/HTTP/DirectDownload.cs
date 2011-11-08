@@ -2,11 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
-
-    using HtmlAgilityPack;
+    using System.Linq;
 
     using NUnit.Framework;
+
+    using Newtonsoft.Json;
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
@@ -14,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping DirectDownload.tv.
     /// </summary>
-    [Parser("RoliSoft", "2011-03-26 4:56 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-11-08 6:05 PM"), TestFixture]
     public class DirectDownload : DownloadSearchEngine
     {
         /// <summary>
@@ -84,45 +84,89 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "ajaxSearch.php?keyword=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//dl");
+            var links = Utils.GetJSON<List<ReleaseInfo>>(Site + "api.php?keyword=" + Uri.EscapeUriString(query));
 
-            if (links == null)
+            if (links.Count == 0)
             {
                 yield break;
             }
 
-            foreach (var node in links)
+            foreach (var item in links)
             {
-                var release = HtmlEntity.DeEntitize(node.GetTextValue("dd[@class='title']/strong")).Trim();
-                var quality = FileNames.Parser.ParseQuality(release);
-                var size    = Regex.Match(node.GetTextValue("dd[@class='title']"), @"(\d+\.\d+ MB)").Groups[1].Value;
-                var sites   = node.SelectNodes("dd[@class='links']/a");
-
-                for (var i = 0; i < sites.Count; i++)
+                foreach (var site in item.Links)
                 {
                     var link = new Link(this);
 
-                    link.Release = release;
-                    link.InfoURL = Site + "s/" + release;
-                    link.FileURL = sites[i].GetAttributeValue("href");
-                    link.Quality = quality;
-                    link.Size    = size;
-                    link.Infos   = Regex.Replace(sites[i].GetNodeAttributeValue("img", "title"), @"Download (?:file \d+ )?on ", string.Empty).ToLower().ToUppercaseFirst();
-
-                    var first = new Uri(sites[i].GetAttributeValue("href"));
-
-                tryNext:
-                    if (i + 1 < sites.Count && first.Host == new Uri(sites[i + 1].GetAttributeValue("href")).Host)
-                    {
-                        i++;
-                        link.FileURL += "\0" + sites[i].GetAttributeValue("href");
-                        goto tryNext;
-                    }
+                    link.Release = item.Release;
+                    link.InfoURL = Site + "s/" + item.Release;
+                    link.FileURL = string.Join("\0", site.Values.First());
+                    link.Quality = FileNames.Parser.ParseQuality(item.Release);
+                    link.Size    = Utils.GetFileSize((long)(item.Size * 1048576));
+                    link.Infos   = site.Keys.First().ToLower().ToUppercaseFirst();
 
                     yield return link;
                 }
             }
+        }
+
+        /// <summary>
+        /// Represents the release information (name, size, download links, etc) of an episode.
+        /// </summary>
+        public class ReleaseInfo
+        {
+            /// <summary>
+            /// Gets or sets the release name.
+            /// </summary>
+            /// <value>
+            /// The release name.
+            /// </value>
+            [JsonProperty("release")]
+            public string Release { get; set; }
+
+            /// <summary>
+            /// Gets or sets the upload date of the release.
+            /// </summary>
+            /// <value>
+            /// The upload date of the release.
+            /// </value>
+            [JsonProperty("dateGMT")]
+            public DateTime Date { get; set; }
+
+            /// <summary>
+            /// Gets or sets the size of the release in MB.
+            /// </summary>
+            /// <value>
+            /// The size of the release in MB.
+            /// </value>
+            [JsonProperty("size")]
+            public double Size { get; set; }
+
+            /// <summary>
+            /// Gets or sets the quality of the release.
+            /// </summary>
+            /// <value>
+            /// The quality of the release.
+            /// </value>
+            [JsonProperty("quality")]
+            public string Quality { get; set; }
+
+            /// <summary>
+            /// Gets or sets the name of the show.
+            /// </summary>
+            /// <value>
+            /// The name of the show.
+            /// </value>
+            [JsonProperty("showName")]
+            public string ShowName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the URLs to the files hosted on various sites.
+            /// </summary>
+            /// <value>
+            /// The URLs to the files hosted on various sites.
+            /// </value>
+            [JsonProperty("links")]
+            public List<Dictionary<string, List<string>>> Links { get; set; }
         }
     }
 }

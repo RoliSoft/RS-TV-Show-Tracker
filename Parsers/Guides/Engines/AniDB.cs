@@ -70,7 +70,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = XDocument.Load("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
+            var list = Utils.GetXML("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
 
             foreach (var show in list.Descendants("anime"))
             {
@@ -111,8 +111,7 @@
         public override TVShow GetData(string id, string language = "en")
         {
             // XDocument will fail, because the response is gzipped; Utils.GetURL supports gzipped content
-            var req  = Utils.GetURL("http://api.anidb.net:9001/httpapi?request=anime&client=rstvshowtracker&clientver=2&protover=1&aid=" + id);
-            var info = XDocument.Load(new StringReader(req));
+            var info = Utils.GetXML("http://api.anidb.net:9001/httpapi?request=anime&client=rstvshowtracker&clientver=2&protover=1&aid=" + id);
             var show = new TVShow();
 
             try { show.Title = info.Descendants("title").Where(t => t.Attributes().First().Value == language).First().Value; }

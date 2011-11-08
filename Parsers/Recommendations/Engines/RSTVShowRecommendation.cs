@@ -79,7 +79,7 @@
         /// <returns>Recommended shows list.</returns>
         public override IEnumerable<RecommendedShow> GetList(IEnumerable<string> shows)
         {
-            var lab = XDocument.Load("http://lab.rolisoft.net/tv/api.php?key=" + _key + "&uid=" + _uuid + (_type == 1 ? "&genre=true" : String.Empty) + "&output=xml" + shows.Aggregate(String.Empty, (current, r) => current + ("&show[]=" + Uri.EscapeUriString(r))));
+            var lab = Utils.GetXML("http://lab.rolisoft.net/tv/api.php?key=" + _key + "&uid=" + _uuid + (_type == 1 ? "&genre=true" : String.Empty) + "&output=xml" + shows.Aggregate(String.Empty, (current, r) => current + ("&show[]=" + Uri.EscapeUriString(r))));
 
             return lab.Descendants("show")
                    .Select(item => new RecommendedShow

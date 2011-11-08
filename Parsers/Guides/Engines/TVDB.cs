@@ -96,7 +96,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = XDocument.Load("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(name)), language));
+            var list = Utils.GetXML("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(name)), language));
             var prev = new List<string>();
 
             foreach (var show in list.Descendants("Series"))
@@ -131,7 +131,7 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            var info = XDocument.Load("http://www.thetvdb.com/api/{0}/series/{1}/all/{2}.xml".FormatWith(Key, id, language));
+            var info = Utils.GetXML("http://www.thetvdb.com/api/{0}/series/{1}/all/{2}.xml".FormatWith(Key, id, language));
             var show = new TVShow();
 
             show.Title       = info.GetValue("SeriesName");

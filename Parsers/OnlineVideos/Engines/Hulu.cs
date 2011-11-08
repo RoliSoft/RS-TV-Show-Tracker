@@ -53,8 +53,7 @@
                 return g[0].URL;
             }
 
-            var xml  = Utils.GetURL("http://www.hulu.com/feed/search?fs=0&query=" + Uri.EscapeUriString("show:" + ShowNames.Parser.Normalize(name) + Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", " season:$1 episode:$2", RegexOptions.IgnoreCase) + " type:episode") + "&sort_by=relevance&st=1");
-            var xdoc = XDocument.Parse(xml);
+            var xdoc = Utils.GetXML("http://www.hulu.com/feed/search?fs=0&query=" + Uri.EscapeUriString("show:" + ShowNames.Parser.Normalize(name) + Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", " season:$1 episode:$2", RegexOptions.IgnoreCase) + " type:episode") + "&sort_by=relevance&st=1");
             var link = xdoc.XPathSelectElement("//item/link[1]");
 
             if (link != null)

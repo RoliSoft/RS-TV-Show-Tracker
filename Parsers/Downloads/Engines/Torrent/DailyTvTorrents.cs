@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for Daily TV Torrents' API.
     /// </summary>
-    [Parser("RoliSoft", "2011-09-20 9:00 PM"), TestFixture]
+    [Parser("RoliSoft", "2011-11-08 5:55 PM"), TestFixture]
     public class DailyTvTorrents : DownloadSearchEngine
     {
         /// <summary>
@@ -57,28 +57,23 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            List<TorrentInfo> links;
+            var parts = ShowNames.Parser.Split(query);
+                parts[0] = Regex.Replace(parts[0].ToLower(), @"[^a-z0-9\s]", string.Empty);
+                parts[0] = Regex.Replace(parts[0], @"\s+", "-");
+
+            if (parts.Length == 1)
+            {
+                yield break;
+            }
+
+            var links = new List<TorrentInfo>();
 
             try
             {
-                var parts = ShowNames.Parser.Split(query);
-                 parts[0] = Regex.Replace(parts[0].ToLower(), @"[^a-z0-9\s]", string.Empty);
-                 parts[0] = Regex.Replace(parts[0], @"\s+", "-");
+                links = Utils.GetJSON<List<TorrentInfo>>("http://api.dailytvtorrents.org/1.0/torrent.getInfosAll?show_name=" + Uri.EscapeUriString(parts[0]) + "&episode_num=" + Uri.EscapeUriString(parts[1]));
+            } catch { }
 
-                 if (parts.Length == 1)
-                 {
-                     yield break;
-                 }
-
-                var json = Utils.GetURL("http://api.dailytvtorrents.org/1.0/torrent.getInfosAll?show_name=" +  Uri.EscapeUriString(parts[0]) + "&episode_num=" + Uri.EscapeUriString(parts[1]));
-                   links = JsonConvert.DeserializeObject<List<TorrentInfo>>(json);
-
-                if (links.Count == 0)
-                {
-                    yield break;
-                }
-            }
-            catch
+            if (links.Count == 0)
             {
                 yield break;
             }
