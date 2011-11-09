@@ -17,6 +17,7 @@
 
     using Microsoft.WindowsAPICodePack.Dialogs;
 
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
     using RoliSoft.TVShowTracker.Tables;
     using RoliSoft.TVShowTracker.TaskDialogs;
@@ -809,63 +810,30 @@
 
                 cm.Items.Add(sov);
 
-                // - Hulu
+                // - Engines
 
-                var hul    = new MenuItem();
-                hul.Header = "Hulu";
-                hul.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/hulu.png")) };
-                hul.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show.Name, nextep, show.Next.Substring(9));
+                var ovseidx = -1;
+                foreach (var ovse in Extensibility.GetNewInstances<OnlineVideoSearchEngine>().OrderBy(ovse => ovse.Index))
+                {
+                    if ((ovseidx - ovse.Index) != -1)
+                    {
+                        sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+                    }
 
-                sov.Items.Add(hul);
+                    ovseidx = ovse.Index;
 
-                // - iPlayer
+                    var ovmi    = new MenuItem();
+                    ovmi.Tag    = ovse;
+                    ovmi.Header = ovse.Name;
+                    ovmi.Icon   = new Image { Source = new BitmapImage(new Uri(ovse.Icon)) };
+                    ovmi.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog((OnlineVideoSearchEngine)ovmi.Tag).Search(dbep);
+                    sov.Items.Add(ovmi);
+                }
 
-                var ipl    = new MenuItem();
-                ipl.Header = "iPlayer";
-                ipl.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/bbc.png")) };
-                ipl.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show.Name, nextep);
-
-                sov.Items.Add(ipl);
-
-                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
-
-                // - iTunes
-
-                var itu    = new MenuItem();
-                itu.Header = "iTunes";
-                itu.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/apple.png")) };
-                itu.Click += (s, r) => ITunesClick(show.Name, nextep);
-
-                sov.Items.Add(itu);
-
-                // - Amazon
-
-                var amz    = new MenuItem();
-                amz.Header = "Amazon Instant Video";
-                amz.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/amazon.png")) };
-                amz.Click += (s, r) => AmazonClick(show.Name, nextep);
-
-                sov.Items.Add(amz);
-
-                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
-
-                // - SideReel
-
-                var srs    = new MenuItem();
-                srs.Header = "SideReel";
-                srs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sidereel.png")) };
-                srs.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show.Name, nextep);
-
-                sov.Items.Add(srs);
-
-                // - Tube+
-
-                var tbp    = new MenuItem();
-                tbp.Header = "Tube+";
-                tbp.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/tubeplus.png")) };
-                tbp.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<TubePlus>().Search(show.Name, nextep);
-
-                sov.Items.Add(tbp);
+                if (ovseidx != -1)
+                {
+                    sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+                }
 
                 // - Google search
 
@@ -990,63 +958,30 @@
 
                 cm.Items.Add(sov);
 
-                // - Hulu
+                // - Engines
 
-                var hul    = new MenuItem();
-                hul.Header = "Hulu";
-                hul.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/hulu.png")) };
-                hul.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(show.Name, lastep, Regex.Replace(show.Title.Substring(9), " · .+", string.Empty));
+                var ovseidx = -1;
+                foreach (var ovse in Extensibility.GetNewInstances<OnlineVideoSearchEngine>().OrderBy(ovse => ovse.Index))
+                {
+                    if ((ovseidx - ovse.Index) != -1)
+                    {
+                        sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+                    }
 
-                sov.Items.Add(hul);
+                    ovseidx = ovse.Index;
 
-                // - iPlayer
+                    var ovmi    = new MenuItem();
+                    ovmi.Tag    = ovse;
+                    ovmi.Header = ovse.Name;
+                    ovmi.Icon   = new Image { Source = new BitmapImage(new Uri(ovse.Icon)) };
+                    ovmi.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog((OnlineVideoSearchEngine)ovmi.Tag).Search(dbep2);
+                    sov.Items.Add(ovmi);
+                }
 
-                var ipl    = new MenuItem();
-                ipl.Header = "iPlayer";
-                ipl.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/bbc.png")) };
-                ipl.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(show.Name, lastep);
-
-                sov.Items.Add(ipl);
-
-                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
-
-                // - iTunes
-
-                var itu    = new MenuItem();
-                itu.Header = "iTunes";
-                itu.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/apple.png")) };
-                itu.Click += (s, r) => ITunesClick(show.Name, lastep);
-
-                sov.Items.Add(itu);
-
-                // - Amazon
-
-                var amz    = new MenuItem();
-                amz.Header = "Amazon Instant Video";
-                amz.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/amazon.png")) };
-                amz.Click += (s, r) => AmazonClick(show.Name, lastep);
-
-                sov.Items.Add(amz);
-
-                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
-
-                // - SideReel
-
-                var srs    = new MenuItem();
-                srs.Header = "SideReel";
-                srs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sidereel.png")) };
-                srs.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(show.Name, lastep);
-
-                sov.Items.Add(srs);
-
-                // - Tube+
-
-                var tbp    = new MenuItem();
-                tbp.Header = "Tube+";
-                tbp.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/tubeplus.png")) };
-                tbp.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog<TubePlus>().Search(show.Name, lastep);
-
-                sov.Items.Add(tbp);
+                if (ovseidx != -1)
+                {
+                    sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+                }
 
                 // - Google search
 

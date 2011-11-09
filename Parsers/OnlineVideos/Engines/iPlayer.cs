@@ -2,9 +2,9 @@
 {
     using System;
     using System.Linq;
-    using System.Text.RegularExpressions;
 
     using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+    using RoliSoft.TVShowTracker.Tables;
 
     /// <summary>
     /// Provides support for searching videos on BBC iPlayer.
@@ -36,15 +36,40 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>
+        /// The icon location.
+        /// </value>
+        public override string Icon
+        {
+            get
+            {
+                return "pack://application:,,,/RSTVShowTracker;component/Images/bbc.png";
+            }
+        }
+
+        /// <summary>
+        /// Gets a number representing where should the engine be placed in the list.
+        /// </summary>
+        public override int Index
+        {
+            get
+            {
+                return 1;
+            }
+        }
+
+        /// <summary>
         /// Searches for videos on BBC iPlayer.
         /// </summary>
-        /// <param name="name">The name of the show.</param>
-        /// <param name="episode">The episode number.</param>
-        /// <param name="extra">This field is not used here.</param>
-        /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
-        public override string Search(string name, string episode, object extra = null)
+        /// <param name="ep">The episode.</param>
+        /// <returns>
+        /// URL of the video.
+        /// </returns>
+        public override string Search(Episode ep)
         {
-            var g = new Google().Search("intitle:{0} intitle:\"{1}\" site:bbc.co.uk/iplayer/episode/".FormatWith(name, Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase))).ToList();
+            var g = new Google().Search("intitle:{0} intitle:\"Series {1} Episode {2}\" site:bbc.co.uk/iplayer/episode/".FormatWith(ep.Show.Name, ep.Season, ep.Number)).ToList();
 
             if (g.Count != 0)
             {
@@ -52,7 +77,7 @@
             }
             else
             {
-                throw new OnlineVideoNotFoundException("No videos could be found on iPlayer using Google." + Environment.NewLine + "You can try to use iPlayer's internal search engine.", "Open iPlayer search page", "http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(name + " " + Regex.Replace(episode, "S0?([0-9]{1,2})E0?([0-9]{1,2})", "Series $1 Episode $2", RegexOptions.IgnoreCase)));
+                throw new OnlineVideoNotFoundException("No videos could be found on iPlayer using Google." + Environment.NewLine + "You can try to use iPlayer's internal search engine.", "Open iPlayer search page", "http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
             }
         }
     }

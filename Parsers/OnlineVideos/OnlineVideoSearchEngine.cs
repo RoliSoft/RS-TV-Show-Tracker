@@ -3,11 +3,18 @@
     using System;
     using System.Threading;
 
+    using RoliSoft.TVShowTracker.Tables;
+
     /// <summary>
     /// Provides methods to search for episodes on online services.
     /// </summary>
     public abstract class OnlineVideoSearchEngine : ParserEngine
     {
+        /// <summary>
+        /// Gets a number representing where should the engine be placed in the list.
+        /// </summary>
+        public abstract int Index { get; }
+
         /// <summary>
         /// Occurs when an online search is done.
         /// </summary>
@@ -21,11 +28,11 @@
         /// <summary>
         /// Searches for videos on the service.
         /// </summary>
-        /// <param name="name">The name of the show.</param>
-        /// <param name="episode">The episode number.</param>
-        /// <param name="extra">The extra information required for the selected parser.</param>
-        /// <returns>URL of the video.</returns>
-        public abstract string Search(string name, string episode, object extra = null);
+        /// <param name="ep">The episode.</param>
+        /// <returns>
+        /// URL of the video.
+        /// </returns>
+        public abstract string Search(Episode ep);
 
         /// <summary>
         /// Gets the search thread.
@@ -36,25 +43,23 @@
         /// <summary>
         /// Searches for videos on the service asynchronously.
         /// </summary>
-        /// <param name="name">The name of the show.</param>
-        /// <param name="episode">The episode number.</param>
-        /// <param name="extra">The extra information required for the selected parser.</param>
-        public void SearchAsync(string name, string episode, object extra = null)
+        /// <param name="ep">The episode.</param>
+        public void SearchAsync(Episode ep)
         {
             SearchThread = new Thread(() =>
                 {
                     try
                     {
-                        var url = Search(name, episode, extra);
-                        OnlineSearchDone.Fire(this, name + " " + episode, url);
+                        var url = Search(ep);
+                        OnlineSearchDone.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number), url);
                     }
                     catch (OnlineVideoNotFoundException ex)
                     {
-                        OnlineSearchError.Fire(this, name + " " + episode, ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkURL, null));
+                        OnlineSearchError.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number), ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkURL, null));
                     }
                     catch (Exception ex)
                     {
-                        OnlineSearchError.Fire(this, name + " " + episode, "There was an error while searching for the video on this service.", new Tuple<string, string, string>(null, null, ex.Message));
+                        OnlineSearchError.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number), "There was an error while searching for the video on this service.", new Tuple<string, string, string>(null, null, ex.Message));
                     }
                 });
             SearchThread.Start();

@@ -6,30 +6,41 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Tables;
 
     using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>OnlineVideoSearchEngine</c> class.
     /// </summary>
-    public class OnlineVideoSearchEngineTaskDialog<T> where T : OnlineVideoSearchEngine, new()
+    public class OnlineVideoSearchEngineTaskDialog
     {
         private TaskDialog _td;
         private Result _res;
-        private T _os;
+        private OnlineVideoSearchEngine _os;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OnlineVideoSearchEngineTaskDialog"/> class.
+        /// </summary>
+        /// <param name="engine">The engine.</param>
+        public OnlineVideoSearchEngineTaskDialog(OnlineVideoSearchEngine engine)
+        {
+            _os = engine;
+
+            _os.OnlineSearchDone  += OnlineSearchDone;
+            _os.OnlineSearchError += OnlineSearchError;
+        }
 
         /// <summary>
         /// Searches for the specified show and its episode.
         /// </summary>
-        /// <param name="show">The show.</param>
-        /// <param name="episode">The episode.</param>
-        /// <param name="extra">The extra which might be needed by the engine.</param>
-        public void Search(string show, string episode, object extra = null)
+        /// <param name="ep">The episode.</param>
+        public void Search(Episode ep)
         {
             _td = new TaskDialog
                 {
                     Title           = "Searching...",
-                    Instruction     = show + " " + episode,
+                    Instruction     = "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number),
                     Content         = "Searching for the episode...",
                     CommonButtons   = TaskDialogButton.Cancel,
                     ShowProgressBar = true
@@ -41,11 +52,7 @@
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
-            _os = new T();
-
-            _os.OnlineSearchDone  += OnlineSearchDone;
-            _os.OnlineSearchError += OnlineSearchError;
-            _os.SearchAsync(show, episode, extra);
+            _os.SearchAsync(ep);
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }

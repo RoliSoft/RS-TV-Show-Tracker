@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Xml.Linq;
 
     using NUnit.Framework;
 
@@ -60,7 +59,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = Utils.GetXML("http://services.tvrage.com/myfeeds/search.php?key={0}&show={1}".FormatWith(Key, Uri.EscapeUriString(name)));
+            var list = Utils.GetXML("http://services.tvrage.com/myfeeds/search.php?key={0}&show={1}".FormatWith(Key, Uri.EscapeUriString(name)), timeout: 120000);
 
             foreach (var show in list.Descendants("show"))
             {
@@ -84,8 +83,8 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            var info = Utils.GetXML("http://services.tvrage.com/myfeeds/showinfo.php?key={0}&sid={1}".FormatWith(Key, id));
-            var list = Utils.GetXML("http://services.tvrage.com/myfeeds/episode_list.php?key={0}&sid={1}".FormatWith(Key, id));
+            var info = Utils.GetXML("http://services.tvrage.com/myfeeds/showinfo.php?key={0}&sid={1}".FormatWith(Key, id), timeout: 120000);
+            var list = Utils.GetXML("http://services.tvrage.com/myfeeds/episode_list.php?key={0}&sid={1}".FormatWith(Key, id), timeout: 120000);
             var show = new TVShow();
 
             show.Title       = info.GetValue("showname");

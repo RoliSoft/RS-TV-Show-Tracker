@@ -1,15 +1,13 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines
 {
     using System;
-    using System.Linq;
 
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
     using RoliSoft.TVShowTracker.Tables;
 
     /// <summary>
-    /// Provides support for searching videos on Tube+.
+    /// Provides support for searching videos on Amazon Instant Video.
     /// </summary>
-    public class TubePlus : OnlineVideoSearchEngine
+    public class Amazon : OnlineVideoSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -19,7 +17,7 @@
         {
             get
             {
-                return "Tube+";
+                return "Amazon Instant Video";
             }
         }
 
@@ -31,7 +29,7 @@
         {
             get
             {
-                return "http://tubeplus.me/";
+                return "http://www.amazon.com/Instant-Video/b/?ie=UTF8&node=2858778011";
             }
         }
 
@@ -45,7 +43,7 @@
         {
             get
             {
-                return "pack://application:,,,/RSTVShowTracker;component/Images/tubeplus.png";
+                return "pack://application:,,,/RSTVShowTracker;component/Images/amazon.png";
             }
         }
 
@@ -56,12 +54,12 @@
         {
             get
             {
-                return 7;
+                return 4;
             }
         }
 
         /// <summary>
-        /// Searches for videos on SideReel.
+        /// Searches for videos on BBC iPlayer.
         /// </summary>
         /// <param name="ep">The episode.</param>
         /// <returns>
@@ -69,16 +67,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Google().Search("intitle:{0} intitle:\"S{1:00}E{2:00}\" site:tubeplus.me/player/".FormatWith(ep.Show.Name, ep.Season, ep.Number)).ToList();
-
-            if (g.Count != 0)
-            {
-                return g[0].URL;
-            }
-            else
-            {
-                throw new OnlineVideoNotFoundException("No videos could be found on Tube+ using Google." + Environment.NewLine + "You can try to use Tube+'s internal search engine.", "Open Tube+ search page", "http://tubeplus.me/search/tv-shows/{0}/0/".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(ep.Show.Name))));
-            }
+            return "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + ep.Show.Name + " intitle:\"Season " + ep.Season + ", Episode " + ep.Number + "\" site:amazon.com");
         }
     }
 }

@@ -657,7 +657,7 @@
                     cmi.Tag    = dlcmi;
                     cmi.Header = dlcmi.Name;
                     cmi.Icon   = dlcmi.Icon;
-                    cmi.Click += (s, r) => ((ContextMenuItem<LinkItem>)cmi.Tag).Click(link);
+                    cmi.Click += (s, r) => ((ContextMenuItem<Link>)cmi.Tag).Click(link);
                     cm.Items.Add(cmi);
                 }
             }

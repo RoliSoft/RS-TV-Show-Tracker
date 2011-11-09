@@ -129,7 +129,6 @@
     <Compile Include="ContextMenus\DownloadLinkContextMenu.cs" />
     <Compile Include="ContextMenus\ContextMenuItem.cs" />
     <Compile Include="ContextMenus\SubtitleContextMenu.cs" />
-    <Compile Include="ContextMenus\test.cs" />
     <Compile Include="Dependencies\GreyableImage\GreyableImage.cs" />
     <Compile Include="Dependencies\GreyableImage\ImageGreyer.cs" />
     <Compile Include="DLCAPI.cs" />
@@ -184,6 +183,8 @@
     <Compile Include="Parsers\LinkCheckers\Engines\FileFactory.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\FileServe.cs" />
     <Compile Include="Parsers\LinkCheckers\LinkCheckerEngine.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\Amazon.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\iTunes.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\TubePlus.cs" />
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />

@@ -473,7 +473,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<Hulu>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number), ep.Name);
+            new OnlineVideoSearchEngineTaskDialog(new Hulu()).Search(ep);
         }
 
         /// <summary>
@@ -487,7 +487,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<BBCiPlayer>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
+            new OnlineVideoSearchEngineTaskDialog(new BBCiPlayer()).Search(ep);
         }
 
         /// <summary>
@@ -529,7 +529,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<SideReel>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
+            new OnlineVideoSearchEngineTaskDialog(new SideReel()).Search(ep);
         }
 
         /// <summary>
@@ -543,7 +543,7 @@
 
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
-            new OnlineVideoSearchEngineTaskDialog<TubePlus>().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number));
+            new OnlineVideoSearchEngineTaskDialog(new TubePlus()).Search(ep);
         }
 
         /// <summary>

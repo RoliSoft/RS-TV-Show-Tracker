@@ -5,6 +5,7 @@
     using System.Text.RegularExpressions;
 
     using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+    using RoliSoft.TVShowTracker.Tables;
 
     /// <summary>
     /// Provides support for searching videos on SideReel.
@@ -45,29 +46,40 @@
         {
             get
             {
-                return Site + "images/favicon.ico";
+                return "pack://application:,,,/RSTVShowTracker;component/Images/sidereel.png";
+            }
+        }
+
+        /// <summary>
+        /// Gets a number representing where should the engine be placed in the list.
+        /// </summary>
+        public override int Index
+        {
+            get
+            {
+                return 6;
             }
         }
 
         /// <summary>
         /// Searches for videos on SideReel.
         /// </summary>
-        /// <param name="name">The name of the show.</param>
-        /// <param name="episode">The episode number.</param>
-        /// <param name="extra">This field is not used here.</param>
-        /// <exception cref="OnlineVideoNotFoundException">No video was found.</exception>
-        public override string Search(string name, string episode, object extra = null)
+        /// <param name="ep">The episode.</param>
+        /// <returns>
+        /// URL of the video.
+        /// </returns>
+        public override string Search(Episode ep)
         {
-            var g = new Google().Search("intitle:Watch {0} online site:sidereel.com".FormatWith(name)).ToList();
+            var g = new Google().Search("intitle:Watch {0} online site:sidereel.com".FormatWith(ep.Show.Name)).ToList();
 
             if (g.Count == 0)
             {
-                throw new OnlineVideoNotFoundException("No videos could be found on SideReel using Google." + Environment.NewLine + "You can try to use SideReel's internal search engine.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(name)));
+                throw new OnlineVideoNotFoundException("No videos could be found on SideReel using Google." + Environment.NewLine + "You can try to use SideReel's internal search engine.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(ep.Show.Name)));
             }
 
             var id = Regex.Match(g[0].URL, @"sidereel\.com/([^/$]+)", RegexOptions.IgnoreCase);
 
-            return "http://www.sidereel.com/{0}/{1}/search".FormatWith(id.Groups[1].Value, ShowNames.Parser.ExtractEpisode(episode, "season-{0}/episode-{1}"));
+            return "http://www.sidereel.com/{0}/season-{1}/episode-{2}/search".FormatWith(id.Groups[1].Value, ep.Season, ep.Number);
         }
     }
 }
