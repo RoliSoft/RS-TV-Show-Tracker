@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
 
@@ -18,12 +17,20 @@
     public static class Extensibility
     {
         /// <summary>
-        /// Gets or sets a list of loaded plugin assemblies.
+        /// Gets or sets a list of internal plugin types.
         /// </summary>
         /// <value>
-        /// The list of loaded plugin assemblies
+        /// The list of internal plugin types.
         /// </value>
-        public static List<Assembly> Plugins { get; set; }
+        public static List<Type> InternalPlugins { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list of external plugin types.
+        /// </summary>
+        /// <value>
+        /// The list of external plugin types.
+        /// </value>
+        public static List<Type> ExternalPlugins { get; set; }
 
         /// <summary>
         /// Gets or sets a list of compiled and loaded scripts.
@@ -38,13 +45,17 @@
         /// </summary>
         static Extensibility()
         {
-            Plugins = new List<Assembly>();
+            InternalPlugins = new List<Type>(GetDerivedTypesFromAssembly<IPlugin>(Assembly.GetExecutingAssembly()));
+            ExternalPlugins = new List<Type>();
 
             foreach (var file in Directory.EnumerateFiles(Signature.FullPath, "*.Plugin.dll"))
             {
                 try
                 {
-                    Plugins.Add(Assembly.LoadFile(file));
+                    var asm = Assembly.LoadFile(file);
+                    var lst = GetDerivedTypesFromAssembly<IPlugin>(asm);
+
+                    ExternalPlugins.AddRange(lst);
                 }
                 catch (Exception ex)
                 {
@@ -120,42 +131,53 @@
         /// <summary>
         /// Gets the derived types from the specified assembly for the specified type.
         /// </summary>
+        /// <typeparam name="T">The class whose derived types are needed.</typeparam>
         /// <param name="assembly">The assembly to search.</param>
-        /// <param name="baseClass">The class whose derived types are needed.</param>
-        /// <param name="inclAbstract">if set to <c>true</c> abstract classes will not be filtered.</param>
         /// <returns>
         /// List of derived classes.
         /// </returns>
-        public static IEnumerable<Type> GetDerivedTypesFromAssembly(Assembly assembly, Type baseClass, bool inclAbstract = false)
+        public static IEnumerable<Type> GetDerivedTypesFromAssembly<T>(Assembly assembly)
         {
-            return assembly.GetTypes().Where(type => type.IsClass && type.IsSubclassOf(baseClass) && (inclAbstract || !type.IsAbstract));
+            var parent = typeof(T);
+
+            foreach (var type in assembly.GetTypes())
+            {
+                if (type.IsClass && !type.IsAbstract && parent.IsAssignableFrom(type))
+                {
+                    yield return type;
+                }
+            }
         }
 
         /// <summary>
         /// Gets the derived types from both internal and external sources for the specified type.
         /// </summary>
         /// <typeparam name="T">The class whose derived types are needed.</typeparam>
-        /// <param name="inclAbstract">if set to <c>true</c> abstract classes will not be filtered.</param>
         /// <param name="inclInternal">if set to <c>true</c> the internal assembly will be included in the search.</param>
         /// <param name="inclExternal">if set to <c>true</c> the external assemblies will be included in the search.</param>
         /// <returns>
         /// List of derived classes.
         /// </returns>
-        public static IEnumerable<Type> GetDerivedTypes<T>(bool inclAbstract = false, bool inclInternal = true, bool inclExternal = true)
+        public static IEnumerable<Type> GetDerivedTypes<T>(bool inclInternal = true, bool inclExternal = true)
         {
+            var parent = typeof(T);
+
             if (inclInternal)
             {
-                foreach (var type in GetDerivedTypesFromAssembly(Assembly.GetExecutingAssembly(), typeof(T), inclAbstract))
+                foreach (var type in InternalPlugins)
                 {
-                    yield return type;
+                    if (parent.IsAssignableFrom(type))
+                    {
+                        yield return type;
+                    }
                 }
             }
 
             if (inclExternal)
             {
-                foreach (var asm in Plugins)
+                foreach (var type in ExternalPlugins)
                 {
-                    foreach (var type in GetDerivedTypesFromAssembly(asm, typeof(T), inclAbstract))
+                    if (parent.IsAssignableFrom(type))
                     {
                         yield return type;
                     }
@@ -167,25 +189,26 @@
         /// Gets the derived types from both internal and external sources for the specified type and create a new instance for each.
         /// </summary>
         /// <typeparam name="T">The class whose derived types are needed.</typeparam>
-        /// <param name="inclAbstract">if set to <c>true</c> abstract classes will not be filtered.</param>
         /// <param name="inclInternal">if set to <c>true</c> the internal assembly will be included in the search.</param>
         /// <param name="inclExternal">if set to <c>true</c> the external assemblies will be included in the search.</param>
         /// <param name="inclScripts">if set to <c>true</c> the compiled scripts will be included in the search.</param>
         /// <returns>
         /// List of derived instantiated classes.
         /// </returns>
-        public static IEnumerable<T> GetNewInstances<T>(bool inclAbstract = false, bool inclInternal = true, bool inclExternal = true, bool inclScripts = true)
+        public static IEnumerable<T> GetNewInstances<T>(bool inclInternal = true, bool inclExternal = true, bool inclScripts = true)
         {
-            foreach (var type in GetDerivedTypes<T>(inclAbstract, inclInternal, inclExternal))
+            foreach (var type in GetDerivedTypes<T>(inclInternal, inclExternal))
             {
                 yield return (T)Activator.CreateInstance(type);
             }
 
             if (inclScripts)
             {
+                var parent = typeof(T);
+
                 foreach (var script in Scripts)
                 {
-                    if (script.Type.IsSubclassOf(typeof(T)) && (inclAbstract || !script.Type.IsAbstract))
+                    if (!script.Type.IsAbstract && parent.IsAssignableFrom(script.Type))
                     {
                         yield return (T)script.Scope.Engine.Operations.CreateInstance(script.Scope.GetVariable(script.Name));
                     }

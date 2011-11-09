@@ -132,6 +132,7 @@
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
     <Compile Include="Extensibility.cs" />
     <Compile Include="HttpToSocks.cs" />
+    <Compile Include="IPlugin.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\FreshWap.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Mukki.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />

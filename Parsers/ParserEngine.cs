@@ -4,7 +4,7 @@
     /// Represents a parser engine.
     /// </summary>
     [Parser]
-    public abstract class ParserEngine
+    public abstract class ParserEngine : IPlugin
     {
         /// <summary>
         /// Gets the name of the site.
