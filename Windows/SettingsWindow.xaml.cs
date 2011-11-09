@@ -16,6 +16,7 @@
 
     using Microsoft.Win32;
 
+    using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.Parsers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -1191,7 +1192,9 @@
                     typeof(RecommendationEngine), 
                     typeof(SocialEngine),
                     typeof(WebSearchEngine),
-                    typeof(ParserEngine)
+                    typeof(DownloadLinkContextMenu),
+                    typeof(SubtitleContextMenu),
+                    typeof(IPlugin)
                 };
 
             var icons = new[]
@@ -1204,10 +1207,12 @@
                     "/RSTVShowTracker;component/Images/information.png",
                     "/RSTVShowTracker;component/Images/bird.png",
                     "/RSTVShowTracker;component/Images/magnifier.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
                     "/RSTVShowTracker;component/Images/dll.gif"
                 };
 
-            foreach (var engine in Extensibility.GetNewInstances<ParserEngine>(inclInternal: inclInternal).OrderBy(engine => engine.Name))
+            foreach (var engine in Extensibility.GetNewInstances<IPlugin>(inclInternal: inclInternal).OrderBy(engine => engine.Name))
             {
                 var type   = engine.GetType();
                 var parent = string.Empty;

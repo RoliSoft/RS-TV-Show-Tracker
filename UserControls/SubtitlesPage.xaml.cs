@@ -7,11 +7,13 @@
     using System.Net;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
     using RoliSoft.TVShowTracker.TaskDialogs;
@@ -289,6 +291,26 @@
         }
 
         /// <summary>
+        /// Handles the Unchecked event of the appendLanguage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AppendLanguageUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Append Language to Subtitle", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the appendLanguage control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void AppendLanguageChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Append Language to Subtitle", true);
+        }
+
+        /// <summary>
         /// Initiates a search on this usercontrol.
         /// </summary>
         /// <param name="query">The query.</param>
@@ -442,10 +464,44 @@
         /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
         private void ListViewContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (listView.SelectedIndex == -1)
+            e.Handled = true;
+
+            if (listView.SelectedIndex == -1) return;
+
+            var cm = new ContextMenu();
+            ((FrameworkElement)e.Source).ContextMenu = cm;
+            var sub = (Subtitle)listView.SelectedValue;
+
+            var dls    = new MenuItem();
+            dls.Header = "Download subtitle";
+            dls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+            dls.Click += DownloadSubtitleClick;
+            cm.Items.Add(dls);
+
+            var dnv    = new MenuItem();
+            dnv.Header = "Download subtitle near video";
+            dnv.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/inbox-download.png")) };
+            dnv.Click += DownloadSubtitleNearVideoClick;
+            cm.Items.Add(dnv);
+
+            foreach (var dlcm in Extensibility.GetNewInstances<SubtitleContextMenu>())
             {
-                e.Handled = true;
+                foreach (var dlcmi in dlcm.GetMenuItems(sub))
+                {
+                    var cmi    = new MenuItem();
+                    cmi.Tag    = dlcmi;
+                    cmi.Header = dlcmi.Name;
+                    cmi.Icon   = dlcmi.Icon;
+                    cmi.Click += (s, r) => ((ContextMenuItem<Subtitle>)cmi.Tag).Click(sub);
+                    cm.Items.Add(cmi);
+                }
             }
+
+            TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(cm, TextRenderingMode.ClearType);
+            RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
+
+            cm.IsOpen = true;
         }
 
         /// <summary>
@@ -458,7 +514,7 @@
             if (listView.SelectedIndex == -1) return;
 
             var sub = (Subtitle)listView.SelectedValue;
-            
+
             new SubtitleDownloadTaskDialog().Download(sub);
         }
 
@@ -487,26 +543,6 @@
             catch { }
             
             new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, show[0], show[1], airdate);
-        }
-
-        /// <summary>
-        /// Handles the Unchecked event of the appendLanguage control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void AppendLanguageUnchecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Append Language to Subtitle", false);
-        }
-
-        /// <summary>
-        /// Handles the Checked event of the appendLanguage control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void AppendLanguageChecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Append Language to Subtitle", true);
         }
     }
 }

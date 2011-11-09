@@ -125,6 +125,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AutoDownloader.cs" />
+    <Compile Include="ContextMenus\ContextMenu.cs" />
+    <Compile Include="ContextMenus\DownloadLinkContextMenu.cs" />
+    <Compile Include="ContextMenus\ContextMenuItem.cs" />
+    <Compile Include="ContextMenus\SubtitleContextMenu.cs" />
+    <Compile Include="ContextMenus\test.cs" />
     <Compile Include="Dependencies\GreyableImage\GreyableImage.cs" />
     <Compile Include="Dependencies\GreyableImage\ImageGreyer.cs" />
     <Compile Include="DLCAPI.cs" />
@@ -747,6 +752,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\menu.png" />
     <Resource Include="Images\pubclass.gif" />
     <Resource Include="Images\dll.gif" />
     <Resource Include="Images\document-insert.png" />

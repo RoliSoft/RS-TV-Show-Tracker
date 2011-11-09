@@ -77,20 +77,6 @@
                     <VirtualizingStackPanel />
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
-            <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Download subtitle" Click="DownloadSubtitleClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/torrents.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Download subtitle near video" Click="DownloadSubtitleNearVideoClick">
-                        <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/inbox-download.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </ContextMenu>
-            </ListView.ContextMenu>
         </ListView>
         <Label Grid.Row="1" Name="statusThrobber" Foreground="White" FontWeight="Bold" Content="&#9696;" Padding="0,0" Margin="7,0" Width="12" Height="17" HorizontalAlignment="Left" Visibility="Hidden">
             <Label.Effect>

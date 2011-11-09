@@ -17,6 +17,7 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -579,7 +580,7 @@
             if (listView.SelectedIndex == -1) return;
 
             var cm = new ContextMenu();
-            (e.Source as FrameworkElement).ContextMenu = cm;
+            ((FrameworkElement)e.Source).ContextMenu = cm;
             var link = (LinkItem)listView.SelectedValue;
 
             if (!string.IsNullOrWhiteSpace(link.InfoURL))
@@ -646,6 +647,19 @@
                 jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")) };
                 jd.Click += (s, r) => SendToJDownloader(link.FileURL.Split('\0'));
                 cm.Items.Add(jd);
+            }
+
+            foreach (var dlcm in Extensibility.GetNewInstances<DownloadLinkContextMenu>())
+            {
+                foreach (var dlcmi in dlcm.GetMenuItems(link))
+                {
+                    var cmi    = new MenuItem();
+                    cmi.Tag    = dlcmi;
+                    cmi.Header = dlcmi.Name;
+                    cmi.Icon   = dlcmi.Icon;
+                    cmi.Click += (s, r) => ((ContextMenuItem<LinkItem>)cmi.Tag).Click(link);
+                    cm.Items.Add(cmi);
+                }
             }
 
             TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
