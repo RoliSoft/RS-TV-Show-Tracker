@@ -812,7 +812,7 @@
 
                 // - Engines
 
-                var ovseidx = -1;
+                var ovseidx = -1f;
                 foreach (var ovse in Extensibility.GetNewInstances<OnlineVideoSearchEngine>().OrderBy(ovse => ovse.Index))
                 {
                     if ((ovseidx - ovse.Index) != -1)
@@ -960,7 +960,7 @@
 
                 // - Engines
 
-                var ovseidx = -1;
+                var ovseidx = -1f;
                 foreach (var ovse in Extensibility.GetNewInstances<OnlineVideoSearchEngine>().OrderBy(ovse => ovse.Index))
                 {
                     if ((ovseidx - ovse.Index) != -1)

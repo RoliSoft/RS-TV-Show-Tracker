@@ -13,7 +13,13 @@
         /// <summary>
         /// Gets a number representing where should the engine be placed in the list.
         /// </summary>
-        public abstract int Index { get; }
+        public virtual float Index
+        {
+            get
+            {
+                return short.MaxValue;
+            }
+        }
 
         /// <summary>
         /// Occurs when an online search is done.

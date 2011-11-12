@@ -52,7 +52,7 @@
         /// <summary>
         /// Gets a number representing where should the engine be placed in the list.
         /// </summary>
-        public override int Index
+        public override float Index
         {
             get
             {

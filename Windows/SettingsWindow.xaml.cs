@@ -609,13 +609,13 @@
         }
 
         /// <summary>
-        /// Handles the Click event of the JDownloaderHyperlink control.
+        /// Handles the Click event of the Hyperlink control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void JDownloaderHyperlinkClick(object sender, RoutedEventArgs e)
+        private void HyperlinkClick(object sender, RoutedEventArgs e)
         {
-            Utils.Run((sender as Hyperlink).NavigateUri.ToString());
+            Utils.Run(((Hyperlink)sender).NavigateUri.ToString());
         }
         #endregion
 
