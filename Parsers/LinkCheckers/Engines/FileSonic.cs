@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
     using System;
+    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
@@ -47,6 +48,18 @@
             var node = html.DocumentNode.SelectSingleNode("//strong[text() = 'Available']");
 
             return node != null;
+        }
+
+        /// <summary>
+        /// Determines whether this instance can check the availability of the link on the specified service.
+        /// </summary>
+        /// <param name="url">The link to check.</param>
+        /// <returns>
+        ///   <c>true</c> if this instance can check the specified service; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanCheck(string url)
+        {
+            return Regex.IsMatch(new Uri(url).Host, @"filesonic\.(ro|com)$");
         }
 
         /// <summary>

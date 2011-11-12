@@ -34,3 +34,4 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 /todo.txt
 /sqlite3.exe
+/Parsers/LinkCheckers/Engines/JDownloader.cs

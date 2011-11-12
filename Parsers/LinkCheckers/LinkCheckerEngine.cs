@@ -29,6 +29,15 @@
         /// </returns>
         public abstract bool Check(string url);
 
+        /// <summary>
+        /// Determines whether this instance can check the availability of the link on the specified service.
+        /// </summary>
+        /// <param name="url">The link to check.</param>
+        /// <returns>
+        ///   <c>true</c> if this instance can check the specified service; otherwise, <c>false</c>.
+        /// </returns>
+        public abstract bool CanCheck(string url);
+
         private Thread _job;
 
         /// <summary>

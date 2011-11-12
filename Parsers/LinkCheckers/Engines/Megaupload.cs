@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
+    using System;
     using System.Text.RegularExpressions;
 
     using NUnit.Framework;
@@ -61,6 +62,18 @@
             var req = Utils.GetURL(Site + "mgr_linkcheck.php", "id0=" + id);
             
             return Regex.IsMatch(req, "&n=.+");
+        }
+
+        /// <summary>
+        /// Determines whether this instance can check the availability of the link on the specified service.
+        /// </summary>
+        /// <param name="url">The link to check.</param>
+        /// <returns>
+        ///   <c>true</c> if this instance can check the specified service; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanCheck(string url)
+        {
+            return new Uri(url).Host.EndsWith("megaupload.com");
         }
 
         /// <summary>

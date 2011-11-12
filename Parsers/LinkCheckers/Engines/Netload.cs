@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
+    using System;
     using System.Text.RegularExpressions;
 
     using NUnit.Framework;
@@ -61,6 +62,18 @@
             var req = Utils.GetURL("http://api.netload.in/info.php", "auth=BVm96BWDSoB4WkfbEhn42HgnjIe1ilMt&file_id=" + id);
 
             return req.TrimEnd().EndsWith(";online");
+        }
+
+        /// <summary>
+        /// Determines whether this instance can check the availability of the link on the specified service.
+        /// </summary>
+        /// <param name="url">The link to check.</param>
+        /// <returns>
+        ///   <c>true</c> if this instance can check the specified service; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanCheck(string url)
+        {
+            return new Uri(url).Host.EndsWith("netload.in");
         }
 
         /// <summary>

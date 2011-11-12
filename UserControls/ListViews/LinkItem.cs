@@ -106,9 +106,9 @@
         /// </summary>
         public void CheckLink()
         {
-            var checker = Extensibility.GetDerivedTypes<LinkCheckerEngine>().Where(x => FileURL.Contains(x.Name.ToLower())).ToList();
+            var checker = Extensibility.GetNewInstances<LinkCheckerEngine>().FirstOrDefault(x => x.CanCheck(FileURL));
 
-            if (checker.Count == 0)
+            if (checker == null)
             {
                 return;
             }
@@ -125,7 +125,7 @@
 
             try
             {
-                var result = ((LinkCheckerEngine)Activator.CreateInstance(checker[0])).Check(FileURL.Split('\0').First());
+                var result = checker.Check(FileURL.Split('\0').First());
 
                 if (!result)
                 {

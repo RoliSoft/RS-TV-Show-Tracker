@@ -50,6 +50,18 @@
         }
 
         /// <summary>
+        /// Determines whether this instance can check the availability of the link on the specified service.
+        /// </summary>
+        /// <param name="url">The link to check.</param>
+        /// <returns>
+        ///   <c>true</c> if this instance can check the specified service; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool CanCheck(string url)
+        {
+            return new Uri(url).Host.EndsWith("uploadstation.com");
+        }
+
+        /// <summary>
         /// Tests the link checker.
         /// </summary>
         [Test]
