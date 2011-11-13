@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-    using System.Xml.Linq;
 
     using NUnit.Framework;
 
@@ -46,7 +44,31 @@
         {
             get
             {
-                return "/RSTVShowTracker;component/Images/anidb.png";
+                return "pack://application:,,,/RSTVShowTracker;component/Images/anidb.png";
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-07-19 8:12 PM");
             }
         }
 

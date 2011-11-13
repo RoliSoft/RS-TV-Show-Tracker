@@ -50,6 +50,30 @@
         }
 
         /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-11-12 6:01 PM");
+            }
+        }
+
+        /// <summary>
         /// Gets a number representing where should the engine be placed in the list.
         /// </summary>
         public override float Index

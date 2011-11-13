@@ -39,6 +39,30 @@
         }
 
         /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-10-31 8:14 PM");
+            }
+        }
+
+        /// <summary>
         /// Searches for the specified query with this service.
         /// </summary>
         /// <param name="query">The query.</param>

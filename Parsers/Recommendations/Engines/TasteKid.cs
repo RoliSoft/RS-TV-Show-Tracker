@@ -40,6 +40,30 @@
         }
 
         /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-07-12 2:46 PM");
+            }
+        }
+
+        /// <summary>
         /// Gets the list of recommended TV show from the engine.
         /// </summary>
         /// <param name="shows">The currently watched shows.</param>

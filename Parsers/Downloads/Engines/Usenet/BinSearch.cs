@@ -14,7 +14,7 @@
     /// <summary>
     /// Provides support for scraping BinSearch.
     /// </summary>
-    [Parser("RoliSoft", "2011-01-29 9:48 PM"), TestFixture]
+    [TestFixture]
     public class BinSearch : DownloadSearchEngine
     {
         /// <summary>
@@ -38,6 +38,30 @@
             get
             {
                 return "http://binsearch.info/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-01-29 9:48 PM");
             }
         }
 

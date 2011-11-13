@@ -233,7 +233,6 @@
     <Compile Include="Parsers\Guides\Engines\TVcom.cs" />
     <Compile Include="Parsers\Guides\TVShow.cs" />
     <Compile Include="Parsers\OnlineVideos\OnlineVideoNotFoundException.cs" />
-    <Compile Include="Parsers\ParserAttribute.cs" />
     <Compile Include="Parsers\Recommendations\RecommendedShow.cs" />
     <Compile Include="Parsers\Subtitles\Engines\SuperSubtitles.cs" />
     <Compile Include="Languages.cs" />

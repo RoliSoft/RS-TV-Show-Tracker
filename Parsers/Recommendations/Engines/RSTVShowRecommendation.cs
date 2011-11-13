@@ -51,6 +51,30 @@
             }
         }
 
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-07-12 2:46 PM");
+            }
+        }
+
         private readonly int _type;
         private readonly string _key  = "S2qNfbCFCWoQ8RoL1S0FTbjbW",
                                 _uuid = Utils.GetUUID();

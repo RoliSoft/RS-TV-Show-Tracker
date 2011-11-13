@@ -15,7 +15,7 @@
     /// <summary>
     /// Provides support for scraping Mukki.org.
     /// </summary>
-    [Parser("RoliSoft", "2011-10-01 6:51 AM"), TestFixture]
+    [TestFixture]
     public class Mukki : DownloadSearchEngine
     {
         /// <summary>
@@ -39,6 +39,30 @@
             get
             {
                 return "http://mukki.org/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-10-01 6:51 AM");
             }
         }
 

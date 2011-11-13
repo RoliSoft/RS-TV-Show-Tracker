@@ -11,13 +11,6 @@
     /// <summary>
     /// Provides support for scraping Hosszupuska Sub.
     /// </summary>
-    /// <remarks>
-    /// WARNING!
-    /// Hosszupuskasub.com currently is not accessable from outside Hungary.
-    /// It either resolves to 127.0.0.1 or shows a "Hamarosan..." page with HTTP 403 status code.
-    /// If I can't access the page anymore, I can't maintain the plugin either, which means,
-    /// if they continue to fuck off everyone outside Hungary, the plugin will be permanently removed.
-    /// </remarks>
     [TestFixture]
     public class Hosszupuska : SubtitleSearchEngine
     {
@@ -42,6 +35,30 @@
             get
             {
                 return "http://hosszupuskasub.com/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2010-12-22 6:39 PM");
             }
         }
 

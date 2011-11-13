@@ -1,9 +1,11 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers
 {
+    using System;
+    using System.Reflection;
+
     /// <summary>
     /// Represents a parser engine.
     /// </summary>
-    [Parser]
     public abstract class ParserEngine : IPlugin
     {
         /// <summary>
@@ -27,6 +29,44 @@
             get
             {
                 return Site + "favicon.ico";
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public virtual string Developer
+        {
+            get
+            {
+                var company = GetType().Assembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), true);
+
+                if (company.Length != 0)
+                {
+                    return ((AssemblyCompanyAttribute)company[0]).Company;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public virtual Version Version
+        {
+            get
+            {
+                var version = GetType().Assembly.GetCustomAttributes(typeof(AssemblyVersionAttribute), true);
+
+                if (version.Length != 0)
+                {
+                    return Version.Parse(((AssemblyVersionAttribute)version[0]).Version);
+                }
+
+                return new Version(1, 0);
             }
         }
     }

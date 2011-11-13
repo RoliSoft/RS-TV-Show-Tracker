@@ -654,7 +654,7 @@
                                       ? "/RSTVShowTracker;component/Images/cookie.png"
                                       : "/RSTVShowTracker;component/Images/cross.png"
                                   : "/RSTVShowTracker;component/Images/na.png",
-                        Version = (engine.GetAttribute<ParserAttribute>() ?? new ParserAttribute() { Version = engine.GetType().Assembly.GetName(false).Version }).Version.ToString().PadRight(14, '0')
+                        Version = engine.Version.ToString().PadRight(14, '0')
                     });
             }
 
@@ -1231,19 +1231,17 @@
                     i++;
                 }
 
-                var ver  = string.Empty;
-                var attr = engine.GetAttribute<ParserAttribute>();
+                var file = type.Assembly.ManifestModule.Name;
 
-                if (attr != null && attr.Version != null)
+                if (file == "<In Memory Module>")
                 {
-                    ver = attr.Version.ToString();
-                }
-                else
-                {
-                    ver = type.Assembly.GetName(false).Version.ToString();
-                }
+                    var script = Extensibility.Scripts.FirstOrDefault(s => s.Type == type);
 
-                ver = ver.PadRight(14, '0');
+                    if (script != null)
+                    {
+                        file = Path.GetFileName(script.File);
+                    }
+                }
 
                 PluginsListViewItemCollection.Add(new PluginsListViewItem
                     {
@@ -1251,8 +1249,8 @@
                         Name    = engine.Name,
                         Type    = parent,
                         Icon2   = picon,
-                        Version = ver,
-                        File    = type.Assembly.ManifestModule.Name
+                        Version = engine.Version.ToString().PadRight(14, '0'),
+                        File    = file
                     });
             }
         }

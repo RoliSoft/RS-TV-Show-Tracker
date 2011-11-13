@@ -11,7 +11,7 @@
     /// <summary>
     /// Provides support for scraping TorrentLeech.
     /// </summary>
-    [Parser("RoliSoft", "2011-08-16 16:30 PM"), TestFixture]
+    [TestFixture]
     public class TorrentLeech : DownloadSearchEngine
     {
         /// <summary>
@@ -35,6 +35,30 @@
             get
             {
                 return "http://www.torrentleech.org/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-08-16 16:30 PM");
             }
         }
 

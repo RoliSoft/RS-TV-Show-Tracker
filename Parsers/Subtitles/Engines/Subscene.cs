@@ -52,6 +52,30 @@
         }
 
         /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2011-08-03 11:50 AM");
+            }
+        }
+
+        /// <summary>
         /// Returns an <c>IDownloader</c> object which can be used to download the URLs provided by this parser.
         /// </summary>
         /// <value>The downloader.</value>
