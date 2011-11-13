@@ -113,18 +113,6 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether to show the 'Open details page' context menu item.
-        /// </summary>
-        /// <value><c>true</c> if yes; otherwise, <c>false</c>.</value>
-        public string OpenDetailsPageVisible
-        {
-            get
-            {
-                return string.IsNullOrWhiteSpace(URL) ? "Collapsed" : "Visible";
-            }
-        }
-
-        /// <summary>
         /// Fires a property changed event for the <c>SeenIt</c> field.
         /// </summary>
         public void RefreshSeenIt()

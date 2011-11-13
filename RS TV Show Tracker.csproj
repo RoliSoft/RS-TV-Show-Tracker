@@ -126,6 +126,11 @@
     </ApplicationDefinition>
     <Compile Include="AutoDownloader.cs" />
     <Compile Include="ContextMenus\ContextMenu.cs" />
+    <Compile Include="ContextMenus\RecommendationContextMenu.cs" />
+    <Compile Include="ContextMenus\StatisticsContextMenu.cs" />
+    <Compile Include="ContextMenus\UpcomingListingContextMenu.cs" />
+    <Compile Include="ContextMenus\EpisodeListingContextMenu.cs" />
+    <Compile Include="ContextMenus\OverviewContextMenu.cs" />
     <Compile Include="ContextMenus\DownloadLinkContextMenu.cs" />
     <Compile Include="ContextMenus\ContextMenuItem.cs" />
     <Compile Include="ContextMenus\SubtitleContextMenu.cs" />

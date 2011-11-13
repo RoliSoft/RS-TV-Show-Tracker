@@ -8,9 +8,12 @@
     using System.Windows.Controls;
     using System.Windows.Data;
     using System.Windows.Input;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
+    using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
     using RoliSoft.TVShowTracker.Tables;
     using RoliSoft.TVShowTracker.TaskDialogs;
@@ -292,7 +295,7 @@
             var guide = Updater.CreateGuide(Database.ShowData(id, "grabber"));
 
             showGeneralSub.Text        += Environment.NewLine + "Episode listing provided by " + guide.Name;
-            showGeneralGuideIcon.Source = new BitmapImage(new Uri(guide.Icon, UriKind.Relative));
+            showGeneralGuideIcon.Source = new BitmapImage(new Uri(guide.Icon));
 
             _activeShowUrl = Database.ShowData(id, "url");
             if (string.IsNullOrWhiteSpace(_activeShowUrl))
@@ -377,22 +380,6 @@
         }
         #endregion
 
-        #region Play episode
-        /// <summary>
-        /// Handles the Click event of the PlayEpisode control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void PlayEpisodeClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            new FileSearchTaskDialog().Search(ep.Show.Name, string.Format("S{0:00}E{1:00}", ep.Season, ep.Number), ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")));
-        }
-        #endregion
-
         #region Open details page
         /// <summary>
         /// Handles the Click event of the OpenDetailsPage control.
@@ -458,106 +445,6 @@
 
             MainWindow.Active.tabControl.SelectedIndex = 3;
             MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
-        }
-        #endregion
-
-        #region Search for online videos
-        /// <summary>
-        /// Handles the Click event of the Hulu control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void HuluClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            new OnlineVideoSearchEngineTaskDialog(new Hulu()).Search(ep);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the iPlayer control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void IPlayerClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            new OnlineVideoSearchEngineTaskDialog(new BBCiPlayer()).Search(ep);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the iTunes control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void ITunesClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + ep.Show.Name + " intitle:\"season " + ep.Season + "\" site:itunes.apple.com inurl:/tv-season/"));
-        }
-
-        /// <summary>
-        /// Handles the Click event of the Amazon control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void AmazonClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + ep.Show.Name + " intitle:\"Season " + ep.Season + ", Episode " + ep.Number + "\" site:amazon.com"));
-        }
-
-        /// <summary>
-        /// Handles the Click event of the SideReel control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SideReelClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            new OnlineVideoSearchEngineTaskDialog(new SideReel()).Search(ep);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the TubePlus control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void TubePlusClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            new OnlineVideoSearchEngineTaskDialog(new TubePlus()).Search(ep);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the GoogleSearch control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void GoogleSearchClick(object sender, RoutedEventArgs e)
-        {
-            if (listView.SelectedIndex == -1) return;
-
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
-
-            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number))));
         }
         #endregion
 
@@ -736,6 +623,124 @@
         private void ShowGeneralSettingsMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             new EditShowWindow(_activeShowID, showGeneralName.Text).ShowDialog();
+        }
+        #endregion
+
+        #region ListView keys
+        /// <summary>
+        /// Handles the ContextMenuOpening event of the ListViewItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.ContextMenuEventArgs"/> instance containing the event data.</param>
+        private void ListViewItemContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            e.Handled = true;
+
+            if (listView.SelectedIndex == -1) return;
+
+            var cm = new ContextMenu();
+            (e.Source as FrameworkElement).ContextMenu = cm;
+            var episode = (GuideListViewItem)listView.SelectedValue;
+
+            var spm = -55;
+            var lbw = 115;
+
+            // Play episode
+
+            var pla    = new MenuItem();
+            pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
+            pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID.Show.Name, string.Format("S{0:00}E{1:00}", episode.ID.Season, episode.ID.Number), episode.ID.Airdate.ToOriginalTimeZone(episode.ID.Show.Data.Get("timezone")));
+            pla.Header = "Play episode";
+            cm.Items.Add(pla);
+
+            if (!string.IsNullOrWhiteSpace(episode.URL))
+            {
+                // Details page
+
+                var det    = new MenuItem();
+                det.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page.png")) };
+                det.Click += OpenDetailsPageClick;
+                det.Header = "Details page";
+                cm.Items.Add(det);
+            }
+
+            // Download links
+
+            var sfd    = new MenuItem();
+            sfd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+            sfd.Click += SearchDownloadLinksClick;
+            sfd.Header = "Download links";
+            cm.Items.Add(sfd);
+
+            // Subtitles
+
+            var sfs    = new MenuItem();
+            sfs.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/subtitles.png")) };
+            sfs.Click += SearchSubtitlesClick;
+            sfs.Header = "Subtitles";
+            cm.Items.Add(sfs);
+
+            // Search for online videos
+
+            var sov    = new MenuItem();
+            sov.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/monitor.png")) };
+            sov.Header = "Online videos";
+            cm.Items.Add(sov);
+
+            // - Engines
+
+            var ovseidx = -1f;
+            foreach (var ovse in Extensibility.GetNewInstances<OnlineVideoSearchEngine>().OrderBy(ovse => ovse.Index))
+            {
+                if ((ovseidx - ovse.Index) != -1)
+                {
+                    sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+                }
+
+                ovseidx = ovse.Index;
+
+                var ovmi    = new MenuItem();
+                ovmi.Tag    = ovse;
+                ovmi.Header = ovse.Name;
+                ovmi.Icon   = new Image { Source = new BitmapImage(new Uri(ovse.Icon)) };
+                ovmi.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog((OnlineVideoSearchEngine)ovmi.Tag).Search(episode.ID);
+                sov.Items.Add(ovmi);
+            }
+
+            if (ovseidx != -1)
+            {
+                sov.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+            }
+
+            // - Google search
+
+            var gls    = new MenuItem();
+            gls.Header = "Google search";
+            gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
+            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(string.Format("{0} S{1:00}E{2:00}", episode.ID.Show.Name, episode.ID.Season, episode.ID.Number)));
+
+            sov.Items.Add(gls);
+
+            // Plugins
+
+            foreach (var ovcm in Extensibility.GetNewInstances<EpisodeListingContextMenu>())
+            {
+                foreach (var ovcmi in ovcm.GetMenuItems(episode.ID))
+                {
+                    var cmi    = new MenuItem();
+                    cmi.Tag    = ovcmi;
+                    cmi.Header = ovcmi.Name;
+                    cmi.Icon   = ovcmi.Icon;
+                    cmi.Click += (s, r) => ((ContextMenuItem<Episode>)cmi.Tag).Click(episode.ID);
+                    cm.Items.Add(cmi);
+                }
+            }
+
+            TextOptions.SetTextFormattingMode(cm, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(cm, TextRenderingMode.ClearType);
+            RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
+
+            cm.IsOpen = true;
         }
         #endregion
     }

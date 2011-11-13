@@ -17,6 +17,7 @@
 
     using Microsoft.WindowsAPICodePack.Dialogs;
 
+    using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
     using RoliSoft.TVShowTracker.Tables;
@@ -456,30 +457,6 @@
         {
             MainWindow.Active.tabControl.SelectedIndex = 3;
             MainWindow.Active.activeSubtitlesPage.Search(show + " " + episode);
-        }
-        #endregion
-
-        #region Search for online videos
-        /// <summary>
-        /// Handles the Click event of the iTunes control.
-        /// </summary>
-        /// <param name="show">The show.</param>
-        /// <param name="episode">The episode.</param>
-        private void ITunesClick(string show, string episode)
-        {
-            var epnr = ShowNames.Parser.ExtractEpisode(episode);
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show + " intitle:\"season " + epnr.Season + "\" site:itunes.apple.com inurl:/tv-season/"));
-        }
-
-        /// <summary>
-        /// Handles the Click event of the Amazon control.
-        /// </summary>
-        /// <param name="show">The show.</param>
-        /// <param name="episode">The episode.</param>
-        private void AmazonClick(string show, string episode)
-        {
-            var epnr = ShowNames.Parser.ExtractEpisode(episode);
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + show + " intitle:\"Season " + epnr.Season + ", Episode " + epnr.Episode + "\" site:amazon.com"));
         }
         #endregion
 
@@ -995,11 +972,40 @@
                 cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
             }
 
+            // View episode list
+
             var vel    = new MenuItem();
             vel.Header = "View episode list";
             vel.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/guides.png")) };
             vel.Click += EpisodeListClick;
             cm.Items.Add(vel);
+
+            // Plugins
+
+            cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            var z = 0;
+            foreach (var ovcm in Extensibility.GetNewInstances<OverviewContextMenu>())
+            {
+                foreach (var ovcmi in ovcm.GetMenuItems(show.Show))
+                {
+                    var cmi    = new MenuItem();
+                    cmi.Tag    = ovcmi;
+                    cmi.Header = ovcmi.Name;
+                    cmi.Icon   = ovcmi.Icon;
+                    cmi.Click += (s, r) => ((ContextMenuItem<TVShow>)cmi.Tag).Click(show.Show);
+                    cm.Items.Add(cmi);
+
+                    z++;
+                }
+            }
+
+            if (z != 0)
+            {
+                cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+            }
+
+            // Settings
 
             BuildSettingsMenu(cm);
 
@@ -1024,8 +1030,6 @@
             var grouping = Settings.Get("Grouping", string.Empty);
             var hideend  = Settings.Get<bool>("Hide Ended");
             var fadeend  = Settings.Get<bool>("Fade Ended");
-
-            cm.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
 
             // ../Settings
 
