@@ -3,9 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
     using System.Linq;
-    using System.Text.RegularExpressions;
     using System.Timers;
     using System.Windows;
     using System.Windows.Controls;
@@ -18,8 +16,8 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
 
     using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
-    using RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines;
     using RoliSoft.TVShowTracker.Tables;
     using RoliSoft.TVShowTracker.TaskDialogs;
 

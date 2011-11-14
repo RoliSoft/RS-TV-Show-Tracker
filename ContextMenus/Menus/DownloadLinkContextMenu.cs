@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.ContextMenus
+﻿namespace RoliSoft.TVShowTracker.ContextMenus.Menus
 {
     /// <summary>
     /// Represents a download link context menu item.

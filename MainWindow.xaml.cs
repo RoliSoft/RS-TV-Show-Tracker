@@ -202,6 +202,11 @@
                     Thread.Sleep(5000);
                     CheckForUpdate();
                 }).Start();
+
+            foreach (var plugin in Extensibility.GetNewInstances<StartupPlugin>())
+            {
+                plugin.Run();
+            }
         }
 
         /// <summary>

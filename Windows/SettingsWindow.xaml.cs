@@ -16,8 +16,7 @@
 
     using Microsoft.Win32;
 
-    using RoliSoft.TVShowTracker.ContextMenus;
-    using RoliSoft.TVShowTracker.Parsers;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.LinkCheckers;
@@ -1192,8 +1191,14 @@
                     typeof(RecommendationEngine), 
                     typeof(SocialEngine),
                     typeof(WebSearchEngine),
+                    typeof(OverviewContextMenu),
+                    typeof(UpcomingListingContextMenu),
+                    typeof(EpisodeListingContextMenu),
                     typeof(DownloadLinkContextMenu),
                     typeof(SubtitleContextMenu),
+                    typeof(StatisticsContextMenu),
+                    typeof(RecommendationContextMenu),
+                    typeof(StartupPlugin),
                     typeof(IPlugin)
                 };
 
@@ -1209,6 +1214,12 @@
                     "/RSTVShowTracker;component/Images/magnifier.png",
                     "/RSTVShowTracker;component/Images/menu.png",
                     "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/document-insert.png",
                     "/RSTVShowTracker;component/Images/dll.gif"
                 };
 

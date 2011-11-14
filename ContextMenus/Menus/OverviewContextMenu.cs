@@ -1,4 +1,4 @@
-﻿namespace RoliSoft.TVShowTracker.ContextMenus
+﻿namespace RoliSoft.TVShowTracker.ContextMenus.Menus
 {
     /// <summary>
     /// Represents an overview context menu item.

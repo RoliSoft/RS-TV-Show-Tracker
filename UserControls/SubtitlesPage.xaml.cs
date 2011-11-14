@@ -14,6 +14,7 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
     using RoliSoft.TVShowTracker.TaskDialogs;

@@ -126,14 +126,14 @@
     </ApplicationDefinition>
     <Compile Include="AutoDownloader.cs" />
     <Compile Include="ContextMenus\ContextMenu.cs" />
-    <Compile Include="ContextMenus\RecommendationContextMenu.cs" />
-    <Compile Include="ContextMenus\StatisticsContextMenu.cs" />
-    <Compile Include="ContextMenus\UpcomingListingContextMenu.cs" />
-    <Compile Include="ContextMenus\EpisodeListingContextMenu.cs" />
-    <Compile Include="ContextMenus\OverviewContextMenu.cs" />
-    <Compile Include="ContextMenus\DownloadLinkContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\RecommendationContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\StatisticsContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\UpcomingListingContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\EpisodeListingContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\OverviewContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\DownloadLinkContextMenu.cs" />
     <Compile Include="ContextMenus\ContextMenuItem.cs" />
-    <Compile Include="ContextMenus\SubtitleContextMenu.cs" />
+    <Compile Include="ContextMenus\Menus\SubtitleContextMenu.cs" />
     <Compile Include="Dependencies\GreyableImage\GreyableImage.cs" />
     <Compile Include="Dependencies\GreyableImage\ImageGreyer.cs" />
     <Compile Include="DLCAPI.cs" />
@@ -203,6 +203,7 @@
     <Compile Include="Parsers\Social\Engines\Identica.cs" />
     <Compile Include="Parsers\Social\Engines\Twitter.cs" />
     <Compile Include="Parsers\WebSearch\WebSearchEngine.cs" />
+    <Compile Include="StartupPlugin.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\ShowFile.cs" />
