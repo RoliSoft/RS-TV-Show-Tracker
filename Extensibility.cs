@@ -8,6 +8,7 @@
 
     using IronPython.Hosting;
 
+    using Microsoft.Scripting;
     using Microsoft.Scripting.Hosting;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
@@ -38,93 +39,152 @@
         /// <value>
         /// The list of compiled and loaded scripts.
         /// </value>
-        public static List<Script> Scripts { get; set; } 
+        public static List<Script> Scripts { get; set; }
+
+        /// <summary>
+        /// Gets or sets a dictionary where file extensions are mapped to their loader methods.
+        /// </summary>
+        /// <value>
+        /// The dictionary where file extensions are mapped to their loader methods.
+        /// </value>
+        public static Dictionary<string, Func<string, bool>> Handlers { get; set; }
 
         /// <summary>
         /// Initializes the <see cref="Extensibility"/> class.
         /// </summary>
         static Extensibility()
         {
+            Handlers = new Dictionary<string, Func<string, bool>>
+                {
+                    { ".dll", LoadAssembly        },
+                    { ".py",  LoadPythonScript    },
+                  //{ ".rb",  LoadRubyScript      },
+                  //{ ".php", LoadPhalangerScript },
+                };
+
             InternalPlugins = new List<Type>(GetDerivedTypesFromAssembly<IPlugin>(Assembly.GetExecutingAssembly()));
             ExternalPlugins = new List<Type>();
+            Scripts         = new List<Script>();
 
-            foreach (var file in Directory.EnumerateFiles(Signature.FullPath, "*.Plugin.dll"))
+            foreach (var file in Directory.EnumerateFiles(Signature.FullPath, "*.Plugin.*"))
             {
-                try
+                Func<string, bool> load;
+
+                if (Handlers.TryGetValue(Path.GetExtension(file), out load))
                 {
-                    var asm = Assembly.LoadFile(file);
-                    var lst = GetDerivedTypesFromAssembly<IPlugin>(asm);
-
-                    ExternalPlugins.AddRange(lst);
-                }
-                catch (Exception ex)
-                {
-                    var sb = new StringBuilder();
-
-                parseException:
-                    sb.AppendLine(ex.GetType() + ": " + ex.Message);
-                    sb.AppendLine(ex.StackTrace);
-
-                    if (ex.InnerException != null)
-                    {
-                        ex = ex.InnerException;
-                        goto parseException;
-                    }
-
-                    new TaskDialog
-                        {
-                            Icon                  = TaskDialogStandardIcon.Error,
-                            Caption               = "Failed to load plugin",
-                            InstructionText       = "Failed to load plugin",
-                            Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), new FileInfo(file).Name),
-                            DetailsExpandedText   = sb.ToString(),
-                            DetailsExpandedLabel  = "Hide stacktrace",
-                            DetailsCollapsedLabel = "Show stacktrace"
-                        }.Show();
+                    load(file);
                 }
             }
+        }
 
-            Scripts = new List<Script>();
-
-            foreach (var file in Directory.EnumerateFiles(Signature.FullPath, "*.Plugin.py"))
+        /// <summary>
+        /// Loads the specified assembly and extracts the classes.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <returns>
+        ///    <c>true</c> when there were no errors; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool LoadAssembly(string file)
+        {
+            try
             {
-                try
+                var asm = Assembly.LoadFile(file);
+                var lst = GetDerivedTypesFromAssembly<IPlugin>(asm);
+
+                ExternalPlugins.AddRange(lst);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                var sb = new StringBuilder();
+
+            parseException:
+                sb.AppendLine(ex.GetType() + ": " + ex.Message);
+                sb.AppendLine(ex.StackTrace);
+
+                if (ex.InnerException != null)
                 {
-                    var engine = Python.CreateEngine();
-                    engine.SetSearchPaths(new[] { Signature.FullPath });
-
-                    var source = engine.CreateScriptSourceFromFile(file);
-                    var scope  = engine.CreateScope();
-
-                    source.Execute(scope);
-
-                    Scripts.Add(new Script(file, scope));
+                    ex = ex.InnerException;
+                    goto parseException;
                 }
-                catch (Exception ex)
-                {
-                    var sb = new StringBuilder();
 
-                parseException:
-                    sb.AppendLine(ex.GetType() + ": " + ex.Message);
-                    sb.AppendLine(ex.StackTrace);
-
-                    if (ex.InnerException != null)
+                new TaskDialog
                     {
-                        ex = ex.InnerException;
-                        goto parseException;
-                    }
+                        Icon                  = TaskDialogStandardIcon.Error,
+                        Caption               = "Failed to load plugin",
+                        InstructionText       = "Failed to load plugin",
+                        Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), new FileInfo(file).Name),
+                        DetailsExpandedText   = sb.ToString(),
+                        DetailsExpandedLabel  = "Hide stacktrace",
+                        DetailsCollapsedLabel = "Show stacktrace"
+                    }.Show();
 
-                    new TaskDialog
-                        {
-                            Icon                  = TaskDialogStandardIcon.Error,
-                            Caption               = "Failed to load plugin",
-                            InstructionText       = "Failed to load plugin",
-                            Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), new FileInfo(file).Name),
-                            DetailsExpandedText   = sb.ToString(),
-                            DetailsExpandedLabel  = "Hide stacktrace",
-                            DetailsCollapsedLabel = "Show stacktrace"
-                        }.Show();
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Compiles the specified Python script and extracts the classes.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <returns>
+        ///    <c>true</c> when there were no errors; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool LoadPythonScript(string file)
+        {
+            try
+            {
+                var engine = Python.CreateEngine();
+                engine.SetSearchPaths(new[] { Signature.FullPath });
+
+                var source = engine.CreateScriptSourceFromFile(file);
+                var scope  = engine.CreateScope();
+
+                source.Execute(scope);
+
+                Scripts.Add(new Script(file, scope));
+
+                return true;
+            }
+            catch (SyntaxErrorException ex)
+            {
+                new TaskDialog
+                    {
+                        Icon            = TaskDialogStandardIcon.Error,
+                        Caption         = "Failed to parse plugin",
+                        InstructionText = "Failed to parse plugin",
+                        Text            = "Syntax error in {0} line {1} column {2}:\r\n\r\n{3}".FormatWith(new FileInfo(file).Name, ex.Line, ex.Column, ex.Message.ToUppercaseFirst()),
+                    }.Show();
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                var sb = new StringBuilder();
+
+            parseException:
+                sb.AppendLine(ex.GetType() + ": " + ex.Message);
+                sb.AppendLine(ex.StackTrace);
+
+                if (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    goto parseException;
                 }
+
+                new TaskDialog
+                    {
+                        Icon                  = TaskDialogStandardIcon.Error,
+                        Caption               = "Failed to load plugin",
+                        InstructionText       = "Failed to load plugin",
+                        Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), new FileInfo(file).Name),
+                        DetailsExpandedText   = sb.ToString(),
+                        DetailsExpandedLabel  = "Hide stacktrace",
+                        DetailsCollapsedLabel = "Show stacktrace"
+                    }.Show();
+
+                return false;
             }
         }
 
