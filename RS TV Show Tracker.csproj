@@ -762,6 +762,9 @@
   <ItemGroup>
     <Content Include="Dependencies\BouncyCastle.Crypto.dll" />
     <Content Include="Dependencies\Hammock.ClientProfile.dll" />
+    <Content Include="Dependencies\IronPython.dll" />
+    <Content Include="Dependencies\Microsoft.Dynamic.dll" />
+    <Content Include="Dependencies\Microsoft.Scripting.dll" />
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
