@@ -206,6 +206,16 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://ironpython.net/">IronPython</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://dlr.codeplex.com/">Microsoft® Dynamic Language Runtime™</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://windowsformsaero.codeplex.com/">Windows Forms Aero</Hyperlink>
                             </Paragraph>
                         </ListItem>
