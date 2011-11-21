@@ -184,6 +184,8 @@
     <Compile Include="Parsers\Guides\Engines\AnimeNewsNetwork.cs" />
     <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\LinkSafe.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\RapidShare.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\DepositFiles.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\FileJungle.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Netload.cs" />
