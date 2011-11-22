@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -69,7 +68,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "sorozatok.php", "cim=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(query)), encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html = Utils.GetHTML(Site + "kereso.php", "cim=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(query)), encoding: Encoding.GetEncoding("iso-8859-2"));
             var subs = html.DocumentNode.SelectNodes("//td/a[starts-with(@href,'download.php?file=')]");
 
             if (subs == null)
