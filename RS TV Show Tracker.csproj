@@ -149,6 +149,7 @@
     <Compile Include="Extensibility.cs" />
     <Compile Include="HttpToSocks.cs" />
     <Compile Include="IPlugin.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\OneDDL.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\FreshWap.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Mukki.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />
@@ -184,6 +185,8 @@
     <Compile Include="Parsers\Guides\Engines\AnimeNewsNetwork.cs" />
     <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
     <Compile Include="Parsers\Guides\Engines\IMDb.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Multiupload.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\FilePost.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\LinkSafe.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\RapidShare.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\DepositFiles.cs" />
