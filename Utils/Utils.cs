@@ -28,8 +28,6 @@
 
     using Newtonsoft.Json;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent;
-
     /// <summary>
     /// Provides various little utility functions.
     /// </summary>
@@ -62,7 +60,9 @@
         /// <summary>
         /// Gets a value indicating whether the operating system is Windows 7 or newer.
         /// </summary>
-        /// <value><c>true</c> if the OS is Windows 7 or newer; otherwise, <c>false</c>.</value>
+        /// <value>
+        /// 	<c>true</c> if the OS is Windows 7 or newer; otherwise, <c>false</c>.
+        /// </value>
         public static bool Is7
         {
             get
@@ -70,6 +70,20 @@
                 return Environment.OSVersion.Platform == PlatformID.Win32NT &&
                      ((Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 1) ||
                        Environment.OSVersion.Version.Major >= 6);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the software has administrator rights.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the software has administrator rights; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsAdmin
+        {
+            get
+            {
+                return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
 
@@ -219,7 +233,7 @@
 
             if (elevate)
             {
-                if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+                if (!IsAdmin)
                 {
                     p.StartInfo.Verb = "runas";
                 }

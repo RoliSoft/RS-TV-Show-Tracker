@@ -105,6 +105,7 @@
 
                 currentTimezone.ContentEnd.InsertTextInRun(tzinfo);
 
+                searchNtfsMft.IsChecked       = Settings.Get<bool>("Search NTFS MFT records");
                 disableAero.IsChecked         = !Settings.Get("Enable Aero", true);
                 disableAnimations.IsChecked   = !Settings.Get("Enable Animations", true);
                 showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
@@ -364,6 +365,37 @@
             }
 
             Settings.Set("Processes to Monitor", proc);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the searchNtfsMft control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchNtfsMftChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Search NTFS MFT records", true);
+
+            if (!Utils.IsAdmin)
+            {
+                new TaskDialog
+                    {
+                        CommonIcon  = TaskDialogIcon.Warning,
+                        Title       = "Administrator right required",
+                        Instruction = "Administrator right required",
+                        Content     = "The software doesn't have administrator rights, which means it won't be able to access the MFT records on your NTFS partitions. Please restart the software by right-clicking on the executable and selecting \"Run as administrator\" from the menu."
+                    }.Show();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the searchNtfsMft control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchNtfsMftUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Search NTFS MFT records", false);
         }
 
         /// <summary>

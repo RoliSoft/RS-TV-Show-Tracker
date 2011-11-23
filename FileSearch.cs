@@ -8,6 +8,8 @@
     using System.Text.RegularExpressions;
     using System.Threading;
 
+    using Dependencies.USNJournal;
+
     /// <summary>
     /// Provides file search for finding the episodes on the disk.
     /// </summary>
@@ -22,7 +24,7 @@
         /// Gets the paths where the search will begin.
         /// </summary>
         /// <value>The start paths.</value>
-        public string[] StartPaths { get; internal set; }
+        public Dictionary<string, List<string>> StartPaths { get; internal set; }
 
         /// <summary>
         /// Gets the name of the show and the episode number.
@@ -58,8 +60,21 @@
             _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode, airdate);
 
             ShowQuery  = show + " " + episode;
-            StartPaths = paths.ToArray();
             Files      = new List<string>();
+            StartPaths = new Dictionary<string, List<string>>();
+
+            foreach (var path in paths)
+            {
+                var match = Regex.Match(path, @"^([A-Za-z]{1,2}):\\");
+                var drive = match.Success ? match.Groups[1].Value : string.Empty;
+
+                if (!StartPaths.ContainsKey(drive))
+                {
+                    StartPaths[drive] = new List<string>();
+                }
+
+                StartPaths[drive].Add(path);
+            }
         }
 
         /// <summary>
@@ -84,18 +99,49 @@
         /// </summary>
         private void Search()
         {
-            foreach (var path in StartPaths)
+            foreach (var paths in StartPaths)
             {
-                ScanDirectoryForFile(path);
+                DriveInfo drive = null;
+
+                if (paths.Key != string.Empty)
+                {
+                    try
+                    {
+                        drive = new DriveInfo(paths.Key);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainWindow.Active.HandleUnexpectedException(ex);
+                    }
+                }
+
+                if (drive != null && drive.DriveFormat == "NTFS" && Settings.Get<bool>("Search NTFS MFT records") && Utils.IsAdmin)
+                {
+                    try
+                    {
+                        ScanNtfsMftForFile(drive, paths.Value.Count == 1 && paths.Value[0].Length == 3 ? null : paths.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainWindow.Active.HandleUnexpectedException(ex);
+                    }
+                }
+                else
+                {
+                    foreach (var path in paths.Value)
+                    {
+                        ScanDirectoryForFile(path);
+                    }
+                }
             }
 
             FileSearchDone.Fire(this);
         }
 
         /// <summary>
-        /// Scans the directory recursively for an episode.
+        /// Scans the directory recursively for a matching file.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">The path to start the search from.</param>
         private void ScanDirectoryForFile(string path)
         {
             // search for matching files
@@ -103,16 +149,20 @@
             {
                 foreach (var file in Directory.EnumerateFiles(path))
                 {
-                    var name = Path.GetFileName(file);
-                    var dirs = Path.GetDirectoryName(file) ?? string.Empty;
-
-                    if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
+                    try
                     {
-                        var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
-                        if (pf.Success && _titleParts.SequenceEqual(Database.GetReleaseName(pf.Show, replaceApostrophes: @"['`’\._]?")))
+                        if (IsMatch(file))
                         {
                             Files.Add(file);
                         }
+                    }
+                    catch (PathTooLongException)        { }
+                    catch (SecurityException)           { }
+                    catch (UnauthorizedAccessException) { }
+                    catch (DirectoryNotFoundException)  { }
+                    catch (Exception ex)
+                    {
+                        MainWindow.Active.HandleUnexpectedException(ex);
                     }
                 }
             }
@@ -146,6 +196,58 @@
             {
                 MainWindow.Active.HandleUnexpectedException(ex);
             }
+        }
+
+        /// <summary>
+        /// Scans the NTFS Master File Table entries for a matching file.
+        /// </summary>
+        /// <param name="drive">The partition to scan.</param>
+        /// <param name="paths">The paths to which the search should be limited.</param>
+        private void ScanNtfsMftForFile(DriveInfo drive, IEnumerable<string> paths = null)
+        {
+            var usn  = new NtfsUsnJournal(drive);
+            var list = usn.GetParsedPaths(ShowNames.Regexes.KnownVideo, paths);
+
+            foreach (var file in list)
+            {
+                try
+                {
+                    if (IsMatch(file))
+                    {
+                        Files.Add(file);
+                    }
+                }
+                catch (PathTooLongException)        { }
+                catch (SecurityException)           { }
+                catch (UnauthorizedAccessException) { }
+                catch (DirectoryNotFoundException)  { }
+                catch (Exception ex)
+                {
+                    MainWindow.Active.HandleUnexpectedException(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified file is a match.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified file is a match; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsMatch(string file)
+        {
+            var name = Path.GetFileName(file);
+            var dirs = Path.GetDirectoryName(file) ?? string.Empty;
+
+            if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
+            {
+                var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
+
+                return pf.Success && _titleParts.SequenceEqual(Database.GetReleaseName(pf.Show, replaceApostrophes: @"['`’\._]?"));
+            }
+
+            return false;
         }
     }
 }

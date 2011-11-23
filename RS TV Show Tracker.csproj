@@ -143,6 +143,8 @@
     <Compile Include="ContextMenus\Menus\SubtitleContextMenu.cs" />
     <Compile Include="Dependencies\GreyableImage\GreyableImage.cs" />
     <Compile Include="Dependencies\GreyableImage\ImageGreyer.cs" />
+    <Compile Include="Dependencies\USNJournal\NtfsUsnJournal.cs" />
+    <Compile Include="Dependencies\USNJournal\Win32Api.cs" />
     <Compile Include="DLCAPI.cs" />
     <Compile Include="Downloaders\Engines\BinSearchDownloader.cs" />
     <Compile Include="Downloaders\Engines\PodnapisiDownloader.cs" />
@@ -773,6 +775,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\fire.png" />
     <Resource Include="Images\menu.png" />
     <Resource Include="Images\pubclass.gif" />
     <Resource Include="Images\dll.gif" />
