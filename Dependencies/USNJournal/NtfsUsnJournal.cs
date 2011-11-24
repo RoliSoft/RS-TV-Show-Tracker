@@ -24,7 +24,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
     using System.Runtime.InteropServices;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Accesses and parses the NTFS Master File Table entries.
@@ -146,7 +145,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
             IntPtr pData = Marshal.AllocHGlobal(pDataSize);
             Win32Api.ZeroMemory(pData, pDataSize);
             uint outBytesReturned = 0;
-            Win32Api.UsnEntry usnEntry = null;
 
             //
             // Gather up volume's directories
@@ -164,7 +162,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 IntPtr pUsnRecord = new IntPtr(pData.ToInt32() + sizeof (Int64));
                 while (outBytesReturned > 60)
                 {
-                    usnEntry = new Win32Api.UsnEntry(pUsnRecord);
+                    var usnEntry = new Win32Api.UsnEntry(pUsnRecord);
 
                     if (usnEntry.IsFile && (filter == null || filter.IsMatch(usnEntry.Name)))
                     {
@@ -201,19 +199,17 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
 
             var final = new ConcurrentBag<string>();
 
-            Parallel.ForEach(files, file =>
+            files.AsParallel().WithDegreeOfParallelism(3).ForAll(file =>
                 {
                     var names   = new Stack<string>();
                     var current = file;
 
-                    while (true)
-                    {
-                        names.Push(current.Name);
+                  buildName:
+                    names.Push(current.Name);
 
-                        if (!dirs.TryGetValue(current.ParentFileReferenceNumber, out current))
-                        {
-                            break;
-                        }
+                    if (dirs.TryGetValue(current.ParentFileReferenceNumber, out current))
+                    {
+                        goto buildName;
                     }
 
                     var name = _driveInfo.Name + string.Join(@"\", names);

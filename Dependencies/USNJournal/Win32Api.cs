@@ -499,7 +499,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
         /// Parent File Reference Number(64bits), Reason Code(32bits), File Attributes(32bits),
         /// File Name Length(32bits), the File Name Offset(32bits) and the File Name.
         /// </summary>
-        public class UsnEntry : IComparable<UsnEntry>
+        public struct UsnEntry : IComparable<UsnEntry>
         {
             private const int FR_OFFSET = 8;
             private const int PFR_OFFSET = 16;
@@ -515,12 +515,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 get { return _recordLength; }
             }
 
-            private Int64 _usn;
-            public Int64 USN
-            {
-                get { return _usn; }
-            }
-
             private UInt64 _frn;
             public UInt64 FileReferenceNumber
             {
@@ -533,12 +527,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 get { return _pfrn; }
             }
 
-            private UInt32 _reason;
-            public UInt32 Reason
-            {
-                get { return _reason; }
-            }
-
             private string _name;
             public string Name
             {
@@ -548,34 +536,12 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 }
             }
 
-            private string _oldName;
-            public string OldName
-            {
-                get
-                {
-                    if (0 != (_fileAttributes & USN_REASON_RENAME_OLD_NAME))
-                    {
-                        return _oldName;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                set { _oldName = value; }
-            }
-
             private UInt32 _fileAttributes;
             public bool IsFolder
             {
                 get
                 {
-                    bool bRtn = false;
-                    if (0 != (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
-                    {
-                        bRtn = true;
-                    }
-                    return bRtn;
+                    return 0 != (_fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
                 }
             }
 
@@ -583,12 +549,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
             {
                 get
                 {
-                    bool bRtn = false;
-                    if (0 == (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
-                    {
-                        bRtn = true;
-                    }
-                    return bRtn;
+                    return 0 == (_fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
                 }
             }
 
@@ -601,15 +562,11 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 _recordLength = (UInt32)Marshal.ReadInt32(ptrToUsnRecord);
                 _frn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, FR_OFFSET);
                 _pfrn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, PFR_OFFSET);
-                _usn = (Int64)Marshal.ReadInt64(ptrToUsnRecord, USN_OFFSET);
-                _reason = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, REASON_OFFSET);
                 _fileAttributes = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
                 short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
                 short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
                 _name = Marshal.PtrToStringUni(new IntPtr(ptrToUsnRecord.ToInt32() + fileNameOffset), fileNameLength / sizeof(char));
             }
-
-
 
             #region IComparable<UsnEntry> Members
 
