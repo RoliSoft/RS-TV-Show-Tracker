@@ -193,9 +193,23 @@
             _fs = new FileSearch(paths, show, episode, airdate);
 
             _fs.FileSearchDone += NearVideoFileSearchDone;
+            _fs.FileSearchProgressChanged += NearVideoFileSearchProgressChanged;
             _fs.BeginSearch();
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+        }
+
+        /// <summary>
+        /// Event handler for <c>FileSearch.FileSearchProgressChanged</c>.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="string"/> instance containing the event data.</param>
+        private void NearVideoFileSearchProgressChanged(object sender, EventArgs<string> e)
+        {
+            if (_td != null)
+            {
+                _td.Content = e.Data;
+            }
         }
 
         /// <summary>

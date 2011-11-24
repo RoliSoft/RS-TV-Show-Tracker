@@ -21,6 +21,11 @@
         public event EventHandler<EventArgs> FileSearchDone;
 
         /// <summary>
+        /// Occurs when the progress of the file search has changed.
+        /// </summary>
+        public event EventHandler<EventArgs<string>> FileSearchProgressChanged;
+
+        /// <summary>
         /// Gets the paths where the search will begin.
         /// </summary>
         /// <value>The start paths.</value>
@@ -130,6 +135,8 @@
                 {
                     foreach (var path in paths.Value)
                     {
+                        FileSearchProgressChanged.Fire(this, "Searching recursively for matching files in " + path + "...");
+
                         ScanDirectoryForFile(path);
                     }
                 }
@@ -205,8 +212,12 @@
         /// <param name="paths">The paths to which the search should be limited.</param>
         private void ScanNtfsMftForFile(DriveInfo drive, IEnumerable<string> paths = null)
         {
+            FileSearchProgressChanged.Fire(this, "Reading the MFT records of the " + drive.Name[0] + " partition...");
+
             var usn  = new NtfsUsnJournal(drive);
             var list = usn.GetParsedPaths(ShowNames.Regexes.KnownVideo, paths);
+
+            FileSearchProgressChanged.Fire(this, "Searching for matching files in the " + drive.Name[0] + " partition...");
 
             foreach (var file in list)
             {

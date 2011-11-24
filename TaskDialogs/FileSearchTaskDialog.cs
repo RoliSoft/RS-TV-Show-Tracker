@@ -4,12 +4,11 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
-    using System.Linq;
     using System.Threading;
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.FileNames;
+    using FileNames;
 
     using VistaControls.TaskDialog;
 
@@ -76,6 +75,7 @@
             _fs = new FileSearch(paths, show, episode, airdate);
 
             _fs.FileSearchDone += FileSearchDone;
+            _fs.FileSearchProgressChanged += FileSearchProgressChanged;
             _fs.BeginSearch();
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
@@ -96,6 +96,19 @@
                 _res    = Result.Cancel;
 
                 _fs.CancelSearch();
+            }
+        }
+
+        /// <summary>
+        /// Event handler for <c>FileSearch.FileSearchProgressChanged</c>.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="string"/> instance containing the event data.</param>
+        private void FileSearchProgressChanged(object sender, EventArgs<string> e)
+        {
+            if (_td != null)
+            {
+                _td.Content = e.Data;
             }
         }
 
