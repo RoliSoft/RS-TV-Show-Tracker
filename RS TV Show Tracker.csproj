@@ -141,6 +141,10 @@
     <Compile Include="ContextMenus\Menus\DownloadLinkContextMenu.cs" />
     <Compile Include="ContextMenus\ContextMenuItem.cs" />
     <Compile Include="ContextMenus\Menus\SubtitleContextMenu.cs" />
+    <Compile Include="Scripting\ExternalType.cs" />
+    <Compile Include="Scripting\ExternalTypes\DLRType.cs" />
+    <Compile Include="Scripting\Interpreters\IronPython.cs" />
+    <Compile Include="Scripting\ScriptingPlugin.cs" />
     <Compile Include="Dependencies\GreyableImage\GreyableImage.cs" />
     <Compile Include="Dependencies\GreyableImage\ImageGreyer.cs" />
     <Compile Include="Dependencies\USNJournal\NtfsUsnJournal.cs" />
@@ -775,6 +779,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\python.png" />
     <Resource Include="Images\fire.png" />
     <Resource Include="Images\menu.png" />
     <Resource Include="Images\pubclass.gif" />

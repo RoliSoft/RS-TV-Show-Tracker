@@ -3,13 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Text;
 
-    using IronPython.Hosting;
+    using Scripting;
 
     using Microsoft.Scripting;
-    using Microsoft.Scripting.Hosting;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
     /// <summary>
@@ -39,152 +39,82 @@
         /// <value>
         /// The list of compiled and loaded scripts.
         /// </value>
-        public static List<Script> Scripts { get; set; }
+        public static List<ExternalType> Scripts { get; set; }
 
         /// <summary>
-        /// Gets or sets a dictionary where file extensions are mapped to their loader methods.
+        /// Gets or sets a dictionary where file extensions are mapped to their handler plugins.
         /// </summary>
         /// <value>
-        /// The dictionary where file extensions are mapped to their loader methods.
+        /// The dictionary where file extensions are mapped to their handler plugins.
         /// </value>
-        public static Dictionary<string, Func<string, bool>> Handlers { get; set; }
+        public static Dictionary<string, ScriptingPlugin> Handlers { get; set; }
 
         /// <summary>
         /// Initializes the <see cref="Extensibility"/> class.
         /// </summary>
         static Extensibility()
         {
-            Handlers = new Dictionary<string, Func<string, bool>>
-                {
-                    { ".dll", LoadAssembly        },
-                    { ".py",  LoadPythonScript    },
-                  //{ ".rb",  LoadRubyScript      },
-                  //{ ".php", LoadPhalangerScript },
-                };
+            // load internal classes
 
             InternalPlugins = new List<Type>(GetDerivedTypesFromAssembly<IPlugin>(Assembly.GetExecutingAssembly()));
+
+            // load external plugins
+
             ExternalPlugins = new List<Type>();
-            Scripts         = new List<Script>();
+            Scripts         = new List<ExternalType>();
 
-            foreach (var file in Directory.EnumerateFiles(Signature.FullPath, "*.Plugin.*"))
+            var plugins = Directory.GetFiles(Signature.FullPath, "*.Plugin.*");
+
+            foreach (var file in plugins.Where(f => f.EndsWith(".dll")))
             {
-                Func<string, bool> load;
-
-                if (Handlers.TryGetValue(Path.GetExtension(file), out load))
+                try
                 {
-                    load(file);
+                    var asm = Assembly.LoadFile(file);
+                    var lst = GetDerivedTypesFromAssembly<IPlugin>(asm);
+
+                    ExternalPlugins.AddRange(lst);
+                }
+                catch (Exception ex)
+                {
+                    HandleLoadException(file, ex);
                 }
             }
-        }
 
-        /// <summary>
-        /// Loads the specified assembly and extracts the classes.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <returns>
-        ///    <c>true</c> when there were no errors; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool LoadAssembly(string file)
-        {
-            try
+            // load script handlers
+
+            Handlers = new Dictionary<string, ScriptingPlugin>();
+
+            foreach (var splugin in GetNewInstances<ScriptingPlugin>(inclScripts: false))
             {
-                var asm = Assembly.LoadFile(file);
-                var lst = GetDerivedTypesFromAssembly<IPlugin>(asm);
-
-                ExternalPlugins.AddRange(lst);
-
-                return true;
+                Handlers.Add(splugin.Extension, splugin);
             }
-            catch (Exception ex)
+
+            // load external scripts
+
+            foreach (var file in plugins.Where(f => !f.EndsWith(".dll")))
             {
-                var sb = new StringBuilder();
+                ScriptingPlugin handler;
 
-            parseException:
-                sb.AppendLine(ex.GetType() + ": " + ex.Message);
-                sb.AppendLine(ex.StackTrace);
-
-                if (ex.InnerException != null)
+                if (!Handlers.TryGetValue(Path.GetExtension(file), out handler))
                 {
-                    ex = ex.InnerException;
-                    goto parseException;
+                    continue;
                 }
 
-                new TaskDialog
-                    {
-                        Icon                  = TaskDialogStandardIcon.Error,
-                        Caption               = "Failed to load plugin",
-                        InstructionText       = "Failed to load plugin",
-                        Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), new FileInfo(file).Name),
-                        DetailsExpandedText   = sb.ToString(),
-                        DetailsExpandedLabel  = "Hide stacktrace",
-                        DetailsCollapsedLabel = "Show stacktrace"
-                    }.Show();
+                List<ExternalType> types = null;
 
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Compiles the specified Python script and extracts the classes.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <returns>
-        ///    <c>true</c> when there were no errors; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool LoadPythonScript(string file)
-        {
-            try
-            {
-                var engine = Python.CreateEngine();
-                engine.SetSearchPaths(new[] { Signature.FullPath });
-
-                var source = engine.CreateScriptSourceFromFile(file);
-                var scope  = engine.CreateScope();
-
-                source.Execute(scope);
-
-                Scripts.Add(new Script(file, scope));
-
-                return true;
-            }
-            catch (SyntaxErrorException ex)
-            {
-                new TaskDialog
-                    {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Failed to parse plugin",
-                        InstructionText = "Failed to parse plugin",
-                        Text            = "Syntax error in {0} line {1} column {2}:\r\n\r\n{3}".FormatWith(new FileInfo(file).Name, ex.Line, ex.Column, ex.Message.ToUppercaseFirst()),
-                    }.Show();
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                var sb = new StringBuilder();
-
-            parseException:
-                sb.AppendLine(ex.GetType() + ": " + ex.Message);
-                sb.AppendLine(ex.StackTrace);
-
-                if (ex.InnerException != null)
+                try
                 {
-                    ex = ex.InnerException;
-                    goto parseException;
+                    types = handler.LoadScript(file);
+                }
+                catch (Exception ex)
+                {
+                    HandleLoadException(file, ex);
                 }
 
-                new TaskDialog
-                    {
-                        Icon                  = TaskDialogStandardIcon.Error,
-                        Caption               = "Failed to load plugin",
-                        InstructionText       = "Failed to load plugin",
-                        Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), new FileInfo(file).Name),
-                        DetailsExpandedText   = sb.ToString(),
-                        DetailsExpandedLabel  = "Hide stacktrace",
-                        DetailsCollapsedLabel = "Show stacktrace"
-                    }.Show();
-
-                return false;
+                if (types != null && types.Count != 0)
+                {
+                    Scripts.AddRange(types);
+                }
             }
         }
 
@@ -268,62 +198,55 @@
 
                 foreach (var script in Scripts)
                 {
-                    if (!script.Type.IsAbstract && parent.IsAssignableFrom(script.Type))
+                    if (script.Handler.IsCompatible(script, parent))
                     {
-                        yield return (T)script.Scope.Engine.Operations.CreateInstance(script.Scope.GetVariable(script.Name));
+                        yield return script.Handler.CreateInstance<T>(script);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Represents a Python plugin script.
+        /// Handles the exception which occurred while loading a plugin.
         /// </summary>
-        public class Script
+        /// <param name="file">The plugin file.</param>
+        /// <param name="ex">The thrown exception.</param>
+        private static void HandleLoadException(string file, Exception ex)
         {
-            /// <summary>
-            /// Gets or sets the name.
-            /// </summary>
-            /// <value>
-            /// The name.
-            /// </value>
-            public string Name { get; set; }
-
-            /// <summary>
-            /// Gets or sets the full path to the file.
-            /// </summary>
-            /// <value>
-            /// The full path to the file.
-            /// </value>
-            public string File { get; set; }
-
-            /// <summary>
-            /// Gets or sets the CLR type of the class.
-            /// </summary>
-            /// <value>
-            /// The CLR type of the class.
-            /// </value>
-            public Type Type { get; set; }
-
-            /// <summary>
-            /// Gets or sets the script scope.
-            /// </summary>
-            /// <value>
-            /// The script scope.
-            /// </value>
-            public ScriptScope Scope { get; set; }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Script"/> class.
-            /// </summary>
-            /// <param name="file">The path to the file.</param>
-            /// <param name="scope">The script scope.</param>
-            public Script(string file, ScriptScope scope)
+            if (ex is SyntaxErrorException)
             {
-                File  = file;
-                Scope = scope;
-                Name  = new FileInfo(file).Name.Replace(".Plugin.py", string.Empty);
-                Type  = Scope.GetVariable<Type>(Name);
+                new TaskDialog
+                    {
+                        Icon            = TaskDialogStandardIcon.Error,
+                        Caption         = "Failed to parse plugin",
+                        InstructionText = "Failed to parse plugin",
+                        Text            = "Syntax error in {0} line {1} column {2}:\r\n\r\n{3}".FormatWith(Path.GetFileName(file), ((SyntaxErrorException)ex).Line, ((SyntaxErrorException)ex).Column, ex.Message.ToUppercaseFirst()),
+                    }.Show();
+            }
+            else
+            {
+                var sb = new StringBuilder();
+
+            parseException:
+                sb.AppendLine(ex.GetType() + ": " + ex.Message);
+                sb.AppendLine(ex.StackTrace);
+
+                if (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    goto parseException;
+                }
+
+                new TaskDialog
+                    {
+                        Icon                  = TaskDialogStandardIcon.Error,
+                        Caption               = "Failed to load plugin",
+                        InstructionText       = "Failed to load plugin",
+                        Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), Path.GetFileName(file)),
+                        DetailsExpandedText   = sb.ToString(),
+                        DetailsExpandedLabel  = "Hide stacktrace",
+                        DetailsCollapsedLabel = "Show stacktrace"
+                    }.Show();
             }
         }
     }
