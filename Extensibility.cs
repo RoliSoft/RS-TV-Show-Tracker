@@ -116,6 +116,89 @@
                     Scripts.AddRange(types);
                 }
             }
+
+            // resolve conflicts
+
+            var iremove = new List<Type>();
+            var eremove = new List<Type>();
+            var sremove = new List<ExternalType>();
+
+            foreach (var iplugin in InternalPlugins)
+            {
+                foreach (var eplugin in ExternalPlugins)
+                {
+                    if (iplugin.Name == eplugin.Name)
+                    {
+                        var iinst = (IPlugin)Activator.CreateInstance(iplugin);
+                        var einst = (IPlugin)Activator.CreateInstance(eplugin);
+
+                        if (iinst.Version >= einst.Version)
+                        {
+                            eremove.Add(eplugin);
+                        }
+                        else
+                        {
+                            iremove.Add(iplugin);
+                        }
+                    }
+                }
+
+                foreach (var splugin in Scripts)
+                {
+                    if (iplugin.Name == splugin.Name)
+                    {
+                        var iinst = (IPlugin)Activator.CreateInstance(iplugin);
+                        var sinst = splugin.Handler.CreateInstance<IPlugin>(splugin);
+
+                        if (iinst.Version >= sinst.Version)
+                        {
+                            sremove.Add(splugin);
+                        }
+                        else
+                        {
+                            iremove.Add(iplugin);
+                        }
+                    }
+                }
+            }
+
+            foreach (var splugin in Scripts)
+            {
+                foreach (var eplugin in ExternalPlugins)
+                {
+                    if (splugin.Name == eplugin.Name)
+                    {
+                        var einst = (IPlugin)Activator.CreateInstance(eplugin);
+                        var sinst = splugin.Handler.CreateInstance<IPlugin>(splugin);
+
+                        if (einst.Version >= sinst.Version)
+                        {
+                            sremove.Add(splugin);
+                        }
+                        else
+                        {
+                            eremove.Add(eplugin);
+                        }
+                    }
+                }
+            }
+
+            // remove conflicts
+
+            foreach (var iplugin in iremove)
+            {
+                InternalPlugins.Remove(iplugin);
+            }
+
+            foreach (var eplugin in eremove)
+            {
+                ExternalPlugins.Remove(eplugin);
+            }
+
+            foreach (var splugin in sremove)
+            {
+                Scripts.Remove(splugin);
+            }
         }
 
         /// <summary>
