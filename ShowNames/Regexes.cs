@@ -95,7 +95,7 @@
         /// <summary>
         /// Simple regular expression to detect S00E00 and 0x00 at the end of a query.
         /// </summary>
-        public static readonly Regex Numbering     = new Regex(@"\s+((?:S[0-9]{2}E[0-9]{2})|(?:[0-9]{1,2}x[0-9]{1,2}))", RegexOptions.IgnoreCase);
+        public static readonly Regex Numbering     = new Regex(@"\s+((?:S[0-9]{2}(?:E[0-9]{2})?)|(?:[0-9]{1,2}x[0-9]{1,2}))", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Matches release names which are season packs.
