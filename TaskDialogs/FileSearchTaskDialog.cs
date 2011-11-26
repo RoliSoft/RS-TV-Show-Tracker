@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
+    using System.Linq;
     using System.Threading;
 
     using Microsoft.WindowsAPICodePack.Taskbar;
@@ -149,7 +150,14 @@
                     break;
 
                 case 1:
-                    Utils.Run(_fs.Files[0]);
+                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_fs.Files[0]).ToLower()))
+                    {
+                        new OpenArchiveTaskDialog().OpenArchive(_fs.Files[0]);
+                    }
+                    else
+                    {
+                        Utils.Run(_fs.Files[0]);
+                    }
                     break;
 
                 default:
@@ -165,9 +173,16 @@
 
                     mfftd.ButtonClick += (s, c) =>
                         {
-                            if(c.ButtonID < _fs.Files.Count)
+                            if (c.ButtonID < _fs.Files.Count)
                             {
-                                Utils.Run(_fs.Files[c.ButtonID]);
+                                if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_fs.Files[c.ButtonID]).ToLower()))
+                                {
+                                    new OpenArchiveTaskDialog().OpenArchive(_fs.Files[c.ButtonID]);
+                                }
+                                else
+                                {
+                                    Utils.Run(_fs.Files[c.ButtonID]);
+                                }
                             }
                         };
 

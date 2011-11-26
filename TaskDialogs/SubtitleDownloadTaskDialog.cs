@@ -10,9 +10,9 @@
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Downloaders;
-    using RoliSoft.TVShowTracker.FileNames;
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using Downloaders;
+    using FileNames;
+    using Parsers.Subtitles;
 
     using SharpCompress.Archive;
 
@@ -30,17 +30,6 @@
         private Subtitle _link;
         private string _show, _episode;
         private bool _play;
-
-        /// <summary>
-        /// Gets a list of supported archive file extensions.
-        /// </summary>
-        public static string[] SupportedArchives
-        {
-            get
-            {
-                return new[] { ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2" };
-            }
-        }
 
         #region Download subtitle
         /// <summary>
@@ -323,7 +312,14 @@
 
                                 if (_play)
                                 {
-                                    Utils.Run(_fs.Files[c.ButtonID]);
+                                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_fs.Files[0]).ToLower()))
+                                    {
+                                        new OpenArchiveTaskDialog().OpenArchive(_fs.Files[c.ButtonID]);
+                                    }
+                                    else
+                                    {
+                                        Utils.Run(_fs.Files[c.ButtonID]);
+                                    }
                                 }
                             }).Start();
                     }
@@ -357,7 +353,7 @@
         /// <param name="subtitle">The original file name of the subtitle.</param>
         private void NearVideoFinishMove(string video, string temp, string subtitle)
         {
-            if (SupportedArchives.Contains(new FileInfo(subtitle).Extension.ToLower()))
+            if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(subtitle).ToLower()))
             {
                 var archive = ArchiveFactory.Open(temp);
                 var files   = archive.Entries.Where(f => !f.IsDirectory).ToList();

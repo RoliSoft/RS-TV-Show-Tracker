@@ -807,6 +807,34 @@
         }
 
         /// <summary>
+        /// Determines whether the specified file is in use by another process.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <returns>
+        ///   <c>true</c> if the file is in use by another process; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsFileLocked(string file)
+        {
+            FileStream stream = null;
+
+            try
+            {
+                stream = File.Open(file, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Serializes the specified object to a byte array.
         /// </summary>
         /// <param name="obj">The object.</param>

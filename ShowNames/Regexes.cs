@@ -70,7 +70,7 @@
         /// <summary>
         /// Matches video file extensions.
         /// </summary>
-        public static readonly Regex KnownVideo    = new Regex(@"\.(avi|mkv|mp4|ts|wmv)$", RegexOptions.IgnoreCase);
+        public static readonly Regex KnownVideo    = new Regex(@"\.(avi|mkv|mp4|ts|wmv|rar|zip|000)$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Matches if the specified file name is only a sample of the video.

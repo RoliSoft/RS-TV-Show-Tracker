@@ -229,6 +229,7 @@
     <Compile Include="Synchronization\SyncEngine.cs" />
     <Compile Include="Tables\Episode.cs" />
     <Compile Include="Tables\TVShow.cs" />
+    <Compile Include="TaskDialogs\OpenArchiveTaskDialog.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\OnlineVideoSearchEngineTaskDialog.cs" />
