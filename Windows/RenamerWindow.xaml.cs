@@ -119,7 +119,7 @@
         /// <summary>
         /// Contains the parsed name for the sample file.
         /// </summary>
-        public static readonly string[] SampleTitleParts = ShowNames.Parser.GetRoot(SampleInfo.Show);
+        public static readonly Regex SampleTitleRegex = ShowNames.Parser.GenerateTitleRegex(SampleInfo.Show);
 
         /// <summary>
         /// Contains a regular expression which matches the episode parts for the sample file.
@@ -493,7 +493,7 @@
             Settings.Set("Rename Format", Format = renameFormatTextBox.Text);
             resultingNameTextBox.Text = FileNames.Parser.FormatFileName(Format, SampleInfo);
 
-            if (ShowNames.Parser.IsMatch(Path.GetFileName(resultingNameTextBox.Text), SampleTitleParts, SampleEpisodeRegex))
+            if (ShowNames.Parser.IsMatch(Path.GetFileName(resultingNameTextBox.Text), SampleTitleRegex, SampleEpisodeRegex))
             {
                 resultingDetected.Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/tick.png", UriKind.Relative));
                 resultingDetected.ToolTip = "The software recognizes this format.\r\nThis means you will be able to find the episode using the 'Play episode' context menu\r\nand the software can automatically mark the episode as watched when you're playing it.";

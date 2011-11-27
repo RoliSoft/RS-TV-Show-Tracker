@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.ShowNames
 {
     using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Provides support for comparing shows for Linq functions.
@@ -16,7 +15,7 @@
         /// </returns>
         public bool Equals(string x, string y)
         {
-            return Parser.NameSequenceEquals(Parser.GetRoot(x), Parser.GetRoot(y));
+            return Parser.GenerateTitleRegex(x).IsMatch(y.ToUpper()) && Parser.GenerateTitleRegex(y).IsMatch(x.ToUpper());
         }
 
         /// <summary>
@@ -29,7 +28,7 @@
         /// <exception cref="T:System.ArgumentNullException">The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.</exception>
         public int GetHashCode(string obj)
         {
-            return Parser.GetRoot(obj).Sum(word => word.GetHashCode());
+            return Utils.CreateSlug(obj).GetHashCode();
         }
     }
 }

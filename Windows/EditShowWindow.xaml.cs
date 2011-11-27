@@ -36,12 +36,12 @@
             if (!string.IsNullOrWhiteSpace(release.Release))
             {
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = true;
-                releaseTextBox.Text = string.Join(" ", release.Release).ToLower();
+                releaseTextBox.Text = release.Release;
             }
             else
             {
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = false;
-                releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(show)).ToLower();
+                releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(show).ToString();
             }
             
             switch (Database.ShowData(_id, "grabber"))

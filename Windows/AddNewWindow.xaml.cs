@@ -354,7 +354,7 @@
 
                     // insert into tvshows and let the autoincrementing field assign a showid
                     Database.Execute("update tvshows set rowid = rowid + 1");
-                    Database.Execute("insert into tvshows values (1, null, ?, ?)", tv.Title, show.Title != tv.Title ? string.Join(" ", ShowNames.Parser.GetRoot(show.Title)) : string.Empty);
+                    Database.Execute("insert into tvshows values (1, null, ?, ?)", tv.Title, show.Title != tv.Title ? ShowNames.Parser.GenerateTitleRegex(show.Title).ToString() : string.Empty);
 
                     // then get that showid
                     _dbid = Database.Query("select showid from tvshows where name = ? limit 1", tv.Title)[0]["showid"].ToInteger();

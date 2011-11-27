@@ -131,6 +131,7 @@
         /// </param>
         /// <param name="replaceApostrophes">The character to replace apostrophe to.</param>
         /// <returns>Normalized name.</returns>
+        [Obsolete]
         public static string Normalize(string show, bool removeCommon = true, string replaceApostrophes = null)
         {
             var episode = string.Empty;
