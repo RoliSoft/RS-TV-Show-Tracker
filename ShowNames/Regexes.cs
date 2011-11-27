@@ -28,6 +28,11 @@
         public static readonly Regex NewYear       = new Regex(@"\s\(20\d{2}\)");
 
         /// <summary>
+        /// Matches 1800-2999 in brackets.
+        /// </summary>
+        public static readonly Regex Year          = new Regex(@"\((1[89]\d{2}|2\d{3})\)");
+
+        /// <summary>
         /// Matches US, UK and AU in brackets with leading space.
         /// </summary>
         public static readonly Regex Countries     = new Regex(@"\s\((US|UK|AU)\)");

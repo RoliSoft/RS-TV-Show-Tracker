@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Security;
     using System.Text.RegularExpressions;
     using System.Threading;
@@ -254,7 +253,7 @@
             {
                 var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 
-                return pf.Success && _titleRegex.ToString() == Database.GetReleaseName2(pf.Show).ToString();
+                return pf.Success; // TODO additional check for _titleRegex ~ pf?
             }
 
             return false;

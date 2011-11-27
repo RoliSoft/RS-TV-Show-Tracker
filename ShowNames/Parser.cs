@@ -99,16 +99,13 @@
             // remove special characters
             show = Regexes.SpecialChars.Replace(show, " ").Trim();
 
-            // remove year if the show started later than 2000
-            if (Regexes.NewYear.IsMatch(show))
-            {
-                show = Regexes.NewYear.Replace(show, string.Empty);
-            }
-
             // remove parentheses
-            show = show.Replace("(", string.Empty).Replace(")", string.Empty);
+            //show = show.Replace("(", string.Empty).Replace(")", string.Empty);
 
-            // remove common words and single characters
+            // make year optional
+            show = Regexes.Year.Replace(show, m => "(?:" + m.Groups[1].Value + ")?");
+
+            // make common words and single characters optional
             show = Regexes.Common.Replace(show, m => "(?:" + m.Groups[1].Value + ")?");
             show = Regexes.OneChar.Replace(show, m => "(?:" + m.Groups[1].Value + ")?");
 

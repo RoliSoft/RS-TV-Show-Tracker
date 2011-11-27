@@ -182,15 +182,12 @@
 
             // try to find show in local database
 
-            var fileRegex = ShowNames.Parser.GenerateTitleRegex(name);
-
             foreach (var show in Database.TVShows)
             {
-                var titleRegex   = ShowNames.Parser.GenerateTitleRegex(show.Value.Name);
-                var releaseRegex = !string.IsNullOrWhiteSpace(show.Value.Release) ? new Regex(show.Value.Release) : null;
+                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Value.Name).Match(name);
+                var releaseMatch = !string.IsNullOrWhiteSpace(show.Value.Release) ? Regex.Match(name, show.Value.Release) : null;
 
-                // TODO the following line is really fucked up
-                if (fileRegex.ToString() == titleRegex.ToString() || (releaseRegex != null && fileRegex.ToString() == releaseRegex.ToString()))
+                if ((titleMatch.Success && titleMatch.Value == name) || (releaseMatch != null && releaseMatch.Success && releaseMatch.Value == name))
                 {
                     if (ep.AirDate != null)
                     {

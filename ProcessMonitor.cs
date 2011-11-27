@@ -7,10 +7,10 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
-    using RoliSoft.TVShowTracker.FileNames;
-    using RoliSoft.TVShowTracker.Parsers.Social;
+    using FileNames;
+    using Parsers.Social;
 
-    using Parser = RoliSoft.TVShowTracker.ShowNames.Parser;
+    using Parser = ShowNames.Parser;
 
     /// <summary>
     /// Provides methods to monitor a given process for open file handles.
@@ -87,15 +87,15 @@
 
             foreach (var show in Database.TVShows)
             {
-                var titleParts   = Parser.GetRoot(show.Value.Name, replaceApostrophes: @"['`’\._]?");
-                var releaseParts = !string.IsNullOrWhiteSpace(show.Value.Release) ? show.Value.Release.Split(' ') : null;
+                var titleRegex   = Parser.GenerateTitleRegex(show.Value.Name);
+                var releaseRegex = !string.IsNullOrWhiteSpace(show.Value.Release) ? new Regex(show.Value.Release) : null;
 
                 foreach (var file in files)
                 {
-                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleParts) || (releaseParts != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseParts)))
+                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleRegex) || (releaseRegex != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseRegex)))
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
-                        if (pf.Success && Database.GetReleaseName(show.Value.Name).SequenceEqual(Database.GetReleaseName(pf.Show))) // or the one extracted from the directory name?
+                        if (pf.Success && Database.GetReleaseName2(show.Value.Name) == Database.GetReleaseName2(pf.Show)) // or the one extracted from the directory name?
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {
