@@ -191,33 +191,6 @@
         /// Determines whether the specified release name matches with the specified show and episode.
         /// </summary>
         /// <param name="name">The name of the show.</param>
-        /// <param name="titleParts">The title parts.</param>
-        /// <param name="episodeRegex">The episode regex.</param>
-        /// <param name="onlyVideo">if set to <c>true</c> returns false for files that are not video.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified release matches the specified show and episode; otherwise, <c>false</c>.
-        /// </returns>
-        [Obsolete]
-        public static bool IsMatch(string name, string[] titleParts, Regex episodeRegex = null, bool onlyVideo = true)
-        {
-            return !string.IsNullOrWhiteSpace(name)
-                && (!onlyVideo || (Regexes.KnownVideo.IsMatch(name) && !Regexes.SampleVideo.IsMatch(name)))
-                && (episodeRegex == null || episodeRegex.IsMatch(name))
-                && titleParts.All(part =>
-                    {
-                        if (part.First() == '[' && part.Last() == ']')
-                        {
-                            return true;
-                        }
-
-                        return Regex.IsMatch(name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase);
-                    });
-        }
-
-        /// <summary>
-        /// Determines whether the specified release name matches with the specified show and episode.
-        /// </summary>
-        /// <param name="name">The name of the show.</param>
         /// <param name="titleRegex">The title regex.</param>
         /// <param name="episodeRegex">The episode regex.</param>
         /// <param name="onlyVideo">if set to <c>true</c> returns false for files that are not video.</param>

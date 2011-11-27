@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using NUnit.Framework;
 
@@ -15,65 +14,81 @@
         /// <summary>
         /// Contains a list of show names and the array they're supposed to look after processing.
         /// </summary>
-        public static Dictionary<string, string[]> ShowNames = new Dictionary<string, string[]>
+        public static Dictionary<string, string> ShowNames = new Dictionary<string, string>
             {
                 // test to see whether irrevelant single characters are removed
                 {
                     "House, M.D.",
-                    new[] { "HOUSE" }
+                    "HOUSE"
                 },
                 {
                     "Two and a half men",
-                    new[] { "TWO", "AND", "A", "HALF", "MEN" }
+                    "TWO AND A HALF MEN"
                 },
                 {
                     "How I met your mother",
-                    new[] { "HOW", "I", "MET", "YOUR", "MOTHER" }
+                    "HOW I MET YOUR MOTHER"
                 },
                 {
                     "Penn & Teller: Bullshit!",
-                    new[] { "PENN", "TELLER", "BULLSHIT" }
+                    "PENN TELLER BULLSHIT"
                 },
                 {
                     "It's Always Sunny in Philadelphia",
-                    new[] { "ITS", "ALWAYS", "SUNNY", "IN", "PHILADELPHIA" }
+                    "ITS ALWAYS SUNNY IN PHILADELPHIA"
+                },
+                {
+                    "It's Always Sunny in Philadelphia 2",
+                    "IT\\'S ALWAYS SUNNY IN PHILADELPHIA 2"
                 },
                 
                 // test to see how years are handled
                 // if the show is newer than 2000, the year is removed
                 {
                     "V (2009)",
-                    new[] { "V" }
+                    "V"
                 },
                 {
                     "The V (2009)",
-                    new[] { "V" }
+                    "V"
                 },
                 {
                     "V (1965)",
-                    new[] { "V", "1965" }
+                    "V 1965"
                 },
                 {
                     "The V (1965)",
-                    new[] { "V", "1965" }
+                    "V 1965"
                 },
                 
-                // test to see whether the year is removed
+                // test to see whether the country is removed
                 {
                     "Top Gear (US)",
-                    new[] { "TOP", "GEAR", "US" }
+                    "TOP GEAR US"
+                },
+                {
+                    "Top Gear (UK)",
+                    "TOP GEAR (UK)"
                 },
 
                 // test the use of dictionary lookup-based cleaning
                 {
                     "Sci-Fi Science: Physics of the Impossible",
-                    new[] { "SCI", "FI", "SCIENCE" }
+                    "SCI-FI SCIENCE"
                 },
                 
                 // test wierd names
                 {
                     "Tosh.0",
-                    new[] { "TOSH", "0" }
+                    "TOSH.0"
+                },
+                {
+                    "Numb3rs",
+                    "NUMB3RS"
+                },
+                {
+                    "$#*!  My Dad Says",
+                    "SHIT MY DAD SAYS"
                 },
             };
 
@@ -173,23 +188,27 @@
             };
 
         /// <summary>
-        /// Tests whether the show names are correctly cleaned.
+        /// Tests the <see cref="RoliSoft.TVShowTracker.ShowNames.Parser.GenerateTitleRegex"/> method's ability to generate regular expressions.
         /// </summary>
         [Test]
-        public void NameCleaning()
+        public void TitleRegexGeneration()
         {
             foreach (var show in ShowNames)
             {
-                Console.WriteLine(show.Key + ": [" + String.Join(", ", show.Value) + "]");
-                Assert.IsTrue(show.Value.SequenceEqual(Parser.GetRoot(show.Key, false)), "'{0}' is not cleaned correctly: [{1}]".FormatWith(show.Key, string.Join(", ", Parser.GetRoot(show.Key, false))));
+                var rgx = TVShowTracker.ShowNames.Parser.GenerateTitleRegex(show.Key);
+
+                Console.WriteLine(show.Key + " -> " + rgx + " -> " + show.Value);
+                Assert.IsTrue(rgx.IsMatch(show.Key.ToUpper()), "The generated regular expression didn't match the original string.");
+                Assert.IsTrue(rgx.IsMatch(show.Value), "The generated regular expression didn't match the sample string.");
             }
         }
 
         /// <summary>
-        /// Tests the extraction of episode numberings.
+        /// Tests the <see cref="RoliSoft.TVShowTracker.ShowNames.Regexes.AdvNumbering"/> dynamically generated regular
+        /// expression through <see cref="RoliSoft.TVShowTracker.ShowNames.Parser.ExtractEpisode"/> against a few weird cases.
         /// </summary>
         [Test]
-        public void EpisodeExtraction()
+        public void EpisodeNumberingExtraction()
         {
             foreach (var show in EpisodeNotations)
             {
@@ -199,7 +218,7 @@
         }
 
         /// <summary>
-        /// Tests the removal of season pack notations.
+        /// Tests the <see cref="RoliSoft.TVShowTracker.ShowNames.Regexes.VolNumbering"/> static regular expression.
         /// </summary>
         [Test]
         public void SeasonPackRemoval()
