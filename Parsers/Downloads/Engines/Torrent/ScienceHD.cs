@@ -166,7 +166,7 @@
                 else if (type.StartsWith("group_torrent") && group.Length != 0)
                 {
                     var link = new Link(this);
-                    var item = node.GetTextValue("td[1]/span[2]/a");
+                    var item = node.GetTextValue("td[1]/span[2]/a") ?? string.Empty;
 
                     link.Release = group;
                     link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("td[1]/span[2]/a", "href"));
