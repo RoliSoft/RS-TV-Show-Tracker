@@ -6,7 +6,7 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using Parsers.Downloads;
 
     /// <summary>
     /// Provides methods for searching download links on multiple provides asynchronously.
@@ -41,8 +41,7 @@
         public bool Filter { get; set; }
 
         private volatile List<string> _remaining;
-        private string[] _titleParts;
-        private Regex _episodeRegex;
+        private Regex _titleRegex, _episodeRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadSearch"/> class.
@@ -91,12 +90,12 @@
                 if (ShowNames.Regexes.Numbering.IsMatch(query))
                 {
                     var tmp       = ShowNames.Parser.Split(query);
-                    _titleParts   = Database.GetReleaseName(tmp[0], replaceApostrophes: @"(?:\\?['`’\._])?");
+                    _titleRegex   = Database.GetReleaseName(tmp[0]);
                     _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(tmp[1]);
                 }
                 else
                 {
-                    _titleParts   = Database.GetReleaseName(query, replaceApostrophes: @"(?:\\?['`’\._])?");
+                    _titleRegex   = Database.GetReleaseName(query);
                     _episodeRegex = null;
                 }
             }
@@ -122,14 +121,14 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
         {
-            try { _remaining.Remove((sender as DownloadSearchEngine).Name); } catch { }
+            try { _remaining.Remove(((DownloadSearchEngine)sender).Name); } catch { }
 
             var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
 
             if (Filter)
             {
                 e.Data = e.Data
-                          .Where(link => ShowNames.Parser.IsMatch(link.Release, _titleParts, _episodeRegex, false))
+                          .Where(link => ShowNames.Parser.IsMatch(link.Release, _titleRegex, _episodeRegex, false))
                           .ToList();
             }
 
@@ -148,7 +147,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchError(object sender, EventArgs<string, Exception> e)
         {
-            try { _remaining.Remove((sender as DownloadSearchEngine).Name); } catch { }
+            try { _remaining.Remove(((DownloadSearchEngine)sender).Name); } catch { }
 
             DownloadSearchError.Fire(this, e.First, e.Second);
 

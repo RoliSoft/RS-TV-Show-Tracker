@@ -95,7 +95,7 @@
                     if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleRegex) || (releaseRegex != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseRegex)))
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
-                        if (pf.Success && Database.GetReleaseName2(show.Value.Name) == Database.GetReleaseName2(pf.Show)) // or the one extracted from the directory name?
+                        if (pf.Success && show.Value.Name == pf.Show)
                         {
                             if (!OpenFiles.Contains(file.ToString()))
                             {

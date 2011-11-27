@@ -110,7 +110,7 @@
             show = Regexes.OneChar.Replace(show, m => "(?:" + m.Groups[1].Value + ")?");
 
             // replace null placeholder for apostrophes
-            show = show.Replace("\0", @"['`’\._]?");
+            show = show.Replace("\0", @"(?:\\?['`’\._])?");
 
             // replace whitespace to non-letter matcher
             show = Regexes.Whitespace.Replace(show.Trim(), "[^A-Z0-9]+");

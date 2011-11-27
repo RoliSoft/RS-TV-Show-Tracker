@@ -59,7 +59,7 @@
         /// <param name="airdate">The airdate.</param>
         public FileSearch(IEnumerable<string> paths, string show, string episode, DateTime? airdate = null)
         {
-            _titleRegex   = Database.GetReleaseName2(show);
+            _titleRegex   = Database.GetReleaseName(show);
             _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode, airdate);
 
             ShowQuery  = show + " " + episode;

@@ -195,7 +195,7 @@
         private void CustomReleaseNameChecked(object sender, RoutedEventArgs e)
         {
             releaseTextBox.IsEnabled = true;
-            releaseTextBox.Text = string.Join(" ", Database.GetReleaseName(_show)).ToLower();
+            releaseTextBox.Text = Database.GetReleaseName(_show).ToString();
         }
 
         /// <summary>
@@ -206,7 +206,7 @@
         private void CustomReleaseNameUnchecked(object sender, RoutedEventArgs e)
         {
             releaseTextBox.IsEnabled = false;
-            releaseTextBox.Text = string.Join(" ", ShowNames.Parser.GetRoot(_show)).ToLower();
+            releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(_show).ToString();
         }
 
         /// <summary>

@@ -171,7 +171,7 @@
                 }
             }
 
-            // TODO write a better matcher
+            // TODO better/bigger exception list
             ShowIDs[165] = "House";
 
             using (var file = File.Create(Path.Combine(Path.GetTempPath(), "Hosszupuska-IDs.bin")))
@@ -238,14 +238,18 @@
         /// <returns>Corresponding ID.</returns>
         private int? SearchForID(string name)
         {
-            var parts = Database.GetReleaseName(name);
+            var regex = Database.GetReleaseName(name);
 
             foreach (var show in ShowIDs)
             {
-                if (ShowNames.Parser.IsMatch(show.Value, parts, null, false) &&
-                    ShowNames.Parser.IsMatch(name, Database.GetReleaseName(show.Value), null, false))
+                if (regex.IsMatch(show.Value.ToUpper()))
                 {
-                    return show.Key;
+                    var regx2 = ShowNames.Parser.GenerateTitleRegex(show.Value);
+
+                    if (regx2.IsMatch(name.ToUpper()))
+                    {
+                        return show.Key;
+                    }
                 }
             }
 
