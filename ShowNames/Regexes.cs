@@ -38,14 +38,14 @@
         public static readonly Regex Contractions  = new Regex(@"(?<=[A-z0-9])['`’\._](?=(?:S|VE|NT|RE|EM|LL)\b)");
 
         /// <summary>
-        /// Matches the four most common words in the english language. (and, the, of, a)
+        /// Matches the four most common words in the english language. (and, the, of)
         /// </summary>
-        public static readonly Regex Common        = new Regex(@"\b(AND|THE|OF|A)\b");
+        public static readonly Regex Common        = new Regex(@"\b(AND\s?|THE\s?|OF\s?)\b");
 
         /// <summary>
         /// Matches a single character surrounded by word boundaries, except if it is the first character or has a null placeholder.
         /// </summary>
-        public static readonly Regex OneChar       = new Regex(@"(?<!^)\b(?<!\0)[A-Z]\b");
+        public static readonly Regex OneChar       = new Regex(@"(?<!^)\b(?<!\0)([A-Z]\s?)\b");
 
         /// <summary>
         /// Matches strings starting with "the".
@@ -70,7 +70,7 @@
         /// <summary>
         /// Matches video file extensions.
         /// </summary>
-        public static readonly Regex KnownVideo    = new Regex(@"\.(avi|mkv|mp4|ts|wmv|rar|zip|000)$", RegexOptions.IgnoreCase);
+        public static readonly Regex KnownVideo    = new Regex(@"\.(avi|mkv|mp4|ts|wmv|rar|zip|001)$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Matches if the specified file name is only a sample of the video.

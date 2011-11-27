@@ -22,6 +22,7 @@
         /// <returns>
         /// List of the required words.
         /// </returns>
+        [Obsolete]
         public static string[] GetRoot(string show, bool removeCommon = true, string replaceApostrophes = null)
         {
             // see if the show has a different name
@@ -71,6 +72,56 @@
             var parts = Regexes.Whitespace.Split(Regexes.Whitespace.Replace(show, " ").Trim());
 
             return parts;
+        }
+
+        /// <summary>
+        /// Generates a regular expression for matching the show's name.
+        /// </summary>
+        /// <param name="show">The show's name.</param>
+        /// <returns>
+        /// Regular expression which matches to the show's name.
+        /// </returns>
+        public static Regex GenerateTitleRegex(string show)
+        {
+            // see if the show has a different name
+            show = show.Trim();
+            if (Regexes.Exclusions.ContainsKey(show))
+            {
+                show = Regexes.Exclusions[show];
+            }
+
+            // the CLR is optimized for uppercase string matching
+            show = show.ToUpper();
+
+            // replace apostrophes which occur in contractions to a null placeholder
+            show = Regexes.Contractions.Replace(show, "\0");
+
+            // remove special characters
+            show = Regexes.SpecialChars.Replace(show, " ").Trim();
+
+            // remove year if the show started later than 2000
+            if (Regexes.NewYear.IsMatch(show))
+            {
+                show = Regexes.NewYear.Replace(show, string.Empty);
+            }
+
+            // remove parentheses
+            show = show.Replace("(", string.Empty).Replace(")", string.Empty);
+
+            // remove common words and single characters
+            show = Regexes.Common.Replace(show, m => "(?:" + m.Groups[1].Value + ")?");
+            show = Regexes.OneChar.Replace(show, m => "(?:" + m.Groups[1].Value + ")?");
+
+            // replace null placeholder for apostrophes
+            show = show.Replace("\0", @"['`’\._]?");
+
+            // replace whitespace to non-letter matcher
+            show = Regexes.Whitespace.Replace(show.Trim(), "[^A-Z0-9]+");
+
+            // quick fix for ending optional tags
+            show = show.Replace("[^A-Z0-9]+(?:", "[^A-Z0-9]*(?:").Replace(")?(?:", ")?[^A-Z0-9]*(?:");
+
+            return new Regex(show);
         }
 
         /// <summary>
@@ -148,6 +199,7 @@
         /// <returns>
         /// 	<c>true</c> if the specified release matches the specified show and episode; otherwise, <c>false</c>.
         /// </returns>
+        [Obsolete]
         public static bool IsMatch(string name, string[] titleParts, Regex episodeRegex = null, bool onlyVideo = true)
         {
             return !string.IsNullOrWhiteSpace(name)
@@ -162,6 +214,36 @@
 
                         return Regex.IsMatch(name, @"(?:\b|_)" + part + @"(?:\b|_)", RegexOptions.IgnoreCase);
                     });
+        }
+
+        /// <summary>
+        /// Determines whether the specified release name matches with the specified show and episode.
+        /// </summary>
+        /// <param name="name">The name of the show.</param>
+        /// <param name="titleRegex">The title regex.</param>
+        /// <param name="episodeRegex">The episode regex.</param>
+        /// <param name="onlyVideo">if set to <c>true</c> returns false for files that are not video.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified release matches the specified show and episode; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsMatch(string name, Regex titleRegex, Regex episodeRegex = null, bool onlyVideo = true)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
+            if (onlyVideo && (!Regexes.KnownVideo.IsMatch(name) || Regexes.SampleVideo.IsMatch(name)))
+            {
+                return false;
+            }
+
+            if (episodeRegex != null && !episodeRegex.IsMatch(name))
+            {
+                return false;
+            }
+
+            return titleRegex.IsMatch(name);
         }
 
         /// <summary>

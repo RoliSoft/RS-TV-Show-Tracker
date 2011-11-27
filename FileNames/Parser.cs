@@ -9,9 +9,9 @@
 
     using ProtoBuf;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-    using RoliSoft.TVShowTracker.Parsers.Guides;
-    using RoliSoft.TVShowTracker.ShowNames;
+    using Parsers.Downloads;
+    using Parsers.Guides;
+    using ShowNames;
 
     /// <summary>
     /// Provides support for parsing scene release file names.
@@ -182,14 +182,15 @@
 
             // try to find show in local database
 
-            var fileParts = ShowNames.Parser.GetRoot(name);
+            var fileRegex = ShowNames.Parser.GenerateTitleRegex(name);
 
             foreach (var show in Database.TVShows)
             {
-                var titleParts   = ShowNames.Parser.GetRoot(show.Value.Name);
-                var releaseParts = !string.IsNullOrWhiteSpace(show.Value.Release) ? show.Value.Release.Split(' ') : null;
+                var titleRegex   = ShowNames.Parser.GenerateTitleRegex(show.Value.Name);
+                var releaseRegex = !string.IsNullOrWhiteSpace(show.Value.Release) ? new Regex(show.Value.Release) : null;
 
-                if (ShowNames.Parser.NameSequenceEquals(fileParts, titleParts) || (releaseParts != null && ShowNames.Parser.NameSequenceEquals(fileParts, releaseParts)))
+                // TODO the following line is really fucked up
+                if (fileRegex.ToString() == titleRegex.ToString() || (releaseRegex != null && fileRegex.ToString() == releaseRegex.ToString()))
                 {
                     if (ep.AirDate != null)
                     {

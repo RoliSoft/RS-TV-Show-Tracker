@@ -49,8 +49,7 @@
         /// <value>The files.</value>
         public List<string> Files { get; set; }
 
-        private readonly string[] _titleParts;
-        private readonly Regex _episodeRegex;
+        private readonly Regex _titleRegex, _episodeRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
@@ -61,7 +60,7 @@
         /// <param name="airdate">The airdate.</param>
         public FileSearch(IEnumerable<string> paths, string show, string episode, DateTime? airdate = null)
         {
-            _titleParts   = Database.GetReleaseName(show, replaceApostrophes: @"['`’\._]?");
+            _titleRegex   = Database.GetReleaseName2(show);
             _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode, airdate);
 
             ShowQuery  = show + " " + episode;
@@ -251,11 +250,11 @@
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
 
-            if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleParts, _episodeRegex) && !Files.Contains(file))
+            if (ShowNames.Parser.IsMatch((dirs + @"\" + name).ToUpper(), _titleRegex, _episodeRegex) && !Files.Contains(file))
             {
                 var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 
-                return pf.Success && _titleParts.SequenceEqual(Database.GetReleaseName(pf.Show, replaceApostrophes: @"['`’\._]?"));
+                return pf.Success && _titleRegex.ToString() == Database.GetReleaseName2(pf.Show).ToString();
             }
 
             return false;

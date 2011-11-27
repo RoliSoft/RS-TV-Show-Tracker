@@ -27,7 +27,7 @@
         {
             get
             {
-                return new[] { ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".000" };
+                return new[] { ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".001" };
             }
         }
 

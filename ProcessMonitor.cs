@@ -78,7 +78,7 @@
                 procs.Add("4"); // PID 4, System
             }
 
-            if (procs.Count() == 0)
+            if (procs.Any())
             {
                 return;
             }

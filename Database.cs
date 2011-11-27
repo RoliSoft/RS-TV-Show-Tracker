@@ -5,7 +5,7 @@
     using System.Data.SQLite;
     using System.IO;
     using System.Linq;
-
+    using System.Text.RegularExpressions;
     using RoliSoft.TVShowTracker.Tables;
 
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
@@ -541,6 +541,7 @@
         /// </param>
         /// <param name="replaceApostrophes">The character to replace apostrophe to.</param>
         /// <returns>Name of the show used in scene releases.</returns>
+        [Obsolete]
         public static string[] GetReleaseName(string show, bool removeCommon = true, string replaceApostrophes = null)
         {
             var release = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
@@ -551,6 +552,23 @@
             }
 
             return ShowNames.Parser.GetRoot(show, removeCommon, replaceApostrophes);
+        }
+
+        /// <summary>
+        /// Gets the name of the show used in scene releases.
+        /// </summary>
+        /// <param name="show">The name of the show.</param>
+        /// <returns>Name of the show used in scene releases.</returns>
+        public static Regex GetReleaseName2(string show)
+        {
+            var release = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
+
+            if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0].Release))
+            {
+                return new Regex(release[0].Release);
+            }
+
+            return ShowNames.Parser.GenerateTitleRegex(show);
         }
     }
 }
