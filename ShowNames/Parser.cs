@@ -117,16 +117,17 @@
         }
 
         /// <summary>
-        /// Normalizes the specified TV show name.
+        /// Removes unnecessary stuff from a show's name.
         /// </summary>
-        /// <param name="show">The show name.</param>
+        /// <param name="show">The show's name including episode notation.</param>
         /// <param name="removeCommon">
         /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
         /// otherwise, only "the" and any one character word that is other than "a" will be removed.
         /// </param>
-        /// <returns>Normalized name.</returns>
-        [Obsolete]
-        public static string Normalize(string show, bool removeCommon = true)
+        /// <returns>
+        /// Clean title with episode notation.
+        /// </returns>
+        public static string CleanTitleWithEp(string show, bool removeCommon = true)
         {
             var episode = string.Empty;
 
@@ -307,7 +308,7 @@
         {
             if (normalize)
             {
-                query = Normalize(query, removeCommon);
+                query = CleanTitleWithEp(query, removeCommon);
             }
 
             return Split(query)[0] + " " + ExtractEpisode(query, format);

@@ -119,7 +119,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = Utils.GetXML("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(name)), language), timeout: 120000);
+            var list = Utils.GetXML("http://www.thetvdb.com/api/GetSeries.php?seriesname={0}&language={1}".FormatWith(Uri.EscapeUriString(ShowNames.Parser.CleanTitleWithEp(name)), language), timeout: 120000);
             var prev = new List<string>();
 
             foreach (var show in list.Descendants("Series"))

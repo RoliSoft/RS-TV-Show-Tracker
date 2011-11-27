@@ -98,7 +98,7 @@
 
             if (g.Count == 0)
             {
-                throw new OnlineVideoNotFoundException("No videos could be found on SideReel using Google." + Environment.NewLine + "You can try to use SideReel's internal search engine.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(ep.Show.Name)));
+                throw new OnlineVideoNotFoundException("No videos could be found on SideReel using Google." + Environment.NewLine + "You can try to use SideReel's internal search engine.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ShowNames.Parser.CleanTitleWithEp(ep.Show.Name)));
             }
 
             var id = Regex.Match(g[0].URL, @"sidereel\.com/([^/$]+)", RegexOptions.IgnoreCase);

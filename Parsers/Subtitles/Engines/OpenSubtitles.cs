@@ -89,7 +89,7 @@
                 yield break;
             }
 
-            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Parser.Normalize(query) } });
+            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Parser.CleanTitleWithEp(query) } });
             if (search == null || !search.ContainsKey("data"))
             {
                 yield break;

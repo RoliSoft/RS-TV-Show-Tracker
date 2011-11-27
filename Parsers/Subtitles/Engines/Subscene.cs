@@ -99,7 +99,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "s.aspx?q=" + Uri.EscapeUriString(ShowNames.Parser.Normalize(query)));
+            var html = Utils.GetHTML(Site + "s.aspx?q=" + Uri.EscapeUriString(ShowNames.Parser.CleanTitleWithEp(query)));
             var subs = html.DocumentNode.SelectNodes("//a[@class='a1']");
             
             if (subs == null)

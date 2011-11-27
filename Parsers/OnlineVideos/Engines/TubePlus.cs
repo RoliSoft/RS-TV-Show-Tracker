@@ -101,7 +101,7 @@
             }
             else
             {
-                throw new OnlineVideoNotFoundException("No videos could be found on Tube+ using Google." + Environment.NewLine + "You can try to use Tube+'s internal search engine.", "Open Tube+ search page", "http://tubeplus.me/search/tv-shows/{0}/0/".FormatWith(Uri.EscapeUriString(ShowNames.Parser.Normalize(ep.Show.Name))));
+                throw new OnlineVideoNotFoundException("No videos could be found on Tube+ using Google." + Environment.NewLine + "You can try to use Tube+'s internal search engine.", "Open Tube+ search page", "http://tubeplus.me/search/tv-shows/{0}/0/".FormatWith(Uri.EscapeUriString(ShowNames.Parser.CleanTitleWithEp(ep.Show.Name))));
             }
         }
     }
