@@ -11,70 +11,6 @@
     public static class Parser
     {
         /// <summary>
-        /// Gets the root words from a show name.
-        /// </summary>
-        /// <param name="show">The show's name.</param>
-        /// <param name="removeCommon">
-        /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
-        /// otherwise, only "the" and any one character word that is other than "a" will be removed.
-        /// </param>
-        /// <param name="replaceApostrophes">The character to replace apostrophes to.</param>
-        /// <returns>
-        /// List of the required words.
-        /// </returns>
-        [Obsolete]
-        public static string[] GetRoot(string show, bool removeCommon = true, string replaceApostrophes = null)
-        {
-            // see if the show has a different name
-            show = show.Trim();
-            if (Regexes.Exclusions.ContainsKey(show))
-            {
-                show = Regexes.Exclusions[show];
-            }
-
-            // the CLR is optimized for uppercase string matching
-            show = show.ToUpper();
-
-            // remove apostrophes which occur in contractions or replace them to a null placeholder
-            show = Regexes.Contractions.Replace(show, replaceApostrophes != null ? "\0" : string.Empty);
-
-            // remove special characters
-            show = Regexes.SpecialChars.Replace(show, " ").Trim();
-
-            // remove year if the show started later than 2000
-            if (Regexes.NewYear.IsMatch(show))
-            {
-                show = Regexes.NewYear.Replace(show, string.Empty);
-            }
-
-            // remove parentheses
-            show = show.Replace("(", string.Empty).Replace(")", string.Empty);
-
-            // remove common words and single characters
-            if (removeCommon)
-            {
-                show = Regexes.Common.Replace(show, string.Empty);
-                show = Regexes.OneChar.Replace(show.Trim(), string.Empty);
-            }
-            else
-            {
-                show = Regexes.StrictCommon.Replace(show, string.Empty);
-                show = Regexes.StrictOneChar.Replace(show.Trim(), string.Empty);
-            }
-
-            // replace null placeholder for apostrophes
-            if (replaceApostrophes != null)
-            {
-                show = show.Replace("\0", replaceApostrophes);
-            }
-
-            // split it up
-            var parts = Regexes.Whitespace.Split(Regexes.Whitespace.Replace(show, " ").Trim());
-
-            return parts;
-        }
-
-        /// <summary>
         /// Generates a regular expression for matching the show's name.
         /// </summary>
         /// <param name="show">The show's name.</param>
@@ -122,6 +58,65 @@
         }
 
         /// <summary>
+        /// Removes unnecessary stuff from a show's name.
+        /// </summary>
+        /// <param name="show">The show's name.</param>
+        /// <param name="removeCommon">
+        /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
+        /// otherwise, only "the" and any one character word that is other than "a" will be removed.
+        /// </param>
+        /// <returns>
+        /// Clean title.
+        /// </returns>
+        public static string CleanTitle(string show, bool removeCommon = true)
+        {
+            // see if the show has a different name
+            show = show.Trim();
+            if (Regexes.Exclusions.ContainsKey(show))
+            {
+                show = Regexes.Exclusions[show];
+            }
+
+            // the CLR is optimized for uppercase string matching
+            show = show.ToUpper();
+
+            // replace apostrophes which occur in contractions to a null placeholder
+            show = Regexes.Contractions.Replace(show, "\0");
+
+            // remove special characters
+            show = Regexes.SpecialChars.Replace(show, " ").Trim();
+
+            // remove year if the show started later than 2000
+            if (Regexes.NewYear.IsMatch(show))
+            {
+                show = Regexes.NewYear.Replace(show, string.Empty);
+            }
+
+            // remove parentheses
+            show = show.Replace("(", string.Empty).Replace(")", string.Empty);
+
+            // remove common words and single characters
+            if (removeCommon)
+            {
+                show = Regexes.Common.Replace(show, string.Empty);
+                show = Regexes.OneChar.Replace(show.Trim(), string.Empty);
+            }
+            else
+            {
+                show = Regexes.StrictCommon.Replace(show, string.Empty);
+                show = Regexes.StrictOneChar.Replace(show.Trim(), string.Empty);
+            }
+
+            // replace null placeholder for apostrophes
+            show = show.Replace("\0", "'");
+
+            // replace subsequent whitespace
+            show = Regexes.Whitespace.Replace(show, " ").Trim();
+
+            return show.ToLower().ToUppercaseWords();
+        }
+
+        /// <summary>
         /// Normalizes the specified TV show name.
         /// </summary>
         /// <param name="show">The show name.</param>
@@ -129,10 +124,9 @@
         /// if set to <c>true</c> "and", "the", "of", and any one character word will be removed,
         /// otherwise, only "the" and any one character word that is other than "a" will be removed.
         /// </param>
-        /// <param name="replaceApostrophes">The character to replace apostrophe to.</param>
         /// <returns>Normalized name.</returns>
         [Obsolete]
-        public static string Normalize(string show, bool removeCommon = true, string replaceApostrophes = null)
+        public static string Normalize(string show, bool removeCommon = true)
         {
             var episode = string.Empty;
 
@@ -143,7 +137,7 @@
                 episode = tmp[1];
             }
 
-            var parts = String.Join(" ", GetRoot(show, removeCommon, replaceApostrophes)).ToLower();
+            var parts = CleanTitle(show, removeCommon);
 
             return episode.Length != 0
                    ? parts + " " + episode
