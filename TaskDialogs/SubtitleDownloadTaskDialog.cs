@@ -27,6 +27,7 @@
         private Result _res;
         private IDownloader _dl;
         private FileSearch _fs;
+        private List<string> _files; 
         private Subtitle _link;
         private string _show, _episode;
         private bool _play;
@@ -205,10 +206,12 @@
         /// Event handler for <c>FileSearch.FileSearchDone</c>.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void NearVideoFileSearchDone(object sender, EventArgs e)
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
+        private void NearVideoFileSearchDone(object sender, EventArgs<List<string>>  e)
         {
-            if (_fs.Files.Count == 0)
+            _files = e.Data ?? new List<string>();
+
+            if (_files.Count == 0)
             {
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
@@ -295,7 +298,7 @@
                     Instruction           = _link.Release,
                     Content               = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode),
                     CommonButtons         = TaskDialogButton.Cancel,
-                    CustomButtons         = new CustomButton[_fs.Files.Count],
+                    CustomButtons         = new CustomButton[_files.Count],
                     UseCommandLinks       = true,
                     VerificationText      = "Play video after subtitle is downloaded",
                     IsVerificationChecked = false
@@ -304,21 +307,21 @@
             dlsnvtd.VerificationClick += (s, c) => _play = c.IsChecked ;
             dlsnvtd.ButtonClick       += (s, c) =>
                 {
-                    if (c.ButtonID < _fs.Files.Count)
+                    if (c.ButtonID < _files.Count)
                     {
                         new Thread(() =>
                             {
-                                NearVideoFinishMove(_fs.Files[c.ButtonID], e.First, e.Second);
+                                NearVideoFinishMove(_files[c.ButtonID], e.First, e.Second);
 
                                 if (_play)
                                 {
-                                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_fs.Files[0]).ToLower()))
+                                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_files[0]).ToLower()))
                                     {
-                                        new OpenArchiveTaskDialog().OpenArchive(_fs.Files[c.ButtonID]);
+                                        new OpenArchiveTaskDialog().OpenArchive(_files[c.ButtonID]);
                                     }
                                     else
                                     {
-                                        Utils.Run(_fs.Files[c.ButtonID]);
+                                        Utils.Run(_files[c.ButtonID]);
                                     }
                                 }
                             }).Start();
@@ -326,7 +329,7 @@
                 };
 
             var i = 0;
-            foreach (var f in _fs.Files)
+            foreach (var f in _files)
             {
                 var file    = f;
                 var fi      = new FileInfo(file);

@@ -117,8 +117,8 @@
         /// Event handler for <c>FileSearch.FileSearchDone</c>.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void FileSearchDone(object sender, EventArgs e)
+        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
+        private void FileSearchDone(object sender, EventArgs<List<string>> e)
         {
             _active = false;
 
@@ -129,12 +129,12 @@
                 _td.SimulateButtonClick(-1);
             }
 
-            if (_res == Result.Cancel)
+            if (_res == Result.Cancel || e.Data == null)
             {
                 return;
             }
 
-            switch (_fs.Files.Count)
+            switch (e.Data.Count)
             {
                 case 0:
                     new TaskDialog
@@ -150,13 +150,13 @@
                     break;
 
                 case 1:
-                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_fs.Files[0]).ToLower()))
+                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(e.Data[0]).ToLower()))
                     {
-                        new OpenArchiveTaskDialog().OpenArchive(_fs.Files[0]);
+                        new OpenArchiveTaskDialog().OpenArchive(e.Data[0]);
                     }
                     else
                     {
-                        Utils.Run(_fs.Files[0]);
+                        Utils.Run(e.Data[0]);
                     }
                     break;
 
@@ -167,27 +167,27 @@
                             Instruction     = _show + " " + _episode,
                             Content         = "Multiple files were found for this episode:",
                             CommonButtons   = TaskDialogButton.Cancel,
-                            CustomButtons   = new CustomButton[_fs.Files.Count],
+                            CustomButtons   = new CustomButton[e.Data.Count],
                             UseCommandLinks = true
                         };
 
                     mfftd.ButtonClick += (s, c) =>
                         {
-                            if (c.ButtonID < _fs.Files.Count)
+                            if (c.ButtonID < e.Data.Count)
                             {
-                                if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_fs.Files[c.ButtonID]).ToLower()))
+                                if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(e.Data[c.ButtonID]).ToLower()))
                                 {
-                                    new OpenArchiveTaskDialog().OpenArchive(_fs.Files[c.ButtonID]);
+                                    new OpenArchiveTaskDialog().OpenArchive(e.Data[c.ButtonID]);
                                 }
                                 else
                                 {
-                                    Utils.Run(_fs.Files[c.ButtonID]);
+                                    Utils.Run(e.Data[c.ButtonID]);
                                 }
                             }
                         };
 
                     var i = 0;
-                    foreach (var file in _fs.Files)
+                    foreach (var file in e.Data)
                     {
                         var fi      = new FileInfo(file);
                         var quality = Parser.ParseQuality(file);
