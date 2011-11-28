@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Represents a TV show in the SQLite database.
@@ -59,6 +60,24 @@
             get
             {
                 return Database.Episodes.Where(ep => ep.ShowID == ShowID);
+            }
+        }
+
+        /// <summary>
+        /// Generates a regular expression which matches this show's name.
+        /// </summary>
+        /// <returns>
+        /// A regular expression which matches this show's name.
+        /// </returns>
+        public Regex GenerateRegex()
+        {
+            if (!string.IsNullOrWhiteSpace(Release))
+            {
+                return new Regex(Release);
+            }
+            else
+            {
+                return ShowNames.Parser.GenerateTitleRegex(Name);
             }
         }
 

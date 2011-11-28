@@ -10,7 +10,7 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using FileNames;
-
+    using Tables;
     using VistaControls.TaskDialog;
 
     /// <summary>
@@ -21,19 +21,16 @@
         private TaskDialog _td;
         private Result _res;
         private FileSearch _fs;
-        private string _show, _episode;
+        private Episode _ep;
         private volatile bool _active;
 
         /// <summary>
         /// Searches for the specified show and its episode.
         /// </summary>
-        /// <param name="show">The show.</param>
-        /// <param name="episode">The episode.</param>
-        /// <param name="airdate">The airdate.</param>
-        public void Search(string show, string episode, DateTime? airdate = null)
+        /// <param name="episode">The episode to search for.</param>
+        public void Search(Episode episode)
         {
-            _show    = show;
-            _episode = episode;
+            _ep = episode;
 
             var paths = Settings.Get<List<string>>("Download Paths");
 
@@ -52,7 +49,7 @@
             _td = new TaskDialog
                 {
                     Title           = "Searching...",
-                    Instruction     = show + " " + episode,
+                    Instruction     = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
                     Content         = "Searching for the episode...",
                     CommonButtons   = TaskDialogButton.Cancel,
                     ShowProgressBar = true
@@ -73,7 +70,7 @@
                     }
                 }).Start();
             
-            _fs = new FileSearch(paths, show, episode, airdate);
+            _fs = new FileSearch(paths, _ep);
 
             _fs.FileSearchDone += FileSearchDone;
             _fs.FileSearchProgressChanged += FileSearchProgressChanged;
@@ -141,7 +138,7 @@
                         {
                             CommonIcon          = TaskDialogIcon.Stop,
                             Title               = "No files found",
-                            Instruction         = _show + " " + _episode,
+                            Instruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
                             Content             = "No files were found for this episode.",
                             ExpandedControlText = "Troubleshoot",
                             ExpandedInformation = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
@@ -164,7 +161,7 @@
                     var mfftd = new TaskDialog
                         {
                             Title           = "Multiple files found",
-                            Instruction     = _show + " " + _episode,
+                            Instruction     = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
                             Content         = "Multiple files were found for this episode:",
                             CommonButtons   = TaskDialogButton.Cancel,
                             CustomButtons   = new CustomButton[e.Data.Count],

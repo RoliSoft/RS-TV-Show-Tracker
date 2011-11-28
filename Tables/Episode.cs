@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Tables
 {
     using System;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Represents an episode in the SQLite database.
@@ -97,6 +98,17 @@
         /// The URL of the episode on the source guide.
         /// </value>
         public string URL { get; set; }
+
+        /// <summary>
+        /// Generates a regular expression which matches this episode's numbering.
+        /// </summary>
+        /// <returns>
+        /// A regular expression which matches this episode's numbering.
+        /// </returns>
+        public Regex GenerateRegex()
+        {
+            return ShowNames.Parser.GenerateEpisodeRegexes(Season.ToString(), Number.ToString(), Airdate.ToOriginalTimeZone(Show.Data.Get("timezone")));
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.

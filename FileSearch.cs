@@ -3,11 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Security;
     using System.Text.RegularExpressions;
     using System.Threading;
 
     using Dependencies.USNJournal;
+    using Tables;
 
     /// <summary>
     /// Provides file search for finding the episodes on the disk.
@@ -31,32 +33,54 @@
         public Dictionary<string, List<string>> StartPaths { get; internal set; }
 
         /// <summary>
-        /// Gets the name of the show and the episode number.
-        /// </summary>
-        /// <value>The name of the show and the episode number.</value>
-        public string ShowQuery { get; internal set; }
-
-        /// <summary>
         /// Gets the search thread.
         /// </summary>
         /// <value>The search thread.</value>
         public Thread SearchThread { get; internal set; }
 
-        private readonly Regex _titleRegex, _episodeRegex;
+        private readonly Episode[] _episodes;
+        private readonly Regex[] _titleRegex, _episodeRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
         /// </summary>
         /// <param name="paths">The paths where to start the search.</param>
-        /// <param name="show">The show name.</param>
-        /// <param name="episode">The episode number.</param>
-        /// <param name="airdate">The airdate.</param>
-        public FileSearch(IEnumerable<string> paths, string show, string episode, DateTime? airdate = null)
+        /// <param name="episode">The episode to search for.</param>
+        public FileSearch(IEnumerable<string> paths, Episode episode)
         {
-            _titleRegex   = Database.GetReleaseName(show);
-            _episodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(episode, airdate);
+            _episodes     = new[] { episode };
+            _titleRegex   = new[] { episode.Show.GenerateRegex() };
+            _episodeRegex = new[] { episode.GenerateRegex() };
 
-            ShowQuery  = show + " " + episode;
+            InitStartPaths(paths);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSearch"/> class.
+        /// </summary>
+        /// <param name="paths">The paths where to start the search.</param>
+        /// <param name="episodes">The episodes to search for.</param>
+        public FileSearch(IEnumerable<string> paths, IEnumerable<Episode> episodes)
+        {
+            _episodes     = episodes.ToArray();
+            _titleRegex   = new Regex[_episodes.Length];
+            _episodeRegex = new Regex[_episodes.Length];
+
+            for (var i = 0; i < _episodes.Length; i++)
+            {
+                _titleRegex[i]   = _episodes[i].Show.GenerateRegex();
+                _episodeRegex[i] = _episodes[i].GenerateRegex();
+            }
+
+            InitStartPaths(paths);
+        }
+
+        /// <summary>
+        /// Groups the start paths into <see cref="StartPaths"/>.
+        /// </summary>
+        /// <param name="paths">The paths where to start the search.</param>
+        private void InitStartPaths(IEnumerable<string> paths)
+        {
             StartPaths = new Dictionary<string, List<string>>();
 
             foreach (var path in paths)
@@ -246,7 +270,7 @@
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
 
-            if (ShowNames.Parser.IsMatch((dirs + @"\" + name).ToUpper(), _titleRegex, _episodeRegex))
+            if (ShowNames.Parser.IsMatch((dirs + @"\" + name).ToUpper(), _titleRegex[0], _episodeRegex[0]))
             {
                 var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 

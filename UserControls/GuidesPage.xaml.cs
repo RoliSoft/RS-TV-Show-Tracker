@@ -649,7 +649,7 @@
 
             var pla    = new MenuItem();
             pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
-            pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID.Show.Name, string.Format("S{0:00}E{1:00}", episode.ID.Season, episode.ID.Number), episode.ID.Airdate.ToOriginalTimeZone(episode.ID.Show.Data.Get("timezone")));
+            pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID);
             pla.Header = "Play episode";
             cm.Items.Add(pla);
 

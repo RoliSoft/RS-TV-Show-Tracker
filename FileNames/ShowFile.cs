@@ -2,8 +2,9 @@
 {
     using System;
     using System.IO;
-
-    using RoliSoft.TVShowTracker.ShowNames;
+    using System.Linq;
+    using ShowNames;
+    using Tables;
 
     /// <summary>
     /// Represents a TV show video file.
@@ -110,6 +111,30 @@
             Group         = group;
             Airdate       = airdate;
             Success       = success;
+        }
+
+        /// <summary>
+        /// Searches for this episode in the local database and returns a reference to it.
+        /// </summary>
+        /// <returns>
+        /// The reference to the equivalent object in the database.
+        /// </returns>
+        public Episode GetDatabaseEquivalent()
+        {
+            if (!Success)
+            {
+                return null;
+            }
+
+            try
+            {
+                return Database.TVShows.First(tv => tv.Value.Name == Show).Value
+                               .Episodes.First(ep => ep.Season == Episode.Season && ep.Number == Episode.Episode);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>

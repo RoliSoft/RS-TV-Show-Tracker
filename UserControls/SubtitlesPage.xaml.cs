@@ -18,6 +18,7 @@
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
     using RoliSoft.TVShowTracker.TaskDialogs;
+    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Interaction logic for SubtitlesPage.xaml
@@ -528,22 +529,40 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var sub  = (Subtitle)listView.SelectedValue;
-            var show = ShowNames.Parser.Split(textBox.Text);
-
-            var airdate = (DateTime?)null;
+            var sub = (Subtitle)listView.SelectedValue;
 
             try
             {
                 var sf = FileNames.Parser.ParseFile(textBox.Text, null, false);
+
                 if (sf.Success)
                 {
-                    airdate = sf.Airdate.ToOriginalTimeZone(Database.TVShows.Values.First(x => x.Name == sf.Show).Data.Get("timezone"));
+                    var ep = sf.GetDatabaseEquivalent();
+
+                    if (ep != null)
+                    {
+                        new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, ep);
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+                }
+                else
+                {
+                    throw new Exception();
                 }
             }
-            catch { }
-            
-            new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, show[0], show[1], airdate);
+            catch
+            {
+                new TaskDialog
+                    {
+                        CommonIcon  = TaskDialogIcon.Stop,
+                        Title       = "Mapping error",
+                        Instruction = textBox.Text.Trim(),
+                        Content     = "The query you've entered could not be mapped to an episode in the database. If this show is not on your list, add it, so the file search engine can find it."
+                    }.Show();
+            }
         }
     }
 }

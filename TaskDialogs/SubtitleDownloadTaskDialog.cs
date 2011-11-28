@@ -15,7 +15,7 @@
     using Parsers.Subtitles;
 
     using SharpCompress.Archive;
-
+    using Tables;
     using VistaControls.TaskDialog;
 
     /// <summary>
@@ -29,7 +29,7 @@
         private FileSearch _fs;
         private List<string> _files; 
         private Subtitle _link;
-        private string _show, _episode;
+        private Episode _ep;
         private bool _play;
 
         #region Download subtitle
@@ -142,14 +142,11 @@
         /// Downloads the specified link near the specified video.
         /// </summary>
         /// <param name="link">The link.</param>
-        /// <param name="show">The show.</param>
-        /// <param name="episode">The episode.</param>
-        /// <param name="airdate">The airdate.</param>
-        public void DownloadNearVideo(Subtitle link, string show, string episode, DateTime? airdate = null)
+        /// <param name="episode">The episode to search for.</param>
+        public void DownloadNearVideo(Subtitle link, Episode episode)
         {
-            _link    = link;
-            _show    = show;
-            _episode = episode;
+            _link = link;
+            _ep   = episode;
 
             var paths = Settings.Get<List<string>>("Download Paths");
 
@@ -180,7 +177,7 @@
 
             new Thread(() => _res = _td.Show().CommonButton).Start();
 
-            _fs = new FileSearch(paths, show, episode, airdate);
+            _fs = new FileSearch(paths, _ep);
 
             _fs.FileSearchDone += NearVideoFileSearchDone;
             _fs.FileSearchProgressChanged += NearVideoFileSearchProgressChanged;
@@ -296,7 +293,7 @@
                 {
                     Title                 = "Download subtitle near video",
                     Instruction           = _link.Release,
-                    Content               = "The following files were found for {0} {1}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_show, _episode),
+                    Content               = "The following files were found for {0} S{1:00}E{2:00}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_ep.Show.Name, _ep.Season, _ep.Number),
                     CommonButtons         = TaskDialogButton.Cancel,
                     CustomButtons         = new CustomButton[_files.Count],
                     UseCommandLinks       = true,
