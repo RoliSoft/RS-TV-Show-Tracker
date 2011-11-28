@@ -78,7 +78,7 @@
                 procs.Add("4"); // PID 4, System
             }
 
-            if (procs.Any())
+            if (!procs.Any())
             {
                 return;
             }
@@ -92,7 +92,7 @@
 
                 foreach (var file in files)
                 {
-                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleRegex) || (releaseRegex != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseRegex)))
+                    if (Parser.IsMatch((file.DirectoryName + @"\" + file.Name).ToUpper(), titleRegex) || (releaseRegex != null && Parser.IsMatch((file.DirectoryName + @"\" + file.Name).ToUpper(), releaseRegex)))
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
                         if (pf.Success && show.Value.Name == pf.Show)
