@@ -97,12 +97,12 @@
 
                 if (sr.Success)
                 {
-                    se = sr.Groups["n"].Value;
+                    se = "s" + sr.Groups["n"].Value.PadLeft(2, '0');
                 }
 
                 if (er.Success)
                 {
-                    ep = er.Groups["n"].Value;
+                    ep = "e" + er.Groups["n"].Value.PadLeft(2, '0');
                 }
             }
 
