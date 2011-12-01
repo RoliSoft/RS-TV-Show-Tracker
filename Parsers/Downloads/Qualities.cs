@@ -40,7 +40,7 @@
         /// <summary>
         /// A 1280x720 high-definition video downloaded from a legal source; usually iTunes.
         /// </summary>
-        [Description("Web-Dl 720p")]
+        [Description("Web-DL 720p")]
         WebDL720p,
 
         /// <summary>
@@ -58,7 +58,7 @@
         /// <summary>
         /// A 1920x1080 high-definition video downloaded from a legal source; usually iTunes.
         /// </summary>
-        [Description("Web-Dl 1080p")]
+        [Description("Web-DL 1080p")]
         WebDL1080p,
 
         /// <summary>
