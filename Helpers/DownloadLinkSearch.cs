@@ -19,14 +19,19 @@
         public event EventHandler<EventArgs> DownloadSearchDone;
 
         /// <summary>
-        /// Occurs when a download link search progress has changed.
+        /// Occurs when a download link search is done.
         /// </summary>
-        public event EventHandler<EventArgs<List<Link>, double, List<string>>> DownloadSearchProgressChanged;
+        public event EventHandler<EventArgs<List<DownloadSearchEngine>>> DownloadSearchEngineDone;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
         /// </summary>
-        public event EventHandler<EventArgs<string, Exception>> DownloadSearchError;
+        public event EventHandler<EventArgs<string, Exception>> DownloadSearchEngineError;
+
+        /// <summary>
+        /// Occurs when a download link search found a new link.
+        /// </summary>
+        public event EventHandler<EventArgs<Link>> DownloadSearchEngineNewLink;
 
         /// <summary>
         /// Gets or sets the search engines.
@@ -40,7 +45,7 @@
         /// <value><c>true</c> if filtering is enabled; otherwise, <c>false</c>.</value>
         public bool Filter { get; set; }
 
-        private volatile List<string> _remaining;
+        private List<DownloadSearchEngine> _remaining;
         private Regex _titleRegex, _episodeRegex;
 
         /// <summary>
@@ -57,8 +62,9 @@
 
             foreach (var engine in SearchEngines)
             {
-                engine.DownloadSearchDone  += SingleDownloadSearchDone;
-                engine.DownloadSearchError += SingleDownloadSearchError;
+                engine.DownloadSearchNewLink += SingleDownloadSearchNewLink;
+                engine.DownloadSearchDone    += SingleDownloadSearchDone;
+                engine.DownloadSearchError   += SingleDownloadSearchError;
 
                 if (engine.Private)
                 {
@@ -100,7 +106,7 @@
                 }
             }
 
-            _remaining = SearchEngines.Select(engine => engine.Name).ToList();
+            _remaining = new List<DownloadSearchEngine>(SearchEngines);
             query      = ShowNames.Parser.CleanTitleWithEp(query, false);
 
             SearchEngines.ForEach(engine => engine.SearchAsync(query));
@@ -115,24 +121,37 @@
         }
 
         /// <summary>
+        /// Occurs when a download link search found a new link.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void SingleDownloadSearchNewLink(object sender, EventArgs<Link> e)
+        {
+            if (Filter && !ShowNames.Parser.IsMatch(e.Data.Release, _titleRegex, _episodeRegex, false))
+            {
+                return;
+            }
+
+            DownloadSearchEngineNewLink.Fire(this, e.Data);
+        }
+
+        /// <summary>
         /// Called when a download link search is done.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void SingleDownloadSearchDone(object sender, EventArgs<List<Link>> e)
+        private void SingleDownloadSearchDone(object sender, EventArgs e)
         {
-            try { _remaining.Remove(((DownloadSearchEngine)sender).Name); } catch { }
-
-            var percentage = (double)(SearchEngines.Count - _remaining.Count) / SearchEngines.Count * 100;
-
-            if (Filter)
+            try
             {
-                e.Data = e.Data
-                          .Where(link => ShowNames.Parser.IsMatch(link.Release, _titleRegex, _episodeRegex, false))
-                          .ToList();
+                lock (_remaining)
+                {
+                    _remaining.Remove((DownloadSearchEngine)sender);
+                }
             }
+            catch { }
 
-            DownloadSearchProgressChanged.Fire(this, e.Data, percentage, _remaining);
+            DownloadSearchEngineDone.Fire(this, _remaining);
 
             if (_remaining.Count == 0)
             {
@@ -147,9 +166,16 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchError(object sender, EventArgs<string, Exception> e)
         {
-            try { _remaining.Remove(((DownloadSearchEngine)sender).Name); } catch { }
+            try
+            {
+                lock (_remaining)
+                {
+                    _remaining.Remove((DownloadSearchEngine)sender);
+                }
+            }
+            catch { }
 
-            DownloadSearchError.Fire(this, e.First, e.Second);
+            DownloadSearchEngineError.Fire(this, e.First, e.Second);
 
             if (_remaining.Count == 0)
             {

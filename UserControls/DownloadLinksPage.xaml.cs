@@ -390,9 +390,10 @@
 
             ActiveSearch = new DownloadSearch(AutoDownloader.ActiveSearchEngines, filterResults.IsChecked);
 
-            ActiveSearch.DownloadSearchDone            += DownloadSearchDone;
-            ActiveSearch.DownloadSearchProgressChanged += DownloadSearchProgressChanged;
-            ActiveSearch.DownloadSearchError           += DownloadSearchError;
+            ActiveSearch.DownloadSearchDone          += DownloadSearchDone;
+            ActiveSearch.DownloadSearchEngineNewLink += DownloadSearchEngineNewLink;
+            ActiveSearch.DownloadSearchEngineDone    += DownloadSearchEngineDone;
+            ActiveSearch.DownloadSearchEngineError   += DownloadSearchEngineError;
 
             SetStatus("Searching for download links on " + (string.Join(", ", ActiveSearch.SearchEngines.Select(engine => engine.Name).ToArray())) + "...", true);
 
@@ -404,35 +405,43 @@
         }
 
         /// <summary>
-        /// Called when a download link search progress has changed.
+        /// Occurs when a download link search found a new link.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void DownloadSearchProgressChanged(object sender, EventArgs<List<Link>, double, List<string>> e)
+        private void DownloadSearchEngineNewLink(object sender, EventArgs<Link> e)
+        {
+            lock (_results)
+            {
+                _results.Add(new LinkItem(e.Data));
+            }
+
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    lock (DownloadLinksListViewItemCollection)
+                    {
+                        DownloadLinksListViewItemCollection.Clear();
+                        DownloadLinksListViewItemCollection.AddRange(_results
+                                                                     .OrderBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
+                                                                     .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name)));
+                    }
+                }));
+        }
+
+        /// <summary>
+        /// Called when a download link search is done.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void DownloadSearchEngineDone(object sender, EventArgs<List<DownloadSearchEngine>> e)
         {
             if (!_searching)
             {
                 return;
             }
 
-            SetStatus("Searching for download links on " + (string.Join(", ", e.Third)) + "...", true);
-            Utils.Win7Taskbar((int)e.Second);
-
-            if (e.First != null)
-            {
-                lock (_results)
-                {
-                    _results.AddRange(e.First.Select(link => new LinkItem(link)));
-                }
-
-                Dispatcher.Invoke((Action)(() =>
-                    {
-                        DownloadLinksListViewItemCollection.Clear();
-                        DownloadLinksListViewItemCollection.AddRange(_results
-                                                                     .OrderBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
-                                                                     .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name)));
-                    }));
-            }
+            SetStatus("Searching for download links on " + (string.Join(", ", e.Data.Select(l => l.Name))) + "...", true);
+            Utils.Win7Taskbar((int)((double)(ActiveSearch.SearchEngines.Count - e.Data.Count) / ActiveSearch.SearchEngines.Count * 100));
         }
 
         /// <summary>
@@ -457,14 +466,9 @@
                     textBox.IsEnabled    = true;
                     searchButton.Content = "Search";
 
-                    var dhttp = DownloadLinksListViewItemCollection.Where(x => x.Source.Type == Types.DirectHTTP).ToList();
-
-                    if (dhttp.Count != 0)
+                    foreach (var item in DownloadLinksListViewItemCollection.Where(x => x.Source.Type == Types.DirectHTTP).ToList())
                     {
-                        foreach (var item in dhttp)
-                        {
-                            new Thread(item.CheckLink).Start();
-                        }
+                        new Thread(item.CheckLink).Start();
                     }
 
                     if (DownloadLinksListViewItemCollection.Count != 0)
@@ -483,7 +487,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        public void DownloadSearchError(object sender, EventArgs<string, Exception> e)
+        public void DownloadSearchEngineError(object sender, EventArgs<string, Exception> e)
         {
             if (e.Second is WebException)
             {

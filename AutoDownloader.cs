@@ -181,8 +181,8 @@
             var start = DateTime.Now;
             var busy  = true;
 
-            dlsrc.DownloadSearchProgressChanged += (s, e) => links.AddRange(e.First);
-            dlsrc.DownloadSearchDone            += (s, e) => { busy = false; };
+            dlsrc.DownloadSearchEngineNewLink += (s, e) => links.Add(e.Data);
+            dlsrc.DownloadSearchDone          += (s, e) => { busy = false; };
 
             dlsrc.SearchAsync(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
 

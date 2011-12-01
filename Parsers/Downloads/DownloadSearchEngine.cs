@@ -13,8 +13,8 @@
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Downloaders;
-    using RoliSoft.TVShowTracker.Downloaders.Engines;
+    using Downloaders;
+    using Downloaders.Engines;
 
     /// <summary>
     /// Represents a download link search engine.
@@ -112,7 +112,12 @@
         /// <summary>
         /// Occurs when a download link search is done.
         /// </summary>
-        public event EventHandler<EventArgs<List<Link>>> DownloadSearchDone;
+        public event EventHandler<EventArgs> DownloadSearchDone;
+
+        /// <summary>
+        /// Occurs when a download link search found a new link.
+        /// </summary>
+        public event EventHandler<EventArgs<Link>> DownloadSearchNewLink;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.
@@ -152,7 +157,13 @@
                     try
                     {
                         var list = Search(query);
-                        DownloadSearchDone.Fire(this, list.ToList());
+
+                        foreach (var link in list)
+                        {
+                            DownloadSearchNewLink.Fire(this, link);
+                        }
+
+                        DownloadSearchDone.Fire(this);
                     }
                     catch (InvalidCredentialException)
                     {
@@ -160,7 +171,7 @@
 
                         if (!CanLogin || string.IsNullOrWhiteSpace(info))
                         {
-                            DownloadSearchDone.Fire(this, new List<Link>());
+                            DownloadSearchDone.Fire(this);
                             return;
                         }
 
@@ -173,11 +184,17 @@
                             Settings.Set(Name + " Cookies", cookies);
 
                             var list = Search(query);
-                            DownloadSearchDone.Fire(this, list.ToList());
+
+                            foreach (var link in list)
+                            {
+                                DownloadSearchNewLink.Fire(this, link);
+                            }
+
+                            DownloadSearchDone.Fire(this);
                         }
                         catch (InvalidCredentialException)
                         {
-                            DownloadSearchDone.Fire(this, new List<Link>());
+                            DownloadSearchDone.Fire(this);
                         }
                         catch (Exception ex)
                         {
