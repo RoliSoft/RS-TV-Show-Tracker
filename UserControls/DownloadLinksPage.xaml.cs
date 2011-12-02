@@ -17,12 +17,12 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.ContextMenus;
-    using RoliSoft.TVShowTracker.ContextMenus.Menus;
-    using RoliSoft.TVShowTracker.Downloaders.Engines;
-    using RoliSoft.TVShowTracker.Helpers;
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-    using RoliSoft.TVShowTracker.TaskDialogs;
+    using ContextMenus;
+    using ContextMenus.Menus;
+    using Downloaders.Engines;
+    using Helpers;
+    using Parsers.Downloads;
+    using TaskDialogs;
 
     using Image = System.Windows.Controls.Image;
 
@@ -441,7 +441,7 @@
             }
 
             SetStatus("Searching for download links on " + (string.Join(", ", e.Data.Select(l => l.Name))) + "...", true);
-            Utils.Win7Taskbar((int)((double)(ActiveSearch.SearchEngines.Count - e.Data.Count) / ActiveSearch.SearchEngines.Count * 100));
+            try { Utils.Win7Taskbar((int)((double)(ActiveSearch.SearchEngines.Count - e.Data.Count) / ActiveSearch.SearchEngines.Count * 100)); } catch { }
         }
 
         /// <summary>

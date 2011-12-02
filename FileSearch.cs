@@ -22,15 +22,14 @@
         public event EventHandler<EventArgs<List<string>>> FileSearchDone;
 
         /// <summary>
+        /// Occurs when a multiple file search is done.
+        /// </summary>
+        public event EventHandler<EventArgs<List<string>[]>> MultiFileSearchDone;
+
+        /// <summary>
         /// Occurs when the progress of the file search has changed.
         /// </summary>
         public event EventHandler<EventArgs<string>> FileSearchProgressChanged;
-
-        /// <summary>
-        /// Gets the paths where the search will begin.
-        /// </summary>
-        /// <value>The start paths.</value>
-        public Dictionary<string, List<string>> StartPaths { get; internal set; }
 
         /// <summary>
         /// Gets the search thread.
@@ -38,8 +37,10 @@
         /// <value>The search thread.</value>
         public Thread SearchThread { get; internal set; }
 
-        private readonly Episode[] _episodes;
-        private readonly Regex[] _titleRegex, _episodeRegex;
+        private Dictionary<string, List<string>> _paths;
+        private List<string>[] _files; 
+        private Episode[] _episodes;
+        private Regex[] _titleRegex, _episodeRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
@@ -76,24 +77,24 @@
         }
 
         /// <summary>
-        /// Groups the start paths into <see cref="StartPaths"/>.
+        /// Groups the start paths into <see cref="_paths"/>.
         /// </summary>
         /// <param name="paths">The paths where to start the search.</param>
         private void InitStartPaths(IEnumerable<string> paths)
         {
-            StartPaths = new Dictionary<string, List<string>>();
+            _paths = new Dictionary<string, List<string>>();
 
             foreach (var path in paths)
             {
                 var match = Regex.Match(path, @"^([A-Za-z]{1,2}):\\");
                 var drive = match.Success ? match.Groups[1].Value : string.Empty;
 
-                if (!StartPaths.ContainsKey(drive))
+                if (!_paths.ContainsKey(drive))
                 {
-                    StartPaths[drive] = new List<string>();
+                    _paths[drive] = new List<string>();
                 }
 
-                StartPaths[drive].Add(path);
+                _paths[drive].Add(path);
             }
         }
 
@@ -119,9 +120,14 @@
         /// </summary>
         private void Search()
         {
-            var files = new List<string>();
+            _files = new List<string>[_episodes.Length];
 
-            foreach (var paths in StartPaths)
+            for (var i = 0; i < _files.Length; i++)
+            {
+                _files[i] = new List<string>();
+            }
+
+            foreach (var paths in _paths)
             {
                 DriveInfo drive = null;
 
@@ -141,7 +147,7 @@
                 {
                     try
                     {
-                        ScanNtfsMftForFile(drive, files, paths.Value.Count == 1 && paths.Value[0].Length == 3 ? null : paths.Value);
+                        ScanNtfsMftForFile(drive, paths.Value.Count == 1 && paths.Value[0].Length == 3 ? null : paths.Value);
                     }
                     catch (Exception ex)
                     {
@@ -154,20 +160,26 @@
                     {
                         FileSearchProgressChanged.Fire(this, "Searching recursively for matching files in " + path + "...");
 
-                        ScanDirectoryForFile(path, files);
+                        ScanDirectoryForFile(path);
                     }
                 }
             }
 
-            FileSearchDone.Fire(this, files);
+            if (_files.Length == 1)
+            {
+                FileSearchDone.Fire(this, _files[0]);
+            }
+            else
+            {
+                MultiFileSearchDone.Fire(this, _files);
+            }
         }
 
         /// <summary>
         /// Scans the directory recursively for a matching file.
         /// </summary>
         /// <param name="path">The path to start the search from.</param>
-        /// <param name="files">The reference to a <c>List[string]</c> object where the files will be added.</param>
-        private void ScanDirectoryForFile(string path, List<string> files)
+        private void ScanDirectoryForFile(string path)
         {
             // search for matching files
             try
@@ -176,10 +188,7 @@
                 {
                     try
                     {
-                        if (IsMatch(file))
-                        {
-                            files.Add(file);
-                        }
+                        CheckFile(file);
                     }
                     catch (PathTooLongException)        { }
                     catch (SecurityException)           { }
@@ -210,7 +219,7 @@
                         continue;
                     }
 
-                    ScanDirectoryForFile(dir, files);
+                    ScanDirectoryForFile(dir);
                 }
             }
             catch (PathTooLongException)        { }
@@ -227,9 +236,8 @@
         /// Scans the NTFS Master File Table entries for a matching file.
         /// </summary>
         /// <param name="drive">The partition to scan.</param>
-        /// <param name="files">The reference to a <c>List[string]</c> object where the files will be added.</param>
         /// <param name="paths">The paths to which the search should be limited.</param>
-        private void ScanNtfsMftForFile(DriveInfo drive, List<string> files, IEnumerable<string> paths = null)
+        private void ScanNtfsMftForFile(DriveInfo drive, IEnumerable<string> paths = null)
         {
             FileSearchProgressChanged.Fire(this, "Reading the MFT records of the " + drive.Name[0] + " partition...");
 
@@ -242,10 +250,7 @@
             {
                 try
                 {
-                    if (IsMatch(file))
-                    {
-                        files.Add(file);
-                    }
+                    CheckFile(file);
                 }
                 catch (PathTooLongException)        { }
                 catch (SecurityException)           { }
@@ -259,25 +264,27 @@
         }
 
         /// <summary>
-        /// Determines whether the specified file is a match.
+        /// Determines whether the specified file is a match and inserts it into <see cref="_files"/> if it is.
         /// </summary>
         /// <param name="file">The file.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified file is a match; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsMatch(string file)
+        private void CheckFile(string file)
         {
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
 
-            if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleRegex[0], _episodeRegex[0]))
+            for (var i = 0; i < _files.Length; i++)
             {
-                var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
+                if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleRegex[i], _episodeRegex[i]))
+                {
+                    var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 
-                return pf.Success;
+                    if (pf.Success)
+                    {
+                        _files[i].Add(file);
+                        break;
+                    }
+                }
             }
-
-            return false;
         }
     }
 }

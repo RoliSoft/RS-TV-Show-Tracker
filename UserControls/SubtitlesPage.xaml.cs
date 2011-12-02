@@ -13,11 +13,12 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.ContextMenus;
-    using RoliSoft.TVShowTracker.ContextMenus.Menus;
-    using RoliSoft.TVShowTracker.Helpers;
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
-    using RoliSoft.TVShowTracker.TaskDialogs;
+    using ContextMenus;
+    using ContextMenus.Menus;
+    using Helpers;
+    using Parsers.Subtitles;
+    using TaskDialogs;
+
     using VistaControls.TaskDialog;
 
     /// <summary>
@@ -431,7 +432,7 @@
             }
 
             SetStatus("Searching for subtitles on " + (string.Join(", ", e.Data.Select(l => l.Name))) + "...", true);
-            Utils.Win7Taskbar((int)((double)(ActiveSearch.SearchEngines.Count - e.Data.Count) / ActiveSearch.SearchEngines.Count * 100));
+            try { Utils.Win7Taskbar((int)((double)(ActiveSearch.SearchEngines.Count - e.Data.Count) / ActiveSearch.SearchEngines.Count * 100)); } catch { }
         }
 
         /// <summary>
