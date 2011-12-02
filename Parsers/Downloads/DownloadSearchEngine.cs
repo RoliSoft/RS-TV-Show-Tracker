@@ -110,14 +110,14 @@
         }
 
         /// <summary>
-        /// Occurs when a download link search is done.
-        /// </summary>
-        public event EventHandler<EventArgs> DownloadSearchDone;
-
-        /// <summary>
         /// Occurs when a download link search found a new link.
         /// </summary>
         public event EventHandler<EventArgs<Link>> DownloadSearchNewLink;
+
+        /// <summary>
+        /// Occurs when a download link search is done.
+        /// </summary>
+        public event EventHandler<EventArgs> DownloadSearchDone;
 
         /// <summary>
         /// Occurs when a download link search has encountered an error.

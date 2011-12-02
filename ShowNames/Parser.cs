@@ -54,7 +54,7 @@
             // quick fix for ending optional tags
             show = show.Replace("[^A-Z0-9]+(?:", "[^A-Z0-9]*(?:").Replace(")?(?:", ")?[^A-Z0-9]*(?:");
 
-            return new Regex(show);
+            return new Regex(show, RegexOptions.IgnoreCase);
         }
 
         /// <summary>
@@ -372,7 +372,7 @@
                     // S[0]2[.]E[P][13-]14
                     @"S0?{0}[^0-9]?EP?(?:(?<em>\d{{1,2}})[\-E_](?:EP?)?)?0?{1}(?:[E_].+)?".FormatWith(season, episode),
                     // 2x[13-]14
-                    @"{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
+                    @"0?{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
                     // [S[e[ason|ries]]] 1[ - ]E[p[isode]] [1 - ]2
                     @"S(?:e(?:ason|ries)?)?[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode),
                     // 213; must be followed by quality notation

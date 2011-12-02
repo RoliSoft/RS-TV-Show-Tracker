@@ -56,7 +56,7 @@
         public DownloadSearch(IEnumerable<DownloadSearchEngine> engines = null, bool filter = false)
         {
             SearchEngines = (engines ?? AutoDownloader.ActiveSearchEngines).ToList();
-            Filter = filter;
+            Filter        = filter;
 
             var remove = new List<DownloadSearchEngine>();
 
@@ -176,6 +176,7 @@
             catch { }
 
             DownloadSearchEngineError.Fire(this, e.First, e.Second);
+            DownloadSearchEngineDone.Fire(this, _remaining);
 
             if (_remaining.Count == 0)
             {

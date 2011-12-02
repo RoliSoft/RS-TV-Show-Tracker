@@ -7,8 +7,8 @@
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Downloaders;
-    using RoliSoft.TVShowTracker.Downloaders.Engines;
+    using Downloaders;
+    using Downloaders.Engines;
 
     /// <summary>
     /// Represents a subtitle search engine.
@@ -28,9 +28,14 @@
         }
 
         /// <summary>
+        /// Occurs when a download link search found a new link.
+        /// </summary>
+        public event EventHandler<EventArgs<Subtitle>> SubtitleSearchNewLink;
+
+        /// <summary>
         /// Occurs when a subtitle search is done.
         /// </summary>
-        public event EventHandler<EventArgs<List<Subtitle>>> SubtitleSearchDone;
+        public event EventHandler<EventArgs> SubtitleSearchDone;
 
         /// <summary>
         /// Occurs when a subtitle search has encountered an error.
@@ -59,7 +64,13 @@
                     try
                     {
                         var list = Search(query);
-                        SubtitleSearchDone.Fire(this, list.ToList());
+
+                        foreach (var sub in list)
+                        {
+                            SubtitleSearchNewLink.Fire(this, sub);
+                        }
+
+                        SubtitleSearchDone.Fire(this);
                     }
                     catch (Exception ex)
                     {

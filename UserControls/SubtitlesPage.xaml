@@ -26,6 +26,11 @@
                         <Image Source="/RSTVShowTracker;component/Images/language.png" />
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Filter results locally" Name="filterResults" IsCheckable="True" Checked="FilterResultsChecked" Unchecked="FilterResultsUnchecked">
+                    <MenuItem.Icon>
+                        <Image Source="/RSTVShowTracker;component/Images/funnel.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="Append language to file" Name="appendLanguage" ToolTip="Appends the ISO 639-2/B language code to the file name when it was downloaded with &quot;Download near video&quot;." IsCheckable="True" Checked="AppendLanguageChecked"  Unchecked="AppendLanguageUnchecked">
                     <MenuItem.Icon>
                         <Image Source="/RSTVShowTracker;component/Images/document-insert.png" />

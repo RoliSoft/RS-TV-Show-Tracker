@@ -92,7 +92,7 @@
 
                 foreach (var file in files)
                 {
-                    if (Parser.IsMatch((file.DirectoryName + @"\" + file.Name).ToUpper(), titleRegex) || (releaseRegex != null && Parser.IsMatch((file.DirectoryName + @"\" + file.Name).ToUpper(), releaseRegex)))
+                    if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleRegex) || (releaseRegex != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseRegex)))
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
                         if (pf.Success && show.Value.Name == pf.Show)

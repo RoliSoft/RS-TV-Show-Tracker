@@ -293,6 +293,26 @@
         }
 
         /// <summary>
+        /// Handles the Checked event of the filterResults control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FilterResultsChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Filter Subtitles", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the filterResults control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FilterResultsUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Filter Subtitles", false);
+        }
+
+        /// <summary>
         /// Handles the Unchecked event of the appendLanguage control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -366,11 +386,12 @@
             textBox.IsEnabled    = false;
             searchButton.Content = "Cancel";
 
-            ActiveSearch = new SubtitleSearch(ActiveSearchEngines);
+            ActiveSearch = new SubtitleSearch(ActiveSearchEngines, ActiveLangs, filterResults.IsChecked);
 
-            ActiveSearch.SubtitleSearchDone            += SubtitleSearchDone;
-            ActiveSearch.SubtitleSearchProgressChanged += SubtitleSearchProgressChanged;
-            ActiveSearch.SubtitleSearchError           += SubtitleSearchError;
+            ActiveSearch.SubtitleSearchDone          += SubtitleSearchDone;
+            ActiveSearch.SubtitleSearchEngineNewLink += SubtitleSearchEngineNewLink;
+            ActiveSearch.SubtitleSearchEngineDone    += SubtitleSearchEngineDone;
+            ActiveSearch.SubtitleSearchEngineError   += SubtitleSearchEngineError;
             
             SetStatus("Searching for subtitles on " + (string.Join(", ", ActiveSearch.SearchEngines.Select(engine => engine.Name).ToArray())) + "...", true);
 
@@ -380,28 +401,37 @@
 
             Utils.Win7Taskbar(0, TaskbarProgressBarState.Normal);
         }
-
+        
         /// <summary>
-        /// Called when a subtitle search progress has changed.
+        /// Occurs when a subtitle search found a new link.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void SubtitleSearchProgressChanged(object sender, EventArgs<List<Subtitle>, double, List<string>> e)
+        private void SubtitleSearchEngineNewLink(object sender, EventArgs<Subtitle> e)
+        {
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    lock (SubtitlesListViewItemCollection)
+                    {
+                        SubtitlesListViewItemCollection.Add(new SubtitleItem(e.Data));
+                    }
+                }));
+        }
+
+        /// <summary>
+        /// Called when a subtitle search is done.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void SubtitleSearchEngineDone(object sender, EventArgs<List<SubtitleSearchEngine>> e)
         {
             if (!_searching)
             {
                 return;
             }
 
-            SetStatus("Searching for subtitles on " + (string.Join(", ", e.Third)) + "...", true);
-            Utils.Win7Taskbar((int)e.Second);
-
-            if (e.First != null)
-            {
-                Dispatcher.Invoke((Action)(() => SubtitlesListViewItemCollection.AddRange(e.First
-                                                                                           .Where(sub => ActiveLangs.Contains(sub.Language))
-                                                                                           .Select(sub => new SubtitleItem(sub)))));
-            }
+            SetStatus("Searching for subtitles on " + (string.Join(", ", e.Data.Select(l => l.Name))) + "...", true);
+            Utils.Win7Taskbar((int)((double)(ActiveSearch.SearchEngines.Count - e.Data.Count) / ActiveSearch.SearchEngines.Count * 100));
         }
 
         /// <summary>
@@ -442,7 +472,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        public void SubtitleSearchError(object sender, EventArgs<string, Exception> e)
+        public void SubtitleSearchEngineError(object sender, EventArgs<string, Exception> e)
         {
             if (e.Second is WebException || e.Second is CookComputing.XmlRpc.XmlRpcException)
             {

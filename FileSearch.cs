@@ -270,7 +270,7 @@
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
 
-            if (ShowNames.Parser.IsMatch((dirs + @"\" + name).ToUpper(), _titleRegex[0], _episodeRegex[0]))
+            if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleRegex[0], _episodeRegex[0]))
             {
                 var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 
