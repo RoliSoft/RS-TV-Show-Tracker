@@ -420,7 +420,7 @@
         {
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
-                rk.DeleteValue("RS TVShow Tracker", false);
+                rk.DeleteValue("RS TV Show Tracker", false);
             }
         }
 
