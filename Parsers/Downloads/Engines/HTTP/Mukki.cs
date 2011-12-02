@@ -62,7 +62,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-10-01 6:51 AM");
+                return Utils.DateTimeToVersion("2011-12-02 2:43 AM");
             }
         }
 
@@ -139,6 +139,13 @@
                 var release = HtmlEntity.DeEntitize(node.InnerText);
                 var quality = FileNames.Parser.ParseQuality(release);
                 var infourl = node.GetAttributeValue("href");
+                var sizergx = Regex.Match((node.GetTextValue("../..//span[@class='rls-size']") ?? string.Empty), @"(\d+(?:\.\d+)?)\s*([KMG]B)", RegexOptions.IgnoreCase);
+                var size    = string.Empty;
+
+                if (sizergx.Success)
+                {
+                    size = sizergx.Groups[1].Value + " " + sizergx.Groups[2].Value.ToUpper();
+                }
 
                 if (i == ExtractLimit)
                 {
@@ -146,6 +153,7 @@
 
                     link.Release = release;
                     link.InfoURL = infourl;
+                    link.Size    = size;
                     link.Quality = quality;
 
                     yield return link;
@@ -155,16 +163,8 @@
                 i++;
                 Thread.Sleep(ExtractSleep);
 
-                var html2   = Utils.GetHTML(infourl);
-                var sizergx = Regex.Match((html2.DocumentNode.GetTextValue("//table[2]//tr/td[position() = 1 and contains(text(), 'Size')]/following-sibling::td") ?? string.Empty), @"(\d+(?:\.\d+)?)\s*([KMG]B)", RegexOptions.IgnoreCase);
-                var size    = string.Empty;
-
-                if (sizergx.Success)
-                {
-                    size = sizergx.Groups[1].Value + " " + sizergx.Groups[2].Value.ToUpper();
-                }
-
-                var sites = html2.DocumentNode.SelectNodes("//span[@class='links']");
+                var html2 = Utils.GetHTML(infourl);
+                var sites = html2.DocumentNode.SelectNodes("//span[starts-with(@class, 'links')]");
 
                 if (sites == null)
                 {

@@ -71,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-03 11:50 AM");
+                return Utils.DateTimeToVersion("2011-12-02 2:50 AM");
             }
         }
 
@@ -91,6 +91,11 @@
         /// A regular expression to match the HI notation tag in the release names.
         /// </summary>
         public static Regex HINotationRegex = new Regex(@"[\.\-_]HI\b", RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// A regular expression to match the corrected tag in the release names.
+        /// </summary>
+        public static Regex CorrectedRegex = new Regex(@"\s+\((?:sync,?)?\s*correc(?:ted\s*(?:by [^\)]+)?|\.{3})\)", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Searches for subtitles on the service.
@@ -118,7 +123,7 @@
 
                 sub.Release     = node.GetTextValue("span[2]").Trim();
                 sub.HINotations = HINotationRegex.IsMatch(sub.Release);
-                sub.Corrected   = Regex.IsMatch(sub.Release, @"\bcorrec(?:ted|\.{3})\)", RegexOptions.IgnoreCase);
+                sub.Corrected   = CorrectedRegex.IsMatch(sub.Release);
                 sub.Language    = Languages.Parse(node.GetTextValue("span[1]").Trim());
                 sub.URL         = Site.TrimEnd('/') + node.GetAttributeValue("href");
 
@@ -129,7 +134,7 @@
 
                 if (sub.Corrected)
                 {
-                    sub.Release = Regex.Replace(sub.Release, @"\s+\((?:sync,?)?\s*correc(?:ted|\.{3})\)", string.Empty, RegexOptions.IgnoreCase);
+                    sub.Release = CorrectedRegex.Replace(sub.Release, string.Empty);
                 }
 
                 yield return sub;

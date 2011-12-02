@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-07 1:29 AM");
+                return Utils.DateTimeToVersion("2011-12-02 3:05 AM");
             }
         }
 
@@ -74,6 +74,20 @@
             get
             {
                 return new PodnapisiDownloader();
+            }
+        }
+
+        /// <summary>
+        /// Gets a number representing the number of pages to parse from the search results.
+        /// </summary>
+        /// <remarks>
+        /// The default number is 2. It's configurable from Settings.json, but you shouldn't increase it, as it might get you an IP ban.
+        /// </remarks>
+        public static int ExtractPages
+        {
+            get
+            {
+                return Settings.Get("Podnapisi Extract Pages", 2);
             }
         }
 
@@ -106,22 +120,9 @@
                 yield break;
             }
 
-            var pg2 = html.DocumentNode.GetNodeAttributeValue("//span[@class='strani']/a[1]", "href");
+            var pg = 1;
 
-            if (!string.IsNullOrWhiteSpace(pg2))
-            {
-                var html2 = Utils.GetHTML(Site.TrimEnd('/') + HtmlEntity.DeEntitize(pg2));
-                var subs2 = html2.DocumentNode.SelectNodes("//tr[@class='a' or @class='b']");
-
-                if (subs2 != null)
-                {
-                    foreach (var sub2 in subs2)
-                    {
-                        subs.Add(sub2);
-                    }
-                }
-            }
-            
+        extract:
             foreach (var node in subs)
             {
                 var sub = new Subtitle(this);
@@ -163,6 +164,26 @@
                 sub.URL      = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[1]/a[2]", "href");
 
                 yield return sub;
+            }
+
+            if (pg == ExtractPages)
+            {
+                yield break;
+            }
+
+            var nextpg = html.DocumentNode.GetNodeAttributeValue("//span[@class='strani']/a[1]", "href");
+
+            if (!string.IsNullOrWhiteSpace(nextpg))
+            {
+                html = Utils.GetHTML(Site.TrimEnd('/') + HtmlEntity.DeEntitize(nextpg));
+                subs = html.DocumentNode.SelectNodes("//tr[@class='a' or @class='b']");
+
+                if (subs != null)
+                {
+                    pg++;
+
+                    goto extract;
+                }
             }
         }
     }
