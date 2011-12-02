@@ -6,11 +6,9 @@
     using System.Linq;
     using System.Threading;
 
-    using ProtoBuf;
-
-    using RoliSoft.TVShowTracker.Helpers;
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-    using RoliSoft.TVShowTracker.Tables;
+    using Helpers;
+    using Parsers.Downloads;
+    using Tables;
 
     /// <summary>
     /// Provides support for searching and downloading links automatically.
@@ -82,20 +80,11 @@
         public static TimeSpan WaitForPreferred { get; set; }
 
         /// <summary>
-        /// Gets or sets the missing episodes.
-        /// </summary>
-        /// <value>
-        /// The missing episodes.
-        /// </value>
-        public static List<MissingEpisode> MissingEpisodes { get; set; }
-
-        /// <summary>
         /// Initializes the <see cref="AutoDownloader"/> class.
         /// </summary>
         static AutoDownloader()
         {
             LoadParsers();
-            LoadMissingEpisodes();
         }
 
         /// <summary>
@@ -119,7 +108,7 @@
         /// </summary>
         public static void SearchForMissingEpisodes()
         {
-            RefreshMissingEpisodes();
+            /*RefreshMissingEpisodes();
 
             foreach (var ep in MissingEpisodes)
             {
@@ -151,20 +140,18 @@
                 }
             }
 
-            SaveMissingEpisodes();
+            SaveMissingEpisodes();*/
         }
 
         /// <summary>
-        /// Refreshes the list of missing episodes.
+        /// Compiles a list of recently aired (3 week) and unwatched episodes.
         /// </summary>
-        public static void RefreshMissingEpisodes()
+        /// <returns>
+        /// A list of recently aired (3 week) and unwatched episodes.
+        /// </returns>
+        public static List<Episode> GetRecentUnwatchedEps()
         {
-            MissingEpisodes.RemoveAll(ep => ep.Episode == null || (DateTime.Now - ep.Episode.Airdate).TotalDays > 21);
-
-            foreach (var ep in Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21 && MissingEpisodes.Count(y => y.EpisodeID == x.EpisodeID) == 0))
-            {
-                MissingEpisodes.Add(new MissingEpisode(ep));
-            }
+            return Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21).ToList();
         }
 
         /// <summary>
@@ -174,7 +161,7 @@
         /// <returns>
         /// List of download links.
         /// </returns>
-        public static List<Link> SearchForEpisode(Episode ep)
+        public static List<Link> SearchForLinks(Episode ep)
         {
             var links = new List<Link>();
             var dlsrc = new DownloadSearch(ActiveSearchEngines, true);
@@ -186,12 +173,51 @@
 
             dlsrc.SearchAsync(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
 
-            while (busy && (DateTime.Now - start).TotalMinutes < 1)
+            while (busy && (DateTime.Now - start).TotalMinutes < 2)
             {
                 Thread.Sleep(TimeSpan.FromSeconds(1));
             }
 
             return links;
+        }
+
+        /// <summary>
+        /// Searches for downloaded files for the unwatched episodes.
+        /// </summary>
+        /// <param name="episodes">The episodes.</param>
+        /// <returns>
+        /// A list of found files mapped to their episode objects.
+        /// </returns>
+        public static Dictionary<Episode, List<string>> SearchForFiles(List<Episode> episodes)
+        {
+            var files = new Dictionary<Episode, List<string>>();
+            var busy  = true;
+
+            foreach (var episode in episodes)
+            {
+                files[episode] = new List<string>();
+            }
+
+            var fs = new FileSearch(Settings.Get<List<string>>("Download Paths"), episodes);
+
+            fs.MultiFileSearchDone += (s, e) =>
+                {
+                    for (var i = 0; i < e.Data.Length; i++)
+                    {
+                        files[episodes[i]].AddRange(e.Data[i]);
+                    }
+
+                    busy = false;
+                };
+
+            fs.BeginSearch();
+
+            while (busy)
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+
+            return files;
         }
 
         /// <summary>
@@ -264,109 +290,6 @@
                 case Types.HTTP:
                     File.WriteAllText(file + ".url", "[InternetShortcut]\r\nURL=" + (link.FileURL ?? link.InfoURL));
                     return;
-            }
-        }
-
-        /// <summary>
-        /// Loads the list of missing episodes and their current states.
-        /// </summary>
-        public static void LoadMissingEpisodes()
-        {
-            var path = Path.Combine(Signature.FullPath, "AutoDownloader.bin");
-
-            if (File.Exists(path))
-            {
-                using (var file = File.OpenRead(path))
-                {
-                    MissingEpisodes = Serializer.Deserialize<List<MissingEpisode>>(file);
-                }
-            }
-            else
-            {
-                MissingEpisodes = new List<MissingEpisode>();
-            }
-        }
-
-        /// <summary>
-        /// Saves the list of missing episodes and their current states.
-        /// </summary>
-        public static void SaveMissingEpisodes()
-        {
-            using (var file = File.Create(Path.Combine(Signature.FullPath, "AutoDownloader.bin")))
-            {
-                Serializer.Serialize(file, MissingEpisodes);
-            }
-        }
-
-        /// <summary>
-        /// Represents a missing episode.
-        /// </summary>
-        [ProtoContract]
-        public class MissingEpisode
-        {
-            /// <summary>
-            /// Gets or sets the episode ID.
-            /// </summary>
-            /// <value>
-            /// The episode ID.
-            /// </value>
-            [ProtoMember(1)]
-            public int EpisodeID { get; set; }
-
-            private Episode _episode;
-
-            /// <summary>
-            /// Gets the episode.
-            /// </summary>
-            public Episode Episode
-            {
-                get
-                {
-                    return _episode ?? (_episode = Database.Episodes.FirstOrDefault(ep => ep.EpisodeID == EpisodeID));
-                }
-            }
-
-            /// <summary>
-            /// Gets or sets a value indicating whether this <see cref="MissingEpisode"/> has been downloaded.
-            /// </summary>
-            /// <value>
-            ///   <c>true</c> if it's been downloaded; otherwise, <c>false</c>.
-            /// </value>
-            [ProtoMember(2)]
-            public bool Downloaded { get; set; }
-
-            /// <summary>
-            /// Gets or sets the date of the last search.
-            /// </summary>
-            /// <value>
-            /// The date of the last search.
-            /// </value>
-            [ProtoMember(3)]
-            public DateTime LastSearch { get; set; }
-
-            /// <summary>
-            /// Gets or sets the last best match.
-            /// </summary>
-            /// <value>
-            /// The last best match.
-            /// </value>
-            [ProtoMember(4)]
-            public string[] LastBestMatch { get; set; }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="MissingEpisode"/> class.
-            /// </summary>
-            public MissingEpisode()
-            {
-            }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="MissingEpisode"/> class.
-            /// </summary>
-            /// <param name="ep">The episode.</param>
-            public MissingEpisode(Episode ep)
-            {
-                EpisodeID = ep.EpisodeID;
             }
         }
     }
