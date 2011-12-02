@@ -54,6 +54,9 @@
             // quick fix for ending optional tags
             show = show.Replace("[^A-Z0-9]+(?:", "[^A-Z0-9]*(?:").Replace(")?(?:", ")?[^A-Z0-9]*(?:");
 
+            // add boundary restrictions
+            show = @"(?:\b|_)" + show + @"(?:\b|_)";
+
             return new Regex(show, RegexOptions.IgnoreCase);
         }
 
