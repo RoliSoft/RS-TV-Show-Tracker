@@ -14,8 +14,8 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using RoliSoft.TVShowTracker.FileNames;
-    using RoliSoft.TVShowTracker.ShowNames;
+    using FileNames;
+    using ShowNames;
 
     using DataFormats    = System.Windows.DataFormats;
     using DragEventArgs  = System.Windows.DragEventArgs;
@@ -126,6 +126,8 @@
         /// </summary>
         public static readonly Regex SampleEpisodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(new ShowEpisode(SampleInfo.Episode.Season, SampleInfo.Episode.Episode));
 
+        private bool _loaded;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RenamerWindow"/> class.
         /// </summary>
@@ -154,7 +156,6 @@
             ParserTimer.Start();
 
             Format = renameFormatTextBox.Text = Settings.Get("Rename Format", @"$show\Season $seasonz\$show S$seasonE$episode - $title$ext");
-            RenameFormatTextBoxTextChanged(null, null);
 
             switch (Operation = Settings.Get("Rename File Operation", "rename"))
             {
@@ -176,6 +177,10 @@
             }
 
             TargetDir = targetDirTextBox.Text = Settings.Get("Rename Target Directory");
+
+            _loaded = true;
+
+            RenameFormatTextBoxTextChanged(null, null);
         }
 
         /// <summary>
@@ -286,6 +291,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void TabControlSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (tabControl.SelectedIndex == 0)
             {
                 foreach (FileListViewItem item in listView.Items)
@@ -488,7 +495,7 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void RenameFormatTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (resultingNameTextBox == null) return;
+            if (!_loaded) return;
 
             Settings.Set("Rename Format", Format = renameFormatTextBox.Text);
             resultingNameTextBox.Text = FileNames.Parser.FormatFileName(Format, SampleInfo);
@@ -514,6 +521,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void RenameRadioButtonChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Rename File Operation", Operation = "rename");
         }
 
@@ -524,6 +533,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void CopyRadioButtonChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Rename File Operation", Operation = "copy");
         }
 
@@ -534,6 +545,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MoveRadioButtonChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Rename File Operation", Operation = "move");
         }
 
@@ -544,6 +557,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SymLinkRadioButtonChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Rename File Operation", Operation = "symlink");
         }
 
@@ -554,6 +569,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void TargetDirTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Rename Target Directory", TargetDir = targetDirTextBox.Text);
         }
 

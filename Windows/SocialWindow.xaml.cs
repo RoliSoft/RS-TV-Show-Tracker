@@ -9,7 +9,7 @@
     using System.Windows.Media;
     using System.Windows.Media.Effects;
 
-    using RoliSoft.TVShowTracker.Parsers.Social.Engines;
+    using Parsers.Social.Engines;
 
     using VistaControls.TaskDialog;
 
@@ -29,6 +29,8 @@
         private Twitter _twitter;
         private Identica _identica;
         private Facebook _facebook;
+
+        private bool _loaded;
 
         /// <summary>
         /// Handles the Loaded event of the Window control.
@@ -132,6 +134,8 @@
                 }
             }
 
+            _loaded = true;
+
             ListBoxSelectionChanged();
 
             foreach (var show in Database.TVShows.Values.OrderBy(x => x.Name))
@@ -160,6 +164,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void PostToTwitterChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post to Twitter", true);
         }
 
@@ -170,6 +176,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void PostToTwitterUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post to Twitter", false);
         }
 
@@ -276,6 +284,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void TwitterPinTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (twitterFinishAuthButton != null)
             {
                 twitterFinishAuthButton.IsEnabled = !string.IsNullOrWhiteSpace(twitterPinTextBox.Text) && Regex.IsMatch(twitterPinTextBox.Text.Trim(), @"^\d+$");
@@ -289,7 +299,11 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void TwitterStatusFormatTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            Settings.Set("Twitter Status Format", twitterStatusFormat.Text);
+            if (_loaded)
+            {
+                Settings.Set("Twitter Status Format", twitterStatusFormat.Text);
+            }
+
             twitterStatusFormatExample.Text = FileNames.Parser.FormatFileName(twitterStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
         }
         #endregion
@@ -302,6 +316,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void PostToIdenticaChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post to Identi.ca", true);
         }
 
@@ -312,6 +328,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void PostToIdenticaUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post to Identi.ca", false);
         }
 
@@ -418,6 +436,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void IdenticaPinTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (identicaFinishAuthButton != null)
             {
                 identicaFinishAuthButton.IsEnabled = !string.IsNullOrWhiteSpace(identicaPinTextBox.Text) && Regex.IsMatch(identicaPinTextBox.Text.Trim(), @"^\d+$");
@@ -431,7 +451,11 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void IdenticaStatusFormatTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            Settings.Set("Identi.ca Status Format", identicaStatusFormat.Text);
+            if (_loaded)
+            {
+                Settings.Set("Identi.ca Status Format", identicaStatusFormat.Text);
+            }
+
             identicaStatusFormatExample.Text = FileNames.Parser.FormatFileName(identicaStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
         }
         #endregion
@@ -444,6 +468,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void PostToFacebookChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post to Facebook", true);
         }
 
@@ -454,6 +480,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void PostToFacebookUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post to Facebook", false);
         }
 
@@ -528,7 +556,11 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void FacebookStatusFormatTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            Settings.Set("Facebook Status Format", facebookStatusFormat.Text);
+            if (_loaded)
+            {
+                Settings.Set("Facebook Status Format", facebookStatusFormat.Text);
+            }
+
             facebookStatusFormatExample.Text = FileNames.Parser.FormatFileName(facebookStatusFormat.Text, RenamerWindow.SampleInfo).CutIfLonger(140);
         }
         #endregion
@@ -541,6 +573,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ListBoxSelectionChanged(object sender = null, System.Windows.Controls.SelectionChangedEventArgs e = null)
         {
+            if (!_loaded) return;
+
             listRemoveButton.IsEnabled = listBox.SelectedIndex != -1;
         }
 
@@ -551,6 +585,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ListComboBoxSelectionChanged(object sender = null, System.Windows.Controls.SelectionChangedEventArgs e = null)
         {
+            if (!_loaded) return;
+
             listAddButton.IsEnabled = listComboBox.SelectedIndex != -1;
         }
 
@@ -561,6 +597,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void OnlyNewChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post only recent", true);
         }
 
@@ -571,6 +609,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void OnlyNewUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Post only recent", false);
         }
 
@@ -581,6 +621,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void WhiteListRadioButtonClick(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             listTypeText.Text = "Specify TV shows to allow to be posted:";
             Settings.Set("Post restrictions list type", "white");
         }
@@ -592,6 +634,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void BlackListRadioButtonClick(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             listTypeText.Text = "Specify TV shows to block from being posted:";
             Settings.Set("Post restrictions list type", "black");
         }

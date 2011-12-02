@@ -16,16 +16,16 @@
 
     using Microsoft.Win32;
 
-    using RoliSoft.TVShowTracker.ContextMenus.Menus;
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-    using RoliSoft.TVShowTracker.Parsers.Guides;
-    using RoliSoft.TVShowTracker.Parsers.LinkCheckers;
-    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
-    using RoliSoft.TVShowTracker.Parsers.Recommendations;
-    using RoliSoft.TVShowTracker.Parsers.Social;
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
-    using RoliSoft.TVShowTracker.Parsers.WebSearch;
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+    using ContextMenus.Menus;
+    using Parsers.Downloads;
+    using Parsers.Guides;
+    using Parsers.LinkCheckers;
+    using Parsers.OnlineVideos;
+    using Parsers.Recommendations;
+    using Parsers.Social;
+    using Parsers.Subtitles;
+    using Parsers.WebSearch;
+    using Parsers.WebSearch.Engines;
 
     using VistaControls.TaskDialog;
 
@@ -61,6 +61,8 @@
         /// </summary>
         /// <value>The plugins list view item collection.</value>
         public ObservableCollection<PluginsListViewItem> PluginsListViewItemCollection { get; set; }
+
+        private bool _loaded;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsWindow"/> class.
@@ -238,6 +240,8 @@
             {
                 MainWindow.Active.HandleUnexpectedException(ex);
             }
+
+            _loaded = true;
         }
 
         /// <summary>
@@ -247,7 +251,7 @@
         /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
         private void GlassWindowClosing(object sender, CancelEventArgs e)
         {
-            Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)));
+            new Thread(() => Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)))).Start();
         }
 
         #region General
@@ -258,6 +262,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void DlPathsListBoxSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
         {
+            if (!_loaded) return;
+
             dlPathRemoveButton.IsEnabled   = dlPathsListBox.SelectedIndex != -1;
             dlPathMoveUpButton.IsEnabled   = dlPathsListBox.SelectedIndex > 0;
             dlPathMoveDownButton.IsEnabled = dlPathsListBox.SelectedIndex != -1 && dlPathsListBox.SelectedIndex < dlPathsListBox.Items.Count - 1;
@@ -357,6 +363,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void ProcessTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             var proc = processTextBox.Text.Trim(',').Split(',').ToList();
 
             if (proc.Count == 1 && string.IsNullOrWhiteSpace(proc[0]))
@@ -374,6 +382,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchNtfsMftChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Search NTFS MFT records", true);
 
             if (!Utils.IsAdmin)
@@ -395,6 +405,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchNtfsMftUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Search NTFS MFT records", false);
         }
 
@@ -405,6 +417,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void StartAtStartupChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
                 rk.SetValue("RS TV Show Tracker", "\"" + Assembly.GetExecutingAssembly().Location + "\" -hide");
@@ -418,6 +432,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void StartAtStartupUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
             {
                 rk.DeleteValue("RS TV Show Tracker", false);
@@ -431,6 +447,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ConvertTimezoneChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Convert Timezone", true);
         }
 
@@ -441,6 +459,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ConvertTimezoneUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Convert Timezone", false);
         }
 
@@ -451,6 +471,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DisableAeroChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Enable Aero", false);
 
             MainWindow.Active.ActivateNonAero();
@@ -463,6 +485,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DisableAeroUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Enable Aero", true);
 
             MainWindow.Active.AeroChanged(sender, new PropertyChangedEventArgs("IsGlassEnabled"));
@@ -475,6 +499,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DisableAnimationsChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Enable Animations", false);
 
             MainWindow.Active.DeactivateAnimation();
@@ -487,6 +513,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DisableAnimationsUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Enable Animations", true);
 
             MainWindow.Active.ActivateAnimation();
@@ -499,6 +527,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ShowUnhandledErrorsChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Show Unhandled Errors", true);
         }
 
@@ -509,6 +539,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ShowUnhandledErrorsUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Show Unhandled Errors", false);
         }
         #endregion
@@ -521,6 +553,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MonitorNetworkShareChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Monitor Network Shares", true);
         }
 
@@ -531,6 +565,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MonitorNetworkShareUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             Settings.Set("Monitor Network Shares", false);
         }
 
@@ -563,6 +599,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void TorrentPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (torrentPathTextBox.Text.Length == 0 || File.Exists(torrentPathTextBox.Text))
             {
                 Settings.Set("Torrent Downloader", torrentPathTextBox.Text);
@@ -598,6 +636,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void UsenetPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (usenetPathTextBox.Text.Length == 0 || File.Exists(usenetPathTextBox.Text))
             {
                 Settings.Set("Usenet Downloader", usenetPathTextBox.Text);
@@ -633,6 +673,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
         private void JDlPathTextBoxTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (jDlPathTextBox.Text.Length == 0 || File.Exists(jDlPathTextBox.Text))
             {
                 Settings.Set("JDownloader", jDlPathTextBox.Text);
@@ -658,6 +700,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ListViewSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
         {
+            if (!_loaded) return;
+
             parserEditButton.IsEnabled = listView.SelectedIndex != -1;
             moveUpButton.IsEnabled     = listView.SelectedIndex > 0;
             moveDownButton.IsEnabled   = listView.SelectedIndex != -1 && listView.SelectedIndex < listView.Items.Count - 1;
@@ -700,6 +744,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void EnabledChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (!AutoDownloader.Actives.Contains((sender as CheckBox).Tag as string))
             {
                 AutoDownloader.Actives.Add((sender as CheckBox).Tag as string);
@@ -715,6 +761,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void EnabledUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             if (AutoDownloader.Actives.Contains((sender as CheckBox).Tag as string))
             {
                 AutoDownloader.Actives.Remove((sender as CheckBox).Tag as string);
@@ -797,6 +845,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ProxiesListViewSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
         {
+            if (!_loaded) return;
+
             proxyEditButton.IsEnabled = proxySearchButton.IsEnabled = proxyTestButton.IsEnabled = proxyRemoveButton.IsEnabled = proxiesListView.SelectedIndex != -1;
         }
 
@@ -807,6 +857,8 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ProxiedDomainsListViewSelectionChanged(object sender = null, SelectionChangedEventArgs e = null)
         {
+            if (!_loaded) return;
+
             proxyDomainEditButton.IsEnabled = proxyDomainRemoveButton.IsEnabled = proxiedDomainsListView.SelectedIndex != -1;
         }
 
@@ -1305,6 +1357,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ShowInternalChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             ReloadPlugins(true);
         }
 
@@ -1315,6 +1369,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ShowInternalUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             ReloadPlugins();
         }
         #endregion
