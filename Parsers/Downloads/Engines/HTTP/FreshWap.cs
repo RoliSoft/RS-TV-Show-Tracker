@@ -62,7 +62,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-03 7:31 AM");
+                return Utils.DateTimeToVersion("2011-12-04 3:48 AM");
             }
         }
 
@@ -164,7 +164,7 @@
                 Thread.Sleep(ExtractSleep);
 
                 var html2 = Utils.GetHTML(infourl);
-                var sites = Regex.Matches(html2.DocumentNode.GetHtmlValue("//div[@class='quote']") ?? string.Empty, @"(http://[^<$\s]+)");
+                var sites = Regex.Matches(html2.DocumentNode.GetHtmlValue("//div[@class='quote']") ?? string.Empty, @"((?<!src=[""']?)http://[^<$\s]+)");
 
                 if (sites.Count == 0)
                 {

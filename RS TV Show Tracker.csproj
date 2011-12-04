@@ -142,6 +142,7 @@
     <Compile Include="ContextMenus\ContextMenuItem.cs" />
     <Compile Include="ContextMenus\Menus\SubtitleContextMenu.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Scroogle.cs" />
     <Compile Include="Parsers\WebSearch\Engines\StartPage.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Ixquick.cs" />
