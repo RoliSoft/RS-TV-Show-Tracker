@@ -108,39 +108,34 @@
         /// </summary>
         public static void SearchForMissingEpisodes()
         {
-            /*RefreshMissingEpisodes();
+            var eps   = GetRecentUnwatchedEps();
+            var files = SearchForFiles(eps);
 
-            foreach (var ep in MissingEpisodes)
+            foreach (var ep in eps)
             {
-                if (ep.Downloaded)
+                // is there any file downloaded which matches the rules set?
+
+                if (files[ep].Any(file => IsMatchingRule(ep, file)))
                 {
                     continue;
                 }
 
-                ep.LastSearch = DateTime.Now;
+                // if not, initiate the search for links
 
-                var links = SearchForEpisode(ep.Episode);
+                var links = SearchForLinks(ep);
 
                 if (links.Count == 0)
                 {
-                    ep.LastBestMatch = null;
                     continue;
                 }
 
                 var link = SelectBestLink(links);
 
-                ep.LastBestMatch = new[] { link.Release, link.Quality.ToString(), link.Size, link.Source.Name };
-
-                if (link.Quality == PreferredQuality
-                 || (DateTime.Now - ep.Episode.Airdate) > WaitForPreferred)
+                if (IsMatchingRule(ep, link))
                 {
-                    ep.Downloaded = true;
-
-                    DownloadFile(link);
+                    //DownloadFile(link);
                 }
             }
-
-            SaveMissingEpisodes();*/
         }
 
         /// <summary>
@@ -266,6 +261,38 @@
             // return the highest found quality from the highest priority site
 
             return ordered.First();
+        }
+
+        /// <summary>
+        /// Determines whether the specified file matches the rule set for the specified show
+        /// </summary>
+        /// <param name="episode">The episode.</param>
+        /// <param name="file">The file.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified file matches the rule; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsMatchingRule(Episode episode, string file)
+        {
+            // TODO
+
+            var quality = FileNames.Parser.ParseQuality(file);
+
+            return quality == Qualities.WebDL720p;
+        }
+
+        /// <summary>
+        /// Determines whether the specified link matches the rule set for the specified show
+        /// </summary>
+        /// <param name="episode">The episode.</param>
+        /// <param name="link">The link.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified link matches the rule; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsMatchingRule(Episode episode, Link link)
+        {
+            // TODO
+
+            return link.Quality == Qualities.WebDL720p || (DateTime.Now - episode.Airdate) > WaitForPreferred;
         }
 
         /// <summary>
