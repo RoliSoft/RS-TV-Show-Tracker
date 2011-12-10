@@ -60,7 +60,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-16 16:09 PM");
+                return Utils.DateTimeToVersion("2011-12-10 8:42 PM");
             }
         }
 
@@ -157,12 +157,12 @@
             {
                 var link = new Link(this);
 
-                var release = Regex.Match(node.InnerHtml, @"<b>Release Name</b>: ([^<$]+)");
+                var release = node.GetNodeAttributeValue("//b[contains('Release Name:', text())]/following-sibling::span", "title");
                 var quality = node.GetTextValue("a[2]/following-sibling::text()").Trim();
 
-                if (release.Success && !release.Groups[1].Value.Trim().Contains("Not Available"))
+                if (release != null && !release.Trim().Contains("Not Available"))
                 {
-                    link.Release = HtmlEntity.DeEntitize(release.Groups[1].Value.Trim());
+                    link.Release = HtmlEntity.DeEntitize(release);
                     link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 }
                 else
