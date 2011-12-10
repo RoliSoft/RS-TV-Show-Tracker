@@ -157,7 +157,7 @@
             {
                 var link = new Link(this);
 
-                var release = node.GetNodeAttributeValue("//b[contains('Release Name:', text())]/following-sibling::span", "title");
+                var release = node.GetNodeAttributeValue(".//b[contains('Release Name:', text())]/following-sibling::span", "title");
                 var quality = node.GetTextValue("a[2]/following-sibling::text()").Trim();
 
                 if (release != null && !release.Trim().Contains("Not Available"))
