@@ -505,6 +505,24 @@
             ((FrameworkElement)e.Source).ContextMenu = cm;
             var sub = (Subtitle)listView.SelectedValue;
 
+            if (!string.IsNullOrWhiteSpace(sub.InfoURL))
+            {
+                var oib    = new MenuItem();
+                oib.Header = "Open details in browser";
+                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page.png")) };
+                oib.Click += (s, r) => Utils.Run(sub.InfoURL);
+                cm.Items.Add(oib);
+            }
+
+            if (!string.IsNullOrWhiteSpace(sub.FileURL))
+            {
+                var oib    = new MenuItem();
+                oib.Header = "Download subtitle in browser";
+                oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
+                oib.Click += (s, r) => Utils.Run(sub.FileURL);
+                cm.Items.Add(oib);
+            }
+
             var dls    = new MenuItem();
             dls.Header = "Download subtitle";
             dls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
