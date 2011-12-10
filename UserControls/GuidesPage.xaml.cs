@@ -312,8 +312,8 @@
 
             try
             {
-                var last = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
-                var next = show.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var last = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.EpisodeID).Take(1).ToList();
+                var next = show.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.EpisodeID).Take(1).ToList();
 
                 if (last.Count != 0)
                 {
@@ -348,7 +348,7 @@
 
             // fill up episode list
 
-            var episodes = show.Episodes.OrderByDescending(ep => ep.Season * 1000 + ep.Number);
+            var episodes = show.Episodes.OrderByDescending(ep => ep.EpisodeID);
             var icon     = Updater.CreateGuide(show.Data.Get("grabber", "TVRage")).Icon;
 
             GuideListViewItemCollection.RaiseListChangedEvents = false;

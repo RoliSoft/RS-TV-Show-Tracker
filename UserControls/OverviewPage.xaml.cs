@@ -171,7 +171,7 @@
             {
                 // last episode
                 
-                var count  = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).Count();
+                var count  = Database.Episodes.Count(ep => !ep.Watched && ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch);
                      _eps += count;
                 
                 if (hideend && show.Data.Get("airing", "False") == "False" && count == 0)
@@ -179,7 +179,7 @@
                     continue;
                 }
 
-                var lastep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var lastep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.EpisodeID).Take(1).ToList();
                 var last   = lastep.Count != 0
                            ? "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].Season, lastep[0].Number, lastep[0].Name)
                            : "This show hasn't started yet.";
@@ -195,7 +195,7 @@
 
                 // next episode
 
-                var nextep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate > DateTime.Now).OrderBy(ep => ep.Season * 1000 + ep.Number).Take(1).ToList();
+                var nextep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.Airdate > DateTime.Now).OrderBy(ep => ep.EpisodeID).Take(1).ToList();
                 string next;
 
                 if (nextep.Count != 0)
@@ -209,7 +209,20 @@
                 }
                 else if (show.Data.Get("airing", "False") == "True")
                 {
-                    next = "No data available";
+                    var epid = lastep.Count != 0
+                             ? lastep[0].EpisodeID + 1
+                             : 0;
+
+                    nextep = Database.Episodes.Where(ep => ep.ShowID == show.ShowID && ep.EpisodeID >= epid).OrderBy(ep => ep.EpisodeID).Take(1).ToList();
+
+                    if (nextep.Count != 0)
+                    {
+                        next = "S{0:00}E{1:00} · {2}".FormatWith(nextep[0].Season, nextep[0].Number, string.IsNullOrWhiteSpace(nextep[0].Name) ? "TBA" : nextep[0].Name);
+                    }
+                    else
+                    {
+                        next = "No data available";
+                    }
                 }
                 else
                 {
@@ -674,7 +687,7 @@
 
             if (show.NewEpisodes >= 2)
             {
-                var dbep   = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderBy(ep => ep.Season * 1000 + ep.Number).First();
+                var dbep   = Database.Episodes.Where(ep => !ep.Watched && ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderBy(ep => ep.EpisodeID).First();
                 var nextnt = dbep.Show.Data.Get("notation") == "airdate";
                 var nextdt = dbep.Airdate.ToOriginalTimeZone(dbep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd");
                 var nextep = "S{0:00}E{1:00}".FormatWith(dbep.Season, dbep.Number);
@@ -824,7 +837,7 @@
 
             if (show.Started)
             {
-                var dbep2  = Database.Episodes.Where(ep => ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.Season * 1000 + ep.Number).First();
+                var dbep2  = Database.Episodes.Where(ep => ep.ShowID == show.Show.ShowID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.EpisodeID).First();
                 var lastnt = dbep2.Show.Data.Get("notation") == "airdate";
                 var lastdt = dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.Data.Get("timezone")).ToString("yyyy.MM.dd");
                 var lastep = "S{0:00}E{1:00}".FormatWith(dbep2.Season, dbep2.Number);
