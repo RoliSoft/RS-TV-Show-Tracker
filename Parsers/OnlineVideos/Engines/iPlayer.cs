@@ -93,7 +93,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Google().Search("intitle:{0} intitle:\"Series {1} Episode {2}\" site:bbc.co.uk/iplayer/episode/".FormatWith(ep.Show.Name, ep.Season, ep.Number)).ToList();
+            var g = new Scroogle().Search("intitle:{0} intitle:\"Series {1} Episode {2}\" site:bbc.co.uk/iplayer/episode/".FormatWith(ep.Show.Name, ep.Season, ep.Number)).ToList();
 
             if (g.Count != 0)
             {

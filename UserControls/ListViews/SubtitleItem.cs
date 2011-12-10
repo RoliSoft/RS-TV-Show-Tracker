@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using Parsers.Subtitles;
 
     /// <summary>
     /// Extended class of the original Subtitle class for the listview.
@@ -14,7 +14,8 @@
         public SubtitleItem(Subtitle subtitle) : base(subtitle.Source)
         {
             Release     = subtitle.Release;
-            URL         = subtitle.URL;
+            InfoURL     = subtitle.InfoURL;
+            FileURL     = subtitle.FileURL;
             HINotations = subtitle.HINotations;
             Corrected   = subtitle.Corrected;
             Language    = subtitle.Language;

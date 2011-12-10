@@ -52,7 +52,7 @@
             }
             else if (link is Subtitle)
             {
-                uri = new Uri((link as Subtitle).URL);
+                uri = new Uri((link as Subtitle).FileURL);
             }
             else
             {

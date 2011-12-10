@@ -47,10 +47,6 @@
             {
                 url = (link as Link).FileURL;
             }
-            else if (link is Subtitle)
-            {
-                url = (link as Subtitle).URL;
-            }
             else
             {
                 throw new Exception("The link object is an unsupported type.");

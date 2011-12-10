@@ -94,7 +94,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Google().Search("intitle:Watch {0} online site:sidereel.com".FormatWith(ep.Show.Name)).ToList();
+            var g = new Scroogle().Search("intitle:Watch {0} online site:sidereel.com".FormatWith(ep.Show.Name)).ToList();
 
             if (g.Count == 0)
             {

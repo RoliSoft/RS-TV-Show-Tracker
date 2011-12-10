@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-02 3:05 AM");
+                return Utils.DateTimeToVersion("2011-12-10 5:13 PM");
             }
         }
 
@@ -112,7 +112,7 @@
                 show = Uri.EscapeUriString(query);
             }
 
-            var html = Utils.GetHTML(Site + "en/ppodnapisi/search?tbsl=3&asdp=1&sK={0}&sM=&sJ=0&sO=asc&sS=time&submit=Search&sTS={1}&sTE={2}&sY=&sR=&sT=1".FormatWith(show, season, episode));
+            var html = Utils.GetHTML(Site + "en/ppodnapisi/search?tbsl=3&asdp=1&sK={0}&sM=&sJ=0&sO=desc&sS=time&submit=Search&sTS={1}&sTE={2}&sY=&sR=&sT=1".FormatWith(show, season, episode));
             var subs = html.DocumentNode.SelectNodes("//tr[@class='a' or @class='b']");
             
             if (subs == null)
@@ -128,25 +128,22 @@
                 var sub = new Subtitle(this);
 
                 sub.Release = node.GetNodeAttributeValue("td[1]/span/span", "title");
-                if (!string.IsNullOrWhiteSpace(sub.Release) && Regex.IsMatch(sub.Release, @"[^A-Za-z]"))
+                if (!string.IsNullOrWhiteSpace(sub.Release) && Regex.IsMatch(sub.Release, @"[^A-Za-z]") && !Regex.IsMatch(sub.Release, @"^\s*(hdtv|dvdrip)", RegexOptions.IgnoreCase))
                 {
                     sub.Release = sub.Release.Trim().Split(' ')[0];
                 }
                 else
                 {
                     sub.Release = node.GetTextValue("td[1]/a[2]") + " ";
+                    var sopinfo = node.GetTextValue("td[1]/span[@class='opis']").Replace("&nbsp;", string.Empty);
 
-                    var epinfo = node.GetTextValue("td[1]/span[@class='opis']").Replace("&nbsp;", string.Empty);
-                    if (Regex.IsMatch(epinfo, @"[^A-Za-z]"))
+                    if (Regex.IsMatch(sopinfo, @"^\s*(hdtv|dvdrip)", RegexOptions.IgnoreCase))
                     {
-                        sub.Release += epinfo;
-                    }
-                    else
-                    {
-                        sub.Release += node.GetTextValue("td[1]/span[@class='opis'][2]").Replace("&nbsp;", string.Empty);
+                        sub.Release += node.GetTextValue("td[1]/span[@class='opis'][2]").Replace("&nbsp;", string.Empty) + " ";
                     }
 
-                    sub.Release = Regex.Replace(sub.Release, @"\s*Season: (\d{1,2}) Episode: (\d{1,2}),?\s*", m => string.Format(" S{0:00}E{1:00}", m.Groups[1].Value.ToInteger(), m.Groups[2].Value.ToInteger()));
+                    sub.Release += sopinfo;
+                    sub.Release  = Regex.Replace(sub.Release, @"\s*Season: (\d{1,2}) Episode: (\d{1,2}),?", m => string.Format(" S{0:00}E{1:00}", m.Groups[1].Value.ToInteger(), m.Groups[2].Value.ToInteger()));
                 }
 
                 if (node.SelectSingleNode("td[1]/img[contains(@src, 'h.gif')]") != null)
@@ -161,7 +158,7 @@
                 }
 
                 sub.Language = Languages.Parse(node.GetNodeAttributeValue("td[1]/a/img", "title"));
-                sub.URL      = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[1]/a[2]", "href");
+                sub.InfoURL  = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[1]/a[2]", "href");
 
                 yield return sub;
             }

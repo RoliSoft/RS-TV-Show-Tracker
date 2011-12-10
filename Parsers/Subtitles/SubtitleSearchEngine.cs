@@ -102,11 +102,11 @@
 
             Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House S07E01 on {0}.".FormatWith(Name));
 
-            Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
-            Console.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");
-            Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
-            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), item.URL.CutIfLonger(60))));
-            Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
+            Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Release name                                       │ Language   │ Details page URL                                             │ Downloadable file URL                                        │");
+            Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┤");
+            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │ {3,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), (item.InfoURL ?? string.Empty).CutIfLonger(60), (item.FileURL ?? string.Empty).CutIfLonger(60))));
+            Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┘");
         }
 
         /// <summary>
@@ -119,11 +119,11 @@
 
             Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House on {0}.".FormatWith(Name));
 
-            Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┐");
-            Console.WriteLine("│ Release name                                       │ Language   │ URL                                                          │");
-            Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┤");
-            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), item.URL.CutIfLonger(60))));
-            Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┘");
+            Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
+            Console.WriteLine("│ Release name                                       │ Language   │ Details page URL                                             │ Downloadable file URL                                        │");
+            Console.WriteLine("├────────────────────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┤");
+            list.ForEach(item => Console.WriteLine("│ {0,-50} │ {1,-10} │ {2,-60} │ {3,-60} │".FormatWith(item.Release.Transliterate().CutIfLonger(50), item.Language.ToString().CutIfLonger(10), (item.InfoURL ?? string.Empty).CutIfLonger(60), (item.FileURL ?? string.Empty).CutIfLonger(60))));
+            Console.WriteLine("└────────────────────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┘");
         }
     }
 }

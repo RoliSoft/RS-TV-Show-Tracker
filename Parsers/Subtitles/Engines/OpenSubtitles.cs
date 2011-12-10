@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
 
     using CookComputing.XmlRpc;
 
@@ -70,7 +69,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-03 11:50 AM");
+                return Utils.DateTimeToVersion("2011-12-10 4:38 PM");
             }
         }
 
@@ -113,7 +112,8 @@
                 sub.Release     = data["SubFileName"].ToString().Replace("." + data["SubFormat"], string.Empty);
                 sub.HINotations = Subscene.HINotationRegex.IsMatch(sub.Release);
                 sub.Language    = Languages.Parse(data["LanguageName"].ToString());
-                sub.URL         = data["ZipDownloadLink"].ToString();
+                sub.InfoURL     = data["SubtitlesLink"].ToString();
+                sub.FileURL     = data["ZipDownloadLink"].ToString();
 
                 if (sub.HINotations)
                 {

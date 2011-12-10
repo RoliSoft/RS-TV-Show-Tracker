@@ -43,7 +43,7 @@
                 {
                     Title           = "Downloading...",
                     Instruction     = link.Release,
-                    Content         = "Sending request to " + new Uri(link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...",
+                    Content         = "Sending request to " + new Uri(link.FileURL ?? link.InfoURL).DnsSafeHost.Replace("www.", string.Empty) + "...",
                     CommonButtons   = TaskDialogButton.Cancel,
                     ShowProgressBar = true
                 };
@@ -233,7 +233,7 @@
                 return;
             }
 
-            _td.Content = "Sending request to " + new Uri(_link.URL).DnsSafeHost.Replace("www.", string.Empty) + "...";
+            _td.Content = "Sending request to " + new Uri(_link.FileURL ?? _link.InfoURL).DnsSafeHost.Replace("www.", string.Empty) + "...";
 
             var prm = true;
 

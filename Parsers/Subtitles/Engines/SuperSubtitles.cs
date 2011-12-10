@@ -55,7 +55,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-02-26 4:20 PM");
+                return Utils.DateTimeToVersion("2011-12-10 4:48 PM");
             }
         }
 
@@ -66,7 +66,8 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "index.php?search=" + Uri.EscapeUriString(ShowNames.Parser.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false)));
+            var sfmt = Uri.EscapeUriString(ShowNames.Parser.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false));
+            var html = Utils.GetHTML(Site + "index.php?search=" + sfmt);
             var subs = html.DocumentNode.SelectNodes("//tr[@id='vilagit']");
 
             if (subs == null)
@@ -80,7 +81,8 @@
 
                 sub.Release  = node.GetTextValue("td[3]/div[2]").Trim();
                 sub.Language = ParseLanguage(node.GetTextValue("td[@class='lang']").Trim());
-                sub.URL      = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[6]/a", "href");
+                sub.InfoURL  = Site + "index.php?search=" + sfmt;
+                sub.FileURL  = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[6]/a", "href");
 
                 yield return sub;
             }

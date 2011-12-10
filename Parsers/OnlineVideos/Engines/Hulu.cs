@@ -94,7 +94,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Google().Search("intitle:{0}: {1} \"Season {2} Ep. {3}\" site:hulu.com/watch/".FormatWith(ShowNames.Parser.CleanTitleWithEp(ep.Show.Name), ep.Name, ep.Season, ep.Number)).ToList();
+            var g = new Scroogle().Search("intitle:{0}: {1} \"Season {2} Ep. {3}\" site:hulu.com/watch/".FormatWith(ShowNames.Parser.CleanTitleWithEp(ep.Show.Name), ep.Name, ep.Season, ep.Number)).ToList();
 
             if (g.Count != 0)
             {

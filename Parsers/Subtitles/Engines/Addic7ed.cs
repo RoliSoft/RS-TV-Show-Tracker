@@ -59,7 +59,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-05 6:13 PM");
+                return Utils.DateTimeToVersion("2011-12-10 4:44 PM");
             }
         }
 
@@ -81,7 +81,7 @@
 
             if (string.IsNullOrWhiteSpace(adid))
             {
-                var url = new Google().Search(show[0] + " site:addic7ed.com/serie/").ToList();
+                var url = new Scroogle().Search(show[0] + " site:addic7ed.com/serie/").ToList();
                 if (url.Count == 0)
                 {
                     yield break;
@@ -95,7 +95,8 @@
                 }
             }
 
-            var html = Utils.GetHTML(Site + "serie/" + adid + "/" + ShowNames.Parser.ExtractEpisode(query, "{0:0}/{1:00}") + "/episode");
+            var epnt = ShowNames.Parser.ExtractEpisode(query, "{0:0}/{1:00}");
+            var html = Utils.GetHTML(Site + "serie/" + adid + "/" + epnt + "/episode");
             var subs = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/original/')] | //a[starts-with(@href,'/updated/')]");
 
             if (subs == null)
@@ -121,7 +122,8 @@
                                 + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
                                 + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty);
                 sub.Language    = Languages.Parse(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
-                sub.URL         = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                sub.InfoURL     = Site + "serie/" + adid + "/" + epnt + "/episode";
+                sub.FileURL     = Site.TrimEnd('/') + node.GetAttributeValue("href");
 
                 yield return sub;
             }

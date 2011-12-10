@@ -40,10 +40,16 @@
         public bool HINotations { get; set; }
 
         /// <summary>
-        /// Gets or sets the URL to the subtitle.
+        /// Gets or sets the URL to the details page.
         /// </summary>
         /// <value>The URL.</value>
-        public string URL { get; set; }
+        public string InfoURL { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL to the downloadable subtitle.
+        /// </summary>
+        /// <value>The URL.</value>
+        public string FileURL { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subtitle"/> class.

@@ -125,7 +125,7 @@
                 sub.HINotations = HINotationRegex.IsMatch(sub.Release);
                 sub.Corrected   = CorrectedRegex.IsMatch(sub.Release);
                 sub.Language    = Languages.Parse(node.GetTextValue("span[1]").Trim());
-                sub.URL         = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                sub.InfoURL     = Site.TrimEnd('/') + node.GetAttributeValue("href");
 
                 if (sub.HINotations)
                 {

@@ -62,7 +62,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-27 1:17 AM");
+                return Utils.DateTimeToVersion("2011-12-10 4:42 PM");
             }
         }
 
@@ -106,7 +106,7 @@
                 }
             }
 
-            var html = Utils.GetHTML(Site + "kereso.php", "sorozatid=" + id.Value + "&nyelvtipus=%25&evad=" + Uri.EscapeUriString(se) + "&resz=" + Uri.EscapeUriString(ep), encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html = Utils.GetHTML(Site + "kereso.php", "sorozatid=" + id.Value + "&nyelvtipus=%25&evad=" + se + "&resz=" + ep, encoding: Encoding.GetEncoding("iso-8859-2"));
             var subs = html.DocumentNode.SelectNodes("//td/a[starts-with(@href,'download.php?file=')]");
 
             if (subs == null)
@@ -120,7 +120,8 @@
 
                 sub.Release  = Regex.Replace(node.SelectSingleNode("../../td[2]").InnerHtml, @".*?<br>", string.Empty);
                 sub.Language = ParseLanguage(node.SelectSingleNode("../../td[3]/img").GetAttributeValue("src", string.Empty));
-                sub.URL      = Site + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty);
+                sub.InfoURL  = Site + "kereso.php?sorozatid=" + id.Value + "&nyelvtipus=%25&evad=" + se + "&resz=" + ep;
+                sub.FileURL  = Site + node.SelectSingleNode("../../td[7]/a").GetAttributeValue("href", string.Empty);
 
                 yield return sub;
             }
