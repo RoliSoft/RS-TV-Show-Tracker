@@ -10,6 +10,7 @@
     using ProtoBuf;
 
     using Parsers.Downloads;
+    using Parsers.Subtitles;
     using Parsers.Guides;
     using ShowNames;
 
@@ -480,7 +481,7 @@
             {
                 return Qualities.HDTVXviD;
             }
-            if (IsMatch(release, @"\bTV[_\-\.]?Rip\b"))
+            if (IsMatch(release, @"\bTV[_\-\.\s]?Rip\b"))
             {
                 return Qualities.TVRip;
             }
@@ -506,6 +507,31 @@
             }
 
             return Qualities.Unknown;
+        }
+
+        /// <summary>
+        /// Parses the edition of the file.
+        /// </summary>
+        /// <param name="release">The release name.</param>
+        /// <returns>Extracted edition or Unknown.</returns>
+        public static Editions ParseEdition(string release)
+        {
+            release = release.Replace((char)160, '.').Replace((char)32, '.');
+
+            if (IsMatch(release, @"\b(TV[_\-\.\s]?Rip|HDTV|PDTV|DVB(Rip)?)\b"))
+            {
+                return Editions.TV;
+            }
+            if (IsMatch(release, @"\bWEB[_\-\.]?DL\b"))
+            {
+                return Editions.WebDL;
+            }
+            if (IsMatch(release, @"\b(DVD|HD\-?DVD|Blu[_\-]?Ray|VHS)\b"))
+            {
+                return Editions.Retail;
+            }
+
+            return Editions.Unknown;
         }
 
         /// <summary>
