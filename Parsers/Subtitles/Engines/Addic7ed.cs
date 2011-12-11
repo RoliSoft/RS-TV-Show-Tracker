@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.IO;
     using System.Text.RegularExpressions;
+
+    using HtmlAgilityPack;
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+    using ProtoBuf;
 
     /// <summary>
     /// Provides support for scraping Addic7ed.
@@ -59,9 +61,15 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-10 4:44 PM");
+                return Utils.DateTimeToVersion("2011-12-11 2:08 AM");
             }
         }
+
+        /// <summary>
+        /// Gets or sets the show IDs on the site.
+        /// </summary>
+        /// <value>The show IDs.</value>
+        public static Dictionary<int, string> ShowIDs { get; set; }
 
         /// <summary>
         /// Searches for subtitles on the service.
@@ -70,33 +78,17 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var show = ShowNames.Parser.Split(query);
-            var dbid = Database.GetShowID(show[0]);
-            var adid = string.Empty;
+            var pr = ShowNames.Parser.Split(query);
+            var ep = ShowNames.Parser.ExtractEpisode(query);
+            var id = GetIDForShow(pr[0]);
 
-            if (dbid != int.MinValue)
+            if (!id.HasValue && ep != null)
             {
-                adid = Database.ShowData(dbid, "Addic7ed.ID");
+                yield break;
             }
 
-            if (string.IsNullOrWhiteSpace(adid))
-            {
-                var url = new Scroogle().Search(show[0] + " site:addic7ed.com/serie/").ToList();
-                if (url.Count == 0)
-                {
-                    yield break;
-                }
-
-                adid = Regex.Match(url[0].URL, @"/serie/([^/$]+)").Groups[1].Value;
-
-                if (dbid != int.MinValue)
-                {
-                    Database.ShowData(dbid, "Addic7ed.ID", adid);
-                }
-            }
-
-            var epnt = ShowNames.Parser.ExtractEpisode(query, "{0:0}/{1:00}");
-            var html = Utils.GetHTML(Site + "serie/" + adid + "/" + epnt + "/episode");
+            var iurl = Site + "re_episode.php?ep=" + id + "-" + ep.Season + "x" + ep.Episode;
+            var html = Utils.GetHTML(iurl, response: r => iurl = r.ResponseUri.ToString());
             var subs = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/original/')] | //a[starts-with(@href,'/updated/')]");
 
             if (subs == null)
@@ -122,7 +114,7 @@
                                 + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
                                 + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty);
                 sub.Language    = Languages.Parse(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
-                sub.InfoURL     = Site + "serie/" + adid + "/" + epnt + "/episode";
+                sub.InfoURL     = iurl;
                 sub.FileURL     = Site.TrimEnd('/') + node.GetAttributeValue("href");
 
                 yield return sub;
@@ -135,6 +127,113 @@
         public override void TestSearchShow()
         {
             Assert.Inconclusive("Addic7ed only supports searching for specific episodes.");
+        }
+
+        /// <summary>
+        /// Gets the IDs from the browse page.
+        /// </summary>
+        public void GetIDs()
+        {
+            var page = Utils.GetHTML(Site);
+            var opts = page.DocumentNode.SelectNodes("//select[@name='qsShow']/option[position()!=1]");
+
+            ShowIDs = new Dictionary<int, string>();
+
+            if (opts == null)
+            {
+                return;
+            }
+
+            foreach (var opt in opts)
+            {
+                int id;
+
+                if (int.TryParse(opt.GetAttributeValue("value"), out id))
+                {
+                    ShowIDs.Add(id, HtmlEntity.DeEntitize(opt.NextSibling.InnerText));
+                }
+            }
+
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "Addic7ed-IDs.bin")))
+            {
+                Serializer.Serialize(file, ShowIDs);
+            }
+        }
+
+        /// <summary>
+        /// Gets the ID for a show name.
+        /// </summary>
+        /// <param name="name">The show name.</param>
+        /// <returns>Corresponding ID.</returns>
+        public int? GetIDForShow(string name)
+        {
+            var fn = Path.Combine(Path.GetTempPath(), "Addic7ed-IDs.bin");
+
+            if (ShowIDs == null)
+            {
+                if (File.Exists(fn))
+                {
+                    using (var file = File.OpenRead(fn))
+                    {
+                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
+                    }
+                }
+                else
+                {
+                    GetIDs();
+                }
+            }
+
+            if (ShowIDs != null)
+            {
+                var id = SearchForID(name);
+                if (id.HasValue)
+                {
+                    return id;
+                }
+            }
+
+            // try to refresh if the cache is older than an hour
+            if ((DateTime.Now - File.GetLastWriteTime(fn)).TotalHours > 1)
+            {
+                GetIDs();
+
+                if (ShowIDs != null)
+                {
+                    var id = SearchForID(name);
+                    if (id.HasValue)
+                    {
+                        return id;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Searches for the specified show in the local cache.
+        /// </summary>
+        /// <param name="name">The show name.</param>
+        /// <returns>Corresponding ID.</returns>
+        private int? SearchForID(string name)
+        {
+            var regex = Database.GetReleaseName(name);
+
+            foreach (var show in ShowIDs)
+            {
+                if (regex.IsMatch(show.Value.ToUpper()))
+                {
+                    var regx2 = ShowNames.Parser.GenerateTitleRegex(show.Value);
+
+                    if (regx2.IsMatch(name.ToUpper()))
+                    {
+                        return show.Key;
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

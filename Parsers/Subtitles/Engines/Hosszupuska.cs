@@ -153,7 +153,7 @@
         public void GetIDs()
         {
             var page = Utils.GetHTML(Site);
-            var opts = page.DocumentNode.SelectNodes("//select[@name='sorozatid']/option");
+            var opts = page.DocumentNode.SelectNodes("//select[@name='sorozatid']/option[position()!=1]");
 
             ShowIDs = new Dictionary<int, string>();
 
