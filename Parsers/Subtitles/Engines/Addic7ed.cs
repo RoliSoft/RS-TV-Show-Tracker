@@ -222,14 +222,11 @@
 
             foreach (var show in ShowIDs)
             {
-                if (regex.IsMatch(show.Value.ToUpper()))
-                {
-                    var regx2 = ShowNames.Parser.GenerateTitleRegex(show.Value);
+                var m = regex.Match(show.Value);
 
-                    if (regx2.IsMatch(name.ToUpper()))
-                    {
-                        return show.Key;
-                    }
+                if (m.Success && Math.Abs(show.Value.Length - m.Length) <= 3)
+                {
+                    return show.Key;
                 }
             }
 
