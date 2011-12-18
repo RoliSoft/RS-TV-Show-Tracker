@@ -76,7 +76,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-16 16:20 PM");
+                return Utils.DateTimeToVersion("2011-12-18 17:36 PM");
             }
         }
 
@@ -205,7 +205,7 @@
                 idx++;
 
                 var quality   = arr[idx].Trim();
-                link.Quality  = ParseQuality(quality);
+                link.Quality  = FileNames.Parser.ParseQuality(Regex.Match(quality, @"\[(?:(?:PROPER|REPACK)(?:\s\-)?)?\s*(.*?)\s\-").Groups[1].Value);
                 link.Release += " " + quality.Replace("[", string.Empty).Replace("]", string.Empty).Replace(" - ", " ");
 
                 idx += 7;
@@ -231,64 +231,6 @@
         public override string Login(string username, string password)
         {
             return GazelleTrackerLogin(username, password);
-        }
-
-        /// <summary>
-        /// Parses the quality of the file.
-        /// </summary>
-        /// <param name="release">The release name.</param>
-        /// <returns>Extracted quality or Unknown.</returns>
-        public static Qualities ParseQuality(string release)
-        {
-            var q = Regex.Match(release, @"\[(?:(?:PROPER|REPACK)(?:\s\-)?)?\s*(.*?)\s\-").Groups[1].Value;
-
-            if (IsMatch("Blu-ray-1080p", q))
-            {
-                return Qualities.BluRay1080p;
-            }
-            if (IsMatch("HDTV-1080(p|i)", q))
-            {
-                return Qualities.HDTV1080i;
-            }
-            if (IsMatch("Web-Dl-720p", q))
-            {
-                return Qualities.WebDL720p;
-            }
-            if (IsMatch("Blu-ray-720p", q))
-            {
-                return Qualities.BluRay720p;
-            }
-            if (IsMatch("HDTV-720p", q))
-            {
-                return Qualities.HDTV720p;
-            }
-            if (IsMatch("HR-HDTV", q))
-            {
-                return Qualities.HRx264;
-            }
-            if (IsMatch("TvRip", q))
-            {
-                return Qualities.SDTVRip;
-            }
-            if (IsMatch("(PDTV|DVDSRC|Rip$)", q))
-            {
-                return Qualities.HDTVXviD;
-            }
-
-            return Qualities.Unknown;
-        }
-
-        /// <summary>
-        /// Determines whether the specified pattern is a match.
-        /// </summary>
-        /// <param name="pattern">The pattern.</param>
-        /// <param name="input">The input.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified pattern is a match; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsMatch(string pattern, string input)
-        {
-            return Regex.IsMatch(input, pattern.Replace("-", @"(\-|\s)?"), RegexOptions.IgnoreCase);
         }
 
         /// <summary>

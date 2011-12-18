@@ -449,91 +449,103 @@
         {
             release = release.Replace((char)160, '.').Replace((char)32, '.');
 
-            if (IsMatch(release, @"\b1080[ip]\b", @"\bWEB[_\-\.\s]?DL\b"))
+            if (AreMatching(release, @"1080[ip]", @"WEB[_\-\.\s]?DL"))
             {
                 return Qualities.WebDL1080p;
             }
-            if (IsMatch(release, @"\b1080[ip]\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
+            if (AreMatching(release, @"1080[ip]", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
             {
                 return Qualities.BluRay1080p;
             }
-            if (IsMatch(release, @"\b1080[ip]\b"))
+            if (AreMatching(release, @"1080[ip]"))
             {
                 return Qualities.HDTV1080i;
             }
-            if (IsMatch(release, @"\b720p\b", @"\bWEB[_\-\.\s]?DL\b"))
+            if (AreMatching(release, @"720p", @"WEB[_\-\.\s]?DL"))
             {
                 return Qualities.WebDL720p;
             }
-            if (IsMatch(release, @"\b720p\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
+            if (AreMatching(release, @"720p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
             {
                 return Qualities.BluRay720p;
             }
-            if (IsMatch(release, @"\b720p\b"))
+            if (AreMatching(release, @"720p"))
             {
                 return Qualities.HDTV720p;
             }
-            if (IsMatch(release, @"\b576p\b", @"\bWEB[[_\-\.\s]?DL\b"))
+            if (AreMatching(release, @"576p", @"WEB[_\-\.\s]?DL"))
             {
                 return Qualities.WebDL576p;
             }
-            if (IsMatch(release, @"\b576p\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
+            if (AreMatching(release, @"576p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
             {
                 return Qualities.BluRay576p;
             }
-            if (IsMatch(release, @"\b576[ip]\b"))
+            if (AreMatching(release, @"576[ip]"))
             {
                 return Qualities.HDTV576p;
             }
-            if (IsMatch(release, @"\b480p\b", @"\bWEB[[_\-\.\s]?DL\b"))
+            if (AreMatching(release, @"480p", @"WEB[_\-\.\s]?DL"))
             {
                 return Qualities.WebDL480p;
             }
-            if (IsMatch(release, @"\b480p\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
+            if (AreMatching(release, @"480p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
             {
                 return Qualities.BluRay480p;
             }
-            if (IsMatch(release, @"\b480[ip]\b"))
+            if (AreMatching(release, @"480[ip]"))
             {
                 return Qualities.HDTV480p;
             }
-            if (IsMatch(release, @"\bDVD(?![_\-\.\s]?Rip)([_\-\.\s]?[R59])?\b"))
+            if (AreMatching(release, @"DVD(?![_\-\.\s]?Rip)([_\-\.\s]?[R59])?"))
             {
                 return Qualities.DVD;
             }
-            if (IsMatch(release, @"\b((HR|HQ|HiRes|High[_\-\.\s]?Res(olution)?)\b|x264\-|H264)"))
-            {
-                return Qualities.HRx264;
-            }
-            if (IsMatch(release, @"\bDVD[_\-\.\s]?Rip\b", @"\bx264\b"))
+            if (AreMatching(release, @"DVD[_\-\.\s]?Rip", @"[Hx]264"))
             {
                 return Qualities.DVDRipx264;
             }
-            if (IsMatch(release, @"\b(B[DR][_\-\.\s]?Rip|BDR|Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b", @"\bXviD\b"))
+            if (AreMatching(release, @"(HDTV|PDTV|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)", @"[Hx]264"))
+            {
+                return Qualities.HDTVx264;
+            }
+            if (AreMatching(release, @"(B[DR][_\-\.\s]?Rip|BDR)") || AreMatching(release, @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)", @"XviD"))
             {
                 return Qualities.BDRipXviD;
             }
-            if (IsMatch(release, @"\bDVD[_\-\.\s]?Rip\b"))
+            if (AreMatching(release, @"DVD[_\-\.\s]?Rip"))
             {
                 return Qualities.DVDRipXviD;
             }
-            if (IsMatch(release, @"\b(HDTV|PDTV|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)\b"))
+            if (AreMatching(release, @"WEB(([_\-\.\s]?DL)?[_\-\.\s]?Rip)?", @"[Hx]264"))
             {
-                return Qualities.HDTVXviD;
+                return Qualities.WebRipx264;
             }
-            if (IsMatch(release, @"\bVHS([_\-\.\s]?Rip)?\b", @"\bx264\b"))
+            if (AreMatching(release, @"WEB(([_\-\.\s]?DL)?[_\-\.\s]?Rip)?"))
+            {
+                return Qualities.WebRipXviD;
+            }
+            if (AreMatching(release, @"(S?VCD|VHS)([_\-\.\s]?Rip)?", @"[Hx]264"))
             {
                 return Qualities.VHSRipx264;
             }
-            if (IsMatch(release, @"\bVHS([_\-\.\s]?Rip)?\b"))
+            if (AreMatching(release, @"(S?VCD|VHS)([_\-\.\s]?Rip)?"))
             {
                 return Qualities.VHSRipXviD;
             }
-            if (IsMatch(release, @"\b(SDTV|TV[_\-\.\s]?Rip)\b"))
+            if (AreMatching(release, @"(SDTV|([SE]D)?TV[_\-\.\s]?Rip)"))
             {
                 return Qualities.SDTVRip;
             }
-            if (IsMatch(release, @"\b((DVD)?Screener|(DVD|BR|BD)SCR|DDC|PreAir)\b"))
+            if (AreMatching(release, @"((HR|HQ|HiRes|High[_\-\.\s]?Res(olution)?)\b|[Hx]264)"))
+            {
+                return Qualities.HRx264;
+            }
+            if (AreMatching(release, @"(HDTV([_\-\.\s]?Rip)?|PDTV([_\-\.\s]?Rip)?|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)"))
+            {
+                return Qualities.HDTVXviD;
+            }
+            if (AreMatching(release, @"((DVD)?Screener|(DVD|BR|BD)SCR|DDC|PreAir)"))
             {
                 return Qualities.Screener;
             }
@@ -541,19 +553,19 @@
             // if quality can't be determined based on the release name,
             // try to make wild guesses based on the extension
 
-            if (IsMatch(release, @"\.ts$"))
+            if (Regex.IsMatch(release, @"\.ts$", RegexOptions.IgnoreCase))
             {
                 return Qualities.HDTV1080i;
             }
-            if (IsMatch(release, @"\.mkv$"))
+            if (Regex.IsMatch(release, @"\.mkv$", RegexOptions.IgnoreCase))
             {
                 return Qualities.HDTV720p;
             }
-            if (IsMatch(release, @"\.avi$"))
+            if (Regex.IsMatch(release, @"\.avi$", RegexOptions.IgnoreCase))
             {
                 return Qualities.HDTVXviD;
             }
-            if (IsMatch(release, @"\.m(ov|pg)$"))
+            if (Regex.IsMatch(release, @"\.m(ov|pg)$", RegexOptions.IgnoreCase))
             {
                 return Qualities.SDTVRip;
             }
@@ -570,19 +582,19 @@
         {
             release = release.Replace((char)160, '.').Replace((char)32, '.');
 
-            if (IsMatch(release, @"\b(TV[_\-\.\s]?Rip|HDTV|PDTV|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)\b"))
+            if (AreMatching(release, @"(TV[_\-\.\s]?Rip|HDTV|PDTV|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)"))
             {
                 return Editions.TV;
             }
-            if (IsMatch(release, @"\bWEB[_\-\.]?DL\b"))
+            if (AreMatching(release, @"WEB[_\-\.]?(DL|Rip)"))
             {
                 return Editions.WebDL;
             }
-            if (IsMatch(release, @"\b(DVD|HD\-?DVD|Blu[_\-]?Ray|BD[59]|B[DR][_\-]?Rip|VHS)\b"))
+            if (AreMatching(release, @"(DVD|HD\-?DVD|Blu[_\-]?Ray|BD[59]|B[DR][_\-]?Rip|VHS)"))
             {
                 return Editions.Retail;
             }
-            if (IsMatch(release, @"\b((DVD)?Screener|(DVD|BR|BD)SCR|DDC|PreAir)\b"))
+            if (AreMatching(release, @"((DVD)?Screener|(DVD|BR|BD)SCR|DDC|PreAir)"))
             {
                 return Editions.Screener;
             }
@@ -591,16 +603,16 @@
         }
 
         /// <summary>
-        /// Determines whether the specified input is matches all the specified regexes.
+        /// Determines whether the specified input matches all the specified regexes.
         /// </summary>
         /// <param name="input">The input.</param>
         /// <param name="regexes">The regexes.</param>
         /// <returns>
         /// 	<c>true</c> if the specified input matches all the specified regexes; otherwise, <c>false</c>.
         /// </returns>
-        private static bool IsMatch(string input, params string[] regexes)
+        private static bool AreMatching(string input, params string[] regexes)
         {
-            return regexes.All(regex => Regex.IsMatch(input, regex, RegexOptions.IgnoreCase));
+            return regexes.All(regex => Regex.IsMatch(input, @"(\b|_)" + regex + @"(\b|_)", RegexOptions.IgnoreCase));
         }
 
         /// <summary>

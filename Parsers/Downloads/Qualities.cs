@@ -22,7 +22,7 @@
         /// <summary>
         /// An SDTV rip, possibly from an analogue source; the resolution is usually NTSC or PAL and low-bitrate.
         /// </summary>
-        [Description("SDTV-Rip")]
+        [Description("SDTV XviD")]
         SDTVRip,
 
         /// <summary>
@@ -36,6 +36,18 @@
         /// </summary>
         [Description("VHS-Rip x264")]
         VHSRipx264,
+
+        /// <summary>
+        /// A web rip, usually the .FLV file served from the show's site encoded with XviD. It has a pretty low quality. Don't confuse with Web-DL, which is far more superior.
+        /// </summary>
+        [Description("Web-Rip XviD")]
+        WebRipXviD,
+
+        /// <summary>
+        /// A web rip, usually the .FLV file served from the show's site encoded with x264. It has a pretty low quality. Don't confuse with Web-DL, which is far more superior.
+        /// </summary>
+        [Description("Web-Rip x264")]
+        WebRipx264,
 
         /// <summary>
         /// A widescreen but low-resolution and bitrate video.
@@ -54,6 +66,12 @@
         /// </summary>
         [Description("BD-Rip XviD")]
         BDRipXviD,
+
+        /// <summary>
+        /// A widescreen and high-resolution (but not high-definition) video.
+        /// </summary>
+        [Description("HDTV x264")]
+        HDTVx264,
 
         /// <summary>
         /// A high-resolution DVD rip.
