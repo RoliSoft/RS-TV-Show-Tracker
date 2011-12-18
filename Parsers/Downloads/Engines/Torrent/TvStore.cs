@@ -268,7 +268,7 @@
             }
             if (IsMatch("TvRip", q))
             {
-                return Qualities.TVRip;
+                return Qualities.SDTVRip;
             }
             if (IsMatch("(PDTV|DVDSRC|Rip$)", q))
             {

@@ -449,23 +449,23 @@
         {
             release = release.Replace((char)160, '.').Replace((char)32, '.');
 
-            if (IsMatch(release, @"\b1080(i|p)\b", @"\bWEB[_\-\.]?DL\b"))
+            if (IsMatch(release, @"\b1080[ip]\b", @"\bWEB[_\-\.\s]?DL\b"))
             {
                 return Qualities.WebDL1080p;
             }
-            if (IsMatch(release, @"\b1080(i|p)\b", @"\bBlu[_\-]?Ray\b"))
+            if (IsMatch(release, @"\b1080[ip]\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
             {
                 return Qualities.BluRay1080p;
             }
-            if (IsMatch(release, @"\b1080(i|p)\b", @"\bHDTV\b"))
+            if (IsMatch(release, @"\b1080[ip]\b"))
             {
                 return Qualities.HDTV1080i;
             }
-            if (IsMatch(release, @"\b720p\b", @"\bWEB[_\-\.]?DL\b"))
+            if (IsMatch(release, @"\b720p\b", @"\bWEB[_\-\.\s]?DL\b"))
             {
                 return Qualities.WebDL720p;
             }
-            if (IsMatch(release, @"\b720p\b", @"\bBlu[_\-]?Ray\b"))
+            if (IsMatch(release, @"\b720p\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
             {
                 return Qualities.BluRay720p;
             }
@@ -473,17 +473,69 @@
             {
                 return Qualities.HDTV720p;
             }
-            if (IsMatch(release, @"\b((HR|HiRes|High[_\-\.]?Resolution)\b|x264\-|H264)"))
+            if (IsMatch(release, @"\b576p\b", @"\bWEB[[_\-\.\s]?DL\b"))
+            {
+                return Qualities.WebDL576p;
+            }
+            if (IsMatch(release, @"\b576p\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
+            {
+                return Qualities.BluRay576p;
+            }
+            if (IsMatch(release, @"\b576[ip]\b"))
+            {
+                return Qualities.HDTV576p;
+            }
+            if (IsMatch(release, @"\b480p\b", @"\bWEB[[_\-\.\s]?DL\b"))
+            {
+                return Qualities.WebDL480p;
+            }
+            if (IsMatch(release, @"\b480p\b", @"\b(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b"))
+            {
+                return Qualities.BluRay480p;
+            }
+            if (IsMatch(release, @"\b480[ip]\b"))
+            {
+                return Qualities.HDTV480p;
+            }
+            if (IsMatch(release, @"\bDVD(?![_\-\.\s]?Rip)([_\-\.\s]?[R59])?\b"))
+            {
+                return Qualities.DVD;
+            }
+            if (IsMatch(release, @"\b((HR|HQ|HiRes|High[_\-\.\s]?Res(olution)?)\b|x264\-|H264)"))
             {
                 return Qualities.HRx264;
             }
-            if (IsMatch(release, @"\b(HDTV|PDTV|DVBRip|DVDRip)\b"))
+            if (IsMatch(release, @"\bDVD[_\-\.\s]?Rip\b", @"\bx264\b"))
+            {
+                return Qualities.DVDRipx264;
+            }
+            if (IsMatch(release, @"\b(B[DR][_\-\.\s]?Rip|BDR|Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)\b", @"\bXviD\b"))
+            {
+                return Qualities.BDRipXviD;
+            }
+            if (IsMatch(release, @"\bDVD[_\-\.\s]?Rip\b"))
+            {
+                return Qualities.DVDRipXviD;
+            }
+            if (IsMatch(release, @"\b(HDTV|PDTV|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)\b"))
             {
                 return Qualities.HDTVXviD;
             }
-            if (IsMatch(release, @"\bTV[_\-\.\s]?Rip\b"))
+            if (IsMatch(release, @"\bVHS([_\-\.\s]?Rip)?\b", @"\bx264\b"))
             {
-                return Qualities.TVRip;
+                return Qualities.VHSRipx264;
+            }
+            if (IsMatch(release, @"\bVHS([_\-\.\s]?Rip)?\b"))
+            {
+                return Qualities.VHSRipXviD;
+            }
+            if (IsMatch(release, @"\b(SDTV|TV[_\-\.\s]?Rip)\b"))
+            {
+                return Qualities.SDTVRip;
+            }
+            if (IsMatch(release, @"\b((DVD)?Screener|(DVD|BR|BD)SCR|DDC|PreAir)\b"))
+            {
+                return Qualities.Screener;
             }
 
             // if quality can't be determined based on the release name,
@@ -503,7 +555,7 @@
             }
             if (IsMatch(release, @"\.m(ov|pg)$"))
             {
-                return Qualities.TVRip;
+                return Qualities.SDTVRip;
             }
 
             return Qualities.Unknown;
@@ -518,7 +570,7 @@
         {
             release = release.Replace((char)160, '.').Replace((char)32, '.');
 
-            if (IsMatch(release, @"\b(TV[_\-\.\s]?Rip|HDTV|PDTV|DVB(Rip)?)\b"))
+            if (IsMatch(release, @"\b(TV[_\-\.\s]?Rip|HDTV|PDTV|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)\b"))
             {
                 return Editions.TV;
             }
@@ -526,9 +578,13 @@
             {
                 return Editions.WebDL;
             }
-            if (IsMatch(release, @"\b(DVD|HD\-?DVD|Blu[_\-]?Ray|VHS)\b"))
+            if (IsMatch(release, @"\b(DVD|HD\-?DVD|Blu[_\-]?Ray|BD[59]|B[DR][_\-]?Rip|VHS)\b"))
             {
                 return Editions.Retail;
+            }
+            if (IsMatch(release, @"\b((DVD)?Screener|(DVD|BR|BD)SCR|DDC|PreAir)\b"))
+            {
+                return Editions.Screener;
             }
 
             return Editions.Unknown;

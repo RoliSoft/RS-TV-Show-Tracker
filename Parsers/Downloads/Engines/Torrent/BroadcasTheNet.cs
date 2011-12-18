@@ -238,7 +238,7 @@
             }
             if (IsMatch(release, @"TVRip"))
             {
-                return Qualities.TVRip;
+                return Qualities.SDTVRip;
             }
 
             return Qualities.Unknown;

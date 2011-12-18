@@ -81,7 +81,7 @@
                 yield return new SearchResult
                     {
                         Title = HtmlEntity.DeEntitize(result.InnerText),
-                        URL   = result.GetAttributeValue("href")
+                        URL   = HtmlEntity.DeEntitize(result.GetAttributeValue("href"))
                     };
             }
         }

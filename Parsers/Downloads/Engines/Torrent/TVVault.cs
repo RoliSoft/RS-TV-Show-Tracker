@@ -216,7 +216,7 @@
             }
             if (IsMatch("VHS", q) || IsMatch("TV", q))
             {
-                return Qualities.TVRip;
+                return Qualities.SDTVRip;
             }
 
             return Qualities.Unknown;

@@ -14,10 +14,28 @@
         Unknown,
 
         /// <summary>
-        /// A TV rip; usually NTSC or PAL size and low-bitrate.
+        /// A screener, digital distribution copy or pre-air release; the quality is lower than what's going to air and might not have post-processing.
         /// </summary>
-        [Description("TV Rip")]
-        TVRip,
+        [Description("Screener")]
+        Screener,
+
+        /// <summary>
+        /// An SDTV rip, possibly from an analogue source; the resolution is usually NTSC or PAL and low-bitrate.
+        /// </summary>
+        [Description("SDTV-Rip")]
+        SDTVRip,
+
+        /// <summary>
+        /// A VHS rip; the resolution is usually NTSC or PAL. The only reason this is after SDTVRip, is because this might contain uncut/uncensored material.
+        /// </summary>
+        [Description("VHS-Rip XviD")]
+        VHSRipXviD,
+
+        /// <summary>
+        /// A VHS rip encoded with an x264 encoder, as if it'd make a difference.
+        /// </summary>
+        [Description("VHS-Rip x264")]
+        VHSRipx264,
 
         /// <summary>
         /// A widescreen but low-resolution and bitrate video.
@@ -26,10 +44,70 @@
         HDTVXviD,
 
         /// <summary>
-        /// A high-resolution (but not necessarily widescreen) video.
+        /// A DVD rip; the resolution is usually NTSC or PAL.
         /// </summary>
-        [Description("HiRes x264")]
+        [Description("DVD-Rip XviD")]
+        DVDRipXviD,
+
+        /// <summary>
+        /// A Blu-ray-rip encoded with XviD; the resolution is usually lower than 720p.
+        /// </summary>
+        [Description("BD-Rip XviD")]
+        BDRipXviD,
+
+        /// <summary>
+        /// A high-resolution DVD rip.
+        /// </summary>
+        [Description("DVD-Rip x264")]
+        DVDRipx264,
+
+        /// <summary>
+        /// A high-resolution (but not high-definition) video.
+        /// </summary>
+        [Description("High-Res x264")]
         HRx264,
+
+        /// <summary>
+        /// A DVD disk. (Not ripped!)
+        /// </summary>
+        [Description("DVD")]
+        DVD,
+
+        /// <summary>
+        /// An 852x480 or 720x480 high-definition video captured from DVB.
+        /// </summary>
+        [Description("HDTV 480p")]
+        HDTV480p,
+
+        /// <summary>
+        /// An 852x480 or 720x480 high-definition video downloaded from a legal source; usually iTunes.
+        /// </summary>
+        [Description("Web-DL 480p")]
+        WebDL480p,
+
+        /// <summary>
+        /// An 852x480 or 720x480 high-definition video ripped from a Blu-Ray disc.
+        /// </summary>
+        [Description("Blu-ray 480p")]
+        BluRay480p,
+
+        /// <summary>
+        /// A 1024x576 high-definition video captured from DVB.
+        /// </summary>
+        [Description("HDTV 576p")]
+        HDTV576p,
+
+        /// <summary>
+        /// A 1024x576 high-definition video downloaded from a legal source; usually iTunes.
+        /// </summary>
+        [Description("Web-DL 576p")]
+        WebDL576p,
+
+        /// <summary>
+        /// A 1024x576 high-definition video ripped from a Blu-Ray disc.
+        /// </summary>
+        [Description("Blu-ray 576p")]
+        BluRay576p,
 
         /// <summary>
         /// A 1280x720 high-definition video captured from DVB.

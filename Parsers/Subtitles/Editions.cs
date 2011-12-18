@@ -14,6 +14,13 @@
         Unknown,
 
         /// <summary>
+        /// The edition which was sent to critics via a DVD or digitally distributed copy or leaked otherwise.
+        /// This video might not have post-processing and not be the same as the episode which is going to air.
+        /// </summary>
+        [Description("Screener")]
+        Screener,
+
+        /// <summary>
         /// The edition which was seen on TV for the first time. These are the XviD and 720p HDTV or PDTV releases.
         /// </summary>
         [Description("TV")]
