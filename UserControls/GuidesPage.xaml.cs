@@ -4,6 +4,7 @@
     using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
@@ -251,9 +252,8 @@
 
             var airing = bool.Parse(show.Data.Get("airing", "False"));
 
-            showGeneralCover.Source = new BitmapImage(new Uri("http://" + Remote.API.EndPoint + "?/GetShowCover/" + Uri.EscapeUriString(comboBox.SelectedValue.ToString())), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable));
-            
             showGeneralName.Text = show.Name;
+            showGeneralCover.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
 
             showGeneralSub.Text = string.Empty;
             string genre;
@@ -377,6 +377,18 @@
 
             upcomingListView.Visibility = Visibility.Collapsed;
             tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Visible;
+
+            // get cover
+
+            
+            new Thread(() =>
+                {
+                    var cover = CoverManager.GetCover(show.Name);
+                    Dispatcher.Invoke((Action)(() =>
+                        {
+                            showGeneralCover.Source = new BitmapImage(cover ?? new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
+                        }));
+                }).Start();
         }
         #endregion
 

@@ -176,7 +176,7 @@
             show.Cover = info.GetValue("poster");
             if (!string.IsNullOrWhiteSpace(show.Cover))
             {
-                show.Cover = "http://thetvdb.com/banners/_cache/" + show.Cover;
+                show.Cover = "http://thetvdb.com/banners/" + show.Cover;
             }
 
             show.Runtime = info.GetValue("Runtime").ToInteger();

@@ -1073,10 +1073,11 @@
         /// Creates a slug from the specified title.
         /// </summary>
         /// <param name="title">The title.</param>
+        /// <param name="extraSlim">if set to <c>true</c> spaces, "and", "the", "of" and "a" will be removed.</param>
         /// <returns>
         /// Slug.
         /// </returns>
-        public static string CreateSlug(string title)
+        public static string CreateSlug(string title, bool extraSlim = true)
         {
             // remove HTML entities
             title = HtmlEntity.DeEntitize(title);
@@ -1084,8 +1085,19 @@
             // remove diacritics. don't ask why this works, it just does.
             title = Encoding.ASCII.GetString(Encoding.GetEncoding("Cyrillic").GetBytes(title));
 
-            // remove stopwords, year, and special characters including spaces.
-            title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|\b(and|the|of|a)\b|[^a-z0-9])", string.Empty).Trim();
+            if (extraSlim)
+            {
+                // remove stopwords, year, and special characters including spaces
+                title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|\b(and|the|of|a)\b|[^a-z0-9])", string.Empty).Trim();
+            }
+            else
+            {
+                // remove year and special characters
+                title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|[^a-z0-9\s])", string.Empty).Trim();
+
+                // replace space to dash
+                title = Regex.Replace(title, @"\s\s*", "-");
+            }
 
             return title;
         }

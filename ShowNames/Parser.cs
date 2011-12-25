@@ -413,57 +413,5 @@
 
             return new Regex(expr, RegexOptions.IgnoreCase);
         }
-
-        /// <summary>
-        /// Names the sequence equals.
-        /// </summary>
-        /// <param name="first">The first array.</param>
-        /// <param name="second">The second array, with optional elements.</param>
-        /// <returns>
-        ///   <c>true</c> if the names match; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool NameSequenceEquals(IEnumerable<string> first, IEnumerable<string> second)
-        {
-            using (var e1 = first.GetEnumerator())
-            using (var e2 = second.GetEnumerator())
-            {
-                while (e1.MoveNext())
-                {
-                    if (!e2.MoveNext())
-                    {
-                        return false;
-                    }
-
-                compare:
-                    if (e1.Current != e2.Current.Trim('[', ']'))
-                    {
-                        if (e2.Current.First() == '[' && e2.Current.Last() == ']')
-                        {
-                            if (!e2.MoveNext())
-                            {
-                                return false;
-                            }
-
-                            goto compare;
-                        }
-                        
-                        return false;
-                    }
-                }
-
-            remaining:
-                if (e2.MoveNext())
-                {
-                    if (e2.Current.First() == '[' && e2.Current.Last() == ']')
-                    {
-                        goto remaining;
-                    }
-
-                    return false;
-                }
-            }
-
-            return true; 
-        }
     }
 }
