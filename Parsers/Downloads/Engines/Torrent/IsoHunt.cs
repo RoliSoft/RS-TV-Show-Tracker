@@ -98,7 +98,7 @@
                 link.FileURL = "http://ca.isohunt.com/download/{0}.torrent".FormatWith(Regex.Match(link.InfoURL, @"/(\d+/[^\?\.$]+)").Groups[1].Value);
                 link.Size    = node.GetTextValue("../../td[4]");
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[5]").Trim(), node.GetTextValue("../../td[6]").Trim())
+                link.Infos   = Link.SeedLeechFormat.FormatWith((node.GetTextValue("../../td[5]") ?? string.Empty).Trim(), (node.GetTextValue("../../td[6]") ?? string.Empty).Trim())
                              + (node.GetHtmlValue("../a[starts-with(@href, '/release/')]") != null ? ", isoHunt Release" : string.Empty)
                              + (node.GetTextValue("../a[1]/img[1]/preceding-sibling::text()") != "0" ? ", " + node.GetTextValue("../a[1]/img[1]/preceding-sibling::text()") + " rating" : string.Empty);
 

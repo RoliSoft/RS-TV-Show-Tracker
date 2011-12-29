@@ -678,7 +678,7 @@
             
             <Border Name="logo" Cursor="Hand" Shell:WindowChrome.IsHitTestVisibleInChrome="True" Margin="5,-5,0,0" Padding="0" Width="160" MaxWidth="160" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="1,0,1,1" BorderBrush="DimGray" CornerRadius="0,0,4,4" Background="{StaticResource HeadGradient}" MouseLeftButtonUp="LogoMouseLeftButtonUp" MouseEnter="LogoMouseEnter" MouseLeave="LogoMouseLeave">
                 <Grid>
-                    <Rectangle Fill="{StaticResource HeadGradientBusy}" Width="0" HorizontalAlignment="Left" Name="progressRectangle" Opacity="0" Margin="0" />
+                    <Rectangle Fill="{StaticResource HeadGradientBusy}" Width="160" HorizontalAlignment="Left" Name="progressRectangle" Opacity="0" Margin="0" />
                     <Image Source="/RSTVShowTracker;component/Images/tv.png" Height="16" Width="16" HorizontalAlignment="Left" Margin="8,-3,0,0"></Image>
                     <Label TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="Grayscale" HorizontalAlignment="Left" Foreground="White" Content="RS TV Show Tracker v2" Padding="30,3,8,5">
                         <Label.Effect>

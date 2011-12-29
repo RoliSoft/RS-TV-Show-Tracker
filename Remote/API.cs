@@ -8,7 +8,7 @@
 
     using Newtonsoft.Json;
 
-    using RoliSoft.TVShowTracker.Remote.Objects;
+    using Objects;
 
     /// <summary>
     /// Provides method proxies for the lab.rolisoft.net API.
@@ -23,7 +23,7 @@
         {
             get
             {
-                //return "home.rolisoft.net/api/";
+                //return "[::1]/api/";
                 return "lab.rolisoft.net/api/";
             }
         }

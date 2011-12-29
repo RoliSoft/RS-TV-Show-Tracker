@@ -133,7 +133,7 @@
             var imdb = new IMDb();
             var res  = imdb.GetID(show).ToList();
 
-            if (res.Count != 0 && !string.IsNullOrWhiteSpace(res[0].Cover))
+            if (res.Count != 0 && !string.IsNullOrWhiteSpace(res[0].Cover) && !res[0].Cover.EndsWith("/tv_series.gif"))
             {
                 return Regex.Replace(res[0].Cover, @"@@.+\.", "@@.");
             }
@@ -153,7 +153,7 @@
             var html = Utils.GetHTML("http://www.amazon.com/gp/search/ref=sr_in_-2_p_n_format_browse-bi_5?rh=n%3A2625373011%2Ck%3A%2Cp_n_format_browse-bin%3A2650304011%7C2650305011%7C2650307011%7C2650308011%7C2650310011%7C2650309011&bbn=2625373011&ie=UTF8&qid=1324847845&rnid=2650303011&keywords=" + Uri.EscapeUriString(show));
             var imgs = html.DocumentNode.SelectNodes("//img[@class='productImage' or @alt='Product Details']");
 
-            if (imgs != null)
+            if (imgs != null && html.DocumentNode.SelectSingleNode("//h1[@id='noResultsTitle']") == null)
             {
                 var src = imgs[0].GetAttributeValue("src");
 

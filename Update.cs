@@ -50,7 +50,7 @@
             }
 
             // get list of active shows
-            var shows = Database.Query("select showid, name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') = 'True' order by rowid asc");
+            var shows = Database.Query("select showid, name, (select value from showdata where showdata.showid = tvshows.showid and key = 'grabber') as grabber from tvshows where (select value from showdata where showdata.showid = tvshows.showid and key = 'airing') = 'True' order by name asc");
             
             var i = 0d;
             foreach (var r in shows)

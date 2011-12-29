@@ -20,7 +20,7 @@
     using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Remote;
+    using Remote;
 
     using VistaControls.TaskDialog;
 
@@ -51,7 +51,7 @@
 
         private Timer _statusTimer;
         private bool _hideOnStart;
-        private bool _askUpdate;
+        private bool _askUpdate, _askErrorUpdate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -188,7 +188,7 @@
                     {
                         var ver = Path.GetFileNameWithoutExtension(uf[0]).Replace("update_", string.Empty);
 
-                        if (Version.Parse(ver) <= Version.Parse(Signature.Version))
+                        if (Version.Parse(ver) <= Version.Parse(Signature.Version) || new FileInfo(Path.Combine(Signature.FullPath, uf[0])).Length == 0)
                         {
                             try { File.Delete(Path.Combine(Signature.FullPath, uf[0])); } catch { }
                         }
@@ -307,6 +307,11 @@
                 _askUpdate = false;
                 UpdateDownloaded((string)update.Tag, true);
             }
+            else if (IsVisible && _askErrorUpdate && updateOuter.Visibility == Visibility.Visible)
+            {
+                _askErrorUpdate = false;
+                UpdateIOError((string)update.Tag);
+            }
         }
 
         /// <summary>
@@ -422,37 +427,7 @@
                 _statusTimer.Stop();
             }
 
-            var last = string.Empty;
-
-            try
-            {
-                last = Database.Setting("last update");
-            }
-            catch (FileNotFoundException)
-            {
-                Hide();
-
-                var td = new VistaControls.TaskDialog.TaskDialog
-                    {
-                        CommonIcon      = TaskDialogIcon.SecurityError,
-                        UseCommandLinks = true,
-                        Title           = Signature.Software,
-                        Instruction     = "Dependency failure",
-                        Content         = "The SQLite database library couldn't be loaded.\r\nYou'll need to download it and install it manually.\r\n\r\nAfter installation if the problem still presists, remove the System.Data.SQLite.dll file from the directory where you've installed this application.",
-                        CustomButtons   = new[]
-                            {
-                                new CustomButton(Result.Yes, "Download"),
-                                new CustomButton(Result.No,  "Exit")
-                            }
-                    };
-
-                if (td.Show().CommonButton == Result.Yes)
-                {
-                    Utils.Run("http://system.data.sqlite.org/sqlite-netFx40-setup-bundle-x86-2010-1.0.74.0.exe");
-                }
-
-                Process.GetCurrentProcess().Kill();
-            }
+            var last = Database.Setting("last update");
 
             if (string.IsNullOrEmpty(last))
             {
@@ -483,36 +458,14 @@
         /// <summary>
         /// Sets the width of the progress bar in the header.
         /// </summary>
-        /// <param name="value">The value. If -1, the progress bar will be hidden.</param>
+        /// <param name="value">The value.</param>
         public void SetHeaderProgress(double value)
         {
-            if (value == -1)
-            {
-                progressRectangle.BeginAnimation(OpacityProperty, new DoubleAnimation
-                    {
-                        To                = 0,
-                        Duration          = TimeSpan.FromMilliseconds(500),
-                        AccelerationRatio = 1
-                    });
-
-                return;
-            }
-
-            if (progressRectangle.Opacity == 0)
-            {
-                progressRectangle.Width   = 0;
-                progressRectangle.Opacity = 1;
-            }
-
-            progressRectangle.BeginAnimation(WidthProperty, new DoubleAnimation
+            progressRectangle.BeginAnimation(OpacityProperty, new DoubleAnimation
                 {
-                    To                = (value / 100) * logo.RenderSize.Width,
+                    To                = value / 100,
                     Duration          = TimeSpan.FromMilliseconds(500),
-                    AccelerationRatio = 1,
-                    EasingFunction    = new ElasticEase
-                        {
-                            Springiness = 10
-                        }
+                    AccelerationRatio = 1
                 });
         }
 
@@ -568,6 +521,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         public void UpdateDatabaseClick(object sender = null, RoutedEventArgs e = null)
         {
+            _statusTimer.Stop();
+
             var updater = new Updater();
 
             updater.UpdateProgressChanged += UpdateProgressChanged;
@@ -691,7 +646,7 @@
             Run(() =>
                 {
                     SetLastUpdated();
-                    SetHeaderProgress(-1);
+                    SetHeaderProgress(0);
                 });
         }
 
@@ -709,7 +664,7 @@
                 Run(() =>
                     {
                         lastUpdatedLabel.Content = "update failed";
-                        SetHeaderProgress(-1);
+                        SetHeaderProgress(0);
                     });
             }
         }
@@ -746,14 +701,35 @@
                         updateToolTipText.Text  = "Downloading update...";
                     });
 
-                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")))
+                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length != 0)
                 {
                     return;
                 }
 
+                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")))
+                {
+                    try
+                    {
+                        File.Delete(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
+                    }
+                    catch (Exception ex)
+                    {
+                        Run(() => UpdateIOError(ex.Message));
+                        return;
+                    }
+                }
+
                 if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp")))
                 {
-                    try { File.Delete(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp")); } catch { }
+                    try
+                    {
+                        File.Delete(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"));
+                    }
+                    catch (Exception ex)
+                    {
+                        Run(() => UpdateIOError(ex.Message));
+                        return;
+                    }
                 }
 
                 var wc = new WebClient();
@@ -761,7 +737,21 @@
                 wc.DownloadProgressChanged += (s, e) => Run(() => updateToolTipText.Text = "Downloading update... (" + e.ProgressPercentage + "%)");
                 wc.DownloadFileCompleted   += (s, e) =>
                     {
-                        File.Move(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
+                        try
+                        {
+                            File.Move(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
+
+                            if (new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length == 0)
+                            {
+                                throw new Exception("The downloaded binary is 0 bytes long.");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Run(() => UpdateIOError(ex.Message));
+                            return;
+                        }
+
                         Run(() => UpdateDownloaded(upd.Version, true));
                     };
 
@@ -792,7 +782,7 @@
                         Content         = "Version " + version + " has been downloaded and is ready to be installed!",
                         CustomButtons   = new[]
                             {
-                                new CustomButton(Result.Yes, "Install now\nIt won't take more than 5 seconds."),
+                                new CustomButton(Result.Yes, "Install now"),
                                 new CustomButton(Result.No,  "Postpone")
                             }
                     };
@@ -805,6 +795,44 @@
             else if (ask && (!IsVisible || Top == -999))
             {
                 _askUpdate = true;
+            }
+        }
+
+        /// <summary>
+        /// Called when an update failed to download.
+        /// </summary>
+        /// <param name="error">The error message.</param>
+        public void UpdateIOError(string error)
+        {
+            update.Tag             = error;
+            updateToolTipText.Text = "There was an error while downloading the update:\r\n" + error + "\r\nClick here to update manually!";
+
+            if (IsVisible && Top != -999)
+            {
+                var td = new VistaControls.TaskDialog.TaskDialog
+                    {
+                        CommonIcon          = TaskDialogIcon.SecurityWarning,
+                        UseCommandLinks     = true,
+                        Title               = Signature.Software,
+                        Instruction         = "Update error",
+                        Content             = "There was an error while downloading the latest update for the software.",
+                        ExpandedInformation = error,
+                        ExpandedControlText = "Show error",
+                        CustomButtons       = new[]
+                            {
+                                new CustomButton(Result.Yes, "Update manually"),
+                                new CustomButton(Result.No,  "Postpone")
+                            }
+                    };
+
+                if (td.Show().CommonButton == Result.Yes)
+                {
+                    Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
+                }
+            }
+            else if (!IsVisible || Top == -999)
+            {
+                _askErrorUpdate = true;
             }
         }
 
@@ -835,10 +863,18 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
         private void UpdateMouseLeftButtonUp(object sender = null, System.Windows.Input.MouseButtonEventArgs e = null)
         {
-            if (File.Exists(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")))
+            if (_askErrorUpdate)
             {
-                Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/S /AR /D=" + Signature.FullPath);
+                Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
+            }
+            else if (File.Exists(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")).Length != 0)
+            {
+                Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/D=" + Signature.FullPath);
                 NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+            }
+            else
+            {
+                Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
             }
         }
         #endregion
