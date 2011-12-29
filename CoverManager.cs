@@ -39,10 +39,11 @@
         /// Gets the cover of the specified show.
         /// </summary>
         /// <param name="show">The show to get covers for.</param>
+        /// <param name="status">The method to call when reporting a status change.</param>
         /// <returns>
         /// Cover of the specified show or null.
         /// </returns>
-        public static Uri GetCover(string show)
+        public static Uri GetCover(string show, Action<string> status)
         {
             var clean = Utils.CreateSlug(show, false);
             var cover = Path.Combine(Location, clean + ".jpg");
@@ -56,26 +57,38 @@
 
             // try to find it on The TVDB
 
-            if ((url = GetCoverFromTVDB(show)) != null
-               && DownloadCover(url, cover))
+            status("Searching for cover on The TVDB...");
+            if ((url = GetCoverFromTVDB(show)) != null)
             {
-                goto success;
+                status("Downloading cover from " + new Uri(url).Host + "...");
+                if (DownloadCover(url, cover))
+                {
+                    goto success;
+                }
             }
 
             // try to find it on IMDb
 
-            if ((url = GetCoverFromIMDb(show)) != null
-               && DownloadCover(url, cover))
+            status("Searching for cover on IMDb...");
+            if ((url = GetCoverFromIMDb(show)) != null)
             {
-                goto success;
+                status("Downloading cover from " + new Uri(url).Host + "...");
+                if (DownloadCover(url, cover))
+                {
+                    goto success;
+                }
             }
 
             // try to find it on Amazon
 
-            if ((url = GetCoverFromAmazon(show)) != null
-               && DownloadCover(url, cover))
+            status("Searching for cover on Amazon...");
+            if ((url = GetCoverFromAmazon(show)) != null)
             {
-                goto success;
+                status("Downloading cover from " + new Uri(url).Host + "...");
+                if (DownloadCover(url, cover))
+                {
+                    goto success;
+                }
             }
 
             return null;

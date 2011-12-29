@@ -6,7 +6,7 @@
     using System.Windows.Controls;
     using System.Windows.Media.Imaging;
 
-    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using Parsers.Guides;
 
     using VistaControls.TaskDialog;
 
@@ -226,6 +226,22 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SaveButtonClick(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                new Regex(releaseTextBox.Text.Trim());
+            }
+            catch (Exception ex)
+            {
+                new TaskDialog
+                    {
+                        CommonIcon  = TaskDialogIcon.Stop,
+                        Title       = "Invalid regex",
+                        Instruction = "Invalid regex",
+                        Content     = ex.Message.ToUppercaseFirst()
+                    }.Show();
+                return;
+            }
+
             if (nameTextBox.Text != _show && !string.IsNullOrWhiteSpace(nameTextBox.Text))
             {
                 Database.Execute("update tvshows set name = ? where showid = ?", nameTextBox.Text.Trim(), _id);
@@ -234,7 +250,7 @@
 
             if (customReleaseName.IsChecked.Value && !string.IsNullOrWhiteSpace(releaseTextBox.Text))
             {
-                var rel = Regex.Replace(releaseTextBox.Text.ToUpper().Trim(), @"\s+", " ");
+                var rel = Regex.Replace(releaseTextBox.Text.Trim(), @"\s+", " ");
                 Database.Execute("update tvshows set release = ? where showid = ?", rel, _id);
                 Database.TVShows[_id].Release = rel;
             }

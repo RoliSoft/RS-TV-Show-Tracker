@@ -44,6 +44,7 @@
 
         private int _activeShowID;
         private string _activeShowUrl;
+        private Thread _coverThd;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GuidesPage"/> class.
@@ -245,6 +246,14 @@
         /// </summary>
         public void LoadSelectedShow()
         {
+            ResetStatus();
+
+            if (_coverThd != null)
+            {
+                try { _coverThd.Abort(); } catch { }
+                _coverThd = null;
+            }
+
             var show = Database.TVShows.Values.First(s => s.Name == comboBox.SelectedValue.ToString());
             var id = _activeShowID = show.ShowID;
 
@@ -381,14 +390,17 @@
             // get cover
 
             
-            new Thread(() =>
+            _coverThd = new Thread(() =>
                 {
-                    var cover = CoverManager.GetCover(show.Name);
+                    var cover = CoverManager.GetCover(show.Name, s => Dispatcher.Invoke((Action)(() => SetStatus(s, true))));
                     Dispatcher.Invoke((Action)(() =>
                         {
                             showGeneralCover.Source = new BitmapImage(cover ?? new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
+                            ResetStatus();
                         }));
-                }).Start();
+                    _coverThd = null;
+                });
+            _coverThd.Start();
         }
         #endregion
 
