@@ -6,7 +6,7 @@
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using Parsers.Downloads;
 
     /// <summary>
     /// Provides unit tests for the file name matching methods.
@@ -52,7 +52,7 @@
                 var descr = quality.GetAttribute<System.ComponentModel.DescriptionAttribute>().Description;
                 var parse = Parser.ParseQuality(descr);
 
-                Console.WriteLine(descr);
+                Console.WriteLine(descr.PadRight(13) + " [" + parse.ToEdition() + "]");
                 Assert.AreEqual(quality, parse);
             }
         }
@@ -67,7 +67,7 @@
             {
                 var parse = Parser.ParseQuality(tvsq.Key);
 
-                Console.WriteLine(tvsq.Key + " -> " + parse);
+                Console.WriteLine(tvsq.Key.PadRight(13) + " -> " + parse);
                 Assert.AreEqual(tvsq.Value, parse);
             }
         }

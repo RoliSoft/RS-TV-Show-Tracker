@@ -603,6 +603,36 @@
         }
 
         /// <summary>
+        /// Extension method to <c>Qualities</c> to convert them to their corresponding <c>Editions</c>.
+        /// </summary>
+        /// <param name="quality">The quality.</param>
+        /// <returns>The corresponding edition.</returns>
+        public static Editions ToEdition(this Qualities quality)
+        {
+            if (quality == Qualities.Screener)
+            {
+                return Editions.Screener;
+            }
+
+            if (Regex.IsMatch(quality.ToString(), @"^(SDTV|HDTV|HR)"))
+            {
+                return Editions.TV;
+            }
+
+            if (quality.ToString().StartsWith("Web"))
+            {
+                return Editions.WebDL;
+            }
+
+            if (Regex.IsMatch(quality.ToString(), @"^(VHSRip|DVD|BDRip|BluRay)"))
+            {
+                return Editions.Retail;
+            }
+
+            return Editions.Unknown;
+        }
+
+        /// <summary>
         /// Determines whether the specified input matches all the specified regexes.
         /// </summary>
         /// <param name="input">The input.</param>

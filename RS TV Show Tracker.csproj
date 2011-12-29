@@ -787,6 +787,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\disc.png" />
     <Resource Include="Images\python.png" />
     <Resource Include="Images\fire.png" />
     <Resource Include="Images\menu.png" />
