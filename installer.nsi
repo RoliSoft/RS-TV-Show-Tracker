@@ -183,14 +183,16 @@ Section -Prerequisites
 	; Check Visual C++ 2010 SP1 Redistributable
 	
 	ClearErrors
-	ReadRegDword $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{196BB40D-1578-3D01-B289-BEFC77A11A1E}" "Version"
+	ReadRegDword $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{F0C3E5D1-1ADE-321E-8167-68EF0DE699A5}" "Version"
 	IfErrors installVCRedist done1
 	
 installVCRedist:
+	Banner::show /NOUNLOAD /set 76 "Visual C++ 2010 SP1 Redistributable" "Downloading setup..."
+	NSISdl::download_quiet http://download.microsoft.com/download/C/6/D/C6D0FD4E-9E53-4897-9B91-836EBA2AACD3/vcredist_x86.exe "$INSTDIR\vcredist_x86.exe"
+	Banner::destroy
 	Banner::show /NOUNLOAD /set 76 "Visual C++ 2010 SP1 Redistributable" "Waiting for installation to finish..."
-	File "Dependencies\vcredist_x86_2010_SP1.exe"
-	ExecWait "$INSTDIR\vcredist_x86_2010_SP1.exe /passive /norestart" 
-	Delete "$INSTDIR\vcredist_x86_2010_SP1.exe"
+	ExecWait "$INSTDIR\vcredist_x86.exe /passive /norestart" 
+	Delete "$INSTDIR\vcredist_x86.exe"
 	Banner::destroy
 	
 	; Check .Net Framework 4 Extended Profile
@@ -199,9 +201,11 @@ done1:
 	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done2 installNetFx4
 	
 installNetFx4:
+	Banner::show /NOUNLOAD /set 76 ".Net Framework 4 Extended Profile" "Downloading setup..."
+	NSISdl::download_quiet http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe "$INSTDIR\dotNetFx40_Full_setup.exe"
+	Banner::destroy
 	Banner::show /NOUNLOAD /set 76 ".Net Framework 4 Extended Profile" "Waiting for installation to finish..."
-	File "Dependencies\dotNetFx40_Full_setup.exe"
-	ExecWait "$INSTDIR\dotNetFx40_Full_setup.exe /passive /norestart" 
+	ExecWait "$INSTDIR\dotNetFx40_Full_setup.exe /passive /norestart"
 	Delete "$INSTDIR\dotNetFx40_Full_setup.exe"
 	Banner::destroy
 	
