@@ -2,13 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using System.Text.RegularExpressions;
 
     using FileNames;
     using Parsers.Social;
+    using Dependencies.DetectOpenFiles;
 
     using Parser = ShowNames.Parser;
 
@@ -32,30 +33,46 @@
         }
 
         /// <summary>
-        /// Gets the list of open file handles for the given processes.
+        /// Gets the process IDs of the specified file names.
         /// </summary>
-        /// <param name="processes">The processes' executable name.</param>
-        /// <returns>List of the open files.</returns>
-        public static List<FileInfo> GetHandleList(IEnumerable<string> processes)
+        /// <param name="names">The process names.</param>
+        /// <returns>List of PIDs.</returns>
+        public static IEnumerable<int> GetPIDs(List<string> names)
         {
-            var sb = new StringBuilder();
-
-            foreach (var process in processes)
+            foreach (var proc in Process.GetProcesses())
             {
-                sb.AppendLine(Utils.RunAndRead(Path.Combine(Signature.FullPath, "handle.exe"), "-accepteula -p " + process, true));
+                foreach (var name in names)
+                {
+                    if (proc.ProcessName.Equals(name.Replace(".exe", string.Empty).Trim(), StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        yield return proc.Id;
+                    }
+                }
             }
+        }
 
-            return Regex.Matches(sb.ToString(), @"(?:D|\-)\)\s+(.+)(?:\r|$)")
-                   .Cast<Match>()
-                   .Select(m => m.Groups[1].Value.Trim())
-                   .Distinct(StringComparer.CurrentCultureIgnoreCase)
-                   .Select(f =>
-                       {
-                           try   { return new FileInfo(f); }
-                           catch { return null; }
-                       })
-                   .Where(f => f != null)
-                   .ToList();
+        /// <summary>
+        /// Gets the list of open file handles for the given process IDs.
+        /// </summary>
+        /// <param name="pids">The process IDs.</param>
+        /// <returns>List of the open files.</returns>
+        public static IEnumerable<FileInfo> GetHandleList(List<int> pids)
+        {
+            foreach (var file in new DetectOpenFiles.OpenFiles(pids))
+            {
+                FileInfo fi;
+
+                try
+                {
+                    fi = new FileInfo(file);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                yield return fi;
+            }
         }
 
         /// <summary>
@@ -63,27 +80,23 @@
         /// </summary>
         public static void CheckOpenFiles()
         {
-            if (!File.Exists(Path.Combine(Signature.FullPath, "handle.exe")))
-            {
-                return;
-            }
-
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
-
             try { procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName)); } catch { }
-
-            if (Settings.Get<bool>("Monitor Network Shares"))
-            {
-                procs.Add("4"); // PID 4, System
-            }
 
             if (!procs.Any())
             {
                 return;
             }
 
-            var files = GetHandleList(procs.Distinct(StringComparer.CurrentCultureIgnoreCase));
+            var pids = GetPIDs(procs).Distinct().ToList();
+
+            if (!pids.Any())
+            {
+                return;
+            }
+
+            var files = GetHandleList(pids).ToList();
 
             foreach (var show in Database.TVShows)
             {
