@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Security.Authentication;
-    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
@@ -36,7 +34,7 @@
         {
             get
             {
-                return "https://broadcasthe.net/";
+                return "http://broadcasthe.net/";
             }
         }
 
@@ -172,7 +170,7 @@
 
                 if (link.Quality == Qualities.Unknown)
                 {
-                    link.Quality = ParseQuality(quality);
+                    link.Quality = FileNames.Parser.ParseQuality(quality);
                 }
 
                 link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("a[2]", "href"));
@@ -195,66 +193,6 @@
         public override string Login(string username, string password)
         {
             return GazelleTrackerLogin(username, password);
-        }
-
-        /// <summary>
-        /// Parses the quality of the file.
-        /// </summary>
-        /// <param name="release">The release name.</param>
-        /// <returns>Extracted quality or Unknown.</returns>
-        public static Qualities ParseQuality(string release)
-        {
-            if (IsMatch(release, @"1080(i|p)", @"WEB"))
-            {
-                return Qualities.WebDL1080p;
-            }
-            if (IsMatch(release, @"1080(i|p)", @"(Bluray|BD|HDDVD)"))
-            {
-                return Qualities.BluRay1080p;
-            }
-            if (IsMatch(release, @"1080(i|p)", @"HDTV"))
-            {
-                return Qualities.HDTV1080i;
-            }
-            if (IsMatch(release, @"720p", @"WEB"))
-            {
-                return Qualities.WebDL720p;
-            }
-            if (IsMatch(release, @"720p", @"(Bluray|BD|HDDVD)"))
-            {
-                return Qualities.BluRay720p;
-            }
-            if (IsMatch(release, @"720p", @"HDTV"))
-            {
-                return Qualities.HDTV720p;
-            }
-            if (IsMatch(release, @"(x264|h.264|MKV)"))
-            {
-                return Qualities.HRx264;
-            }
-            if (IsMatch(release, @"(HDTV|DSR|DVDRip)"))
-            {
-                return Qualities.HDTVXviD;
-            }
-            if (IsMatch(release, @"TVRip"))
-            {
-                return Qualities.SDTVRip;
-            }
-
-            return Qualities.Unknown;
-        }
-
-        /// <summary>
-        /// Determines whether the specified input is matches all the specified regexes.
-        /// </summary>
-        /// <param name="input">The input.</param>
-        /// <param name="regexes">The regexes.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified input matches all the specified regexes; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsMatch(string input, params string[] regexes)
-        {
-            return regexes.All(regex => Regex.IsMatch(input, regex, RegexOptions.IgnoreCase));
         }
     }
 }
