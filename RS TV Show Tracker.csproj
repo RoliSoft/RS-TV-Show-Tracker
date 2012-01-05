@@ -387,6 +387,7 @@
     </Compile>
     <Compile Include="Update.cs" />
     <Compile Include="Utils\Utils.cs" />
+    <Compile Include="XMLTV.cs" />
     <Page Include="Windows\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
