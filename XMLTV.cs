@@ -7,6 +7,8 @@
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
+    using Tables;
+
     /// <summary>
     /// Provides support for parsing XMLTV files and mapping the programming to shows in your database.
     /// </summary>
@@ -26,16 +28,26 @@
         /// <value>
         /// The programmes.
         /// </value>
-        public List<Programme> Programmes { get; set; } 
+        public List<Programme> Programmes { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XMLTV"/> class.
+        /// Gets or sets the language of the titles in the programming.
+        /// </summary>
+        /// <value>
+        /// The language of the titles in the programming.
+        /// </value>
+        public string Language { get; set; }
+
+        /// <summary>
+        /// Loads the programming from the specified file.
         /// </summary>
         /// <param name="file">The XMLTV file.</param>
-        public XMLTV(string file)
+        /// <param name="language">The language of the titles in the programming.</param>
+        public void LoadFrom(string file, string language)
         {
             Channels   = new Dictionary<string, string>();
             Programmes = new List<Programme>();
+            Language   = language;
 
             var doc = XDocument.Load(file);
 
@@ -70,12 +82,12 @@
                 {
                     continue;
                 }
-                
+
                 var prog = new Programme
                     {
-                        Channel = channel.Value,
-                        Title   = title[0].Value.Trim(),
-                        AirDate = airdate
+                        Channel  = Channels[channel.Value],
+                        Title    = title[0].Value.Trim(),
+                        AirDate  = airdate
                     };
 
                 if (descr.Count != 0)
@@ -115,6 +127,41 @@
         }
 
         /// <summary>
+        /// Extracts the tracked.
+        /// </summary>
+        public void Filter()
+        {
+            var filtered = new List<Programme>();
+            var regexes  = new Dictionary<Regex, TVShow>();
+
+            foreach (var show in Database.TVShows)
+            {
+                regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Name) + @"(?!(?:[:0-9]| \- |\s*[a-z]))", RegexOptions.IgnoreCase), show.Value);
+
+                var foreign = show.Value.GetForeignTitle(Language);
+
+                if (!string.IsNullOrWhiteSpace(foreign))
+                {
+                    regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(foreign.RemoveDiacritics()) + @"(?!(?:[:0-9]| \- |\s*[a-z]))", RegexOptions.IgnoreCase), show.Value);
+                }
+            }
+
+            foreach (var prog in Programmes)
+            {
+                foreach (var regex in regexes)
+                {
+                    if (regex.Key.IsMatch(prog.Title.RemoveDiacritics()))
+                    {
+                        filtered.Add(prog);
+                        break;
+                    }
+                }
+            }
+
+            Programmes = filtered;
+        }
+
+        /// <summary>
         /// Represents a programming in an XMLTV listing.
         /// </summary>
         public class Programme
@@ -150,6 +197,17 @@
             /// The airdate.
             /// </value>
             public DateTime AirDate { get; set; }
+
+            /// <summary>
+            /// Returns a <see cref="System.String"/> that represents this instance.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="System.String"/> that represents this instance.
+            /// </returns>
+            public override string ToString()
+            {
+                return Title + " [" + Channel + "]";
+            }
         }
     }
 }

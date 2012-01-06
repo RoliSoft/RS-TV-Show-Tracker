@@ -674,6 +674,16 @@ namespace RoliSoft.TVShowTracker
         }
 
         /// <summary>
+        /// Extension method to string to remove any diacritics from a string.
+        /// </summary>
+        /// <param name="value">The string to be transliterated.</param>
+        /// <returns>ASCII string.</returns>
+        public static string RemoveDiacritics(this string value)
+        {
+            return Encoding.ASCII.GetString(Encoding.GetEncoding("Cyrillic").GetBytes(value));
+        }
+
+        /// <summary>
         /// Extension method to string to determine whether the specified string is null, empty or whitespace.
         /// </summary>
         /// <param name="value">The value.</param>
