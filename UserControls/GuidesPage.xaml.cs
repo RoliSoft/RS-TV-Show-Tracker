@@ -85,7 +85,7 @@
         /// </summary>
         public void ResetStatus()
         {
-            SetStatus(String.Empty);
+            SetStatus(string.Empty);
         }
 
         /// <summary>
@@ -139,6 +139,7 @@
         public void LoadShowList()
         {
             var items = Database.TVShows.Values.OrderBy(s => s.Name).Select(s => s.Name).ToList();
+            items.Insert(0, "— Upcoming episodes in Romania —");
             items.Insert(0, "— Upcoming episodes —");
 
             comboBox.ItemsSource = items;
@@ -201,7 +202,12 @@
                 LoadUpcomingEpisodes();
             }
 
-            if (comboBox.SelectedIndex >= 1)
+            if (comboBox.SelectedIndex == 1)
+            {
+                LoadXMLTVEpisodes();
+            }
+
+            if (comboBox.SelectedIndex >= 2)
             {
                 LoadSelectedShow();
             }
@@ -239,6 +245,49 @@
 
             tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
             upcomingListView.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Loads the upcoming episodes from XMLTV programming.
+        /// </summary>
+        public void LoadXMLTVEpisodes()
+        {
+            var xmltv = new XMLTV();
+
+            SetStatus("Parsing XMLTV file...", true);
+
+            new Thread(() =>
+                {
+                    xmltv.LoadFrom(@"C:\Users\RoliSoft\Desktop\xmltv-0.5.61-win32\guide_ro.xml", "ro");
+
+                    SetStatus("Filtering programming...", true);
+
+                    var episodes = xmltv.GetListing().ToList();
+
+                    ResetStatus();
+
+                    Dispatcher.Invoke((Action)(() =>
+                        {
+                            UpcomingListViewItemCollection.RaiseListChangedEvents = false;
+
+                            foreach (var episode in episodes)
+                            {
+                                UpcomingListViewItemCollection.Add(new UpcomingListViewItem
+                                    {
+                                        Show         = episode.Title + (!string.IsNullOrWhiteSpace(episode.Number) ? " " + episode.Number : string.Empty),
+                                        Name         = !string.IsNullOrWhiteSpace(episode.Description) ? " · " + episode.Description : string.Empty,
+                                        Airdate      = episode.Airdate.DayOfWeek + " / " + episode.Airdate.ToString("h:mm tt") + " / " + episode.Channel,
+                                        RelativeDate = episode.Airdate.ToShortRelativeDate()
+                                    });
+                            }
+
+                            UpcomingListViewItemCollection.RaiseListChangedEvents = true;
+                            UpcomingListViewItemCollection.ResetBindings();
+
+                            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
+                            upcomingListView.Visibility = Visibility.Visible;
+                        }));
+                }).Start();
         }
 
         /// <summary>
