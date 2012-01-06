@@ -3,7 +3,7 @@
     /// <summary>
     /// Provides support for extracting titles off imdb.pt.
     /// </summary>
-    public abstract class IMDbPortugal : IMDbInternational
+    public class IMDbPortugal : IMDbInternational
     {
         /// <summary>
         /// Gets the ISO 639-1 code of the language this engine provides titles for.

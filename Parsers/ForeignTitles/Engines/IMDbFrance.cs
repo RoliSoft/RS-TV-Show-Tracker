@@ -3,7 +3,7 @@
     /// <summary>
     /// Provides support for extracting titles off imdb.fr.
     /// </summary>
-    public abstract class IMDbFrance : IMDbInternational
+    public class IMDbFrance : IMDbInternational
     {
         /// <summary>
         /// Gets the ISO 639-1 code of the language this engine provides titles for.

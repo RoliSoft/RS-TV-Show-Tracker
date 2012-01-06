@@ -144,6 +144,12 @@
     <Compile Include="CoverManager.cs" />
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\IMDbFrance.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\IMDbSpain.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\IMDbItaly.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\IMDbGermany.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\IMDbInternational.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\PORTCzechRepublic.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\PORTSlovakia.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\PORTSerbia.cs" />

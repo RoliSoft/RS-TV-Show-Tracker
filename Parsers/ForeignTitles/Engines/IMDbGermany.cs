@@ -3,7 +3,7 @@
     /// <summary>
     /// Provides support for extracting titles off imdb.de.
     /// </summary>
-    public abstract class IMDbGermany : IMDbInternational
+    public class IMDbGermany : IMDbInternational
     {
         /// <summary>
         /// Gets the ISO 639-1 code of the language this engine provides titles for.
