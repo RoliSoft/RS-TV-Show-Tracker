@@ -6,6 +6,20 @@
     public abstract class ForeignTitleEngine : ParserEngine
     {
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>
+        /// The icon location.
+        /// </value>
+        public override string Icon
+        {
+            get
+            {
+                return "pack://application:,,,/RSTVShowTracker;component/Images/flag-" + Language + ".png";
+            }
+        }
+
+        /// <summary>
         /// Gets the ISO 639-1 code of the language this engine provides titles for.
         /// </summary>
         /// <value>The ISO 639-1 code of the language this engine provides titles for.</value>

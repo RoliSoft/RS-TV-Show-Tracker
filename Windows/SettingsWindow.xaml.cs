@@ -18,6 +18,7 @@
 
     using ContextMenus.Menus;
     using Parsers.Downloads;
+    using Parsers.ForeignTitles;
     using Parsers.Guides;
     using Parsers.LinkCheckers;
     using Parsers.OnlineVideos;
@@ -1282,6 +1283,7 @@
                     typeof(SubtitleContextMenu),
                     typeof(StatisticsContextMenu),
                     typeof(RecommendationContextMenu),
+                    typeof(ForeignTitleEngine),
                     typeof(StartupPlugin),
                     typeof(IPlugin)
                 };
@@ -1303,6 +1305,7 @@
                     "/RSTVShowTracker;component/Images/menu.png",
                     "/RSTVShowTracker;component/Images/menu.png",
                     "/RSTVShowTracker;component/Images/menu.png",
+                    "/RSTVShowTracker;component/Images/language.png",
                     "/RSTVShowTracker;component/Images/document-insert.png",
                     "/RSTVShowTracker;component/Images/dll.gif"
                 };
