@@ -144,6 +144,14 @@
     <Compile Include="CoverManager.cs" />
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTCzechRepublic.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTSlovakia.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTSerbia.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTCroatia.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTRomania.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTHungary.cs" />
+    <Compile Include="Parsers\ForeignTitles\Engines\PORTNetwork.cs" />
+    <Compile Include="Parsers\ForeignTitles\ForeignTitleEngine.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Scroogle.cs" />

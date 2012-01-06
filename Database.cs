@@ -6,6 +6,8 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading;
+    using Parsers.ForeignTitles;
     using RoliSoft.TVShowTracker.Tables;
 
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
@@ -546,6 +548,49 @@
             }
 
             return ShowNames.Parser.GenerateTitleRegex(show);
+        }
+
+        /// <summary>
+        /// Gets the foreign title of the specified show
+        /// </summary>
+        /// <param name="id">The ID of the show.</param>
+        /// <param name="language">The ISO 639-1 code of the language.</param>
+        /// <returns>Foreign title or <c>null</c>.</returns>
+        public static string GetForeignTitle(int id, string language)
+        {
+            var title = ShowData(id, "title." + language);
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                return title;
+            }
+
+            var api = Remote.API.GetForeignTitle(TVShows[id].Name, language);
+
+            if (api.Success && !string.IsNullOrWhiteSpace(api.Result))
+            {
+                ShowData(id, "title." + language, api.Result);
+
+                return api.Result;
+            }
+
+            var engine = Extensibility.GetNewInstances<ForeignTitleEngine>().FirstOrDefault(x => x.Language == language);
+
+            if (engine != null)
+            {
+                var search = engine.Search(TVShows[id].Name);
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    ShowData(id, "title." + language, search);
+
+                    new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Name, search, language)).Start();
+
+                    return search;
+                }
+            }
+
+            return null;
         }
     }
 }

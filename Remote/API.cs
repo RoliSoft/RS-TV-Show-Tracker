@@ -243,6 +243,29 @@
         }
 
         /// <summary>
+        /// Gets the foreign title of the specified show.
+        /// </summary>
+        /// <param name="name">The name of the show.</param>
+        /// <param name="language">The ISO 639-1 code of the language.</param>
+        /// <returns>Foreign title.</returns>
+        public static Generic<string> GetForeignTitle(string name, string language)
+        {
+            return InvokeRemoteMethod<Generic<string>>("GetForeignTitle", name, language);
+        }
+
+        /// <summary>
+        /// Sends the foreign title to the remote database.
+        /// </summary>
+        /// <param name="name">The name of the show.</param>
+        /// <param name="translation">The translated name of the show.</param>
+        /// <param name="language">The ISO 639-1 code of the language.</param>
+        /// <returns><c>true</c> if operation was successful.</returns>
+        public static General SetForeignTitle(string name, string translation, string language)
+        {
+            return InvokeRemoteMethod<General>("SetForeignTitle", name, translation, language);
+        }
+
+        /// <summary>
         /// Reports the unhandled exception anonymously.
         /// </summary>
         /// <param name="stacktrace">The stacktrace of the error.</param>
