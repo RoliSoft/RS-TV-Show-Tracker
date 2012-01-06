@@ -1,8 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.ForeignTitles.Engines
 {
+    using System;
     using System.Linq;
+    using System.Text;
 
-    using WebSearch.Engines;
+    using HtmlAgilityPack;
 
     /// <summary>
     /// Provides support for extracting titles off any port.xx site.
@@ -37,6 +39,30 @@
             }
         }
 
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
+
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2012-01-06 2:52 AM");
+            }
+        }
+
         private readonly string _tld;
 
         /// <summary>
@@ -55,11 +81,43 @@
         /// <returns>The foreign title or <c>null</c>.</returns>
         public override string Search(string name)
         {
-            var q = new Scroogle().Search("\"(\"" + name + "\")\" site:port." + _tld + " inurl:/pls/fi/films.film_page?i_film_id -inurl:i_episode_id").ToList();
+            name = ShowNames.Regexes.Year.Replace(name, string.Empty);
+            name = ShowNames.Regexes.Countries.Replace(name, string.Empty);
+            name = name.Trim();
 
-            if (q.Count != 0)
+            var html  = Utils.GetHTML("http://port." + _tld + "/pls/ci/films.film_list?i_area_id=17&i_text=" + Uri.EscapeDataString(name), encoding: Encoding.GetEncoding("iso-8859-2"));
+            var head  = html.DocumentNode.SelectSingleNode("//h1[@class='blackbigtitle']");
+            var shows = html.DocumentNode.SelectNodes("//a[contains(@href, 'films.film_page')]");
+
+            if (head == null && shows == null && html.DocumentNode.SelectSingleNode("//input[@name='i_text']") != null)
             {
-                return q[0].Title.Replace(" - PORT." + _tld, string.Empty);
+                html  = Utils.GetHTML("http://port." + _tld + "/pls/ci/cinema.film_creator?i_film_creator=1&i_text=" + Uri.EscapeDataString(name), encoding: Encoding.GetEncoding("iso-8859-2"));
+                head  = html.DocumentNode.SelectSingleNode("//h1[@class='blackbigtitle']");
+                shows = html.DocumentNode.SelectNodes("//a[contains(@href, 'films.film_page')]");
+            }
+
+            if (head != null)
+            {
+                var title = HtmlEntity.DeEntitize(head.InnerText).Trim();
+
+                if (title.First() != '(' && title.Last() != ')')
+                {
+                    return title;
+                }
+
+                return null;
+            }
+
+            if (shows != null)
+            {
+                var title = HtmlEntity.DeEntitize(shows[0].InnerText).Trim();
+
+                if (title.First() != '(' && title.Last() != ')')
+                {
+                    return title;
+                }
+
+                return null;
             }
 
             return null;

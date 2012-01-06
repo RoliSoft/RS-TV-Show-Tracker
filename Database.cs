@@ -551,7 +551,7 @@
         }
 
         /// <summary>
-        /// Gets the foreign title of the specified show
+        /// Gets the foreign title of the specified show.
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <param name="language">The ISO 639-1 code of the language.</param>
@@ -562,13 +562,32 @@
 
             if (!string.IsNullOrWhiteSpace(title))
             {
-                return title;
+                if (Regex.IsMatch(title, @"^!\d{10}$"))
+                {
+                    if ((DateTime.Now.ToUnixTimestamp() - int.Parse(title.Substring(1))) < 2629743)
+                    {
+                        // don't search again if the not-found-tag is not older than a month
+
+                        return null;
+                    }
+                }
+                else
+                {
+                    return title;
+                }
             }
 
             var api = Remote.API.GetForeignTitle(TVShows[id].Name, language);
 
             if (api.Success && !string.IsNullOrWhiteSpace(api.Result))
             {
+                if (api.Result == "!")
+                {
+                    ShowData(id, "title." + language, "!" + DateTime.Now.ToUnixTimestamp());
+
+                    return null;
+                }
+
                 ShowData(id, "title." + language, api.Result);
 
                 return api.Result;
@@ -589,6 +608,10 @@
                     return search;
                 }
             }
+
+            ShowData(id, "title." + language, "!" + DateTime.Now.ToUnixTimestamp());
+
+            new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Name, "!", language)).Start();
 
             return null;
         }

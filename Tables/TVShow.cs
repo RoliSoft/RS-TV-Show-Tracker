@@ -82,6 +82,16 @@
         }
 
         /// <summary>
+        /// Gets the foreign title.
+        /// </summary>
+        /// <param name="language">The ISO 639-1 code of the language.</param>
+        /// <returns>Foreign title or <c>null</c>.</returns>
+        public string GetForeignTitle(string language)
+        {
+            return Database.GetForeignTitle(ShowID, language);
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>
