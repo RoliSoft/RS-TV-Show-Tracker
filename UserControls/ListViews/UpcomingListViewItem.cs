@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using RoliSoft.TVShowTracker.Tables;
+    using Tables;
 
     /// <summary>
     /// Represents an upcoming episode on the guide list view.
@@ -36,5 +36,39 @@
         /// </summary>
         /// <value>The relative airdate.</value>
         public string RelativeDate { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a local programming in the guide drop-down menu.
+    /// </summary>
+    public class GuideDropDownUpcomingItem
+    {
+        /// <summary>
+        /// Gets or sets the configuration.
+        /// </summary>
+        /// <value>
+        /// The configuration.
+        /// </value>
+        public LocalProgrammingPlugin.Configuration Config { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GuideDropDownUpcomingItem"/> class.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        public GuideDropDownUpcomingItem(LocalProgrammingPlugin.Configuration config = null)
+        {
+            Config = config;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return "— " + (Config ?? (object)"Upcoming episodes") + " —";
+        }
     }
 }

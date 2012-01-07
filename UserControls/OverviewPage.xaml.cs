@@ -428,7 +428,7 @@
 
             MainWindow.Active.tabControl.SelectedIndex = 1;
             MainWindow.Active.activeGuidesPage.LoadShowList();
-            MainWindow.Active.activeGuidesPage.SelectShow(((OverviewListViewItem)listView.SelectedValue).Name);
+            MainWindow.Active.activeGuidesPage.SelectShow(((OverviewListViewItem)listView.SelectedValue).Show);
         }
 
         /// <summary>

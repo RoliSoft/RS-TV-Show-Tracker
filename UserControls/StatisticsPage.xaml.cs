@@ -78,6 +78,7 @@
 
                 StatisticsListViewItemCollection.Add(new StatisticsListViewItem
                     {
+                        Show       = show,
                         Name       = show.Name,
                         Runtime    = runtime + " minutes",
                         Episodes   = count.ToString("#,###"),
@@ -104,7 +105,7 @@
 
             MainWindow.Active.tabControl.SelectedIndex = 1;
             MainWindow.Active.activeGuidesPage.LoadShowList();
-            MainWindow.Active.activeGuidesPage.SelectShow(((StatisticsListViewItem)listView.SelectedValue).Name);
+            MainWindow.Active.activeGuidesPage.SelectShow(((StatisticsListViewItem)listView.SelectedValue).Show);
         }
     }
 }

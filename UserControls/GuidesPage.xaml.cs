@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
@@ -138,9 +139,18 @@
         /// </summary>
         public void LoadShowList()
         {
-            var items = Database.TVShows.Values.OrderBy(s => s.Name).Select(s => s.Name).ToList();
-            items.Insert(0, "— Upcoming episodes in Romania —");
-            items.Insert(0, "— Upcoming episodes —");
+            var items = new List<object>();
+            items.Add(new GuideDropDownUpcomingItem());
+
+            foreach (var plugin in Extensibility.GetNewInstances<LocalProgrammingPlugin>())
+            {
+                foreach (var config in plugin.GetConfigurations())
+                {
+                    items.Add(new GuideDropDownUpcomingItem(config));
+                }
+            }
+
+            items.AddRange(Database.TVShows.Values.OrderBy(s => s.Name).Select(s => new GuideDropDownTVShowItem(s)));
 
             comboBox.ItemsSource = items;
         }
@@ -148,10 +158,17 @@
         /// <summary>
         /// Selects the show.
         /// </summary>
-        /// <param name="name">The name of the show.</param>
-        public void SelectShow(string name)
+        /// <param name="show">The TV show.</param>
+        public void SelectShow(TVShow show)
         {
-            comboBox.SelectedIndex = comboBox.Items.IndexOf(name);
+            for (int i = 0; i < comboBox.Items.Count; i++)
+            {
+                if (comboBox.Items[i] is GuideDropDownTVShowItem && ((GuideDropDownTVShowItem)comboBox.Items[i]).Show == show)
+                {
+                    comboBox.SelectedIndex = i;
+                    break;
+                }
+            }
         }
 
         #region ComboBox events
@@ -175,12 +192,12 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void ComboBoxDropDownClosed(object sender, EventArgs e)
         {
-            if (comboBox.SelectedIndex <= 0)
+            if (comboBox.SelectedItem is GuideDropDownUpcomingItem)
             {
                 upcomingListView.Visibility = statusLabel.Visibility = Visibility.Visible;
             }
 
-            if (comboBox.SelectedIndex >= 1)
+            if (comboBox.SelectedItem is GuideDropDownTVShowItem)
             {
                 tabControl.Visibility = statusLabel.Visibility = Visibility.Visible;
             }
@@ -197,17 +214,19 @@
             GuideListViewItemCollection.Clear();
             UpcomingListViewItemCollection.Clear();
 
-            if (comboBox.SelectedIndex <= 0)
+            if (comboBox.SelectedItem is GuideDropDownUpcomingItem)
             {
-                LoadUpcomingEpisodes();
+                if (((GuideDropDownUpcomingItem)comboBox.SelectedItem).Config == null)
+                {
+                    LoadUpcomingEpisodes();
+                }
+                else
+                {
+                    LoadSelectedConfig();
+                }
             }
-
-            if (comboBox.SelectedIndex == 1)
-            {
-                LoadXMLTVEpisodes();
-            }
-
-            if (comboBox.SelectedIndex >= 2)
+            
+            if (comboBox.SelectedItem is GuideDropDownTVShowItem)
             {
                 LoadSelectedShow();
             }
@@ -248,21 +267,17 @@
         }
 
         /// <summary>
-        /// Loads the upcoming episodes from XMLTV programming.
+        /// Loads the upcoming episodes from a plugin.
         /// </summary>
-        public void LoadXMLTVEpisodes()
+        public void LoadSelectedConfig()
         {
-            var xmltv = new XMLTV();
+            var config = ((GuideDropDownUpcomingItem)comboBox.SelectedItem).Config;
 
-            SetStatus("Parsing XMLTV file...", true);
+            SetStatus("Loading " + config.Plugin.Name + "...", true);
 
             new Thread(() =>
                 {
-                    xmltv.LoadFrom(@"C:\Users\RoliSoft\Desktop\xmltv-0.5.61-win32\guide_ro.xml", "ro");
-
-                    SetStatus("Filtering programming...", true);
-
-                    var episodes = xmltv.GetListing().ToList();
+                    var episodes = config.Plugin.GetListing(config).ToList();
 
                     ResetStatus();
 
@@ -274,7 +289,7 @@
                             {
                                 UpcomingListViewItemCollection.Add(new UpcomingListViewItem
                                     {
-                                        Show         = episode.Title + (!string.IsNullOrWhiteSpace(episode.Number) ? " " + episode.Number : string.Empty),
+                                        Show         = episode.Show + (!string.IsNullOrWhiteSpace(episode.Number) ? " " + episode.Number : string.Empty),
                                         Name         = !string.IsNullOrWhiteSpace(episode.Description) ? " · " + episode.Description : string.Empty,
                                         Airdate      = episode.Airdate.DayOfWeek + " / " + episode.Airdate.ToString("h:mm tt") + " / " + episode.Channel,
                                         RelativeDate = episode.Airdate.ToShortRelativeDate()
@@ -303,7 +318,7 @@
                 _coverThd = null;
             }
 
-            var show = Database.TVShows.Values.First(s => s.Name == comboBox.SelectedValue.ToString());
+            var show = ((GuideDropDownTVShowItem)comboBox.SelectedItem).Show;
             var id = _activeShowID = show.ShowID;
 
             // fill up general informations
@@ -484,7 +499,7 @@
         private void UpcomingListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (upcomingListView.SelectedIndex == -1) return;
-            SelectShow(((UpcomingListViewItem)upcomingListView.SelectedValue).Episode.Show.Name);
+            SelectShow(((UpcomingListViewItem)upcomingListView.SelectedValue).Episode.Show);
         }
 
         #region Search for download links

@@ -12,46 +12,94 @@
     /// <summary>
     /// Provides support for parsing XMLTV files and mapping the programming to shows in your database.
     /// </summary>
-    public class XMLTV
+    public class XMLTV : LocalProgrammingPlugin
     {
         /// <summary>
-        /// Gets or sets the channels.
+        /// Gets or sets the name of the plugin.
         /// </summary>
-        /// <value>
-        /// The channels.
-        /// </value>
-        public Dictionary<string, string> Channels { get; set; }
-
-        /// <summary>
-        /// Gets or sets the programmes.
-        /// </summary>
-        /// <value>
-        /// The programmes.
-        /// </value>
-        public List<Programme> Programmes { get; set; }
-
-        /// <summary>
-        /// Gets or sets the language of the titles in the programming.
-        /// </summary>
-        /// <value>
-        /// The language of the titles in the programming.
-        /// </value>
-        public string Language { get; set; }
-
-        /// <summary>
-        /// Loads the programming from the specified file.
-        /// </summary>
-        /// <param name="file">The XMLTV file.</param>
-        /// <param name="language">The language of the titles in the programming.</param>
-        public void LoadFrom(string file, string language)
+        /// <value>The name of the plugin.</value>
+        public override string Name
         {
-            Channels   = new Dictionary<string, string>();
-            Programmes = new List<Programme>();
-            Language   = language;
+            get
+            {
+                return "XMLTV";
+            }
+        }
 
-            var doc = XDocument.Load(file);
+        /// <summary>
+        /// Gets the name of the plugin's developer.
+        /// </summary>
+        /// <value>The name of the plugin's developer.</value>
+        public override string Developer
+        {
+            get
+            {
+                return "RoliSoft";
+            }
+        }
 
-            foreach (var channel in doc.Descendants("channel"))
+        /// <summary>
+        /// Gets the version number of the plugin.
+        /// </summary>
+        /// <value>The version number of the plugin.</value>
+        public override Version Version
+        {
+            get
+            {
+                return Utils.DateTimeToVersion("2012-01-07 5:13 AM");
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of available programming configurations.
+        /// </summary>
+        /// <returns>The list of available programming configurations.</returns>
+        public override IEnumerable<Configuration> GetConfigurations()
+        {
+            return new List<XMLTVConfiguration>
+                {
+                    new XMLTVConfiguration(this)
+                        {
+                            Name         = "Romania",
+                            File         = @"C:\Users\RoliSoft\Desktop\xmltv-0.5.61-win32\guide_ro.xml",
+                            Language     = "ro",
+                            AdvHuRoParse = true
+                        },
+                    new XMLTVConfiguration(this)
+                        {
+                            Name         = "Hungary",
+                            File         = @"C:\Users\RoliSoft\Desktop\xmltv-0.5.61-win32\guide_hu.xml",
+                            Language     = "hu",
+                            AdvHuRoParse = true
+                        }
+                };
+        }
+
+        /// <summary>
+        /// Gets a list of upcoming episodes in your area ordered by airdate.
+        /// </summary>
+        /// <param name="config">The config.</param>
+        /// <returns>
+        /// List of upcoming episodes in your area.
+        /// </returns>
+        public override IEnumerable<Programme> GetListing(Configuration config)
+        {
+            return Filter(ParseFile((XMLTVConfiguration)config), (XMLTVConfiguration)config);
+        }
+
+        /// <summary>
+        /// Parses the specified XMLTV file.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
+        /// <returns>
+        /// List of extracted programmes.
+        /// </returns>
+        public IEnumerable<Programme> ParseFile(XMLTVConfiguration config)
+        {
+            var channels = new Dictionary<string, string>();
+            var document = XDocument.Load(config.File);
+
+            foreach (var channel in document.Descendants("channel"))
             {
                 var id   = channel.Attribute("id");
                 var name = channel.Descendants("display-name").ToList();
@@ -61,10 +109,10 @@
                     continue;
                 }
 
-                Channels.Add(id.Value, name[0].Value);
+                channels.Add(id.Value, name[0].Value);
             }
 
-            foreach (var programme in doc.Descendants("programme"))
+            foreach (var programme in document.Descendants("programme"))
             {
                 var channel = programme.Attribute("channel");
                 var start   = programme.Attribute("start");
@@ -83,15 +131,10 @@
                     continue;
                 }
 
-                if (DateTime.Now > airdate)
-                {
-                    continue;
-                }
-
                 var prog = new Programme
                     {
-                        Channel  = Channels[channel.Value],
-                        Title    = title[0].Value.Trim(),
+                        Channel  = channels[channel.Value],
+                        Show     = title[0].Value.Trim(),
                         Airdate  = airdate
                     };
 
@@ -100,25 +143,27 @@
                     prog.Description = descr[0].Value.Trim();
                 }
 
-                Programmes.Add(prog);
+                yield return prog;
             }
         }
 
         /// <summary>
-        /// Filters any show that is not in the main database and returns the programming ordered by airdate.
+        /// Filters the specified list of programmes and orders them by airdate.
         /// </summary>
+        /// <param name="programmes">The full extracted list of programmes.</param>
+        /// <param name="config">The configuration.</param>
         /// <returns>
-        /// Filtered and ordered XMLTV programming.
+        /// List of filtered and ordered programmes.
         /// </returns>
-        public IEnumerable<Programme> GetListing()
+        public IEnumerable<Programme> Filter(IEnumerable<Programme> programmes, XMLTVConfiguration config)
         {
-            var regexes  = new Dictionary<Regex, TVShow>();
+            var regexes = new Dictionary<Regex, TVShow>();
 
             foreach (var show in Database.TVShows)
             {
                 regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Name) + @"(?!(?:[:,0-9]| \- |\s*[a-z]))", RegexOptions.IgnoreCase), show.Value);
 
-                var foreign = show.Value.GetForeignTitle(Language);
+                var foreign = show.Value.GetForeignTitle(config.Language);
 
                 if (!string.IsNullOrWhiteSpace(foreign))
                 {
@@ -126,13 +171,13 @@
                 }
             }
 
-            foreach (var prog in Programmes.OrderBy(p => p.Airdate))
+            foreach (var prog in programmes.OrderBy(p => p.Airdate))
             {
                 foreach (var regex in regexes)
                 {
-                    if (regex.Key.IsMatch(prog.Title.RemoveDiacritics()))
+                    if (regex.Key.IsMatch(prog.Show.RemoveDiacritics()))
                     {
-                        if (prog.Description.StartsWith(prog.Title))
+                        if (config.AdvHuRoParse && prog.Description.StartsWith(prog.Show))
                         {
                             #region Explanation
                             /*
@@ -156,9 +201,9 @@
                              */
                             #endregion
 
-                            var ep = Regex.Match(prog.Description, @"(?:(?:(?<sr>[IVXLCDM]+)\.\s*/\s*)?(?<e>\d{1,3})\. rész|(?<s>\d{1,2})\. évad(?:, (?<e>\d{1,3})\. rész)?|(?:sezonul (?<s>\d{1,2}), )?episodul (?<e>\d{1,3}))");
+                            var ep = Regex.Match(prog.Description, @"(?:(?:(?<sr>[IVXLCDM]+)\.\s*/\s*)?(?<e>\d{1,3})\. rész|(?<s>\d{1,2})\. évad(?:,? (?<e>\d{1,3})\. rész)?|(?:sezonul (?<s>\d{1,2}), )?episodul (?<e>\d{1,3}))");
 
-                            prog.Description = Regex.Replace(prog.Description, @"^\s*" + Regex.Escape(prog.Title) + @"\s*(?:\([^\)]+\)\s*)?(?:\(ism\.\)\s*)?(?:\d{1,2}\. évad(?:, \d{1,3}\. rész(?:, )?)?)?(?:\-\s*)?(?:\(reluare\)\s*)?", string.Empty, RegexOptions.IgnoreCase);
+                            prog.Description = Regex.Replace(prog.Description, @"^\s*" + Regex.Escape(prog.Show) + @"\s*(?:\([^\)]+\)\s*)?(?:\(ism\.\)\s*)?(?:\d{1,2}\. évad(?:, \d{1,3}\. rész(?:, )?)?)?(?:\-\s*)?(?:\(reluare\)\s*)?", string.Empty, RegexOptions.IgnoreCase);
 
                             if (ep.Success)
                             {
@@ -191,7 +236,10 @@
                             }
                         }
 
-                        prog.Title = regex.Value.Name;
+                        if (config.UseMappedNames)
+                        {
+                            prog.Show = regex.Value.Name;
+                        }
 
                         yield return prog;
                         break;
@@ -201,59 +249,52 @@
         }
 
         /// <summary>
-        /// Represents a programming in an XMLTV listing.
+        /// Represents an XMLTV configuration.
         /// </summary>
-        public class Programme
+        public class XMLTVConfiguration : Configuration
         {
             /// <summary>
-            /// Gets or sets the title.
+            /// Gets or sets the location of the XML file.
             /// </summary>
             /// <value>
-            /// The title.
+            /// The location of the XML file.
             /// </value>
-            public string Title { get; set; }
+            public string File { get; set; }
 
             /// <summary>
-            /// Gets or sets the episode number.
+            /// Gets or sets the language of the titles in the programming.
             /// </summary>
             /// <value>
-            /// The episode number.
+            /// The language of the titles in the programming.
             /// </value>
-            public string Number { get; set; }
+            public string Language { get; set; }
 
             /// <summary>
-            /// Gets or sets the description.
+            /// Gets or sets a value indicating whether advanced parsing is enabled.
+            /// </summary>
+            /// <remarks>
+            /// Advanced parsing will remove irrelevant information from the description field and
+            /// extract the episode notation. This only works for hungarian and romanian listing.
+            /// </remarks>
+            /// <value>
+            ///   <c>true</c> if advanced parsing is enabled; otherwise, <c>false</c>.
+            /// </value>
+            public bool AdvHuRoParse { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the mapped english names are used or the original ones found in the listing.
             /// </summary>
             /// <value>
-            /// The description.
+            ///   <c>true</c> if the mapped english names are used; otherwise, <c>false</c>.
             /// </value>
-            public string Description { get; set; }
+            public bool UseMappedNames { get; set; }
 
             /// <summary>
-            /// Gets or sets the channel.
+            /// Initializes a new instance of the <see cref="XMLTVConfiguration"/> class.
             /// </summary>
-            /// <value>
-            /// The channel.
-            /// </value>
-            public string Channel { get; set; }
-
-            /// <summary>
-            /// Gets or sets the airdate.
-            /// </summary>
-            /// <value>
-            /// The airdate.
-            /// </value>
-            public DateTime Airdate { get; set; }
-
-            /// <summary>
-            /// Returns a <see cref="System.String"/> that represents this instance.
-            /// </summary>
-            /// <returns>
-            /// A <see cref="System.String"/> that represents this instance.
-            /// </returns>
-            public override string ToString()
+            /// <param name="plugin">The plugin.</param>
+            public XMLTVConfiguration(LocalProgrammingPlugin plugin) : base(plugin)
             {
-                return Title + " [" + Channel + "]";
             }
         }
     }

@@ -1,10 +1,18 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
+    using Tables;
+
     /// <summary>
     /// Represents a TV show on the statistics list view.
     /// </summary>
     public class StatisticsListViewItem
     {
+        /// <summary>
+        /// Gets or sets the TV show in the database.
+        /// </summary>
+        /// <value>The TV show in the database.</value>
+        public TVShow Show { get; set; }
+
         /// <summary>
         /// Gets or sets the name.
         /// </summary>

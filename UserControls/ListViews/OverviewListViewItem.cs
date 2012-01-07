@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using RoliSoft.TVShowTracker.Tables;
+    using Tables;
 
     /// <summary>
     /// Represents a TV show on the overview list view.

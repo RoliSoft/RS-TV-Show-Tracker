@@ -2,7 +2,7 @@
 {
     using System.ComponentModel;
 
-    using RoliSoft.TVShowTracker.Tables;
+    using Tables;
 
     /// <summary>
     /// Represents a TV show episode on the list view.
@@ -121,6 +121,40 @@
             {
                 PropertyChanged(this, new PropertyChangedEventArgs("SeenIt"));
             }
+        }
+    }
+
+    /// <summary>
+    /// Represents a TV show in the guide drop-down menu.
+    /// </summary>
+    public class GuideDropDownTVShowItem
+    {
+        /// <summary>
+        /// Gets or sets the TV show.
+        /// </summary>
+        /// <value>
+        /// The TV show.
+        /// </value>
+        public TVShow Show { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GuideDropDownTVShowItem"/> class.
+        /// </summary>
+        /// <param name="tvShow">The TV show.</param>
+        public GuideDropDownTVShowItem(TVShow tvShow)
+        {
+            Show = tvShow;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return Show.Name;
         }
     }
 }
