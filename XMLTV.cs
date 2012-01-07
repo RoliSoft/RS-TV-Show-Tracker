@@ -7,7 +7,9 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
+
     using ProtoBuf;
+
     using Tables;
 
     /// <summary>
@@ -85,24 +87,81 @@
         /// </returns>
         public override IEnumerable<Programme> GetListing(Configuration config)
         {
-            var cache = Path.Combine(Path.GetTempPath(), "XMLTV-" + ((XMLTVConfiguration)config).File.GetHashCode() + "-" + ((XMLTVConfiguration)config).Language + ".bin");
-
-            if (File.Exists(cache) && File.GetLastWriteTime(cache) > File.GetLastWriteTime(((XMLTVConfiguration)config).File))
+            var xconfig = (XMLTVConfiguration) config;
+            var listing = (List<XMLTVProgramme>) null;
+            var cache   = Path.Combine(Path.GetTempPath(), "XMLTV-" + (xconfig).File.GetHashCode().ToString("X") + "-" + (xconfig).Language + ".bin");
+            
+            if (File.Exists(cache) && File.GetLastWriteTime(cache) > File.GetLastWriteTime(xconfig.File))
             {
-                using (var file = File.OpenRead(cache))
+                try
                 {
-                    return Serializer.Deserialize<List<Programme>>(file).Where(p => p.Airdate > DateTime.Now);
+                    using (var file = File.OpenRead(cache))
+                    {
+                        listing = Serializer.Deserialize<List<XMLTVProgramme>>(file);
+                    }
+                }
+                catch
+                {
+                    listing = null;
                 }
             }
 
-            var listing = Filter(ParseFile((XMLTVConfiguration)config), (XMLTVConfiguration)config).ToList();
+            if (listing == null)
+            {
+                listing = Filter(ParseFile(xconfig), xconfig).ToList();
+            }
 
             using (var file = File.Create(cache))
             {
                 Serializer.Serialize(file, listing);
             }
 
-            return listing.Where(p => p.Airdate > DateTime.Now);
+            foreach (var prog in listing.Where(p => p.Airdate > DateTime.Now))
+            {
+                if (xconfig.AdvHuRoParse && prog.Description.StartsWith(prog.Name))
+                {
+                    var ep = Regex.Match(prog.Description, @"(?:(?:(?<sr>[IVXLCDM]+)\.(?: évad)?\s*/\s*)?(?<e>\d{1,3})\. rész|(?<s>\d{1,2})\. évad(?:,? (?<e>\d{1,3})\. rész)?|(?:sezonul (?<s>\d{1,2}), )?episodul (?<e>\d{1,3})|^\s*" + Regex.Escape(prog.Name) + @"\s+(?<e>\d{1,3})\.(?:,\s+)?)");
+
+                    prog.Description = Regex.Replace(prog.Description, @"^\s*" + Regex.Escape(prog.Name) + @"\s*(\d{1,3}\.(?:,\s+|$))?(?:\([^\)]+\)\s*)?(?:\(ism\.\)\s*)?(?:(?:\d{1,2}|[IVXLCDM]+)\. évad(?:\s*[,/] \d{1,3}\. rész(?:, )?)?)?(?:\-\s*)?(?:\((?:reluare|St)\)\s*)?(?: Utána: .+| Feliratozva .+)?", string.Empty, RegexOptions.IgnoreCase);
+
+                    if (ep.Success)
+                    {
+                        prog.Number = string.Empty;
+
+                        if (ep.Groups["sr"].Success)
+                        {
+                            prog.Number = "S" + Utils.RomanToNumber(ep.Groups["sr"].Value).ToString("00");
+
+                            if (ep.Groups["e"].Success)
+                            {
+                                prog.Number += " #" + int.Parse(ep.Groups["e"].Value);
+                            }
+                        }
+                        else
+                        {
+                            if (ep.Groups["s"].Success)
+                            {
+                                prog.Number = "S" + int.Parse(ep.Groups["s"].Value).ToString("00");
+                            }
+                            else if (ep.Groups["e"].Success)
+                            {
+                                prog.Number += "#" + int.Parse(ep.Groups["e"].Value);
+                            }
+                            if (ep.Groups["s"].Success && ep.Groups["e"].Success)
+                            {
+                                prog.Number += "E" + int.Parse(ep.Groups["e"].Value).ToString("00");
+                            }
+                        }
+                    }
+                }
+
+                if (xconfig.UseMappedNames)
+                {
+                    prog.Name = prog.Show.Name;
+                }
+
+                yield return prog;
+            }
         }
 
         /// <summary>
@@ -112,22 +171,23 @@
         /// <returns>
         /// List of extracted programmes.
         /// </returns>
-        public IEnumerable<Programme> ParseFile(XMLTVConfiguration config)
+        public IEnumerable<XMLTVProgramme> ParseFile(XMLTVConfiguration config)
         {
-            var channels = new Dictionary<string, string>();
+            var channels = new Dictionary<string, string[]>();
             var document = XDocument.Load(config.File);
 
             foreach (var channel in document.Descendants("channel"))
             {
                 var id   = channel.Attribute("id");
                 var name = channel.Descendants("display-name").ToList();
+                var url  = channel.Descendants("url").ToList();
 
                 if (id == null || !name.Any())
                 {
                     continue;
                 }
 
-                channels.Add(id.Value, name[0].Value);
+                channels.Add(id.Value, new[] { name[0].Value, url.Any() ? url.Last().Value : null });
             }
 
             foreach (var programme in document.Descendants("programme"))
@@ -149,14 +209,15 @@
                     continue;
                 }
 
-                var prog = new Programme
+                var prog = new XMLTVProgramme
                     {
-                        Channel  = channels[channel.Value],
-                        Show     = title[0].Value.Trim(),
-                        Airdate  = airdate
+                        Channel  = channels[channel.Value][0],
+                        Name     = title[0].Value.Trim(),
+                        Airdate  = airdate,
+                        URL      = channels[channel.Value][1]
                     };
 
-                if (descr.Count != 0)
+                if (descr.Any())
                 {
                     prog.Description = descr[0].Value.Trim();
                 }
@@ -173,19 +234,19 @@
         /// <returns>
         /// List of filtered and ordered programmes.
         /// </returns>
-        public IEnumerable<Programme> Filter(IEnumerable<Programme> programmes, XMLTVConfiguration config)
+        public IEnumerable<XMLTVProgramme> Filter(IEnumerable<XMLTVProgramme> programmes, XMLTVConfiguration config)
         {
             var regexes = new Dictionary<Regex, TVShow>();
 
             foreach (var show in Database.TVShows)
             {
-                regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Name) + @"(?!(?:[:,0-9]| \- |\s*[a-z]))", RegexOptions.IgnoreCase), show.Value);
+                regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Name) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
 
                 var foreign = show.Value.GetForeignTitle(config.Language);
 
                 if (!string.IsNullOrWhiteSpace(foreign))
                 {
-                    regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(foreign.RemoveDiacritics()) + @"(?!(?:[:,0-9]| \- |\s*[a-z]))", RegexOptions.IgnoreCase), show.Value);
+                    regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(foreign.RemoveDiacritics()) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
                 }
             }
 
@@ -193,71 +254,9 @@
             {
                 foreach (var regex in regexes)
                 {
-                    if (regex.Key.IsMatch(prog.Show.RemoveDiacritics()))
+                    if (regex.Key.IsMatch(prog.Name.RemoveDiacritics()))
                     {
-                        if (config.AdvHuRoParse && prog.Description.StartsWith(prog.Show))
-                        {
-                            #region Explanation
-                            /*
-                             * This fix is specific to port.hu/ro and tv_huro_grab: remove the title from the description.
-                             * For example, the listing for Discovery Science Romania looks like this:
-                             * 
-                             *   <title lang="ro">Morgan Freeman şi spaţiul cosmic</title>
-                             *   <desc  lang="ro">Morgan Freeman şi spaţiul cosmic (f. s. doc.) - Există viaţă după moarte?</desc>
-                             * 
-                             * Similarly, Discovery Science Hungary has this as well:
-                             * 
-                             *   <title lang="hu">Morgan Freeman: a féreglyukon át</title>
-                             *   <desc  lang="hu">Morgan Freeman: a féreglyukon át (ism. sor.) - Van-e élet a halál után?</desc>
-                             * 
-                             * We can't split by by the separator, because those aren't always included. See Discover HD Romania:
-                             * 
-                             *   <title lang="ro">Through the Wormhole with Morgan Freeman</title>
-                             *   <desc  lang="ro">Through the Wormhole with Morgan Freeman Is There Life After Death?</desc>
-                             * 
-                             * This fix removes anything but the episode's title from the description.
-                             */
-                            #endregion
-
-                            var ep = Regex.Match(prog.Description, @"(?:(?:(?<sr>[IVXLCDM]+)\.\s*/\s*)?(?<e>\d{1,3})\. rész|(?<s>\d{1,2})\. évad(?:,? (?<e>\d{1,3})\. rész)?|(?:sezonul (?<s>\d{1,2}), )?episodul (?<e>\d{1,3}))");
-
-                            prog.Description = Regex.Replace(prog.Description, @"^\s*" + Regex.Escape(prog.Show) + @"\s*(?:\([^\)]+\)\s*)?(?:\(ism\.\)\s*)?(?:\d{1,2}\. évad(?:, \d{1,3}\. rész(?:, )?)?)?(?:\-\s*)?(?:\(reluare\)\s*)?", string.Empty, RegexOptions.IgnoreCase);
-
-                            if (ep.Success)
-                            {
-                                prog.Number = string.Empty;
-
-                                if (ep.Groups["sr"].Success)
-                                {
-                                    prog.Number = "S" + Utils.RomanToNumber(ep.Groups["sr"].Value).ToString("00");
-
-                                    if (ep.Groups["e"].Success)
-                                    {
-                                        prog.Number += "/" + int.Parse(ep.Groups["e"].Value);
-                                    }
-                                }
-                                else
-                                {
-                                    if (ep.Groups["s"].Success)
-                                    {
-                                        prog.Number = "S" + int.Parse(ep.Groups["s"].Value).ToString("00");
-                                    }
-                                    else if (ep.Groups["e"].Success)
-                                    {
-                                        prog.Number += "#" + int.Parse(ep.Groups["e"].Value);
-                                    }
-                                    if (ep.Groups["s"].Success && ep.Groups["e"].Success)
-                                    {
-                                        prog.Number += "E" + int.Parse(ep.Groups["e"].Value).ToString("00");
-                                    }
-                                }
-                            }
-                        }
-
-                        if (config.UseMappedNames)
-                        {
-                            prog.Show = regex.Value.Name;
-                        }
+                        prog.ShowID = regex.Value.ShowID;
 
                         yield return prog;
                         break;
@@ -313,6 +312,104 @@
             /// <param name="plugin">The plugin.</param>
             public XMLTVConfiguration(LocalProgrammingPlugin plugin) : base(plugin)
             {
+            }
+        }
+
+        /// <summary>
+        /// Represents an XMLT-encoded programme in the listing.
+        /// </summary>
+        [ProtoContract]
+        public class XMLTVProgramme : Programme
+        {
+            /// <summary>
+            /// Gets or sets the ID of the show in the database.
+            /// </summary>
+            /// <value>
+            /// The ID of the show in the database.
+            /// </value>
+            [ProtoMember(short.MaxValue)]
+            public int ShowID
+            {
+                get { return base.Show.ShowID; }
+                set { base.Show = Database.TVShows[value]; }
+            }
+
+            /// <summary>
+            /// Gets or sets the name of the show.
+            /// </summary>
+            /// <value>
+            /// The name of the show.
+            /// </value>
+            [ProtoMember(1)]
+            public new string Name
+            {
+                get { return base.Name; }
+                set { base.Name = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets the episode number.
+            /// </summary>
+            /// <value>
+            /// The episode number.
+            /// </value>
+            [ProtoMember(2)]
+            public new string Number
+            {
+                get { return base.Number; }
+                set { base.Number = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets the description.
+            /// </summary>
+            /// <value>
+            /// The description.
+            /// </value>
+            [ProtoMember(3)]
+            public new string Description
+            {
+                get { return base.Description; }
+                set { base.Description = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets the channel.
+            /// </summary>
+            /// <value>
+            /// The channel.
+            /// </value>
+            [ProtoMember(4)]
+            public new string Channel
+            {
+                get { return base.Channel; }
+                set { base.Channel = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets the airdate.
+            /// </summary>
+            /// <value>
+            /// The airdate.
+            /// </value>
+            [ProtoMember(5)]
+            public new DateTime Airdate
+            {
+                get { return base.Airdate; }
+                set { base.Airdate = value; }
+            }
+
+            /// <summary>
+            /// Gets or sets an URL to the listing or episode information.
+            /// </summary>
+            /// <value>
+            /// The URL to the listing or episode information.
+            /// </value>
+            [ProtoMember(6)]
+            public string URL
+            {
+                get { return base.URL; }
+                set { base.URL = value; }
             }
         }
     }

@@ -3,7 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+
     using ProtoBuf;
+
+    using Tables;
 
     /// <summary>
     /// Represents a plugin which maps your TV shows to your local programming
@@ -125,17 +128,23 @@
         /// <summary>
         /// Represents a programming in the listing.
         /// </summary>
-        [ProtoContract]
         public class Programme
         {
             /// <summary>
-            /// Gets or sets the show.
+            /// Gets the show in the database.
             /// </summary>
             /// <value>
-            /// The show.
+            /// The show in the database.
             /// </value>
-            [ProtoMember(1)]
-            public string Show { get; set; }
+            public TVShow Show { get; set; }
+
+            /// <summary>
+            /// Gets or sets the name of the show.
+            /// </summary>
+            /// <value>
+            /// The name of the show.
+            /// </value>
+            public string Name { get; set; }
 
             /// <summary>
             /// Gets or sets the episode number.
@@ -143,7 +152,6 @@
             /// <value>
             /// The episode number.
             /// </value>
-            [ProtoMember(2)]
             public string Number { get; set; }
 
             /// <summary>
@@ -152,7 +160,6 @@
             /// <value>
             /// The description.
             /// </value>
-            [ProtoMember(3)]
             public string Description { get; set; }
 
             /// <summary>
@@ -161,7 +168,6 @@
             /// <value>
             /// The channel.
             /// </value>
-            [ProtoMember(4)]
             public string Channel { get; set; }
 
             /// <summary>
@@ -170,8 +176,15 @@
             /// <value>
             /// The airdate.
             /// </value>
-            [ProtoMember(5)]
             public DateTime Airdate { get; set; }
+
+            /// <summary>
+            /// Gets or sets an URL to the listing or episode information.
+            /// </summary>
+            /// <value>
+            /// The URL to the listing or episode information.
+            /// </value>
+            public string URL { get; set; }
 
             /// <summary>
             /// Returns a <see cref="System.String"/> that represents this instance.
@@ -181,7 +194,7 @@
             /// </returns>
             public override string ToString()
             {
-                return Show + " [" + Channel + "]";
+                return Name + " [" + Channel + "]";
             }
         }
     }

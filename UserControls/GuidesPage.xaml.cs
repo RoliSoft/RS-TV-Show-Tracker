@@ -289,7 +289,8 @@
                             {
                                 UpcomingListViewItemCollection.Add(new UpcomingListViewItem
                                     {
-                                        Show         = episode.Show + (!string.IsNullOrWhiteSpace(episode.Number) ? " " + episode.Number : string.Empty),
+                                        Programme    = episode,
+                                        Show         = episode.Name + (!string.IsNullOrWhiteSpace(episode.Number) ? " " + episode.Number : string.Empty),
                                         Name         = !string.IsNullOrWhiteSpace(episode.Description) ? " · " + episode.Description : string.Empty,
                                         Airdate      = episode.Airdate.DayOfWeek + " / " + episode.Airdate.ToString("h:mm tt") + " / " + episode.Channel,
                                         RelativeDate = episode.Airdate.ToShortRelativeDate()
@@ -499,7 +500,31 @@
         private void UpcomingListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (upcomingListView.SelectedIndex == -1) return;
-            SelectShow(((UpcomingListViewItem)upcomingListView.SelectedValue).Episode.Show);
+
+            var sel = (UpcomingListViewItem) upcomingListView.SelectedValue;
+
+            if (sel.Episode != null)
+            {
+                if (!string.IsNullOrWhiteSpace(sel.Episode.URL))
+                {
+                    Utils.Run(sel.Episode.URL);
+                }
+                else
+                {
+                    SelectShow(sel.Episode.Show);
+                }
+            }
+            else if (sel.Programme != null)
+            {
+                if (!string.IsNullOrWhiteSpace(sel.Programme.URL))
+                {
+                    Utils.Run(sel.Programme.URL);
+                }
+                else
+                {
+                    SelectShow(sel.Programme.Show);
+                }
+            }
         }
 
         #region Search for download links

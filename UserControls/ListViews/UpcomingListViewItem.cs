@@ -14,6 +14,12 @@
         public Episode Episode { get; set; }
 
         /// <summary>
+        /// Gets or sets the programme.
+        /// </summary>
+        /// <value>The programme.</value>
+        public LocalProgrammingPlugin.Programme Programme { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the show.
         /// </summary>
         /// <value>The name of the show.</value>
