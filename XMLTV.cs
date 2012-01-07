@@ -3,10 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
-
+    using ProtoBuf;
     using Tables;
 
     /// <summary>
@@ -84,7 +85,24 @@
         /// </returns>
         public override IEnumerable<Programme> GetListing(Configuration config)
         {
-            return Filter(ParseFile((XMLTVConfiguration)config), (XMLTVConfiguration)config);
+            var cache = Path.Combine(Path.GetTempPath(), "XMLTV-" + ((XMLTVConfiguration)config).File.GetHashCode() + "-" + ((XMLTVConfiguration)config).Language + ".bin");
+
+            if (File.Exists(cache) && File.GetLastWriteTime(cache) > File.GetLastWriteTime(((XMLTVConfiguration)config).File))
+            {
+                using (var file = File.OpenRead(cache))
+                {
+                    return Serializer.Deserialize<List<Programme>>(file).Where(p => p.Airdate > DateTime.Now);
+                }
+            }
+
+            var listing = Filter(ParseFile((XMLTVConfiguration)config), (XMLTVConfiguration)config).ToList();
+
+            using (var file = File.Create(cache))
+            {
+                Serializer.Serialize(file, listing);
+            }
+
+            return listing.Where(p => p.Airdate > DateTime.Now);
         }
 
         /// <summary>

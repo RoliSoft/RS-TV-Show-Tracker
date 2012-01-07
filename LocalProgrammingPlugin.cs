@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using ProtoBuf;
 
     /// <summary>
     /// Represents a plugin which maps your TV shows to your local programming
@@ -124,6 +125,7 @@
         /// <summary>
         /// Represents a programming in the listing.
         /// </summary>
+        [ProtoContract]
         public class Programme
         {
             /// <summary>
@@ -132,6 +134,7 @@
             /// <value>
             /// The show.
             /// </value>
+            [ProtoMember(1)]
             public string Show { get; set; }
 
             /// <summary>
@@ -140,6 +143,7 @@
             /// <value>
             /// The episode number.
             /// </value>
+            [ProtoMember(2)]
             public string Number { get; set; }
 
             /// <summary>
@@ -148,6 +152,7 @@
             /// <value>
             /// The description.
             /// </value>
+            [ProtoMember(3)]
             public string Description { get; set; }
 
             /// <summary>
@@ -156,6 +161,7 @@
             /// <value>
             /// The channel.
             /// </value>
+            [ProtoMember(4)]
             public string Channel { get; set; }
 
             /// <summary>
@@ -164,6 +170,7 @@
             /// <value>
             /// The airdate.
             /// </value>
+            [ProtoMember(5)]
             public DateTime Airdate { get; set; }
 
             /// <summary>
