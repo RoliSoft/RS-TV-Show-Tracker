@@ -59,23 +59,29 @@
         /// <returns>The list of available programming configurations.</returns>
         public override IEnumerable<Configuration> GetConfigurations()
         {
-            return new List<XMLTVConfiguration>
+            var settings = Settings.Get<List<Dictionary<string, object>>>("XMLTV");
+
+            if (settings == null || !settings.Any())
+            {
+                yield break;
+            }
+
+            foreach (var setting in settings)
+            {
+                if (!setting.ContainsKey("Name") || !(setting["Name"] is string) || !setting.ContainsKey("File") || !(setting["File"] is string))
                 {
-                    new XMLTVConfiguration(this)
-                        {
-                            Name         = "Romania",
-                            File         = @"C:\Users\RoliSoft\Desktop\xmltv-0.5.61-win32\guide_ro.xml",
-                            Language     = "ro",
-                            AdvHuRoParse = true
-                        },
-                    new XMLTVConfiguration(this)
-                        {
-                            Name         = "Hungary",
-                            File         = @"C:\Users\RoliSoft\Desktop\xmltv-0.5.61-win32\guide_hu.xml",
-                            Language     = "hu",
-                            AdvHuRoParse = true
-                        }
-                };
+                    continue;
+                }
+                
+                yield return new XMLTVConfiguration(this)
+                                 {
+                                     Name           = (string) setting["Name"],
+                                     File           = (string) setting["File"],
+                                     Language       = setting.ContainsKey("Language") && setting["Language"] is string ? (string) setting["Language"] : string.Empty,
+                                     AdvHuRoParse   = setting.ContainsKey("Advanced Parsing") && setting["Advanced Parsing"] is bool && (bool) setting["Advanced Parsing"],
+                                     UseMappedNames = setting.ContainsKey("Use English Titles") && setting["Use English Titles"] is bool && (bool) setting["Use English Titles"],
+                                 };
+            }
         }
 
         /// <summary>
@@ -242,11 +248,14 @@
             {
                 regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Name) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
 
-                var foreign = show.Value.GetForeignTitle(config.Language);
-
-                if (!string.IsNullOrWhiteSpace(foreign))
+                if (!string.IsNullOrWhiteSpace(config.Language) && config.Language.Length == 2)
                 {
-                    regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(foreign.RemoveDiacritics()) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
+                    var foreign = show.Value.GetForeignTitle(config.Language);
+
+                    if (!string.IsNullOrWhiteSpace(foreign))
+                    {
+                        regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(foreign.RemoveDiacritics()) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
+                    }
                 }
             }
 
@@ -316,7 +325,7 @@
         }
 
         /// <summary>
-        /// Represents an XMLT-encoded programme in the listing.
+        /// Represents a programme in the XMLTV listing.
         /// </summary>
         [ProtoContract]
         public class XMLTVProgramme : Programme

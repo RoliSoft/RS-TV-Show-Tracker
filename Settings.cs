@@ -8,7 +8,7 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using Parsers.Subtitles;
 
     /// <summary>
     /// Provides access to the default JSON settings file.
@@ -161,6 +161,11 @@
 
                             case "System.Double":
                                 return array.Cast<double>().ToList();
+                        }
+
+                        if (lastType.FullName == typeof(Dictionary<string, object>).FullName)
+                        {
+                            return array.Cast<Dictionary<string, object>>().ToList();
                         }
                     }
                     

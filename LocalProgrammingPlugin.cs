@@ -126,7 +126,7 @@
         }
 
         /// <summary>
-        /// Represents a programming in the listing.
+        /// Represents a programme in the listing.
         /// </summary>
         public class Programme
         {
