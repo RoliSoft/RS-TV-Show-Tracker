@@ -126,11 +126,6 @@
         {
             LoadShowList();
 
-            if (GuideListViewItemCollection != null && comboBox.SelectedIndex != -1)
-            {
-                ComboBoxSelectionChanged(null, null);
-            }
-
             LoadDate = DateTime.Now;
         }
 
@@ -152,7 +147,14 @@
 
             items.AddRange(Database.TVShows.Values.OrderBy(s => s.Name).Select(s => new GuideDropDownTVShowItem(s)));
 
+            var idx = comboBox.SelectedIndex;
+
             comboBox.ItemsSource = items;
+
+            if (idx != -1 && items.Count > idx)
+            {
+                comboBox.SelectedIndex = idx;
+            }
         }
 
         /// <summary>
