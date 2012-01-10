@@ -66,6 +66,9 @@
             }
 
             _loaded = true;
+
+            ProxiesListViewSelectionChanged();
+            ProxiedDomainsListViewSelectionChanged();
         }
         
         /// <summary>

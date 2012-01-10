@@ -55,7 +55,7 @@
             <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                     <Image Source="/RSTVShowTracker;component/Images/servers-network.png" Height="16" Width="16" Margin="0,1,5,0" />
-                    <Label Content="Proxied Domains" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                    <Label Content="Proxied domains" FontSize="16" Foreground="DarkBlue" Padding="0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Height="299">
                     <ListView Name="proxiedDomainsListView" SelectionChanged="ProxiedDomainsListViewSelectionChanged" Margin="0,0,5,0" Width="481" Height="299" Padding="-2,-1">

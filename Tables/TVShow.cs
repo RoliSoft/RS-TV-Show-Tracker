@@ -86,9 +86,9 @@
         /// </summary>
         /// <param name="language">The ISO 639-1 code of the language.</param>
         /// <returns>Foreign title or <c>null</c>.</returns>
-        public string GetForeignTitle(string language)
+        public string GetForeignTitle(string language, bool askRemote = false)
         {
-            return Database.GetForeignTitle(ShowID, language);
+            return Database.GetForeignTitle(ShowID, language, askRemote);
         }
 
         /// <summary>

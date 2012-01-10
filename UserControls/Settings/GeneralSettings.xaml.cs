@@ -44,8 +44,6 @@
                     dlPathsListBox.Items.Add(path);
                 }
 
-                DlPathsListBoxSelectionChanged();
-
                 using (var rk = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
                 {
                     startAtStartup.IsChecked = rk.GetValue("RS TV Show Tracker") != null;
@@ -69,6 +67,8 @@
             }
 
             _loaded = true;
+
+            DlPathsListBoxSelectionChanged();
         }
 
         /// <summary>

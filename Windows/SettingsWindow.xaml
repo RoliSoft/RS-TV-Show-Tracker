@@ -78,6 +78,20 @@
                     <UserControls:PluginsSettings x:Name="activePluginsPage" />
                 </Grid>
             </TabItem>
+
+            <TabItem Header="XMLTV" Name="xmltvTabItem">
+                <Grid Name="xmltvGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <UserControls:XMLTVSettings x:Name="activeXMLTVPage" />
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </Shell:GlassWindow>

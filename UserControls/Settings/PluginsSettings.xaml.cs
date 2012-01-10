@@ -51,6 +51,7 @@
 
             _loaded = true;
         }
+
         /// <summary>
         /// Reloads the plugins list view.
         /// </summary>

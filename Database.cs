@@ -555,8 +555,9 @@
         /// </summary>
         /// <param name="id">The ID of the show.</param>
         /// <param name="language">The ISO 639-1 code of the language.</param>
+        /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked then a foreign title provider engine.</param>
         /// <returns>Foreign title or <c>null</c>.</returns>
-        public static string GetForeignTitle(int id, string language)
+        public static string GetForeignTitle(int id, string language, bool askRemote = false)
         {
             var title = ShowData(id, "title." + language);
 
@@ -575,6 +576,11 @@
                 {
                     return title;
                 }
+            }
+
+            if (!askRemote)
+            {
+                return null;
             }
 
             var api = Remote.API.GetForeignTitle(TVShows[id].Name, language);

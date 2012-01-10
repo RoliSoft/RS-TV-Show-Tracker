@@ -49,6 +49,8 @@
             }
 
             _loaded = true;
+
+            ListViewSelectionChanged();
         }
 
         /// <summary>

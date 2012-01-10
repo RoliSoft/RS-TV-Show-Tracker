@@ -309,6 +309,8 @@
     <Compile Include="UserControls\Settings\GeneralSettings.xaml.cs">
       <DependentUpon>GeneralSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Settings\ListViews\TitlesListViewItem.cs" />
+    <Compile Include="UserControls\Settings\ListViews\XMLTVListViewItem.cs" />
     <Compile Include="UserControls\Settings\ParsersSettings.xaml.cs">
       <DependentUpon>ParsersSettings.xaml</DependentUpon>
     </Compile>
@@ -317,6 +319,9 @@
     </Compile>
     <Compile Include="UserControls\Settings\ProxiesSettings.xaml.cs">
       <DependentUpon>ProxiesSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Settings\XMLTVSettings.xaml.cs">
+      <DependentUpon>XMLTVSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Interop.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
@@ -354,7 +359,7 @@
     <Compile Include="Windows\FacebookAuthWindow.xaml.cs">
       <DependentUpon>FacebookAuthWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\ListViews\PluginsListViewItem.cs" />
+    <Compile Include="UserControls\Settings\ListViews\PluginsListViewItem.cs" />
     <Compile Include="Windows\SocialWindow.xaml.cs">
       <DependentUpon>SocialWindow.xaml</DependentUpon>
     </Compile>
@@ -364,8 +369,8 @@
     <Compile Include="Windows\ProxiedDomainWindow.xaml.cs">
       <DependentUpon>ProxiedDomainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\ListViews\ProxiedDomainsListViewItem.cs" />
-    <Compile Include="Windows\ListViews\ProxiesListViewItem.cs" />
+    <Compile Include="UserControls\Settings\ListViews\ProxiedDomainsListViewItem.cs" />
+    <Compile Include="UserControls\Settings\ListViews\ProxiesListViewItem.cs" />
     <Compile Include="Windows\ListViews\FileListViewItem.cs" />
     <Compile Include="Windows\ProxyWindow.xaml.cs">
       <DependentUpon>ProxyWindow.xaml</DependentUpon>
@@ -379,7 +384,7 @@
     <Compile Include="Windows\SendFeedbackWindow.xaml.cs">
       <DependentUpon>SendFeedbackWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\ListViews\DownloadsListViewItem.cs" />
+    <Compile Include="UserControls\Settings\ListViews\DownloadsListViewItem.cs" />
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -435,6 +440,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Settings\ProxiesSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Settings\XMLTVSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -839,6 +848,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\locale.png" />
     <Resource Include="Images\disc.png" />
     <Resource Include="Images\python.png" />
     <Resource Include="Images\fire.png" />
