@@ -92,6 +92,7 @@
                                      Language       = setting.ContainsKey("Language") && setting["Language"] is string ? (string) setting["Language"] : string.Empty,
                                      AdvHuRoParse   = setting.ContainsKey("Advanced Parsing") && setting["Advanced Parsing"] is bool && (bool) setting["Advanced Parsing"],
                                      UseMappedNames = setting.ContainsKey("Use English Titles") && setting["Use English Titles"] is bool && (bool) setting["Use English Titles"],
+                                     TZCorrection   = setting.ContainsKey("Time Zone Correction") && setting["Time Zone Correction"] is int ? (int) setting["Time Zone Correction"] : 0,
                                  };
             }
         }
@@ -134,7 +135,7 @@
                 Serializer.Serialize(file, listing);
             }
 
-            foreach (var prog in listing.Where(p => p.Airdate > DateTime.Now))
+            foreach (var prog in listing.Where(p => p.Airdate.AddHours(xconfig.TZCorrection) > DateTime.Now))
             {
                 if (xconfig.AdvHuRoParse && prog.Description.StartsWith(prog.Name))
                 {
@@ -176,6 +177,11 @@
                 if (xconfig.UseMappedNames)
                 {
                     prog.Name = prog.Show.Name;
+                }
+
+                if (xconfig.TZCorrection != 0)
+                {
+                    prog.Airdate = prog.Airdate.AddHours(xconfig.TZCorrection);
                 }
 
                 yield return prog;
@@ -326,6 +332,14 @@
             ///   <c>true</c> if the mapped english names are used; otherwise, <c>false</c>.
             /// </value>
             public bool UseMappedNames { get; set; }
+
+            /// <summary>
+            /// Gets or sets the timezone correction information.
+            /// </summary>
+            /// <value>
+            /// The timezone correction information.
+            /// </value>
+            public int TZCorrection { get; set; }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="XMLTVConfiguration"/> class.
