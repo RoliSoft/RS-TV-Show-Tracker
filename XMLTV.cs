@@ -30,6 +30,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the plugin's icon.
+        /// </summary>
+        /// <value>The location of the plugin's icon.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://wiki.xmltv.org/favicon.ico";
+            }
+        }
+
+        /// <summary>
         /// Gets the name of the plugin's developer.
         /// </summary>
         /// <value>The name of the plugin's developer.</value>

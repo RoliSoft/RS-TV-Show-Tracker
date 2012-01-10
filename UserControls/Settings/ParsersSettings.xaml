@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="RoliSoft.TVShowTracker.UserControls.ParsersSettings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
+        Loaded="UserControlLoaded">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <Image Source="/RSTVShowTracker;component/Images/code.png" Height="16" Width="16" Margin="0,1,5,0" />
+                    <Label Content="Available parsers" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Height="442">
+                    <ListView Name="listView" SelectionChanged="ListViewSelectionChanged" Margin="0,0,5,0" Width="481" Height="442" Padding="-2,-1">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn>
+                                    <GridViewColumnHeader />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Name="Enabled" Tag="{Binding Site}" IsChecked="{Binding Enabled}" Checked="EnabledChecked" Unchecked="EnabledUnchecked" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Site" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding Icon}" Height="16" Width="16" />
+                                                <TextBlock Text="{Binding Site}" Padding="5,0,0,0" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="45">
+                                    <GridViewColumnHeader Content="Login" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Width="45" Margin="0" HorizontalAlignment="Center">
+                                                <Image Source="{Binding Login}" Height="16" Width="16" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Version" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Version}" TextAlignment="Center" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <StackPanel Orientation="Vertical">
+                        <Button Name="parserEditButton" Click="ParserEditButtonClick" ToolTip="Edit the login information for the selected parser">
+                            <Image Source="/RSTVShowTracker;component/Images/pencil.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                        <Button Name="moveUpButton" Click="MoveUpButtonClick" ToolTip="Move up the selected parser in the list and increase its priority">
+                            <Image Source="/RSTVShowTracker;component/Images/up.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                        <Button Name="moveDownButton" Click="MoveDownButtonClick" ToolTip="Move down the selected parser in the list and decrease its priority">
+                            <Image Source="/RSTVShowTracker;component/Images/down.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

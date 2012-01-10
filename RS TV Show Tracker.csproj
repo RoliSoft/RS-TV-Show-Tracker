@@ -303,6 +303,21 @@
     <Compile Include="UserControls\ListViews\LinkItem.cs" />
     <Compile Include="UserControls\ListViews\OverviewListViewItem.cs" />
     <Compile Include="UserControls\ListViews\StatisticsListViewItem.cs" />
+    <Compile Include="UserControls\Settings\AssociationsSettings.xaml.cs">
+      <DependentUpon>AssociationsSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Settings\GeneralSettings.xaml.cs">
+      <DependentUpon>GeneralSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Settings\ParsersSettings.xaml.cs">
+      <DependentUpon>ParsersSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Settings\PluginsSettings.xaml.cs">
+      <DependentUpon>PluginsSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Settings\ProxiesSettings.xaml.cs">
+      <DependentUpon>ProxiesSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Interop.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
@@ -403,6 +418,26 @@
     <Compile Include="Update.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="XMLTV.cs" />
+    <Page Include="UserControls\Settings\AssociationsSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Settings\GeneralSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Settings\ParsersSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Settings\PluginsSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Settings\ProxiesSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

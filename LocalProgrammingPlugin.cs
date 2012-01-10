@@ -4,8 +4,6 @@
     using System.Collections.Generic;
     using System.Reflection;
 
-    using ProtoBuf;
-
     using Tables;
 
     /// <summary>
