@@ -185,17 +185,7 @@
         {
             if (!_loaded) return;
 
-            titlesEditButton.IsEnabled = titlesRemoveButton.IsEnabled = titlesListView.SelectedIndex != -1;
-        }
-
-        /// <summary>
-        /// Handles the Click event of the titlesEditButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void TitlesEditButtonClick(object sender, RoutedEventArgs e)
-        {
-
+            titlesSearchButton.IsEnabled = titlesRemoveButton.IsEnabled = titlesListView.SelectedIndex != -1;
         }
 
         /// <summary>
@@ -204,6 +194,16 @@
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void TitlesRemoveButtonClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// Handles the Click event of the titlesSearchButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void TitlesSearchButtonClick(object sender, RoutedEventArgs e)
         {
 
         }
