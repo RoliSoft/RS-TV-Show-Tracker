@@ -45,7 +45,7 @@
 
         private int _activeShowID;
         private string _activeShowUrl;
-        private Thread _coverThd;
+        private Thread _workThd;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GuidesPage"/> class.
@@ -273,11 +273,17 @@
         /// </summary>
         public void LoadSelectedConfig()
         {
+            if (_workThd != null)
+            {
+                try { _workThd.Abort(); } catch { }
+                _workThd = null;
+            }
+
             var config = ((GuideDropDownUpcomingItem)comboBox.SelectedItem).Config;
 
             SetStatus("Loading " + config.Plugin.Name + "...", true);
 
-            new Thread(() =>
+            _workThd = new Thread(() =>
                 {
                     var episodes = config.Plugin.GetListing(config).ToList();
 
@@ -305,7 +311,10 @@
                             tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
                             upcomingListView.Visibility = Visibility.Visible;
                         }));
-                }).Start();
+
+                    _workThd = null;
+                });
+            _workThd.Start();
         }
 
         /// <summary>
@@ -315,10 +324,10 @@
         {
             ResetStatus();
 
-            if (_coverThd != null)
+            if (_workThd != null)
             {
-                try { _coverThd.Abort(); } catch { }
-                _coverThd = null;
+                try { _workThd.Abort(); } catch { }
+                _workThd = null;
             }
 
             var show = ((GuideDropDownTVShowItem)comboBox.SelectedItem).Show;
@@ -456,8 +465,7 @@
 
             // get cover
 
-            
-            _coverThd = new Thread(() =>
+            _workThd = new Thread(() =>
                 {
                     var cover = CoverManager.GetCover(show.Name, s => Dispatcher.Invoke((Action)(() => SetStatus(s, true))));
                     Dispatcher.Invoke((Action)(() =>
@@ -465,9 +473,9 @@
                             showGeneralCover.Source = new BitmapImage(cover ?? new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
                             ResetStatus();
                         }));
-                    _coverThd = null;
+                    _workThd = null;
                 });
-            _coverThd.Start();
+            _workThd.Start();
         }
         #endregion
 
