@@ -92,7 +92,7 @@
                                      Language       = setting.ContainsKey("Language") && setting["Language"] is string ? (string) setting["Language"] : string.Empty,
                                      AdvHuRoParse   = setting.ContainsKey("Advanced Parsing") && setting["Advanced Parsing"] is bool && (bool) setting["Advanced Parsing"],
                                      UseMappedNames = setting.ContainsKey("Use English Titles") && setting["Use English Titles"] is bool && (bool) setting["Use English Titles"],
-                                     TZCorrection   = setting.ContainsKey("Time Zone Correction") && setting["Time Zone Correction"] is int ? (int) setting["Time Zone Correction"] : 0,
+                                     TZCorrection   = setting.ContainsKey("Time Zone Correction") && setting["Time Zone Correction"] is double ? (double) setting["Time Zone Correction"] : 0,
                                  };
             }
         }
@@ -339,7 +339,7 @@
             /// <value>
             /// The timezone correction information.
             /// </value>
-            public int TZCorrection { get; set; }
+            public double TZCorrection { get; set; }
 
             /// <summary>
             /// Initializes a new instance of the <see cref="XMLTVConfiguration"/> class.

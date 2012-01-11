@@ -356,6 +356,9 @@
     <Compile Include="Windows\CaptchaWindow.xaml.cs">
       <DependentUpon>CaptchaWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\XMLTVWindow.xaml.cs">
+      <DependentUpon>XMLTVWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\FacebookAuthWindow.xaml.cs">
       <DependentUpon>FacebookAuthWindow.xaml</DependentUpon>
     </Compile>
@@ -489,6 +492,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\CaptchaWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\XMLTVWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

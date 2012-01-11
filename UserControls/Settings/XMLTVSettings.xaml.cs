@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
     using System.Linq;
     using System.Windows;
     using System.Windows.Data;
@@ -95,7 +94,7 @@
         {
             TitlesListViewItemCollection.Clear();
 
-            var langs = Settings.Get<List<Dictionary<string, object>>>("XMLTV").Where(x => x.ContainsKey("Language") && x["Language"] is string && ((string)x["Language"]).Length == 2).Select(x => ((string)x["Language"]).ToLower()).Distinct();
+            var langs = Settings.Get<List<Dictionary<string, object>>>("XMLTV").Where(x => x.ContainsKey("Language") && x["Language"] is string && ((string)x["Language"]).Length == 2 && (string)x["Language"] != "en").Select(x => ((string)x["Language"]).ToLower()).Distinct().ToList();
 
             foreach (var show in Database.TVShows.Values.OrderBy(t => t.Name))
             {
@@ -133,8 +132,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void XMLTVAddButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
-            //new XMLTVWindow().ShowDialog();
+            new XMLTVWindow().ShowDialog();
+
             ReloadConfigs();
+            ReloadTitles();
+            MainWindow.Active.activeGuidesPage.Refresh();
         }
 
         /// <summary>
@@ -146,8 +148,11 @@
         {
             if (xmltvListView.SelectedIndex == -1) return;
 
-            //new XMLTVWindow(((XMLTVListViewItem)xmltvListView.SelectedItem).Config).ShowDialog();
+            new XMLTVWindow(((XMLTVListViewItem)xmltvListView.SelectedItem).Config).ShowDialog();
+
             ReloadConfigs();
+            ReloadTitles();
+            MainWindow.Active.activeGuidesPage.Refresh();
         }
 
         /// <summary>
