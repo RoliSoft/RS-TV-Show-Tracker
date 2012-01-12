@@ -71,6 +71,7 @@
             _loaded = true;
 
             XMLTVListViewSelectionChanged();
+            TitlesListViewSelectionChanged();
         }
 
         /// <summary>
@@ -252,7 +253,6 @@
                         }
 
                         td.SimulateButtonClick(-1);
-                        td = null;
                     });
 
                 td.ButtonClick += (o, a) =>
@@ -260,7 +260,6 @@
                         try
                         {
                             thd.Abort();
-                            thd = null;
                         }
                         catch { }
 
