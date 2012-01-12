@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.Tables
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -85,10 +86,14 @@
         /// Gets the foreign title.
         /// </summary>
         /// <param name="language">The ISO 639-1 code of the language.</param>
-        /// <returns>Foreign title or <c>null</c>.</returns>
-        public string GetForeignTitle(string language, bool askRemote = false)
+        /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked then a foreign title provider engine.</param>
+        /// <param name="statusCallback">The method to call to report a status change.</param>
+        /// <returns>
+        /// Foreign title or <c>null</c>.
+        /// </returns>
+        public string GetForeignTitle(string language, bool askRemote = false, Action<string> statusCallback = null)
         {
-            return Database.GetForeignTitle(ShowID, language, askRemote);
+            return Database.GetForeignTitle(ShowID, language, askRemote, statusCallback);
         }
 
         /// <summary>

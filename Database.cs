@@ -556,8 +556,9 @@
         /// <param name="id">The ID of the show.</param>
         /// <param name="language">The ISO 639-1 code of the language.</param>
         /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked then a foreign title provider engine.</param>
+        /// <param name="statusCallback">The method to call to report a status change.</param>
         /// <returns>Foreign title or <c>null</c>.</returns>
-        public static string GetForeignTitle(int id, string language, bool askRemote = false)
+        public static string GetForeignTitle(int id, string language, bool askRemote = false, Action<string> statusCallback = null)
         {
             var title = ShowData(id, "title." + language);
 
@@ -583,6 +584,11 @@
                 return null;
             }
 
+            if (statusCallback != null)
+            {
+                statusCallback("Searching for the " + Languages.List[language] + " title of " + TVShows[id].Name +" on lab.rolisoft.net...");
+            }
+
             var api = Remote.API.GetForeignTitle(TVShows[id].Name, language);
 
             if (api.Success && !string.IsNullOrWhiteSpace(api.Result))
@@ -603,6 +609,11 @@
 
             if (engine != null)
             {
+                if (statusCallback != null)
+                {
+                    statusCallback("Searching for the " + Languages.List[language] + " title of " + TVShows[id].Name + " on " + engine.Name + "...");
+                }
+
                 var search = engine.Search(TVShows[id].Name);
 
                 if (!string.IsNullOrWhiteSpace(search))

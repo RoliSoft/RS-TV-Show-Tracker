@@ -4,12 +4,15 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
     using System.Windows.Documents;
     using System.Windows.Input;
     using System.Windows.Media;
+
+    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Interaction logic for XMLTVSettings.xaml
@@ -222,7 +225,52 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void TitlesSearchButtonClick(object sender, RoutedEventArgs e)
         {
+            if (titlesListView.SelectedIndex == -1) return;
 
+            var sels = titlesListView.SelectedItems.OfType<TitlesListViewItem>().ToList();
+
+            if (MessageBox.Show("Are you sure you want to search for the foreign title of " + (sels.Count == 1 ? sels[0].Title : sels.Count + " shows") + " on an external service?", "Search foreign titles", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                var td = new TaskDialog
+                    {
+                        Title           = "Searching foreign titles...",
+                        Instruction     = "Searching foreign titles...",
+                        CommonButtons   = TaskDialogButton.Cancel,
+                        ShowProgressBar = true
+                    };
+                
+                var thd = new Thread(() =>
+                    {
+                        var i = 1;
+                        foreach (var sel in sels)
+                        {
+                            Database.ShowData(sel.Show.ShowID, "title." + sel.LangCode, string.Empty);
+                            sel.Show.GetForeignTitle(sel.LangCode, true, s => td.Content = s);
+
+                            td.ProgressBarPosition = (int) Math.Round(((double) i/(double) sels.Count)*100d);
+                            i++;
+                        }
+
+                        td.SimulateButtonClick(-1);
+                        td = null;
+                    });
+
+                td.ButtonClick += (o, a) =>
+                    {
+                        try
+                        {
+                            thd.Abort();
+                            thd = null;
+                        }
+                        catch { }
+
+                        Dispatcher.Invoke((Action)ReloadTitles);
+                    };
+
+                new Thread(() => td.Show()).Start();
+
+                thd.Start();
+            }
         }
 
         /// <summary>
