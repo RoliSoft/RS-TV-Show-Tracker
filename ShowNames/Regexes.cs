@@ -73,9 +73,14 @@
         public static readonly Regex PartText      = new Regex(@"(?:,? part \d{1,2}(?: of \d{1,2})| \((?:part ?)?\d{1,2}\))\s*$", RegexOptions.IgnoreCase);
 
         /// <summary>
-        /// Matches video file extensions.
+        /// Matches video file extensions, including popular archives.
         /// </summary>
         public static readonly Regex KnownVideo    = new Regex(@"\.(avi|mkv|mp4|ts|wmv|rar|zip|001)$", RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Matches subtitle file extensions.
+        /// </summary>
+        public static readonly Regex KnownSubtitle = new Regex(@"\.(srt|sub|ass|ssa|smi|usf)$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Matches if the specified file name is only a sample of the video.

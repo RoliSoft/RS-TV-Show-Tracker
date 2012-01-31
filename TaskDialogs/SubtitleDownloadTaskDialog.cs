@@ -10,13 +10,16 @@
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using Downloaders;
-    using FileNames;
-    using Parsers.Subtitles;
-
     using SharpCompress.Archive;
-    using Tables;
+
     using VistaControls.TaskDialog;
+
+    using Downloaders;
+    using Parsers.Subtitles;
+    using ShowNames;
+    using Tables;
+
+    using Parser = FileNames.Parser;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>SubtitlesPage</c> links.
@@ -356,7 +359,7 @@
             if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(subtitle).ToLower()))
             {
                 var archive = ArchiveFactory.Open(temp);
-                var files   = archive.Entries.Where(f => !f.IsDirectory).ToList();
+                var files   = archive.Entries.Where(f => !f.IsDirectory && Regexes.KnownSubtitle.IsMatch(f.FilePath)).ToList();
 
                 if (files.Count == 1)
                 {
