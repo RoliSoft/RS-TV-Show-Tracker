@@ -92,7 +92,7 @@
                 var link = new Link(this);
 
                 link.Release = node.InnerText;
-                link.FileURL = node.GetNodeAttributeValue("../../a[1]", "href");
+                link.FileURL = node.GetNodeAttributeValue("../../a[2]", "href");
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
                 link.Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty);
                 link.Quality = FileNames.Parser.ParseQuality(node.InnerText);
