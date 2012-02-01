@@ -4,14 +4,11 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Text.RegularExpressions;
-
-    using HtmlAgilityPack;
 
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping IMDb pages.
+    /// Provides support for using the official IMDb mobile API.
     /// </summary>
     [TestFixture]
     public class IMDb : Guide
@@ -84,25 +81,24 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var html  = Utils.GetHTML("http://www.imdb.com/search/title?title_type=tv_series&title=" + Uri.EscapeUriString(name), headers: new Dictionary<string, string> { { "Accept-Language", "en-US" } });
-            var shows = html.DocumentNode.SelectNodes("//td[@class='title']");
+            var json = Utils.GetJSON("http://app.imdb.com/find?api=v1&locale=en_US&q=" + Uri.EscapeUriString(name));
 
-            if (shows == null)
+            foreach (var result in json["data"]["results"])
             {
-                yield break;
-            }
+                foreach (var show in result["list"])
+                {
+                    if (show["type"] != "tv_series") continue;
 
-            foreach (var show in shows)
-            {
-                var id  = new ShowID();
-                
-                id.URL      = Site.TrimEnd('/') + show.GetNodeAttributeValue("a", "href");
-                id.ID       = Regex.Match(id.URL, @"/tt(\d+)/").Groups[1].Value;
-                id.Title    = HtmlEntity.DeEntitize(show.GetNodeAttributeValue("../td[@class='image']//img", "title")).Replace(" TV Series", string.Empty);
-                id.Cover    = show.GetNodeAttributeValue("../td[@class='image']//img", "src");
-                id.Language = "en";
+                    var id = new ShowID();
 
-                yield return id;
+                    id.URL      = "http://www.imdb.com/title/" + (string)show["tconst"] + "/";
+                    id.ID       = ((string)show["tconst"]).Substring(2);
+                    id.Title    = (string)show["title"] + " (" + (string)show["year"] + ")";
+                    id.Cover    = (string)show["image"]["url"];
+                    id.Language = "en";
+
+                    yield return id;
+                }
             }
         }
 
@@ -114,70 +110,50 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            var summary = Utils.GetHTML("http://www.imdb.com/title/tt{0}/".FormatWith(id), headers: new Dictionary<string, string> { { "Accept-Language", "en-US" } });
-            var show    = new TVShow();
+            var main = Utils.GetJSON("http://app.imdb.com/title/maindetails?api=v1&locale=en_US&tconst=tt" + id);
+            var show = new TVShow();
 
-            show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetTextValue("//h1[@class='header']/text()")).Trim();
-            show.Description = Regex.Replace(HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//h2[text()='Storyline']/following-sibling::p[1]") ?? string.Empty)).Trim(), @"\n\nWritten by\s.*$", string.Empty);
-            show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//td[@id='img_primary']//img", "src");
-            show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//span[@class='tv-series-smaller']") ?? string.Empty, @"\d{4}–\d{4}");
+            show.Title       = (string)main["data"]["title"];
+            show.Description = (string)main["data"]["plot"]["outline"];
+            show.Cover       = (string)main["data"]["image"]["url"];
+            show.Airing      = (string)main["data"]["year_end"] == "????";
+            show.Runtime     = (int)main["data"]["runtime"]["time"] / 60;
             show.Language    = "en";
-            show.URL         = "http://www.imdb.com/title/tt{0}/".FormatWith(id);
+            show.URL         = "http://www.imdb.com/title/tt" + id + "/";
             show.Episodes    = new List<TVShow.Episode>();
 
-            var infobar = summary.DocumentNode.GetTextValue("//div[@class='infobar']");
-            var runtime = Regex.Match(infobar, @"(\d{2,3})\smin");
-
-            show.Runtime = runtime.Success
-                           ? runtime.Groups[1].Value.ToInteger()
-                           : 30;
-
-            var genres = summary.DocumentNode.SelectNodes("//div[@class='infobar']/a[contains(@href, '/genre/')]");
-            if (genres != null)
+            foreach (var genre in main["data"]["genres"])
             {
-                foreach (var genre in genres)
-                {
-                    show.Genre += genre.InnerText + ", ";
-                }
-
-                show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
-            }
-            
-            var listing  = Utils.GetHTML("http://www.imdb.com/title/tt{0}/episodes".FormatWith(id), headers: new Dictionary<string, string> { { "Accept-Language", "en-US" } });
-            var nodes    = listing.DocumentNode.SelectNodes("//td/h3");
-
-            if (nodes == null)
-            {
-                return show;
+                show.Genre += (string)genre + ", ";
             }
 
-            foreach (var node in nodes)
+            show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
+
+            var epdata = Utils.GetJSON("http://app.imdb.com/title/episodes?api=v1&locale=en_US&tconst=tt" + id);
+
+            foreach (var season in epdata["data"]["seasons"])
             {
-                var number = Regex.Match(HtmlEntity.DeEntitize(node.InnerText), @"Season (?<season>\d+), Episode (?<episode>\d+): (?<title>.+)");
-                if (!number.Success)
+                var snr = int.Parse((string)season["token"]);
+                var enr = 0;
+
+                foreach (var episode in season["list"])
                 {
-                    continue;
+                    if (episode["type"] != "tv_episode") continue;
+                    
+                    var ep = new TVShow.Episode();
+
+                    ep.Season = snr;
+                    ep.Number = ++enr;
+                    ep.Title  = (string)episode["title"];
+                    ep.URL    = "http://www.imdb.com/title/" + (string)episode["tconst"] + "/";
+                    
+                    DateTime dt;
+                    ep.Airdate = DateTime.TryParseExact((string)episode["release_date"]["normal"] ?? string.Empty, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
+                               ? dt
+                               : Utils.UnixEpoch;
+
+                    show.Episodes.Add(ep);
                 }
-
-                var ep = new TVShow.Episode();
-
-                ep.Season  = number.Groups["season"].Value.ToInteger();
-                ep.Number  = number.Groups["episode"].Value.ToInteger();
-                ep.Title   = number.Groups["title"].Value;
-                ep.Summary = HtmlEntity.DeEntitize((node.GetTextValue("../br/following-sibling::text()") ?? string.Empty).Trim());
-
-                var url = node.GetNodeAttributeValue("a", "href");
-                if (url != null)
-                {
-                    ep.URL = Site.TrimEnd('/') + url;
-                }
-
-                DateTime dt;
-                ep.Airdate = DateTime.TryParseExact(node.GetTextValue("../span/strong") ?? string.Empty, "d MMMM yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
-                           ? dt
-                           : Utils.UnixEpoch;
-
-                show.Episodes.Add(ep);
             }
 
             if (show.Episodes.Count != 0)
