@@ -69,7 +69,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-01 2:07 PM");
+                return Utils.DateTimeToVersion("2012-02-01 4:20 PM");
             }
         }
 
