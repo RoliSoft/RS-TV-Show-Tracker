@@ -866,7 +866,6 @@
     <Resource Include="Images\document-insert.png" />
     <Resource Include="Images\film-timeline.png" />
     <Resource Include="Images\drive-share.png" />
-    <Resource Include="Images\tubeplus.png" />
     <Resource Include="Images\flag-black.png" />
     <Resource Include="Images\flag-white.png" />
     <Resource Include="Images\flag.png" />
