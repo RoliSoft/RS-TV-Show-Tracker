@@ -1,10 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines
 {
     using System;
-    using System.Linq;
 
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
-    using RoliSoft.TVShowTracker.Tables;
+    using Tables;
 
     /// <summary>
     /// Provides support for searching videos on BBC iPlayer.
@@ -69,7 +67,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-12 6:01 PM");
+                return Utils.DateTimeToVersion("2012-03-11 2:28 AM");
             }
         }
 
@@ -93,16 +91,21 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Scroogle().Search("intitle:{0} intitle:\"Series {1} Episode {2}\" site:bbc.co.uk/iplayer/episode/".FormatWith(ep.Show.Name, ep.Season, ep.Number)).ToList();
+            var html  = Utils.GetHTML("http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
+            var links = html.DocumentNode.SelectNodes("//h3/a/span[@class='title']");
+            
+            if (links != null)
+            {
+                foreach (var link in links)
+                {
+                    if (link.InnerText.Contains(" - Series " + ep.Season + "Episode " + ep.Number))
+                    {
+                        return "http://www.bbc.co.uk" + link.GetNodeAttributeValue("..", "href");
+                    }
+                }
+            }
 
-            if (g.Count != 0)
-            {
-                return g[0].URL;
-            }
-            else
-            {
-                throw new OnlineVideoNotFoundException("No videos could be found on iPlayer using Google." + Environment.NewLine + "You can try to use iPlayer's internal search engine.", "Open iPlayer search page", "http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
-            }
+            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open iPlayer search page", "http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
         }
     }
 }

@@ -1,11 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines
 {
     using System;
-    using System.Linq;
-    using System.Text.RegularExpressions;
 
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
-    using RoliSoft.TVShowTracker.Tables;
+    using Tables;
 
     /// <summary>
     /// Provides support for searching videos on SideReel.
@@ -70,7 +67,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-12 6:01 PM");
+                return Utils.DateTimeToVersion("2012-03-11 2:43 AM");
             }
         }
 
@@ -81,7 +78,7 @@
         {
             get
             {
-                return 6;
+                return 7;
             }
         }
 
@@ -94,16 +91,15 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Scroogle().Search("intitle:Watch {0} online site:sidereel.com".FormatWith(ep.Show.Name)).ToList();
-
-            if (g.Count == 0)
+            var html = Utils.GetHTML("http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ep.Show.Name));
+            var link = html.DocumentNode.GetNodeAttributeValue("//div[@class='title']/h2/a[1]", "href");
+            
+            if (string.IsNullOrWhiteSpace(link))
             {
-                throw new OnlineVideoNotFoundException("No videos could be found on SideReel using Google." + Environment.NewLine + "You can try to use SideReel's internal search engine.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ShowNames.Parser.CleanTitleWithEp(ep.Show.Name)));
+                throw new OnlineVideoNotFoundException("No matching videos were found.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ep.Show.Name));
             }
 
-            var id = Regex.Match(g[0].URL, @"sidereel\.com/([^/$]+)", RegexOptions.IgnoreCase);
-
-            return "http://www.sidereel.com/{0}/season-{1}/episode-{2}/search".FormatWith(id.Groups[1].Value, ep.Season, ep.Number);
+            return "http://www.sidereel.com/{0}/season-{1}/episode-{2}/search".FormatWith(link.Trim(" /".ToCharArray()), ep.Season, ep.Number);
         }
     }
 }

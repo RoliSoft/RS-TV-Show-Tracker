@@ -160,6 +160,7 @@
     <Compile Include="Parsers\ForeignTitles\Engines\PORTNetwork.cs" />
     <Compile Include="Parsers\ForeignTitles\ForeignTitleEngine.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Scroogle.cs" />
     <Compile Include="Parsers\WebSearch\Engines\StartPage.cs" />
@@ -231,7 +232,6 @@
     <Compile Include="Parsers\LinkCheckers\LinkCheckerEngine.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Amazon.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\iTunes.cs" />
-    <Compile Include="Parsers\OnlineVideos\Engines\TubePlus.cs" />
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\PhazeDDL.cs" />
@@ -855,6 +855,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\netflix.png" />
     <Resource Include="Images\locale.png" />
     <Resource Include="Images\disc.png" />
     <Resource Include="Images\python.png" />

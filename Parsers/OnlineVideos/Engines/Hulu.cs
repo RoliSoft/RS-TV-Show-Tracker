@@ -1,11 +1,9 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.OnlineVideos.Engines
 {
     using System;
-    using System.Linq;
     using System.Xml.XPath;
 
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
-    using RoliSoft.TVShowTracker.Tables;
+    using Tables;
 
     /// <summary>
     /// Provides support for searching videos on Hulu.
@@ -70,7 +68,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-12 6:01 PM");
+                return Utils.DateTimeToVersion("2012-03-11 2:11 AM");
             }
         }
 
@@ -94,24 +92,15 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var g = new Scroogle().Search("intitle:{0}: {1} \"Season {2} Ep. {3}\" site:hulu.com/watch/".FormatWith(ShowNames.Parser.CleanTitleWithEp(ep.Show.Name), ep.Name, ep.Season, ep.Number)).ToList();
-
-            if (g.Count != 0)
-            {
-                return g[0].URL;
-            }
-
-            var xdoc = Utils.GetXML("http://www.hulu.com/feed/search?fs=0&query=" + Uri.EscapeUriString("show:" + ShowNames.Parser.CleanTitleWithEp(ep.Show.Name) + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&sort_by=relevance&st=1");
+            var xdoc = Utils.GetXML("http://www.hulu.com/feed/search?fs=0&query=" + Uri.EscapeUriString("show:" + ep.Show.Name + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&sort_by=relevance&st=1");
             var link = xdoc.XPathSelectElement("//item/link[1]");
 
             if (link != null)
             {
                 return link.Value;
             }
-            else
-            {
-                throw new OnlineVideoNotFoundException("No videos could be found on Hulu using Google or Hulu's internal search engine." + Environment.NewLine + "You can try to use Hulu's internal search engine anyways.", "Open Hulu search page", "http://www.hulu.com/search?query=" + Uri.EscapeUriString("show:" + ShowNames.Parser.CleanTitleWithEp(ep.Show.Name) + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&st=1");
-            }
+
+            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Hulu search page", "http://www.hulu.com/search?query=" + Uri.EscapeUriString("show:" + ShowNames.Parser.CleanTitleWithEp(ep.Show.Name) + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&st=1");
         }
     }
 }
