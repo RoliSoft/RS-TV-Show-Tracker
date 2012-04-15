@@ -60,7 +60,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-10-31 8:14 PM");
+                return Utils.DateTimeToVersion("2012-04-15 3:47 AM");
             }
         }
 
@@ -93,7 +93,7 @@
                     yield break;
                 }
 
-                if (result["u"] != null)
+                if (result["u"] != null && result["u"].Value<string>().StartsWith("http"))
                 {
                     yield return new SearchResult
                         {

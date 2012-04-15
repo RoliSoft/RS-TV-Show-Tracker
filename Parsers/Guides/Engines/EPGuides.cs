@@ -10,7 +10,7 @@
 
     using NUnit.Framework;
 
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
+    using WebSearch.Engines;
 
     /// <summary>
     /// Provides support for scraping EPGuides pages.
@@ -74,7 +74,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-07-19 8:27 PM");
+                return Utils.DateTimeToVersion("2012-04-15 4:03 AM");
             }
         }
 
@@ -122,10 +122,12 @@
 
             foreach (var result in list)
             {
+                if (!Regex.IsMatch(result.URL, @"^http://(?:www\.)?epguides\.com/(?!menu|current|grid|spring|dvds|faq|search)([a-z0-9_]+)/$", RegexOptions.IgnoreCase)) continue;
+
                 yield return new ShowID
                     {
                         ID       = result.URL,
-                        Title    = result.Title.Replace(" (a Titles & Air Dates Guide)", string.Empty).Replace(" (a Titles and Air Dates Guide)", string.Empty),
+                        Title    = Regex.Replace(result.Title, @"\s+\(a Titles (?:&|and) (?:Air Dates|Seasons) Guide\).*$", string.Empty, RegexOptions.IgnoreCase),
                         Language = "en",
                         URL      = result.URL
                     };
