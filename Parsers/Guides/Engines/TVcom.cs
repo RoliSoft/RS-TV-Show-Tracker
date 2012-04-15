@@ -151,18 +151,23 @@
                 }
             }
 
-            var listing = Utils.GetHTML("http://www.tv.com/shows/{0}/episodes/all/".FormatWith(id));
+            var epurl = "episodes";
+            var snr   = -1;
+
+          grabSeason:
+            var listing = Utils.GetHTML("http://www.tv.com/shows/{0}/{1}/?expanded=1".FormatWith(id, epurl));
             var nodes   = listing.DocumentNode.SelectNodes("//li[starts-with(@class, 'episode')]");
 
             if (nodes == null)
             {
+                show.Episodes.Reverse();
                 return show;
             }
 
-            foreach (var node in nodes.Reverse())
+            foreach (var node in nodes)
             {
-                var season = Regex.Match(node.GetTextValue("../../a[@class='season_name toggle']"), "Season ([0-9]+)");
-                var epnr   = Regex.Match(node.GetTextValue("div[@class='toggle']") ?? string.Empty, "Ep ([0-9]+)");
+                var season = Regex.Match(node.GetTextValue("../../a[@class='season_name toggle']") ?? "Season " + snr, "Season ([0-9]+)");
+                var epnr   = Regex.Match(node.GetTextValue(".//div[@class='ep_info']") ?? string.Empty, "Episode ([0-9]+)");
 
                 if (!season.Success || !epnr.Success) { continue; }
 
@@ -170,10 +175,10 @@
 
                 ep.Season  = season.Groups[1].Value.ToInteger();
                 ep.Number  = epnr.Groups[1].Value.ToInteger();
-                ep.Title   = HtmlEntity.DeEntitize(node.GetTextValue("a[@class='title']"));
+                ep.Title   = HtmlEntity.DeEntitize(node.GetTextValue(".//a[@class='title']"));
                 ep.Summary = HtmlEntity.DeEntitize(node.GetTextValue(".//div[@class='description']").Replace("&nbsp;", " ").Replace("moreless", string.Empty).Trim());
                 ep.Picture = node.GetNodeAttributeValue(".//img[@class='thumb']", "src");
-                ep.URL     = node.GetNodeAttributeValue("a[@class='title']", "href");
+                ep.URL     = node.GetNodeAttributeValue(".//a[@class='title']", "href");
 
                 if (!string.IsNullOrWhiteSpace(ep.URL))
                 {
@@ -181,13 +186,21 @@
                 }
 
                 DateTime dt;
-                ep.Airdate = DateTime.TryParseExact(node.GetTextValue("div[@class='date']") ?? string.Empty, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
+                ep.Airdate = DateTime.TryParseExact(node.GetTextValue(".//div[@class='date']") ?? string.Empty, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
                              ? dt
                              : Utils.UnixEpoch;
 
                 show.Episodes.Add(ep);
             }
 
+            if (show.Episodes.Count != 0 && show.Episodes.Last().Season > 1)
+            {
+                snr   = show.Episodes.Last().Season - 1;
+                epurl = "season-" + snr;
+                goto grabSeason; // this is a baaad fix, but this plugin is deprecated now, so it's a temorary one.
+            }
+
+            show.Episodes.Reverse();
             return show;
         }
     }
