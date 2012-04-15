@@ -35,7 +35,7 @@
         {
             get
             {
-                return "http://newzbin.com/";
+                return "http://newzbin2.es/";
             }
         }
 
@@ -59,7 +59,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-19 12:08 AM");
+                return Utils.DateTimeToVersion("2012-04-15 4:24 AM");
             }
         }
 
@@ -179,11 +179,11 @@
                     link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../../following-sibling::tr[1]/td/a[starts-with(@title, 'Download')]", "href");
                 }
 
-                var size = Regex.Match(node.GetTextValue("../../../following-sibling::tr[1]/td[3]") ?? string.Empty, @"(\d+(?:\.\d+)?)([KMG]B)");
+                var size = Regex.Match(node.GetTextValue("../../../following-sibling::tr[1]/td[3]") ?? string.Empty, @"(\d+(?:\.\d+)?)([KMG]iB)");
 
                 if (size.Success)
                 {
-                    link.Size = size.Groups[1].Value + " " + size.Groups[2].Value;
+                    link.Size = size.Groups[1].Value + " " + size.Groups[2].Value.Replace("i", string.Empty);
                 }
 
                 yield return link;
