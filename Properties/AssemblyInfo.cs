@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("RoliSoft")]
 [assembly: AssemblyProduct("RS TV Show Tracker")]
-[assembly: AssemblyCopyright("Copyright © RoliSoft 2011")]
+[assembly: AssemblyCopyright("Copyright © RoliSoft 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -49,4 +49,4 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.1.*")]
+[assembly: AssemblyVersion("2.2")]

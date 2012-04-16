@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Reflection;
     using System.Windows;
     using System.Windows.Documents;
     using System.Windows.Input;
@@ -30,13 +31,15 @@
                 SetAeroGlassTransparency();
             }
 
-            version.Text = Signature.Version;
-            compile.Text = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss");
+            version.Text        = Signature.VersionFormatted;
+            compile.Text        = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss");
+            github1.NavigateUri = new Uri("https://github.com/RoliSoft/RS-TV-Show-Tracker/commits/v" + Signature.Version);
 
             if (Properties.Resources.GitRevision.Length > 7)
             {
-                revision.Text    = Properties.Resources.GitRevision.Substring(0, 8);
-                revision.ToolTip = Properties.Resources.GitRevision.Trim();
+                revision.Text       = Properties.Resources.GitRevision.Substring(0, 8);
+                revision.ToolTip    = Properties.Resources.GitRevision.Trim();
+                github2.NavigateUri = new Uri("https://github.com/RoliSoft/RS-TV-Show-Tracker/tree/" + revision.ToolTip);
             }
 
             var α = (UInt64)2.9555336418361426e16m;

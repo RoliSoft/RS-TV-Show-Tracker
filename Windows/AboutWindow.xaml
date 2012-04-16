@@ -146,9 +146,9 @@
             <FlowDocument PagePadding="5,5,5,15">
                 <Section FontFamily="Verdana" FontSize="12" Foreground="White" TextAlignment="Center" Margin="0,200,0,0" Padding="0">
                     <Paragraph Margin="0">
-                        v<Run Name="version">2</Run> / rev <Run Name="revision">00000000</Run>
+                        <Hyperlink Name="github1" NavigateUri="http://github.com/RoliSoft/RS-TV-Show-Tracker/commits"><Run Name="version">v2</Run></Hyperlink> / rev <Hyperlink Name="github2" NavigateUri="http://github.com/RoliSoft/RS-TV-Show-Tracker"><Run Name="revision">00000000</Run></Hyperlink>
                         <LineBreak />
-                        Compiled on <Run Name="compile">2011</Run>
+                        Compiled on <Run Name="compile">2012</Run>
                     </Paragraph>
                     <Paragraph Margin="0,10,0,0">
                         This software is licensed under the
