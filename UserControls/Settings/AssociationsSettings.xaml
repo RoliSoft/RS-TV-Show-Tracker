@@ -40,10 +40,10 @@
                 <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
             </StackPanel>
 
-            <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Opacity="0.5">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="/RSTVShowTracker;component/Images/drive-share.png" Height="16" Width="16" Margin="0,1,5,0" />
-                    <CheckBox Content=" Monitor network shares" Name="monitorNetworkShare" Checked="MonitorNetworkShareChecked"  Unchecked="MonitorNetworkShareUnchecked"  FontSize="16" Foreground="DarkBlue" Padding="0" />
+                    <CheckBox IsEnabled="False" Content=" Monitor network shares" Name="monitorNetworkShare" Checked="MonitorNetworkShareChecked"  Unchecked="MonitorNetworkShareUnchecked"  FontSize="16" Foreground="DarkBlue" Padding="0" />
                 </StackPanel>
                 <TextBlock TextWrapping="Wrap" Margin="3,5,0,0" Padding="20,0,0,0">
                     <Image Source="/RSTVShowTracker;component/Images/information.png" Height="12" Width="12" Margin="-20,0,0,-1" />Monitors the usage of files shared on this computer. It will automatically mark them as watched, if it's being accessed for more than 10 minutes by another computer or device.
