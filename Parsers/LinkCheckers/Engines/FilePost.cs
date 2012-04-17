@@ -1,7 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
     using System;
-
+    using System.Text.RegularExpressions;
     using NUnit.Framework;
 
     /// <summary>
@@ -54,7 +54,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-22 2:09 AM");
+                return Utils.DateTimeToVersion("2012-04-17 6:08 PM");
             }
         }
 
@@ -82,7 +82,8 @@
         /// </returns>
         public override bool CanCheck(string url)
         {
-            return new Uri(url).Host.EndsWith("filepost.com");
+            var host = new Uri(url).Host;
+            return host.EndsWith("fp.io") || host.EndsWith("filepost.com");
         }
 
         /// <summary>
@@ -91,10 +92,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("ebHR+Ngk+ZPfOl+sitC/Ys/VWhyhT1kQzddWI8ZeTbV6mycwA0TjXFq3hW3QjD2nOwaYOHGrfh5ius0B27gPiVDYFD2ojweDz8VxCE/57+k=", Signature.Software));
+            var s1 = Check("http://filepost.com/files/4f278173/rs_tv_show_tracker_unit_test_file.txt/");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("ebHR+Ngk+ZPfOl+sitC/Yu1EWf6ezuv85L02bP+TvvE3HIPegMQ+KggvP/nUsV92qfZ2NCX+uV3QyGNaOVX0SbporEW4Ipwr9kQOCxudji4=", Signature.Software));
+            var s2 = Check("http://filepost.com/files/xx278173/rs_tv_show_tracker_unit_test_file.txt/");
             Assert.IsFalse(s2);
         }
     }

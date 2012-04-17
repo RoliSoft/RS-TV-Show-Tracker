@@ -68,7 +68,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-23 2:49 AM");
+                return Utils.DateTimeToVersion("2012-04-17 6:17 PM");
             }
         }
 
@@ -81,8 +81,8 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var html = Utils.GetHTML(Site + "checkfiles.html", "but=+Check+Urls+&files=" + Uri.EscapeUriString(url));
-            var node = html.DocumentNode.SelectSingleNode("//table[@class='tbl']//span[text() = 'Existent']");
+            var html = Utils.GetHTML(url);
+            var node = html.DocumentNode.SelectSingleNode("//input[contains(@onclick, 'starttimer')]");
 
             return node != null;
         }
@@ -105,10 +105,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("nJhwFy6p4OWQmo15RU3tLBanVAmHlIc04D6/h0zbIxdVLB8chcyEpDdYMEjv0n3/RV/roQPXVTgL+wDeNZGYCMJLd7WRpuF/p3tcpcMe/h0=", Signature.Software));
+            var s1 = Check("https://hotfile.com/dl/153191813/d02058c/rs_tv_show_tracker_unit_test_file.txt.html");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("nJhwFy6p4OWQmo15RU3tLAzqef+94Qy7jZVgaKbJZ/CykyTHe9fi1769ImLKC4jr2ZBAez5LrOJOzeiKWwxF1b32Jb0LtJAmcMwy7puRSIw=", Signature.Software));
+            var s2 = Check("https://hotfile.com/dl/153191813/xx2058c/rs_tv_show_tracker_unit_test_file.txt.html");
             Assert.IsFalse(s2);
         }
     }

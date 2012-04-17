@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
     using System;
-    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
@@ -69,7 +68,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-23 2:49 AM");
+                return Utils.DateTimeToVersion("2012-05-17 5:56 PM");
             }
         }
 
@@ -82,10 +81,7 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var id  = Regex.Match(url, @"\?d=([^&$]+)").Groups[1].Value;
-            var req = Utils.GetURL(Site + "mgr_linkcheck.php", "id0=" + id);
-            
-            return Regex.IsMatch(req, "&n=.+");
+            return false;
         }
 
         /// <summary>
@@ -106,11 +102,7 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("fQvwj9uty5cwz66A5BiBp1b/pbu8Jsdd1662wCY6ZmdN8N7Bi/MUkYrdQSbTRxUX", Signature.Software));
-            Assert.IsTrue(s1);
-
-            var s2 = Check(Utils.Decrypt("fQvwj9uty5cwz66A5BiBp2ZYBN+KWGNxHdglcmNclXBWtxOkciTvaavfSaJ1sIvH", Signature.Software));
-            Assert.IsFalse(s2);
+            Assert.Pass("RIP " + Name);
         }
     }
 }

@@ -106,10 +106,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("xV6Cg3GjsX5raTHgRcW8Anmy861U9tTvHUq/95siqoruD/n57xq4wMQfBN6SqJ/Y", Signature.Software));
+            var s1 = Check("http://netload.in/dateixhhxtRK5eL/rs tv show tracker unit test file.txt.htm");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("xV6Cg3GjsX5raTHgRcW8Aq2eK6YkG2eeRnMlfeV2VJFde3wibbgYJeirTp6kssCb", Signature.Software));
+            var s2 = Check("http://netload.in/dateixhhxtXX5eL/rs tv show tracker unit test file.txt.htm");
             Assert.IsFalse(s2);
         }
     }

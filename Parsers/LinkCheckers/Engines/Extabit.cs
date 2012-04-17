@@ -1,15 +1,14 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
     using System;
-    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for checking FileSonic links.
+    /// Provides support for checking Extabit links.
     /// </summary>
     [TestFixture]
-    public class FileSonic : LinkCheckerEngine
+    public class Extabit : LinkCheckerEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -19,7 +18,7 @@
         {
             get
             {
-                return "FileSonic";
+                return "Extabit";
             }
         }
 
@@ -31,7 +30,7 @@
         {
             get
             {
-                return "http://www.filesonic.ro/";
+                return "http://extabit.com/";
             }
         }
 
@@ -55,7 +54,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-05-17 5:56 PM");
+                return Utils.DateTimeToVersion("2012-04-17 6:42 PM");
             }
         }
 
@@ -68,7 +67,10 @@
         /// </returns>
         public override bool Check(string url)
         {
-            return false;
+            var html = Utils.GetHTML(Site + "linkchecker.jsp", "url=" + Uri.EscapeUriString(url));
+            var node = html.DocumentNode.SelectSingleNode("//span[@class='status_green']");
+
+            return node != null;
         }
 
         /// <summary>
@@ -80,7 +82,7 @@
         /// </returns>
         public override bool CanCheck(string url)
         {
-            return Regex.IsMatch(new Uri(url).Host, @"filesonic(\.co)?\.([a-z]{2,4})$");
+            return new Uri(url).Host.EndsWith("extabit.com");
         }
 
         /// <summary>
@@ -89,7 +91,11 @@
         [Test]
         public override void Test()
         {
-            Assert.Pass("RIP " + Name);
+            var s1 = Check(Utils.Decrypt("Ob7whH8K8+gAiVm6XULVG8MxWWx2X/CTZSov20TGyzVCLeEDymHXGxVmDYLmDTR6", Signature.Software));
+            Assert.IsTrue(s1);
+
+            var s2 = Check(Utils.Decrypt("Ob7whH8K8+gAiVm6XULVG+Vr6gpY4xti8q3+FlmdC8VYIKQi/KRC9TR6OfBpyAmg", Signature.Software));
+            Assert.IsFalse(s2);
         }
     }
 }

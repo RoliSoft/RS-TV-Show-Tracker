@@ -1,15 +1,14 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.LinkCheckers.Engines
 {
     using System;
-    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for checking FileSonic links.
+    /// Provides support for checking BitShare links.
     /// </summary>
     [TestFixture]
-    public class FileSonic : LinkCheckerEngine
+    public class BitShare : LinkCheckerEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -19,7 +18,7 @@
         {
             get
             {
-                return "FileSonic";
+                return "BitShare";
             }
         }
 
@@ -31,7 +30,7 @@
         {
             get
             {
-                return "http://www.filesonic.ro/";
+                return "http://bitshare.com/";
             }
         }
 
@@ -55,7 +54,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-05-17 5:56 PM");
+                return Utils.DateTimeToVersion("2012-04-17 6:36 PM");
             }
         }
 
@@ -68,7 +67,10 @@
         /// </returns>
         public override bool Check(string url)
         {
-            return false;
+            var html = Utils.GetHTML(Site + "linkcheck.html", "submit=Verifica&links=" + Uri.EscapeUriString(url));
+            var node = html.DocumentNode.SelectSingleNode("//img[contains(@src, 'ru_2.gif')]");
+
+            return node != null;
         }
 
         /// <summary>
@@ -80,7 +82,7 @@
         /// </returns>
         public override bool CanCheck(string url)
         {
-            return Regex.IsMatch(new Uri(url).Host, @"filesonic(\.co)?\.([a-z]{2,4})$");
+            return new Uri(url).Host.EndsWith("bitshare.com");
         }
 
         /// <summary>
@@ -89,7 +91,11 @@
         [Test]
         public override void Test()
         {
-            Assert.Pass("RIP " + Name);
+            var s1 = Check("http://bitshare.com/files/cn57iw46/rs-tv-show-tracker-unit-test-file.txt.html");
+            Assert.IsTrue(s1);
+
+            var s2 = Check("http://bitshare.com/files/xx57iw46/rs-tv-show-tracker-unit-test-file.txt.html");
+            Assert.IsFalse(s2);
         }
     }
 }

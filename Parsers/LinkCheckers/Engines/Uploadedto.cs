@@ -106,10 +106,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("PYmrXLxP1q0955G4qq7xh8MriFE+KvBtl5rGHQFWEDTLGXERhY4iauaT7vIkAmw3cIjVQh4/yN+0wegtumlLGya/hXspnE7isxLut9eLBPIVZM0Vvdc7rwvVHFOCtBWl", Signature.Software));
+            var s1 = Check("http://uploaded.to/file/v82x65rd");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("PYmrXLxP1q0955G4qq7xh7Du56+TN0bKfnaVSL2qTPzrzEyWlDpEsB01j68lCAFIaw6OEx614js04WfMk0xGQBmSLgdjUwcMdFFhKQ0Y2mGaGozt/rcgOKC7ACYxjlQb", Signature.Software));
+            var s2 = Check("http://uploaded.to/file/vXXx65rd");
             Assert.IsFalse(s2);
         }
     }

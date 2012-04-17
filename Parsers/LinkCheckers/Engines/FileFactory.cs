@@ -54,7 +54,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-22 5:14 PM");
+                return Utils.DateTimeToVersion("2012-04-17 6:06 PM");
             }
         }
 
@@ -68,7 +68,7 @@
         public override bool Check(string url)
         {
             var html = Utils.GetHTML(Site + "tool/links.php", "func=links&links=" + Uri.EscapeUriString(url));
-            var node = html.DocumentNode.SelectSingleNode("//table[@class='items']/tr/td[2]");
+            var node = html.DocumentNode.SelectSingleNode("//p[@class='uploadDownloadLink']");
 
             return node != null;
         }
@@ -91,10 +91,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("d+d2U2zWw8eCeTHtTECIzDRQTNaMaqRsq2wbtv/gZq41CaEwChlu3/mEuI86J0lGDz49JCsug+wBatD84QqEG4LqNFEyECFun6PH0H6btb5fotd9wLsBUtKbDpbN/fZ/evgPKNr9pMlayQX2jZmOoA==", Signature.Software));
+            var s1 = Check("http://www.filefactory.com/file/4ogdr1loi175/n/rs_tv_show_tracker_unit_test_file.txt");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("d+d2U2zWw8eCeTHtTECIzDRQTNaMaqRsq2wbtv/gZq7JAywoZfy7T3JtSupQZVZn/ZOLmvohIYs2o+otUFyAVmLfnMdJjUBXJ6cpopxeJg/GnIaAa9NdiQuW6VBCGbc0KIvbwSN6qNwUDPtAYGSH0w==", Signature.Software));
+            var s2 = Check("http://www.filefactory.com/file/9xgdr1loi175/n/rs_tv_show_tracker_unit_test_file.txt");
             Assert.IsFalse(s2);
         }
     }

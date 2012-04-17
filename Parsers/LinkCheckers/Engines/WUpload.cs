@@ -54,7 +54,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-22 5:14 PM");
+                return Utils.DateTimeToVersion("2012-05-17 5:56 PM");
             }
         }
 
@@ -67,10 +67,7 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var html = Utils.GetHTML(Site + "link-checker", "redirect=&controls%5Bsubmit%5D=&links=" + Uri.EscapeUriString(url));
-            var node = html.DocumentNode.SelectSingleNode("//tr[@class='success']");
-
-            return node != null;
+            return false;
         }
 
         /// <summary>
@@ -91,11 +88,7 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("m4xyT1tfBvzrzpgk1uWHRGFpBMYBeGx0uYLNy1GxntNQ6weL1VRqp9pKV4COGlgq/K0vCdrFo6eWx2xiUwIV2+Xmb16VLXeqinb2ZXug/VKOOaW58/XU/sdPZTyk+HG6srlMHvt6h31p5TAKyfGSOg==", Signature.Software));
-            Assert.IsTrue(s1);
-
-            var s2 = Check(Utils.Decrypt("m4xyT1tfBvzrzpgk1uWHRGbM189cgtrodqJMVrnmEfzEit7nDvIYgNtyUimqExfSPtlbQf9dZzDAYOF6RozgINMpH1ZDM+8FWI7iOH5eu13yfiI6nH2jT9lb0gh5a7fH1NvDfegjtdxiWKSawUJ5+A==", Signature.Software));
-            Assert.IsFalse(s2);
+            Assert.Pass("RIP " + Name);
         }
     }
 }

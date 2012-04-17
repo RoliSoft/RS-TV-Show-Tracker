@@ -91,10 +91,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("i0mJNmLH7QXH7gH4KD+GlBGR91dw4mhc0COMgwr7M6yJa3r+5us2V6PitNUWINYgG7SKbhKo+lqyRVOXdbFWJdjTA0xzUVhj+gzIUzsuKPXlSwGHva7F6De/E6vFGgrL", Signature.Software));
+            var s1 = Check("http://depositfiles.com/files/ufmbij1uu");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("i0mJNmLH7QXH7gH4KD+GlFDm9SbedYZ1xkApfxQ2xIibnO0IOfC4sBtuU/L/cBLtQP8yStOTYAdmohhc2Yq8THiap+nNaQrDq3IQCAWWpyQi2e9mioQ71Z2Bs8FifTyL", Signature.Software));
+            var s2 = Check("http://depositfiles.com/files/ufmbij1ux");
             Assert.IsFalse(s2);
         }
     }

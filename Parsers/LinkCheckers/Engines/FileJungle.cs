@@ -91,10 +91,10 @@
         [Test]
         public override void Test()
         {
-            var s1 = Check(Utils.Decrypt("TOanhJwFf/C1xU5mmbmfAZZfo2rRupvWuEBqDWaoPtlrM7RlL29mIPwzdptetpp3E0OWRVfs2grj3r4P42SyE8hPCXFbQjqfCNkDz2JTV6I=", Signature.Software));
+            var s1 = Check("http://www.filejungle.com/f/qdX7qN/rs tv show tracker unit test file.txt");
             Assert.IsTrue(s1);
 
-            var s2 = Check(Utils.Decrypt("TOanhJwFf/C1xU5mmbmfARTqxOZYw4T3CCwKwg/tOBmZKyBTce1N9kG3UUc+YBv9KSrN0FACGz/L7chGTkhrhd/X4z/EBmj0Uyn32NV6iF4=", Signature.Software));
+            var s2 = Check("http://www.filejungle.com/f/xxX7qN/rs tv show tracker unit test file.txt");
             Assert.IsFalse(s2);
         }
     }

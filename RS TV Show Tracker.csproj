@@ -159,6 +159,9 @@
     <Compile Include="Parsers\ForeignTitles\Engines\PORTHungary.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\PORTNetwork.cs" />
     <Compile Include="Parsers\ForeignTitles\ForeignTitleEngine.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\BitShare.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\Extabit.cs" />
+    <Compile Include="Parsers\LinkCheckers\Engines\TurboBit.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
