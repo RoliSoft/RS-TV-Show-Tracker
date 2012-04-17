@@ -74,7 +74,7 @@
         {
             if (!string.IsNullOrWhiteSpace(Release))
             {
-                return new Regex(Release);
+                return new Regex(Release, RegexOptions.IgnoreCase);
             }
             else
             {
