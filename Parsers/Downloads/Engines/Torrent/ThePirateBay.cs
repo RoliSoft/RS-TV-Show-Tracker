@@ -32,7 +32,7 @@
         {
             get
             {
-                return "http://thepiratebay.org/";
+                return "http://thepiratebay.se/";
             }
         }
 
@@ -56,7 +56,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-02-01 3:25 PM");
+                return Utils.DateTimeToVersion("2012-04-17 7:32 PM");
             }
         }
 
@@ -92,7 +92,7 @@
                 var link = new Link(this);
 
                 link.Release = node.InnerText;
-                link.FileURL = node.GetNodeAttributeValue("../../a[2]", "href");
+                link.FileURL = node.GetNodeAttributeValue("../../a[1]", "href");
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
                 link.Size    = Regex.Match(node.GetTextValue("../../font"), "Size (.*?),").Groups[1].Value.Replace("&nbsp;", " ").Replace("i", string.Empty);
                 link.Quality = FileNames.Parser.ParseQuality(node.InnerText);

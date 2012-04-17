@@ -57,7 +57,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-16 16:02 PM");
+                return Utils.DateTimeToVersion("2012-04-17 7:51 PM");
             }
         }
 
@@ -125,6 +125,16 @@
                         { "username",        LoginFieldTypes.UserName },
                         { "password",        LoginFieldTypes.Password },
                         { "megjegyez",       "on"                     },
+                        {
+                            "vxx",
+                            (Func<string>)(() =>
+                                {
+                                    var login = Utils.GetHTML(Site + "login.php?simplelogin=1");
+                                    var token = login.DocumentNode.GetNodeAttributeValue("//input[@type='hidden' and @name='vxx']", "value");
+
+                                    return token;
+                                })
+                        },
                     };
             }
         }

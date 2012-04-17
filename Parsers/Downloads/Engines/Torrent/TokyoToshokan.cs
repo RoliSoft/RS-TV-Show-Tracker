@@ -58,7 +58,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-18 11:31 AM");
+                return Utils.DateTimeToVersion("2012-04-17 7:31 PM");
             }
         }
 
@@ -94,6 +94,9 @@
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
+
+                if (string.IsNullOrWhiteSpace(link.Release)) continue;
+
                 link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../td[@class='web']/a[last()]", "href"));
                 link.FileURL = HtmlEntity.DeEntitize(node.GetAttributeValue("href"));
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);

@@ -36,7 +36,7 @@
         {
             get
             {
-                return "https://www.revolutiontt.net/";
+                return "https://revolutiontt.me/";
             }
         }
 
@@ -60,7 +60,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-24 2:34 AM");
+                return Utils.DateTimeToVersion("2012-04-17 7:37 PM");
             }
         }
 

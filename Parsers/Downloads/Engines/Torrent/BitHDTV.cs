@@ -57,7 +57,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-16 16:07 PM");
+                return Utils.DateTimeToVersion("2012-04-17 7:53 PM");
             }
         }
 
@@ -153,7 +153,7 @@
                 throw new InvalidCredentialException();
             }
 
-            var links = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/download.php/')]");
+            var links = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/download.php')]");
 
             if (links == null)
             {

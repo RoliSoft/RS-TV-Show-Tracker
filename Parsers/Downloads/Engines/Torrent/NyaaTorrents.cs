@@ -45,7 +45,7 @@
         {
             get
             {
-                return "http://files.nyaa.eu/nt";
+                return "http://files.nyaa.eu/favicon.png";
             }
         }
 
@@ -69,7 +69,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-18 11:22 AM");
+                return Utils.DateTimeToVersion("2012-04-17 7:38 PM");
             }
         }
 
