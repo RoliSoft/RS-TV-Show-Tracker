@@ -32,6 +32,9 @@
             // replace apostrophes which occur in contractions to a null placeholder
             show = Regexes.Contractions.Replace(show, "\0");
 
+            // replace "&" to "and"
+            show = Regexes.Ampersand.Replace(show, "AND");
+
             // remove special characters
             show = Regexes.SpecialChars.Replace(show, " ").Trim();
 

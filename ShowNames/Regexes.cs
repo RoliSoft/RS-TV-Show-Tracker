@@ -43,6 +43,11 @@
         public static readonly Regex Contractions  = new Regex(@"(?<=[A-z0-9])['`’\._](?=(?:S|VE|NT|RE|EM|LL)\b)");
 
         /// <summary>
+        /// Matches an ampersand delimited by word boundaries.
+        /// </summary>
+        public static readonly Regex Ampersand     = new Regex(@"(?<=[\s_\-])&(?=[\s_\-])");
+
+        /// <summary>
         /// Matches the four most common words in the english language. (and, the, of)
         /// </summary>
         public static readonly Regex Common        = new Regex(@"\b(AND\s?|THE\s?|OF\s?)\b");

@@ -34,6 +34,18 @@
                     "PENN TELLER BULLSHIT"
                 },
                 {
+                    "Penn & Teller: Bullshit! 2",
+                    "PENN AND TELLER BULLSHIT 2"
+                },
+                {
+                    "Penn and Teller: Bullshit! 3",
+                    "PENN TELLER BULLSHIT 3"
+                },
+                {
+                    "Penn and Teller: Bullshit! 4",
+                    "PENN AND TELLER BULLSHIT 4"
+                },
+                {
                     "It's Always Sunny in Philadelphia",
                     "ITS ALWAYS SUNNY IN PHILADELPHIA"
                 },
