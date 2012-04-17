@@ -73,7 +73,7 @@
                     <Label Content="Mapped foreign titles" FontSize="16" Foreground="DarkBlue" Padding="0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <ListView Name="titlesListView" SelectionChanged="TitlesListViewSelectionChanged" KeyboardNavigation.TabNavigation="Continue" Margin="0,0,5,0" Width="481" Height="274" Padding="-2,-1">
+                    <ListView Name="titlesListView" SelectionChanged="TitlesListViewSelectionChanged" KeyboardNavigation.TabNavigation="Continue" Margin="0,0,5,0" Width="481" Height="258" Padding="-2,-1">
                         <ListView.GroupStyle>
                             <GroupStyle>
                                 <GroupStyle.ContainerStyle>
@@ -134,6 +134,10 @@
                         </Button>
                     </StackPanel>
                 </StackPanel>
+
+                <TextBlock TextWrapping="Wrap" Margin="3,5,-5,0" Padding="20,0,0,0">
+                    <Image Source="/RSTVShowTracker;component/Images/exclamation.png" Height="12" Width="12" Margin="-20,0,0,-1" /> This feature is new and very experimental. Please provide feedback if you try it.
+                </TextBlock>
             </StackPanel>
         </StackPanel>
     </Grid>

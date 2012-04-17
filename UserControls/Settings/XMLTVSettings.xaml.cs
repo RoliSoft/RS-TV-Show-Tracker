@@ -345,6 +345,8 @@
             txtbox.Text = show.Foreign = show.Foreign2 = title;
             Database.ShowData(show.Show.ShowID, "title." + show.LangCode, title);
 
+            new Thread(() => Remote.API.SetForeignTitle(show.Show.Name, title, show.LangCode)).Start();
+
             ForeignTextBoxTextChanged(txtbox, null);
         }
 
