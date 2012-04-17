@@ -163,7 +163,7 @@
     <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
     <Compile Include="Parsers\Subtitles\Engines\LegendasTV.cs" />
-    <Compile Include="Parsers\WebSearch\Engines\Scroogle.cs" />
+    <Compile Include="Parsers\WebSearch\Engines\Seeks.cs" />
     <Compile Include="Parsers\WebSearch\Engines\StartPage.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Ixquick.cs" />
     <Compile Include="Scripting\ExternalType.cs" />

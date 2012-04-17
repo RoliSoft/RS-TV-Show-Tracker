@@ -8,10 +8,10 @@
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for searching on Scroogle.
+    /// Provides support for searching on Seeks Project.
     /// </summary>
     [TestFixture]
-    public class Scroogle : WebSearchEngine
+    public class Seeks : WebSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -21,7 +21,7 @@
         {
             get
             {
-                return "Scroogle";
+                return "Seeks Project";
             }
         }
 
@@ -33,7 +33,7 @@
         {
             get
             {
-                return "http://www.scroogle.org/";
+                return "https://www.seeks-project.info/";
             }
         }
 
@@ -57,8 +57,16 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-01 1:27 AM");
+                return Utils.DateTimeToVersion("2012-04-17 5:28 PM");
             }
+        }
+
+        /// <summary>
+        /// Initializes static members of the <see cref="Seeks"/> class. 
+        /// </summary>
+        static Seeks()
+        {
+            Utils.IgnoreInvalidCertificatesFor.Add("seeks-project.info");
         }
 
         /// <summary>
@@ -68,8 +76,8 @@
         /// <returns>First link on the search result or empty string.</returns>
         public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetHTML(Site + "cgi-bin/nbbw.cgi", "Gw=" + Uri.EscapeUriString(query) + "&n=2", request: r => r.Referer = Site + "/cgi-bin/scraper.htm");
-            var links  = search.DocumentNode.SelectNodes("//font/blockquote/a");
+            var search = Utils.GetHTML(Site + "search.php/search?q=" + Uri.EscapeUriString(query));
+            var links  = search.DocumentNode.SelectNodes("//h3/a");
 
             if (links == null)
             {
@@ -81,7 +89,7 @@
                 yield return new SearchResult
                     {
                         Title = HtmlEntity.DeEntitize(result.InnerText),
-                        URL   = HtmlEntity.DeEntitize(result.GetAttributeValue("href"))
+                        URL   = HtmlEntity.DeEntitize(result.GetNodeAttributeValue("../..//a[@class='search_cite']/cite/..", "href"))
                     };
             }
         }

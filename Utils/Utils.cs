@@ -175,6 +175,11 @@
             };
 
         /// <summary>
+        /// A list of hostnames for which to ignore invalid SSL certificate errors.
+        /// </summary>
+        public static List<string> IgnoreInvalidCertificatesFor = new List<string>(); 
+
+        /// <summary>
         /// Initializes the <see cref="Utils"/> class.
         /// </summary>
         static Utils()
@@ -559,6 +564,11 @@
                 {
                     return true;
                 }
+            }
+
+            if (sender is HttpWebRequest && IgnoreInvalidCertificatesFor.Contains(Regex.Replace((sender as HttpWebRequest).Host, @"^www\.", string.Empty)))
+            {
+                return true;
             }
 
             return false;
