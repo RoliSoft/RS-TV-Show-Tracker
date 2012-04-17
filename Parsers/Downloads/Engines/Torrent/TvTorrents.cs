@@ -150,7 +150,7 @@
         public override IEnumerable<Link> Search(string query)
         {
             var show = ShowNames.Parser.Split(query)[0];
-            var html = Utils.GetHTML(Site + "loggedin/search.do?search=" + Uri.EscapeUriString(show), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "loggedin/search.do?search=" + Utils.EncodeURL(show), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

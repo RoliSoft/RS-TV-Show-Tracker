@@ -88,7 +88,7 @@
         /// <returns>First link on the search result or empty string.</returns>
         public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetHTML(Site + "search.php/search?q=" + Uri.EscapeUriString(query));
+            var search = Utils.GetHTML(Site + "search.php/search?q=" + Utils.EncodeURL(query));
             var links  = search.DocumentNode.SelectNodes("//h3/a");
 
             if (links == null)

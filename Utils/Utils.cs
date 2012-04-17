@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Compat.Web;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
@@ -272,6 +273,26 @@
         }
 
         /// <summary>
+        /// Encodes a URL string.
+        /// </summary>
+        /// <param name="str">The text to encode.</param>
+        /// <returns>An encoded string.</returns>
+        public static string EncodeURL(string str)
+        {
+            return Uri.EscapeDataString(str);
+        }
+
+        /// <summary>
+        /// Converts a string that has been encoded for transmission in a URL into a decoded string.
+        /// </summary>
+        /// <param name="str">The string to decode.</param>
+        /// <returns>A decoded string.</returns>
+        public static string DecodeURL(string str)
+        {
+            return HttpUtility.UrlDecode(str);
+        }
+
+        /// <summary>
         /// Downloads the specified URL and parses it with HtmlAgilityPack.
         /// </summary>
         /// <param name="url">The URL.</param>
@@ -407,7 +428,7 @@
                     case "http":
                         if (proxy.Contains("$url"))
                         {
-                            req = (HttpWebRequest)WebRequest.Create(proxy.Replace("$url", Uri.EscapeUriString(url)));
+                            req = (HttpWebRequest)WebRequest.Create(proxy.Replace("$url", Utils.EncodeURL(url)));
                         }
                         else
                         {
@@ -1073,7 +1094,7 @@
 
             foreach (Match m in mc)
             {
-                dic[m.Groups["key"].Value] = Uri.UnescapeDataString(m.Groups["value"].Value);
+                dic[m.Groups["key"].Value] = Utils.DecodeURL(m.Groups["value"].Value);
             }
 
             return dic;

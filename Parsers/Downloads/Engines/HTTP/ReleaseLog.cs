@@ -108,7 +108,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var req  = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Uri.EscapeUriString(query))
+            var req  = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Utils.EncodeURL(query))
                             .Replace("content:encoded", "content") // HtmlAgilityPack doesn't like tags with colons in their names
                             .Replace("<![CDATA[", string.Empty)
                             .Replace("]]>", string.Empty)

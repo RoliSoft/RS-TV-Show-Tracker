@@ -97,7 +97,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "search.php?search=" + Uri.EscapeUriString(query),
+            var html = Utils.GetHTML(Site + "search.php?search=" + Utils.EncodeURL(query),
                 request: req =>
                     {
                         req.Accept = "*/*";

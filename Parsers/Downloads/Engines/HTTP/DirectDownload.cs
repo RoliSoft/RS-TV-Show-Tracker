@@ -108,7 +108,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var links = Utils.GetJSON<List<ReleaseInfo>>(Site + "api.php?keyword=" + Uri.EscapeUriString(query));
+            var links = Utils.GetJSON<List<ReleaseInfo>>(Site + "api.php?keyword=" + Utils.EncodeURL(query));
 
             if (links.Count == 0)
             {

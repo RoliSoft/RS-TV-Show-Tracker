@@ -81,7 +81,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "torrents/" + Uri.EscapeUriString(query) + "?iht=3");
+            var html  = Utils.GetHTML(Site + "torrents/" + Utils.EncodeURL(query) + "?iht=3");
             var links = html.DocumentNode.SelectNodes("//td[starts-with(@id, 'name')]/a[2]");
 
             if (links == null)

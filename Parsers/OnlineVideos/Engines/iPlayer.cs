@@ -91,7 +91,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var html  = Utils.GetHTML("http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
+            var html  = Utils.GetHTML("http://www.bbc.co.uk/iplayer/search?q=" + Utils.EncodeURL(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
             var links = html.DocumentNode.SelectNodes("//h3/a/span[@class='title']");
             
             if (links != null)
@@ -105,7 +105,7 @@
                 }
             }
 
-            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open iPlayer search page", "http://www.bbc.co.uk/iplayer/search?q=" + Uri.EscapeUriString(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
+            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open iPlayer search page", "http://www.bbc.co.uk/iplayer/search?q=" + Utils.EncodeURL(ep.Show.Name + " Series " + ep.Season + " Episode " + ep.Number));
         }
     }
 }

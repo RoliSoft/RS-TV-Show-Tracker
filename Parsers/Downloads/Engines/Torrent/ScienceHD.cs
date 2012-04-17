@@ -139,7 +139,7 @@
         public override IEnumerable<Link> Search(string query)
         {
             var split = ShowNames.Parser.Split(query);
-            var html  = Utils.GetHTML(Site + "torrents.php?action=advanced&seriesname=" + Uri.EscapeUriString(split[0]) + "&torrentname=" + (split.Length != 1 ? Uri.EscapeUriString(split[1]) : string.Empty), cookies: Cookies);
+            var html  = Utils.GetHTML(Site + "torrents.php?action=advanced&seriesname=" + Utils.EncodeURL(split[0]) + "&torrentname=" + (split.Length != 1 ? Utils.EncodeURL(split[1]) : string.Empty), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

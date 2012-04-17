@@ -67,7 +67,7 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var html = Utils.GetHTML(Site + "check_links.php", "urls=" + Uri.EscapeUriString(url));
+            var html = Utils.GetHTML(Site + "check_links.php", "urls=" + Utils.EncodeURL(url));
             var node = html.DocumentNode.SelectSingleNode("//div[contains(@class, 'linkChecker')]//span[@class='icon approved']");
 
             return node != null;

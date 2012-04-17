@@ -67,7 +67,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "index.php?opcao=buscarlegenda", "selTipo=1&int_idioma=99&btn_buscar.x=25&btn_buscar.y=6&txtLegenda=" + Uri.EscapeUriString(ShowNames.Parser.CleanTitleWithEp(query)));
+            var html = Utils.GetHTML(Site + "index.php?opcao=buscarlegenda", "selTipo=1&int_idioma=99&btn_buscar.x=25&btn_buscar.y=6&txtLegenda=" + Utils.EncodeURL(ShowNames.Parser.CleanTitleWithEp(query)));
             var subs = html.DocumentNode.SelectNodes("//span[@class='brls']");
 
             if (subs == null)

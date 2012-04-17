@@ -94,7 +94,7 @@
 
             try
             {
-                links = Utils.GetJSON<List<TorrentInfo>>("http://api.dailytvtorrents.org/1.0/torrent.getInfosAll?show_name=" + Uri.EscapeUriString(parts[0]) + "&episode_num=" + Uri.EscapeUriString(parts[1]));
+                links = Utils.GetJSON<List<TorrentInfo>>("http://api.dailytvtorrents.org/1.0/torrent.getInfosAll?show_name=" + Utils.EncodeURL(parts[0]) + "&episode_num=" + Utils.EncodeURL(parts[1]));
             } catch { }
 
             if (links.Count == 0)

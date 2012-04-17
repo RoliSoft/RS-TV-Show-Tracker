@@ -92,7 +92,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = Utils.GetXML("http://anisearch.outrance.pl/?task=search&query=" + Uri.EscapeUriString(name));
+            var list = Utils.GetXML("http://anisearch.outrance.pl/?task=search&query=" + Utils.EncodeURL(name));
 
             foreach (var show in list.Descendants("anime"))
             {

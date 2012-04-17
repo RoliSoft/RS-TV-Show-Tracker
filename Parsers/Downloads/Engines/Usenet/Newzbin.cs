@@ -149,7 +149,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "search/query/?area=c.8&fpn=p&searchaction=Go&btnG_x=10&btnG_y=6&category=8&areadone=c.8&q=" + Uri.EscapeUriString(ShowNames.Parser.ReplaceEpisode(query, "{0}x{1:00}", false, false)), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "search/query/?area=c.8&fpn=p&searchaction=Go&btnG_x=10&btnG_y=6&category=8&areadone=c.8&q=" + Utils.EncodeURL(ShowNames.Parser.ReplaceEpisode(query, "{0}x{1:00}", false, false)), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

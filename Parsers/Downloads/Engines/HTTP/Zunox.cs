@@ -108,7 +108,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site, "q=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site, "q=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//div[@class='dllist']/dl");
 
             if (links == null)

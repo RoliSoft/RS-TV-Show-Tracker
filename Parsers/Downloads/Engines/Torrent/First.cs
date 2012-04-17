@@ -147,7 +147,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "browse.php?incldead=0&search=" + Uri.EscapeUriString(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html = Utils.GetHTML(Site + "browse.php?incldead=0&search=" + Utils.EncodeURL(query), cookies: Cookies, encoding: Encoding.GetEncoding("iso-8859-2"));
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

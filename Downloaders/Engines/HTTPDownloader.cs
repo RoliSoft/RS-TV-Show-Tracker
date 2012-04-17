@@ -73,7 +73,7 @@
                     case "http":
                         if (proxy.Contains("$url"))
                         {
-                            uri = new Uri(proxy.Replace("$url", Uri.EscapeUriString(uri.ToString())));
+                            uri = new Uri(proxy.Replace("$url", Utils.EncodeURL(uri.ToString())));
                         }
                         else
                         {

@@ -80,7 +80,7 @@
         /// <returns>The foreign title or <c>null</c>.</returns>
         public override string Search(string name)
         {
-            var html  = Utils.GetHTML("http://www.imdb." + _tld + "/search/title?title_type=tv_series&title=" + Uri.EscapeUriString(name), headers: new Dictionary<string, string> { { "Accept-Language", Language } });
+            var html  = Utils.GetHTML("http://www.imdb." + _tld + "/search/title?title_type=tv_series&title=" + Utils.EncodeURL(name), headers: new Dictionary<string, string> { { "Accept-Language", Language } });
             var shows = html.DocumentNode.SelectNodes("//td[@class='title']");
 
             if (shows != null)

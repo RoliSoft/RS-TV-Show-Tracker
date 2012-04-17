@@ -93,7 +93,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "search.aspx?q=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "search.aspx?q=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//span[contains(@id, 'SubjectLabel')]/a[1]");
 
             if (links == null)

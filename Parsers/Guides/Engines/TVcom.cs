@@ -84,7 +84,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var html  = Utils.GetHTML("http://www.tv.com/search?q=" + Uri.EscapeUriString(name));
+            var html  = Utils.GetHTML("http://www.tv.com/search?q=" + Utils.EncodeURL(name));
             var shows = html.DocumentNode.SelectNodes("//div/h4/a");
 
             if (shows == null)

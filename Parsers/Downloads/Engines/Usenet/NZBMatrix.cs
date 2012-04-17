@@ -147,7 +147,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "nzb-search.php?cat=tv-all&search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "nzb-search.php?cat=tv-all&search=" + Utils.EncodeURL(query), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

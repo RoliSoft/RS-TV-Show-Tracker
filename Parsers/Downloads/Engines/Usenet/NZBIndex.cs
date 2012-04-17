@@ -80,7 +80,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "search/?minsize=100&q=" + Uri.EscapeUriString(query), cookies: "agreed=true; lang=2");
+            var html  = Utils.GetHTML(Site + "search/?minsize=100&q=" + Utils.EncodeURL(query), cookies: "agreed=true; lang=2");
             var links = html.DocumentNode.SelectNodes("//label[starts-with(@for, 'box')]");
 
             if (links == null)

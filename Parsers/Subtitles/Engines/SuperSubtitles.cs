@@ -66,7 +66,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var sfmt = Uri.EscapeUriString(ShowNames.Parser.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false));
+            var sfmt = Utils.EncodeURL(ShowNames.Parser.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false));
             var html = Utils.GetHTML(Site + "index.php?search=" + sfmt);
             var subs = html.DocumentNode.SelectNodes("//tr[@id='vilagit']");
 

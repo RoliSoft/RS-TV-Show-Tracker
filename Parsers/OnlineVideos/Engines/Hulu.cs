@@ -92,7 +92,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var xdoc = Utils.GetXML("http://www.hulu.com/feed/search?fs=0&query=" + Uri.EscapeUriString("show:" + ep.Show.Name + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&sort_by=relevance&st=1");
+            var xdoc = Utils.GetXML("http://www.hulu.com/feed/search?fs=0&query=" + Utils.EncodeURL("show:" + ep.Show.Name + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&sort_by=relevance&st=1");
             var link = xdoc.XPathSelectElement("//item/link[1]");
 
             if (link != null)
@@ -100,7 +100,7 @@
                 return link.Value;
             }
 
-            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Hulu search page", "http://www.hulu.com/search?query=" + Uri.EscapeUriString("show:" + ShowNames.Parser.CleanTitleWithEp(ep.Show.Name) + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&st=1");
+            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Hulu search page", "http://www.hulu.com/search?query=" + Utils.EncodeURL("show:" + ShowNames.Parser.CleanTitleWithEp(ep.Show.Name) + " season:" + ep.Season + " episode:" + ep.Number + " type:episode") + "&st=1");
         }
     }
 }

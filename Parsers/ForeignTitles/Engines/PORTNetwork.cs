@@ -85,13 +85,13 @@
             name = ShowNames.Regexes.Countries.Replace(name, string.Empty);
             name = name.Trim();
 
-            var html  = Utils.GetHTML("http://port." + _tld + "/pls/ci/films.film_list?i_area_id=17&i_text=" + Uri.EscapeDataString(name), encoding: Encoding.GetEncoding("iso-8859-2"));
+            var html  = Utils.GetHTML("http://port." + _tld + "/pls/ci/films.film_list?i_area_id=17&i_text=" + Utils.EncodeURL(name), encoding: Encoding.GetEncoding("iso-8859-2"));
             var head  = html.DocumentNode.SelectSingleNode("//h1[@class='blackbigtitle']");
             var shows = html.DocumentNode.SelectNodes("//a[contains(@href, 'films.film_page')]");
 
             if (head == null && shows == null && html.DocumentNode.SelectSingleNode("//input[@name='i_text']") != null)
             {
-                html  = Utils.GetHTML("http://port." + _tld + "/pls/ci/cinema.film_creator?i_film_creator=1&i_text=" + Uri.EscapeDataString(name), encoding: Encoding.GetEncoding("iso-8859-2"));
+                html  = Utils.GetHTML("http://port." + _tld + "/pls/ci/cinema.film_creator?i_film_creator=1&i_text=" + Utils.EncodeURL(name), encoding: Encoding.GetEncoding("iso-8859-2"));
                 head  = html.DocumentNode.SelectSingleNode("//h1[@class='blackbigtitle']");
                 shows = html.DocumentNode.SelectNodes("//a[contains(@href, 'films.film_page')]");
             }

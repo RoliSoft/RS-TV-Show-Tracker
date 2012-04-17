@@ -69,7 +69,7 @@
         /// <returns>First link on the search result or empty string.</returns>
         public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetURL(Site + "uds/GwebSearch?callback=google.search.WebSearch.RawCompletion&context=0&lstkp=0&rsz=small&hl=en&source=gsc&gss=.com&sig=22c4e39868158a22aac047a2c138a780&q={0}&gl=www.google.com&qid=12a9cb9d0a6870d28&key=AIzaSyA5m1Nc8ws2BbmPRwKu5gFradvD_hgq6G0&v=1.0".FormatWith(Uri.EscapeUriString(query)));
+            var search = Utils.GetURL(Site + "uds/GwebSearch?callback=google.search.WebSearch.RawCompletion&context=0&lstkp=0&rsz=small&hl=en&source=gsc&gss=.com&sig=22c4e39868158a22aac047a2c138a780&q={0}&gl=www.google.com&qid=12a9cb9d0a6870d28&key=AIzaSyA5m1Nc8ws2BbmPRwKu5gFradvD_hgq6G0&v=1.0".FormatWith(Utils.EncodeURL(query)));
             var json   = JObject.Parse(search.Remove(0, "google.search.WebSearch.RawCompletion('0',".Length));
 
             if (!json["results"].HasValues)

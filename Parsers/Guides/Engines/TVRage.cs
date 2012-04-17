@@ -83,7 +83,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var list = Utils.GetXML("http://services.tvrage.com/myfeeds/search.php?key={0}&show={1}".FormatWith(Key, Uri.EscapeUriString(name)), timeout: 120000);
+            var list = Utils.GetXML("http://services.tvrage.com/myfeeds/search.php?key={0}&show={1}".FormatWith(Key, Utils.EncodeURL(name)), timeout: 120000);
 
             foreach (var show in list.Descendants("show"))
             {

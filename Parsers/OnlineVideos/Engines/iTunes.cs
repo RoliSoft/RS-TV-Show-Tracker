@@ -91,7 +91,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            return "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString("intitle:" + ep.Show.Name + " intitle:\"season " + ep.Season + "\" site:itunes.apple.com inurl:/tv-season/");
+            return "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL("intitle:" + ep.Show.Name + " intitle:\"season " + ep.Season + "\" site:itunes.apple.com inurl:/tv-season/");
         }
     }
 }

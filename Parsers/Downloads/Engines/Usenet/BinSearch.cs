@@ -96,7 +96,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "index.php?q=" + Uri.EscapeUriString(query) + "&max=50&adv_age=999&adv_sort=date&adv_col=on&minsize=100");
+            var html  = Utils.GetHTML(Site + "index.php?q=" + Utils.EncodeURL(query) + "&max=50&adv_age=999&adv_sort=date&adv_col=on&minsize=100");
             var links = html.DocumentNode.SelectNodes("//td/span[@class='s']");
             var ages  = Regex.Matches(html.DocumentNode.InnerHtml, @"<td>(\d+(?:\.\d+)?)\s*([mhdwy])<"); // HtmlAgilityPack won't parse it due to broken markup
 
@@ -112,7 +112,7 @@
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
                 link.InfoURL = Site.TrimEnd('/') + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../span[@class='d']/a", "href"));
-                link.FileURL = "http://www.binsearch.info/fcgi/nzb.fcgi?q=" + Uri.EscapeUriString(query) + "&m=&max=50&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=100;" + node.GetNodeAttributeValue("../..//input", "name") + "=on&action=nzb;" + Utils.SanitizeFileName(link.Release.CutIfLonger(200)).Replace('/', '-') + ".nzb";
+                link.FileURL = "http://www.binsearch.info/fcgi/nzb.fcgi?q=" + Utils.EncodeURL(query) + "&m=&max=50&adv_g=&adv_age=999&adv_sort=date&adv_col=on&minsize=100;" + node.GetNodeAttributeValue("../..//input", "name") + "=on&action=nzb;" + Utils.SanitizeFileName(link.Release.CutIfLonger(200)).Replace('/', '-') + ".nzb";
                 link.Size    = Regex.Match(HtmlEntity.DeEntitize(node.GetTextValue("../span[@class='d']")), @"size: ([^,<]+)").Groups[1].Value;
                 link.Quality = FileNames.Parser.ParseQuality(link.Release.Replace(' ', '.'));
                 link.Infos   = Utils.ParseAge(ages[i++].Value);

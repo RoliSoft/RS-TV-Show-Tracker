@@ -125,7 +125,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "index.php?do=search&subaction=search&search_start=1&full_search=1&titleonly=3&searchuser=&replyless=0&replylimit=0&searchdate=0&beforeafter=after&sortby=date&resorder=desc&result_num=30&result_from=1&showposts=0&catlist%5B%5D=7&story=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "index.php?do=search&subaction=search&search_start=1&full_search=1&titleonly=3&searchuser=&replyless=0&replylimit=0&searchdate=0&beforeafter=after&sortby=date&resorder=desc&result_num=30&result_from=1&showposts=0&catlist%5B%5D=7&story=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//div[@class='title']/a");
 
             if (links == null)

@@ -78,7 +78,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "files/?category=3&query=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "files/?category=3&query=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//td/a[starts-with(@href, '/files/details/')]");
             var sizes = html.DocumentNode.SelectNodes("//td[starts-with(@class, 'tone_') and @align='right']");
 

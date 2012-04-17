@@ -102,14 +102,14 @@
 
             if (ShowNames.Regexes.Numbering.IsMatch(query))
             {
-                show     = Uri.EscapeUriString(ShowNames.Parser.Split(query)[0]);
+                show     = Utils.EncodeURL(ShowNames.Parser.Split(query)[0]);
                 var epnr = ShowNames.Parser.ExtractEpisode(query);
                 season   = epnr.Season.ToString();
                 episode  = epnr.Episode.ToString();
             }
             else
             {
-                show = Uri.EscapeUriString(query);
+                show = Utils.EncodeURL(query);
             }
 
             var html = Utils.GetHTML(Site + "en/ppodnapisi/search?tbsl=3&asdp=1&sK={0}&sM=&sJ=0&sO=desc&sS=time&submit=Search&sTS={1}&sTE={2}&sY=&sR=&sT=1".FormatWith(show, season, episode));

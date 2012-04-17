@@ -79,7 +79,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "search/" + Uri.EscapeUriString(query) + "/0/7/0");
+            var html  = Utils.GetHTML(Site + "search/" + Utils.EncodeURL(query) + "/0/7/0");
             var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/div/a");
 
             if (links == null)

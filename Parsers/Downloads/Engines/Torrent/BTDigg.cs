@@ -80,7 +80,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "search?q=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "search?q=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//td[@class='torrent_name']/a");
 
             if (links == null)

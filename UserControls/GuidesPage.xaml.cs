@@ -715,7 +715,7 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ShowGeneralWikipediaMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(showGeneralName.Text + " TV Series site:en.wikipedia.org"));
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(showGeneralName.Text + " TV Series site:en.wikipedia.org"));
         }
 
         /// <summary>
@@ -725,7 +725,7 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ShowGeneralImdbMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(showGeneralName.Text + " intitle:\"TV Series\" site:imdb.com"));
+            Utils.Run("http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(showGeneralName.Text + " intitle:\"TV Series\" site:imdb.com"));
         }
 
         /// <summary>
@@ -735,7 +735,7 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ShowGeneralGoogleMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Utils.Run("http://www.google.com/search?hl=en&q=" + Uri.EscapeUriString(showGeneralName.Text));
+            Utils.Run("http://www.google.com/search?hl=en&q=" + Utils.EncodeURL(showGeneralName.Text));
         }
 
         /// <summary>
@@ -840,7 +840,7 @@
             var gls    = new MenuItem();
             gls.Header = "Google search";
             gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(string.Format("{0} S{1:00}E{2:00}", episode.ID.Show.Name, episode.ID.Season, episode.ID.Number)));
+            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(string.Format("{0} S{1:00}E{2:00}", episode.ID.Show.Name, episode.ID.Season, episode.ID.Number)));
 
             sov.Items.Add(gls);
 

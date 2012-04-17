@@ -137,7 +137,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "torrents.php?searchstr=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "torrents.php?searchstr=" + Utils.EncodeURL(query), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

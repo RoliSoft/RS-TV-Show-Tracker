@@ -91,12 +91,12 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var html = Utils.GetHTML("http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ep.Show.Name));
+            var html = Utils.GetHTML("http://www.sidereel.com/_television/search?q=" + Utils.EncodeURL(ep.Show.Name));
             var link = html.DocumentNode.GetNodeAttributeValue("//div[@class='title']/h2/a[1]", "href");
             
             if (string.IsNullOrWhiteSpace(link))
             {
-                throw new OnlineVideoNotFoundException("No matching videos were found.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Uri.EscapeUriString(ep.Show.Name));
+                throw new OnlineVideoNotFoundException("No matching videos were found.", "Open SideReel search page", "http://www.sidereel.com/_television/search?q=" + Utils.EncodeURL(ep.Show.Name));
             }
 
             return "http://www.sidereel.com/{0}/season-{1}/episode-{2}/search".FormatWith(link.Trim(" /".ToCharArray()), ep.Season, ep.Number);

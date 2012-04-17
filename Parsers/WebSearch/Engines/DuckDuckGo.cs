@@ -71,7 +71,7 @@
         /// <returns>First link on the search result or empty string.</returns>
         public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetURL(Site + "d.js?q={0}&l=us-en&s=0".FormatWith(Uri.EscapeUriString(query)));
+            var search = Utils.GetURL(Site + "d.js?q={0}&l=us-en&s=0".FormatWith(Utils.EncodeURL(query)));
             var json   = JArray.Parse(search.Substring(search.IndexOf('[')));
 
             if (json[0]["t"].Value<string>() == "EOF")

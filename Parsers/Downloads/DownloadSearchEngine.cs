@@ -348,7 +348,7 @@
                     }
                 }
 
-                post.Append(Uri.EscapeDataString(value));
+                post.Append(Utils.EncodeURL(value));
             }
 
             var cookies = new StringBuilder();

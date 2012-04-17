@@ -68,7 +68,7 @@
         /// <returns>First link on the search result or empty string.</returns>
         public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetHTML("http://eu.ixquick.com/do/metasearch.pl?cmd=process_search&pid=e729da4630e3ad8fee0b29f42b8b9edb&nossl=1", "cat=web&cmd=process_search&language=english&engine0=v1all&query=" + Uri.EscapeUriString(query) + "&prf=3670146b5ded1d599d7f30331221aa62&suggestOn=0");
+            var search = Utils.GetHTML("http://eu.ixquick.com/do/metasearch.pl?cmd=process_search&pid=e729da4630e3ad8fee0b29f42b8b9edb&nossl=1", "cat=web&cmd=process_search&language=english&engine0=v1all&query=" + Utils.EncodeURL(query) + "&prf=3670146b5ded1d599d7f30331221aa62&suggestOn=0");
             var links  = search.DocumentNode.SelectNodes("//div[@id='results']/div/h3/a");
 
             if (links == null)

@@ -160,7 +160,7 @@
         {
             var ep    = ShowNames.Parser.ExtractEpisode(query);
             var split = Regex.Replace(ShowNames.Parser.ReplaceEpisode(query, "{0}", true, true), @"[^A-Za-z0-9\s]", string.Empty).Replace(' ', ',').TrimEnd(',');
-            var html  = Utils.GetHTML(Site + "wsgi/torrent/find?title=" + Uri.EscapeUriString(split), cookies: Cookies);
+            var html  = Utils.GetHTML(Site + "wsgi/torrent/find?title=" + Utils.EncodeURL(split), cookies: Cookies);
 
             if (html.DocumentNode.SelectSingleNode("//form[@id = 'login']") != null)
             {
@@ -208,7 +208,7 @@
         /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
         public override string Login(string username, string password)
         {
-            var cookie = "username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password);
+            var cookie = "username=" + Utils.EncodeURL(username) + "&password=" + Utils.EncodeURL(password);
             var login  = Utils.GetURL(LoginURL, cookie);
             var auth   = Regex.Match(login, @"'cookie':\s*'([^']+)");
 

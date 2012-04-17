@@ -103,21 +103,21 @@
         /// <returns>Recommended shows list.</returns>
         public override IEnumerable<RecommendedShow> GetList(IEnumerable<string> shows)
         {
-            var lab = Utils.GetXML("http://lab.rolisoft.net/tv/api.php?key=" + _key + "&uid=" + _uuid + (_type == 1 ? "&genre=true" : String.Empty) + "&output=xml" + shows.Aggregate(String.Empty, (current, r) => current + ("&show[]=" + Uri.EscapeUriString(r))));
+            var lab = Utils.GetXML("http://lab.rolisoft.net/tv/api.php?key=" + _key + "&uid=" + _uuid + (_type == 1 ? "&genre=true" : String.Empty) + "&output=xml" + shows.Aggregate(String.Empty, (current, r) => current + ("&show[]=" + Utils.EncodeURL(r))));
 
             return lab.Descendants("show")
                    .Select(item => new RecommendedShow
                    {
                        Name      = item.Value,
                        Score     = item.Attribute("score").Value,
-                       Official  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " official site"),
-                       Wikipedia = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " TV Series site:en.wikipedia.org"),
-                       TVRage    = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"TV Show\" site:tvrage.com"),
-                       TVDB      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"Series Info\" site:thetvdb.com"),
-                       TVcom     = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " intitle:\"on TV.com\" inurl:summary.html site:tv.com"),
+                       Official  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(item.Value + " official site"),
+                       Wikipedia = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(item.Value + " TV Series site:en.wikipedia.org"),
+                       TVRage    = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(item.Value + " intitle:\"TV Show\" site:tvrage.com"),
+                       TVDB      = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(item.Value + " intitle:\"Series Info\" site:thetvdb.com"),
+                       TVcom     = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(item.Value + " intitle:\"on TV.com\" inurl:summary.html site:tv.com"),
                        Epguides  = item.Attribute("epguides").Value,
                        Imdb      = item.Attribute("imdb").Value,
-                       TVTropes  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Uri.EscapeUriString(item.Value + " site:tvtropes.org")
+                       TVTropes  = "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL(item.Value + " site:tvtropes.org")
                    });
         }
     }

@@ -828,7 +828,7 @@
                 var gls    = new MenuItem();
                 gls.Header = "Google search";
                 gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + (nextnt ? nextdt : nextep)));
+                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(show.Name + " " + (nextnt ? nextdt : nextep)));
 
                 sov.Items.Add(gls);
 
@@ -976,7 +976,7 @@
                 var gls    = new MenuItem();
                 gls.Header = "Google search";
                 gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(show.Name + " " + (lastnt ? lastdt : lastep)));
+                gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(show.Name + " " + (lastnt ? lastdt : lastep)));
 
                 sov.Items.Add(gls);
 

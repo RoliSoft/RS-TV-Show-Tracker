@@ -151,7 +151,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "browse.php?cat=0&titleonly=1&search=" + Uri.EscapeUriString(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "browse.php?cat=0&titleonly=1&search=" + Utils.EncodeURL(query), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
@@ -216,7 +216,7 @@
             // send login request
 
             var cookies = new StringBuilder();
-            var post    = "username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password) + "&submit.x=60&submit.y=25";
+            var post    = "username=" + Utils.EncodeURL(username) + "&password=" + Utils.EncodeURL(password) + "&submit.x=60&submit.y=25";
 
             Utils.GetURL(LoginURL, post, reqcook.ToString(),
                 request: req =>

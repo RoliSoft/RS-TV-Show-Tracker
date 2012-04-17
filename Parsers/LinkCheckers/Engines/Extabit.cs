@@ -67,7 +67,7 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var html = Utils.GetHTML(Site + "linkchecker.jsp", "url=" + Uri.EscapeUriString(url));
+            var html = Utils.GetHTML(Site + "linkchecker.jsp", "url=" + Utils.EncodeURL(url));
             var node = html.DocumentNode.SelectSingleNode("//span[@class='status_green']");
 
             return node != null;

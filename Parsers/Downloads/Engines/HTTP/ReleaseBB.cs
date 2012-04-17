@@ -94,7 +94,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "category/tv-shows/?s=" + Uri.EscapeUriString(query));
+            var html  = Utils.GetHTML(Site + "category/tv-shows/?s=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//div[@class='postContent']");
 
             if (links == null)

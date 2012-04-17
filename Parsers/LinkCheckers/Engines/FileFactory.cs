@@ -67,7 +67,7 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var html = Utils.GetHTML(Site + "tool/links.php", "func=links&links=" + Uri.EscapeUriString(url));
+            var html = Utils.GetHTML(Site + "tool/links.php", "func=links&links=" + Utils.EncodeURL(url));
             var node = html.DocumentNode.SelectSingleNode("//p[@class='uploadDownloadLink']");
 
             return node != null;

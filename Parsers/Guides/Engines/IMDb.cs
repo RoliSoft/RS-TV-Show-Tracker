@@ -81,7 +81,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var json = Utils.GetJSON("http://app.imdb.com/find?api=v1&locale=en_US&q=" + Uri.EscapeUriString(name));
+            var json = Utils.GetJSON("http://app.imdb.com/find?api=v1&locale=en_US&q=" + Utils.EncodeURL(name));
 
             foreach (var result in json["data"]["results"])
             {

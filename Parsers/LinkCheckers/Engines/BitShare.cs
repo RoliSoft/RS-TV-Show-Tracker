@@ -79,7 +79,7 @@
         /// </returns>
         public override bool Check(string url)
         {
-            var html = Utils.GetHTML(Site + "linkcheck.html", "submit=Verifica&links=" + Uri.EscapeUriString(url));
+            var html = Utils.GetHTML(Site + "linkcheck.html", "submit=Verifica&links=" + Utils.EncodeURL(url));
             var node = html.DocumentNode.SelectSingleNode("//img[contains(@src, 'ru_2.gif')]");
 
             return node != null;

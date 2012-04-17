@@ -203,7 +203,7 @@
                 }
             }
 
-            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Netflix search page", "http://movies.netflix.com/WiSearch?v1=" + Uri.EscapeUriString(ep.Show.Name));
+            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Netflix search page", "http://movies.netflix.com/WiSearch?v1=" + Utils.EncodeURL(ep.Show.Name));
         }
     }
 }

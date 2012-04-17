@@ -201,7 +201,7 @@
 
                                         show.Tagline     = infos[show.Name].Tagline ?? Regex.Replace(infos[show.Name].Description ?? string.Empty, @"\s+", " ", RegexOptions.Multiline);
                                         show.Description = infos[show.Name].Description;
-                                        show.Picture     = "http://" + API.EndPoint + "?/GetShowCover/" + Uri.EscapeUriString(show.Name);
+                                        show.Picture     = "http://" + API.EndPoint + "?/GetShowCover/" + Utils.EncodeURL(show.Name);
                                         show.InfoSource  = infos[show.Name].Source;
 
                                         if (!string.IsNullOrWhiteSpace(infos[show.Name].Genre))
@@ -376,7 +376,7 @@
         private void SearchYouTubeClick(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
-            Utils.Run("http://www.youtube.com/results?search_query=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name) + "+promo");
+            Utils.Run("http://www.youtube.com/results?search_query=" + Utils.EncodeURL(((RecommendedShow)listView.SelectedValue).Name) + "+promo");
         }
 
         /// <summary>
@@ -387,7 +387,7 @@
         private void SearchGoogleClick(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
-            Utils.Run("http://www.google.com/search?q=" + Uri.EscapeUriString(((RecommendedShow)listView.SelectedValue).Name));
+            Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(((RecommendedShow)listView.SelectedValue).Name));
         }
 
         /// <summary>

@@ -152,7 +152,7 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var html  = Utils.GetHTML("http://www.episodeworld.com/search/?searchlang=" + LanguageIDs[language] + "&searchitem=" + Uri.EscapeUriString(name));
+            var html  = Utils.GetHTML("http://www.episodeworld.com/search/?searchlang=" + LanguageIDs[language] + "&searchitem=" + Utils.EncodeURL(name));
             var shows = html.DocumentNode.SelectNodes("//table[@id='list']/tr/td[3]/a/b");
 
             if (shows == null)
