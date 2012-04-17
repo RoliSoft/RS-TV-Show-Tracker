@@ -93,12 +93,12 @@
         }
 
         /// <summary>
-        /// Tests the parser by searching for "House S07E01" on the site.
+        /// Tests the parser by searching for "House S08E01" on the site.
         /// </summary>
         [Test]
         public virtual void TestSearchEpisode()
         {
-            var list = Search("House S07E01").ToList();
+            var list = Search("House S08E01").ToList();
 
             Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House S07E01 on {0}.".FormatWith(Name));
 

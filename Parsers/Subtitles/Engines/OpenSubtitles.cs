@@ -69,7 +69,31 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-10 4:38 PM");
+                return Utils.DateTimeToVersion("2012-04-17 5:21 PM");
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the token sent by the login method.
+        /// </summary>
+        /// <value>The authentication token.</value>
+        public static string Token { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date of the token's last utilization.
+        /// </summary>
+        /// <value>The date of the token's last utilization.</value>
+        public static DateTime TokenLastUse { get; set; }
+
+        /// <summary>
+        /// Gets the timespan of an authentication token.
+        /// </summary>
+        /// <value>A timespan of 14 minutes.</value>
+        public static TimeSpan TokenExpiration
+        {
+            get
+            {
+                return TimeSpan.FromMinutes(14);
             }
         }
 
@@ -81,14 +105,22 @@
         /// <exception cref="Exception">XML-RPC failed.</exception>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var svc   = XmlRpcProxyGen.Create<IOpenSubtitles>();
-            var login = svc.LogIn(string.Empty, string.Empty, "en", "RS TV Show Tracker 1.0");
-            if (login == null || !login.ContainsKey("status") || login["status"].ToString() == "401 Unauthorized" || login["status"].ToString() == "407 Download limit reached")
-            {
-                yield break;
-            }
+            var svc = XmlRpcProxyGen.Create<IOpenSubtitles>();
 
-            var search = svc.SearchSubtitles(login["token"].ToString(), new[] { new { query = ShowNames.Parser.CleanTitleWithEp(query) } });
+            if (Token == null || (DateTime.Now - TokenLastUse) > TokenExpiration)
+            {
+                var login = svc.LogIn(string.Empty, string.Empty, "en", "RS TV Show Tracker 1.0");
+                if (login == null || !login.ContainsKey("status") || login["status"].ToString() == "401 Unauthorized" || login["status"].ToString() == "407 Download limit reached")
+                {
+                    yield break;
+                }
+
+                Token = login["token"].ToString();
+            }
+            
+            TokenLastUse = DateTime.Now;
+
+            var search = svc.SearchSubtitles(Token, new[] { new { query = ShowNames.Parser.CleanTitleWithEp(query) } });
             if (search == null || !search.ContainsKey("data"))
             {
                 yield break;
