@@ -15,6 +15,17 @@
             {
                 { "Sci-Fi Science: Physics of the Impossible", "Sci Fi Science"   },
                 { "$#*! My Dad Says",                          "Shit My Dad Says" },
+                { "Bleep My Dad Says",                         "Shit My Dad Says" },
+                { "Don't Trust the Bitch in Apartment 23",     "Apartment 23"     },
+                { "Don't Trust the B---- in Apartment 23",     "Apartment 23"     },
+            };
+
+        /// <summary>
+        /// List of TV shows which have a name so weird they need a hand-written regular expression.
+        /// </summary>
+        public static readonly Dictionary<string, string> Pregenerated = new Dictionary<string, string>
+            {
+                { "Apartment 23", @"(?:\b|_)(?:DON(?:\\?['`’\._])?T[^A-Z0-9]+TRUST[^A-Z0-9]+THE[^A-Z0-9]+B(?:ITCH|\-+)?[^A-Z0-9]+IN[^A-Z0-9]+)?APARTMENT[^A-Z0-9]+23(?:\b|_)" },
             };
 
         /// <summary>

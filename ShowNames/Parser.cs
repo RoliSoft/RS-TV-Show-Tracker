@@ -26,6 +26,12 @@
                 show = Regexes.Exclusions[show];
             }
 
+            // see if the show already has a hand-written regex
+            if (Regexes.Pregenerated.ContainsKey(show))
+            {
+                return new Regex(Regexes.Pregenerated[show], RegexOptions.IgnoreCase);
+            }
+
             // the CLR is optimized for uppercase string matching
             show = show.ToUpper();
 
