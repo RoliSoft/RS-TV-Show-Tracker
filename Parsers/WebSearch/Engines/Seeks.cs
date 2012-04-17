@@ -38,6 +38,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://www.seeks-project.info/site/wp-content/themes/sight/images/favico.ico";
+            }
+        }
+
+        /// <summary>
         /// Gets the name of the plugin's developer.
         /// </summary>
         /// <value>The name of the plugin's developer.</value>

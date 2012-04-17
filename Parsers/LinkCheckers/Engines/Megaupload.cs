@@ -44,7 +44,7 @@
         {
             get
             {
-                return "http://wwwstatic.megaupload.com/images/icon.ico";
+                return "http://lab.rolisoft.net/images/tvshowtracker/favicons/megaupload.png";
             }
         }
 
