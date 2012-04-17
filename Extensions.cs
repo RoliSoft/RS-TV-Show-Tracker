@@ -605,6 +605,8 @@ namespace RoliSoft.TVShowTracker
         /// <returns>String with uppercased first letter.</returns>
         public static string ToUppercaseFirst(this string value)
         {
+            if (value.Length < 2) return value;
+
             return char.ToUpper(value[0]) + value.Substring(1);
         }
 

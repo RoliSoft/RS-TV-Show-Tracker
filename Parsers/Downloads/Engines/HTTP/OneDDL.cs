@@ -37,7 +37,7 @@
         {
             get
             {
-                return "http://www.oneddl.com/";
+                return "http://www.oneddl.eu/";
             }
         }
 
@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-22 1:25 AM");
+                return Utils.DateTimeToVersion("2012-04-17 6:59 PM");
             }
         }
 

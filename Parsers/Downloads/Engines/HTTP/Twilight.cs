@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-03-26 4:06 PM");
+                return Utils.DateTimeToVersion("2012-04-17 7:15 PM");
             }
         }
 
@@ -97,7 +97,7 @@
         public override IEnumerable<Link> Search(string query)
         {
             var html  = Utils.GetHTML(Site, "type=TV&searchoption=broad&q=" + Uri.EscapeUriString(query));
-            var links = html.DocumentNode.SelectNodes("//table[1]/tr");
+            var links = html.DocumentNode.SelectNodes("//div[@class='dllist']/dl");
 
             if (links == null)
             {
@@ -106,22 +106,21 @@
 
             foreach (var node in links)
             {
-                if (node.SelectNodes("td/div[contains(@class, 'verified')]") != null || node.SelectNodes("td[contains(@class, 'dltitle')]") == null)
-                {
-                   continue;
-                }
-
                 var link = new Link(this);
 
-                var site = node.GetTextValue("td[contains(@class, 'dlsite')]/a/span/following-sibling::text()");
-                var star = node.GetTextValue("td[contains(@class, 'dlsite')]/a/span/preceding-sibling::text()");
-                var list = node.SelectNodes("td[contains(@class, 'dlhost')]/span");
+                if (node.GetHtmlValue("dd[contains(@class, 'tv')]") == null) continue; // header and ads
 
-                link.Release = HtmlEntity.DeEntitize(node.GetTextValue("td[contains(@class, 'dltitle')]/a[@title != '']")).Trim()
-                             + (!string.IsNullOrWhiteSpace(site) ? " @ " + site : string.Empty)
+                var site = node.GetTextValue("dd/span[@class='rating']/../a");
+                var star = node.GetTextValue("dd/span[@class='rating']");
+                var list = node.SelectNodes("dd[@class='fh']/span");
+
+                link.Release = HtmlEntity.DeEntitize(node.GetTextValue("dt/a")).Trim()
+                             + (!string.IsNullOrWhiteSpace(site) ? " @ " + site.Trim() : string.Empty)
                              + (!string.IsNullOrWhiteSpace(star) && Regex.IsMatch(star, @"\s*\d") ? " " + star.Trim() + "✩" : string.Empty);
-                link.InfoURL = Site + node.GetNodeAttributeValue("td[contains(@class, 'dltitle')]/a[@title != '']", "href");
-                link.Quality = Qualities.HDTVXviD;
+                link.InfoURL = Site + node.GetNodeAttributeValue("dt/a", "href");
+                link.Quality = Regex.IsMatch(link.Release, @"(720p|\bHD\b)", RegexOptions.IgnoreCase)
+                             ? Qualities.HDTV720p
+                             : Qualities.HDTVXviD;
 
                 if (list != null)
                 {

@@ -185,9 +185,7 @@
     <Compile Include="IPlugin.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\OneDDL.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\FreshWap.cs" />
-    <Compile Include="Parsers\Downloads\Engines\HTTP\Mukki.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />
-    <Compile Include="Parsers\Downloads\Engines\HTTP\ev0.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\First.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\IPTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\SceneAccess.cs" />
@@ -238,7 +236,6 @@
     <Compile Include="Parsers\OnlineVideos\Engines\iTunes.cs" />
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />
-    <Compile Include="Parsers\Downloads\Engines\HTTP\PhazeDDL.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
     <Compile Include="Parsers\Social\Engines\Facebook.cs" />
