@@ -145,6 +145,7 @@
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
     <Compile Include="LocalProgrammingPlugin.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbFrance.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbSpain.cs" />
