@@ -56,6 +56,12 @@
         HDTVXviD,
 
         /// <summary>
+        /// An XviD-encoded video downloaded from a legal source; usually iTunes.
+        /// </summary>
+        [Description("Web-DL XviD")]
+        WebDLXviD,
+
+        /// <summary>
         /// A DVD rip; the resolution is usually NTSC or PAL.
         /// </summary>
         [Description("DVD-Rip XviD")]

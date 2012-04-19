@@ -449,7 +449,7 @@
         {
             release = release.Replace((char)160, '.').Replace((char)32, '.');
 
-            if (AreMatching(release, @"1080[ip]", @"WEB[_\-\.\s]?DL"))
+            if (AreMatching(release, @"1080[ip]", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
             {
                 return Qualities.WebDL1080p;
             }
@@ -461,7 +461,7 @@
             {
                 return Qualities.HDTV1080i;
             }
-            if (AreMatching(release, @"720p", @"WEB[_\-\.\s]?DL"))
+            if (AreMatching(release, @"720p", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
             {
                 return Qualities.WebDL720p;
             }
@@ -473,7 +473,7 @@
             {
                 return Qualities.HDTV720p;
             }
-            if (AreMatching(release, @"576p", @"WEB[_\-\.\s]?DL"))
+            if (AreMatching(release, @"576p", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
             {
                 return Qualities.WebDL576p;
             }
@@ -485,7 +485,7 @@
             {
                 return Qualities.HDTV576p;
             }
-            if (AreMatching(release, @"480p", @"WEB[_\-\.\s]?DL"))
+            if (AreMatching(release, @"480p", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
             {
                 return Qualities.WebDL480p;
             }
@@ -540,6 +540,10 @@
             if (AreMatching(release, @"((HR|HQ|HiRes|High[_\-\.\s]?Res(olution)?)\b|[Hx]264)"))
             {
                 return Qualities.HRx264;
+            }
+            if (AreMatching(release, @"XviD", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
+            {
+                return Qualities.WebDLXviD;
             }
             if (AreMatching(release, @"(HDTV([_\-\.\s]?Rip)?|PDTV([_\-\.\s]?Rip)?|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)"))
             {
