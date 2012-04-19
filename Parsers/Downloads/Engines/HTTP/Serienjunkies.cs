@@ -40,6 +40,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return Site + "media/img/favicon.ico";
+            }
+        }
+
+        /// <summary>
         /// Gets the name of the plugin's developer.
         /// </summary>
         /// <value>The name of the plugin's developer.</value>

@@ -164,6 +164,7 @@
     <Compile Include="Parsers\LinkCheckers\Engines\Extabit.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\TurboBit.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
+    <Compile Include="Parsers\OnlineVideos\Engines\Serienjunkies.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
     <Compile Include="Parsers\Subtitles\Engines\LegendasTV.cs" />
@@ -856,6 +857,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\serienjunkies.png" />
     <Resource Include="Images\netflix.png" />
     <Resource Include="Images\locale.png" />
     <Resource Include="Images\disc.png" />

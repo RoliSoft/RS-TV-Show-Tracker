@@ -18,6 +18,7 @@
         private TaskDialog _td;
         private Result _res;
         private OnlineVideoSearchEngine _os;
+        private volatile bool _active;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OnlineVideoSearchEngineTaskDialog"/> class.
@@ -49,8 +50,17 @@
             _td.SetMarqueeProgressBar(true);
             _td.Destroyed   += TaskDialogDestroyed;
             _td.ButtonClick += TaskDialogDestroyed;
+            
+            _active = true;
+            new Thread(() =>
+                {
+                    Thread.Sleep(500);
 
-            new Thread(() => _res = _td.Show().CommonButton).Start();
+                    if (_active)
+                    {
+                        _res = _td.Show().CommonButton;
+                    }
+                }).Start();
 
             _os.SearchAsync(ep);
 
@@ -64,11 +74,12 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2))
+            if (_active && (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2)))
             {
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-                _res = Result.Cancel;
+                _active = false;
+                _res    = Result.Cancel;
 
                 _os.CancelSearch();
             }
@@ -81,13 +92,15 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void OnlineSearchDone(object sender, EventArgs<string, string> e)
         {
+            _active = false;
+
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             if (_td != null && _td.IsShowing)
             {
                 _td.SimulateButtonClick(-1);
             }
-
+            
             if (_res == Result.Cancel)
             {
                 return;
@@ -103,6 +116,8 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void OnlineSearchError(object sender, EventArgs<string, string, Tuple<string, string, string>> e)
         {
+            _active = false;
+
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
             if (_td != null && _td.IsShowing)
