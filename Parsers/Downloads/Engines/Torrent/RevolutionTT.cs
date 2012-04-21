@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using System.Security.Authentication;
-    using System.Text;
 
     using HtmlAgilityPack;
 
@@ -191,63 +189,15 @@
         {
             // get session id
 
-            var reqcook = new StringBuilder();
+            var session = string.Empty;
 
             Utils.GetURL(Site,
                 request:  req  => req.Referer = Site,
-                response: resp =>
-                    {
-                        if (resp.Cookies == null || resp.Cookies.Count == 0)
-                        {
-                            return;
-                        }
+                response: resp => session = Utils.EatCookieCollection(resp.Cookies));
 
-                        foreach (Cookie cookie in resp.Cookies)
-                        {
-                            if (reqcook.Length != 0)
-                            {
-                                reqcook.Append("; ");
-                            }
-
-                            reqcook.Append(cookie.Name + "=" + cookie.Value);
-                        }
-                    });
-            
             // send login request
 
-            var cookies = new StringBuilder();
-            var post    = "username=" + Utils.EncodeURL(username) + "&password=" + Utils.EncodeURL(password) + "&submit.x=60&submit.y=25";
-
-            Utils.GetURL(LoginURL, post, reqcook.ToString(),
-                request: req =>
-                    {
-                        req.Referer = Site;
-                        req.AllowAutoRedirect = false;
-                    },
-                response: resp =>
-                {
-                    if (resp.Cookies == null || resp.Cookies.Count == 0)
-                    {
-                        return;
-                    }
-
-                    foreach (Cookie cookie in resp.Cookies)
-                    {
-                        if (cookie.Name == "PHPSESSID" || cookie.Name == "JSESSIONID" || cookie.Value == "deleted")
-                        {
-                            continue;
-                        }
-
-                        if (cookies.Length != 0)
-                        {
-                            cookies.Append("; ");
-                        }
-
-                        cookies.Append(cookie.Name + "=" + cookie.Value);
-                    }
-                });
-
-            return cookies.ToString();
+            return GazelleTrackerLogin(username, password, cookies: session);
         }
     }
 }

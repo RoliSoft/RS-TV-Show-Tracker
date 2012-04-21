@@ -146,6 +146,7 @@
     <Compile Include="LocalProgrammingPlugin.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\FuckYeahTorrents.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbFrance.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbSpain.cs" />

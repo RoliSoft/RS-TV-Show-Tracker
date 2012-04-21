@@ -3,16 +3,17 @@
     using System;
     using System.Collections.Generic;
     using System.Security.Authentication;
+    using System.Text.RegularExpressions;
 
     using HtmlAgilityPack;
 
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping BitMeTV.
+    /// Provides support for scraping FuckYeahTorrents.
     /// </summary>
     [TestFixture]
-    public class BitMeTV : DownloadSearchEngine
+    public class FuckYeahTorrents : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -22,7 +23,7 @@
         {
             get
             {
-                return "BitMeTV";
+                return "FuckYeahTorrents";
             }
         }
 
@@ -34,7 +35,7 @@
         {
             get
             {
-                return "http://www.bitmetv.org/";
+                return "http://fuckyeahtorrents.com/";
             }
         }
 
@@ -58,7 +59,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-01 2:45 PM");
+                return Utils.DateTimeToVersion("2012-04-22 2:21 AM");
             }
         }
 
@@ -82,7 +83,7 @@
         {
             get
             {
-                return new[] { "uid", "pass" };
+                return new[] { "member_id", "pass_hash", "session_id", "uid", "pass", "hashv" };
             }
         }
 
@@ -122,9 +123,10 @@
             {
                 return new Dictionary<string, object>
                     {
-                        { "username", LoginFieldTypes.UserName },
-                        { "password", LoginFieldTypes.Password },
-                        { "secimage", LoginFieldTypes.Captcha  },
+                        { "username",         LoginFieldTypes.UserName },
+                        { "password",         LoginFieldTypes.Password },
+                        { "captchaSelection", LoginFieldTypes.Captcha  },
+                        { "submitme",         "X"                      },
                     };
             }
         }
@@ -142,35 +144,21 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether this site is deprecated.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
-        /// </value>
-        public override bool Deprecated
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "browse.php?search=" + Utils.EncodeURL(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "tv.php?_by=0&cat=0&search=" + Utils.EncodeURL(query), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
                 throw new InvalidCredentialException();
             }
 
-            var links = html.DocumentNode.SelectNodes("//table/tr/td/a[starts-with(@href, 'details.php')]");
-
+            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b");
+            
             if (links == null)
             {
                 yield break;
@@ -180,13 +168,13 @@
             {
                 var link = new Link(this);
 
-                link.Release = HtmlEntity.DeEntitize(node.GetAttributeValue("title"));
-                link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetAttributeValue("href"));
-                link.FileURL = Site + node.GetNodeAttributeValue("../td[1]/a", "href");
-                link.Size    = node.GetHtmlValue("../../td[6]").Trim().Replace("<br>", " ");
+                link.Release = Regex.Match(node.GetNodeAttributeValue("../", "onmouseover") ?? "<b>" + node.InnerText + "</b>", @"<b>(.*?)</b>").Groups[1].Value.Trim();
+                link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../a", "href"));
+                link.FileURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../../td[3]/a", "href"));
+                link.Size    = node.GetHtmlValue("../../../td[8]").Replace("<br>", " ");
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[8]").Trim(), node.GetTextValue("../../td[9]").Trim());
-
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[10]").Trim(), node.GetTextValue("../../../td[11]").Trim());
+                
                 yield return link;
             }
         }
@@ -199,35 +187,23 @@
         /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
         public override string Login(string username, string password)
         {
-            // get captcha image
+            // in this function we're going to entirely bypass FYT's Two-Factor Login Protection™
 
             var session = string.Empty;
-            var sectext = string.Empty;
-            var captcha = Utils.GetURL(Site + "visual.php", encoding: new Utils.Base64Encoding(),
+            var captcha = Utils.GetURL(Site + "simpleCaptcha.php?numImages=1",
                 request:  req  => req.Referer = Site,
                 response: resp => session = Utils.EatCookieCollection(resp.Cookies));
 
-            // show captcha to user
+            var hash = Regex.Match(captcha, "\"hash\":\"([^\"]+)\"");
 
-            MainWindow.Active.Run(() =>
-                {
-                    var cw  = new CaptchaWindow(Name, Convert.FromBase64String(captcha), 200, 50);
-                    var res = cw.ShowDialog();
-
-                    if (res.HasValue && res.Value)
-                    {
-                        sectext = cw.Solution;
-                    }
-                });
-
-            if (string.IsNullOrWhiteSpace(sectext))
+            if (!hash.Success)
             {
                 return string.Empty;
             }
 
             // send login request
 
-            return GazelleTrackerLogin(username, password, sectext, session);
+            return GazelleTrackerLogin(username, password, hash.Groups[1].Value, session);
         }
     }
 }

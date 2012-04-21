@@ -180,27 +180,11 @@
         {
             // get captcha image
 
-            var reqcook = new StringBuilder();
+            var session = string.Empty;
             var sectext = string.Empty;
             var captcha = Utils.GetURL(Site + "freecap.php", encoding: new Utils.Base64Encoding(),
                 request:  req  => req.Referer = Site,
-                response: resp =>
-                    {
-                        if (resp.Cookies == null || resp.Cookies.Count == 0)
-                        {
-                            return;
-                        }
-
-                        foreach (Cookie cookie in resp.Cookies)
-                        {
-                            if (reqcook.Length != 0)
-                            {
-                                reqcook.Append("; ");
-                            }
-
-                            reqcook.Append(cookie.Name + "=" + cookie.Value);
-                        }
-                    });
+                response: resp => session = Utils.EatCookieCollection(resp.Cookies));
 
             // show captcha to user
 
@@ -222,39 +206,7 @@
 
             // send login request
 
-            var cookies = new StringBuilder();
-            var post    = "username=" + Utils.EncodeURL(username) + "&password=" + Utils.EncodeURL(password) + "&word=" + Utils.EncodeURL(sectext);
-
-            Utils.GetURL(LoginURL, post, reqcook.ToString(),
-                request: req =>
-                    {
-                        req.Referer = Site;
-                        req.AllowAutoRedirect = false;
-                    },
-                response: resp =>
-                    {
-                        if (resp.Cookies == null || resp.Cookies.Count == 0)
-                        {
-                            return;
-                        }
-
-                        foreach (Cookie cookie in resp.Cookies)
-                        {
-                            if (cookie.Name == "PHPSESSID" || cookie.Name == "JSESSIONID" || cookie.Value == "deleted")
-                            {
-                                continue;
-                            }
-
-                            if (cookies.Length != 0)
-                            {
-                                cookies.Append("; ");
-                            }
-
-                            cookies.Append(cookie.Name + "=" + cookie.Value);
-                        }
-                    });
-
-            return cookies.ToString();
+            return GazelleTrackerLogin(username, password, sectext, session);
         }
     }
 }

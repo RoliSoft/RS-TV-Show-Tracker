@@ -299,16 +299,46 @@
         {
             return node.SelectSingleNode("//form[@method = 'post' and contains(@action, 'login')]") != null;
         }
-        
+
         /// <summary>
         /// Initiates a login on a Gazelle or TBSource-based tracker.
         /// </summary>
-        /// <param name="username">The username.</param>
-        /// <param name="password">The password.</param>
+        /// <param name="username">The username, if such value is required.</param>
+        /// <param name="password">The password, if such value is required.</param>
+        /// <param name="captcha">The captcha code entered by the user, if such value is required.</param>
+        /// <param name="cookies">The cookies to send to the login page.</param>
         /// <returns>
         /// Cookies.
         /// </returns>
-        protected string GazelleTrackerLogin(string username, string password)
+        protected string GazelleTrackerLogin(string username = null, string password = null, string captcha = null, string cookies = null)
+        {
+            var cookiez = string.Empty;
+            
+            Utils.GetURL(
+                LoginURL,
+                GenerateLoginPostData(username, password, captcha),
+                cookies,
+                request: req =>
+                    {
+                        req.Referer = Site;
+                        req.AllowAutoRedirect = false;
+                    },
+                response: resp => cookiez = Utils.EatCookieCollection(resp.Cookies, true)
+            );
+
+            return cookiez;
+        }
+
+        /// <summary>
+        /// Generates the login POST data using the <c>LoginFields</c> object on this current instance.
+        /// </summary>
+        /// <param name="username">The username, if such value is required.</param>
+        /// <param name="password">The password, if such value is required.</param>
+        /// <param name="captcha">The captcha code entered by the user, if such value is required.</param>
+        /// <returns>
+        /// URL-encoded data to POST to the login page.
+        /// </returns>
+        protected string GenerateLoginPostData(string username = null, string password = null, string captcha = null)
         {
             var post = new StringBuilder();
 
@@ -342,6 +372,10 @@
                             value = password;
                             break;
 
+                        case LoginFieldTypes.Captcha:
+                            value = captcha;
+                            break;
+
                         case LoginFieldTypes.ReturnTo:
                             value = "/";
                             break;
@@ -351,39 +385,7 @@
                 post.Append(Utils.EncodeURL(value));
             }
 
-            var cookies = new StringBuilder();
-            
-            Utils.GetURL(LoginURL, post.ToString(),
-                request: req =>
-                    {
-                        req.Referer = Site;
-                        req.AllowAutoRedirect = false;
-                    },
-                response: resp =>
-                    {
-                        if (resp.Cookies == null || resp.Cookies.Count == 0)
-                        {
-                            return;
-                        }
-
-                        foreach (Cookie cookie in resp.Cookies)
-                        {
-                            if (cookie.Name == "PHPSESSID" || cookie.Name == "JSESSIONID" || cookie.Value == "deleted")
-                            {
-                                continue;
-                            }
-
-                            if (cookies.Length != 0)
-                            {
-                                cookies.Append("; ");
-                            }
-
-                            cookies.Append(cookie.Name + "=" + cookie.Value);
-                        }
-                    }
-            );
-
-            return cookies.ToString();
+            return post.ToString();
         }
     }
 }

@@ -1233,6 +1233,41 @@
         }
 
         /// <summary>
+        /// Transforms a <c>CookieCollection</c> object into a cookie string.
+        /// </summary>
+        /// <param name="cookies">The wierdly-stored cookies.</param>
+        /// <param name="removeSession">if set to <c>true</c> temporary cookies (such as <c>PHPSESSID</c>) will be removed.</param>
+        /// <returns>
+        /// String of cookie key-values.
+        /// </returns>
+        public static string EatCookieCollection(CookieCollection cookies, bool removeSession = false)
+        {
+            if (cookies == null || cookies.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var cookiez = new StringBuilder();
+
+            foreach (Cookie cookie in cookies)
+            {
+                if (removeSession && (cookie.Name == "PHPSESSID" || cookie.Name == "JSESSIONID" || cookie.Value == "deleted"))
+                {
+                    continue;
+                }
+
+                if (cookiez.Length != 0)
+                {
+                    cookiez.Append("; ");
+                }
+
+                cookiez.Append(cookie.Name + "=" + cookie.Value);
+            }
+
+            return cookiez.ToString();
+        }
+
+        /// <summary>
         /// A custom encoding to denote Base64-encoded content.
         /// </summary>
         public class Base64Encoding : ASCIIEncoding
