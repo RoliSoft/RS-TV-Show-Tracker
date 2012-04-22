@@ -109,6 +109,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite, Version=1.0.74.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -165,6 +166,17 @@
     <Compile Include="Parsers\LinkCheckers\Engines\Extabit.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\TurboBit.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
+    <Compile Include="Parsers\News\Engines\SerialeTari.cs" />
+    <Compile Include="Parsers\News\Engines\TVBlog.cs" />
+    <Compile Include="Parsers\News\Engines\SorozatGURU.cs" />
+    <Compile Include="Parsers\News\Engines\EWInsideTV.cs" />
+    <Compile Include="Parsers\News\Engines\TVbytheNumbers.cs" />
+    <Compile Include="Parsers\News\Engines\TVcom.cs" />
+    <Compile Include="Parsers\News\Engines\TVLine.cs" />
+    <Compile Include="Parsers\News\Engines\TVpedia.cs" />
+    <Compile Include="Parsers\News\Engines\Sorozatjunkie.cs" />
+    <Compile Include="Parsers\News\FeedReaderEngine.cs" />
+    <Compile Include="Parsers\News\Article.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Serienjunkies.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />

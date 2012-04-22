@@ -20,6 +20,7 @@
     using System.Windows;
     using System.Windows.Interop;
     using System.Windows.Media.Imaging;
+    using System.Xml;
     using System.Xml.Linq;
 
     using HtmlAgilityPack;
@@ -340,6 +341,33 @@
             var xml = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
 
             return XDocument.Parse(xml);
+        }
+
+        /// <summary>
+        /// Downloads the specified URL and parses it as an XML.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="postData">The data to POST.</param>
+        /// <param name="cookies">The cookies.</param>
+        /// <param name="encoding">The encoding.</param>
+        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
+        /// <param name="userAgent">The user agent to send.</param>
+        /// <param name="timeout">The request timeout in milliseconds.</param>
+        /// <param name="headers">The additional headers to send.</param>
+        /// <param name="proxy">The proxy to use to connect.</param>
+        /// <param name="request">The method to call with the request object before the request is made.</param>
+        /// <param name="response">The method to call with the response object after the request was made.</param>
+        /// <returns>
+        /// Remote page's parsed content.
+        /// </returns>
+        public static XmlDocument GetXML2(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        {
+            var xml = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            var doc = new XmlDocument();
+
+            doc.LoadXml(xml);
+
+            return doc;
         }
 
         /// <summary>
