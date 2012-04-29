@@ -2,8 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
-
+    using HtmlAgilityPack;
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
@@ -148,12 +149,23 @@
                 }
 
                 var permlnk = node.GetNodeAttributeValue("../../h2/a[1]", "href");
-                var info    = node.GetTextValue("preceding-sibling::p/strong[text()='Dauer:']/..");
                 var slinks  = node.SelectNodes("a");
 
-                var sizergx = Regex.Match(info ?? string.Empty, @"(\d+)\s*([KMG]B)", RegexOptions.IgnoreCase);
-                var size    = string.Empty;
+                var infoNode = node.PreviousSibling;
+                var testFor  = new[] { "Dauer:", "Größe:", "Sprache:" };
+                var sizergx  = Match.Empty;
+                while (infoNode != null)
+                {
+                    if (testFor.Contains((infoNode.GetTextValue("strong") ?? string.Empty).Trim()))
+                    {
+                        sizergx = Regex.Match(infoNode.InnerText ?? string.Empty, @"(\d+(?:[,\.]\d+)?)\s*([KMG]B)", RegexOptions.IgnoreCase);
+                        break;
+                    }
 
+                    infoNode = infoNode.PreviousSibling;
+                }
+
+                var size = string.Empty;
                 if (sizergx.Success)
                 {
                     size = sizergx.Groups[1].Value + " " + sizergx.Groups[2].Value.ToUpper();
