@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Windows;
@@ -14,11 +16,12 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using RoliSoft.TVShowTracker.ContextMenus;
-    using RoliSoft.TVShowTracker.ContextMenus.Menus;
-    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
-    using RoliSoft.TVShowTracker.Tables;
-    using RoliSoft.TVShowTracker.TaskDialogs;
+    using ContextMenus;
+    using ContextMenus.Menus;
+    using Parsers.News;
+    using Parsers.OnlineVideos;
+    using Tables;
+    using TaskDialogs;
 
     /// <summary>
     /// Interaction logic for GuidesPage.xaml
@@ -42,6 +45,12 @@
         /// </summary>
         /// <value>The upcoming list view item collection.</value>
         public BindingList<UpcomingListViewItem> UpcomingListViewItemCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the news list view item collection.
+        /// </summary>
+        /// <value>The news list view item collection.</value>
+        public ObservableCollection<Article> NewsListViewItemCollection { get; set; }
 
         private int _activeShowID;
         private string _activeShowUrl;
@@ -106,6 +115,12 @@
             {
                 UpcomingListViewItemCollection = new BindingList<UpcomingListViewItem>();
                 ((CollectionViewSource)FindResource("cvs2")).Source = UpcomingListViewItemCollection;
+            }
+
+            if (NewsListViewItemCollection == null)
+            {
+                NewsListViewItemCollection = new ObservableCollection<Article>();
+                ((CollectionViewSource)FindResource("cvs3")).Source = NewsListViewItemCollection;
             }
 
             if (MainWindow.Active != null && MainWindow.Active.IsActive && LoadDate < Database.DataChange)
@@ -212,9 +227,10 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            upcomingListView.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
+            upcomingListView.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
             GuideListViewItemCollection.Clear();
             UpcomingListViewItemCollection.Clear();
+            NewsListViewItemCollection.Clear();
 
             if (comboBox.SelectedItem is GuideDropDownUpcomingItem)
             {
@@ -264,7 +280,7 @@
             UpcomingListViewItemCollection.RaiseListChangedEvents = true;
             UpcomingListViewItemCollection.ResetBindings();
 
-            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
+            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
             upcomingListView.Visibility = Visibility.Visible;
         }
 
@@ -308,7 +324,7 @@
                             UpcomingListViewItemCollection.RaiseListChangedEvents = true;
                             UpcomingListViewItemCollection.ResetBindings();
 
-                            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Collapsed;
+                            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
                             upcomingListView.Visibility = Visibility.Visible;
                         }));
 
@@ -338,7 +354,17 @@
             var airing = bool.Parse(show.Data.Get("airing", "False"));
 
             showGeneralName.Text = show.Name;
-            showGeneralCover.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
+
+            var cover = CoverManager.GetCoverLocation(show.Name);
+            if (File.Exists(cover))
+            {
+                showGeneralCover.Source = new BitmapImage(new Uri(cover, UriKind.Absolute));
+            }
+            else
+            {
+                cover = null;
+                showGeneralCover.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
+            }
 
             showGeneralSub.Text = string.Empty;
             string genre;
@@ -461,21 +487,26 @@
             GuideListViewItemCollection.ResetBindings();
 
             upcomingListView.Visibility = Visibility.Collapsed;
-            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = Visibility.Visible;
+            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Visible;
 
             // get cover
 
-            _workThd = new Thread(() =>
-                {
-                    var cover = CoverManager.GetCover(show.Name, s => Dispatcher.Invoke((Action)(() => SetStatus(s, true))));
-                    Dispatcher.Invoke((Action)(() =>
-                        {
-                            showGeneralCover.Source = new BitmapImage(cover ?? new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
-                            ResetStatus();
-                        }));
-                    _workThd = null;
-                });
-            _workThd.Start();
+            if (cover == null)
+            {
+                _workThd = new Thread(() =>
+                    {
+                        cover = CoverManager.GetCover(show.Name, s => Dispatcher.Invoke((Action)(() => SetStatus(s, true))));
+                        Dispatcher.Invoke((Action)(() =>
+                            {
+                                showGeneralCover.Source = new BitmapImage(cover != null ? new Uri(cover, UriKind.Absolute) : new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
+                                ResetStatus();
+                            }));
+                        _workThd = null;
+                    });
+                _workThd.Start();
+            }
+
+            TabControlSelectionChanged(null, null);
         }
         #endregion
 
@@ -866,5 +897,126 @@
             cm.IsOpen = true;
         }
         #endregion
+        
+        /// <summary>
+        /// Handles the SelectionChanged event of the tabControl control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void TabControlSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (tabControl.SelectedIndex)
+            {
+                case 2: // rss
+                    if (!(rssListView.Tag is int) || ((int)rssListView.Tag) != _activeShowID)
+                    {
+                        LoadRSSFeeds();
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Loads the RSS feeds.
+        /// </summary>
+        public void LoadRSSFeeds()
+        {
+            SetStatus("Loading feeds...", true);
+
+            var last  = new Dictionary<FeedReaderEngine, DateTime>();
+            var sites = Extensibility.GetNewInstances<FeedReaderEngine>().ToList();
+            var id    = _activeShowID;
+
+            rssListView.Tag = id;
+
+            NewsListViewItemCollection.Clear();
+
+            foreach (var site in sites)
+            {
+                last[site] = DateTime.MinValue;
+
+                var cache = site.GetCache(showGeneralName.Text).ToList();
+                if (cache.Count == 0) continue;
+
+                last[site] = cache.First().Date;
+                InsertArticles(cache);
+            }
+
+            var i = 0;
+
+            foreach (var siteLoop in sites)
+            {
+                var site = siteLoop;
+
+                if ((DateTime.Now - site.GetCacheDate(showGeneralName.Text)).TotalHours < 3) continue;
+
+                site.ArticleSearchError += (o, e) =>
+                    {
+                        if (id != _activeShowID) return;
+
+                        i--;
+
+                        if (i == 0)
+                        {
+                            FinishedLoadingFeeds();
+                        }
+                    };
+                site.ArticleSearchDone  += (o, e) =>
+                    {
+                        if (id != _activeShowID) return;
+
+                        i--;
+                        Dispatcher.Invoke((Action)(() => InsertArticles(e.Data.Where(x => x.Date > last[site]))));
+
+                        if (i == 0)
+                        {
+                            FinishedLoadingFeeds();
+                        }
+                    };
+
+                i++;
+                site.SearchAsync(showGeneralName.Text);
+            }
+
+            if (i == 0)
+            {
+                FinishedLoadingFeeds();
+            }
+        }
+
+        /// <summary>
+        /// Inserts the articles into the aggregated news list view.
+        /// </summary>
+        /// <param name="articles">The articles to insert.</param>
+        private void InsertArticles(IEnumerable<Article> articles)
+        {
+            lock (NewsListViewItemCollection)
+            {
+                foreach (var item in articles)
+                {
+                    NewsListViewItemCollection.Add(item);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when all the feeds were loaded.
+        /// </summary>
+        private void FinishedLoadingFeeds()
+        {
+            SetStatus("Found " + Utils.FormatNumber(NewsListViewItemCollection.Count, "relevant article") + ".");
+        }
+
+        /// <summary>
+        /// Handles the MouseDoubleClick event of the rssListView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void RssListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (rssListView.SelectedIndex == -1) return;
+
+            Utils.Run(((Article)rssListView.SelectedValue).Link);
+        }
     }
 }

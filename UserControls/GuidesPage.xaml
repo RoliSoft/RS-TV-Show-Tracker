@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:Transitionals="clr-namespace:Transitionals.Controls;assembly=Transitionals" xmlns:Transitions="clr-namespace:Transitionals.Transitions;assembly=Transitionals"
-             xmlns:s="clr-namespace:System;assembly=mscorlib" mc:Ignorable="d" d:Height="450" d:Width="1069" Loaded="UserControlLoaded" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True">
+             xmlns:s="clr-namespace:System;assembly=mscorlib"
+             xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase" mc:Ignorable="d" d:Height="450" d:Width="1069" Loaded="UserControlLoaded" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True">
     <UserControl.Resources>
 
         <!-- tab item style -->
@@ -44,6 +45,11 @@
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="RelativeDate"/>
             </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="cvs3">
+            <CollectionViewSource.SortDescriptions>
+                <cm:SortDescription PropertyName="Date" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
 
         <!-- toggle button -->
@@ -220,7 +226,7 @@
 
         <!-- show tab control -->
         
-        <TabControl Grid.Row="0" Name="tabControl" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0">
+        <TabControl Grid.Row="0" Name="tabControl" Background="Transparent" BorderBrush="Transparent" Margin="0,25,0,0" BorderThickness="0" TabStripPlacement="Right" Padding="0,0,3,0" SelectionChanged="TabControlSelectionChanged">
 
             <!-- general tab -->
 
@@ -346,7 +352,50 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>
-                
+            </TabItem>
+
+            <!-- news tab -->
+
+            <TabItem Name="newsTab" Visibility="Collapsed">
+                <TabItem.Header>
+                    <Image Source="/RSTVShowTracker;component/Images/feed.png" Margin="0,-1,0,0" Height="16" Width="16"></Image>
+                </TabItem.Header>
+                <ListView Visibility="Collapsed" Margin="0" Name="rssListView" ItemsSource="{Binding Source={StaticResource cvs3}}" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" MouseDoubleClick="RssListViewMouseDoubleClick">
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="False">
+                            <GridViewColumn Width="830">
+                                <GridViewColumnHeader Margin="-3,0,0,0" Content="Aggregated news" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding Source.Icon}" ToolTip="{Binding Source.Name}" Height="16" Width="16" VerticalAlignment="Top" Margin="0,0,3,0" />
+                                                <TextBlock Text="{Binding Title}" Width="665" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding Date, StringFormat={}{0:MMMM d\, yyyy H:mm}}" Width="135" TextAlignment="Right" FontWeight="Normal" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Summary}" FontWeight="Normal" TextTrimming="CharacterEllipsis">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="{x:Type TextBlock}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="Text" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                </ListView>
             </TabItem>
 
         </TabControl>

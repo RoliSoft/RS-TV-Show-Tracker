@@ -870,6 +870,7 @@
     <Content Include="Dependencies\protobuf-net.dll" />
     <Content Include="Dependencies\SharpCompress.dll" />
     <Content Include="Dependencies\Starksoft.Net.Proxy.dll" />
+    <Resource Include="Images\feed.png" />
     <Resource Include="Images\serienjunkies.png" />
     <Resource Include="Images\netflix.png" />
     <Resource Include="Images\locale.png" />

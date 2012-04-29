@@ -48,8 +48,7 @@
         /// Searches for articles on the service asynchronously.
         /// </summary>
         /// <param name="query">The name of the TV show to search for.</param>
-        /// <returns>List of cached articles from the last search or <c>null</c>.</returns>
-        public IEnumerable<Article> SearchAsync(string query)
+        public void SearchAsync(string query)
         {
             CancelAsync();
 
@@ -69,8 +68,6 @@
                     }
                 });
             _job.Start();
-
-            return GetCache(query).ToList();
         }
 
         /// <summary>
@@ -124,7 +121,7 @@
                 var article = new Article(this);
 
                 article.Title   = HtmlEntity.DeEntitize(item.Title.Text);
-                article.Summary = Regex.Replace(HtmlEntity.DeEntitize(item.Summary.Text), @"\s*<[^>]+>\s*", string.Empty);
+                article.Summary = Regex.Replace(HtmlEntity.DeEntitize(item.Summary.Text), @"\s*<[^>]+>\s*", string.Empty).Trim();
                 article.Date    = item.PublishDate.DateTime;
                 article.Link    = HtmlEntity.DeEntitize(item.Links[0].Uri.ToString());
 
@@ -133,11 +130,25 @@
         }
 
         /// <summary>
+        /// Gets the date when the cache was last written to.
+        /// </summary>
+        /// <param name="query">The name of the TV show to get the cache's date for.</param>
+        /// <returns>Date of last file write or <c>DateTime.MinValue</c>.</returns>
+        public DateTime GetCacheDate(string query)
+        {
+            var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
+
+            return !File.Exists(fn)
+                  ? DateTime.MinValue
+                  : File.GetLastWriteTime(fn);
+        }
+
+        /// <summary>
         /// Gets the cached articles from the last search on this service.
         /// </summary>
         /// <param name="query">The name of the TV show to get the cached articles for.</param>
         /// <returns>List of cached articles from the last search or <c>null</c>.</returns>
-        protected IEnumerable<Article> GetCache(string query)
+        public IEnumerable<Article> GetCache(string query)
         {
             var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
 

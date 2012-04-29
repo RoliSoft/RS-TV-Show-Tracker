@@ -36,6 +36,18 @@
         }
 
         /// <summary>
+        /// Gets the local cover location of the specified show.
+        /// </summary>
+        /// <param name="show">The show to get the cover location for.</param>
+        /// <returns>
+        /// Local location of the cover.
+        /// </returns>
+        public static string GetCoverLocation(string show)
+        {
+            return Path.Combine(Location, Utils.CreateSlug(show, false) + ".jpg");
+        }
+
+        /// <summary>
         /// Gets the cover of the specified show.
         /// </summary>
         /// <param name="show">The show to get covers for.</param>
@@ -43,10 +55,9 @@
         /// <returns>
         /// Cover of the specified show or null.
         /// </returns>
-        public static Uri GetCover(string show, Action<string> status)
+        public static string GetCover(string show, Action<string> status)
         {
-            var clean = Utils.CreateSlug(show, false);
-            var cover = Path.Combine(Location, clean + ".jpg");
+            var cover = GetCoverLocation(show);
 
             if (File.Exists(cover))
             {
@@ -94,7 +105,7 @@
             return null;
 
           success:
-            return new Uri(cover, UriKind.Absolute);
+            return cover;
         }
 
         /// <summary>

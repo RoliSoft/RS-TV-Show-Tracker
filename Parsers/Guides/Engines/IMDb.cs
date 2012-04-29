@@ -94,8 +94,9 @@
                     id.URL      = "http://www.imdb.com/title/" + (string)show["tconst"] + "/";
                     id.ID       = ((string)show["tconst"]).Substring(2);
                     id.Title    = (string)show["title"] + " (" + (string)show["year"] + ")";
-                    id.Cover    = (string)show["image"]["url"];
                     id.Language = "en";
+
+                    try { id.Cover = (string)show["image"]["url"]; } catch { }
 
                     yield return id;
                 }
