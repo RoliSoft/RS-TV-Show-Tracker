@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.ServiceModel.Syndication;
     using System.Text.RegularExpressions;
@@ -10,6 +11,8 @@
     using HtmlAgilityPack;
 
     using NUnit.Framework;
+
+    using ProtoBuf;
 
     /// <summary>
     /// Represents a feed reader engine.
@@ -26,11 +29,6 @@
         /// Occurs when an article search is done.
         /// </summary>
         public event EventHandler<EventArgs<List<Article>>> ArticleSearchDone;
-
-        /// <summary>
-        /// Occurs when an article search is returned from cache.
-        /// </summary>
-        public event EventHandler<EventArgs<List<Article>>> ArticleSearchCached;
 
         /// <summary>
         /// Occurs when an article search has encountered an error.
@@ -50,22 +48,29 @@
         /// Searches for articles on the service asynchronously.
         /// </summary>
         /// <param name="query">The name of the TV show to search for.</param>
-        public void SearchAsync(string query)
+        /// <returns>List of cached articles from the last search or <c>null</c>.</returns>
+        public IEnumerable<Article> SearchAsync(string query)
         {
             CancelAsync();
 
             _job = new Thread(() =>
-            {
-                try
                 {
-                    ArticleSearchDone.Fire(this, Search(query).ToList());
-                }
-                catch (Exception ex)
-                {
-                    ArticleSearchError.Fire(this, "There was an error while searching for articles.", ex);
-                }
-            });
+                    try
+                    {
+                        var result = Search(query).ToList();
+
+                        ArticleSearchDone.Fire(this, result);
+
+                        SetCache(query, result);
+                    }
+                    catch (Exception ex)
+                    {
+                        ArticleSearchError.Fire(this, "There was an error while searching for articles.", ex);
+                    }
+                });
             _job.Start();
+
+            return GetCache(query).ToList();
         }
 
         /// <summary>
@@ -125,6 +130,45 @@
 
                 yield return article;
             }
-        }  
+        }
+
+        /// <summary>
+        /// Gets the cached articles from the last search on this service.
+        /// </summary>
+        /// <param name="query">The name of the TV show to get the cached articles for.</param>
+        /// <returns>List of cached articles from the last search or <c>null</c>.</returns>
+        protected IEnumerable<Article> GetCache(string query)
+        {
+            var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
+
+            if (!File.Exists(fn))
+            {
+                yield break;
+            }
+
+            using (var file = File.OpenRead(fn))
+            {
+                foreach (var article in Serializer.Deserialize<List<Article>>(file))
+                {
+                    article.Source = this;
+                    yield return article;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the cached articles on this service for this show.
+        /// </summary>
+        /// <param name="query">The name of the TV show to set the cached aricles for.</param>
+        /// <param name="articles">The articles to cache.</param>
+        protected void SetCache(string query, IEnumerable<Article> articles)
+        {
+            var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
+
+            using (var file = File.Create(fn))
+            {
+                Serializer.Serialize(file, articles);
+            }
+        }
     }
 }
