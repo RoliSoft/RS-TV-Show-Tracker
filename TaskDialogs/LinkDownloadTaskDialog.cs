@@ -26,7 +26,7 @@
         /// </summary>
         /// <param name="link">The link.</param>
         /// <param name="token">The token.</param>
-        public void Download(LinkItem link, string token)
+        public void Download(Link link, string token)
         {
             if (link.FileURL.StartsWith("magnet:"))
             {

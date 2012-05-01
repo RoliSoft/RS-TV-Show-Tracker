@@ -3,8 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Text.RegularExpressions;
-    using HtmlAgilityPack;
+
     using NUnit.Framework;
 
     using RoliSoft.TVShowTracker.Downloaders;
@@ -14,7 +15,7 @@
     /// Provides support for scraping Serienjunkies.
     /// </summary>
     [TestFixture]
-    public class Serienjunkies : DownloadSearchEngine
+    public class Serienjunkies : DownloadSearchEngine, ILinkExpander<Link>
     {
         /// <summary>
         /// Gets the name of the site.
@@ -190,6 +191,71 @@
                     yield return link;
                 }
             }
+        }
+
+        /// <summary>
+        /// Extracts the direct links from the supplied link.
+        /// </summary>
+        /// <param name="link">The protected link.</param>
+        /// <returns>Direct links.</returns>
+        public string ExpandLinks(Link link)
+        {
+            var html = Utils.GetHTML(link.FileURL);
+
+            var captcha = html.DocumentNode.GetNodeAttributeValue("//td/img[contains(@src, '/secure/')]", "src");
+            var session = html.DocumentNode.GetNodeAttributeValue("//input[@name='s']", "value");
+
+            if (captcha == null && session == null)
+            {
+                goto extract;
+            }
+
+            var sectext = string.Empty;
+
+            MainWindow.Active.Run(() =>
+                {
+                    var cw  = new CaptchaWindow(Name, "http://download.serienjunkies.org" + captcha, 100, 60);
+                    var res = cw.ShowDialog();
+
+                    if (res.HasValue && res.Value)
+                    {
+                        sectext = cw.Solution;
+                    }
+                });
+
+            if (string.IsNullOrWhiteSpace(sectext))
+            {
+                return link.FileURL;
+            }
+
+            html = Utils.GetHTML(link.FileURL, "s=" + session + "&c=" + sectext + "&action=Download");
+
+        extract:
+            var links = html.DocumentNode.SelectNodes("//form[contains(@action, '/go-')]");
+
+            if (links == null)
+            {
+                return link.FileURL;
+            }
+
+            var urls = string.Empty;
+
+            foreach (var node in links)
+            {
+                var url = node.GetAttributeValue("action");
+
+                if (string.IsNullOrWhiteSpace(url)) continue;
+
+                Utils.GetHTML(
+                    url,
+                    request:  r => r.AllowAutoRedirect = false,
+                    response: r => url = r.Headers[HttpResponseHeader.Location]
+                );
+
+                urls += url + "\0";
+            }
+
+            return urls.TrimEnd('\0');
         }
     }
 }

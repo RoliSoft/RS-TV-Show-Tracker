@@ -21,6 +21,7 @@
     using ContextMenus.Menus;
     using Downloaders.Engines;
     using Helpers;
+    using Parsers;
     using Parsers.Downloads;
     using TaskDialogs;
 
@@ -602,13 +603,13 @@
                 var oib    = new MenuItem();
                 oib.Header = "Download file in browser";
                 oib.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page-dl.png")) };
-                oib.Click += (s, r) =>
+                oib.Click += (s, r) => ProcessLink(link, x =>
                     {
-                        foreach (var url in link.FileURL.Split('\0'))
+                        foreach (var url in x.FileURL.Split('\0'))
                         {
                             Utils.Run(url);
                         }
-                    };
+                    });
                 cm.Items.Add(oib);
             }
 
@@ -650,7 +651,7 @@
                 var jd    = new MenuItem();
                 jd.Header = "Send to JDownloader";
                 jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")) };
-                jd.Click += (s, r) => SendToJDownloader(link.FileURL.Split('\0'));
+                jd.Click += (s, r) => ProcessLink(link, x => SendToJDownloader(x.FileURL.Split('\0')));
                 cm.Items.Add(jd);
             }
 
@@ -683,7 +684,7 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var link = (LinkItem)listView.SelectedValue;
+            var link = (Link)listView.SelectedValue;
 
             if (_defaultTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
             {
@@ -699,14 +700,17 @@
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL) && !string.IsNullOrWhiteSpace(_jDlPath) && link.Source.Type == Types.DirectHTTP)
             {
-                SendToJDownloader(link.FileURL.Split('\0'));
+                ProcessLink(link, x => SendToJDownloader(x.FileURL.Split('\0')));
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL))
             {
-                foreach (var url in link.FileURL.Split('\0'))
-                {
-                    Utils.Run(url);
-                }
+                ProcessLink(link, x =>
+                    {
+                        foreach (var url in x.FileURL.Split('\0'))
+                        {
+                            Utils.Run(url);
+                        }
+                    });
             }
             else if (!string.IsNullOrWhiteSpace(link.InfoURL))
             {
@@ -724,6 +728,30 @@
             File.WriteAllText(tmp, DLCAPI.CreateRSDF(urls));
             Utils.Run(_jDlPath, tmp);
         }
+
+        /// <summary>
+        /// Processes the link.
+        /// </summary>
+        /// <param name="link">The link.</param>
+        /// <param name="callback">The callback.</param>
+        private void ProcessLink(Link link, Action<Link> callback)
+        {
+            if (link.Source is ILinkExpander<Link>)
+            {
+                var url = string.Empty;
+
+                new GenericAsyncTaskDialog(
+                    "Expanding links...",
+                    "Bypassing the link protection on " + new Uri(link.FileURL.Split('\0')[0]).Host + "...",
+                    () => url = ((ILinkExpander<Link>)link.Source).ExpandLinks(link),
+                    () => { link.FileURL = url; callback(link); }
+                ).Run();
+            }
+            else
+            {
+                callback(link);
+            }
+        }
         #endregion
 
         #region Download file
@@ -736,9 +764,10 @@
         {
             if (listView.SelectedIndex == -1) return;
 
-            var link = (LinkItem)listView.SelectedValue;
-
-            new LinkDownloadTaskDialog().Download(link, sender is string ? sender as string : "DownloadFile");
+            ProcessLink(
+                (Link)listView.SelectedValue,
+                link => new LinkDownloadTaskDialog().Download(link, sender is string ? sender as string : "DownloadFile")
+            );
         }
         #endregion
     }

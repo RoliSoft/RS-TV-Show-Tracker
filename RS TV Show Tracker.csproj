@@ -148,6 +148,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\FuckYeahTorrents.cs" />
+    <Compile Include="Parsers\ILinkExpander.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbFrance.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbSpain.cs" />
@@ -267,6 +268,7 @@
     <Compile Include="Synchronization\SyncEngine.cs" />
     <Compile Include="Tables\Episode.cs" />
     <Compile Include="Tables\TVShow.cs" />
+    <Compile Include="TaskDialogs\GenericAsyncTaskDialog.cs" />
     <Compile Include="TaskDialogs\OpenArchiveTaskDialog.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />
     <Compile Include="TaskDialogs\LinkDownloadTaskDialog.cs" />
