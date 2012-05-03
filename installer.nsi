@@ -4,7 +4,12 @@
 !define VERSION "2.0.0.0"
 !define COPYRIGHT "© 2011 RoliSoft"
 !define DESCRIPTION "RS TV Show Tracker"
-!define INSTALLER_NAME "tvshowtracker_v2_setup.exe"
+!ifndef INSTALLER_NAME
+	!define INSTALLER_NAME "tvshowtracker_v2_setup.exe"
+!endif
+!ifndef TARGET_DIR
+	!define TARGET_DIR "Release"
+!endif
 !define MAIN_APP_EXE "RSTVShowTracker.exe"
 !define INSTALL_TYPE "SetShellVarContext current"
 !define REG_ROOT "HKCU"
@@ -169,9 +174,9 @@ Section -MainProgram
 	File "Dependencies\System.Data.SQLite.dll"
 	File "Dependencies\Transitionals.dll"
 	File "Dependencies\VistaControls.dll"
-	File "bin\Release\RSTVShowTracker.exe"
-	File "bin\Release\RSTVShowTracker.exe.config"
-	File "bin\Release\RSTVShowTracker.pdb"
+	File "bin\${TARGET_DIR}\RSTVShowTracker.exe"
+	File "bin\${TARGET_DIR}\RSTVShowTracker.exe.config"
+	File "bin\${TARGET_DIR}\RSTVShowTracker.pdb"
 SectionEnd
 
 ######################################################################
