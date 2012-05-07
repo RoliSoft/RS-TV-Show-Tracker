@@ -5,10 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Security;
-    using System.Text.RegularExpressions;
     using System.Threading;
-
-    using ProtoBuf;
 
     /// <summary>
     /// Various functions to discover TV shows in a specified input.
@@ -28,14 +25,6 @@
         /// </value>
         public Thread SearchThread { get; internal set; }
 
-        /// <summary>
-        /// Gets or sets the list of regexes from the list of all known shows.
-        /// </summary>
-        /// <value>
-        /// The list of regexes from the list of all known shows.
-        /// </value>
-        public Dictionary<FileNames.Parser.KnownTVShow, Regex> ShowRegexes { get; set; }
-
         private HashSet<string> _results;
 
         /// <summary>
@@ -47,8 +36,6 @@
         /// </returns>
         public List<string> DiscoverFiles(string path)
         {
-            GenerateShowRegexes();
-            
             _results = new HashSet<string>();
 
             ScanDirectoryForFile(path);
@@ -72,36 +59,6 @@
         public void CancelAsync()
         {
             try { SearchThread.Abort(); } catch { }
-        }
-
-        /// <summary>
-        /// Generates a list of regexes from the list of all known shows.
-        /// </summary>
-        private void GenerateShowRegexes()
-        {
-            if (FileNames.Parser.AllKnownTVShows.Count == 0)
-            {
-                var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin");
-
-                if (File.Exists(fn) && new FileInfo(fn).Length != 0)
-                {
-                    using (var file = File.OpenRead(fn))
-                    {
-                        try { FileNames.Parser.AllKnownTVShows = Serializer.Deserialize<List<FileNames.Parser.KnownTVShow>>(file); } catch { }
-                    }
-                }
-                else
-                {
-                    try { FileNames.Parser.GetAllKnownTVShows(); } catch { }
-                }
-            }
-
-            ShowRegexes = new Dictionary<FileNames.Parser.KnownTVShow, Regex>();
-
-            foreach (var show in FileNames.Parser.AllKnownTVShows.Where(x => !string.IsNullOrWhiteSpace(x.Slug)).GroupBy(x => x.Slug).Select(x => x.First()))
-            {
-                ShowRegexes.Add(show, ShowNames.Parser.GenerateTitleRegex(show.Title));
-            }
         }
 
         /// <summary>
@@ -167,16 +124,10 @@
         /// <param name="file">The file.</param>
         private void CheckFile(string file)
         {
-            var name = Path.GetFileName(file);
-            var dirs = Path.GetDirectoryName(file) ?? string.Empty;
-
-            foreach (var show in ShowRegexes)
+            var pf = FileNames.Parser.ParseFile(Path.GetFileName(file), Path.GetDirectoryName(file).Split(Path.DirectorySeparatorChar), false);
+            if (pf.Success)
             {
-                if (ShowNames.Parser.IsMatch(dirs + @"\" + name, show.Value))
-                {
-                    _results.Add(show.Key.Title);
-                    break;
-                }
+                _results.Add(pf.Show);
             }
         }
     }

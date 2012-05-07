@@ -66,8 +66,11 @@
         /// <param name="file">The file.</param>
         /// <param name="parents">The name of the parent directories.</param>
         /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked to identify a show after the local database failed.</param>
-        /// <returns>Parsed file information.</returns>
-        public static ShowFile ParseFile(string file, string[] parents = null, bool askRemote = true)
+        /// <param name="extractEpisode">if set to <c>true</c> the file will be mapped to an episode in the database.</param>
+        /// <returns>
+        /// Parsed file information.
+        /// </returns>
+        public static ShowFile ParseFile(string file, string[] parents = null, bool askRemote = true, bool extractEpisode = true)
         {
             // split the name into two parts: before and after the episode numbering
 
@@ -100,7 +103,7 @@
 
             if (!string.IsNullOrWhiteSpace(name))
             {
-                var info = IdentifyShow(name, ep, askRemote);
+                var info = IdentifyShow(name, extractEpisode ? ep : null, askRemote);
 
                 if (info != null)
                 {
@@ -120,7 +123,7 @@
                     if ((parents.Length - i) <= 0) break;
 
                     var dir = Regexes.VolNumbering.Replace(Regexes.SpecialChars.Replace(parents[parents.Length - i].ToUpper(), " ").Trim(), string.Empty);
-                    var dirinfo = IdentifyShow(dir, ep);
+                    var dirinfo = IdentifyShow(dir, extractEpisode ? ep : null);
 
                     if (dirinfo != null)
                     {
@@ -174,7 +177,9 @@
         /// <param name="name">The name of the show.</param>
         /// <param name="ep">The episode.</param>
         /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked to identify a show after the local database failed.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// A tuple containing the show's and episode's title and airdate.
+        /// </returns>
         private static Tuple<string, string, DateTime> IdentifyShow(string name, ShowEpisode ep, bool askRemote = false)
         {
             var title = string.Empty;
@@ -182,7 +187,7 @@
             var match = false;
 
             // try to find show in local database
-
+            
             foreach (var show in Database.TVShows)
             {
                 var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Value.Name).Match(name);
@@ -190,7 +195,14 @@
 
                 if ((titleMatch.Success && titleMatch.Value == name) || (releaseMatch != null && releaseMatch.Success && releaseMatch.Value == name))
                 {
-                    if (ep.AirDate != null)
+                    if (ep == null)
+                    {
+                        match = true;
+                        name  = show.Value.Name;
+
+                        break;
+                    }
+                    else if (ep.AirDate != null)
                     {
                         var episode = Database.Episodes.Where(x => x.ShowID == show.Value.ShowID && x.Airdate.ToOriginalTimeZone(x.Show.Data.Get("timezone")).Date == ep.AirDate.Value.Date).ToList();
                         if (episode.Count != 0)
@@ -221,7 +233,7 @@
                     }
                 }
             }
-
+            
             // try to find show in the local cache of the list over at lab.rolisoft.net
 
             if (!match)
@@ -254,7 +266,12 @@
                     }
                 }
 
-                if (matches.Count != 0)
+                if (matches.Count != 0 && ep == null)
+                {
+                    match = true;
+                    name  = matches[0].Title;
+                }
+                else if (matches.Count != 0 && ep != null)
                 {
                     Tables.TVShow local = null;
 
@@ -297,7 +314,7 @@
                             }
                         }
                     }
-                    else if (ShowIDCache.ContainsKey(name))
+                    else if (ShowIDCache.ContainsKey(name) && TVShowCache.ContainsKey(name))
                     {
                         match = true;
                         name  = ShowIDCache[name].Title;
@@ -335,7 +352,7 @@
                         name  = data.Title;
 
                         TVShowCache[name] = data;
-                    
+                        
                         if (ep.AirDate != null)
                         {
                             var eps = data.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
@@ -368,25 +385,35 @@
                 match = true;
                 name  = ShowIDCache[name].Title;
 
-                if (ep.AirDate != null)
+                if (ep != null)
                 {
-                    var eps = TVShowCache[name].Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
-                    if (eps.Count() != 0)
+                    if (TVShowCache.ContainsKey(name))
                     {
-                        title = eps[0].Title;
-                        date  = eps[0].Airdate;
+                        if (ep.AirDate != null)
+                        {
+                            var eps = TVShowCache[name].Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
 
-                        ep.Season  = eps[0].Season;
-                        ep.Episode = eps[0].Number;
+                                ep.Season  = eps[0].Season;
+                                ep.Episode = eps[0].Number;
+                            }
+                        }
+                        else
+                        {
+                            var eps = TVShowCache[name].Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+                            }
+                        }
                     }
-                }
-                else
-                {
-                    var eps = TVShowCache[name].Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
-                    if (eps.Count() != 0)
+                    else
                     {
-                        title = eps[0].Title;
-                        date  = eps[0].Airdate;
+                        match = false;
                     }
                 }
             }
@@ -399,35 +426,45 @@
 
                 if (req.Success)
                 {
-                    var guide = Updater.CreateGuide(req.Source);
-                    var data  = guide.GetData(req.SourceID);
-
-                    ShowIDCache[name] = new ShowID { Title = data.Title };
-
-                    match = true;
-                    name  = data.Title;
-
-                    TVShowCache[name] = data;
-                    
-                    if (ep.AirDate != null)
+                    if (ep == null)
                     {
-                        var eps = data.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
-                        if (eps.Count() != 0)
-                        {
-                            title = eps[0].Title;
-                            date  = eps[0].Airdate;
+                        ShowIDCache[name] = new ShowID { Title = req.Title };
 
-                            ep.Season  = eps[0].Season;
-                            ep.Episode = eps[0].Number;
-                        }
+                        match = true;
+                        name  = req.Title;
                     }
                     else
                     {
-                        var eps = data.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
-                        if (eps.Count() != 0)
+                        var guide = Updater.CreateGuide(req.Source);
+                        var data  = guide.GetData(req.SourceID);
+
+                        ShowIDCache[name] = new ShowID { Title = data.Title };
+
+                        match = true;
+                        name  = data.Title;
+
+                        TVShowCache[name] = data;
+                    
+                        if (ep.AirDate != null)
                         {
-                            title = eps[0].Title;
-                            date  = eps[0].Airdate;
+                            var eps = data.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+
+                                ep.Season  = eps[0].Season;
+                                ep.Episode = eps[0].Number;
+                            }
+                        }
+                        else
+                        {
+                            var eps = data.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
+                            if (eps.Count() != 0)
+                            {
+                                title = eps[0].Title;
+                                date  = eps[0].Airdate;
+                            }
                         }
                     }
                 }

@@ -1147,7 +1147,7 @@
             if (extraSlim)
             {
                 // remove stopwords, year, and special characters including spaces
-                title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|\b(and|the|of|a)\b|[^a-z0-9])", string.Empty).Trim();
+                title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|\s20\d{2}$|\b(and|the|of|a)\b|[^a-z0-9])", string.Empty).Trim();
             }
             else
             {
