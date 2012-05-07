@@ -5,6 +5,7 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Net;
+    using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
@@ -233,8 +234,66 @@
                     (mi.Header as StackPanel).Children.Add(new Label
                         {
                             Content = engine.Name,
-                            Padding = new Thickness(5, 0, 0, 0)
+                            Padding = new Thickness(5, 0, 0, 0),
+                            Width   = 105
                         });
+
+                    if (engine.Private)
+                    {
+                        var login   = Settings.Get(engine.Name + " Login", string.Empty);
+                        var cookies = Settings.Get(engine.Name + " Cookies", string.Empty);
+                        var tooltip = string.Empty;
+
+                        if (string.IsNullOrWhiteSpace(login) && string.IsNullOrWhiteSpace(cookies))
+                        {
+                            if (engine.CanLogin)
+                            {
+                                tooltip = "Go to Settings, click on the Parsers tab, then select this site and enter the username and password.";
+                            }
+                            else
+                            {
+                                tooltip = "Go to Settings, click on the Parsers tab, then select this site and enter the extracted cookies.";
+                            }
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(login))
+                        {
+                            try
+                            {
+                                var ua = Utils.Decrypt(login, engine.GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+                                tooltip = "You have supplied login credentials for " + ua[0] + ".";
+                            }
+                            catch (Exception ex)
+                            {
+                                tooltip = "Error while decrypting login credentials: " + ex.Message;
+                            }
+                        }
+                        else if (!string.IsNullOrWhiteSpace(cookies))
+                        {
+                            tooltip = "You have supplied the following cookies:";
+
+                            foreach (var cookie in cookies.Split(';'))
+                            {
+                                if (cookie.TrimStart().StartsWith("pass"))
+                                {
+                                    tooltip += "\r\n - " + Regex.Replace(cookie.Trim(), "(?<=pass=.{4})(.+)", m => new string('▪', m.Groups[1].Value.Length)).CutIfLonger(60);
+                                }
+                                else
+                                {
+                                    tooltip += "\r\n - " + cookie.Trim().CutIfLonger(60);
+                                }
+                            }
+                        }
+
+                        (mi.Header as StackPanel).Children.Add(new Image
+                            {
+                                Source  = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/" + (string.IsNullOrWhiteSpace(login) && string.IsNullOrWhiteSpace(cookies) ? "lock" : "key") + ".png", UriKind.Relative)),
+                                Width   = 16,
+                                Height  = 16,
+                                Margin  = new Thickness(3, -2, -100, 0),
+                                ToolTip = "This is a private site and therefore a valid account is required to search on it.\r\n" + tooltip
+                            });
+                    }
 
                     mi.Checked   += SearchEngineMenuItemChecked;
                     mi.Unchecked += SearchEngineMenuItemUnchecked;
