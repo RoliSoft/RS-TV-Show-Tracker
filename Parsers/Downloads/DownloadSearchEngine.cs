@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
     using System.Security.Authentication;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -323,7 +322,7 @@
                         req.Referer = Site;
                         req.AllowAutoRedirect = false;
                     },
-                response: resp => cookiez = Utils.EatCookieCollection(resp.Cookies, true)
+                response: resp => cookiez = Utils.EatCookieCollection(resp.Cookies, !RequiredCookies.Contains("PHPSESSID"))
             );
 
             return cookiez;

@@ -56,7 +56,74 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-04-17 5:59 AM");
+                return Utils.DateTimeToVersion("2012-05-07 4:52 PM");
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the site requires authentication.
+        /// </summary>
+        /// <value><c>true</c> if requires authentication; otherwise, <c>false</c>.</value>
+        public override bool Private
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the names of the required cookies for the authentication.
+        /// </summary>
+        /// <value>The required cookies for authentication.</value>
+        public override string[] RequiredCookies
+        {
+            get
+            {
+                return new[] { "Login", "Auth", "PHPSESSID" };
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this search engine can login using a username and password.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this search engine can login; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanLogin
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the login page.
+        /// </summary>
+        /// <value>The URL to the login page.</value>
+        public override string LoginURL
+        {
+            get
+            {
+                return Site + "login_verificar.php";
+            }
+        }
+
+        /// <summary>
+        /// Gets the input fields of the login form.
+        /// </summary>
+        /// <value>The input fields of the login form.</value>
+        public override Dictionary<string, object> LoginFields
+        {
+            get
+            {
+                return new Dictionary<string, object>
+                    {
+                        { "txtLogin", LoginFieldTypes.UserName },
+                        { "txtSenha", LoginFieldTypes.Password },
+                        { "chkLogin", "1"                      }
+                    };
             }
         }
 
@@ -67,7 +134,7 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "index.php?opcao=buscarlegenda", "selTipo=1&int_idioma=99&btn_buscar.x=25&btn_buscar.y=6&txtLegenda=" + Utils.EncodeURL(ShowNames.Parser.CleanTitleWithEp(query)));
+            var html = Utils.GetHTML(Site + "index.php?opcao=buscarlegenda", "selTipo=1&int_idioma=99&btn_buscar.x=25&btn_buscar.y=6&txtLegenda=" + Utils.EncodeURL(ShowNames.Parser.CleanTitleWithEp(query)), cookies: Cookies);
             var subs = html.DocumentNode.SelectNodes("//span[@class='brls']");
 
             if (subs == null)
@@ -90,6 +157,17 @@
 
                 yield return sub;
             }
+        }
+
+        /// <summary>
+        /// Authenticates with the site and returns the cookies.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
+        public override string Login(string username, string password)
+        {
+            return GazelleTrackerLogin(username, password);
         }
     }
 }

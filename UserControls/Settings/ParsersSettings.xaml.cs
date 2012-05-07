@@ -104,7 +104,13 @@
                         Type    = "Subtitles",
                         Icon    = engine.Icon,
                         Site    = engine.Name,
-                        Login   = "/RSTVShowTracker;component/Images/na.png",
+                        Login   = engine.Private
+                                  ? !string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login"))
+                                    ? "/RSTVShowTracker;component/Images/tick.png"
+                                    : !string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Cookies"))
+                                      ? "/RSTVShowTracker;component/Images/cookie.png"
+                                      : "/RSTVShowTracker;component/Images/cross.png"
+                                  : "/RSTVShowTracker;component/Images/na.png",
                         Version = engine.Version.ToString().PadRight(14, '0')
                     });
             }
@@ -187,19 +193,35 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void ParserEditButtonClick(object sender, RoutedEventArgs e)
         {
-            var sel = listView.SelectedItem as DownloadsListViewItem;
-            var prs = AutoDownloader.SearchEngines.Single(en => en.Name == sel.Site);
+            dynamic parser = null;
+            var sel = (DownloadsListViewItem)listView.SelectedItem;
 
-            if (prs.Private)
+            switch (sel.Type)
             {
-                if (new ParserWindow(prs).ShowDialog() == true) // Nullable<bool> vs true
+                case "Download links":
+                    parser = AutoDownloader.SearchEngines.Single(en => en.Name == sel.Site);
+                    break;
+
+                case "Subtitles":
+                    parser = SubtitlesPage.SearchEngines.Single(en => en.Name == sel.Site);
+                    break;
+            }
+
+            if (parser == null)
+            {
+                return;
+            }
+
+            if (parser.Private)
+            {
+                if (new ParserWindow(parser).ShowDialog() == true) // Nullable<bool> vs true
                 {
                     ReloadParsers();
                 }
             }
             else
             {
-                MessageBox.Show(prs.Name + " does not require authentication to search the site.", "Login not required", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(parser.Name + " does not require authentication to search the site.", "Login not required", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

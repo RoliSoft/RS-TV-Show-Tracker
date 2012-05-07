@@ -11,8 +11,6 @@
 
     using WebBrowser = System.Windows.Forms.WebBrowser;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-
     /// <summary>
     /// Interaction logic for CookieCatcherWindow.xaml
     /// </summary>
@@ -24,7 +22,7 @@
         /// <value>
         /// The engine.
         /// </value>
-        public DownloadSearchEngine Engine { get; set; }
+        public dynamic Engine { get; set; }
 
         /// <summary>
         /// Gets or sets the cookies.
@@ -40,7 +38,7 @@
         /// Initializes a new instance of the <see cref="SettingsWindow"/> class.
         /// </summary>
         /// <param name="engine">The engine to grab cookies for.</param>
-        public CookieCatcherWindow(DownloadSearchEngine engine)
+        public CookieCatcherWindow(dynamic engine)
         {
             InitializeComponent();
 
@@ -60,7 +58,7 @@
                 SetAeroGlassTransparency();
             }
 
-            Title           = "Login to {0}".FormatWith(Engine.Name);
+            Title           = "Login to {0}".FormatWith((string)Engine.Name);
             urlTextBox.Text = Engine.Site;
             favicon.Source  = new BitmapImage(new Uri("http://getfavicon.appspot.com/http://{0}/".FormatWith(new Uri(Engine.Site).DnsSafeHost)));
 
@@ -99,7 +97,7 @@
         {
             Cookies = _webBrowser.Document.Cookie ?? string.Empty;
 
-            if (Engine.RequiredCookies != null && Engine.RequiredCookies.Length != 0 && !Engine.RequiredCookies.All(req => Regex.IsMatch(Cookies, @"(?:^|[\s;]){0}=".FormatWith(req), RegexOptions.IgnoreCase)))
+            if (Engine.RequiredCookies != null && Engine.RequiredCookies.Length != 0 && !((string[])Engine.RequiredCookies).All(req => Regex.IsMatch(Cookies, @"(?:^|[\s;]){0}=".FormatWith(req), RegexOptions.IgnoreCase)))
             {
                 var td = new TaskDialog
                     {

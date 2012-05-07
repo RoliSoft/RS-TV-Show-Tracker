@@ -65,11 +65,30 @@
             Langs         = (languages ?? new List<string>()).ToList();
             Filter        = filter;
 
+            var remove = new List<SubtitleSearchEngine>();
+
             foreach (var engine in SearchEngines)
             {
                 engine.SubtitleSearchNewLink += SingleSubtitleSearchNewLink;
                 engine.SubtitleSearchDone    += SingleSubtitleSearchDone;
                 engine.SubtitleSearchError   += SingleSubtitleSearchError;
+
+                if (engine.Private)
+                {
+                    engine.Cookies = Settings.Get(engine.Name + " Cookies");
+
+                    // if requires authentication and no cookies or login information were provided, ignore the engine
+                    if (string.IsNullOrWhiteSpace(engine.Cookies) && string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login")))
+                    {
+                        remove.Add(engine);
+                    }
+                }
+            }
+
+            // now remove them. if we remove it directly in the previous loop, an exception will be thrown that the enumeration was modified
+            foreach (var engine in remove)
+            {
+                SearchEngines.Remove(engine);
             }
         }
 

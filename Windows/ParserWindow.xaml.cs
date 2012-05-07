@@ -7,8 +7,6 @@
     using System.Windows.Documents;
     using System.Windows.Media.Effects;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-
     using VistaControls.TaskDialog;
 
     /// <summary>
@@ -20,7 +18,7 @@
         /// Initializes a new instance of the <see cref="ParserWindow"/> class.
         /// </summary>
         /// <param name="parser">The parser.</param>
-        public ParserWindow(DownloadSearchEngine parser)
+        public ParserWindow(dynamic parser)
         {
             InitializeComponent();
 
@@ -42,7 +40,7 @@
         /// <value>
         /// The parser.
         /// </value>
-        public DownloadSearchEngine Parser { get; set; }
+        public dynamic Parser { get; set; }
 
         private Dictionary<string, string> _original;
 

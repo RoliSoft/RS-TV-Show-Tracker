@@ -3,8 +3,8 @@
     using System;
     using System.Net;
 
-    using RoliSoft.TVShowTracker.Parsers.Downloads;
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using Parsers.Downloads;
+    using Parsers.Subtitles;
 
     /// <summary>
     /// Provides a simple HTTP downloader.
@@ -53,6 +53,11 @@
             else if (link is Subtitle)
             {
                 uri = new Uri((link as Subtitle).FileURL);
+
+                if (!string.IsNullOrWhiteSpace((link as Subtitle).Source.Cookies))
+                {
+                    _wc.Headers[HttpRequestHeader.Cookie] = (link as Subtitle).Source.Cookies;
+                }
             }
             else
             {

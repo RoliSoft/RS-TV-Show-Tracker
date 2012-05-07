@@ -237,7 +237,7 @@
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsRus.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\Newzbin.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
-    <Compile Include="Parsers\Downloads\LoginFieldTypes.cs" />
+    <Compile Include="Parsers\LoginFieldTypes.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BTDigg.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\iPlay.cs" />
@@ -795,7 +795,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Dependencies\CookComputing.XmlRpcV2.dll" />
-    <None Include="Dependencies\handle.exe" />
     <None Include="Dependencies\HtmlAgilityPack.dll" />
     <None Include="Dependencies\Microsoft.Windows.Shell.dll" />
     <None Include="Dependencies\Microsoft.WindowsAPICodePack.dll" />
