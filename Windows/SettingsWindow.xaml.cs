@@ -38,7 +38,11 @@
         /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
         private void GlassWindowClosing(object sender, CancelEventArgs e)
         {
-            new Thread(() => Dispatcher.Invoke((Action)(() => MainWindow.Active.activeDownloadLinksPage.LoadEngines(true)))).Start();
+            new Thread(() => Dispatcher.Invoke((Action)(() =>
+                {
+                    MainWindow.Active.activeDownloadLinksPage.LoadEngines(true);
+                    MainWindow.Active.activeSubtitlesPage.LoadEngines(true);
+                }))).Start();
         }
     }
 }

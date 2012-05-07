@@ -40,7 +40,20 @@
                 <TextBox Name="processTextBox" TextChanged="ProcessTextBoxTextChanged" Margin="0,0,5,0" />
             </StackPanel>
 
+            <Canvas>
+                <Canvas.Effect>
+                    <DropShadowEffect ShadowDepth="0" />
+                </Canvas.Effect>
+                <Canvas.RenderTransform>
+                    <RotateTransform Angle="-5" />
+                </Canvas.RenderTransform>
+                <TextBlock Canvas.Top="40" Canvas.Left="115" Text="temporarily disabled in this release" FontSize="18" FontWeight="Bold" Opacity="0.7"></TextBlock>
+            </Canvas>
+
             <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Opacity="0.5">
+                <StackPanel.Effect>
+                    <BlurEffect Radius="3" />
+                </StackPanel.Effect>
                 <StackPanel Orientation="Horizontal">
                     <Image Source="/RSTVShowTracker;component/Images/drive-share.png" Height="16" Width="16" Margin="0,1,5,0" />
                     <CheckBox IsEnabled="False" Content=" Monitor network shares" Name="monitorNetworkShare" Checked="MonitorNetworkShareChecked"  Unchecked="MonitorNetworkShareUnchecked"  FontSize="16" Foreground="DarkBlue" Padding="0" />

@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Data;
 
     /// <summary>
     /// Interaction logic for ParsersSettings.xaml
@@ -63,8 +64,8 @@
             if (!_loaded) return;
 
             parserEditButton.IsEnabled = listView.SelectedIndex != -1;
-            moveUpButton.IsEnabled     = listView.SelectedIndex > 0;
-            moveDownButton.IsEnabled   = listView.SelectedIndex != -1 && listView.SelectedIndex < listView.Items.Count - 1;
+            moveUpButton.IsEnabled     = listView.SelectedIndex > 0 && ((DownloadsListViewItem)listView.SelectedItem).Type == "Download links";
+            moveDownButton.IsEnabled   = listView.SelectedIndex != -1 && listView.SelectedIndex < listView.Items.Count - 1  && ((DownloadsListViewItem)listView.SelectedItem).Type == "Download links";
         }
 
         /// <summary>
@@ -73,6 +74,7 @@
         private void ReloadParsers()
         {
             var idx = listView.SelectedIndex;
+            listView.Items.GroupDescriptions.Clear();
             DownloadsListViewItemCollection.Clear();
 
             foreach (var engine in AutoDownloader.SearchEngines.OrderBy(engine => AutoDownloader.Parsers.IndexOf(engine.Name)))
@@ -80,6 +82,7 @@
                 DownloadsListViewItemCollection.Add(new DownloadsListViewItem
                     {
                         Enabled = AutoDownloader.Actives.Contains(engine.Name),
+                        Type    = "Download links",
                         Icon    = engine.Icon,
                         Site    = engine.Name,
                         Login   = engine.Private
@@ -92,8 +95,22 @@
                         Version = engine.Version.ToString().PadRight(14, '0')
                     });
             }
+            
+            foreach (var engine in SubtitlesPage.SearchEngines)
+            {
+                DownloadsListViewItemCollection.Add(new DownloadsListViewItem
+                    {
+                        Enabled = SubtitlesPage.Actives.Contains(engine.Name),
+                        Type    = "Subtitles",
+                        Icon    = engine.Icon,
+                        Site    = engine.Name,
+                        Login   = "/RSTVShowTracker;component/Images/na.png",
+                        Version = engine.Version.ToString().PadRight(14, '0')
+                    });
+            }
 
             listView.SelectedIndex = idx;
+            listView.Items.GroupDescriptions.Add(new PropertyGroupDescription("Type"));
             ListViewSelectionChanged();
         }
 
@@ -106,11 +123,27 @@
         {
             if (!_loaded) return;
 
-            if (!AutoDownloader.Actives.Contains((sender as CheckBox).Tag as string))
-            {
-                AutoDownloader.Actives.Add((sender as CheckBox).Tag as string);
+            var item = (DownloadsListViewItem)((FrameworkElement)sender).DataContext;
 
-                Settings.Set("Active Trackers", AutoDownloader.Actives);
+            switch (item.Type)
+            {
+                case "Download links":
+                    if (!AutoDownloader.Actives.Contains(item.Site))
+                    {
+                        AutoDownloader.Actives.Add(item.Site);
+
+                        Settings.Set("Active Trackers", AutoDownloader.Actives);
+                    }
+                    break;
+
+                case "Subtitles":
+                    if (!SubtitlesPage.Actives.Contains(item.Site))
+                    {
+                        SubtitlesPage.Actives.Add(item.Site);
+
+                        Settings.Set("Active Subtitle Sites", SubtitlesPage.Actives);
+                    }
+                    break;
             }
         }
 
@@ -123,11 +156,27 @@
         {
             if (!_loaded) return;
 
-            if (AutoDownloader.Actives.Contains((sender as CheckBox).Tag as string))
-            {
-                AutoDownloader.Actives.Remove((sender as CheckBox).Tag as string);
+            var item = (DownloadsListViewItem)((FrameworkElement)sender).DataContext;
 
-                Settings.Set("Active Trackers", AutoDownloader.Actives);
+            switch (item.Type)
+            {
+                case "Download links":
+                    if (AutoDownloader.Actives.Contains(item.Site))
+                    {
+                        AutoDownloader.Actives.Remove(item.Site);
+
+                        Settings.Set("Active Trackers", AutoDownloader.Actives);
+                    }
+                    break;
+
+                case "Subtitles":
+                    if (SubtitlesPage.Actives.Contains(item.Site))
+                    {
+                        SubtitlesPage.Actives.Remove(item.Site);
+
+                        Settings.Set("Active Subtitle Sites", SubtitlesPage.Actives);
+                    }
+                    break;
             }
         }
 
@@ -161,14 +210,16 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MoveUpButtonClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex == -1) return;
+            if (listView.SelectedIndex == -1 || ((DownloadsListViewItem)listView.SelectedItem).Type != "Download links") return;
 
-            var idx = AutoDownloader.Parsers.IndexOf((listView.SelectedItem as DownloadsListViewItem).Site);
+            var idx = AutoDownloader.Parsers.IndexOf(((DownloadsListViewItem)listView.SelectedItem).Site);
 
             if (idx != 0)
             {
                 AutoDownloader.Parsers.MoveUp(idx);
+                listView.Items.GroupDescriptions.Clear();
                 DownloadsListViewItemCollection.Move(listView.SelectedIndex, listView.SelectedIndex - 1);
+                listView.Items.GroupDescriptions.Add(new PropertyGroupDescription("Type"));
                 ListViewSelectionChanged();
 
                 Settings.Set("Tracker Order", AutoDownloader.Parsers);
@@ -182,14 +233,16 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void MoveDownButtonClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex == -1) return;
+            if (listView.SelectedIndex == -1 || ((DownloadsListViewItem)listView.SelectedItem).Type != "Download links") return;
 
-            var idx = AutoDownloader.Parsers.IndexOf((listView.SelectedItem as DownloadsListViewItem).Site);
+            var idx = AutoDownloader.Parsers.IndexOf(((DownloadsListViewItem)listView.SelectedItem).Site);
 
             if (idx != AutoDownloader.Parsers.Count - 1)
             {
                 AutoDownloader.Parsers.MoveDown(idx);
+                listView.Items.GroupDescriptions.Clear();
                 DownloadsListViewItemCollection.Move(listView.SelectedIndex, listView.SelectedIndex + 1);
+                listView.Items.GroupDescriptions.Add(new PropertyGroupDescription("Type"));
                 ListViewSelectionChanged();
 
                 Settings.Set("Tracker Order", AutoDownloader.Parsers);

@@ -18,6 +18,14 @@
         public string Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the type of the parser.
+        /// </summary>
+        /// <value>
+        /// The type of the parser.
+        /// </value>
+        public string Type { get; set; }
+
+        /// <summary>
         /// Gets or sets the site.
         /// </summary>
         /// <value>The site.</value>

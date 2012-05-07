@@ -139,38 +139,7 @@
                 appendLanguage.IsChecked = Settings.Get<bool>("Append Language to Subtitle");
             }
 
-            if (availableEngines.Items.Count == 0)
-            {
-                foreach (var engine in SearchEngines)
-                {
-                    var mi = new MenuItem
-                    {
-                        Header           = new StackPanel { Orientation = Orientation.Horizontal },
-                        IsCheckable      = true,
-                        IsChecked        = Actives.Contains(engine.Name),
-                        StaysOpenOnClick = true,
-                        Tag              = engine.Name
-                    };
-
-                    (mi.Header as StackPanel).Children.Add(new Image
-                        {
-                            Source = new BitmapImage(engine.Icon != null ? new Uri(engine.Icon) : new Uri("/RSTVShowTracker;component/Images/navigation.png", UriKind.Relative), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
-                            Width  = 16,
-                            Height = 16,
-                            Margin = new Thickness(3, -2, 0, 0)
-                        });
-                    (mi.Header as StackPanel).Children.Add(new Label
-                        {
-                            Content = engine.Name,
-                            Padding = new Thickness(5, 0, 0, 0)
-                        });
-
-                    mi.Checked   += SearchEngineMenuItemChecked;
-                    mi.Unchecked += SearchEngineMenuItemUnchecked;
-
-                    availableEngines.Items.Add(mi);
-                }
-            }
+            LoadEngines();
 
             if (languages.Items.Count == 0)
             {
@@ -230,6 +199,48 @@
                 mi2.Unchecked += LanguageMenuItemUnchecked;
 
                 languages.Items.Add(mi2);
+            }
+        }
+        
+        /// <summary>
+        /// Loads the engines.
+        /// </summary>
+        /// <param name="reload">if set to <c>true</c> it will reload all variables; otherwise, it will just load the variables which are null.</param>
+        public void LoadEngines(bool reload = false)
+        {
+            if (reload || availableEngines.Items.Count == 0)
+            {
+                availableEngines.Items.Clear();
+
+                foreach (var engine in SearchEngines)
+                {
+                    var mi = new MenuItem
+                        {
+                            Header           = new StackPanel { Orientation = Orientation.Horizontal },
+                            IsCheckable      = true,
+                            IsChecked        = Actives.Contains(engine.Name),
+                            StaysOpenOnClick = true,
+                            Tag              = engine.Name
+                        };
+
+                    (mi.Header as StackPanel).Children.Add(new Image
+                        {
+                            Source = new BitmapImage(engine.Icon != null ? new Uri(engine.Icon) : new Uri("/RSTVShowTracker;component/Images/navigation.png", UriKind.Relative), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
+                            Width  = 16,
+                            Height = 16,
+                            Margin = new Thickness(3, -2, 0, 0)
+                        });
+                    (mi.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = engine.Name,
+                            Padding = new Thickness(5, 0, 0, 0)
+                        });
+
+                    mi.Checked   += SearchEngineMenuItemChecked;
+                    mi.Unchecked += SearchEngineMenuItemUnchecked;
+
+                    availableEngines.Items.Add(mi);
+                }
             }
         }
 

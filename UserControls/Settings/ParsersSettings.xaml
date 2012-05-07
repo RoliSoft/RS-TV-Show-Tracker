@@ -11,13 +11,39 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Height="442">
                     <ListView Name="listView" SelectionChanged="ListViewSelectionChanged" Margin="0,0,5,0" Width="481" Height="442" Padding="-2,-1">
+                        <ListView.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Margin" Value="0,0,0,0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <Grid Height="20">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                            <Separator Grid.Column="1" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
+                                                        </Grid>
+                                                        <ItemsPresenter Margin="0" />
+                                                    </StackPanel>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                        </ListView.GroupStyle>
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
                                 <GridViewColumn>
                                     <GridViewColumnHeader />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox Name="Enabled" Tag="{Binding Site}" IsChecked="{Binding Enabled}" Checked="EnabledChecked" Unchecked="EnabledUnchecked" />
+                                            <CheckBox Name="Enabled" IsChecked="{Binding Enabled}" Checked="EnabledChecked" Unchecked="EnabledUnchecked" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
