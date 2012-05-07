@@ -162,6 +162,7 @@
     <Compile Include="ContextMenus\Menus\SubtitleContextMenu.cs" />
     <Compile Include="CoverManager.cs" />
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
+    <Compile Include="DiscoverShows.cs" />
     <Compile Include="LocalProgrammingPlugin.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
