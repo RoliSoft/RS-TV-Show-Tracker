@@ -1133,10 +1133,11 @@
         /// </summary>
         /// <param name="title">The title.</param>
         /// <param name="extraSlim">if set to <c>true</c> spaces, "and", "the", "of" and "a" will be removed.</param>
+        /// <param name="separator">The separator to use when <c>extraSlim</c> is set to <c>false</c>.</param>
         /// <returns>
         /// Slug.
         /// </returns>
-        public static string CreateSlug(string title, bool extraSlim = true)
+        public static string CreateSlug(string title, bool extraSlim = true, string separator = "-")
         {
             // remove HTML entities
             title = HtmlEntity.DeEntitize(title);
@@ -1154,8 +1155,8 @@
                 // remove year and special characters
                 title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|[^a-z0-9\s])", string.Empty).Trim();
 
-                // replace space to dash
-                title = Regex.Replace(title, @"\s\s*", "-");
+                // replace space to specified separator
+                title = Regex.Replace(title, @"\s\s*", separator);
             }
 
             return title;
