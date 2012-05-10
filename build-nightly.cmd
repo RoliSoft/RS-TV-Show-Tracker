@@ -65,7 +65,7 @@ if exist "%ProgramFiles(x86)%\NSIS\makensis.exe" (
 
 rmdir /S /Q bin\Nightly
 
-:: move portable archive to Dropbox, SkyDrive, Google Drive and Ubuntu One
+:: move portable archive to Dropbox, SkyDrive and Google Drive
 
 if exist tvshowtracker_v2_nightly_portable.zip (
 	if exist "%HomePath%\Dropbox\RS TV Show Tracker" (
@@ -77,9 +77,6 @@ if exist tvshowtracker_v2_nightly_portable.zip (
 	if exist "%HomePath%\Google Drive\RS TV Show Tracker" (
 		cp tvshowtracker_v2_nightly_portable.zip "%HomePath%\Google Drive\RS TV Show Tracker"
 	)
-	if exist "%HomePath%\Ubuntu One\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_portable.zip "%HomePath%\Ubuntu One\RS TV Show Tracker"
-	)
 	
 	del tvshowtracker_v2_nightly_portable.zip
 ) else (
@@ -87,7 +84,7 @@ if exist tvshowtracker_v2_nightly_portable.zip (
 	pause
 )
 
-:: move installer to Dropbox, SkyDrive, Google Drive and Ubuntu One
+:: move installer to Dropbox, SkyDrive and Google Drive
 
 if exist tvshowtracker_v2_nightly_setup.exe (
 	if exist "%HomePath%\Dropbox\RS TV Show Tracker" (
@@ -98,9 +95,6 @@ if exist tvshowtracker_v2_nightly_setup.exe (
 	)
 	if exist "%HomePath%\Google Drive\RS TV Show Tracker" (
 		cp tvshowtracker_v2_nightly_setup.exe "%HomePath%\Google Drive\RS TV Show Tracker"
-	)
-	if exist "%HomePath%\Ubuntu One\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_setup.exe "%HomePath%\Ubuntu One\RS TV Show Tracker"
 	)
 	
 	del tvshowtracker_v2_nightly_setup.exe
@@ -115,7 +109,7 @@ for /f "tokens=2,3,4,5,6 usebackq delims=:/ " %%a in ('%date% %time%') do set da
 for /f "tokens=1 delims=" %%a in ('git rev-parse HEAD') do set commit=%%a
 echo. | set /p={"date":"%datum%","commit":"%commit%"} > tvshowtracker_v2_nightly_info.js
 
-:: move JSON to Dropbox, SkyDrive, Google Drive and Ubuntu One
+:: move JSON to Dropbox, SkyDrive and Google Drive
 
 if exist "%HomePath%\Dropbox\RS TV Show Tracker" (
 	cp tvshowtracker_v2_nightly_info.js "%HomePath%\Dropbox\RS TV Show Tracker"
@@ -125,9 +119,6 @@ if exist "%HomePath%\SkyDrive\RS TV Show Tracker" (
 )
 if exist "%HomePath%\Google Drive\RS TV Show Tracker" (
 	cp tvshowtracker_v2_nightly_info.js "%HomePath%\Google Drive\RS TV Show Tracker"
-)
-if exist "%HomePath%\Ubuntu One\RS TV Show Tracker" (
-	cp tvshowtracker_v2_nightly_info.js "%HomePath%\Ubuntu One\RS TV Show Tracker"
 )
 
 del tvshowtracker_v2_nightly_info.js
