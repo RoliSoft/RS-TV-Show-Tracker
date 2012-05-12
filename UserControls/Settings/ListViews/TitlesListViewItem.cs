@@ -57,5 +57,13 @@
         /// The ISO 639-1 code of the language.
         /// </value>
         public string LangCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon of the language.
+        /// </summary>
+        /// <value>
+        /// The icon of the language
+        /// .</value>
+        public string LangIcon { get; set; }
     }
 }

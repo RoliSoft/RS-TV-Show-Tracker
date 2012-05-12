@@ -29,6 +29,39 @@
     public partial class GuidesPage : IRefreshable
     {
         /// <summary>
+        /// Gets the search engines loaded in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public static IEnumerable<FeedReaderEngine> FeedReaderEngines
+        {
+            get
+            {
+                return Extensibility.GetNewInstances<FeedReaderEngine>()
+                                    .OrderBy(engine => engine.Name);
+            }
+        }
+
+        /// <summary>
+        /// Gets the search engines activated in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public static IEnumerable<FeedReaderEngine> ActiveFeedReaderEngines
+        {
+            get
+            {
+                return FeedReaderEngines.Where(engine => Actives.Contains(engine.Name));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the list of activated parsers.
+        /// </summary>
+        /// <value>
+        /// The activated parsers.
+        /// </value>
+        public static List<string> Actives { get; set; }
+
+        /// <summary>
         /// Gets or sets the date when this control was loaded.
         /// </summary>
         /// <value>The load date.</value>
@@ -62,6 +95,14 @@
         public GuidesPage()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Initializes the <see cref="GuidesPage"/> class.
+        /// </summary>
+        static GuidesPage()
+        {
+            Actives = Settings.Get<List<string>>("Active News Sites");
         }
 
         /// <summary>
@@ -924,7 +965,7 @@
             SetStatus("Loading feeds...", true);
 
             var last  = new Dictionary<FeedReaderEngine, DateTime>();
-            var sites = Extensibility.GetNewInstances<FeedReaderEngine>().ToList();
+            var sites = ActiveFeedReaderEngines.ToList();
             var id    = _activeShowID;
 
             rssListView.Tag = id;

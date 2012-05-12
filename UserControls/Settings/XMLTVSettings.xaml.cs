@@ -113,8 +113,9 @@
                                                              Title    = show.Name,
                                                              Foreign  = show.GetForeignTitle(lang),
                                                              Foreign2 = show.GetForeignTitle(lang),
+                                                             Language = Languages.List[lang],
                                                              LangCode = lang,
-                                                             Language = Languages.List[lang]
+                                                             LangIcon = "pack://application:,,,/RSTVShowTracker;component/Images/flag-" + lang + ".png"
                                                          });
                 }
             }

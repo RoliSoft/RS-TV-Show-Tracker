@@ -345,9 +345,13 @@
     <Compile Include="UserControls\Settings\AssociationsSettings.xaml.cs">
       <DependentUpon>AssociationsSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Settings\FeedsSettings.xaml.cs">
+      <DependentUpon>FeedsSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Settings\GeneralSettings.xaml.cs">
       <DependentUpon>GeneralSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Settings\ListViews\FeedsListViewItem.cs" />
     <Compile Include="UserControls\Settings\ListViews\TitlesListViewItem.cs" />
     <Compile Include="UserControls\Settings\ListViews\XMLTVListViewItem.cs" />
     <Compile Include="UserControls\Settings\ParsersSettings.xaml.cs">
@@ -468,6 +472,10 @@
     <Page Include="UserControls\Settings\AssociationsSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Settings\FeedsSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserControls\Settings\GeneralSettings.xaml">
       <SubType>Designer</SubType>

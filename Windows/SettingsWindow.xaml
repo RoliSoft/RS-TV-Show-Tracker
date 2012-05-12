@@ -50,6 +50,20 @@
                     <UserControls:ParsersSettings x:Name="activeParsersPage" />
                 </Grid>
             </TabItem>
+
+            <TabItem Header="Feeds" Name="feedsTabItem">
+                <Grid Name="feedsGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <UserControls:FeedsSettings x:Name="activeFeedsPage" />
+                </Grid>
+            </TabItem>
             
             <TabItem Header="Proxy" Name="proxyTabItem">
                 <Grid Name="proxyGrid">
