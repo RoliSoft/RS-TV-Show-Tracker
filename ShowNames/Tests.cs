@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.ShowNames
 {
     using System;
-    using System.Collections.Generic;
 
     using NUnit.Framework;
 
@@ -14,7 +13,7 @@
         /// <summary>
         /// Contains a list of show names and the array they're supposed to look after processing.
         /// </summary>
-        public static Dictionary<string, string> ShowNames = new Dictionary<string, string>
+        public static readonly KeyValueList<string, string> ShowNames = new KeyValueList<string, string>
             {
                 // test to see whether irrevelant single characters are removed
                 {
@@ -34,24 +33,24 @@
                     "PENN TELLER BULLSHIT"
                 },
                 {
-                    "Penn & Teller: Bullshit! 2",
-                    "PENN AND TELLER BULLSHIT 2"
+                    "Penn & Teller: Bullshit!",
+                    "PENN AND TELLER BULLSHIT"
                 },
                 {
-                    "Penn and Teller: Bullshit! 3",
-                    "PENN TELLER BULLSHIT 3"
+                    "Penn and Teller: Bullshit!",
+                    "PENN TELLER BULLSHIT"
                 },
                 {
-                    "Penn and Teller: Bullshit! 4",
-                    "PENN AND TELLER BULLSHIT 4"
+                    "Penn and Teller: Bullshit!",
+                    "PENN AND TELLER BULLSHIT"
                 },
                 {
                     "It's Always Sunny in Philadelphia",
                     "ITS ALWAYS SUNNY IN PHILADELPHIA"
                 },
                 {
-                    "It's Always Sunny in Philadelphia 2",
-                    "IT\\'S ALWAYS SUNNY IN PHILADELPHIA 2"
+                    "It's Always Sunny in Philadelphia",
+                    "IT\\'S ALWAYS SUNNY IN PHILADELPHIA"
                 },
                 
                 // test to see how years are handled
@@ -102,12 +101,16 @@
                     "$#*!  My Dad Says",
                     "SHIT MY DAD SAYS"
                 },
+                {
+                    "Don't Trust the B---- in Apartment 23",
+                    "Apartment 23"
+                },
             };
 
         /// <summary>
         /// Contains a list of standard, non-standard and downright pervert episode notations.
         /// </summary>
-        public static Dictionary<string, ShowEpisode> EpisodeNotations = new Dictionary<string, ShowEpisode>
+        public static readonly KeyValueList<string, ShowEpisode> EpisodeNotations = new KeyValueList<string, ShowEpisode>
             {
                 // standard scene episode numbering tests
                 {
@@ -179,7 +182,7 @@
         /// <summary>
         /// Contains a list of release names with season pack notations and how they're supposed to look after removal.
         /// </summary>
-        public static Dictionary<string, string> PackNotations = new Dictionary<string, string>
+        public static readonly KeyValueList<string, string> PackNotations = new KeyValueList<string, string>
             {
                 {
                     "Lost.COMPLETE.720p.BluRay.x264-TvT",
@@ -209,7 +212,7 @@
             {
                 var rgx = TVShowTracker.ShowNames.Parser.GenerateTitleRegex(show.Key);
 
-                Console.WriteLine(show.Key + " -> " + rgx + " -> " + show.Value);
+                Console.WriteLine(show.Key + "\r\n -> " + rgx + "\r\n -> " + show.Value);
                 Assert.IsTrue(rgx.IsMatch(show.Key.ToUpper()), "The generated regular expression didn't match the original string.");
                 Assert.IsTrue(rgx.IsMatch(show.Value), "The generated regular expression didn't match the sample string.");
             }
@@ -224,8 +227,9 @@
         {
             foreach (var show in EpisodeNotations)
             {
-                Console.WriteLine(show.Key + " -> " + show.Value);
-                Assert.AreEqual(show.Value, Parser.ExtractEpisode(show.Key));
+                var test = FileNames.Parser.ParseFile(show.Key, null, false, true);
+                Console.WriteLine(show.Key.PadRight(78) + " -> " + test);
+                Assert.AreEqual(show.Value, test.Episode);
             }
         }
 
@@ -237,7 +241,7 @@
         {
             foreach (var show in PackNotations)
             {
-                Console.WriteLine(show.Key + " -> " + show.Value);
+                Console.WriteLine(show.Key.PadRight(37) + " -> " + show.Value);
                 Assert.AreEqual(show.Value, Regexes.VolNumbering.Replace(show.Key, string.Empty));
             }
         }

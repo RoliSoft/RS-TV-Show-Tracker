@@ -145,9 +145,9 @@
         /// </returns>
         public override string ToString()
         {
-            return Episode.SecondEpisode.HasValue
-                   ? "{0} S{1:00}E{2:00}-{3:00}".FormatWith(Show, Episode.Season, Episode.Episode, Episode.SecondEpisode)
-                   : "{0} S{1:00}E{2:00}".FormatWith(Show, Episode.Season, Episode.Episode);
+            return ParseError.HasValue && ParseError.Value != FailureReasons.ShowNotIdentified
+                   ? ParseError.Value.ToString()
+                   : Show + " " + Episode;
         }
 
         /// <summary>
