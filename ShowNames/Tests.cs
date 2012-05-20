@@ -28,6 +28,8 @@
                     "How I met your mother",
                     "HOW I MET YOUR MOTHER"
                 },
+
+                // test to see if "&"/"and" can be swapped without consequences
                 {
                     "Penn & Teller: Bullshit!",
                     "PENN TELLER BULLSHIT"
@@ -44,6 +46,8 @@
                     "Penn and Teller: Bullshit!",
                     "PENN AND TELLER BULLSHIT"
                 },
+
+                // test to see if PHP's fsm-damn magic quotes are recognized
                 {
                     "It's Always Sunny in Philadelphia",
                     "ITS ALWAYS SUNNY IN PHILADELPHIA"
@@ -164,7 +168,9 @@
 
                 // extremely non-standard episode numbering tests
                 {
-                    // seriously, why the fuck did immerse and dimension use this instead of plain E01?
+                    // seriously, why the fuck did immerse and dimension use this instead of
+                    // the standard PartXX for miniseries where XX are arabic numerals?
+                    // see http://scenerules.irc.gs/n.html?id=2011_TV_X264.nfo line 210
                     "spartacus.gods.of.the.arena.pt.i.720p.hdtv.x264-immerse.mkv",
                     new ShowEpisode(1, 1)
                 },
@@ -176,6 +182,12 @@
                     // this release is fictional to test multiple episode matching with roman numbering
                     "Spartacus.Gods.of.the.Arena.Part.II-XV.720p.HDTV.X264-DIMENSION.mkv",
                     new ShowEpisode(1, 2, 15)
+                },
+
+                // test anime
+                {
+                    "[HorribleSubs] Hunter X Hunter - 32 [1080p].mkv",
+                    new ShowEpisode(1, 32)
                 },
             };
 
