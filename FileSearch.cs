@@ -40,7 +40,7 @@
         private Dictionary<string, List<string>> _paths;
         private List<string>[] _files; 
         private Episode[] _episodes;
-        private Regex[] _titleRegex, _episodeRegex;
+        private Regex[] _titleRegex, _episodeRegex, _altEpRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
@@ -52,6 +52,7 @@
             _episodes     = new[] { episode };
             _titleRegex   = new[] { episode.Show.GenerateRegex() };
             _episodeRegex = new[] { episode.GenerateRegex() };
+            _altEpRegex   = new[] { episode.GenerateAltRegex() };
 
             InitStartPaths(paths);
         }
@@ -66,11 +67,13 @@
             _episodes     = episodes.ToArray();
             _titleRegex   = new Regex[_episodes.Length];
             _episodeRegex = new Regex[_episodes.Length];
+            _altEpRegex   = new Regex[_episodes.Length];
 
             for (var i = 0; i < _episodes.Length; i++)
             {
                 _titleRegex[i]   = _episodes[i].Show.GenerateRegex();
                 _episodeRegex[i] = _episodes[i].GenerateRegex();
+                _altEpRegex[i]   = _episodes[i].GenerateAltRegex();
             }
 
             InitStartPaths(paths);
@@ -274,7 +277,7 @@
 
             for (var i = 0; i < _files.Length; i++)
             {
-                if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleRegex[i], _episodeRegex[i]))
+                if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleRegex[i], _episodeRegex[i], true, _altEpRegex[i]))
                 {
                     var pf = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 

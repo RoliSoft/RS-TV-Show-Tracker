@@ -132,5 +132,14 @@
         /// More advanced regular expression to detect season and episode number in various forms in a string.
         /// </summary>
         public static readonly Regex AdvNumbering  = Parser.GenerateEpisodeRegexes(generateExtractor: true);
+
+        /// <summary>
+        /// Alternative episode numbering used in anime release.
+        /// </summary>
+        /// <remarks>
+        /// Try this ONLY if <c>AdvNumbering</c> doesn't match.
+        /// </remarks>
+        public static readonly Regex AniNumbering  = Parser.GenerateAltEpisodeRegexes(generateExtractor: true);
+
     }
 }

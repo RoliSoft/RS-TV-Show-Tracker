@@ -111,6 +111,17 @@
         }
 
         /// <summary>
+        /// Generates an alternative regular expression which matches this episode's numbering.
+        /// </summary>
+        /// <returns>
+        /// A regular expression which matches this episode's numbering.
+        /// </returns>
+        public Regex GenerateAltRegex()
+        {
+            return ShowNames.Parser.GenerateAltEpisodeRegexes(Number.ToString());
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>
         /// <returns>

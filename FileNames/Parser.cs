@@ -78,6 +78,11 @@
 
             if (fi.Length < 2)
             {
+                fi = Regexes.AniNumbering.Split(file);
+            }
+
+            if (fi.Length < 2)
+            {
                 return new ShowFile(file, ShowFile.FailureReasons.EpisodeNumberingNotFound);
             }
 
