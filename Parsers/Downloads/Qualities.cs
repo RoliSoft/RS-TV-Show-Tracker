@@ -80,6 +80,12 @@
         HDTVx264,
 
         /// <summary>
+        /// A high-resolution (but not high-definition) video downloaded from a legal source; usually iTunes.
+        /// </summary>
+        [Description("Web-DL x264")]
+        WebDLx264,
+
+        /// <summary>
         /// A high-resolution DVD rip.
         /// </summary>
         [Description("DVD-Rip x264")]

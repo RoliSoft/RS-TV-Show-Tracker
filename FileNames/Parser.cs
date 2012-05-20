@@ -554,6 +554,14 @@
             {
                 return Qualities.DVDRipXviD;
             }
+            if (AreMatching(release, @"(WEB[_\-\.\s]?DL|iTunesHD)", @"[Hx]264"))
+            {
+                return Qualities.WebDLx264;
+            }
+            if (AreMatching(release, @"XviD", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
+            {
+                return Qualities.WebDLXviD;
+            }
             if (AreMatching(release, @"WEB(([_\-\.\s]?DL)?[_\-\.\s]?Rip)?", @"[Hx]264"))
             {
                 return Qualities.WebRipx264;
@@ -577,10 +585,6 @@
             if (AreMatching(release, @"((HR|HQ|HiRes|High[_\-\.\s]?Res(olution)?)\b|[Hx]264)"))
             {
                 return Qualities.HRx264;
-            }
-            if (AreMatching(release, @"XviD", @"(WEB[_\-\.\s]?DL|iTunesHD)"))
-            {
-                return Qualities.WebDLXviD;
             }
             if (AreMatching(release, @"(HDTV([_\-\.\s]?Rip)?|PDTV([_\-\.\s]?Rip)?|DSR(ip)?|DTH(Rip)?|DVB[_\-\.\s]?Rip|PPV(Rip)?|VOD(R(ip)?)?)"))
             {
