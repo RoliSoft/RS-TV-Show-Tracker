@@ -13,10 +13,10 @@
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping FreshWap.
+    /// Provides support for scraping TV-Release.
     /// </summary>
     [TestFixture]
-    public class FreshWap : DownloadSearchEngine
+    public class TVRelease : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -26,7 +26,7 @@
         {
             get
             {
-                return "FreshWap";
+                return "TV-Release";
             }
         }
 
@@ -38,7 +38,7 @@
         {
             get
             {
-                return "http://freshwap.com/";
+                return "http://tv-release.net/";
             }
         }
 
@@ -62,7 +62,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-04 3:48 AM");
+                return Utils.DateTimeToVersion("2012-05-20 4:16 PM");
             }
         }
 
@@ -100,7 +100,7 @@
         {
             get
             {
-                return Settings.Get("FreshWap Extract Limit", 10);
+                return Settings.Get("TV-Release Extract Limit", 10);
             }
         }
 
@@ -114,7 +114,7 @@
         {
             get
             {
-                return Settings.Get("FreshWap Extract Sleep", 250);
+                return Settings.Get("TV-Release Extract Sleep", 250);
             }
         }
 
@@ -125,8 +125,8 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "index.php?do=search&subaction=search&search_start=1&full_search=1&titleonly=3&searchuser=&replyless=0&replylimit=0&searchdate=0&beforeafter=after&sortby=date&resorder=desc&result_num=30&result_from=1&showposts=0&catlist%5B%5D=7&story=" + Utils.EncodeURL(query));
-            var links = html.DocumentNode.SelectNodes("//div[@class='title']/a");
+            var html  = Utils.GetHTML(Site + "?cat=163&s=" + Utils.EncodeURL(query));
+            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/a/b/font");
 
             if (links == null)
             {
@@ -138,14 +138,8 @@
             {
                 var release = HtmlEntity.DeEntitize(node.InnerText);
                 var quality = FileNames.Parser.ParseQuality(release);
-                var infourl = node.GetAttributeValue("href");
-                var sizergx = Regex.Match(node.GetTextValue("../../../div[starts-with(@id, 'news-id-')]"), @"(\d+(?:\.\d+)?)\s*([KMG]B)(?![/p])", RegexOptions.IgnoreCase);
-                var size    = string.Empty;
-
-                if (sizergx.Success)
-                {
-                    size = sizergx.Groups[1].Value + " " + sizergx.Groups[2].Value.ToUpper();
-                }
+                var infourl = node.GetNodeAttributeValue("../..", "href");
+                var size    = node.GetTextValue("../../../../td[5]").Trim();
 
                 if (i == ExtractLimit)
                 {
@@ -164,33 +158,30 @@
                 Thread.Sleep(ExtractSleep);
 
                 var html2 = Utils.GetHTML(infourl);
-                var sites = Regex.Matches(html2.DocumentNode.GetHtmlValue("//div[@class='quote']") ?? string.Empty, @"((?<!src=[""']?)http://[^<$\s]+)");
+                var sites = html2.DocumentNode.SelectNodes("//td[@class='td_cols']");
 
-                if (sites.Count == 0)
+                if (sites == null)
                 {
                     continue;
                 }
 
-                for (var x = 0; x < sites.Count; x++)
+                foreach (var site in sites)
                 {
                     var link = new Link(this);
 
                     link.Release = release;
                     link.InfoURL = infourl;
-                    link.FileURL = sites[x].Groups[1].Value;
                     link.Size    = size;
                     link.Quality = quality;
-                    link.Infos   = Regex.Match(link.FileURL, @"https://(?:www\.)?([^\.]+)").Groups[1].Value.ToUppercaseFirst();
 
-                    var first = new Uri(sites[x].Groups[1].Value);
-
-                tryNext:
-                    if (x + 1 < sites.Count && first.Host == new Uri(sites[x + 1].Groups[1].Value).Host)
+                    var links2 = site.SelectNodes("a");
+                    foreach (var link2 in links2)
                     {
-                        x++;
-                        link.FileURL += "\0" + sites[x].Groups[1].Value;
-                        goto tryNext;
+                        link.FileURL += "\0" + link2.GetAttributeValue("href").Trim();
                     }
+
+                    link.FileURL = link.FileURL.Trim('\0');
+                    link.Infos   = Regex.Match(link.FileURL, @"https?://(?:www\.)?([^\.]+)").Groups[1].Value.ToUppercaseFirst();
 
                     yield return link;
                 }

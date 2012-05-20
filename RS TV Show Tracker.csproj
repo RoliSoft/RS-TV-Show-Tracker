@@ -167,6 +167,7 @@
     <Compile Include="KeyValueList.cs" />
     <Compile Include="LocalProgrammingPlugin.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\TVRelease.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\FuckYeahTorrents.cs" />
     <Compile Include="Parsers\ILinkExpander.cs" />
