@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Reflection;
     using System.Windows;
     using System.Windows.Documents;
     using System.Windows.Input;

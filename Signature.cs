@@ -29,6 +29,26 @@
         public static string VersionFormatted { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether this is a nightly build.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this is a nightly build; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsNightly
+        {
+            get
+            {
+                return
+#if NIGHTLY
+                    true
+#else
+                    false
+#endif
+                ;
+            }
+        }
+
+        /// <summary>
         /// Gets the date and time when the executing assembly was compiled.
         /// </summary>
         /// <value>The compile time.</value>
@@ -60,7 +80,7 @@
 
             Software         = "RS TV Show Tracker";
             Version          = ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty);
-            VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? " build " + ver.Build : string.Empty);
+            VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? " build " + ver.Build : string.Empty) + (IsNightly ? " nightly" : string.Empty);
             CompileTime      = RetrieveLinkerTimestamp();
             try { FullPath   = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; } catch (ArgumentException) { }
         }
