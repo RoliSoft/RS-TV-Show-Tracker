@@ -34,7 +34,7 @@
         {
             get
             {
-                return "http://broadcasthe.net/";
+                return "https://broadcasthe.net/";
             }
         }
 
@@ -58,7 +58,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-10 8:42 PM");
+                return Utils.DateTimeToVersion("2012-07-28 7:28 PM");
             }
         }
 
@@ -137,7 +137,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "torrents.php?searchstr=" + Utils.EncodeURL(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "torrents.php?action=advanced&foreign=2&releasename=" + Utils.EncodeURL(query), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
