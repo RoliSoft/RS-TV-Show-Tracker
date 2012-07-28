@@ -190,6 +190,8 @@
     <Compile Include="Parsers\LinkCheckers\Engines\TurboBit.cs" />
     <Compile Include="Parsers\LinkCheckers\Engines\Uploadedto.cs" />
     <Compile Include="Parsers\News\Engines\commentcom.cs" />
+    <Compile Include="Parsers\News\Engines\BuddyTV.cs" />
+    <Compile Include="Parsers\News\Engines\SorozatPlanet.cs" />
     <Compile Include="Parsers\News\Engines\Deadline.cs" />
     <Compile Include="Parsers\News\Engines\TVFanatic.cs" />
     <Compile Include="Parsers\News\Engines\SerialeTari.cs" />
