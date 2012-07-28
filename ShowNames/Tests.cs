@@ -184,11 +184,11 @@
                     new ShowEpisode(1, 2, 15)
                 },
 
-                // test anime
-                {
+                // test anime; extended anime support has been removed for now
+                /*{
                     "[HorribleSubs] Hunter X Hunter - 32 [1080p].mkv",
                     new ShowEpisode(1, 32)
-                },
+                },*/
             };
 
         /// <summary>

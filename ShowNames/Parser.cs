@@ -201,11 +201,10 @@
         /// <param name="titleRegex">The title regex.</param>
         /// <param name="episodeRegex">The episode regex.</param>
         /// <param name="onlyVideo">if set to <c>true</c> returns false for files that are not video.</param>
-        /// <param name="altEpRegex">The alternative episode regex.</param>
         /// <returns>
         ///   <c>true</c> if the specified release matches the specified show and episode; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsMatch(string name, Regex titleRegex, Regex episodeRegex = null, bool onlyVideo = true, Regex altEpRegex = null)
+        public static bool IsMatch(string name, Regex titleRegex, Regex episodeRegex = null, bool onlyVideo = true)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -219,10 +218,7 @@
 
             if (episodeRegex != null && !episodeRegex.IsMatch(name))
             {
-                if (altEpRegex == null || !altEpRegex.IsMatch(name))
-                {
-                    return false;
-                }
+                return false;
             }
 
             return titleRegex.IsMatch(name);
@@ -236,11 +232,6 @@
         public static ShowEpisode ExtractEpisode(string name)
         {
             var m = Regexes.AdvNumbering.Match(name);
-
-            if (!m.Success)
-            {
-                m = Regexes.AniNumbering.Match(name);
-            }
 
             if (m.Success)
             {
@@ -423,36 +414,13 @@
                         // E[P][13-]14
                         @"(?<!(?:Season|Series|S).*\d{{1,2}}.*)EP?(?:(?<em>\d{{1,2}})\-(?:EP?)?)?0?{0}".FormatWith(episode),
                         // [E[p[isode]]|P[ar]t|Vol[ume]][ ][9|IX]
-                        @"(?<!(?:Season|Series|S).*\d{{1,2}}.*)(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?(?:(?:0?(?<em>\d{{1,2}})|(?<em>[IVXLCDM]+))[^a-z0-9]{{1,3}})?(?:0?{0}|{1})".FormatWith(episode, roman),
+                        @"(?<!(?:Season|Series|S).*\d{{1,2}}.*)(?:E(?:p(?:isode)?)?|P(?:ar)?t|Vol(?:ume)?)[^a-z0-9]?(?:(?:0?(?<em>\d{{1,2}})|(?<em>[IVXLCDM]+))[^a-z0-9]{{1,3}})?(?:0?{0}|{1})".FormatWith(episode, roman)
                     });
             }
 
             var expr = regexes.Aggregate(@"(?:\b|_)(" + (!generateExtractor ? "?:" : string.Empty), (current, format) => current + (format + "|")).TrimEnd('|') + @")(?:\b|_)";
 
             return new Regex(expr, RegexOptions.IgnoreCase);
-        }
-
-        /// <summary>
-        /// Generates regular expressions for matching alternative episode numberings used usually in anime releases.
-        /// </summary>
-        /// <param name="episode">The extracted episode.</param>
-        /// <returns>List of regular expressions.</returns>
-        public static Regex GenerateAltEpisodeRegexes(ShowEpisode episode)
-        {
-            return GenerateAltEpisodeRegexes(episode.Episode.ToString("00"));
-        }
-        
-        /// <summary>
-        /// Generates regular expressions for matching alternative episode numberings used usually in anime releases.
-        /// </summary>
-        /// <param name="episode">The episode number or expression.</param>
-        /// <param name="generateExtractor">if set to <c>true</c> generates an expression which universally matches any season/episode.</param>
-        /// <returns>
-        /// List of regular expressions.
-        /// </returns>
-        public static Regex GenerateAltEpisodeRegexes(string episode = null, bool generateExtractor = false)
-        {
-            return new Regex(@"(?:[^a-z0-9]{0}[^a-z0-9]?[$\.\[\(]|^{0}$)".FormatWith(generateExtractor ? @"(?<e>(?:\d{2,3}|0\d{1}))" : episode), RegexOptions.IgnoreCase);
         }
     }
 }
