@@ -5,6 +5,8 @@
     using System.Globalization;
     using System.Linq;
 
+    using Hammock.Authentication.OAuth;
+
     using NUnit.Framework;
 
     /// <summary>
@@ -69,9 +71,11 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-02-01 4:20 PM");
+                return Utils.DateTimeToVersion("2012-07-28 8:32 PM");
             }
         }
+
+        private const string Key = "eRnAYqbvj2JWXyPcu62yCA";
 
         /// <summary>
         /// Gets the ID of a TV show in the database.
@@ -81,8 +85,8 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var json = Utils.GetJSON("http://app.imdb.com/find?api=v1&locale=en_US&q=" + Utils.EncodeURL(name));
-
+            var json = Utils.GetJSON(SignURL("http://app.imdb.com/find?q=" + Utils.EncodeURL(name)));
+            
             foreach (var result in json["data"]["results"])
             {
                 foreach (var show in result["list"])
@@ -111,7 +115,7 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            var main = Utils.GetJSON("http://app.imdb.com/title/maindetails?api=v1&locale=en_US&tconst=tt" + id);
+            var main = Utils.GetJSON(SignURL("http://app.imdb.com/title/maindetails?tconst=tt" + id));
             var show = new TVShow();
 
             show.Title       = (string)main["data"]["title"];
@@ -130,7 +134,7 @@
 
             show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
 
-            var epdata = Utils.GetJSON("http://app.imdb.com/title/episodes?api=v1&locale=en_US&tconst=tt" + id);
+            var epdata = Utils.GetJSON(SignURL("http://app.imdb.com/title/episodes?tconst=tt" + id));
 
             foreach (var season in epdata["data"]["seasons"])
             {
@@ -163,6 +167,17 @@
             }
 
             return show;
+        }
+
+        /// <summary>
+        /// Signs the specified URL with HMAC-SHA1 using the private key.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <returns>Signed URL.</returns>
+        private string SignURL(string url)
+        {
+            var guid = Guid.NewGuid();
+            return url + "&appid=android2&device=" + guid + "&locale=en_US&timestamp=" + OAuthTools.GetTimestamp() + "&sig=and2-" + OAuthTools.GetSignature(OAuthSignatureMethod.HmacSha1, url + "&appid=android2&device=" + guid + "&locale=en_US", Key);
         }
     }
 }

@@ -6,6 +6,8 @@
     using System.Net;
     using System.Text.RegularExpressions;
 
+    using NUnit.Framework;
+
     using Parsers.Guides.Engines;
 
     /// <summary>
@@ -197,6 +199,21 @@
             }
 
             return File.Exists(path) && new FileInfo(path).Length != 0;
+        }
+
+        /// <summary>
+        /// Tests the search.
+        /// </summary>
+        [Test]
+        public static void TestSearch()
+        {
+            var show = "House";
+            Console.Write("TVDB:   ");
+            Console.WriteLine(GetCoverFromTVDB(show));
+            Console.Write("IMDb:   ");
+            Console.WriteLine(GetCoverFromIMDb(show));
+            Console.Write("Amazon: ");
+            Console.WriteLine(GetCoverFromAmazon(show));
         }
     }
 }
