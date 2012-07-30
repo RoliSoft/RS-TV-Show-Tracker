@@ -32,5 +32,7 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
+#ignore other private stuff
 /todo.txt
 /sqlite3.exe
+/upload-nightly.cmd

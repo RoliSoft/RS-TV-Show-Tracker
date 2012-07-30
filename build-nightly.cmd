@@ -3,7 +3,7 @@
 :: 2. Create portable archive with 7-Zip or WinRAR (tvshowtracker_v2_nightly_portable.zip)
 :: 3. Create installer with NSIS (tvshowtracker_v2_nightly_setup.exe)
 :: 4. Create JSON file with compile date and commit hash (tvshowtracker_v2_nightly_info.js)
-:: 5. Copy the files to C:\Users\[You]\[Dropbox|SkyDrive|Google Drive]\RS TV Show Tracker
+:: 5. Copy the files via the upload-nightly.cmd command you create (see upload-nightly.sample.cmd)
 :: 6. Remove anything leftover (bin\Nightly and tvshowtracker_v2_nightly_[portable.zip|setup.exe|info.js])
 :: 
 :: It assumes that:
@@ -15,6 +15,15 @@
 :: - Git is in your %PATH%
 
 @echo off
+
+:: check for upload-nightly.cmd
+
+if not exist upload-nightly.cmd (
+	echo You have not written a batch script to upload the files somewhere.
+	echo Copy upload-nightly.sample.cmd to upload-nightly.cmd then edit it.
+	pause
+	exit
+)
 
 :: remove previous build
 
@@ -65,38 +74,20 @@ if exist "%ProgramFiles(x86)%\NSIS\makensis.exe" (
 
 rmdir /S /Q bin\Nightly
 
-:: move portable archive to Dropbox, SkyDrive and Google Drive
+:: upload portable archive
 
 if exist tvshowtracker_v2_nightly_portable.zip (
-	if exist "%HomePath%\Dropbox\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_portable.zip "%HomePath%\Dropbox\RS TV Show Tracker"
-	)
-	if exist "%HomePath%\SkyDrive\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_portable.zip "%HomePath%\SkyDrive\RS TV Show Tracker"
-	)
-	if exist "%HomePath%\Google Drive\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_portable.zip "%HomePath%\Google Drive\RS TV Show Tracker"
-	)
-	
+	call upload-nightly tvshowtracker_v2_nightly_portable.zip
 	del tvshowtracker_v2_nightly_portable.zip
 ) else (
 	echo tvshowtracker_v2_nightly_portable.zip doesn't exist!
 	pause
 )
 
-:: move installer to Dropbox, SkyDrive and Google Drive
+:: upload installer
 
 if exist tvshowtracker_v2_nightly_setup.exe (
-	if exist "%HomePath%\Dropbox\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_setup.exe "%HomePath%\Dropbox\RS TV Show Tracker"
-	)
-	if exist "%HomePath%\SkyDrive\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_setup.exe "%HomePath%\SkyDrive\RS TV Show Tracker"
-	)
-	if exist "%HomePath%\Google Drive\RS TV Show Tracker" (
-		cp tvshowtracker_v2_nightly_setup.exe "%HomePath%\Google Drive\RS TV Show Tracker"
-	)
-	
+	call upload-nightly tvshowtracker_v2_nightly_setup.exe
 	del tvshowtracker_v2_nightly_setup.exe
 ) else (
 	echo tvshowtracker_v2_nightly_setup.exe doesn't exist!
@@ -109,16 +100,7 @@ for /f "tokens=2,3,4,5,6 usebackq delims=:/ " %%a in ('%date% %time%') do set da
 for /f "tokens=1 delims=" %%a in ('git rev-parse HEAD') do set commit=%%a
 echo. | set /p={"date":"%datum%","commit":"%commit%"} > tvshowtracker_v2_nightly_info.js
 
-:: move JSON to Dropbox, SkyDrive and Google Drive
+:: upload JSON
 
-if exist "%HomePath%\Dropbox\RS TV Show Tracker" (
-	cp tvshowtracker_v2_nightly_info.js "%HomePath%\Dropbox\RS TV Show Tracker"
-)
-if exist "%HomePath%\SkyDrive\RS TV Show Tracker" (
-	cp tvshowtracker_v2_nightly_info.js "%HomePath%\SkyDrive\RS TV Show Tracker"
-)
-if exist "%HomePath%\Google Drive\RS TV Show Tracker" (
-	cp tvshowtracker_v2_nightly_info.js "%HomePath%\Google Drive\RS TV Show Tracker"
-)
-
+call upload-nightly tvshowtracker_v2_nightly_info.js
 del tvshowtracker_v2_nightly_info.js
