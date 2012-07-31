@@ -4,12 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Xml.Linq;
 
     using HtmlAgilityPack;
 
     using NUnit.Framework;
-
-    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
 
     /// <summary>
     /// Provides support for scraping Anime News Network pages.
@@ -73,7 +72,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-07-19 8:12 PM");
+                return Utils.DateTimeToVersion("2012-07-31 6:34 PM");
             }
         }
 
@@ -85,29 +84,25 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var results = new DuckDuckGo().Search(name + " intitle:\"episode titles\" site:animenewsnetwork.com/encyclopedia/").ToList();
+            var list = Utils.GetXML("http://cdn.animenewsnetwork.com/encyclopedia/api.xml?anime=~" + Utils.EncodeURL(name));
 
-            if (results.Count == 0)
+            foreach (var show in list.Descendants("anime"))
             {
-                yield break;
-            }
-
-            var ids = new List<string>();
-            
-            foreach (var result in results)
-            {
-                var id  = new ShowID();
-                
-                id.URL      = result.URL;
-                id.ID       = Regex.Match(id.URL, @"\?id=(\d+)").Groups[1].Value;
-                id.Title    = Regex.Split(result.Title, @"(?:\s\((?:TV|OAV)\)?|\s\[(?:Episode titles|Trivia|Links|In the news)\]|\s-\s(?:Anime\s?(?:\.\.\.|News\s?(?:\.\.\.|Network))))")[0];
-                id.Language = "en";
-
-                if (!ids.Contains(id.ID))
+                int eps;
+                if (!int.TryParse(GetDescendantItemValue(show, "info", "type", "Number of episodes"), out eps) || eps == 0)
                 {
-                    ids.Add(id.ID);
-                    yield return id;
+                    continue;
                 }
+
+                var id = new ShowID();
+
+                id.Title    = GetDescendantItemValue(show, "info", "type", "Main title");
+                id.Language = "en";
+                id.ID       = show.Attribute("id").Value;
+                id.URL      = Site + "encyclopedia/anime.php?id=" + id.ID;
+                id.Cover    = GetDescendantItemAttribute(show, "info", "type", "Picture", "src");
+
+                yield return id;
             }
         }
 
@@ -119,35 +114,35 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            var summary = Utils.GetHTML("http://www.animenewsnetwork.com/encyclopedia/anime.php?id=" + id);
+            var summary = Utils.GetXML("http://cdn.animenewsnetwork.com/encyclopedia/api.xml?anime=" + id);
             var show    = new TVShow();
-
-            show.Title       = Regex.Replace(HtmlEntity.DeEntitize(summary.DocumentNode.GetTextValue("//h1[@id='page_header']")), @"\([^\)]+\)$", string.Empty);
-            show.Description = HtmlEntity.DeEntitize(summary.DocumentNode.GetTextValue("//strong[text() = 'Plot Summary:']/following-sibling::span[1]") ?? string.Empty).Trim();
-            show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//img[@id='vid-art']", "src");
-            show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//strong[text() = 'Vintage:']/following-sibling::span[1]") ?? string.Empty, " to ");
+            
+            show.Title       = GetDescendantItemValue(summary, "info", "type", "Main title");
+            show.Description = GetDescendantItemValue(summary, "info", "type", "Plot Summary");
+            show.Cover       = GetDescendantItemAttribute(summary, "info", "type", "Picture", "src");
+            show.Airing      = !Regex.IsMatch(GetDescendantItemValue(summary, "info", "type", "Vintage"), " to ");
             show.AirTime     = "20:00";
             show.Language    = "en";
-            show.URL         = "http://www.animenewsnetwork.com/encyclopedia/anime.php?id=" + id;
+            show.URL         = Site + "encyclopedia/anime.php?id=" + id;
             show.Episodes    = new List<TVShow.Episode>();
 
-            var runtxt   = Regex.Match(summary.DocumentNode.GetTextValue("//strong[text() = 'Running time:']/following-sibling::span[1]") ?? string.Empty, "([0-9]+)");
+            var runtxt = Regex.Match(GetDescendantItemValue(summary, "info", "type", "Running time"), "([0-9]+)");
             show.Runtime = runtxt.Success
                          ? int.Parse(runtxt.Groups[1].Value)
                          : 30;
 
-            var genre = summary.DocumentNode.SelectNodes("//a[contains(@href, '/genreresults?') and @class = 'discreet']");
-            if (genre != null)
+            var genre = GetDescendantItemValues(summary, "info", "type", "Genres");
+            if (genre.Count() != 0)
             {
                 foreach (var gen in genre)
                 {
-                    show.Genre += gen.InnerText + ", ";
+                    show.Genre += gen.ToUppercaseFirst() + ", ";
                 }
 
                 show.Genre = show.Genre.TrimEnd(", ".ToCharArray());
             }
 
-            var listing = Utils.GetHTML("http://www.animenewsnetwork.com/encyclopedia/anime.php?id=" + id + "&page=25");
+            var listing = Utils.GetHTML(Site + "encyclopedia/anime.php?id=" + id + "&page=25");
             var nodes   = listing.DocumentNode.SelectNodes("//table[@class='episode-list']/tr");
 
             if (nodes == null)
@@ -171,7 +166,7 @@
                 ep.URL    = show.URL + "&page=25";
 
                 DateTime dt;
-                ep.Airdate = DateTime.TryParse((node.GetTextValue("td[@class='d'][1]/div") ?? string.Empty), out dt)
+                ep.Airdate = DateTime.TryParse(node.GetTextValue("td[@class='d'][1]/div") ?? string.Empty, out dt)
                            ? dt
                            : Utils.UnixEpoch;
 
@@ -184,6 +179,121 @@
             }
 
             return show;
+        }
+
+        /// <summary>
+        /// Gets the value of the descendant node which has a specified attribute.
+        /// </summary>
+        /// <param name="xdoc">The XML document.</param>
+        /// <param name="descendant">The targeted descendant nodes.</param>
+        /// <param name="attribute">The attribute name.</param>
+        /// <param name="attributeValue">The attribute value.</param>
+        /// <returns>
+        /// Value of the searched node.
+        /// </returns>
+        private static string GetDescendantItemValue(XContainer xdoc, string descendant, string attribute, string attributeValue)
+        {
+            try
+            {
+                return xdoc.Descendants(descendant).First(i => i.Attribute(attribute).Value == attributeValue).Value;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the second specified attribute of the descendant node which has a specified attribute. If you didn't understand what I just said, look at the fucking source.
+        /// </summary>
+        /// <param name="xdoc">The XML document.</param>
+        /// <param name="descendant">The targeted descendant nodes.</param>
+        /// <param name="attribute">The attribute name.</param>
+        /// <param name="attributeValue">The attribute value.</param>
+        /// <param name="secondAttribute">The second attribute whose value to return.</param>
+        /// <returns>
+        /// Value of the searched node's second attribute.
+        /// </returns>
+        private static string GetDescendantItemAttribute(XContainer xdoc, string descendant, string attribute, string attributeValue, string secondAttribute)
+        {
+            try
+            {
+                return xdoc.Descendants(descendant).First(i => i.Attribute(attribute).Value == attributeValue).Attribute(secondAttribute).Value;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of values of the descendant node which has a specified attribute.
+        /// </summary>
+        /// <param name="xdoc">The XML document.</param>
+        /// <param name="descendant">The targeted descendant nodes.</param>
+        /// <param name="attribute">The attribute name.</param>
+        /// <param name="attributeValue">The attribute value.</param>
+        /// <returns>
+        /// Values of the searched node.
+        /// </returns>
+        private static IEnumerable<string> GetDescendantItemValues(XContainer xdoc, string descendant, string attribute, string attributeValue)
+        {
+            var list = new List<XElement>();
+
+            try
+            {
+                list = xdoc.Descendants(descendant).Where(i => i.Attribute(attribute).Value == attributeValue).ToList();
+            }
+            catch
+            {
+                yield break;
+            }
+
+            foreach (var item in list)
+            {
+                yield return item.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of values of the second specified attribute of the descendant node which has a specified attribute. If you didn't understand what I just said, look at the fucking source.
+        /// </summary>
+        /// <param name="xdoc">The XML document.</param>
+        /// <param name="descendant">The targeted descendant nodes.</param>
+        /// <param name="attribute">The attribute name.</param>
+        /// <param name="attributeValue">The attribute value.</param>
+        /// <param name="secondAttribute">The second attribute whose value to return.</param>
+        /// <returns>
+        /// Values of the searched node's second attribute.
+        /// </returns>
+        private static IEnumerable<string> GetDescendantItemAttributes(XContainer xdoc, string descendant, string attribute, string attributeValue, string secondAttribute)
+        {
+            var list = new List<XElement>();
+
+            try
+            {
+                list = xdoc.Descendants(descendant).Where(i => i.Attribute(attribute).Value == attributeValue).ToList();
+            }
+            catch
+            {
+                yield break;
+            }
+
+            foreach (var item in list)
+            {
+                var str = string.Empty;
+
+                try
+                {
+                    str = item.Attribute(secondAttribute).Value;
+                }
+                catch
+                {
+                    continue;
+                }
+
+                yield return str;
+            }
         }
     }
 }

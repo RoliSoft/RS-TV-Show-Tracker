@@ -46,7 +46,7 @@
         [Test]
         public void TestGrab()
         {
-            var id = GetID(this is Engines.AniDB ? "hack" : "House").ToList();
+            var id = GetID(this is Engines.AniDB || this is Engines.AnimeNewsNetwork ? "hack" : "House").ToList();
 
             Assert.Greater(id.Count, 0, "Failed to find any shows on the guide.");
 

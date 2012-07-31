@@ -100,14 +100,14 @@
                 
                 try
                 {
-                    id.Title = show.Descendants("title").Where(t => t.Attribute("lang").Value == "en").First().Value;
+                    id.Title = show.Descendants("title").First(t => t.Attribute("lang").Value == "en").Value;
                     id.Language = "en";
                 }
                 catch
                 {
                     try
                     {
-                        id.Title = show.Descendants("title").Where(t => t.Attribute("lang").Value == language).First().Value;
+                        id.Title = show.Descendants("title").First(t => t.Attribute("lang").Value == language).Value;
                         id.Language = language;
                     }
                     catch
@@ -118,7 +118,7 @@
                 }
 
                 id.ID  = show.Attribute("aid").Value;
-                id.URL = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id.ID;
+                id.URL = Site + "perl-bin/animedb.pl?show=anime&aid=" + id.ID;
 
                 yield return id;
             }
@@ -132,14 +132,13 @@
         /// <returns>TV show data.</returns>
         public override TVShow GetData(string id, string language = "en")
         {
-            // XDocument will fail, because the response is gzipped; Utils.GetURL supports gzipped content
             var info = Utils.GetXML("http://api.anidb.net:9001/httpapi?request=anime&client=rstvshowtracker&clientver=2&protover=1&aid=" + id);
             var show = new TVShow();
 
-            try { show.Title = info.Descendants("title").Where(t => t.Attributes().First().Value == language).First().Value; }
+            try { show.Title = info.Descendants("title").First(t => t.Attributes().First().Value == language).Value; }
             catch
             {
-                try   { show.Title = info.Descendants("title").Where(t => t.Attributes().First().Value == "en").First().Value; }
+                try   { show.Title = info.Descendants("title").First(t => t.Attributes().First().Value == "en").Value; }
                 catch { show.Title = info.GetValue("title"); }
             }
 
@@ -149,7 +148,7 @@
             show.Runtime     = info.GetValue("length").ToInteger();
             show.TimeZone    = "Tokyo Standard Time";
             show.Language    = language;
-            show.URL         = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=" + id;
+            show.URL         = Site + "perl-bin/animedb.pl?show=anime&aid=" + id;
             show.Episodes    = new List<TVShow.Episode>();
 
             show.Cover = info.GetValue("picture");
@@ -170,12 +169,12 @@
 
                 ep.Season = 1;
                 ep.Number = node.GetValue("epno").ToInteger();
-                ep.URL    = "http://anidb.net/perl-bin/animedb.pl?show=ep&eid=" + node.Attribute("id").Value;
+                ep.URL    = Site + "perl-bin/animedb.pl?show=ep&eid=" + node.Attribute("id").Value;
 
-                try { ep.Title = node.Descendants("title").Where(t => t.Attributes().First().Value == language).First().Value; }
+                try { ep.Title = node.Descendants("title").First(t => t.Attributes().First().Value == language).Value; }
                 catch
                 {
-                    try   { ep.Title = node.Descendants("title").Where(t => t.Attributes().First().Value == "en").First().Value; }
+                    try   { ep.Title = node.Descendants("title").First(t => t.Attributes().First().Value == "en").Value; }
                     catch { ep.Title = node.GetValue("title"); }
                 }
 
