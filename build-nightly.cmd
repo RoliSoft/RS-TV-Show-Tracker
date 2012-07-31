@@ -5,6 +5,7 @@
 :: 4. Create JSON file with compile date and commit hash (tvshowtracker_v2_nightly_info.js)
 :: 5. Copy the files via the upload-nightly.cmd command you create (see upload-nightly.sample.cmd)
 :: 6. Remove anything leftover (bin\Nightly and tvshowtracker_v2_nightly_[portable.zip|setup.exe|info.js])
+:: 7. Call post-build.cmd, if exists
 :: 
 :: It assumes that:
 :: - The following files exist:
@@ -13,6 +14,7 @@
 ::   - %ProgramFiles(x86)%\NSIS\makensis.exe OR %ProgramFiles%\NSIS\makensis.exe
 :: - Regional settings are set to US date and time format (for %date% and %time%)
 :: - Git is in your %PATH%
+:: - You have written a functional upload-nightly.cmd script
 
 @echo off
 
@@ -104,3 +106,7 @@ echo. | set /p={"date":"%datum%","commit":"%commit%"} > tvshowtracker_v2_nightly
 
 call upload-nightly tvshowtracker_v2_nightly_info.js
 del tvshowtracker_v2_nightly_info.js
+
+:: call post-build script, if exists
+
+if exist post-build.cmd call post-build.cmd 

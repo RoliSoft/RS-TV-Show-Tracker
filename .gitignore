@@ -36,3 +36,4 @@ _ReSharper*/
 /todo.txt
 /sqlite3.exe
 /upload-nightly.cmd
+/post-build.cmd
