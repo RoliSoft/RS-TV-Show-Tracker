@@ -71,7 +71,7 @@
             var proxy = Settings.Get(uri.Host.Replace("www.", string.Empty) + " proxy");
             if (!string.IsNullOrEmpty(proxy))
             {
-                var proxyUri = new Uri(proxy);
+                var proxyUri = new Uri(proxy.Replace("$domain.", string.Empty));
 
                 switch (proxyUri.Scheme.ToLower())
                 {
@@ -79,6 +79,10 @@
                         if (proxy.Contains("$url"))
                         {
                             uri = new Uri(proxy.Replace("$url", Utils.EncodeURL(uri.ToString())));
+                        }
+                        else if (proxy.Contains("$domain") && proxy.Contains("$path"))
+                        {
+                            uri = new Uri(proxy.Replace("$domain", uri.DnsSafeHost).Replace("$path", uri.AbsolutePath));
                         }
                         else
                         {

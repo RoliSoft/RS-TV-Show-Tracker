@@ -97,7 +97,9 @@
             using (var client = _server.EndAcceptTcpClient(asyncResult))
             using (var stream = client.GetStream())
             {
+                client.Client.NoDelay = true;
                 stream.ReadTimeout = 100;
+
                 ProcessHTTPRequest(stream);
             }
         }
@@ -203,6 +205,7 @@
             using (var client = RemoteProxy.CreateProxy().CreateConnection(destHost, destPort))
             using (var stream = client.GetStream())
             {
+                client.Client.NoDelay = true;
                 stream.ReadTimeout = 100;
 
                 CopyBytesToStream(requestData, stream);
@@ -223,6 +226,7 @@
             using (var client = RemoteProxy.CreateProxy().CreateConnection(destHost, destPort))
             using (var stream = client.GetStream())
             {
+                client.Client.NoDelay = true;
                 stream.ReadTimeout = 100;
 
                 while (true)

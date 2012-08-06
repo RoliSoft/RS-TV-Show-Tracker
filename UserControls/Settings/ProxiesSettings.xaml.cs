@@ -167,7 +167,7 @@
             var done = false;
 
             var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
-            var uri = new Uri(sel.Address);
+            var uri = new Uri(sel.Address.Replace("$domain.", string.Empty));
 
             if (uri.Host == "localhost" || uri.Host == "127.0.0.1" || uri.Host == "::1")
             {
@@ -219,13 +219,13 @@
                 {
                     try
                     {
-                        var src = new Bing();
+                        var src = new DuckDuckGo();
                         var res = new List<SearchResult>();
-                        res.AddRange(src.Search(uri.Host + " intitle:proxy"));
+                        res.AddRange(src.Search("\"" + uri.Host + "\" intitle:proxy"));
 
                         if (res.Count == 0)
                         {
-                            res.AddRange(src.Search(uri.Host + " intitle:proxies"));
+                            res.AddRange(src.Search("\"" + uri.Host + "\" intitle:proxies"));
                         }
 
                         done = true;
@@ -297,7 +297,7 @@
             var done = false;
 
             var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
-            var uri = new Uri(sel.Address);
+            var uri = new Uri(sel.Address.Replace("$domain.", string.Empty));
             var td  = new TaskDialog
                 {
                     Title           = sel.Name,

@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.ProxyWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
-        Title="Add proxy" Height="366" Width="398" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/server-cast.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Add proxy" Height="379" Width="398" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/server-cast.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
             <TabControl.Effect>
@@ -38,7 +38,8 @@
                                 - Authentication, if required: <Bold><Italic>username</Italic>:<Italic>password</Italic>@</Bold><LineBreak />
                                 - Host name or IP address<LineBreak />
                                 - Port, if not 80; spearated by a colon from the host<LineBreak />
-                                - For PHP proxies, use <Bold>$url</Bold> to include the request URL.<LineBreak />
+                                - For PHP/CGI proxies, use <Bold>$url</Bold> to include the request URL.<LineBreak />
+                                - For catch-all subdomain proxies, use <Bold>$domain</Bold> and <Bold>$path</Bold>.<LineBreak />
                                 <LineBreak />
                                 For example, the default Tor server is SOCKS5 on port 9050 of localhost, which would be:
                                 <Bold>socks5://127.0.0.1:9050</Bold>

@@ -147,14 +147,14 @@
 
             if (proxy != null)
             {
-                var proxyUri = new Uri(proxy);
+                var proxyUri = new Uri(proxy.Replace("$domain.", string.Empty));
 
                 switch (proxyUri.Scheme.ToLower())
                 {
                     case "http":
-                        if (proxy.Contains("$url"))
+                        if (proxy.Contains("$url") || (proxy.Contains("$domain") && proxy.Contains("$path")))
                         {
-                            throw new Exception("Web-based proxies are not supported with Netflix for now, because of the way Hammock signs the requests.");
+                            throw new Exception("Web-based proxies are not supported with Netflix for now, because of OAuth signatures.");
                         }
                         else
                         {

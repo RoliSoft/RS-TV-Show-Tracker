@@ -74,11 +74,8 @@
         {
             if (string.IsNullOrWhiteSpace(nameTextBox.Text) || string.IsNullOrWhiteSpace(addressTextBox.Text)) return;
 
-            try
-            {
-                new Uri(addressTextBox.Text);
-            }
-            catch
+            Uri test;
+            if (!Uri.TryCreate(addressTextBox.Text.Replace("$domain", "example.com"), UriKind.Absolute, out test))
             {
                 MessageBox.Show("The specified address is not a valid URL.", "Invalid URL", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;

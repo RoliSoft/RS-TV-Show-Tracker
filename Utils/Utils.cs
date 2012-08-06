@@ -190,6 +190,8 @@
             CryptoRand = new RNGCryptoServiceProvider();
 
             ServicePointManager.Expect100Continue = false;
+            ServicePointManager.UseNagleAlgorithm = false;
+            ServicePointManager.DefaultConnectionLimit = 100;
             ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
         }
 
@@ -449,14 +451,18 @@
 
             if (proxy != null)
             {
-                var proxyUri = new Uri(proxy);
+                var proxyUri = new Uri(proxy.Replace("$domain.", string.Empty));
 
                 switch (proxyUri.Scheme.ToLower())
                 {
                     case "http":
                         if (proxy.Contains("$url"))
                         {
-                            req = (HttpWebRequest)WebRequest.Create(proxy.Replace("$url", Utils.EncodeURL(url)));
+                            req = (HttpWebRequest)WebRequest.Create(proxy.Replace("$url", EncodeURL(url)));
+                        }
+                        else if (proxy.Contains("$domain") && proxy.Contains("$path"))
+                        {
+                            req = (HttpWebRequest)WebRequest.Create(proxy.Replace("$domain", req.RequestUri.DnsSafeHost).Replace("$path", req.RequestUri.AbsolutePath));
                         }
                         else
                         {
@@ -478,6 +484,7 @@
             
             req.Timeout   = timeout;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
+            req.ConnectionGroupName    = Guid.NewGuid().ToString();
             req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             if (!string.IsNullOrWhiteSpace(postData))
