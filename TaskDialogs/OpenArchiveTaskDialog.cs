@@ -6,7 +6,6 @@
     using System.Threading;
 
     using SharpCompress.Archive;
-    using SharpCompress.Common;
 
     using VistaControls.TaskDialog;
 
@@ -16,7 +15,6 @@
     public class OpenArchiveTaskDialog
     {
         private TaskDialog _td;
-        private ExtractionListener _el;
         private Thread _thd;
         private string _file, _ext;
 
@@ -88,10 +86,10 @@
                 case 1:
                     var archive = ArchiveFactory.Open(_file);
                     var files   = archive.Entries.Where(f => !f.IsDirectory && ShowNames.Regexes.KnownVideo.IsMatch(f.FilePath) && !ShowNames.Regexes.SampleVideo.IsMatch(f.FilePath)).ToList();
-
+                    
                     if (files.Count == 1)
                     {
-                        ExtractFile(files[0]);
+                        ExtractFile(files[0], archive);
                     }
                     else if (files.Count == 0)
                     {
@@ -120,7 +118,7 @@
                             {
                                 if (c.ButtonID < files.Count)
                                 {
-                                    ExtractFile(files[c.ButtonID]);
+                                    ExtractFile(files[c.ButtonID], archive);
                                 }
                             };
 
@@ -141,7 +139,8 @@
         /// Begins the file extraction.
         /// </summary>
         /// <param name="file">The file within the archive.</param>
-        private void ExtractFile(IArchiveEntry file)
+        /// <param name="archive">The archive.</param>
+        private void ExtractFile(IArchiveEntry file, IArchive archive)
         {
             _td = new TaskDialog
                 {
@@ -159,12 +158,29 @@
 
             _ext = Path.Combine(Path.GetDirectoryName(_file), Path.GetFileName(file.FilePath));
 
-            _el = new ExtractionListener();
+            var total = file.Size;
+            var last = DateTime.MinValue;
 
-            _el.TaskDialog = _td;
-            _el.Finished = () =>
+            archive.CompressedBytesRead += (sender, args) =>
                 {
-                    _el.Finished = null;
+                    if (args.CurrentFilePartCompressedBytesRead == total)
+                    {
+                        return;
+                    }
+
+                    if ((DateTime.Now - last).TotalMilliseconds < 150)
+                    {
+                        return;
+                    }
+
+                    last = DateTime.Now;
+
+                    var perc = ((double)args.CurrentFilePartCompressedBytesRead / (double)total) * 100;
+                    _td.ProgressBarPosition = (int)perc;
+                    _td.Content = "Extracting file: " + Utils.GetFileSize(args.CurrentFilePartCompressedBytesRead) + " / " + perc.ToString("0.00") + "% done...";
+                };
+            archive.EntryExtractionEnd += (sender, args) =>
+                {
                     _td.SimulateButtonClick(-1);
 
                     if (!File.Exists(_ext))
@@ -182,7 +198,7 @@
                         }).Start();
                 };
 
-            _thd = new Thread(() => file.WriteToFile(_ext, _el));
+            _thd = new Thread(() => file.WriteToFile(_ext));
             _thd.Start();
         }
 
@@ -231,87 +247,6 @@
             if (res.ButtonID == 6)
             {
                 try { File.Delete(_ext); } catch { }
-            }
-        }
-
-        /// <summary>
-        /// Provides an extraction listener to <see cref="IArchive"/>.
-        /// </summary>
-        private class ExtractionListener : IExtractionListener
-        {
-            /// <summary>
-            /// Gets or sets the task dialog.
-            /// </summary>
-            /// <value>
-            /// The task dialog.
-            /// </value>
-            public TaskDialog TaskDialog { get; set; }
-
-            /// <summary>
-            /// Gets or sets the method to call when finished.
-            /// </summary>
-            /// <value>
-            /// The method to call when finished.
-            /// </value>
-            public Action Finished { get; set; }
-
-            private long _total;
-            private DateTime _last = DateTime.MinValue;
-            
-            /// <summary>
-            /// Called when file entry extraction initialized.
-            /// </summary>
-            /// <param name="entryFileName">Name of the entry file.</param>
-            /// <param name="totalEntryCompressedBytes">The total entry compressed bytes.</param>
-            public void OnFileEntryExtractionInitialized(string entryFileName, long? totalEntryCompressedBytes)
-            {
-                _total = totalEntryCompressedBytes.Value;
-            }
-
-            /// <summary>
-            /// Called when file part extraction initialized.
-            /// </summary>
-            /// <param name="partFileName">Name of the part file.</param>
-            /// <param name="totalPartCompressedBytes">The total part compressed bytes.</param>
-            public void OnFilePartExtractionInitialized(string partFileName, long totalPartCompressedBytes)
-            {
-            }
-
-            /// <summary>
-            /// Called when compressed bytes read.
-            /// </summary>
-            /// <param name="currentPartCompressedBytes">The current part compressed bytes.</param>
-            /// <param name="currentEntryCompressedBytes">The current entry compressed bytes.</param>
-            public void OnCompressedBytesRead(long currentPartCompressedBytes, long currentEntryCompressedBytes)
-            {
-                if (currentEntryCompressedBytes == _total)
-                {
-                    if (Finished != null)
-                    {
-                        Finished();
-                    }
-
-                    return;
-                }
-
-                if ((DateTime.Now - _last).TotalMilliseconds < 150)
-                {
-                    return;
-                }
-
-                _last = DateTime.Now;
-
-                var perc = ((double)currentEntryCompressedBytes / (double)_total) * 100;
-                TaskDialog.ProgressBarPosition = (int)perc;
-                TaskDialog.Content = "Extracting file: " + Utils.GetFileSize(currentEntryCompressedBytes) + " / " + perc.ToString("0.00") + "% done...";
-            }
-
-            /// <summary>
-            /// Called when information.
-            /// </summary>
-            /// <param name="message">The message.</param>
-            public void OnInformation(string message)
-            {
             }
         }
     }
