@@ -49,6 +49,25 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether a donation key has been entered.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if a donation key has been entered; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsActivated
+        {
+            get
+            {
+#if ACTIVATE_WITHOUT_DONATION
+                return true;
+#else
+                // TODO check for activation.
+                return true;
+#endif
+            }
+        }
+
+        /// <summary>
         /// Gets the date and time when the executing assembly was compiled.
         /// </summary>
         /// <value>The compile time.</value>

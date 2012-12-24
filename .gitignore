@@ -37,3 +37,4 @@ _ReSharper*/
 /sqlite3.exe
 /upload-nightly.cmd
 /post-build.cmd
+/sign.cmd

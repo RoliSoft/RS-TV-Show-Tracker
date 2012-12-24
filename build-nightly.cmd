@@ -2,10 +2,11 @@
 :: 1. Compile the "Nightly" configuration of the solution with MSBuild
 :: 2. Create portable archive with 7-Zip or WinRAR (tvshowtracker_v2_nightly_portable.zip)
 :: 3. Create installer with NSIS (tvshowtracker_v2_nightly_setup.exe)
-:: 4. Create JSON file with compile date and commit hash (tvshowtracker_v2_nightly_info.js)
-:: 5. Copy the files via the upload-nightly.cmd command you create (see upload-nightly.sample.cmd)
-:: 6. Remove anything leftover (bin\Nightly and tvshowtracker_v2_nightly_[portable.zip|setup.exe|info.js])
-:: 7. Call post-build.cmd, if exists
+:: 4. Sign the installer
+:: 5. Create JSON file with compile date and commit hash (tvshowtracker_v2_nightly_info.js)
+:: 6. Copy the files via the upload-nightly.cmd command you create (see upload-nightly.sample.cmd)
+:: 7. Remove anything leftover (bin\Nightly and tvshowtracker_v2_nightly_[portable.zip|setup.exe|info.js])
+:: 8. Call post-build.cmd, if exists
 :: 
 :: It assumes that:
 :: - The following files exist:
@@ -71,6 +72,10 @@ if exist "%ProgramFiles(x86)%\NSIS\makensis.exe" (
 		pause
 	)
 )
+
+:: sign the installer
+
+if exist sign.cmd call sign tvshowtracker_v2_nightly_setup.exe
 
 :: remove build
 
