@@ -391,6 +391,7 @@
     <Compile Include="UserControls\Settings\XMLTVSettings.xaml.cs">
       <DependentUpon>XMLTVSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\Base85.cs" />
     <Compile Include="Utils\Interop.cs" />
     <Compile Include="Windows\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
