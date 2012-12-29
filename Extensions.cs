@@ -168,6 +168,192 @@ namespace RoliSoft.TVShowTracker
         }
         #endregion
 
+        #region Byte[]
+        /// <summary>
+        /// Combines two byte arrays.
+        /// </summary>
+        /// <param name="first">The first array.</param>
+        /// <param name="second">The second array.</param>
+        /// <returns>
+        /// Concated byte array.
+        /// </returns>
+        public static byte[] Combine(this byte[] first, byte[] second)
+        {
+            var ret = new byte[first.Length + second.Length];
+            Buffer.BlockCopy(first, 0, ret, 0, first.Length);
+            Buffer.BlockCopy(second, 0, ret, first.Length, second.Length);
+            return ret;
+        }
+
+        /// <summary>
+        /// Combines three byte arrays.
+        /// </summary>
+        /// <param name="first">The first array.</param>
+        /// <param name="second">The second array.</param>
+        /// <param name="third">The third array.</param>
+        /// <returns>
+        /// Concated byte array.
+        /// </returns>
+        public static byte[] Combine(this byte[] first, byte[] second, byte[] third)
+        {
+            var ret = new byte[first.Length + second.Length + third.Length];
+            Buffer.BlockCopy(first, 0, ret, 0, first.Length);
+            Buffer.BlockCopy(second, 0, ret, first.Length, second.Length);
+            Buffer.BlockCopy(third, 0, ret, first.Length + second.Length, third.Length);
+            return ret;
+        }
+
+        /// <summary>
+        /// Combines two byte arrays.
+        /// </summary>
+        /// <param name="arrays">The byte arrays to concate into one.</param>
+        /// <returns>
+        /// Concated byte array.
+        /// </returns>
+        public static byte[] Combine(params byte[][] arrays)
+        {
+            var ret = new byte[arrays.Sum(x => x.Length)];
+            var offset = 0;
+            foreach (var data in arrays)
+            {
+                Buffer.BlockCopy(data, 0, ret, offset, data.Length);
+                offset += data.Length;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Truncates a byte array.
+        /// </summary>
+        /// <param name="array">The byte array to truncate.</param>
+        /// <param name="newLength">The new length.</param>
+        /// <returns>
+        /// Truncated byte array.
+        /// </returns>
+        public static byte[] Truncate(this byte[] array, int newLength)
+        {
+            var ret = new byte[newLength];
+            Buffer.BlockCopy(array, 0, ret, 0, newLength);
+            return ret;
+        }
+
+        /// <summary>
+        /// Copies part of the byte array.
+        /// </summary>
+        /// <param name="array">The byte array to truncate.</param>
+        /// <param name="index">The index from which to start the copy.</param>
+        /// <param name="count">The number of bytes to copy.</param>
+        /// <returns>Copied byte array.</returns>
+        public static byte[] Slice(this byte[] array, int index, int count)
+        {
+            var ret = new byte[count];
+            Buffer.BlockCopy(array, index, ret, 0, count);
+            return ret;
+        }
+
+        /// <summary>
+        /// Locates the specified byte.
+        /// </summary>
+        /// <param name="array">The byte array to search.</param>
+        /// <param name="character">The character to find.</param>
+        /// <returns>
+        /// Index of the first occurrence or -1.
+        /// </returns>
+        public static int Locate(this byte[] array, byte character)
+        {
+            if (array == null || array.Length == 0)
+            {
+                return -1;
+            }
+
+            for (var i = 0; i < array.Length; i++)
+            {
+                if (array[i] == character)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Locates the specified byte array sequence.
+        /// </summary>
+        /// <param name="array">The byte array to search.</param>
+        /// <param name="sequence">The sequence to find.</param>
+        /// <returns>
+        /// Index of the first occurrence or -1.
+        /// </returns>
+        public static int Locate(this byte[] array, byte[] sequence)
+        {
+            if (array == null || sequence == null || array.Length == 0 || sequence.Length == 0 || sequence.Length > array.Length)
+            {
+                return -1;
+            }
+
+            for (var i = 0; i < array.Length; i++)
+            {
+                if (sequence.Length > (array.Length - i))
+                {
+                    continue;
+                }
+
+                var match = true;
+
+                for (var x = 0; x < sequence.Length; x++)
+                {
+                    if (array[i + x] != sequence[x])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Compares two byte arrays. Turns out it's not just <c>b1 == b2</c>.
+        /// </summary>
+        /// <param name="b1">The first array.</param>
+        /// <param name="b2">The second array.</param>
+        /// <returns>
+        ///     <c>true</c> if they equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static unsafe bool EqualsExactly(this byte[] b1, byte[] b2)
+        {
+            if (b1.Length != b2.Length)
+            {
+                return false;
+            }
+
+            var n = b1.Length;
+
+            fixed (byte* p1 = b1, p2 = b2)
+            {
+                var ptr1 = p1;
+                var ptr2 = p2;
+
+                while (n-- > 0)
+                {
+                    if (*ptr1++ != *ptr2++)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+        #endregion
+
         #region List<T>
         /// <summary>
         /// Extension method to <c>List&lt;T&gt;</c> to move an item.
@@ -204,6 +390,28 @@ namespace RoliSoft.TVShowTracker
         {
             Move(list, item, item + 1);
         }
+
+        /// <summary>
+        /// Applies an accumulator function over a sequence. The specified seed value is used as the initial accumulator value.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TAccumulate">The type of the accumulator value.</typeparam>
+        /// <param name="source">An <code>IEnumerable&gt;T&lt;</code> to aggregate over.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <returns>The final accumulator value.</returns>
+        public static TAccumulate Aggregate<TSource, TAccumulate>(this IEnumerable<TSource> source, TAccumulate seed, Func<TAccumulate, int, TSource, TAccumulate> func)
+        {
+            var index = 0;
+            var result = seed;
+
+            foreach (var element in source)
+            {
+                result = func(result, index++, element);
+            }
+
+            return result;
+        } 
         #endregion
 
         #region Dictionary<TKey, TValue>

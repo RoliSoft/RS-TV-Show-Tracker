@@ -933,17 +933,6 @@
         }
 
         /// <summary>
-        /// Combines the specified byte arrays.
-        /// </summary>
-        /// <param name="first">The first array.</param>
-        /// <param name="second">The second array.</param>
-        /// <returns>Combined array.</returns>
-        public static byte[] Combine(byte[] first, byte[] second)
-        {
-            return first.Concat(second).ToArray();
-        }
-
-        /// <summary>
         /// Converts the specified arabic numeral to a roman numeral.
         /// </summary>
         /// <param name="number">The arabic numeral.</param>

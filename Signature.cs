@@ -2,14 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
+    using System.Linq;
+    using System.Numerics;
     using System.Reflection;
     using System.Security.Cryptography;
     using System.Text;
-
-    using Org.BouncyCastle.Crypto.Engines;
-    using Org.BouncyCastle.Crypto.Parameters;
-    using Org.BouncyCastle.Math;
 
     /// <summary>
     /// Contains informations about the assembly.
@@ -50,7 +49,7 @@
 #else
                     false
 #endif
-                ;
+;
             }
         }
 
@@ -99,23 +98,18 @@
         /// <summary>
         /// Gets the Aperture Science Turret Testing Facility Access Codes.
         /// </summary>
-        private static BigInteger Exponent = new BigInteger(new byte[] { 0x01, 0x00, 0x01 });
-
-        /// <summary>
-        /// Gets Cave Johnson's known phone numbers.
-        /// </summary>
         private static BigInteger[] Moduluses =
             {
-                new BigInteger(new byte[] { 0x00, 0xce, 0x23, 0xb3, 0xd1, 0x54, 0x92, 0xf7, 0x56, 0x2c, 0x0c, 0x7c, 0xaa, 0xc8, 0xe0, 0x63, 0xf3, }),
-                new BigInteger(new byte[] { 0x00, 0xce, 0xab, 0x66, 0x25, 0xac, 0x61, 0x54, 0xfb, 0x4e, 0x3c, 0xdf, 0x32, 0x0e, 0x4b, 0x0a, 0xc9, }),
-                new BigInteger(new byte[] { 0x00, 0xaf, 0x49, 0x2f, 0xfc, 0x6c, 0x95, 0xfc, 0xd9, 0x89, 0x80, 0x8f, 0x7e, 0x74, 0x6d, 0xe9, 0x7f, }),
-                new BigInteger(new byte[] { 0x00, 0xa2, 0x8f, 0x41, 0x94, 0x39, 0xed, 0x95, 0xb9, 0xee, 0xa0, 0x82, 0xa4, 0x36, 0x4e, 0x81, 0x17, }),
-                new BigInteger(new byte[] { 0x00, 0xb2, 0x58, 0x49, 0xd8, 0xac, 0x4b, 0x96, 0x34, 0x31, 0x61, 0x74, 0x14, 0x1b, 0xba, 0x7b, 0x59, }),
-                new BigInteger(new byte[] { 0x00, 0xc6, 0x82, 0x67, 0x1a, 0x39, 0x22, 0x81, 0x87, 0xbe, 0xe5, 0x9c, 0x9c, 0x36, 0x4f, 0x7f, 0x0d, }),
-                new BigInteger(new byte[] { 0x00, 0x9d, 0xa6, 0x44, 0x89, 0xfe, 0xed, 0x21, 0x05, 0xbd, 0x65, 0x41, 0xfe, 0x12, 0xc9, 0x42, 0x03, }),
-                new BigInteger(new byte[] { 0x00, 0xa5, 0x53, 0x73, 0xda, 0x6b, 0xf2, 0x00, 0xf1, 0xac, 0xb8, 0x63, 0x8a, 0xc7, 0x11, 0x74, 0x4d, }),
-                new BigInteger(new byte[] { 0x00, 0xd1, 0x8b, 0x4c, 0x02, 0xef, 0x79, 0xa7, 0xe6, 0xd4, 0xbd, 0x2e, 0xe6, 0x01, 0xe5, 0x7b, 0xd1, }),
-                new BigInteger(new byte[] { 0x00, 0xc3, 0x55, 0xa1, 0xa2, 0xe3, 0xe2, 0xad, 0x7e, 0x62, 0xcc, 0xaa, 0x98, 0x34, 0xb7, 0x15, 0x6d, }),
+                new BigInteger(15246487771235781107)*(17971768237329038849),
+                new BigInteger(16455720859197541667)*(16693946381056259363),
+                new BigInteger(14486207375898700283)*(16083913764276947789),
+                new BigInteger(14283561927021492269)*(15127792701305930963),
+                new BigInteger(14370260276245322459)*(16496639490075584219),
+                new BigInteger(15914860067061659267)*(16579739426608955183),
+                new BigInteger(14143463530261769267)*(14816180372324778737),
+                new BigInteger(14726713035460975247)*(14922266034305327459),
+                new BigInteger(15973096875095683133)*(17437565442450587429),
+                new BigInteger(15028130840778560783)*(17277204033912866243),
             };
 
         /// <summary>
@@ -125,11 +119,11 @@
         {
             var ver = Assembly.GetExecutingAssembly().GetName().Version;
 
-            Software         = "RS TV Show Tracker";
-            Version          = ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty);
+            Software = "RS TV Show Tracker";
+            Version = ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty);
             VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? " build " + ver.Build : string.Empty) + (IsNightly ? " nightly" : string.Empty);
-            CompileTime      = RetrieveLinkerTimestamp();
-            try { FullPath   = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; } catch (ArgumentException) { }
+            CompileTime = RetrieveLinkerTimestamp();
+            try { FullPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; } catch (ArgumentException) { }
         }
 
         /// <summary>
@@ -181,37 +175,13 @@
         /// </returns>
         public static bool Activate(string user, string key)
         {
-            var email = Encoding.UTF8.GetBytes(user.ToLower().Trim());
-            var hash0 = new HMACSHA512(MD5.Create().ComputeHash(email)).ComputeHash(email);
-            var hash1 = Utils.Base85.Decode(key);
-
-            if (hash1.Length != 16)
-            {
-                return false;
-            }
-
-            foreach (var modulus in Moduluses)
-            {
-                var rsa = new RsaEngine();
-                rsa.Init(false, new RsaKeyParameters(false, modulus, Exponent));
-                var hash2 = rsa.ProcessBlock(hash1, 0, hash1.Length);
-                var match = true;
-
-                for (var i = 0; i < 16; i++)
-                {
-                    if (hash2[i] != hash0[i])
-                    {
-                        match = false;
-                    }
-                }
-
-                if (match)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            var a = Encoding.UTF8.GetBytes(user.ToLower().Trim());
+            var b = new BigInteger(new HMACSHA512(MD5.Create().ComputeHash(a)).ComputeHash(a).Truncate(16).Reverse().ToArray());
+            var c = key.Trim().Replace("-", string.Empty).Substring(2).Reverse().ToList();
+            var d = (c.Aggregate(int.Parse(key.TrimStart().Substring(0, 2), NumberStyles.HexNumber), (i, x) => i - x) - 5 * 45) & byte.MaxValue;
+            var e = Enumerable.Range('0', '9' - '0' + 1).Concat(Enumerable.Range('a', 'z' - 'a' + 1)).Concat(Enumerable.Range('A', 'Z' - 'A' + 1)).Select(x => (char)x).ToList();
+            var f = c.Aggregate(BigInteger.Zero, (g, i, x) => BigInteger.Add(g, BigInteger.Multiply(e.IndexOf(x), BigInteger.Pow(e.Count, i))));
+            return Moduluses.Any(m => BigInteger.Subtract(b, BigInteger.ModPow(f, 0x010001, m)).IsZero) && 0 == d;
         }
     }
 }
