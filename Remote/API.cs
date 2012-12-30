@@ -179,6 +179,16 @@
         }
 
         /// <summary>
+        /// Check the donation key's status.
+        /// </summary>
+        /// <param name="hash">The hash of the key.</param>
+        /// <returns>Key status.</returns>
+        public static Generic<int> CheckDonateKey(string hash)
+        {
+            return InvokeRemoteMethod<Generic<int>>("CheckDonateKey", hash);
+        }
+
+        /// <summary>
         /// Gets a list of known shows on the server.
         /// </summary>
         /// <returns>List of shows.</returns>

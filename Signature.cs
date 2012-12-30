@@ -166,14 +166,14 @@
         }
 
         /// <summary>
-        /// Determines whether the specified activation data is valid.
+        /// Determines whether the specified donation key is cryptographically valid.
         /// </summary>
         /// <param name="user">The email address of the user.</param>
         /// <param name="key">The corresponding donation key.</param>
         /// <returns>
-        ///   <c>true</c> if the activation was successful; otherwise, <c>false</c>.
+        ///   <c>true</c> if the verification was successful; otherwise, <c>false</c>.
         /// </returns>
-        public static bool Activate(string user, string key)
+        public static bool VerifyKey(string user, string key)
         {
             var a = Encoding.UTF8.GetBytes(user.ToLower().Trim());
             var b = new BigInteger(new HMACSHA512(MD5.Create().ComputeHash(a)).ComputeHash(a).Truncate(16).Reverse().ToArray());
@@ -182,6 +182,68 @@
             var e = Enumerable.Range('0', '9' - '0' + 1).Concat(Enumerable.Range('a', 'z' - 'a' + 1)).Concat(Enumerable.Range('A', 'Z' - 'A' + 1)).Select(x => (char)x).ToList();
             var f = c.Aggregate(BigInteger.Zero, (g, i, x) => BigInteger.Add(g, BigInteger.Multiply(e.IndexOf(x), BigInteger.Pow(e.Count, i))));
             return Moduluses.Any(m => BigInteger.Subtract(b, BigInteger.ModPow(f, 0x010001, m)).IsZero) && 0 == d;
+        }
+
+        /// <summary>
+        /// Checks whether the specified donation key is active on the server. 
+        /// </summary>
+        /// <param name="user">The email address of the user.</param>
+        /// <param name="key">The corresponding donation key.</param>
+        /// <returns>
+        /// The key status returned by the server.
+        /// </returns>
+        public static KeyStatus CheckKey(string user, string key)
+        {
+            var hash = BitConverter.ToString(new HMACSHA512(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(user.ToLower().Trim()))).ComputeHash(Encoding.UTF8.GetBytes(user.Trim()))).ToLower().Replace("-", string.Empty);
+            var result = Remote.API.CheckDonateKey(hash);
+
+            if (!result.Success)
+            {
+                return KeyStatus.Unchecked;
+            }
+
+            return (KeyStatus)result.Result;
+        }
+
+        /// <summary>
+        /// A list of donation key statuses.
+        /// </summary>
+        public enum KeyStatus : int
+        {
+            /// <summary>
+            /// There was an error while preforming the check.
+            /// </summary>
+            Unchecked = -1,
+
+            /// <summary>
+            /// The key is valid and active.
+            /// </summary>
+            Valid = 0,
+
+            /// <summary>
+            /// The key is not registered on the server, and it is not even cryptographically valid.
+            /// </summary>
+            Invalid = 1,
+
+            /// <summary>
+            /// The key is not registered on the server, however it is cryptographically valid.
+            /// </summary>
+            Unrecognized = 2,
+
+            /// <summary>
+            /// The key was erroneously issued, and therefore it was revoked.
+            /// </summary>
+            Revoked = 3,
+
+            /// <summary>
+            /// The key was suspended, possibly due to suspicious activity.
+            /// </summary>
+            Suspended = 4,
+
+            /// <summary>
+            /// The key was disabled, possibly due to not following the one and only rule: don't fuckin' share it.
+            /// </summary>
+            Disabled = 5
         }
     }
 }
