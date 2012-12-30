@@ -1,15 +1,17 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Usenet
 {
     using System;
     using System.Collections.Generic;
 
     using NUnit.Framework;
 
+    using Newtonsoft.Json.Linq;
+
     /// <summary>
-    /// Provides support for scraping Demonoid.
+    /// Provides support for scraping nzbX.
     /// </summary>
     [TestFixture]
-    public class Demonoid : DownloadSearchEngine
+    public class nzbX : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -19,7 +21,7 @@
         {
             get
             {
-                return "Demonoid";
+                return "nzbX";
             }
         }
 
@@ -31,7 +33,19 @@
         {
             get
             {
-                return "http://www.demonoid.me/";
+                return "https://nzbx.co/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return Site + "favicon.png";
             }
         }
 
@@ -55,7 +69,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-04-17 7:08 PM");
+                return Utils.DateTimeToVersion("2012-12-30 10:59 PM");
             }
         }
 
@@ -67,10 +81,10 @@
         {
             get
             {
-                return Types.Torrent;
+                return Types.Usenet;
             }
         }
-
+        
         /// <summary>
         /// Searches for download links on the service.
         /// </summary>
@@ -78,31 +92,24 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site + "files/?category=3&query=" + Utils.EncodeURL(query));
-            var links = html.DocumentNode.SelectNodes("//td/a[starts-with(@href, '/files/details/')]");
-            var sizes = html.DocumentNode.SelectNodes("//td[starts-with(@class, 'tone_') and @align='right']");
+            var json = Utils.GetJSON(Site + "api/search?q=" + Utils.EncodeURL(query));
 
-            if (links == null)
+            if (!(json is JArray) || json.Count == 0)
             {
                 yield break;
             }
 
-            var i = 0;
-            foreach (var node in links)
+            foreach (JContainer item in json)
             {
-                var link = new Link(this);
-
-                link.Release = node.InnerText;
-                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                link.FileURL = link.InfoURL.Replace("/details/", "/download/");
-                link.Size    = sizes[i].InnerText.Trim();
-                link.Quality = FileNames.Parser.ParseQuality(link.Release.Replace(" ", string.Empty));
-                link.Infos   = Link.SeedLeechFormat.FormatWith(sizes[i].GetTextValue("../td[7]").Trim(), sizes[i].GetTextValue("../td[8]").Trim())
-                             + (node.GetTextValue("../font") == "(external)" ? ", External" : string.Empty);
-
-                i++;
-
-                yield return link;
+                yield return new Link(this)
+                    {
+                        Release = (string)item["name"],
+                        InfoURL = Site + "d?" + (string)item["guid"],
+                        FileURL = (string)item["nzb"],
+                        Size    = Utils.GetFileSize((long)item["size"]),
+                        Quality = FileNames.Parser.ParseQuality((string)item["name"]),
+                        Infos   = Utils.DetermineAge(((int)item["postdate"]*1.0).GetUnixTimestamp())
+                    };
             }
         }
     }

@@ -72,7 +72,7 @@
 
             // extract required info
 
-            var dllink    = "http://subscene.com/" + Regex.Match(info, @"\(new WebForm_PostBackOptions\([^\n\r\t]+?\/([^\n\r\t]+?)&quot;, false, true\)\)", RegexOptions.IgnoreCase).Groups[1].Value;
+            var dllink    = "http://v2.subscene.com/" + Regex.Match(info, @"\(new WebForm_PostBackOptions\([^\n\r\t]+?\/([^\n\r\t]+?)&quot;, false, true\)\)", RegexOptions.IgnoreCase).Groups[1].Value;
             var viewstate = Regex.Match(info, @"<input type=""hidden"" name=""__VIEWSTATE"" id=""__VIEWSTATE"" value=""([^\n\r\t]*?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
             var prevpage  = Regex.Match(info, @"<input type=""hidden"" name=""__PREVIOUSPAGE"" id=""__PREVIOUSPAGE"" value=""([^\n\r\t]*?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
             var subid     = Regex.Match(info, @"<input type=""hidden"" name=""subtitleId"" id=""subtitleId"" value=""(\d+?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
@@ -91,7 +91,7 @@
             req.ContentType       = "application/x-www-form-urlencoded";
             req.Method            = "POST";
             req.Referer           = url;
-            req.Headers["Origin"] = "http://subscene.com";
+            req.Headers["Origin"] = "http://v2.subscene.com";
             req.ContentLength     = pbin.Length;
 
             using (var rs = req.GetRequestStream())

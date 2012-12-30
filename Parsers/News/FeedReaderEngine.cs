@@ -88,9 +88,9 @@
         [Test]
         public virtual void Test()
         {
-            var list = Search("House").ToList();
+            var list = Search("Bones").ToList();
 
-            Assert.Greater(list.Count, 0, "Failed to grab any articles for House on {0}.".FormatWith(Name));
+            Assert.Greater(list.Count, 0, "Failed to grab any articles for Bones on {0}.".FormatWith(Name));
 
             Console.WriteLine("┌──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┬────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Title                                                        │ Summary                                                      │ Date                           │ Link                                                         │");
@@ -120,10 +120,17 @@
             {
                 var article = new Article(this);
 
-                article.Title   = HtmlEntity.DeEntitize(item.Title.Text);
-                article.Summary = Regex.Replace(HtmlEntity.DeEntitize(item.Summary.Text), @"\s*<[^>]+>\s*", string.Empty).Trim();
-                article.Date    = item.PublishDate.DateTime;
-                article.Link    = HtmlEntity.DeEntitize(item.Links[0].Uri.ToString());
+                try
+                {
+                    article.Title = HtmlEntity.DeEntitize(item.Title.Text);
+                    article.Summary = Regex.Replace(HtmlEntity.DeEntitize(item.Summary.Text), @"\s*<[^>]+>\s*", string.Empty).Trim();
+                    article.Date = item.PublishDate.DateTime;
+                    article.Link = HtmlEntity.DeEntitize(item.Links[0].Uri.ToString());
+                }
+                catch
+                {
+                    continue;
+                }
 
                 yield return article;
             }

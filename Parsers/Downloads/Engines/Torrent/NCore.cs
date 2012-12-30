@@ -70,7 +70,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-16 15:59 PM");
+                return Utils.DateTimeToVersion("2012-12-30 12:44 PM");
             }
         }
 
@@ -151,7 +151,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Utils.EncodeURL(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies, Encoding.GetEncoding("iso-8859-2"));
+            var html = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Utils.EncodeURL(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies, Encoding.UTF8);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

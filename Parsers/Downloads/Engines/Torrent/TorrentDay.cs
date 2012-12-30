@@ -1,18 +1,17 @@
-﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Usenet
+﻿namespace RoliSoft.TVShowTracker.Parsers.Downloads.Engines.Torrent
 {
     using System;
     using System.Collections.Generic;
-    using System.Security.Authentication;
-
-    using HtmlAgilityPack;
 
     using NUnit.Framework;
 
+    using Newtonsoft.Json.Linq;
+
     /// <summary>
-    /// Provides support for scraping NZBs.org.
+    /// Provides support for scraping TorrentDay.
     /// </summary>
     [TestFixture]
-    public class NZBsorg : DownloadSearchEngine
+    public class TorrentDay : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -22,7 +21,7 @@
         {
             get
             {
-                return "NZBs.org";
+                return "TorrentDay";
             }
         }
 
@@ -34,7 +33,7 @@
         {
             get
             {
-                return "http://nzbs.org/";
+                return "http://www.torrentday.com/";
             }
         }
 
@@ -58,7 +57,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-25 3:36 PM");
+                return Utils.DateTimeToVersion("2012-12-30 10:44 PM");
             }
         }
 
@@ -82,7 +81,7 @@
         {
             get
             {
-                return new[] { "user_name", "id_hash" };
+                return new[] { "uid", "pass" };
             }
         }
 
@@ -108,7 +107,7 @@
         {
             get
             {
-                return Site + "user.php";
+                return Site + "torrents/";
             }
         }
 
@@ -124,7 +123,6 @@
                     {
                         { "username", LoginFieldTypes.UserName },
                         { "password", LoginFieldTypes.Password },
-                        { "action",   "dologin"                },
                     };
             }
         }
@@ -137,7 +135,7 @@
         {
             get
             {
-                return Types.Usenet;
+                return Types.Torrent;
             }
         }
 
@@ -148,32 +146,24 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "index.php?action=search&catid=t1&q=" + Utils.EncodeURL(query), cookies: Cookies);
+            var json = Utils.GetJSON(Site + "V3/API/API.php", "/browse.php?&search=" + Utils.EncodeURL(query) + "&cata=yes&jxt=8&jxw=b", Cookies, request: req => req.Referer = Site + "browse.php");
 
-            if (GazelleTrackerLoginRequired(html.DocumentNode))
-            {
-                throw new InvalidCredentialException();
-            }
-
-            var links = html.DocumentNode.SelectNodes("//table/tr/td/b/a[@class='nzb']");
-
-            if (links == null)
+            if ((int)json["er"] != 0 || json["Fs"][0]["Cn"]["torrents"].Count == 0)
             {
                 yield break;
             }
 
-            foreach (var node in links)
+            foreach (JContainer item in json["Fs"][0]["Cn"]["torrents"])
             {
-                var link = new Link(this);
-
-                link.Release = HtmlEntity.DeEntitize(node.InnerText);
-                link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetAttributeValue("href"));
-                link.FileURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../../td[8]/b/a", "href"));
-                link.Size    = node.GetHtmlValue("../../../td[5]").Trim().Split(new[] { "<br>" }, StringSplitOptions.None)[0];
-                link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Utils.ParseAge(node.GetTextValue("../../../td[4]"));
-
-                yield return link;
+                yield return new Link(this)
+                    {
+                        Release = (string)item["name"],
+                        InfoURL = Site + "details.php?id=" + (int)item["id"],
+                        FileURL = Site + "download.php/" + (int)item["id"] + "/" + (string)item["fname"],
+                        Size    = (string)item["size"],
+                        Quality = FileNames.Parser.ParseQuality((string)item["name"]),
+                        Infos   = Link.SeedLeechFormat.FormatWith((int)item["seed"], (int)item["leech"])
+                    };
             }
         }
 

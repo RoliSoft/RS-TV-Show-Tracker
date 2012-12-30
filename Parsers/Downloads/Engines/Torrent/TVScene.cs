@@ -140,6 +140,25 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this site is deprecated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
+        /// </value>
+        public override bool Deprecated
+        {
+            get
+            {
+                // My account on this site has been banned due to inactivity.
+                // Because of this, I am unable to unit test and maintain this plugin.
+                // If you want to take over the maintenance of the plugin:
+                // a) fork the git repo and submit pull requests on Github.
+                // b) email me the patches to this file and I will commit them on your behalf.
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>

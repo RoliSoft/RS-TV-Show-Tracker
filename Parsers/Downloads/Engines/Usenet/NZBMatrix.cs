@@ -9,7 +9,7 @@
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping NZBMatrix.
+    /// Provides support for scraping NZB-Matrix.
     /// </summary>
     [TestFixture]
     public class NZBMatrix : DownloadSearchEngine
@@ -22,7 +22,7 @@
         {
             get
             {
-                return "NZBMatrix";
+                return "NZB-Matrix";
             }
         }
 
@@ -34,7 +34,19 @@
         {
             get
             {
-                return "http://nzbmatrix.com/";
+                return "http://nzb-matrix.eu/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return Site + "views/images/favicon.ico";
             }
         }
 
@@ -58,7 +70,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-09-18 11:56 AM");
+                return Utils.DateTimeToVersion("2012-12-30 11:30 PM");
             }
         }
 
@@ -82,7 +94,7 @@
         {
             get
             {
-                return new[] { "uid", "pass" };
+                return new[] { "uid", "idh" };
             }
         }
 
@@ -108,7 +120,7 @@
         {
             get
             {
-                return Site + "account-login.php";
+                return Site + "login";
             }
         }
 
@@ -122,8 +134,10 @@
             {
                 return new Dictionary<string, object>
                     {
-                        { "username", LoginFieldTypes.UserName },
-                        { "password", LoginFieldTypes.Password },
+                        { "username",   LoginFieldTypes.UserName },
+                        { "password",   LoginFieldTypes.Password },
+                        { "redirect",   LoginFieldTypes.ReturnTo },
+                        { "rememberme", "on"                     },
                     };
             }
         }
@@ -147,32 +161,30 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "nzb-search.php?cat=tv-all&search=" + Utils.EncodeURL(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "search/" + Utils.EncodeURL(query) + "?t=5000", cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
                 throw new InvalidCredentialException();
             }
 
-            var links = html.DocumentNode.SelectNodes("//table/tr/td/nobr/a/span/b");
+            var links = html.DocumentNode.SelectNodes("//table/tr/td[@class='item']/label/a[@class='title']");
 
             if (links == null)
             {
                 yield break;
             }
 
-            var vip = html.DocumentNode.SelectSingleNode("//div[@class='box-info']/b[contains(text(), '(VIP Only)')]") == null;
-
             foreach (var node in links)
             {
                 var link = new Link(this);
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText);
-                link.InfoURL = HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../..", "href"));
-                link.FileURL = HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../../../../../../../..//img[@alt='Download " + (vip ? "NZB" : "ZIP") + "']/..", "href"));
-                link.Size    = node.GetTextValue("../../../../../../../../td[4]").Trim();
+                link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../../td[@class='icons']/div[contains(@class, 'icon_nzb')]/a", "href");
+                link.Size    = node.GetHtmlValue("../../../td[@class='less right']").Trim().Split(new[] { "<br>" }, StringSplitOptions.None)[0];
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Utils.ParseAge(node.GetTextValue("../../../../../../../../td[8]").Trim());
+                link.Infos   = Utils.ParseAge(node.GetTextValue("../../../td[@class='less mid'][1]"));
 
                 yield return link;
             }

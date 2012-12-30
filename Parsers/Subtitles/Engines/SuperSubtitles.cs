@@ -2,8 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
+
+    using ProtoBuf;
 
     /// <summary>
     /// Provides support for scraping feliratok.hu and/or its mirrors.
@@ -55,9 +59,15 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-10 4:48 PM");
+                return Utils.DateTimeToVersion("2012-12-31 12:13 PM");
             }
         }
+
+        /// <summary>
+        /// Gets or sets the show IDs on the site.
+        /// </summary>
+        /// <value>The show IDs.</value>
+        public static Dictionary<int, string> ShowIDs { get; set; }
 
         /// <summary>
         /// Searches for subtitles on the service.
@@ -66,8 +76,16 @@
         /// <returns>List of found subtitles.</returns>
         public override IEnumerable<Subtitle> Search(string query)
         {
-            var sfmt = Utils.EncodeURL(ShowNames.Parser.ReplaceEpisode(query, "- {0:0}x{1:00}", true, false));
-            var html = Utils.GetHTML(Site + "index.php?search=" + sfmt);
+            var pr = ShowNames.Parser.Split(query);
+            var ep = ShowNames.Parser.ExtractEpisode(query);
+            var id = GetIDForShow(pr[0]);
+
+            if (!id.HasValue && ep != null)
+            {
+                yield break;
+            }
+
+            var html = Utils.GetHTML(Site + "/index.php?sid=" + id + "&complexsearch=true&evad=" + ep.Season + "&epizod1=" + ep.Episode + "&tab=sorozat");
             var subs = html.DocumentNode.SelectNodes("//tr[@id='vilagit']");
 
             if (subs == null)
@@ -81,7 +99,7 @@
 
                 sub.Release  = node.GetTextValue("td[3]/div[2]").Trim();
                 sub.Language = ParseLanguage(node.GetTextValue("td[@class='lang']").Trim());
-                sub.InfoURL  = Site + "index.php?search=" + sfmt;
+                sub.InfoURL = Site + "/index.php?sid=" + id + "&complexsearch=true&evad=" + ep.Season + "&epizod1=" + ep.Episode + "&tab=sorozat";
                 sub.FileURL  = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[6]/a", "href");
 
                 yield return sub;
@@ -106,6 +124,99 @@
                 default:
                     return string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Gets the IDs from the browse page.
+        /// </summary>
+        public void GetIDs()
+        {
+            var autocmp = Utils.GetJSON(Site + "index.php?term=&nyelv=0&action=autoname");
+
+            ShowIDs = new Dictionary<int, string>();
+
+            foreach (var item in autocmp)
+            {
+                ShowIDs[(int)item["ID"]] = (string)item["name"];
+            }
+
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "SuperSubtitles-IDs.bin")))
+            {
+                Serializer.Serialize(file, ShowIDs);
+            }
+        }
+
+        /// <summary>
+        /// Gets the ID for a show name.
+        /// </summary>
+        /// <param name="name">The show name.</param>
+        /// <returns>Corresponding ID.</returns>
+        public int? GetIDForShow(string name)
+        {
+            var fn = Path.Combine(Path.GetTempPath(), "SuperSubtitles-IDs.bin");
+
+            if (ShowIDs == null)
+            {
+                if (File.Exists(fn))
+                {
+                    using (var file = File.OpenRead(fn))
+                    {
+                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
+                    }
+                }
+                else
+                {
+                    GetIDs();
+                }
+            }
+
+            if (ShowIDs != null)
+            {
+                var id = SearchForID(name);
+                if (id.HasValue)
+                {
+                    return id;
+                }
+            }
+
+            // try to refresh if the cache is older than an hour
+            if ((DateTime.Now - File.GetLastWriteTime(fn)).TotalHours > 1)
+            {
+                GetIDs();
+
+                if (ShowIDs != null)
+                {
+                    var id = SearchForID(name);
+                    if (id.HasValue)
+                    {
+                        return id;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Searches for the specified show in the local cache.
+        /// </summary>
+        /// <param name="name">The show name.</param>
+        /// <returns>Corresponding ID.</returns>
+        private int? SearchForID(string name)
+        {
+            var regex = Database.GetReleaseName(name);
+
+            foreach (var show in ShowIDs)
+            {
+                var m = regex.Match(Regex.Replace(show.Value, @"\s\((1[89]\d{2}|2\d{3})\)$", string.Empty));
+
+                if (m.Success && Math.Abs((show.Value.Length - 4) - m.Length) <= 3)
+                {
+                    return show.Key;
+                }
+            }
+
+            return null;
         }
     }
 }

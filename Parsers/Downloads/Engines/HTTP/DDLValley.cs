@@ -12,10 +12,10 @@
     using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
-    /// Provides support for scraping OneDDL.
+    /// Provides support for scraping DDLValley.
     /// </summary>
     [TestFixture]
-    public class OneDDL : DownloadSearchEngine
+    public class DDLValley : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -25,7 +25,7 @@
         {
             get
             {
-                return "OneDDL";
+                return "DDLValley";
             }
         }
 
@@ -37,7 +37,7 @@
         {
             get
             {
-                return "http://www.oneddl.eu/";
+                return "http://www.ddlvalley.eu/";
             }
         }
 
@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-04-17 6:59 PM");
+                return Utils.DateTimeToVersion("2012-12-31 0:01 AM");
             }
         }
 
@@ -96,7 +96,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var req  = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Utils.EncodeURL(query))
+            var req = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Utils.EncodeURL(query))
                             .Replace("content:encoded", "content") // HtmlAgilityPack doesn't like tags with colons in their names
                             .Replace("<![CDATA[", string.Empty)
                             .Replace("]]>", string.Empty)
@@ -115,10 +115,10 @@
             foreach (var node in links)
             {
                 var infourl = (node.GetTextValue("comments") ?? string.Empty).Replace("#comments", string.Empty); // can't get <link>
-                var titles  = HtmlEntity.DeEntitize(node.GetTextValue("title")).Split(new[] { " & " }, StringSplitOptions.RemoveEmptyEntries);
-                var ps      = node.SelectNodes("content/p");
-                var idx     = -1;
-                var type    = 0;
+                var titles = HtmlEntity.DeEntitize(node.GetTextValue("title")).Split(new[] { " & " }, StringSplitOptions.RemoveEmptyEntries);
+                var ps = node.SelectNodes("content/p");
+                var idx = -1;
+                var type = 0;
 
                 foreach (var p in ps)
                 {
@@ -127,7 +127,7 @@
                         continue;
                     }
 
-                    if (p.ChildNodes[0].Name == "oneclickimg")
+                    if (p.ChildNodes[0].Attributes.FirstOrDefault(a => a.Name == "class" && a.Value == "info2") != null)
                     {
                         idx++;
                         type = 1;
@@ -135,7 +135,7 @@
                         continue;
                     }
 
-                    if (p.ChildNodes[0].Name == "downloadimg")
+                    if (p.ChildNodes[0].Attributes.FirstOrDefault(a => a.Name == "class" && a.Value == "info3") != null)
                     {
                         if (idx == -1)
                         {
@@ -153,7 +153,7 @@
                     }
 
                     var hoster = p.GetTextValue("strong");
-                    var hrefs  = p.SelectNodes("a");
+                    var hrefs = p.SelectNodes("a");
 
                     if (hrefs == null || string.IsNullOrWhiteSpace(hoster))
                     {
@@ -170,7 +170,7 @@
                     link.Release = titles.Length > idx ? titles[idx] : titles.Last();
                     link.InfoURL = infourl;
                     link.FileURL = string.Join("\0", hrefs.Select(x => x.GetAttributeValue("href")));
-                    link.Infos   = hoster.ToLower().ToUppercaseFirst();
+                    link.Infos = hoster.ToLower().ToUppercaseFirst();
                     link.Quality = FileNames.Parser.ParseQuality(link.Release);
 
                     yield return link;

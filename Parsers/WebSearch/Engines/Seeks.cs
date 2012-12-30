@@ -33,7 +33,7 @@
         {
             get
             {
-                return "https://www.seeks-project.info/";
+                return "http://www.seeks-project.info/";
             }
         }
 
@@ -71,14 +71,6 @@
             {
                 return Utils.DateTimeToVersion("2012-04-17 5:28 PM");
             }
-        }
-
-        /// <summary>
-        /// Initializes static members of the <see cref="Seeks"/> class. 
-        /// </summary>
-        static Seeks()
-        {
-            Utils.IgnoreInvalidCertificatesFor.Add("seeks-project.info");
         }
 
         /// <summary>

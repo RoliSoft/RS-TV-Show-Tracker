@@ -1197,6 +1197,43 @@
             }
         }
 
+        /// <summary>
+        /// Converts the specified DateTime a Usenet indexer-style relative age.
+        /// </summary>
+        /// <param name="dateTime">The DateTime to convert.</param>
+        /// <returns>A string value based on the relative date
+        /// of the datetime as compared to the current date.</returns>
+        public static string DetermineAge(DateTime dateTime)
+        {
+            var timeSpan = DateTime.Now - dateTime;
+     
+            if (timeSpan <= TimeSpan.FromSeconds(60))
+            {
+                return FormatNumber(timeSpan.Seconds, "second") + " old";
+            }
+
+            if (timeSpan <= TimeSpan.FromMinutes(60))
+            {
+                return FormatNumber(timeSpan.Minutes, "minute") + " old";
+            }
+
+            if (timeSpan <= TimeSpan.FromHours(24))
+            {
+                return FormatNumber(timeSpan.Hours, "hour") + " old";
+            }
+
+            if (timeSpan <= TimeSpan.FromDays(30))
+            {
+                return FormatNumber(timeSpan.Days, "day") + " old";
+            }
+
+            if (timeSpan <= TimeSpan.FromDays(365))
+            {
+                return FormatNumber((timeSpan.Days / 30), "month") + " old";
+            }
+
+            return FormatNumber((timeSpan.Days / 365), "year") + " old";
+        }
 
         /// <summary>
         /// Converts a date and time to a version number.

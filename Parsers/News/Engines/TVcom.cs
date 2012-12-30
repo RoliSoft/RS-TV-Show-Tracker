@@ -71,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-04-22 9:45 PM");
+                return Utils.DateTimeToVersion("2012-12-30 12:31 PM");
             }
         }
 
@@ -106,9 +106,16 @@
             {
                 var article = new Article(this);
 
-                article.Title   = HtmlEntity.DeEntitize(node.GetTextValue("h3")).Trim();
-                article.Summary = Regex.Replace(HtmlEntity.DeEntitize(node.GetTextValue("p")).Trim(), @"\s+read more\s*$", string.Empty);
-                article.Link    = Site.TrimEnd('/') + node.GetNodeAttributeValue("h3/a", "href");
+                try
+                {
+                    article.Title   = HtmlEntity.DeEntitize(node.GetTextValue("h3")).Trim();
+                    article.Summary = Regex.Replace(HtmlEntity.DeEntitize(node.GetTextValue("p")).Trim(), @"\s+read more\s*$", string.Empty);
+                    article.Link    = Site.TrimEnd('/') + node.GetNodeAttributeValue("h3/a", "href");
+                }
+                catch
+                {
+                    continue;
+                }
 
                 var subline = node.GetTextValue("h4");
 

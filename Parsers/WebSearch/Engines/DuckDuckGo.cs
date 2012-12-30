@@ -60,7 +60,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-04-15 3:47 AM");
+                return Utils.DateTimeToVersion("2012-12-30 11:45 AM");
             }
         }
 
@@ -72,7 +72,7 @@
         public override IEnumerable<SearchResult> Search(string query)
         {
             var search = Utils.GetURL(Site + "d.js?q={0}&l=us-en&s=0".FormatWith(Utils.EncodeURL(query)));
-            var json   = JArray.Parse(search.Substring(search.IndexOf('[')));
+            var json   = JArray.Parse(Regex.Replace(search, @"}][^}\]]+$", "}]").Substring(search.IndexOf('[')));
 
             if (json[0]["t"].Value<string>() == "EOF")
             {

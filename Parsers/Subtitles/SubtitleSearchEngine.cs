@@ -214,9 +214,9 @@
                 }
             }
 
-            var list = Search("House S08E01").ToList();
+            var list = Search("Bones S08E01").ToList();
 
-            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House S07E01 on {0}.".FormatWith(Name));
+            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for Bones S08E01 on {0}.".FormatWith(Name));
 
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Language   │ Details page URL                                             │ Downloadable file URL                                        │");
@@ -241,9 +241,9 @@
                 }
             }
 
-            var list = Search("House").ToList();
+            var list = Search("Bones").ToList();
 
-            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for House on {0}.".FormatWith(Name));
+            Assert.Greater(list.Count, 0, "Failed to grab any subtitles for Bones on {0}.".FormatWith(Name));
 
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Language   │ Details page URL                                             │ Downloadable file URL                                        │");

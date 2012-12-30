@@ -35,7 +35,7 @@
         {
             get
             {
-                return "http://subscene.com/";
+                return "http://v2.subscene.com/";
             }
         }
 
@@ -47,7 +47,7 @@
         {
             get
             {
-                return "http://subscene.com/favicon.png";
+                return "http://v2.subscene.com/favicon.png";
             }
         }
 
@@ -71,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-02 2:50 AM");
+                return Utils.DateTimeToVersion("2012-12-30 2:30 PM");
             }
         }
 

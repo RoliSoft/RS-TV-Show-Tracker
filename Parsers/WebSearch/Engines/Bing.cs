@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
 
     using NUnit.Framework;
 
@@ -57,7 +58,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-10-31 8:14 PM");
+                return Utils.DateTimeToVersion("2012-12-30 11:56 AM");
             }
         }
 
@@ -68,15 +69,15 @@
         /// <returns>First link on the search result or empty string.</returns>
         public override IEnumerable<SearchResult> Search(string query)
         {
-            var search = Utils.GetURL("http://api.bing.net/json.aspx?AppId=072CCFDBC52FB4552FF96CE87A95F8E9DE30C37B&Query={0}&Sources=Web&Version=2.0&Market=en-us&Adult=Off&Web.Count=1&Web.Offset=0&Web.Options=DisableHostCollapsing+DisableQueryAlterations".FormatWith(Utils.EncodeURL(query)));
+            var search = Utils.GetURL("https://api.datamarket.azure.com/Bing/Search/Web?Query=%27{0}%27&$format=json".FormatWith(Utils.EncodeURL(query)), request: request => request.Credentials = new NetworkCredential("4NrIZv4C92lrK8G0M7VNi/lzavUnJqs5xqmYTgeY1pc=", "4NrIZv4C92lrK8G0M7VNi/lzavUnJqs5xqmYTgeY1pc="));
             var json   = JObject.Parse(search);
 
-            if (json["SearchResponse"]["Web"]["Total"].Value<int>() == 0)
+            if (!json["d"]["results"].HasValues)
             {
                 yield break;
             }
 
-            foreach (var result in json["SearchResponse"]["Web"]["Results"])
+            foreach (var result in json["d"]["results"])
             {
                 yield return new SearchResult
                     {

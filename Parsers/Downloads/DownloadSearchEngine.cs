@@ -236,9 +236,16 @@
                 }
             }
 
-            var list = Search("House").ToList();
+            var list = Search("Bones").ToList();
 
-            Assert.Greater(list.Count, 0, "Failed to grab any download links for House on {0}.".FormatWith(Name));
+            if (!Deprecated || list.Count > 0)
+            {
+                Assert.Greater(list.Count, 0, "Failed to grab any download links for Bones on {0}.".FormatWith(Name));
+            }
+            else
+            {
+                Assert.Inconclusive("Failed to grab any download links for Bones on {0}, but because the plugin is marked as Deprecated, this test results in Inconclusive rather than Error.".FormatWith(Name));
+            }
 
             Console.WriteLine("┌────────────────────────────────────────────────────┬────────────┬────────────┬──────────────────────────────────────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐");
             Console.WriteLine("│ Release name                                       │ Size       │ Quality    │ Additional informations                  │ Details page URL                                             │ Downloadable file URL                                        │");

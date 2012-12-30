@@ -188,9 +188,12 @@
     <Compile Include="KeyValueList.cs" />
     <Compile Include="LocalProgrammingPlugin.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Parsers\Downloads\Engines\HTTP\DDLValley.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\TVRelease.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
-    <Compile Include="Parsers\Downloads\Engines\Torrent\FuckYeahTorrents.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\TorrentDay.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Usenet\nzbX.cs" />
     <Compile Include="Parsers\ILinkExpander.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbFrance.cs" />
@@ -247,7 +250,6 @@
     <Compile Include="Extensibility.cs" />
     <Compile Include="HttpToSocks.cs" />
     <Compile Include="IPlugin.cs" />
-    <Compile Include="Parsers\Downloads\Engines\HTTP\OneDDL.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\FreshWap.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\ReleaseBB.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\First.cs" />
@@ -260,12 +262,9 @@
     <Compile Include="Parsers\Downloads\Engines\Torrent\TorrentLeech.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVScene.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVChaosUK.cs" />
-    <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsorg.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBIndex.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsu.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBsRus.cs" />
-    <Compile Include="Parsers\Downloads\Engines\Usenet\Newzbin.cs" />
-    <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
     <Compile Include="Parsers\LoginFieldTypes.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BitHDTV.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\BTDigg.cs" />
@@ -275,7 +274,6 @@
     <Compile Include="Parsers\Downloads\Engines\Torrent\UKNova.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TVVault.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TheBox.cs" />
-    <Compile Include="Parsers\Downloads\Engines\Torrent\Demonoid.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\IsoHunt.cs" />
     <Compile Include="Parsers\Guides\Engines\AnimeNewsNetwork.cs" />
     <Compile Include="Parsers\Guides\Engines\EPisodeWorld.cs" />
@@ -300,7 +298,6 @@
     <Compile Include="Parsers\ParserEngine.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DirectDownload.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Twilight.cs" />
-    <Compile Include="Parsers\Downloads\Engines\HTTP\Zunox.cs" />
     <Compile Include="Parsers\Social\Engines\Facebook.cs" />
     <Compile Include="Parsers\Social\OAuthEngine.cs" />
     <Compile Include="Parsers\Social\SocialEngine.cs" />

@@ -58,7 +58,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-10-30 18:15 PM");
+                return Utils.DateTimeToVersion("2012-12-30 1:04 PM");
             }
         }
 
@@ -108,7 +108,7 @@
         {
             get
             {
-                return Site + "takelogin.php";
+                return Site + "torrents/";
             }
         }
 
@@ -122,9 +122,8 @@
             {
                 return new Dictionary<string, object>
                     {
-                        { "username",   LoginFieldTypes.UserName },
-                        { "password",   LoginFieldTypes.Password },
-                        { "vImageCodP", LoginFieldTypes.Captcha  },
+                        { "username", LoginFieldTypes.UserName },
+                        { "password", LoginFieldTypes.Password },
                     };
             }
         }
@@ -155,7 +154,7 @@
                 throw new InvalidCredentialException();
             }
 
-            var links = html.DocumentNode.SelectNodes("//table/tr/td[2]/b/a");
+            var links = html.DocumentNode.SelectNodes("//a[@class='t_title']");
 
             if (links == null)
             {
@@ -168,11 +167,11 @@
 
                 link.Release = HtmlEntity.DeEntitize(node.InnerText).Trim();
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../../td[4]/a", "href");
-                link.Size    = node.GetTextValue("../../../td[6]").Trim();
+                link.FileURL = Site.TrimEnd('/') + node.GetNodeAttributeValue("../../td[4]/a", "href");
+                link.Size    = node.GetTextValue("../../td[6]").Trim();
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[8]").Trim(), node.GetTextValue("../../../td[9]").Trim())
-                             + (node.GetHtmlValue("..//font[@color='#FF0000' and contains(text(), 'FreeLeech')]") != null ? ", Free" : string.Empty);
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../td[8]").Trim(), node.GetTextValue("../../td[9]").Trim())
+                             + (node.GetHtmlValue("../span[@class='t_tag_free_leech']") != null ? ", Free" : string.Empty);
 
                 yield return link;
             }
@@ -186,35 +185,7 @@
         /// <returns>Cookies on success, <c>string.Empty</c> on failure.</returns>
         public override string Login(string username, string password)
         {
-            // get captcha image
-
-            var session = string.Empty;
-            var sectext = string.Empty;
-            var captcha = Utils.GetURL(Site + "img.php?size=6", encoding: new Utils.Base64Encoding(),
-                request:  req  => req.Referer = Site,
-                response: resp => session = Utils.EatCookieCollection(resp.Cookies));
-
-            // show captcha to user
-
-            MainWindow.Active.Run(() =>
-                {
-                    var cw  = new CaptchaWindow(Name, Convert.FromBase64String(captcha), 160, 20);
-                    var res = cw.ShowDialog();
-
-                    if (res.HasValue && res.Value)
-                    {
-                        sectext = cw.Solution;
-                    }
-                });
-
-            if (string.IsNullOrWhiteSpace(sectext))
-            {
-                return string.Empty;
-            }
-
-            // send login request
-
-            return GazelleTrackerLogin(username, password, sectext, session);
+            return GazelleTrackerLogin(username, password);
         }
     }
 }

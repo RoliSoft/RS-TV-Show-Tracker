@@ -56,7 +56,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-08-16 16:12 PM");
+                return Utils.DateTimeToVersion("2012-12-30 2:24 PM");
             }
         }
 
@@ -166,7 +166,7 @@
                 link.Release = node.GetNodeAttributeValue("../", "title") ?? node.InnerText;
                 link.InfoURL = Site + node.GetNodeAttributeValue("../../a", "href");
                 link.FileURL = Site + node.GetNodeAttributeValue("../../../td[3]/a", "href");
-                link.Size    = node.GetHtmlValue("../../../td[7]").Replace("<br>", " ");
+                link.Size    = node.GetHtmlValue("../../../td[7]/font").Replace("<br>", " ");
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../../../td[9]").Trim(), node.GetTextValue("../../../td[10]").Trim())
                              + (node.GetTextValue("../../b/small/font") == "[FreeLeech]" ? ", Free" : string.Empty);

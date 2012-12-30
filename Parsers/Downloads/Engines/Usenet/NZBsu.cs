@@ -143,6 +143,26 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this site is deprecated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
+        /// </value>
+        public override bool Deprecated
+        {
+            get
+            {
+                // NZB.su one day decided to go VIP-only.
+                // My account was removed without a trace,
+                // and they changed the design as well.
+                // Therefore this plugin is broken until
+                // someone else decides to fix it.
+                return true;
+            }
+        }
+
+
+        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>

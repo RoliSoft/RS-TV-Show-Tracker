@@ -38,7 +38,7 @@
         {
             get
             {
-                return "http://freshwap.com/";
+                return "http://www.freshwap.me/";
             }
         }
 
