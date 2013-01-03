@@ -149,7 +149,7 @@
             show.TimeZone    = "Tokyo Standard Time";
             show.Language    = language;
             show.URL         = Site + "perl-bin/animedb.pl?show=anime&aid=" + id;
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             show.Cover = info.GetValue("picture");
             if (!string.IsNullOrWhiteSpace(show.Cover))
@@ -165,7 +165,7 @@
                     continue;
                 }
 
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season = 1;
                 ep.Number = node.GetValue("epno").ToInteger();

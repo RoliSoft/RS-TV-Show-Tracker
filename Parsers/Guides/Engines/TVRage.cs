@@ -122,7 +122,7 @@
             show.TimeZone    = info.GetValue("timezone");
             show.Language    = "en";
             show.URL         = info.GetValue("showlink");
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             show.Runtime = info.GetValue("runtime").ToInteger();
             show.Runtime = show.Runtime == 30
@@ -140,7 +140,7 @@
                     continue;
                 }
 
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season  = sn;
                 ep.Number  = node.GetValue("seasonnum").ToInteger();

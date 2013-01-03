@@ -125,7 +125,7 @@
             show.Runtime     = (int)main["data"]["runtime"]["time"] / 60;
             show.Language    = "en";
             show.URL         = "http://www.imdb.com/title/tt" + id + "/";
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             foreach (var genre in main["data"]["genres"])
             {
@@ -145,7 +145,7 @@
                 {
                     if (episode["type"] != "tv_episode") continue;
                     
-                    var ep = new TVShow.Episode();
+                    var ep = new Episode();
 
                     ep.Season = snr;
                     ep.Number = ++enr;

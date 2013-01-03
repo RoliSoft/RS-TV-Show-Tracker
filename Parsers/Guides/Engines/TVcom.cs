@@ -125,7 +125,7 @@
             show.Runtime     = 30;
             show.Language    = "en";
             show.URL         = "http://www.tv.com/shows/{0}/".FormatWith(id);
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             var airinfo = summary.DocumentNode.GetTextValue("//div[@class='tagline']");
             if (airinfo != null)
@@ -171,7 +171,7 @@
 
                 if (!season.Success || !epnr.Success) { continue; }
 
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season  = season.Groups[1].Value.ToInteger();
                 ep.Number  = epnr.Groups[1].Value.ToInteger();

@@ -158,7 +158,7 @@
                     AirTime  = "20:00",
                     Language = "en",
                     URL      = id,
-                    Episodes = new List<TVShow.Episode>()
+                    Episodes = new List<Episode>()
                 };
 
             var mc = _infoRegex.Matches(listing);
@@ -198,7 +198,7 @@
 
             foreach (Match m in mc)
             {
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season = m.Groups["season"].Value.Trim().ToInteger();
                 ep.Number = m.Groups["episode"].Value.Trim().ToInteger();

@@ -124,7 +124,7 @@
             show.AirTime     = "20:00";
             show.Language    = "en";
             show.URL         = Site + "encyclopedia/anime.php?id=" + id;
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             var runtxt = Regex.Match(GetDescendantItemValue(summary, "info", "type", "Running time"), "([0-9]+)");
             show.Runtime = runtxt.Success
@@ -158,7 +158,7 @@
                     continue;
                 }
 
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season = 1;
                 ep.Number = epnr.Groups[1].Value.ToInteger();

@@ -194,6 +194,7 @@
     <Compile Include="Parsers\Downloads\Engines\Torrent\TorrentDay.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\nzbX.cs" />
+    <Compile Include="Parsers\Guides\Episode.cs" />
     <Compile Include="Parsers\ILinkExpander.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbFrance.cs" />

@@ -204,7 +204,7 @@
             show.AirTime     = "20:00";
             show.Language    = language;
             show.URL         = "http://www.episodeworld.com/show/" + id + "/season=all/" + Languages.List[language].ToLower() + "/episodeguide";
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             var runtxt   = Regex.Match(listing.DocumentNode.GetTextValue("//td[@class='centerbox_orange']/b[text() = 'Runtime:']/following-sibling::text()[1]") ?? string.Empty, "([0-9]+)");
             show.Runtime = runtxt.Success
@@ -242,7 +242,7 @@
                     continue;
                 }
 
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season  = episode.Groups[1].Value.ToInteger();
                 ep.Number  = episode.Groups[2].Value.ToInteger();

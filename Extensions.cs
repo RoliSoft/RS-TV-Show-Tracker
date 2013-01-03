@@ -10,6 +10,7 @@ namespace RoliSoft.TVShowTracker
     using System;
     using System.Collections.ObjectModel;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Collections.Generic;
     using System.Reflection;
@@ -1010,6 +1011,55 @@ namespace RoliSoft.TVShowTracker
         {
             try   { return doc.SelectSingleNode(xpath).GetAttributeValue(attribute, string.Empty); }
             catch { return null; }
+        }
+        #endregion
+
+        #region BinaryReader/Writer
+        /// <summary>
+        /// Reads in a 32-bit integer in compressed format.
+        /// </summary>
+        /// <param name="br">The <c>BinaryReader</c> instance.</param>
+        /// <returns>
+        /// A 32-bit integer in compressed format.
+        /// </returns>
+        public static int Read7BitEncodedInt(this BinaryReader br)
+        {
+            var count = 0;
+            var shift = 0;
+            byte b;
+
+            do
+            {
+                if (shift == 5 * 7)
+                {
+                    throw new FormatException("The stream is corrupted.");
+                }
+
+                b = br.ReadByte();
+                count |= (b & 0x7F) << shift;
+                shift += 7;
+            }
+            while ((b & 0x80) != 0);
+
+            return count;
+        }
+
+        /// <summary>
+        /// Writes a 32-bit integer in a compressed format.
+        /// </summary>
+        /// <param name="bw">The <c>BinaryWriter</c> instance.</param>
+        /// <param name="value">The 32-bit integer to be written.</param>
+        public static void Write7BitEncodedInt(this BinaryWriter bw, int value)
+        {
+            var v = (uint)value;
+
+            while (v >= 0x80)
+            {
+                bw.Write((byte)(v | 0x80));
+                v >>= 7;
+            }
+
+            bw.Write((byte)v);
         }
         #endregion
     }

@@ -166,7 +166,7 @@
             show.Network     = info.GetValue("Network");
             show.Language    = language;
             show.URL         = "http://thetvdb.com/?tab=series&id=" + info.GetValue("id");
-            show.Episodes    = new List<TVShow.Episode>();
+            show.Episodes    = new List<Episode>();
 
             if (show.Network.StartsWith("BBC") || show.Network.StartsWith("ITV"))
             {
@@ -194,7 +194,7 @@
                     continue;
                 }
 
-                var ep = new TVShow.Episode();
+                var ep = new Episode();
 
                 ep.Season  = sn;
                 ep.Number  = node.GetValue("EpisodeNumber").ToInteger();

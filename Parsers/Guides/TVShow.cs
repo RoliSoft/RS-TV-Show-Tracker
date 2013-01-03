@@ -3,12 +3,29 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Represents a TV show in the guide.
     /// </summary>
     public class TVShow
     {
+        /// <summary>
+        /// Gets or sets the show ID.
+        /// </summary>
+        /// <value>
+        /// The show ID.
+        /// </value>
+        public int ID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the row ID.
+        /// </summary>
+        /// <value>
+        /// The row ID.
+        /// </value>
+        public int RowID { get; set; }
+
         /// <summary>
         /// Gets or sets the title of the show.
         /// </summary>
@@ -94,6 +111,12 @@
         public string SourceID { get; set; }
 
         /// <summary>
+        /// Gets or sets the key-value store associated with this TV show.
+        /// </summary>
+        /// <value>The data.</value>
+        public Dictionary<string, string> Data { get; set; }
+
+        /// <summary>
         /// Gets or sets the episode list.
         /// </summary>
         /// <value>The episode list.</value>
@@ -103,35 +126,10 @@
         /// Saves this object to the stream.
         /// </summary>
         /// <param name="info">The destination stream.</param>
-        public void Save(Stream info)
-        {
-            using (var bw = new BinaryWriter(info))
-            {
-                bw.Write((byte)1);
-                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                bw.Write(Source);
-                bw.Write(SourceID);
-                bw.Write(Title);
-                bw.Write(Description);
-                bw.Write(Cover);
-                bw.Write(Airing);
-                bw.Write(AirTime);
-                bw.Write(AirDay);
-                bw.Write(Network);
-                bw.Write((byte)Runtime);
-                bw.Write(TimeZone);
-                bw.Write(Language);
-                bw.Write(URL);
-            }
-        }
-
-        /// <summary>
-        /// Saves this object to the stream.
-        /// </summary>
-        /// <param name="info">The destination stream.</param>
-        /// <param name="list">The destination stream for episode listing.</param>
+        /// <param name="conf">The destination stream for associated key-value store.</param>
+        /// <param name="seen">The destination stream for episode tracking.</param>
         /// <param name="desc">The destination stream for descriptions.</param>
-        public void Save(Stream info, Stream list, Stream desc)
+        public void Save(Stream info, Stream conf, Stream seen = null, Stream desc = null)
         {
             using (var bw = new BinaryWriter(info))
             {
@@ -150,17 +148,54 @@
                 bw.Write(TimeZone);
                 bw.Write(Language);
                 bw.Write(URL);
+                bw.Write((ushort)Episodes.Count);
             }
 
-            using (var bw = new BinaryWriter(list))
+            if (seen != null)
+            {
+                using (var bw = new BinaryWriter(seen))
+                {
+                    bw.Write((byte)1);
+                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                    bw.Write((ushort)0);
+                }
+            }
+
+            var scnt = 0;
+
+            foreach (var episode in Episodes)
+            {
+                if (episode.Watched)
+                {
+                    scnt++;
+                }
+
+                episode.Save(info, seen, desc);
+            }
+
+            if (seen != null)
+            {
+                seen.Position = 5;
+
+                using (var bw = new BinaryWriter(seen))
+                {
+                    bw.Write((ushort)scnt);
+                }
+            }
+
+            Data["showid"] = ID.ToString();
+            Data["rowid"]  = RowID.ToString();
+
+            using (var bw = new BinaryWriter(conf))
             {
                 bw.Write((byte)1);
                 bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                bw.Write((uint)Episodes.Count);
+                bw.Write((ushort)Data.Count);
 
-                foreach (var episode in Episodes)
+                foreach (var kv in Data)
                 {
-                    episode.Save(list, desc);
+                    bw.Write(kv.Key);
+                    bw.Write(kv.Value);
                 }
             }
         }
@@ -169,12 +204,15 @@
         /// Loads an object from the stream.
         /// </summary>
         /// <param name="info">The source stream.</param>
+        /// <param name="conf">The source stream for associated key-value store.</param>
+        /// <param name="desc">The source stream for descriptions.</param>
         /// <returns>
         /// Deserialized object.
         /// </returns>
-        public static TVShow Load(Stream info)
+        public static TVShow Load(Stream info, Stream conf, Stream desc = null) // TODO load seen back
         {
             var show = new TVShow();
+            int epnr;
 
             using (var br = new BinaryReader(info))
             {
@@ -194,196 +232,79 @@
                 show.TimeZone    = br.ReadString();
                 show.Language    = br.ReadString();
                 show.URL         = br.ReadString();
+
+                epnr = br.ReadUInt16();
             }
+
+            show.Episodes = new List<Episode>(epnr);
+
+            for (var i = 0; i < epnr; i++)
+            {
+                show.Episodes.Add(Episode.Load(show, info, desc));
+            }
+
+            using (var br = new BinaryReader(conf))
+            {
+                var dver = br.ReadByte();
+                var dupd = br.ReadUInt32();
+                var dcnt = br.ReadUInt16();
+
+                show.Data = new Dictionary<string, string>();
+
+                for (var i = 0; i < dcnt; i++)
+                {
+                    show.Data[br.ReadString()] = br.ReadString();
+                }
+            }
+
+            show.ID    = int.Parse(show.Data["showid"]);
+            show.RowID = int.Parse(show.Data["rowid"]);
 
             return show;
         }
 
         /// <summary>
-        /// Loads an object from the stream.
+        /// Generates a regular expression which matches this show's name.
         /// </summary>
-        /// <param name="info">The source stream.</param>
-        /// <param name="list">The source stream for episode listing.</param>
         /// <returns>
-        /// Deserialized object.
+        /// A regular expression which matches this show's name.
         /// </returns>
-        public static TVShow Load(Stream info, Stream list)
+        public Regex GenerateRegex()
         {
-            var show = new TVShow();
-
-            using (var br1 = new BinaryReader(info))
-            using (var br2 = new BinaryReader(list))
+            string regex;
+            if (Data.TryGetValue("regex", out regex) && !string.IsNullOrWhiteSpace(regex))
             {
-                var sver = br1.ReadByte();
-                var supd = br1.ReadUInt32();
-
-                show.Source      = br1.ReadString();
-                show.SourceID    = br1.ReadString();
-                show.Title       = br1.ReadString();
-                show.Description = br1.ReadString();
-                show.Cover       = br1.ReadString();
-                show.Airing      = br1.ReadBoolean();
-                show.AirTime     = br1.ReadString();
-                show.AirDay      = br1.ReadString();
-                show.Network     = br1.ReadString();
-                show.Runtime     = br1.ReadByte();
-                show.TimeZone    = br1.ReadString();
-                show.Language    = br1.ReadString();
-                show.URL         = br1.ReadString();
-
-                var ever = br2.ReadByte();
-                var eupd = br2.ReadUInt32();
-                var epnr = (int)br2.ReadUInt32();
-
-                show.Episodes = new List<Episode>(epnr);
-
-                for (var i = 0; i < epnr; i++)
-                {
-                    show.Episodes.Add(Episode.Load(list));
-                }
+                return new Regex(regex, RegexOptions.IgnoreCase);
             }
-
-            return show;
+            else
+            {
+                return ShowNames.Parser.GenerateTitleRegex(Title);
+            }
         }
 
         /// <summary>
-        /// Represents an episode in a TV show.
+        /// Gets the foreign title.
         /// </summary>
-        public class Episode
+        /// <param name="language">The ISO 639-1 code of the language.</param>
+        /// <param name="askRemote">if set to <c>true</c> lab.rolisoft.net's API will be asked then a foreign title provider engine.</param>
+        /// <param name="statusCallback">The method to call to report a status change.</param>
+        /// <returns>
+        /// Foreign title or <c>null</c>.
+        /// </returns>
+        public string GetForeignTitle(string language, bool askRemote = false, Action<string> statusCallback = null)
         {
-            /// <summary>
-            /// Gets or sets the season number.
-            /// </summary>
-            /// <value>The season.</value>
-            public int Season { get; set; }
+            return Database.GetForeignTitle(ID, language, askRemote, statusCallback);
+        }
 
-            /// <summary>
-            /// Gets or sets the episode number.
-            /// </summary>
-            /// <value>The episode.</value>
-            public int Number { get; set; }
-
-            /// <summary>
-            /// Gets or sets the date when the episode was first aired.
-            /// </summary>
-            /// <value>The air date.</value>
-            public DateTime Airdate { get; set; }
-
-            /// <summary>
-            /// Gets or sets the title of the episode.
-            /// </summary>
-            /// <value>The title.</value>
-            public string Title { get; set; }
-
-            /// <summary>
-            /// Gets or sets the summary of the episode.
-            /// </summary>
-            /// <value>The summary.</value>
-            public string Summary { get; set; }
-
-            /// <summary>
-            /// Gets or sets the URL to a screen capture of the episode.
-            /// </summary>
-            /// <value>The URL to the screen capture.</value>
-            public string Picture { get; set; }
-
-            /// <summary>
-            /// Gets or sets the URL to the episode's page on the site.
-            /// </summary>
-            /// <value>The URL.</value>
-            public string URL { get; set; }
-
-            private uint _pos;
-
-            /// <summary>
-            /// Saves this object to the stream.
-            /// </summary>
-            /// <param name="list">The destination stream for episode listing.</param>
-            /// <param name="desc">The destination stream for descriptions.</param>
-            public void Save(Stream list, Stream desc)
-            {
-                using (var bw1 = new BinaryWriter(list))
-                using (var bw2 = new BinaryWriter(desc))
-                {
-                    if (list.Length == 0)
-                    {
-                        bw1.Write((byte)1);
-                        bw1.Write((uint)DateTime.Now.ToUnixTimestamp());
-                        bw1.Write((uint)1);
-                    }
-
-                    bw1.Write((ushort)Season);
-                    bw1.Write((ushort)Number);
-                    bw1.Write((uint)Airdate.ToUnixTimestamp());
-                    bw1.Write(Title);
-
-                    if (desc.Length == 0)
-                    {
-                        bw2.Write((byte)1);
-                        bw2.Write((uint)DateTime.Now.ToUnixTimestamp());
-                    }
-
-                    bw1.Write((uint)desc.Position);
-                    bw2.Write(URL);
-                    bw2.Write(Picture);
-                    bw2.Write(Summary);
-                }
-            }
-
-            /// <summary>
-            /// Loads an object from the stream.
-            /// </summary>
-            /// <param name="list">The source stream for episode listing.</param>
-            /// <returns>
-            /// Deserialized object.
-            /// </returns>
-            public static Episode Load(Stream list)
-            {
-                var ep = new Episode();
-
-                using (var br = new BinaryReader(list))
-                {
-                    ep.Season  = br.ReadUInt16();
-                    ep.Number  = br.ReadUInt16();
-                    ep.Airdate = ((double)br.ReadUInt32()).GetUnixTimestamp();
-                    ep.Title   = br.ReadString();
-                    ep._pos    = br.ReadUInt32();
-                }
-
-                return ep;
-            }
-
-            /// <summary>
-            /// Loads an object from the stream.
-            /// </summary>
-            /// <param name="list">The source stream for episode listing.</param>
-            /// <param name="desc">The destination stream for descriptions.</param>
-            /// <returns>
-            /// Deserialized object.
-            /// </returns>
-            public static Episode Load(Stream list, Stream desc)
-            {
-                var ep = new Episode();
-
-                using (var br1 = new BinaryReader(list))
-                {
-                    ep.Season  = br1.ReadUInt16();
-                    ep.Number  = br1.ReadUInt16();
-                    ep.Airdate = ((double)br1.ReadUInt32()).GetUnixTimestamp();
-                    ep.Title   = br1.ReadString();
-
-                    desc.Position = br1.ReadUInt32();
-
-                    using (var br2 = new BinaryReader(desc))
-                    {
-                        ep.URL     = br2.ReadString();
-                        ep.Picture = br2.ReadString();
-                        ep.Summary = br2.ReadString();
-                    }
-                }
-
-                return ep;
-            }
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format("{0} [{1}]", Title, ID);
         }
     }
 }
