@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Represents a TV show on the statistics list view.

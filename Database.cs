@@ -7,8 +7,9 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
+
     using Parsers.ForeignTitles;
-    using RoliSoft.TVShowTracker.Tables;
+    using Parsers.Guides;
 
     using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
 
@@ -264,13 +265,13 @@
                             var show = new TVShow();
 
                             show.RowID  = dr.GetInt32(0);
-                            show.ShowID = dr.GetInt32(1);
+                            show.ID = dr.GetInt32(1);
                             show.Name   = dr.GetString(2);
 
                             if (!(dr[3] is DBNull))
                                 show.Release = dr.GetString(3);
 
-                            shows.Add(show.ShowID, show);
+                            shows.Add(show.ID, show);
                         }
                         catch
                         {
@@ -342,13 +343,13 @@
                         {
                             var episode = new Episode();
 
-                            episode.EpisodeID = dr.GetInt32(0);
-                            episode.ShowID    = dr.GetInt32(1);
+                            episode.ID = dr.GetInt32(0);
+                            episode.ID    = dr.GetInt32(1);
                             episode.Season    = dr.GetInt32(2);
                             episode.Number    = dr.GetInt32(3);
 
                             if (setWatched)
-                                episode.Watched = Trackings.Contains(episode.EpisodeID);
+                                episode.Watched = Trackings.Contains(episode.ID);
 
                             if (!(dr[4] is DBNull))
                                 episode.Airdate = Extensions.GetUnixTimestamp(dr.GetInt32(4));
@@ -357,7 +358,7 @@
                                 episode.Name = dr.GetString(5);
 
                             if (!(dr[6] is DBNull))
-                                episode.Description = dr.GetString(6);
+                                episode.Summary = dr.GetString(6);
 
                             if (!(dr[7] is DBNull))
                                 episode.Picture = dr.GetString(7);
@@ -508,7 +509,7 @@
 
             if (showid.Count != 0)
             {
-                return showid[0].ShowID;
+                return showid[0].ID;
             }
 
             return int.MinValue;
@@ -523,11 +524,11 @@
         /// <returns>ID of the show or -2^31.</returns>
         public static int GetEpisodeID(int id, int season, int episode)
         {
-            var episodeid = Episodes.Where(ep => ep.ShowID == id && ep.Season == season && ep.Number == episode).Take(1).ToList();
+            var episodeid = Episodes.Where(ep => ep.ID == id && ep.Season == season && ep.Number == episode).Take(1).ToList();
 
             if (episodeid.Count != 0)
             {
-                return episodeid[0].EpisodeID;
+                return episodeid[0].ID;
             }
 
             return int.MinValue;

@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Represents an mapped title on the list view.

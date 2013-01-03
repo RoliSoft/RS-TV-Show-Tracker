@@ -3,8 +3,9 @@
     using System;
     using System.IO;
     using System.Linq;
+
     using ShowNames;
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Represents a TV show video file.

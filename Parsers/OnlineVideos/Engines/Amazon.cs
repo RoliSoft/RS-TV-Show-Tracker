@@ -2,7 +2,7 @@
 {
     using System;
 
-    using RoliSoft.TVShowTracker.Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on Amazon Instant Video.

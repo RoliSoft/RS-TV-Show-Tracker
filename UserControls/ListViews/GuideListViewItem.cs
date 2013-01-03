@@ -2,7 +2,7 @@
 {
     using System.ComponentModel;
 
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Represents a TV show episode on the list view.

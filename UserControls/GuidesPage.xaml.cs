@@ -20,7 +20,7 @@
     using ContextMenus.Menus;
     using Parsers.News;
     using Parsers.OnlineVideos;
-    using Tables;
+    using Parsers.Guides;
     using TaskDialogs;
 
     /// <summary>
@@ -388,7 +388,7 @@
             }
 
             var show = ((GuideDropDownTVShowItem)comboBox.SelectedItem).Show;
-            var id = _activeShowID = show.ShowID;
+            var id = _activeShowID = show.ID;
 
             // fill up general informations
 
@@ -464,8 +464,8 @@
 
             try
             {
-                var last = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.EpisodeID).Take(1).ToList();
-                var next = show.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.EpisodeID).Take(1).ToList();
+                var last = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.ID).Take(1).ToList();
+                var next = show.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.ID).Take(1).ToList();
 
                 if (last.Count != 0)
                 {
@@ -500,7 +500,7 @@
 
             // fill up episode list
 
-            var episodes = show.Episodes.OrderByDescending(ep => ep.EpisodeID);
+            var episodes = show.Episodes.OrderByDescending(ep => ep.ID);
             var icon     = Updater.CreateGuide(show.Data.Get("grabber", "TVRage")).Icon;
 
             GuideListViewItemCollection.RaiseListChangedEvents = false;
@@ -517,7 +517,7 @@
                                       ? episode.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (episode.Airdate > DateTime.Now ? "*" : string.Empty)
                                       : "Unaired episode",
                         Title       = episode.Name,
-                        Summary     = episode.Description,
+                        Summary     = episode.Summary,
                         Picture     = episode.Picture,
                         URL         = episode.URL,
                         GrabberIcon = icon
@@ -663,8 +663,8 @@
 
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into tracking values (" + item.ID.ShowID + ", '" + item.ID.EpisodeID + "')");
-                        Database.Trackings.Add(item.ID.EpisodeID);
+                        Database.ExecuteOnTransaction(tr, "insert into tracking values (" + item.ID.ID + ", '" + item.ID.ID + "')");
+                        Database.Trackings.Add(item.ID.ID);
                         item.ID.Watched = item.SeenIt = true;
                         item.RefreshSeenIt();
                     }
@@ -686,8 +686,8 @@
 
                 try
                 {
-                    Database.Execute("insert into tracking values (" + episode.ShowID + ", '" + episode.EpisodeID + "')");
-                    Database.Trackings.Add(episode.EpisodeID);
+                    Database.Execute("insert into tracking values (" + episode.ID + ", '" + episode.ID + "')");
+                    Database.Trackings.Add(episode.ID);
                     episode.Watched = true;
                 }
                 catch
@@ -720,8 +720,8 @@
 
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
-                        Database.ExecuteOnTransaction(tr, "delete from tracking where showid = " + item.ID.ShowID + " and episodeid = '" + item.ID.EpisodeID + "'");
-                        Database.Trackings.Remove(item.ID.EpisodeID);
+                        Database.ExecuteOnTransaction(tr, "delete from tracking where showid = " + item.ID.ID + " and episodeid = '" + item.ID.ID + "'");
+                        Database.Trackings.Remove(item.ID.ID);
                         item.ID.Watched = item.SeenIt = false;
                         item.RefreshSeenIt();
                     }
@@ -743,8 +743,8 @@
 
                 try
                 {
-                    Database.Execute("delete from tracking where showid = " + episode.ShowID + " and episodeid = '" + episode.EpisodeID + "'");
-                    Database.Trackings.Remove(episode.EpisodeID);
+                    Database.Execute("delete from tracking where showid = " + episode.ID + " and episodeid = '" + episode.ID + "'");
+                    Database.Trackings.Remove(episode.ID);
                     episode.Watched = false;
                 }
                 catch

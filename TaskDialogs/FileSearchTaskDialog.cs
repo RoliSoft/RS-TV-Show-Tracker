@@ -10,7 +10,7 @@
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using FileNames;
-    using Tables;
+    using Parsers.Guides;
     using VistaControls.TaskDialog;
 
     /// <summary>

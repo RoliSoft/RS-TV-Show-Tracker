@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
 
-    using RoliSoft.TVShowTracker.Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides methods to search for episodes on online services.

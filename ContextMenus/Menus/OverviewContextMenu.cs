@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an overview context menu item.
     /// </summary>
-    public abstract class OverviewContextMenu : ContextMenu<Tables.TVShow>
+    public abstract class OverviewContextMenu : ContextMenu<Parsers.Guides.TVShow>
     {
     }
 }

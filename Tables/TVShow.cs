@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-
+    /*
     /// <summary>
     /// Represents a TV show in the SQLite database.
     /// </summary>
@@ -60,7 +60,7 @@
         {
             get
             {
-                return Database.Episodes.Where(ep => ep.ShowID == ShowID);
+                return Database.Episodes.Where(ep => ep.ID == ShowID);
             }
         }
 
@@ -107,4 +107,5 @@
             return string.Format("{0} [{1}]", Name, ShowID);
         }
     }
+     */
 }

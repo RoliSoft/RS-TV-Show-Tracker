@@ -3,7 +3,7 @@
     using System;
     using System.Text.RegularExpressions;
 
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on Serienjunkies.

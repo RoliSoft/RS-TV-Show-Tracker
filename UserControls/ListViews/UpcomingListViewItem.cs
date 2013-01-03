@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Represents an upcoming episode on the guide list view.

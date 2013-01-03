@@ -10,7 +10,7 @@
 
     using ProtoBuf;
 
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides support for parsing XMLTV files and mapping the programming to shows in your database.
@@ -283,7 +283,7 @@
                 {
                     if (regex.Key.IsMatch(prog.Name.RemoveDiacritics()))
                     {
-                        prog.ShowID = regex.Value.ShowID;
+                        prog.ShowID = regex.Value.ID;
 
                         yield return prog;
                         break;
@@ -365,7 +365,7 @@
             [ProtoMember(short.MaxValue)]
             public int ShowID
             {
-                get { return base.Show.ShowID; }
+                get { return base.Show.ID; }
                 set { base.Show = Database.TVShows[value]; }
             }
 

@@ -17,7 +17,7 @@
     using Downloaders;
     using Parsers.Subtitles;
     using ShowNames;
-    using Tables;
+    using Parsers.Guides;
 
     using Parser = FileNames.Parser;
 

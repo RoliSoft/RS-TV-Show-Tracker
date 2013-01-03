@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an episode listing context menu item.
     /// </summary>
-    public abstract class EpisodeListingContextMenu : ContextMenu<Tables.Episode>
+    public abstract class EpisodeListingContextMenu : ContextMenu<Parsers.Guides.Episode>
     {
     }
 }

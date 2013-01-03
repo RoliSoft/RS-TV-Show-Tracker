@@ -54,6 +54,17 @@
         public string Title { get; set; }
 
         /// <summary>
+        /// Gets or sets the title of the episode.
+        /// </summary>
+        /// <value>The title.</value>
+        [Obsolete("Use Title.")]
+        public string Name
+        {
+            get { return Title; }
+            set { Title = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the summary of the episode.
         /// </summary>
         /// <value>The summary.</value>

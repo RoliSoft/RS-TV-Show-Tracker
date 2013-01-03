@@ -650,7 +650,7 @@
             if (listComboBox.SelectedIndex == -1) return;
 
             var list = Settings.Get("Post restrictions list", new List<int>());
-            var shid = Database.TVShows.Values.First(x => x.Name == (string)listComboBox.SelectedValue).ShowID;
+            var shid = Database.TVShows.Values.First(x => x.Name == (string)listComboBox.SelectedValue).ID;
 
             if (!list.Contains(shid))
             {
@@ -672,7 +672,7 @@
             if (listBox.SelectedIndex == -1) return;
 
             var list = Settings.Get("Post restrictions list", new List<int>());
-            var shid = Database.TVShows.Values.First(x => x.Name == (string)listBox.SelectedValue).ShowID;
+            var shid = Database.TVShows.Values.First(x => x.Name == (string)listBox.SelectedValue).ID;
 
             if (list.Contains(shid))
             {

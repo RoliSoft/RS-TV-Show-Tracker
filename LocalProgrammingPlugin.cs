@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Reflection;
 
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Represents a plugin which maps your TV shows to your local programming

@@ -213,7 +213,7 @@
             {
                 foreach (var sel in sels)
                 {
-                    Database.ShowData(sel.Show.ShowID, "title." + sel.LangCode, string.Empty);
+                    Database.ShowData(sel.Show.ID, "title." + sel.LangCode, string.Empty);
                 }
 
                 ReloadTitles();
@@ -246,7 +246,7 @@
                         var i = 1;
                         foreach (var sel in sels)
                         {
-                            Database.ShowData(sel.Show.ShowID, "title." + sel.LangCode, string.Empty);
+                            Database.ShowData(sel.Show.ID, "title." + sel.LangCode, string.Empty);
                             sel.Show.GetForeignTitle(sel.LangCode, true, s => td.Content = s);
 
                             td.ProgressBarPosition = (int) Math.Round(((double) i/(double) sels.Count)*100d);
@@ -344,7 +344,7 @@
             }
 
             txtbox.Text = show.Foreign = show.Foreign2 = title;
-            Database.ShowData(show.Show.ShowID, "title." + show.LangCode, title);
+            Database.ShowData(show.Show.ID, "title." + show.LangCode, title);
 
             new Thread(() => Remote.API.SetForeignTitle(show.Show.Name, title, show.LangCode)).Start();
 

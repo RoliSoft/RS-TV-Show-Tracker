@@ -6,7 +6,7 @@
     /// Represents a statistics context menu item.
     /// </summary>
     [Obsolete("Plugin loading for this context menu is not implemented yet.")]
-    public abstract class StatisticsContextMenu : ContextMenu<Tables.TVShow>
+    public abstract class StatisticsContextMenu : ContextMenu<Parsers.Guides.TVShow>
     {
     }
 }

@@ -120,7 +120,7 @@
                             }
                             else
                             {
-                                MarkAsSeen(show.Value.ShowID, pf);
+                                MarkAsSeen(show.Value.ID, pf);
                             }
                         }
                     }
@@ -153,7 +153,7 @@
                     Database.Execute("insert into tracking values (?, ?)", showid, epid);
 
                     Database.Trackings.Add(epid);
-                    Database.Episodes.First(e => e.EpisodeID == epid).Watched = true;
+                    Database.Episodes.First(e => e.ID == epid).Watched = true;
                 }
             }
 
@@ -177,7 +177,7 @@
             }
 
             var listed = Settings.Get("Post restrictions list", new List<int>())
-                                 .Contains(Database.TVShows.Values.First(x => x.Name == file.Show).ShowID);
+                                 .Contains(Database.TVShows.Values.First(x => x.Name == file.Show).ID);
 
             switch (Settings.Get("Post restrictions list type", "black"))
             {

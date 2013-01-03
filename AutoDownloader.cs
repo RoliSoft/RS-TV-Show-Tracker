@@ -8,7 +8,7 @@
 
     using Helpers;
     using Parsers.Downloads;
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching and downloading links automatically.

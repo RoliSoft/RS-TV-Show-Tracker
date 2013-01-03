@@ -2,7 +2,7 @@
 {
     using System;
 
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on BBC iPlayer.

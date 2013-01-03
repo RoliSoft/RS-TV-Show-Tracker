@@ -6,10 +6,11 @@
     using System.Net;
     using System.Xml.Linq;
     using System.Xml.XPath;
+
     using Hammock;
     using Hammock.Authentication.OAuth;
 
-    using Tables;
+    using Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on Netflix.

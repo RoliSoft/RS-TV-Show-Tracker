@@ -2,7 +2,7 @@
 {
     using System;
     using System.Text.RegularExpressions;
-
+    /*
     /// <summary>
     /// Represents an episode in the SQLite database.
     /// </summary>
@@ -121,4 +121,5 @@
             return string.Format("{0} S{1:00}E{2:00} {3} {4}", Show.Name, Season, Number, Name, Watched ? "✓" : "✗");
         }
     }
+     */
 }
