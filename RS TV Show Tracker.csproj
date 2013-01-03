@@ -314,6 +314,7 @@
     <Compile Include="Synchronization\SyncEngine.cs" />
     <Compile Include="Tables\Episode.cs" />
     <Compile Include="Tables\TVShow.cs" />
+    <Compile Include="TaskDialogs\DatabaseUpdateTaskDialog.cs" />
     <Compile Include="TaskDialogs\GenericAsyncTaskDialog.cs" />
     <Compile Include="TaskDialogs\OpenArchiveTaskDialog.cs" />
     <Compile Include="TaskDialogs\SubtitleDownloadTaskDialog.cs" />

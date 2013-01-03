@@ -66,6 +66,12 @@
                 MessageBox.Show("This software doesn't support " + Utils.OS + ", only Windows 7 or newer.", Utils.OS + " is not supported", MessageBoxButton.OK, MessageBoxImage.Error);
                 Process.GetCurrentProcess().Kill();
             }
+
+            if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")))
+            {
+                new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
+                return;
+            }
             
             var args = Environment.GetCommandLineArgs();
 
