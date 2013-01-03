@@ -149,6 +149,12 @@
         public List<Episode> Episodes { get; set; }
 
         /// <summary>
+        /// Gets or sets the episode list by ID.
+        /// </summary>
+        /// <value>The episode list.</value>
+        public Dictionary<int, Episode> EpisodeByID { get; set; }
+
+        /// <summary>
         /// Saves this object to the stream.
         /// </summary>
         /// <param name="info">The destination stream.</param>
@@ -231,11 +237,12 @@
         /// </summary>
         /// <param name="info">The source stream.</param>
         /// <param name="conf">The source stream for associated key-value store.</param>
+        /// <param name="seen">The source stream for episode tracking.</param>
         /// <param name="desc">The source stream for descriptions.</param>
         /// <returns>
         /// Deserialized object.
         /// </returns>
-        public static TVShow Load(Stream info, Stream conf, Stream desc = null) // TODO load seen back
+        public static TVShow Load(Stream info, Stream conf, Stream seen = null, Stream desc = null)
         {
             var show = new TVShow();
             int epnr;
@@ -262,11 +269,14 @@
                 epnr = br.ReadUInt16();
             }
 
-            show.Episodes = new List<Episode>(epnr);
+            show.Episodes    = new List<Episode>(epnr);
+            show.EpisodeByID = new Dictionary<int, Episode>();
 
             for (var i = 0; i < epnr; i++)
             {
-                show.Episodes.Add(Episode.Load(show, info, desc));
+                var ep = Episode.Load(show, info, desc);
+                show.Episodes.Add(ep);
+                show.EpisodeByID[ep.Season * 1000 + ep.Number] = ep;
             }
 
             using (var br = new BinaryReader(conf))
@@ -285,6 +295,31 @@
 
             show.ID    = int.Parse(show.Data["showid"]);
             show.RowID = int.Parse(show.Data["rowid"]);
+
+            if (seen == null)
+            {
+                return show;
+            }
+
+            using (var br = new BinaryReader(seen))
+            {
+                var tver = br.ReadByte();
+                var tupd = br.ReadUInt32();
+                var tcnt = br.ReadUInt16();
+
+                for (var i = 0; i < tcnt; i++)
+                {
+                    var sn = br.ReadByte();
+                    var en = br.ReadByte();
+
+                    if (en == 255)
+                    {
+                        en += br.ReadByte();
+                    }
+
+                    show.EpisodeByID[sn * 1000 + en].Watched = true;
+                }
+            }
 
             return show;
         }

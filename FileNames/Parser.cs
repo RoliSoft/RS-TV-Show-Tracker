@@ -182,6 +182,7 @@
         /// </returns>
         private static Tuple<string, string, DateTime> IdentifyShow(string name, ShowEpisode ep, bool askRemote = false)
         {
+            // TODO look over this
             var title = string.Empty;
             var date  = DateTime.MinValue;
             var match = false;
@@ -204,7 +205,7 @@
                     }
                     else if (ep.AirDate != null)
                     {
-                        var episode = Database.Episodes.Where(x => x.ID == show.Value.ID && x.Airdate.ToOriginalTimeZone(x.Show.Data.Get("timezone")).Date == ep.AirDate.Value.Date).ToList();
+                        var episode = show.Value.Episodes.Where(x => x.Airdate.ToOriginalTimeZone(x.Show.Data.Get("timezone")).Date == ep.AirDate.Value.Date).ToList();
                         if (episode.Count != 0)
                         {
                             match = true;
@@ -220,13 +221,13 @@
                     }
                     else
                     {
-                        var episode = Database.Episodes.Where(x => x.ID == ep.Episode + (ep.Season * 1000) + (show.Value.ID * 100 * 1000)).ToList();
-                        if (episode.Count != 0)
+                        Episode episode;
+                        if (show.Value.EpisodeByID.TryGetValue(ep.Season * 1000 + ep.Episode, out episode))
                         {
                             match = true;
                             name  = show.Value.Name;
-                            title = episode[0].Name;
-                            date  = episode[0].Airdate;
+                            title = episode.Name;
+                            date  = episode.Airdate;
 
                             break;
                         }

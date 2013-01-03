@@ -50,7 +50,7 @@
         public static NotifyIcon NotifyIcon { get; set; }
 
         private Timer _statusTimer;
-        private bool _hideOnStart;
+        private bool _hideOnStart, _dieOnStart;
         private bool _askUpdate, _askErrorUpdate;
 
         /// <summary>
@@ -70,6 +70,12 @@
             if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")))
             {
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
+                _dieOnStart = true;
+            }
+
+            if (_dieOnStart)
+            {
+                Visibility = Visibility.Hidden;
                 return;
             }
             
@@ -134,6 +140,12 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WindowSourceInitialized(object sender, EventArgs e)
         {
+            if (_dieOnStart)
+            {
+                Visibility = Visibility.Hidden;
+                return;
+            }
+
             if (Settings.Get("Enable Aero", true) && SystemParameters2.Current.IsGlassEnabled)
             {
                 ActivateAero();
@@ -162,6 +174,12 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+            if (_dieOnStart)
+            {
+                Visibility = Visibility.Hidden;
+                return;
+            }
+
             Active = this;
             BackgroundTasks.Start();
             SetLastUpdated();

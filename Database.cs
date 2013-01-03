@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SQLite;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -11,36 +10,16 @@
     using Parsers.ForeignTitles;
     using Parsers.Guides;
 
-    using DictList = System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, string>>;
-
     /// <summary>
     /// Provides access to the default database.
     /// </summary>
     public static class Database
     {
         /// <summary>
-        /// Gets or sets the active connection.
-        /// </summary>
-        /// <value>The active connection.</value>
-        public static SQLiteConnection Connection { get; set; }
-
-        /// <summary>
         /// Gets or sets the date when the data was last changed. This field is used for caching purposes, and it's not automatically updated by <c>Execute()</c>.
         /// </summary>
         /// <value>The date of last change.</value>
         public static DateTime DataChange { get; set; }
-
-        /// <summary>
-        /// Gets the version of the database structure.
-        /// </summary>
-        /// <value>The version.</value>
-        public static int Version
-        {
-            get
-            {
-                return 2;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the contents of the TV shows table in the database.
@@ -51,14 +30,6 @@
         public static Dictionary<int, TVShow> TVShows { get; set; }
 
         /// <summary>
-        /// Gets or sets the contents of the TV show key-value store table in the database.
-        /// </summary>
-        /// <value>
-        /// The contents of the TV show key-value store table in the database.
-        /// </value>
-        public static Dictionary<int, Dictionary<string, string>> ShowDatas { get; set; } 
-
-        /// <summary>
         /// Gets or sets the contents of the episodes table in the database.
         /// </summary>
         /// <value>
@@ -67,14 +38,14 @@
         public static List<Episode> Episodes { get; set; }
 
         /// <summary>
-        /// Gets or sets the contents of the episode tracking table in the database.
+        /// Gets or sets the contents of the episodes table in the database.
         /// </summary>
         /// <value>
-        /// The contents of the episode tracking table in the database.
+        /// The contents of the episodes table in the database.
         /// </value>
-        public static List<int> Trackings { get; set; }
+        public static Dictionary<int, Episode> EpisodeByID { get; set; }
 
-        private static readonly string _dbFile;
+        private static string _dbPath = Path.Combine(Signature.FullPath, "db");
 
         /// <summary>
         /// Initializes the <see cref="Database"/> class.
@@ -86,317 +57,74 @@
                 return;
             }
 
-            _dbFile = Path.Combine(Signature.FullPath, "TVShows.db3");
-
-            // hackity-hack :)
-            if (Environment.MachineName == "ROLISOFT-PC" && File.Exists(Path.Combine(Signature.FullPath, ".hack")))
+            if (!Directory.Exists(_dbPath))
             {
-                _dbFile = @"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\TVShows.db3";
+                Directory.CreateDirectory(_dbPath);
             }
 
-            var exists = File.Exists(_dbFile);
+            LoadDatabase();
+        }
 
-            Connection = new SQLiteConnection("Data Source=" + _dbFile);
+        /// <summary>
+        /// Loads the database files.
+        /// </summary>
+        private static void LoadDatabase()
+        {
             DataChange = DateTime.Now;
-            
-            Connection.Open();
 
-            // if this is a new database, run table creations
+            TVShows   = new Dictionary<int, TVShow>();
+            Episodes  = new List<Episode>();
 
-            if (!exists)
+            foreach (var dir in Directory.EnumerateDirectories(_dbPath))
             {
-                var tables = Properties.Resources.DatabaseStructure.Split(new[]{ "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var table in tables)
+                if (!Regex.IsMatch(Path.GetDirectoryName(dir), @"^\d+\-") || !File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                 {
-                    Execute(table);
+                    continue;
                 }
-            }
 
-            // if this is an older database, upgrade
+                FileStream info = null, conf = null, seen = null, desc = null;
 
-            var sver = Setting("Version");
-            var ver  = !string.IsNullOrWhiteSpace(sver)
-                       ? sver.ToInteger()
-                       : 0;
-
-            // -> revision 9bec72227f611e4283cbdc24357c83a23b5798a9
-            if (ver == 0)
-            {
-                Execute("alter table episodes add column url TEXT");
-
-                ver++;
-                Setting("Version", ver.ToString());
-            }
-
-            if (ver == 1)
-            {
-                Execute("alter table tvshows add column release TEXT");
-
-                ver++;
-                Setting("Version", ver.ToString());
-            }
-
-            // copy the database to the memory
-            CopyToMemory();
-        }
-
-        /// <summary>
-        /// Copies the contents of the SQLite database to the memory.
-        /// </summary>
-        public static void CopyToMemory()
-        {
-            ShowDatas = GetShowDatas();
-            TVShows   = GetTVShows();
-            Trackings = GetTrackings();
-            Episodes  = GetEpisodes(true);
-        }
-
-        /// <summary>
-        /// Queries the SQL database.
-        /// </summary>
-        /// <param name="sql">The SQL query.</param>
-        /// <param name="args">The arguments in the SQL query.</param>
-        /// <returns>List of dictionary of key-value.</returns>
-        public static DictList Query(string sql, params object[] args)
-        {
-            using (var cmd = new SQLiteCommand(sql, Connection))
-            {
-                if (args.Length != 0)
+                try
                 {
-                    foreach (var arg in args)
+                    info = File.OpenRead(Path.Combine(dir, "info"));
+                    conf = File.OpenRead(Path.Combine(dir, "conf"));
+
+                    if (File.Exists(Path.Combine(dir, "seen")))
                     {
-                        cmd.Parameters.Add(new SQLiteParameter { Value = arg != null ? arg.ToString() : string.Empty });
+                        seen = File.OpenRead(Path.Combine(dir, "seen"));
                     }
-                }
-
-                lock (Connection)
-                {
-                    using (var dr = cmd.ExecuteReader())
+                    
+                    if (File.Exists(Path.Combine(dir, "desc")))
                     {
-                        var al = new DictList();
-
-                        while (dr.Read())
-                        {
-                            var dic = new Dictionary<string, string>();
-
-                            for (var i = 0; i != dr.FieldCount; i++)
-                            {
-                                dic[dr.GetName(i)] = dr[i].ToString();
-                            }
-
-                            al.Add(dic);
-                        }
-
-                        return al;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Executes an SQL statement.
-        /// </summary>
-        /// <param name="sql">The SQL statement.</param>
-        /// <param name="args">The arguments in the SQL statement.</param>
-        /// <returns>Number of changed rows.</returns>
-        public static int Execute(string sql, params object[] args)
-        {
-            using (var cmd = new SQLiteCommand(sql, Connection))
-            {
-                if (args.Length != 0)
-                {
-                    foreach (var arg in args)
-                    {
-                        cmd.Parameters.Add(new SQLiteParameter { Value = arg != null ? arg.ToString() : string.Empty });
-                    }
-                }
-
-                lock (Connection)
-                {
-                    return cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Executes an SQL statement on a transaction.
-        /// </summary>
-        /// <param name="transaction">The open transaction.</param>
-        /// <param name="sql">The SQL statement.</param>
-        /// <param name="args">The arguments in the SQL statement.</param>
-        /// <returns>Number of changed rows.</returns>
-        public static int ExecuteOnTransaction(SQLiteTransaction transaction, string sql, params object[] args)
-        {
-            using(var cmd = new SQLiteCommand(sql, Connection, transaction))
-            {
-                if (args.Length != 0)
-                {
-                    foreach (var arg in args)
-                    {
-                        cmd.Parameters.Add(new SQLiteParameter { Value = arg != null ? arg.ToString() : string.Empty });
-                    }
-                }
-
-                lock (Connection)
-                {
-                    return cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Downloads all the TV shows from the database.
-        /// </summary>
-        /// <returns>List of TV shows.</returns>
-        public static Dictionary<int, TVShow> GetTVShows()
-        {
-            lock (Connection)
-            {
-                using (var cmd = new SQLiteCommand("select rowid, showid, name, release from tvshows order by rowid asc", Connection))
-                using (var dr  = cmd.ExecuteReader())
-                {
-                    var shows = new Dictionary<int, TVShow>();
-
-                    while (dr.Read())
-                    {
-                        try
-                        {
-                            var show = new TVShow();
-
-                            show.RowID  = dr.GetInt32(0);
-                            show.ID = dr.GetInt32(1);
-                            show.Name   = dr.GetString(2);
-
-                            if (!(dr[3] is DBNull))
-                                show.Release = dr.GetString(3);
-
-                            shows.Add(show.ID, show);
-                        }
-                        catch
-                        {
-                        }
+                        desc = File.OpenRead(Path.Combine(dir, "desc"));
                     }
 
-                    return shows;
+                    var show = TVShow.Load(info, conf, seen, desc);
+
+                    TVShows[show.ID] = show;
+                    Episodes.AddRange(show.Episodes);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Downloads all the TV show key-value store information from the database.
-        /// </summary>
-        /// <returns>
-        /// List of TV show key-value stores.
-        /// </returns>
-        public static Dictionary<int, Dictionary<string, string>> GetShowDatas()
-        {
-            lock (Connection)
-            {
-                using (var cmd = new SQLiteCommand("select showid, key, value from showdata", Connection))
-                using (var dr  = cmd.ExecuteReader())
+                finally
                 {
-                    var keys = new Dictionary<int, Dictionary<string, string>>();
-
-                    while (dr.Read())
+                    if (info != null)
                     {
-                        try
-                        {
-                            var showid = dr.GetInt32(0);
-
-                            if (!keys.ContainsKey(showid))
-                            {
-                                keys[showid] = new Dictionary<string, string>();
-                            }
-
-                            keys[showid][dr.GetString(1)] = dr.GetString(2);
-                        }
-                        catch
-                        {
-                        }
+                        info.Dispose();
                     }
 
-                    return keys;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Downloads all the episodes from the database.
-        /// </summary>
-        /// <param name="setWatched">if set to <c>true</c> the value of the <c>Watched</c> will be fetched from the <c>Database.Trackings</c> list.</param>
-        /// <returns>
-        /// List of episodes.
-        /// </returns>
-        public static List<Episode> GetEpisodes(bool setWatched = false)
-        {
-            lock (Connection)
-            {
-                using (var cmd = new SQLiteCommand("select episodeid, showid, season, episode, airdate, name, descr, pic, url from episodes", Connection))
-                using (var dr  = cmd.ExecuteReader())
-                {
-                    var episodes = new List<Episode>();
-
-                    while (dr.Read())
+                    if (conf != null)
                     {
-                        try
-                        {
-                            var episode = new Episode();
-
-                            episode.ID = dr.GetInt32(0);
-                            episode.ID    = dr.GetInt32(1);
-                            episode.Season    = dr.GetInt32(2);
-                            episode.Number    = dr.GetInt32(3);
-
-                            if (setWatched)
-                                episode.Watched = Trackings.Contains(episode.ID);
-
-                            if (!(dr[4] is DBNull))
-                                episode.Airdate = Extensions.GetUnixTimestamp(dr.GetInt32(4));
-
-                            if (!(dr[5] is DBNull))
-                                episode.Name = dr.GetString(5);
-
-                            if (!(dr[6] is DBNull))
-                                episode.Summary = dr.GetString(6);
-
-                            if (!(dr[7] is DBNull))
-                                episode.Picture = dr.GetString(7);
-
-                            if (!(dr[8] is DBNull))
-                                episode.URL = dr.GetString(8);
-
-                            episodes.Add(episode);
-                        }
-                        catch
-                        {
-                        }
+                        conf.Dispose();
                     }
 
-                    return episodes;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Downloads all the episode tracking information from the database.
-        /// </summary>
-        /// <returns>List of episode trackings.</returns>
-        public static List<int> GetTrackings()
-        {
-            lock (Connection)
-            {
-                using (var cmd = new SQLiteCommand("select showid, episodeid from tracking", Connection))
-                using (var dr  = cmd.ExecuteReader())
-                {
-                    var trackings = new List<int>();
-
-                    while (dr.Read())
+                    if (desc != null)
                     {
-                        try { trackings.Add(dr.GetInt32(1)); } catch { }
+                        desc.Dispose();
                     }
 
-                    return trackings;
+                    if (seen != null)
+                    {
+                        seen.Dispose();
+                    }
                 }
             }
         }
@@ -408,20 +136,8 @@
         /// <returns>Stored value or empty string.</returns>
         public static string Setting(string key)
         {
-            using (var cmd = new SQLiteCommand("select value from settings where key = ?", Connection))
-            {
-                cmd.Parameters.Add(new SQLiteParameter { Value = key });
-
-                lock (Connection)
-                {
-                    using (var dr = cmd.ExecuteReader())
-                    {
-                        return dr.Read()
-                               ? dr["value"].ToString()
-                               : null;
-                    }
-                }
-            }
+            // TODO
+            return string.Empty;
         }
 
         /// <summary>
@@ -434,7 +150,7 @@
         {
             string value;
 
-            if (ShowDatas[id].TryGetValue(key, out value))
+            if (TVShows[id].Data.TryGetValue(key, out value))
             {
                 return value;
             }
@@ -447,21 +163,9 @@
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        /// <returns>
-        /// Number of affected rows.
-        /// </returns>
-        public static int Setting(string key, string value)
+        public static void Setting(string key, string value)
         {
-            using (var cmd = new SQLiteCommand("insert into settings values (?, ?)", Connection))
-            {
-                cmd.Parameters.Add(new SQLiteParameter { Value = key   });
-                cmd.Parameters.Add(new SQLiteParameter { Value = value });
-
-                lock (Connection)
-                {
-                    return cmd.ExecuteNonQuery();
-                }
-            }
+            // TODO
         }
 
         /// <summary>
@@ -470,32 +174,10 @@
         /// <param name="id">The id of the show.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        /// <returns>
-        /// Number of affected rows.
-        /// </returns>
-        public static int ShowData(int id, string key, string value)
+        public static void ShowData(int id, string key, string value)
         {
-            if (!ShowDatas.ContainsKey(id))
-            {
-                ShowDatas[id] = new Dictionary<string, string>();
-            }
-
-            ShowDatas[id][key] = value;
-
-            var data = (id + "|" + key).GetHashCode();
-
-            using (var cmd = new SQLiteCommand("insert into showdata values (?, ?, ?, ?)", Connection))
-            {
-                cmd.Parameters.Add(new SQLiteParameter { Value = data  });
-                cmd.Parameters.Add(new SQLiteParameter { Value = id    });
-                cmd.Parameters.Add(new SQLiteParameter { Value = key   });
-                cmd.Parameters.Add(new SQLiteParameter { Value = value });
-
-                lock (Connection)
-                {
-                    return cmd.ExecuteNonQuery();
-                }
-            }
+            // TODO commit
+            TVShows[id].Data[key] = value;
         }
 
         /// <summary>

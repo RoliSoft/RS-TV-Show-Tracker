@@ -38,6 +38,7 @@
 
             _td = new TaskDialog
                 {
+                    CommonIcon      = TaskDialogIcon.SecurityWarning,
                     Title           = "Upgrade database",
                     Instruction     = "Upgrade TVShows.db3",
                     Content         = "From this version forward, SQLite3 is not used anymore as the database store for the software.\r\n\r\nYour database file needs to be upgraded to the new format, however, SQLite3 is not bundled anymore with the software, so it can't open it and convert it.\r\n\r\nThe TVShows.db3 file will be uploaded to one of my servers and converted there. This file only contains TV show information, it does NOT contain your settings, cookies, and site logins.\r\n\r\nIf you would like to continue, select a server close to you.",
@@ -132,7 +133,7 @@
                 _td.SimulateButtonClick(-1);
                 new TaskDialog
                     {
-                        CommonIcon  = TaskDialogIcon.Stop,
+                        CommonIcon  = TaskDialogIcon.SecurityError,
                         Title       = "Upgrade error",
                         Instruction = "Upgrade error",
                         Content     = "Invalid response received from server: " + Encoding.UTF8.GetString(uploadFileCompletedEventArgs.Result) + "\r\n\r\nTry again using a different server or send your TVShows.db3 file to rolisoft@gmail.com for a \"manual\" conversion. :)"
@@ -166,7 +167,15 @@
                 }
                 catch (Exception ex)
                 {
-                    _td.Content = "Error: " + ex.Message;
+                    _td.SimulateButtonClick(-1);
+                    new TaskDialog
+                        {
+                            CommonIcon  = TaskDialogIcon.SecurityError,
+                            Title       = "Upgrade error",
+                            Instruction = "Upgrade error",
+                            Content     = "Error while unpacking database: " + ex.Message + "\r\n\r\nTry again using a different server or send your TVShows.db3 file to rolisoft@gmail.com for a \"manual\" conversion. :)"
+                        }.Show();
+                    Process.GetCurrentProcess().Kill();
                     return;
                 }
 
@@ -179,12 +188,11 @@
             _td.SimulateButtonClick(-1);
             new TaskDialog
                 {
-                    CommonIcon  = TaskDialogIcon.Information,
+                    CommonIcon  = TaskDialogIcon.SecuritySuccess,
                     Title       = "Upgrade finished",
                     Instruction = "Upgrade finished",
                     Content     = "The software will now quit. Please restart it afterwards."
                 }.Show();
-
             Process.GetCurrentProcess().Kill();
         }
 
@@ -201,7 +209,11 @@
                     Start(new Uri("http://ipv4.lab.rolisoft.net/api/migrate/"));
                     break;
 
-                case 1:
+                default:
+                    Process.GetCurrentProcess().Kill();
+                    break;
+
+                    /*case 1:
                     Start(new Uri("http://aws-us.rolisoft.net/migrate.php"));
                     break;
 
@@ -211,7 +223,7 @@
 
                 case 3:
                     Start(new Uri("http://aws-as.rolisoft.net/migrate.php"));
-                    break;
+                    break;*/
             }
         }
 
