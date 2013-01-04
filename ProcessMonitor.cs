@@ -11,6 +11,8 @@
     using Parsers.Social;
     using Dependencies.DetectOpenFiles;
 
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+
     using Parser = ShowNames.Parser;
 
     /// <summary>
@@ -142,23 +144,19 @@
 
             foreach (var epnr in eps)
             {
-                var epid = Database.GetEpisodeID(showid, file.Episode.Season, epnr);
-                if (epid == int.MinValue)
+                Episode ep;
+                if (Database.TVShows[showid].EpisodeByID.TryGetValue(file.Episode.Season * 1000 + epnr, out ep))
                 {
-                    continue;
-                }
-
-                if (@new = (Database.Query("select * from tracking where showid = ? and episodeid = ?", showid, epid).Count == 0))
-                {
-                    Database.Execute("insert into tracking values (?, ?)", showid, epid);
-
-                    Database.Trackings.Add(epid);
-                    Database.Episodes.First(e => e.ID == epid).Watched = true;
+                    if (!ep.Watched)
+                    {
+                        @new = ep.Watched = true;
+                    }
                 }
             }
 
             if (@new)
             {
+                Database.TVShows[showid].SaveTracking();
                 PostToSocial(file);
             }
 

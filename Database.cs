@@ -68,7 +68,7 @@
         /// <summary>
         /// Loads the database files.
         /// </summary>
-        private static void LoadDatabase()
+        public static void LoadDatabase()
         {
             DataChange = DateTime.Now;
 
@@ -82,50 +82,10 @@
                     continue;
                 }
 
-                FileStream info = null, conf = null, seen = null, desc = null;
+                var show = TVShow.Load(dir);
 
-                try
-                {
-                    info = File.OpenRead(Path.Combine(dir, "info"));
-                    conf = File.OpenRead(Path.Combine(dir, "conf"));
-
-                    if (File.Exists(Path.Combine(dir, "seen")))
-                    {
-                        seen = File.OpenRead(Path.Combine(dir, "seen"));
-                    }
-                    
-                    if (File.Exists(Path.Combine(dir, "desc")))
-                    {
-                        desc = File.OpenRead(Path.Combine(dir, "desc"));
-                    }
-
-                    var show = TVShow.Load(info, conf, seen, desc);
-
-                    TVShows[show.ID] = show;
-                    Episodes.AddRange(show.Episodes);
-                }
-                finally
-                {
-                    if (info != null)
-                    {
-                        info.Dispose();
-                    }
-
-                    if (conf != null)
-                    {
-                        conf.Dispose();
-                    }
-
-                    if (desc != null)
-                    {
-                        desc.Dispose();
-                    }
-
-                    if (seen != null)
-                    {
-                        seen.Dispose();
-                    }
-                }
+                TVShows[show.ID] = show;
+                Episodes.AddRange(show.Episodes);
             }
         }
 

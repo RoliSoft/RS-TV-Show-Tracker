@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Timers;
     using System.Windows;
@@ -493,15 +494,17 @@
                 return;
             }
 
-            Database.Execute("update tvshows set rowid = ? where rowid = ?", Int16.MaxValue, rowid - 1);
-            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid - 1, rowid);
-            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid, Int16.MaxValue);
+            Database.TVShows.First(x => x.Value.RowID == rowid - 1).Value.RowID = Int16.MaxValue;
+            Database.TVShows.First(x => x.Value.RowID == rowid).Value.RowID = rowid - 1;
+            Database.TVShows.First(x => x.Value.RowID == Int16.MaxValue).Value.RowID = rowid;
+
+            Database.TVShows.First(x => x.Value.RowID == rowid - 1).Value.SaveData();
+            Database.TVShows.First(x => x.Value.RowID == rowid).Value.SaveData();
 
             OverviewListViewItemCollection.Move(listid, listid - 1);
             listView.SelectedIndex = listid - 1;
             listView.ScrollIntoView(listView.SelectedItem);
 
-            Database.TVShows = Database.GetTVShows();
             MainWindow.Active.DataChanged(false);
         }
 
@@ -526,15 +529,17 @@
                 return;
             }
 
-            Database.Execute("update tvshows set rowid = ? where rowid = ?", Int16.MaxValue, rowid + 1);
-            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid + 1, rowid);
-            Database.Execute("update tvshows set rowid = ? where rowid = ?", rowid, Int16.MaxValue);
+            Database.TVShows.First(x => x.Value.RowID == rowid + 1).Value.RowID = Int16.MaxValue;
+            Database.TVShows.First(x => x.Value.RowID == rowid).Value.RowID = rowid + 1;
+            Database.TVShows.First(x => x.Value.RowID == Int16.MaxValue).Value.RowID = rowid;
+
+            Database.TVShows.First(x => x.Value.RowID == rowid + 1).Value.SaveData();
+            Database.TVShows.First(x => x.Value.RowID == rowid).Value.SaveData();
 
             OverviewListViewItemCollection.Move(listid, listid + 1);
             listView.SelectedIndex = listid + 1;
             listView.ScrollIntoView(listView.SelectedItem);
 
-            Database.TVShows = Database.GetTVShows();
             MainWindow.Active.DataChanged(false);
         }
 
@@ -550,8 +555,7 @@
                 return;
             }
             
-            var sel    = (OverviewListViewItem)listView.SelectedItem;
-            var showid = Database.TVShows.Values.First(s => s.Name == sel.Name).ID;
+            var sel = (OverviewListViewItem)listView.SelectedItem;
 
             var td = new TaskDialog
                 {
@@ -564,28 +568,8 @@
 
             if (td.Show() == TaskDialogResult.Yes)
             {
-                Database.Execute("delete from tvshows where showid = ?", showid);
-                Database.Execute("delete from showdata where showid = ?", showid);
-                Database.Execute("delete from episodes where showid = ?", showid);
-                Database.Execute("delete from tracking where showid = ?", showid);
-
-                Database.Execute("update tvshows set rowid = rowid * -1");
-
-                var tr = Database.Connection.BeginTransaction();
-
-                var shows = Database.Query("select showid from tvshows order by rowid desc");
-                var i = 1;
-                foreach (var show in shows)
-                {
-                    Database.ExecuteOnTransaction(tr, "update tvshows set rowid = ? where showid = ?", i, show["showid"]);
-                    i++;
-                }
-
-                tr.Commit();
-
-                Database.Execute("vacuum;");
-                Database.CopyToMemory();
-
+                Directory.Delete(sel.Show.Directory, true);
+                Database.LoadDatabase();
                 MainWindow.Active.DataChanged();
             }
         }

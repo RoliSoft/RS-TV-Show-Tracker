@@ -16,7 +16,7 @@
         /// <value>
         /// The show ID.
         /// </value>
-        public int ID { get; set; }
+        public int ID { get; private set; }
 
         /// <summary>
         /// Gets or sets the row ID.
@@ -24,13 +24,37 @@
         /// <value>
         /// The row ID.
         /// </value>
-        public int RowID { get; set; }
+        public int RowID
+        {
+            get
+            {
+                if (_rowId.HasValue)
+                {
+                    return _rowId.Value;
+                }
+
+                return (int)(_rowId = int.Parse(Data["rowid"]));
+            }
+            set
+            {
+                _rowId = value;
+                Data["rowid"] = value.ToString();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the title of the show.
         /// </summary>
         /// <value>The title.</value>
-        public string Title { get; set; }
+        public string Title
+        {
+            get { return _title; }
+            set
+            {
+                _title = value;
+                Data["title"] = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the title of the show.
@@ -155,70 +179,59 @@
         public Dictionary<int, Episode> EpisodeByID { get; set; }
 
         /// <summary>
-        /// Saves this object to the stream.
+        /// Gets or sets the directory where the show is stored.
         /// </summary>
-        /// <param name="info">The destination stream.</param>
-        /// <param name="conf">The destination stream for associated key-value store.</param>
-        /// <param name="seen">The destination stream for episode tracking.</param>
-        /// <param name="desc">The destination stream for descriptions.</param>
-        public void Save(Stream info, Stream conf, Stream seen = null, Stream desc = null)
+        /// <value>The directory.</value>
+        public string Directory { get; set; }
+
+        private int? _rowId;
+        private string _title;
+
+        /// <summary>
+        /// Saves the episode tracking information.
+        /// </summary>
+        public void SaveTracking()
         {
-            using (var bw = new BinaryWriter(info))
+            using (var fs = File.OpenRead(Path.Combine(Directory, "seen")))
+            using (var bw = new BinaryWriter(fs))
             {
                 bw.Write((byte)1);
                 bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                bw.Write(Source);
-                bw.Write(SourceID);
-                bw.Write(Title);
-                bw.Write(Description);
-                bw.Write(Cover);
-                bw.Write(Airing);
-                bw.Write(AirTime);
-                bw.Write(AirDay);
-                bw.Write(Network);
-                bw.Write((byte)Runtime);
-                bw.Write(TimeZone);
-                bw.Write(Language);
-                bw.Write(URL);
-                bw.Write((ushort)Episodes.Count);
-            }
+                bw.Write((ushort)0);
 
-            if (seen != null)
-            {
-                using (var bw = new BinaryWriter(seen))
+                var scnt = 0;
+                foreach (var episode in Episodes)
                 {
-                    bw.Write((byte)1);
-                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                    bw.Write((ushort)0);
-                }
-            }
+                    if (episode.Watched)
+                    {
+                        bw.Write((byte)episode.Season);
 
-            var scnt = 0;
+                        if (episode.Number < 255)
+                        {
+                            bw.Write((byte)episode.Number);
+                        }
+                        else
+                        {
+                            bw.Write((byte)255);
+                            bw.Write((byte)(episode.Number - 255));
+                        }
 
-            foreach (var episode in Episodes)
-            {
-                if (episode.Watched)
-                {
-                    scnt++;
+                        scnt++;
+                    }
                 }
 
-                episode.Save(info, seen, desc);
+                bw.Seek(5, SeekOrigin.Begin);
+                bw.Write((ushort)scnt);
             }
+        }
 
-            if (seen != null)
-            {
-                seen.Position = 5;
-
-                using (var bw = new BinaryWriter(seen))
-                {
-                    bw.Write((ushort)scnt);
-                }
-            }
-
-            Data["showid"] = ID.ToString();
-            Data["rowid"]  = RowID.ToString();
-
-            using (var bw = new BinaryWriter(conf))
+        /// <summary>
+        /// Saves the associated key-value store.
+        /// </summary>
+        public void SaveData()
+        {
+            using (var fs = File.OpenRead(Path.Combine(Directory, "conf")))
+            using (var bw = new BinaryWriter(fs))
             {
                 bw.Write((byte)1);
                 bw.Write((uint)DateTime.Now.ToUnixTimestamp());
@@ -233,91 +246,164 @@
         }
 
         /// <summary>
-        /// Loads an object from the stream.
+        /// Saves this object to the stream.
         /// </summary>
-        /// <param name="info">The source stream.</param>
-        /// <param name="conf">The source stream for associated key-value store.</param>
-        /// <param name="seen">The source stream for episode tracking.</param>
-        /// <param name="desc">The source stream for descriptions.</param>
+        /// <param name="dir">The destination directory.</param>
+        public void Save(string dir)
+        {
+            using (var info = File.OpenRead(Path.Combine(dir, "info")))
+            using (var conf = File.OpenRead(Path.Combine(dir, "conf")))
+            using (var seen = File.OpenRead(Path.Combine(dir, "seen")))
+            using (var desc = File.OpenRead(Path.Combine(dir, "desc")))
+            {
+                using (var bw = new BinaryWriter(info))
+                {
+                    bw.Write((byte)1);
+                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                    bw.Write(Source);
+                    bw.Write(SourceID);
+                    bw.Write(Title);
+                    bw.Write(Description);
+                    bw.Write(Cover);
+                    bw.Write(Airing);
+                    bw.Write(AirTime);
+                    bw.Write(AirDay);
+                    bw.Write(Network);
+                    bw.Write((byte)Runtime);
+                    bw.Write(TimeZone);
+                    bw.Write(Language);
+                    bw.Write(URL);
+                    bw.Write((ushort)Episodes.Count);
+                }
+
+                using (var bw = new BinaryWriter(seen))
+                {
+                    bw.Write((byte)1);
+                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                    bw.Write((ushort)0);
+                }
+
+                var scnt = 0;
+                foreach (var episode in Episodes)
+                {
+                    if (episode.Watched)
+                    {
+                        scnt++;
+                    }
+
+                    episode.Save(info, seen, desc);
+                }
+                
+                using (var bw = new BinaryWriter(seen))
+                {
+                    bw.Seek(5, SeekOrigin.Begin);
+                    bw.Write((ushort)scnt);
+                }
+
+                Data["showid"] = ID.ToString();
+                Data["rowid"]  = RowID.ToString();
+
+                using (var bw = new BinaryWriter(conf))
+                {
+                    bw.Write((byte)1);
+                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                    bw.Write((ushort)Data.Count);
+
+                    foreach (var kv in Data)
+                    {
+                        bw.Write(kv.Key);
+                        bw.Write(kv.Value);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads an object from the directory.
+        /// </summary>
+        /// <param name="dir">The source directory.</param>
         /// <returns>
         /// Deserialized object.
         /// </returns>
-        public static TVShow Load(Stream info, Stream conf, Stream seen = null, Stream desc = null)
+        public static TVShow Load(string dir)
         {
-            var show = new TVShow();
-            int epnr;
+            var show = new TVShow { Directory = dir };
 
-            using (var br = new BinaryReader(info))
+            using (var info = File.OpenRead(Path.Combine(dir, "info")))
+            using (var conf = File.OpenRead(Path.Combine(dir, "conf")))
+            using (var seen = File.OpenRead(Path.Combine(dir, "seen")))
+            using (var desc = File.OpenRead(Path.Combine(dir, "desc")))
             {
-                var sver = br.ReadByte();
-                var supd = br.ReadUInt32();
+                int epnr;
 
-                show.Source      = br.ReadString();
-                show.SourceID    = br.ReadString();
-                show.Title       = br.ReadString();
-                show.Description = br.ReadString();
-                show.Cover       = br.ReadString();
-                show.Airing      = br.ReadBoolean();
-                show.AirTime     = br.ReadString();
-                show.AirDay      = br.ReadString();
-                show.Network     = br.ReadString();
-                show.Runtime     = br.ReadByte();
-                show.TimeZone    = br.ReadString();
-                show.Language    = br.ReadString();
-                show.URL         = br.ReadString();
-
-                epnr = br.ReadUInt16();
-            }
-
-            show.Episodes    = new List<Episode>(epnr);
-            show.EpisodeByID = new Dictionary<int, Episode>();
-
-            for (var i = 0; i < epnr; i++)
-            {
-                var ep = Episode.Load(show, info, desc);
-                show.Episodes.Add(ep);
-                show.EpisodeByID[ep.Season * 1000 + ep.Number] = ep;
-            }
-
-            using (var br = new BinaryReader(conf))
-            {
-                var dver = br.ReadByte();
-                var dupd = br.ReadUInt32();
-                var dcnt = br.ReadUInt16();
-
-                show.Data = new Dictionary<string, string>();
-
-                for (var i = 0; i < dcnt; i++)
+                using (var br = new BinaryReader(info))
                 {
-                    show.Data[br.ReadString()] = br.ReadString();
+                    var sver = br.ReadByte();
+                    var supd = br.ReadUInt32();
+
+                    show.Source      = br.ReadString();
+                    show.SourceID    = br.ReadString();
+                    show.Title       = br.ReadString();
+                    show.Description = br.ReadString();
+                    show.Cover       = br.ReadString();
+                    show.Airing      = br.ReadBoolean();
+                    show.AirTime     = br.ReadString();
+                    show.AirDay      = br.ReadString();
+                    show.Network     = br.ReadString();
+                    show.Runtime     = br.ReadByte();
+                    show.TimeZone    = br.ReadString();
+                    show.Language    = br.ReadString();
+                    show.URL         = br.ReadString();
+
+                    epnr = br.ReadUInt16();
                 }
-            }
 
-            show.ID    = int.Parse(show.Data["showid"]);
-            show.RowID = int.Parse(show.Data["rowid"]);
+                show.Episodes    = new List<Episode>(epnr);
+                show.EpisodeByID = new Dictionary<int, Episode>();
 
-            if (seen == null)
-            {
-                return show;
-            }
-
-            using (var br = new BinaryReader(seen))
-            {
-                var tver = br.ReadByte();
-                var tupd = br.ReadUInt32();
-                var tcnt = br.ReadUInt16();
-
-                for (var i = 0; i < tcnt; i++)
+                for (var i = 0; i < epnr; i++)
                 {
-                    var sn = br.ReadByte();
-                    var en = br.ReadByte();
+                    var ep = Episode.Load(show, info, desc);
+                    show.Episodes.Add(ep);
+                    show.EpisodeByID[ep.Season * 1000 + ep.Number] = ep;
+                }
 
-                    if (en == 255)
+                using (var br = new BinaryReader(conf))
+                {
+                    var dver = br.ReadByte();
+                    var dupd = br.ReadUInt32();
+                    var dcnt = br.ReadUInt16();
+
+                    show.Data = new Dictionary<string, string>();
+
+                    for (var i = 0; i < dcnt; i++)
                     {
-                        en += br.ReadByte();
+                        show.Data[br.ReadString()] = br.ReadString();
                     }
+                }
 
-                    show.EpisodeByID[sn * 1000 + en].Watched = true;
+                show.ID = int.Parse(show.Data["showid"]);
+                show._rowId = int.Parse(show.Data["rowid"]);
+                show.Data.TryGetValue("title", out show._title);
+
+                using (var br = new BinaryReader(seen))
+                {
+                    var tver = br.ReadByte();
+                    var tupd = br.ReadUInt32();
+                    var tcnt = br.ReadUInt16();
+
+                    for (var i = 0; i < tcnt; i++)
+                    {
+                        var sn = br.ReadByte();
+                        var en = br.ReadByte();
+
+                        if (en == 255)
+                        {
+                            en += br.ReadByte();
+                        }
+
+                        show.EpisodeByID[sn * 1000 + en].Watched = true;
+                    }
                 }
             }
 

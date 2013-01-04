@@ -659,17 +659,13 @@
 
                 try
                 {
-                    var tr = Database.Connection.BeginTransaction();
-
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into tracking values (" + item.ID.ID + ", '" + item.ID.ID + "')");
-                        Database.Trackings.Add(item.ID.ID);
                         item.ID.Watched = item.SeenIt = true;
                         item.RefreshSeenIt();
                     }
 
-                    tr.Commit();
+                    episode.Show.SaveTracking();
                 }
                 catch
                 {
@@ -686,9 +682,8 @@
 
                 try
                 {
-                    Database.Execute("insert into tracking values (" + episode.ID + ", '" + episode.ID + "')");
-                    Database.Trackings.Add(episode.ID);
                     episode.Watched = true;
+                    episode.Show.SaveTracking();
                 }
                 catch
                 {
@@ -716,17 +711,13 @@
 
                 try
                 {
-                    var tr = Database.Connection.BeginTransaction();
-
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
-                        Database.ExecuteOnTransaction(tr, "delete from tracking where showid = " + item.ID.ID + " and episodeid = '" + item.ID.ID + "'");
-                        Database.Trackings.Remove(item.ID.ID);
                         item.ID.Watched = item.SeenIt = false;
                         item.RefreshSeenIt();
                     }
 
-                    tr.Commit();
+                    episode.Show.SaveTracking();
                 }
                 catch
                 {
@@ -743,9 +734,8 @@
 
                 try
                 {
-                    Database.Execute("delete from tracking where showid = " + episode.ID + " and episodeid = '" + episode.ID + "'");
-                    Database.Trackings.Remove(episode.ID);
                     episode.Watched = false;
+                    episode.Show.SaveTracking();
                 }
                 catch
                 {

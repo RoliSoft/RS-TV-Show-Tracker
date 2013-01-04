@@ -13,13 +13,13 @@
         /// Gets or sets the TV show associated with this episode.
         /// </summary>
         /// <value>The show.</value>
-        public TVShow Show { get; set; }
+        public TVShow Show { get; private set; }
 
         /// <summary>
-        /// Gets or sets the row ID.
+        /// Gets or sets the episode ID.
         /// </summary>
-        /// <value>The row ID.</value>
-        public int ID { get; set; }
+        /// <value>The episode ID.</value>
+        public int ID { get; private set; }
 
         /// <summary>
         /// Gets or sets the season number.
@@ -90,7 +90,7 @@
         /// <param name="list">The destination stream for episode listing.</param>
         /// <param name="seen">The destination stream for episode tracking.</param>
         /// <param name="desc">The destination stream for descriptions.</param>
-        public void Save(Stream list, Stream seen = null, Stream desc = null)
+        public void Save(Stream list, Stream seen, Stream desc)
         {
             using (var bw = new BinaryWriter(list))
             {
@@ -108,13 +108,6 @@
 
                 bw.Write((uint)Airdate.ToUnixTimestamp());
                 bw.Write(Title);
-
-                if (desc == null)
-                {
-                    bw.Write7BitEncodedInt(-1);
-                    return;
-                }
-                    
                 bw.Write7BitEncodedInt((int)desc.Position);
             }
 
@@ -125,7 +118,7 @@
                 bw.Write(Summary);
             }
 
-            if (seen != null && Watched)
+            if (Watched)
             {
                 using (var bw = new BinaryWriter(seen))
                 {
@@ -153,7 +146,7 @@
         /// <returns>
         /// Deserialized object.
         /// </returns>
-        public static Episode Load(TVShow show, Stream list, Stream desc = null)
+        public static Episode Load(TVShow show, Stream list, Stream desc)
         {
             var ep = new Episode();
 
@@ -172,11 +165,6 @@
                 ep.Airdate = ((double)br.ReadUInt32()).GetUnixTimestamp();
                 ep.Title   = br.ReadString();
                 ep._pos    = br.Read7BitEncodedInt();
-            }
-
-            if (desc == null || ep._pos == -1)
-            {
-                return ep;
             }
 
             desc.Position = ep._pos;

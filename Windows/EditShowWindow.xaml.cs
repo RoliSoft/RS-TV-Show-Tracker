@@ -44,7 +44,7 @@
                 releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(show).ToString();
             }
             
-            switch (Database.ShowData(_id, "grabber"))
+            switch (Database.TVShows[_id].Source)
             {
                 case "TVRage":
                     database.SelectedIndex = 1;
@@ -80,7 +80,7 @@
             }
 
             _guide = AddNewWindow.CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
-            _lang  = Database.ShowData(_id, _guide.GetType().Name + ".lang");
+            _lang  = Database.TVShows[_id].Language;
 
             var sel = 0;
 
@@ -244,23 +244,22 @@
 
             if (nameTextBox.Text != _show && !string.IsNullOrWhiteSpace(nameTextBox.Text))
             {
-                Database.Execute("update tvshows set name = ? where showid = ?", nameTextBox.Text.Trim(), _id);
-                Database.TVShows[_id].Name = nameTextBox.Text.Trim();
+                Database.TVShows[_id].Title = nameTextBox.Text.Trim();
             }
 
             if (customReleaseName.IsChecked.Value && !string.IsNullOrWhiteSpace(releaseTextBox.Text))
             {
                 var rel = Regex.Replace(releaseTextBox.Text.Trim(), @"\s+", " ");
-                Database.Execute("update tvshows set release = ? where showid = ?", rel, _id);
-                Database.TVShows[_id].Release = rel;
+                Database.TVShows[_id].Data["regex"] = rel;
             }
             else
             {
-                Database.Execute("update tvshows set release = ? where showid = ?", string.Empty, _id);
-                Database.TVShows[_id].Release = string.Empty;
+                Database.TVShows[_id].Data.Remove("regex");
             }
 
-            Database.ShowData(_id, _guide.GetType().Name + ".lang", (language.SelectedItem as StackPanel).Tag as string);
+            //Database.TVShows[_id].Language = (language.SelectedItem as StackPanel).Tag as string;
+
+            Database.TVShows[_id].SaveData();
 
             DialogResult = true;
         }
