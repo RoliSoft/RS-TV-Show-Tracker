@@ -34,141 +34,70 @@
         /// <summary>
         /// Does the update.
         /// </summary>
-        public void Update() // TODO you know... the method body...
-        {/*
-            // create transaction
-            SQLiteTransaction tr;
-            try
-            {
-                tr = Database.Connection.BeginTransaction();
-            }
-            catch (Exception ex)
-            {
-                UpdateError.Fire(this, "Could not begin SQLite transaction.", ex, false, true);
-                return;
-            }
-
-            // get list of active shows
-            var shows = Database.Query("select showid, name, (select value from showdata where showdata.ID = tvshows.ID and key = 'grabber') as grabber from tvshows where (select value from showdata where showdata.ID = tvshows.ID and key = 'airing') = 'True' order by name asc");
-            
+        public void Update()
+        {
             var i = 0d;
-            foreach (var r in shows)
+            var cnt = Database.TVShows.Values.Count(s => s.Airing);
+            foreach (var r in Database.TVShows.Values.Where(s => s.Airing).OrderBy(s => s.Title))
             {
-                // fire event
-                UpdateProgressChanged.Fire(this, r["name"], ++i / shows.Count * 100);
+                UpdateProgressChanged.Fire(this, r.Title, ++i / cnt * 100);
 
-                // get guide
                 Guide guide;
-                string gname;
                 try
                 {
-                    guide = CreateGuide(r["grabber"]);
-                    gname = guide.GetType().Name;
+                    guide = CreateGuide(r.Source);
                 }
                 catch (Exception ex)
                 {
-                    UpdateError.Fire(this, "Could not get guide object for '" + r["name"] + "'", ex, true, false);
+                    UpdateError.Fire(this, "Could not get guide object for '" + r.Title + "'", ex, true, false);
                     continue;
                 }
 
-                // get ID on guide
-                var showid = int.Parse(r["showid"]);
-                string id, lang;
-                try
-                {
-                    id = Database.ShowData(showid, gname + ".id");
-                    if (string.IsNullOrWhiteSpace(id))
-                    {
-                        throw new ArgumentNullException();
-                    }
-
-                    lang = Database.ShowData(showid, gname + ".lang");
-                    if (string.IsNullOrWhiteSpace(lang))
-                    {
-                        lang = "en";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    UpdateError.Fire(this, "Could not get guide ID for '" + r["name"] + "'", ex, true, false);
-                    continue;
-                }
-
-                // get data from guide
                 TVShow tv;
                 try
                 {
-                    tv = guide.GetData(id, lang);
+                    tv = guide.GetData(r.SourceID, r.Language);
                 }
                 catch (Exception ex)
                 {
-                    UpdateError.Fire(this, "Could not get guide data for '" + r["name"] + "'", ex, true, false);
+                    UpdateError.Fire(this, "Could not get guide data for '" + r.Title + "'", ex, true, false);
                     continue;
                 }
 
-                // update showdata fields
-                Database.ShowData(showid, "genre",    tv.Genre);
-                Database.ShowData(showid, "descr",    tv.Description);
-                Database.ShowData(showid, "cover",    tv.Cover);
-                Database.ShowData(showid, "airing",   tv.Airing.ToString());
-                Database.ShowData(showid, "airtime",  tv.AirTime);
-                Database.ShowData(showid, "airday",   tv.AirDay);
-                Database.ShowData(showid, "network",  tv.Network);
-                Database.ShowData(showid, "timezone", tv.TimeZone);
-                Database.ShowData(showid, "runtime",  tv.Runtime.ToString());
-                Database.ShowData(showid, "url",      tv.URL);
+                tv.ID        = r.ID;
+                tv.Data      = r.Data;
+                tv.Directory = r.Directory;
 
-                // remove current episodes
-                Database.ExecuteOnTransaction(tr, "delete from episodes where showid = ?", showid);
-
-                // update episodes
                 foreach (var ep in tv.Episodes)
                 {
-                    try
+                    if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
                     {
-                        Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)", ep.Number + (ep.Season * 1000) + (showid * 100 * 1000), showid, ep.Season, ep.Number, string.IsNullOrWhiteSpace(tv.AirTime) || ep.Airdate == Utils.UnixEpoch ? ep.Airdate.ToUnixTimestamp() : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(), ep.Title, ep.Summary, ep.Picture, ep.URL);
-                    }
-                    catch (Exception ex)
-                    {
-                        UpdateError.Fire(this, string.Format("Could not insert '{0} S{1:00}E{2:00}' into database.", r["name"], ep.Season, ep.Number), ex, false, false);
+                        ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
                     }
                 }
 
-                // asynchronously update lab.rolisoft.net's cache
-                if (lang == "en")
+                if (tv.Language == "en")
                 {
-                    UpdateRemoteCache(new Tuple<string, string>(gname, id), tv);
+                    UpdateRemoteCache(tv);
+                }
+
+                try
+                {
+                    tv.Save();
+                }
+                catch (Exception ex)
+                {
+                    UpdateError.Fire(this, "Could not save database for '" + r.Title + "'", ex, true, false);
+                    continue;
                 }
             }
 
-            // commit the changes
-            try
-            {
-                tr.Commit();
-            }
-            catch (Exception ex)
-            {
-                    UpdateError.Fire(this, "Could not commit changes to database.", ex, false, true);
-                return;
-            }
+            Database.Setting("update", DateTime.Now.ToUnixTimestamp().ToString());
 
-            // set last updated and vacuum database
-            try
-            {
-                Database.Setting("last update", DateTime.Now.ToUnixTimestamp().ToString());
-                Database.Execute("vacuum");
-            }
-            catch (Exception ex)
-            {
-                UpdateError.Fire(this, "Could not vacuum the database.", ex, false, false);
-            }
-
-            // fire data change event
-            Database.CopyToMemory();
+            Database.LoadDatabase();
             MainWindow.Active.DataChanged();
 
-            // fire event
-            UpdateDone.Fire(this);*/
+            UpdateDone.Fire(this);
         }
 
         /// <summary>
@@ -231,9 +160,8 @@
         /// <summary>
         /// Sends metadata information about the TV show into lab.rolisoft.net cache.
         /// </summary>
-        /// <param name="guide">The guide name and show ID on it.</param>
         /// <param name="tv">The TV show.</param>
-        public static void UpdateRemoteCache(Tuple<string, string> guide, TVShow tv)
+        public static void UpdateRemoteCache(TVShow tv)
         {
             new Thread(() =>
                 {
@@ -253,8 +181,8 @@
                                 Runtime     = tv.Runtime,
                                 Seasons     = tv.Episodes.Last().Season,
                                 Episodes    = tv.Episodes.Count,
-                                Source      = guide.Item1,
-                                SourceID    = guide.Item2
+                                Source      = tv.Source,
+                                SourceID    = tv.SourceID
                             };
 
                         var hash = BitConverter.ToString(new HMACSHA256(Encoding.ASCII.GetBytes(Utils.GetUUID() + "\0" + Signature.Version)).ComputeHash(Encoding.UTF8.GetBytes(

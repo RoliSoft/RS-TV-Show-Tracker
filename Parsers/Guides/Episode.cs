@@ -85,46 +85,40 @@
         /// <summary>
         /// Saves this object to the stream.
         /// </summary>
-        /// <param name="list">The destination stream for episode listing.</param>
-        /// <param name="seen">The destination stream for episode tracking.</param>
-        public void Save(Stream list, Stream seen)
+        /// <param name="inbw">The destination writer for episode listing.</param>
+        /// <param name="sebw">The destination writer for episode tracking.</param>
+        public void Save(BinaryWriter inbw, BinaryWriter sebw = null)
         {
-            using (var bw = new BinaryWriter(list))
+            inbw.Write((byte)Season);
+
+            if (Number < 255)
             {
-                bw.Write((byte)Season);
+                inbw.Write((byte)Number);
+            }
+            else
+            {
+                inbw.Write((byte)255);
+                inbw.Write((byte)(Number - 255));
+            }
+
+            inbw.Write((uint)Airdate.ToUnixTimestamp());
+            inbw.Write(Title ?? string.Empty);
+            inbw.Write(Summary ?? string.Empty);
+            inbw.Write(Picture ?? string.Empty);
+            inbw.Write(URL ?? string.Empty);
+
+            if (sebw != null && Watched)
+            {
+                sebw.Write((byte)Season);
 
                 if (Number < 255)
                 {
-                    bw.Write((byte)Number);
+                    sebw.Write((byte)Number);
                 }
                 else
                 {
-                    bw.Write((byte)255);
-                    bw.Write((byte)(Number - 255));
-                }
-
-                bw.Write((uint)Airdate.ToUnixTimestamp());
-                bw.Write(Title);
-                bw.Write(Summary);
-                bw.Write(Picture);
-                bw.Write(URL);
-            }
-
-            if (Watched)
-            {
-                using (var bw = new BinaryWriter(seen))
-                {
-                    bw.Write((byte)Season);
-
-                    if (Number < 255)
-                    {
-                        bw.Write((byte)Number);
-                    }
-                    else
-                    {
-                        bw.Write((byte)255);
-                        bw.Write((byte)(Number - 255));
-                    }
+                    sebw.Write((byte)255);
+                    sebw.Write((byte)(Number - 255));
                 }
             }
         }

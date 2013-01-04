@@ -681,6 +681,8 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void UpdateError(object sender, EventArgs<string, Exception, bool, bool> e)
         {
+            HandleUnexpectedException(e.Second);
+
             if (e.Fourth) // fatal to whole update
             {
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
@@ -909,7 +911,7 @@
         /// </summary>
         /// <param name="ex">The exception.</param>
         /// <param name="isTerminating">if set to <c>true</c> the exception will terminate the execution.</param>
-        public void HandleUnexpectedException(Exception ex, bool isTerminating = false)
+        public static void HandleUnexpectedException(Exception ex, bool isTerminating = false)
         {
             if (ex is ThreadAbortException)
             {
@@ -952,10 +954,13 @@
                         StandardButtons       = TaskDialogStandardButtons.None
                     };
 
-                if ((bool)Dispatcher.Invoke((Func<bool>)(() => IsVisible)))
+                if (Active != null)
                 {
-                    td.Opened  += (s, r) => Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
-                    td.Closing += (s, r) => Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                    if ((bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
+                    {
+                        td.Opened  += (s, r) => Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
+                        td.Closing += (s, r) => Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                    }
                 }
 
                 var fd = new TaskDialogCommandLink { Text = "Submit bug report" };

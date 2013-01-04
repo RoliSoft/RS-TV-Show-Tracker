@@ -141,9 +141,11 @@
                 try   { show.Title = info.Descendants("title").First(t => t.Attributes().First().Value == "en").Value; }
                 catch { show.Title = info.GetValue("title"); }
             }
-
-            show.Genre       = info.Descendants("category").Aggregate(string.Empty, (current, g) => current + (g.GetValue("name") + ", ")).TrimEnd(", ".ToCharArray());
+            
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = info.GetValue("description");
+            show.Genre       = info.Descendants("category").Aggregate(string.Empty, (current, g) => current + (g.GetValue("name") + ", ")).TrimEnd(", ".ToCharArray());
             show.Airing      = string.IsNullOrWhiteSpace(info.GetValue("enddate"));
             show.Runtime     = info.GetValue("length").ToInteger();
             show.TimeZone    = "Tokyo Standard Time";

@@ -158,8 +158,10 @@
             var show = new TVShow();
 
             show.Title       = info.GetValue("SeriesName");
-            show.Genre       = info.GetValue("Genre").Trim('|').Replace("|", ", ");
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = info.GetValue("Overview");
+            show.Genre       = info.GetValue("Genre").Trim('|').Replace("|", ", ");
             show.Airing      = !Regex.IsMatch(info.GetValue("Status"), "(Canceled|Ended)");
             show.AirTime     = info.GetValue("Airs_Time");
             show.AirDay      = info.GetValue("Airs_DayOfWeek");

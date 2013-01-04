@@ -155,6 +155,8 @@
             var listing = Utils.GetURL(id, "list=" + db, autoDetectEncoding: true);
             var show = new TVShow
                 {
+                    Source   = GetType().Name,
+                    SourceID = id,
                     AirTime  = "20:00",
                     Language = "en",
                     URL      = id,

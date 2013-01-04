@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Text;
     using System.Text.RegularExpressions;
 
     /// <summary>
@@ -17,7 +16,7 @@
         /// <value>
         /// The show ID.
         /// </value>
-        public int ID { get; private set; }
+        public int ID { get; set; }
 
         /// <summary>
         /// Gets or sets the row ID.
@@ -248,81 +247,60 @@
 
                 foreach (var kv in Data)
                 {
-                    bw.Write(kv.Key);
-                    bw.Write(kv.Value);
+                    bw.Write(kv.Key ?? string.Empty);
+                    bw.Write(kv.Value ?? string.Empty);
                 }
             }
         }
 
         /// <summary>
-        /// Saves this object to the stream.
+        /// Saves this object.
         /// </summary>
-        /// <param name="dir">The destination directory.</param>
-        public void Save(string dir)
+        /// <remarks>
+        /// This will NOT save episode tracking information.
+        /// Call <c>SaveTracking()</c> if you need that as well.
+        /// </remarks>
+        public void Save()
         {
-            using (var info = File.OpenWrite(Path.Combine(dir, "info")))
-            using (var conf = File.OpenWrite(Path.Combine(dir, "conf")))
-            using (var seen = File.OpenWrite(Path.Combine(dir, "seen")))
+            using (var info = File.OpenWrite(Path.Combine(Directory, "info")))
+            using (var conf = File.OpenWrite(Path.Combine(Directory, "conf")))
+            using (var inbw = new BinaryWriter(info))
+            using (var cobw = new BinaryWriter(conf))
             {
-                using (var bw = new BinaryWriter(info))
-                {
-                    bw.Write((byte)1);
-                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                    bw.Write(Title);
-                    bw.Write(Source);
-                    bw.Write(SourceID);
-                    bw.Write(Description);
-                    bw.Write(Genre);
-                    bw.Write(Cover);
-                    bw.Write(Airing);
-                    bw.Write(AirTime);
-                    bw.Write(AirDay);
-                    bw.Write(Network);
-                    bw.Write((byte)Runtime);
-                    bw.Write(TimeZone);
-                    bw.Write(Language);
-                    bw.Write(URL);
-                    bw.Write((ushort)Episodes.Count);
-                }
+                inbw.Write((byte)1);
+                inbw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                inbw.Write(Title ?? string.Empty);
+                inbw.Write(Source ?? string.Empty);
+                inbw.Write(SourceID ?? string.Empty);
+                inbw.Write(Description ?? string.Empty);
+                inbw.Write(Genre ?? string.Empty);
+                inbw.Write(Cover ?? string.Empty);
+                inbw.Write(Airing);
+                inbw.Write(AirTime ?? string.Empty);
+                inbw.Write(AirDay ?? string.Empty);
+                inbw.Write(Network ?? string.Empty);
+                inbw.Write((byte)Runtime);
+                inbw.Write(TimeZone ?? string.Empty);
+                inbw.Write(Language ?? string.Empty);
+                inbw.Write(URL ?? string.Empty);
+                inbw.Write((ushort)Episodes.Count);
 
-                using (var bw = new BinaryWriter(seen))
-                {
-                    bw.Write((byte)1);
-                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                    bw.Write((ushort)0);
-                }
-
-                var scnt = 0;
                 foreach (var episode in Episodes)
                 {
-                    if (episode.Watched)
-                    {
-                        scnt++;
-                    }
-
-                    episode.Save(info, seen);
-                }
-                
-                using (var bw = new BinaryWriter(seen))
-                {
-                    bw.Seek(5, SeekOrigin.Begin);
-                    bw.Write((ushort)scnt);
+                    episode.Save(inbw);
                 }
 
                 Data["showid"] = ID.ToString();
                 Data["rowid"]  = RowID.ToString();
 
-                using (var bw = new BinaryWriter(conf))
-                {
-                    bw.Write((byte)1);
-                    bw.Write((uint)DateTime.Now.ToUnixTimestamp());
-                    bw.Write((ushort)Data.Count);
+                cobw.Write((byte)1);
+                cobw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                cobw.Write((ushort)Data.Count);
 
-                    foreach (var kv in Data)
-                    {
-                        bw.Write(kv.Key);
-                        bw.Write(kv.Value);
-                    }
+                foreach (var kv in Data)
+                {
+                    cobw.Write(kv.Key ?? string.Empty);
+                    cobw.Write(kv.Value ?? string.Empty);
                 }
             }
         }

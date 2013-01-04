@@ -63,7 +63,7 @@
             }
             catch (Exception ex)
             {
-                MainWindow.Active.HandleUnexpectedException(ex);
+                MainWindow.HandleUnexpectedException(ex);
             }
 
             _loaded = true;

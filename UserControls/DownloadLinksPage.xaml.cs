@@ -501,7 +501,7 @@
                 return;
             }
 
-            MainWindow.Active.HandleUnexpectedException(e.Second);
+            MainWindow.HandleUnexpectedException(e.Second);
         }
         #endregion
 

@@ -198,6 +198,8 @@
             var show    = new TVShow();
 
             show.Title       = HtmlEntity.DeEntitize(listing.DocumentNode.GetTextValue("//div[@class='orangecorner_content']//h1"));
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = HtmlEntity.DeEntitize(listing.DocumentNode.GetTextValue("//table/tr/td[1]/table[1]/tr[@class='centerbox_orange']/td[@class='centerbox_orange']") ?? string.Empty).Trim();
             show.Cover       = listing.DocumentNode.GetNodeAttributeValue("//table/tr/td[1]/table[1]/tr[@class='centerbox_orange']/td[@class='centerbox_orange_l']//img", "src");
             show.Airing      = !Regex.IsMatch(listing.DocumentNode.GetTextValue("//div[@class='orangecorner_content']//th[4]") ?? string.Empty, "(Canceled|Ended)");

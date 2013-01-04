@@ -118,8 +118,10 @@
             var show    = new TVShow();
 
             show.Title       = HtmlEntity.DeEntitize(summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:title']", "content"));
-            show.Genre       = Regex.Replace(summary.DocumentNode.GetTextValue("//div[contains(@class, 'categories')]") ?? string.Empty, @"\s+", string.Empty).Replace("Categories", string.Empty).Replace(",", ", ");
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = HtmlEntity.DeEntitize((summary.DocumentNode.GetTextValue("//div[@class='description']/span") ?? string.Empty).Replace("&nbsp;", " ").Replace("moreless", string.Empty).Trim());
+            show.Genre       = Regex.Replace(summary.DocumentNode.GetTextValue("//div[contains(@class, 'categories')]") ?? string.Empty, @"\s+", string.Empty).Replace("Categories", string.Empty).Replace(",", ", ");
             show.Cover       = summary.DocumentNode.GetNodeAttributeValue("//meta[@property='og:image']", "content");
             show.Airing      = !Regex.IsMatch(summary.DocumentNode.GetTextValue("//ul[@class='stats']/li[2]") ?? string.Empty, "(Canceled|Ended)");
             show.Runtime     = 30;

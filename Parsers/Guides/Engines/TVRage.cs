@@ -112,8 +112,10 @@
             var show = new TVShow();
 
             show.Title       = info.GetValue("showname");
-            show.Genre       = info.Descendants("genre").Aggregate(string.Empty, (current, g) => current + (g.Value + ", ")).TrimEnd(", ".ToCharArray());
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = info.GetValue("summary");
+            show.Genre       = info.Descendants("genre").Aggregate(string.Empty, (current, g) => current + (g.Value + ", ")).TrimEnd(", ".ToCharArray());
             show.Cover       = info.GetValue("image");
             show.Airing      = !Regex.IsMatch(info.GetValue("status"), "(Canceled|Ended)");
             show.AirTime     = info.GetValue("airtime");

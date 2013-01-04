@@ -119,6 +119,8 @@
             var show = new TVShow();
 
             show.Title       = (string)main["data"]["title"];
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = (string)main["data"]["plot"]["outline"];
             show.Cover       = (string)main["data"]["image"]["url"];
             show.Airing      = (string)main["data"]["year_end"] == "????";

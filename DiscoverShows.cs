@@ -148,7 +148,7 @@
                     catch (DirectoryNotFoundException)  { }
                     catch (Exception ex)
                     {
-                        MainWindow.Active.HandleUnexpectedException(ex);
+                        MainWindow.HandleUnexpectedException(ex);
                     }
                 }
             }
@@ -158,7 +158,7 @@
             catch (DirectoryNotFoundException)  { }
             catch (Exception ex)
             {
-                MainWindow.Active.HandleUnexpectedException(ex);
+                MainWindow.HandleUnexpectedException(ex);
             }
 
             // WE MUST GO DEEPER!
@@ -180,7 +180,7 @@
             catch (DirectoryNotFoundException)  { }
             catch (Exception ex)
             {
-                MainWindow.Active.HandleUnexpectedException(ex);
+                MainWindow.HandleUnexpectedException(ex);
             }
         }
 

@@ -118,6 +118,8 @@
             var show    = new TVShow();
             
             show.Title       = GetDescendantItemValue(summary, "info", "type", "Main title");
+            show.Source      = GetType().Name;
+            show.SourceID    = id;
             show.Description = GetDescendantItemValue(summary, "info", "type", "Plot Summary");
             show.Cover       = GetDescendantItemAttribute(summary, "info", "type", "Picture", "src");
             show.Airing      = !Regex.IsMatch(GetDescendantItemValue(summary, "info", "type", "Vintage"), " to ");

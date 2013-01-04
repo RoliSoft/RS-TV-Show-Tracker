@@ -10,6 +10,8 @@
     using Parsers.ForeignTitles;
     using Parsers.Guides;
 
+    using VistaControls.TaskDialog;
+
     /// <summary>
     /// Provides access to the default database.
     /// </summary>
@@ -36,14 +38,6 @@
         /// The contents of the episodes table in the database.
         /// </value>
         public static List<Episode> Episodes { get; set; }
-
-        /// <summary>
-        /// Gets or sets the contents of the episodes table in the database.
-        /// </summary>
-        /// <value>
-        /// The contents of the episodes table in the database.
-        /// </value>
-        public static Dictionary<int, Episode> EpisodeByID { get; set; }
 
         /// <summary>
         /// Gets or sets the key-value store associated with this database.
@@ -88,10 +82,17 @@
                     continue;
                 }
 
-                var show = TVShow.Load(dir);
+                try
+                {
+                    var show = TVShow.Load(dir);
 
-                TVShows[show.ID] = show;
-                Episodes.AddRange(show.Episodes);
+                    TVShows[show.ID] = show;
+                    Episodes.AddRange(show.Episodes);
+                }
+                catch (Exception ex)
+                {
+                    MainWindow.HandleUnexpectedException(new Exception("Couldn't load db\\" + Path.GetFileName(dir) + " due to an error.", ex));
+                }
             }
         }
 
@@ -138,7 +139,7 @@
         {
             Data[key] = value;
 
-            using (var fs = File.OpenRead(Path.Combine(_dbPath, "conf")))
+            using (var fs = File.OpenWrite(Path.Combine(_dbPath, "conf")))
             using (var bw = new BinaryWriter(fs))
             {
                 bw.Write((byte)1);

@@ -159,7 +159,7 @@
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-            MainWindow.Active.HandleUnexpectedException(e.Second);
+            MainWindow.HandleUnexpectedException(e.Second);
         }
 
         /// <summary>
