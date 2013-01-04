@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -45,6 +44,12 @@
         /// The contents of the episodes table in the database.
         /// </value>
         public static Dictionary<int, Episode> EpisodeByID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the key-value store associated with this database.
+        /// </summary>
+        /// <value>The data.</value>
+        public static Dictionary<string, string> Data { get; set; }
 
         private static string _dbPath = Path.Combine(Signature.FullPath, "db");
 
@@ -97,7 +102,30 @@
         /// <returns>Stored value or empty string.</returns>
         public static string Setting(string key)
         {
-            // TODO
+            if (Data == null)
+            {
+                using (var fs = File.OpenRead(Path.Combine(_dbPath, "conf")))
+                using (var br = new BinaryReader(fs))
+                {
+                    var dver = br.ReadByte();
+                    var dupd = br.ReadUInt32();
+                    var dcnt = br.ReadUInt16();
+
+                    Data = new Dictionary<string, string>();
+
+                    for (var i = 0; i < dcnt; i++)
+                    {
+                        Data[br.ReadString()] = br.ReadString();
+                    }
+                }
+            }
+
+            string value;
+            if (Data.TryGetValue(key, out value))
+            {
+                return value;
+            }
+
             return string.Empty;
         }
 
@@ -108,43 +136,21 @@
         /// <param name="value">The value.</param>
         public static void Setting(string key, string value)
         {
-            // TODO
-        }
+            Data[key] = value;
 
-        /// <summary>
-        /// Gets the ID of a show in the database.
-        /// </summary>
-        /// <param name="show">The name of the show.</param>
-        /// <returns>ID of the show or -2^31.</returns>
-        public static int GetShowID(string show)
-        {
-            var showid = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
-
-            if (showid.Count != 0)
+            using (var fs = File.OpenRead(Path.Combine(_dbPath, "conf")))
+            using (var bw = new BinaryWriter(fs))
             {
-                return showid[0].ID;
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((ushort)Data.Count);
+
+                foreach (var kv in Data)
+                {
+                    bw.Write(kv.Key);
+                    bw.Write(kv.Value);
+                }
             }
-
-            return int.MinValue;
-        }
-        
-        /// <summary>
-        /// Gets the ID of an episode in the database.
-        /// </summary>
-        /// <param name="id">The ID of the show.</param>
-        /// <param name="season">The season of the episode.</param>
-        /// <param name="episode">The number of the episode.</param>
-        /// <returns>ID of the show or -2^31.</returns>
-        public static int GetEpisodeID(int id, int season, int episode)
-        {
-            var episodeid = Episodes.Where(ep => ep.ID == id && ep.Season == season && ep.Number == episode).Take(1).ToList();
-
-            if (episodeid.Count != 0)
-            {
-                return episodeid[0].ID;
-            }
-
-            return int.MinValue;
         }
 
         /// <summary>

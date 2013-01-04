@@ -205,7 +205,7 @@
                     }
                     else if (ep.AirDate != null)
                     {
-                        var episode = show.Value.Episodes.Where(x => x.Airdate.ToOriginalTimeZone(x.Show.Data.Get("timezone")).Date == ep.AirDate.Value.Date).ToList();
+                        var episode = show.Value.Episodes.Where(x => x.Airdate.ToOriginalTimeZone(x.Show.TimeZone).Date == ep.AirDate.Value.Date).ToList();
                         if (episode.Count != 0)
                         {
                             match = true;
@@ -280,7 +280,7 @@
                     {
                         foreach (var show in Database.TVShows.Values)
                         {
-                            if (show.Data.Get("grabber") == mtch.Database && show.Data.Get(mtch.Database + ".id") == mtch.DatabaseID)
+                            if (show.Source == mtch.Database && show.SourceID == mtch.DatabaseID)
                             {
                                 local = show;
                                 break;

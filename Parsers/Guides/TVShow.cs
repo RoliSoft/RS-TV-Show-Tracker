@@ -201,7 +201,7 @@
         /// </summary>
         public void SaveTracking()
         {
-            using (var fs = File.OpenRead(Path.Combine(Directory, "seen")))
+            using (var fs = File.OpenWrite(Path.Combine(Directory, "seen")))
             using (var bw = new BinaryWriter(fs))
             {
                 bw.Write((byte)1);
@@ -239,7 +239,7 @@
         /// </summary>
         public void SaveData()
         {
-            using (var fs = File.OpenRead(Path.Combine(Directory, "conf")))
+            using (var fs = File.OpenWrite(Path.Combine(Directory, "conf")))
             using (var bw = new BinaryWriter(fs))
             {
                 bw.Write((byte)1);
@@ -260,10 +260,10 @@
         /// <param name="dir">The destination directory.</param>
         public void Save(string dir)
         {
-            using (var info = File.OpenRead(Path.Combine(dir, "info")))
-            using (var conf = File.OpenRead(Path.Combine(dir, "conf")))
-            using (var seen = File.OpenRead(Path.Combine(dir, "seen")))
-            using (var desc = File.OpenRead(Path.Combine(dir, "desc")))
+            using (var info = File.OpenWrite(Path.Combine(dir, "info")))
+            using (var conf = File.OpenWrite(Path.Combine(dir, "conf")))
+            using (var seen = File.OpenWrite(Path.Combine(dir, "seen")))
+            using (var desc = File.OpenWrite(Path.Combine(dir, "desc")))
             {
                 using (var bw = new BinaryWriter(info))
                 {

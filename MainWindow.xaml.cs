@@ -451,7 +451,7 @@
                 _statusTimer.Stop();
             }
 
-            var last = Database.Setting("last update");
+            var last = Database.Setting("update");
 
             if (string.IsNullOrEmpty(last))
             {

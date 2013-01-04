@@ -651,12 +651,12 @@
                 return string.Empty;
             }
 
-            var uid = Database.Setting("uid");
+            var uid = Database.Setting("uuid");
 
             if (string.IsNullOrWhiteSpace(uid))
             {
                 uid = Guid.NewGuid().ToString();
-                Database.Setting("uid", uid);
+                Database.Setting("uuid", uid);
             }
 
             return uid;

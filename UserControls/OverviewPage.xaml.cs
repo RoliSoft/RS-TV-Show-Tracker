@@ -676,9 +676,9 @@
 
             if (show.NewEpisodes >= 2)
             {
-                var dbep   = Database.Episodes.Where(ep => !ep.Watched && ep.ID == show.Show.ID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderBy(ep => ep.ID).First();
+                var dbep   = show.Show.Episodes.Where(ep => !ep.Watched && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderBy(ep => ep.ID).First();
                 var nextnt = dbep.Show.Data.Get("notation") == "airdate";
-                var nextdt = dbep.Airdate.ToOriginalTimeZone(dbep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd");
+                var nextdt = dbep.Airdate.ToOriginalTimeZone(dbep.Show.TimeZone).ToString("yyyy.MM.dd");
                 var nextep = "S{0:00}E{1:00}".FormatWith(dbep.Season, dbep.Number);
                 
                 // Play next unseen episode
@@ -826,9 +826,9 @@
 
             if (show.Started)
             {
-                var dbep2  = Database.Episodes.Where(ep => ep.ID == show.Show.ID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.ID).First();
+                var dbep2  = show.Show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.ID).First();
                 var lastnt = dbep2.Show.Data.Get("notation") == "airdate";
-                var lastdt = dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.Data.Get("timezone")).ToString("yyyy.MM.dd");
+                var lastdt = dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.TimeZone).ToString("yyyy.MM.dd");
                 var lastep = "S{0:00}E{1:00}".FormatWith(dbep2.Season, dbep2.Number);
                 
                 var pla    = new MenuItem();

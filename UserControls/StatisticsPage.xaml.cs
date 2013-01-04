@@ -72,7 +72,7 @@
             foreach (var show in Database.TVShows.Values.OrderBy(s => s.Name))
             {
                 var count   = show.Episodes.Count();
-                var runtime = show.Data.Get("runtime", "30").ToInteger();
+                var runtime = show.Runtime;
                   episodes += count;
                   minutes  += TimeSpan.FromMinutes(runtime * count);
 

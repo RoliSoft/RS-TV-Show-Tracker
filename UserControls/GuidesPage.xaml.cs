@@ -388,11 +388,10 @@
             }
 
             var show = ((GuideDropDownTVShowItem)comboBox.SelectedItem).Show;
-            var id = _activeShowID = show.ID;
+
+            _activeShowID = show.ID;
 
             // fill up general informations
-
-            var airing = bool.Parse(show.Data.Get("airing", "False"));
 
             showGeneralName.Text = show.Name;
 
@@ -487,7 +486,7 @@
                 showGeneralNext.Text = string.Empty;
 
                 showGeneralLastDate.Text = "no data available";
-                showGeneralNextDate.Text = airing ? "no data available" : "this show has ended";
+                showGeneralNextDate.Text = show.Airing ? "no data available" : "this show has ended";
             }
 
             // fill up episode list
@@ -613,7 +612,7 @@
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
             MainWindow.Active.tabControl.SelectedIndex = 2;
-            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 
@@ -630,7 +629,7 @@
             var ep = ((GuideListViewItem)listView.SelectedValue).ID;
 
             MainWindow.Active.tabControl.SelectedIndex = 3;
-            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.Data.Get("timezone")).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 

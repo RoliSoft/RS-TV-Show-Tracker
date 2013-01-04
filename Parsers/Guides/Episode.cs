@@ -180,7 +180,7 @@
         /// </returns>
         public Regex GenerateRegex()
         {
-            return ShowNames.Parser.GenerateEpisodeRegexes(Season.ToString(), Number.ToString(), Airdate.ToOriginalTimeZone(Show.Data.Get("timezone")));
+            return ShowNames.Parser.GenerateEpisodeRegexes(Season.ToString(), Number.ToString(), Airdate.ToOriginalTimeZone(Show.TimeZone));
         }
 
         /// <summary>
