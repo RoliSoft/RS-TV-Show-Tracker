@@ -142,9 +142,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite, Version=1.0.81.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.ServiceModel" />
@@ -312,8 +309,6 @@
     <Compile Include="FileNames\ShowFile.cs" />
     <Compile Include="FileNames\Tests.cs" />
     <Compile Include="Synchronization\SyncEngine.cs" />
-    <Compile Include="Tables\Episode.cs" />
-    <Compile Include="Tables\TVShow.cs" />
     <Compile Include="TaskDialogs\DatabaseUpdateTaskDialog.cs" />
     <Compile Include="TaskDialogs\GenericAsyncTaskDialog.cs" />
     <Compile Include="TaskDialogs\OpenArchiveTaskDialog.cs" />
@@ -746,9 +741,6 @@
     <Resource Include="Images\eye.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\TVShows.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\bug.png" />
     <Resource Include="Images\light-bulb.png" />
   </ItemGroup>
@@ -837,9 +829,6 @@
     <None Include="Dependencies\Microsoft.WindowsAPICodePack.Shell.dll" />
     <None Include="Dependencies\Newtonsoft.Json.dll" />
     <None Include="Dependencies\Transitionals.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Dependencies\System.Data.SQLite.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Dependencies\nunit.framework.dll" />

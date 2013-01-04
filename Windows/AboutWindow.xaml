@@ -161,11 +161,6 @@
                     <List Margin="0,10,0,0" Padding="0" MarkerStyle="None">
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://system.data.sqlite.org/">System.Data.SQLite</Hyperlink>
-                            </Paragraph>
-                        </ListItem>
-                        <ListItem>
-                            <Paragraph>
                                 <Hyperlink NavigateUri="http://htmlagilitypack.codeplex.com/">Html Agility Pack</Hyperlink>
                             </Paragraph>
                         </ListItem>

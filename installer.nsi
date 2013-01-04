@@ -171,7 +171,6 @@ Section -MainProgram
 	File "Dependencies\protobuf-net.dll"
 	File "Dependencies\SharpCompress.dll"
 	File "Dependencies\Starksoft.Net.Proxy.dll"
-	File "Dependencies\System.Data.SQLite.dll"
 	File "Dependencies\Transitionals.dll"
 	File "Dependencies\VistaControls.dll"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe"
@@ -184,25 +183,9 @@ SectionEnd
 Section -Prerequisites
 	SetOutPath "$INSTDIR"
 	
-	; Check Visual C++ 2010 SP1 Redistributable
-	
-	ClearErrors
-	ReadRegDword $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{F0C3E5D1-1ADE-321E-8167-68EF0DE699A5}" "Version"
-	IfErrors installVCRedist done1
-	
-installVCRedist:
-	Banner::show /NOUNLOAD /set 76 "Visual C++ 2010 SP1 Redistributable" "Downloading setup..."
-	NSISdl::download_quiet http://download.microsoft.com/download/C/6/D/C6D0FD4E-9E53-4897-9B91-836EBA2AACD3/vcredist_x86.exe "$INSTDIR\vcredist_x86.exe"
-	Banner::destroy
-	Banner::show /NOUNLOAD /set 76 "Visual C++ 2010 SP1 Redistributable" "Waiting for installation to finish..."
-	ExecWait "$INSTDIR\vcredist_x86.exe /passive /norestart" 
-	Delete "$INSTDIR\vcredist_x86.exe"
-	Banner::destroy
-	
 	; Check .Net Framework 4 Extended Profile
 	
-done1:
-	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done2 installNetFx4
+	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done1 installNetFx4
 	
 installNetFx4:
 	Banner::show /NOUNLOAD /set 76 ".Net Framework 4 Extended Profile" "Downloading setup..."
@@ -213,7 +196,7 @@ installNetFx4:
 	Delete "$INSTDIR\dotNetFx40_Full_setup.exe"
 	Banner::destroy
 	
-done2:
+done1:
 SectionEnd
 
 ######################################################################
@@ -268,7 +251,6 @@ Section Uninstall
 	Delete "$INSTDIR\protobuf-net.dll"
 	Delete "$INSTDIR\SharpCompress.dll"
 	Delete "$INSTDIR\Starksoft.Net.Proxy.dll"
-	Delete "$INSTDIR\System.Data.SQLite.dll"
 	Delete "$INSTDIR\Transitionals.dll"
 	Delete "$INSTDIR\VistaControls.dll"
 	Delete "$INSTDIR\RSTVShowTracker.exe"
