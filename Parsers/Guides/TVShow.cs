@@ -92,16 +92,16 @@
         }
 
         /// <summary>
-        /// Gets or sets the genre of the show, comma separated if multiple are provided.
-        /// </summary>
-        /// <value>The genre.</value>
-        public string Genre { get; set; }
-
-        /// <summary>
         /// Gets or sets the description of the show.
         /// </summary>
         /// <value>The description.</value>
         public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the genre of the show, comma separated if multiple are provided.
+        /// </summary>
+        /// <value>The genre.</value>
+        public string Genre { get; set; }
 
         /// <summary>
         /// Gets or sets the URL location of a DVD cover.
@@ -263,7 +263,6 @@
             using (var info = File.OpenWrite(Path.Combine(dir, "info")))
             using (var conf = File.OpenWrite(Path.Combine(dir, "conf")))
             using (var seen = File.OpenWrite(Path.Combine(dir, "seen")))
-            using (var desc = File.OpenWrite(Path.Combine(dir, "desc")))
             {
                 using (var bw = new BinaryWriter(info))
                 {
@@ -273,6 +272,7 @@
                     bw.Write(Source);
                     bw.Write(SourceID);
                     bw.Write(Description);
+                    bw.Write(Genre);
                     bw.Write(Cover);
                     bw.Write(Airing);
                     bw.Write(AirTime);
@@ -300,7 +300,7 @@
                         scnt++;
                     }
 
-                    episode.Save(info, seen, desc);
+                    episode.Save(info, seen);
                 }
                 
                 using (var bw = new BinaryWriter(seen))
@@ -341,11 +341,9 @@
             using (var info = File.OpenRead(Path.Combine(dir, "info")))
             using (var conf = File.OpenRead(Path.Combine(dir, "conf")))
             using (var seen = File.OpenRead(Path.Combine(dir, "seen")))
-            using (var desc = File.OpenRead(Path.Combine(dir, "desc")))
             using (var inbr = new BinaryReader(info))
             using (var cobr = new BinaryReader(conf))
             using (var sebr = new BinaryReader(seen))
-            using (var debr = new BinaryReader(desc))
             {
                 int epnr;
 
@@ -356,6 +354,7 @@
                 show.Source      = inbr.ReadString();
                 show.SourceID    = inbr.ReadString();
                 show.Description = inbr.ReadString();
+                show.Genre       = inbr.ReadString();
                 show.Cover       = inbr.ReadString();
                 show.Airing      = inbr.ReadBoolean();
                 show.AirTime     = inbr.ReadString();

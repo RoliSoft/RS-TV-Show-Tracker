@@ -34,13 +34,7 @@
             }
 
             _jsFile = Path.Combine(Signature.FullPath, "Settings.json");
-
-            // hackity-hack :)
-            if (Environment.MachineName == "ROLISOFT-PC" && File.Exists(Path.Combine(Signature.FullPath, ".hack")))
-            {
-                _jsFile = @"C:\Users\RoliSoft\Documents\Visual Studio 2010\Projects\RS TV Show Tracker\RS TV Show Tracker\Settings.json";
-            }
-
+            
             try
             {
                 Keys = (Dictionary<string, object>)ConvertJToNet(

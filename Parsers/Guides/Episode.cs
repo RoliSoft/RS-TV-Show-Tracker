@@ -82,15 +82,12 @@
         /// <value>The URL.</value>
         public string URL { get; set; }
 
-        private int _pos;
-
         /// <summary>
         /// Saves this object to the stream.
         /// </summary>
         /// <param name="list">The destination stream for episode listing.</param>
         /// <param name="seen">The destination stream for episode tracking.</param>
-        /// <param name="desc">The destination stream for descriptions.</param>
-        public void Save(Stream list, Stream seen, Stream desc)
+        public void Save(Stream list, Stream seen)
         {
             using (var bw = new BinaryWriter(list))
             {
@@ -108,14 +105,9 @@
 
                 bw.Write((uint)Airdate.ToUnixTimestamp());
                 bw.Write(Title);
-                bw.Write7BitEncodedInt((int)desc.Position);
-            }
-
-            using (var bw = new BinaryWriter(desc))
-            {
-                bw.Write(URL);
-                bw.Write(Picture);
                 bw.Write(Summary);
+                bw.Write(Picture);
+                bw.Write(URL);
             }
 
             if (Watched)
@@ -161,13 +153,9 @@
 
             ep.Airdate = ((double)inbr.ReadUInt32()).GetUnixTimestamp();
             ep.Title   = inbr.ReadString();
-            ep._pos    = inbr.Read7BitEncodedInt();
-
-            /*debr.BaseStream.Seek(ep._pos, SeekOrigin.Begin);
-
-            ep.URL     = debr.ReadString();
-            ep.Picture = debr.ReadString();
-            ep.Summary = debr.ReadString();*/
+            ep.Summary = inbr.ReadString();
+            ep.Picture = inbr.ReadString();
+            ep.URL     = inbr.ReadString();
 
             return ep;
         }

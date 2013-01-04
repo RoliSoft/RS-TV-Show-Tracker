@@ -83,7 +83,7 @@
 
             foreach (var dir in Directory.EnumerateDirectories(_dbPath))
             {
-                if (!Regex.IsMatch(Path.GetFileName(dir), @"^\d+\-") || !File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
+                if (!File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                 {
                     continue;
                 }
