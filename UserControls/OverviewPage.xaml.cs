@@ -172,15 +172,15 @@
             {
                 // last episode
                 
-                var count  = Database.Episodes.Count(ep => !ep.Watched && ep.ID == show.ID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch);
+                var count  = show.Episodes.Count(ep => !ep.Watched && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch);
                      _eps += count;
                 
-                if (hideend && show.Data.Get("airing", "False") == "False" && count == 0)
+                if (hideend && !show.Airing && count == 0)
                 {
                     continue;
                 }
 
-                var lastep = Database.Episodes.Where(ep => ep.ID == show.ID && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.ID).Take(1).ToList();
+                var lastep = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.ID).Take(1).ToList();
                 var last   = lastep.Count != 0
                            ? "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].Season, lastep[0].Number, lastep[0].Name)
                            : "This show hasn't started yet.";
@@ -196,7 +196,7 @@
 
                 // next episode
 
-                var nextep = Database.Episodes.Where(ep => ep.ID == show.ID && ep.Airdate > DateTime.Now).OrderBy(ep => ep.ID).Take(1).ToList();
+                var nextep = show.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.ID).Take(1).ToList();
                 string next;
 
                 if (nextep.Count != 0)
@@ -208,13 +208,13 @@
                         ndate = nextep[0].Airdate;
                     }
                 }
-                else if (show.Data.Get("airing", "False") == "True")
+                else if (show.Airing)
                 {
                     var epid = lastep.Count != 0
                              ? lastep[0].ID + 1
                              : 0;
 
-                    nextep = Database.Episodes.Where(ep => ep.ID == show.ID && ep.ID >= epid).OrderBy(ep => ep.ID).Take(1).ToList();
+                    nextep = show.Episodes.Where(ep => ep.ID >= epid).OrderBy(ep => ep.ID).Take(1).ToList();
 
                     if (nextep.Count != 0)
                     {
@@ -275,7 +275,12 @@
                 switch (grouping)
                 {
                     case "network":
-                        group = show.Data.Get("network", "Syndicated");
+                        group = show.Network;
+
+                        if (string.IsNullOrWhiteSpace(show.Network))
+                        {
+                            group = "Syndicated";
+                        }
 
                         if (string.IsNullOrWhiteSpace(group) || group == "Syndicated")
                         {
@@ -314,7 +319,7 @@
                             group = nextep[0].Airdate.ToShortRelativeDate();
                             grpri = nextep[0].Airdate.ToRelativeDatePriority();
                         }
-                        else if (show.Data.Get("airing", "False") == "True")
+                        else if (show.Airing)
                         {
                             group  = "Unknown";
                             grpri -= 1;
@@ -354,9 +359,9 @@
                         Name          = show.Name,
                         Title         = last,
                         Next          = next,
-                        NameColor     = fadeend && show.Data.Get("airing", "False") == "False" ? "#50FFFFFF" : "White",
-                        TitleColor    = count != 0 ? "Red" : (lastep.Count != 0 ? (fadeend && show.Data.Get("airing", "False") == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF"),
-                        NextColor     = nextep.Count != 0 ? (fadeend && show.Data.Get("airing", "False") == "False" ? "#50FFFFFF" : "White") : "#50FFFFFF",
+                        NameColor     = fadeend && !show.Airing ? "#50FFFFFF" : "White",
+                        TitleColor    = count != 0 ? "Red" : (lastep.Count != 0 ? (fadeend && !show.Airing ? "#50FFFFFF" : "White") : "#50FFFFFF"),
+                        NextColor     = nextep.Count != 0 ? (fadeend && !show.Airing ? "#50FFFFFF" : "White") : "#50FFFFFF",
                         NewEpisodes   = count,
                         Started       = lastep.Count != 0,
                         Group         = group,

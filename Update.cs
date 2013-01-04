@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Data.SQLite;
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
@@ -35,8 +34,8 @@
         /// <summary>
         /// Does the update.
         /// </summary>
-        public void Update()
-        {
+        public void Update() // TODO you know... the method body...
+        {/*
             // create transaction
             SQLiteTransaction tr;
             try
@@ -169,7 +168,7 @@
             MainWindow.Active.DataChanged();
 
             // fire event
-            UpdateDone.Fire(this);
+            UpdateDone.Fire(this);*/
         }
 
         /// <summary>

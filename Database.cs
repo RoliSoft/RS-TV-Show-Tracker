@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -77,7 +78,7 @@
 
             foreach (var dir in Directory.EnumerateDirectories(_dbPath))
             {
-                if (!Regex.IsMatch(Path.GetDirectoryName(dir), @"^\d+\-") || !File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
+                if (!Regex.IsMatch(Path.GetFileName(dir), @"^\d+\-") || !File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                 {
                     continue;
                 }
@@ -101,24 +102,6 @@
         }
 
         /// <summary>
-        /// Retrieves the key from the show data table.
-        /// </summary>
-        /// <param name="id">The id of the show.</param>
-        /// <param name="key">The key.</param>
-        /// <returns>Stored value or empty string.</returns>
-        public static string ShowData(int id, string key)
-        {
-            string value;
-
-            if (TVShows[id].Data.TryGetValue(key, out value))
-            {
-                return value;
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
         /// Stores the key and value into the SQL settings.
         /// </summary>
         /// <param name="key">The key.</param>
@@ -126,18 +109,6 @@
         public static void Setting(string key, string value)
         {
             // TODO
-        }
-
-        /// <summary>
-        /// Stores the key and value into the show data table.
-        /// </summary>
-        /// <param name="id">The id of the show.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        public static void ShowData(int id, string key, string value)
-        {
-            // TODO commit
-            TVShows[id].Data[key] = value;
         }
 
         /// <summary>
@@ -203,9 +174,8 @@
         /// <returns>Foreign title or <c>null</c>.</returns>
         public static string GetForeignTitle(int id, string language, bool askRemote = false, Action<string> statusCallback = null)
         {
-            var title = ShowData(id, "title." + language);
-
-            if (!string.IsNullOrWhiteSpace(title))
+            string title;
+            if (TVShows[id].Data.TryGetValue("title." + language, out title))
             {
                 if (Regex.IsMatch(title, @"^!\d{10}$"))
                 {
@@ -238,13 +208,13 @@
             {
                 if (api.Result == "!")
                 {
-                    ShowData(id, "title." + language, "!" + DateTime.Now.ToUnixTimestamp());
-
+                    TVShows[id].Data["title." + language] = "!" + DateTime.Now.ToUnixTimestamp();
+                    TVShows[id].SaveData();
                     return null;
                 }
 
-                ShowData(id, "title." + language, api.Result);
-
+                TVShows[id].Data["title." + language] = api.Result;
+                TVShows[id].SaveData();
                 return api.Result;
             }
 
@@ -261,7 +231,8 @@
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
-                    ShowData(id, "title." + language, search);
+                    TVShows[id].Data["title." + language] = search;
+                    TVShows[id].SaveData();
 
                     new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Name, search, language)).Start();
 
@@ -269,7 +240,8 @@
                 }
             }
 
-            ShowData(id, "title." + language, "!" + DateTime.Now.ToUnixTimestamp());
+            TVShows[id].Data["title." + language] = "!" + DateTime.Now.ToUnixTimestamp();
+            TVShows[id].SaveData();
 
             new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Name, "!", language)).Start();
 

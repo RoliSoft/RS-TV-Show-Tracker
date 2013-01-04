@@ -174,7 +174,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void StandardRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Database.ShowData(_id, "notation", "standard");
+            Database.TVShows[_id].Data["notation"] = "standard";
         }
 
         /// <summary>
@@ -184,7 +184,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DateRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Database.ShowData(_id, "notation", "airdate");
+            Database.TVShows[_id].Data["notation"] = "airdate";
         }
 
         /// <summary>

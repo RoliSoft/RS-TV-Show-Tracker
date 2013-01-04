@@ -408,58 +408,50 @@
             }
 
             showGeneralSub.Text = string.Empty;
-            string genre;
-            if ((genre = Database.ShowData(id, "genre")) != string.Empty)
+            if (!string.IsNullOrWhiteSpace(show.Genre))
             {
-                showGeneralSub.Text = genre + " show; ";
+                showGeneralSub.Text = show.Genre + " show; ";
             }
 
-            string runtime;
-            if ((runtime = Database.ShowData(id, "runtime")) != string.Empty)
+            if (show.Runtime > 0)
             {
-                showGeneralSub.Text += runtime + " minutes";
+                showGeneralSub.Text += show.Runtime + " minutes";
             }
 
             var airs = string.Empty;
-            string airday;
-            if ((airday = Database.ShowData(id, "airday")) != string.Empty)
+            if (!string.IsNullOrWhiteSpace(show.AirDay))
             {
-                airs += " " + airday;
+                airs += " " + show.AirDay;
+            }
+            if (!string.IsNullOrWhiteSpace(show.AirTime))
+            {
+                airs += " at " + show.AirTime;
+            }
+            if (!string.IsNullOrWhiteSpace(show.Network))
+            {
+                airs += " on " + show.Network;
             }
 
-            string airtime;
-            if ((airtime = Database.ShowData(id, "airtime")) != string.Empty)
-            {
-                airs += " at " + airtime;
-            }
-
-            string network;
-            if ((network = Database.ShowData(id, "network")) != string.Empty)
-            {
-                airs += " on " + network;
-            }
-
-            if ((airday + airtime + network) != string.Empty)
+            if (airs != string.Empty)
             {
                 showGeneralSub.Text += Environment.NewLine + "Airs" + airs;
             }
 
-            var guide = Updater.CreateGuide(Database.ShowData(id, "grabber"));
+            var guide = Updater.CreateGuide(show.Source);
 
             showGeneralSub.Text        += Environment.NewLine + "Episode listing provided by " + guide.Name;
             showGeneralGuideIcon.Source = new BitmapImage(new Uri(guide.Icon));
 
-            _activeShowUrl = Database.ShowData(id, "url");
+            _activeShowUrl = show.URL;
             if (string.IsNullOrWhiteSpace(_activeShowUrl))
             {
                 _activeShowUrl = guide.Site;
             }
 
             showGeneralDescr.Text = string.Empty;
-            string descr;
-            if ((descr = Database.ShowData(id, "descr")) != string.Empty)
+            if (!string.IsNullOrWhiteSpace(show.Description))
             {
-                showGeneralDescr.Text = descr;
+                showGeneralDescr.Text = show.Description;
             }
 
             try
@@ -501,7 +493,6 @@
             // fill up episode list
 
             var episodes = show.Episodes.OrderByDescending(ep => ep.ID);
-            var icon     = Updater.CreateGuide(show.Data.Get("grabber", "TVRage")).Icon;
 
             GuideListViewItemCollection.RaiseListChangedEvents = false;
 
@@ -520,7 +511,7 @@
                         Summary     = episode.Summary,
                         Picture     = episode.Picture,
                         URL         = episode.URL,
-                        GrabberIcon = icon
+                        GrabberIcon = guide.Icon
                     });
             }
 

@@ -141,40 +141,33 @@
         /// Loads an object from the stream.
         /// </summary>
         /// <param name="show">The show associated with the episode.</param>
-        /// <param name="list">The source stream for episode listing.</param>
-        /// <param name="desc">The source stream for descriptions.</param>
+        /// <param name="inbr">The source reader for episode listing.</param>
         /// <returns>
         /// Deserialized object.
         /// </returns>
-        public static Episode Load(TVShow show, Stream list, Stream desc)
+        internal static Episode Load(TVShow show, BinaryReader inbr)
         {
             var ep = new Episode();
 
-            using (var br = new BinaryReader(list))
+            ep.Show   = show;
+            ep.Season = inbr.ReadByte();
+            ep.Number = inbr.ReadByte();
+            ep.ID     = ep.Number + (ep.Season * 1000) + (ep.Show.ID * 1000 * 1000);
+
+            if (ep.Number == 255)
             {
-                ep.Show   = show;
-                ep.Season = br.ReadByte();
-                ep.Number = br.ReadByte();
-                ep.ID     = ep.Number + (ep.Season * 1000) + (ep.Show.ID * 1000 * 1000);
-
-                if (ep.Number == 255)
-                {
-                    ep.Number += br.ReadByte();
-                }
-
-                ep.Airdate = ((double)br.ReadUInt32()).GetUnixTimestamp();
-                ep.Title   = br.ReadString();
-                ep._pos    = br.Read7BitEncodedInt();
+                ep.Number += inbr.ReadByte();
             }
 
-            desc.Position = ep._pos;
+            ep.Airdate = ((double)inbr.ReadUInt32()).GetUnixTimestamp();
+            ep.Title   = inbr.ReadString();
+            ep._pos    = inbr.Read7BitEncodedInt();
 
-            using (var br = new BinaryReader(desc))
-            {
-                ep.URL     = br.ReadString();
-                ep.Picture = br.ReadString();
-                ep.Summary = br.ReadString();
-            }
+            /*debr.BaseStream.Seek(ep._pos, SeekOrigin.Begin);
+
+            ep.URL     = debr.ReadString();
+            ep.Picture = debr.ReadString();
+            ep.Summary = debr.ReadString();*/
 
             return ep;
         }

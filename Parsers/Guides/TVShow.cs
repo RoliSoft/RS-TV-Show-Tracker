@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     /// <summary>
@@ -38,7 +39,11 @@
             set
             {
                 _rowId = value;
-                Data["rowid"] = value.ToString();
+
+                if (Data != null)
+                {
+                    Data["rowid"] = value.ToString();
+                }
             }
         }
 
@@ -52,7 +57,11 @@
             set
             {
                 _title = value;
-                Data["title"] = value;
+
+                if (Data != null)
+                {
+                    Data["title"] = value;
+                }
             }
         }
 
@@ -260,9 +269,9 @@
                 {
                     bw.Write((byte)1);
                     bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                    bw.Write(Title);
                     bw.Write(Source);
                     bw.Write(SourceID);
-                    bw.Write(Title);
                     bw.Write(Description);
                     bw.Write(Cover);
                     bw.Write(Airing);
@@ -333,29 +342,50 @@
             using (var conf = File.OpenRead(Path.Combine(dir, "conf")))
             using (var seen = File.OpenRead(Path.Combine(dir, "seen")))
             using (var desc = File.OpenRead(Path.Combine(dir, "desc")))
+            using (var inbr = new BinaryReader(info))
+            using (var cobr = new BinaryReader(conf))
+            using (var sebr = new BinaryReader(seen))
+            using (var debr = new BinaryReader(desc))
             {
                 int epnr;
 
-                using (var br = new BinaryReader(info))
+                var sver = inbr.ReadByte();
+                var supd = inbr.ReadUInt32();
+
+                show.Title       = inbr.ReadString();
+                show.Source      = inbr.ReadString();
+                show.SourceID    = inbr.ReadString();
+                show.Description = inbr.ReadString();
+                show.Cover       = inbr.ReadString();
+                show.Airing      = inbr.ReadBoolean();
+                show.AirTime     = inbr.ReadString();
+                show.AirDay      = inbr.ReadString();
+                show.Network     = inbr.ReadString();
+                show.Runtime     = inbr.ReadByte();
+                show.TimeZone    = inbr.ReadString();
+                show.Language    = inbr.ReadString();
+                show.URL         = inbr.ReadString();
+
+                epnr = inbr.ReadUInt16();
+
+                var dver = cobr.ReadByte();
+                var dupd = cobr.ReadUInt32();
+                var dcnt = cobr.ReadUInt16();
+
+                show.Data = new Dictionary<string, string>();
+
+                for (var i = 0; i < dcnt; i++)
                 {
-                    var sver = br.ReadByte();
-                    var supd = br.ReadUInt32();
+                    show.Data[cobr.ReadString()] = cobr.ReadString();
+                }
 
-                    show.Source      = br.ReadString();
-                    show.SourceID    = br.ReadString();
-                    show.Title       = br.ReadString();
-                    show.Description = br.ReadString();
-                    show.Cover       = br.ReadString();
-                    show.Airing      = br.ReadBoolean();
-                    show.AirTime     = br.ReadString();
-                    show.AirDay      = br.ReadString();
-                    show.Network     = br.ReadString();
-                    show.Runtime     = br.ReadByte();
-                    show.TimeZone    = br.ReadString();
-                    show.Language    = br.ReadString();
-                    show.URL         = br.ReadString();
+                show.ID     = int.Parse(show.Data["showid"]);
+                show._rowId = int.Parse(show.Data["rowid"]);
 
-                    epnr = br.ReadUInt16();
+                string ctitle;
+                if (show.Data.TryGetValue("title", out ctitle))
+                {
+                    show._title = ctitle;
                 }
 
                 show.Episodes    = new List<Episode>(epnr);
@@ -363,47 +393,26 @@
 
                 for (var i = 0; i < epnr; i++)
                 {
-                    var ep = Episode.Load(show, info, desc);
+                    var ep = Episode.Load(show, inbr);
                     show.Episodes.Add(ep);
                     show.EpisodeByID[ep.Season * 1000 + ep.Number] = ep;
                 }
 
-                using (var br = new BinaryReader(conf))
+                var tver = sebr.ReadByte();
+                var tupd = sebr.ReadUInt32();
+                var tcnt = sebr.ReadUInt16();
+
+                for (var i = 0; i < tcnt; i++)
                 {
-                    var dver = br.ReadByte();
-                    var dupd = br.ReadUInt32();
-                    var dcnt = br.ReadUInt16();
+                    var sn = sebr.ReadByte();
+                    var en = sebr.ReadByte();
 
-                    show.Data = new Dictionary<string, string>();
-
-                    for (var i = 0; i < dcnt; i++)
+                    if (en == 255)
                     {
-                        show.Data[br.ReadString()] = br.ReadString();
+                        en += sebr.ReadByte();
                     }
-                }
 
-                show.ID = int.Parse(show.Data["showid"]);
-                show._rowId = int.Parse(show.Data["rowid"]);
-                show.Data.TryGetValue("title", out show._title);
-
-                using (var br = new BinaryReader(seen))
-                {
-                    var tver = br.ReadByte();
-                    var tupd = br.ReadUInt32();
-                    var tcnt = br.ReadUInt16();
-
-                    for (var i = 0; i < tcnt; i++)
-                    {
-                        var sn = br.ReadByte();
-                        var en = br.ReadByte();
-
-                        if (en == 255)
-                        {
-                            en += br.ReadByte();
-                        }
-
-                        show.EpisodeByID[sn * 1000 + en].Watched = true;
-                    }
+                    try { show.EpisodeByID[sn * 1000 + en].Watched = true; } catch (KeyNotFoundException) { }
                 }
             }
 

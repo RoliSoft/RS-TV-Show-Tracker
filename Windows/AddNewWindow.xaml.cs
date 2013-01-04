@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SQLite;
     using System.Linq;
     using System.Threading;
     using System.Windows;
@@ -240,7 +239,7 @@
         /// </summary>
         /// <param name="show">The show.</param>
         private void AddShow(ShowID show)
-        {
+        {/*
             working.Content           = "Downloading guide...";
             subworking.Content        = show.Title;
             selectTabItem.Visibility  = Visibility.Collapsed;
@@ -440,7 +439,7 @@
                             }
                         }));
                 });
-            _worker.Start();
+            _worker.Start();*/
         }
 
         /// <summary>
@@ -455,11 +454,11 @@
             var season  = ((string)markUntil.SelectedValue).Substring(1, 2).ToInteger();
             var episode = ((string)markUntil.SelectedValue).Substring(4, 2).ToInteger();
 
-            Database.Execute("delete from tracking where showid = ?", _dbid);
+            /*Database.Execute("delete from tracking where showid = ?", _dbid);
             Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and episodeid <= ?", _dbid, episode + (season * 1000) + (_dbid * 100 * 1000));
 
             Database.CopyToMemory();
-            MainWindow.Active.DataChanged();
+            MainWindow.Active.DataChanged();*/
         }
 
         /// <summary>
