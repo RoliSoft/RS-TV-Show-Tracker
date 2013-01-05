@@ -188,6 +188,8 @@
     <Compile Include="Parsers\Downloads\Engines\HTTP\DDLValley.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\TVRelease.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\Serienjunkies.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\Torrentz.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Torrent\KickassTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TorrentDay.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\nzbX.cs" />
@@ -230,6 +232,7 @@
     <Compile Include="Parsers\OnlineVideos\Engines\Serienjunkies.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\SubtitleSource.cs" />
     <Compile Include="Parsers\Subtitles\Engines\LegendasTV.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Seeks.cs" />
     <Compile Include="Parsers\WebSearch\Engines\StartPage.cs" />

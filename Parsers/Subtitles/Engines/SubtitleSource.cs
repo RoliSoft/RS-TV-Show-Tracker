@@ -12,10 +12,10 @@
     using ProtoBuf;
 
     /// <summary>
-    /// Provides support for scraping Addic7ed.
+    /// Provides support for scraping SubtitleSource.
     /// </summary>
     [TestFixture]
-    public class Addic7ed : SubtitleSearchEngine
+    public class SubtitleSource : SubtitleSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -25,7 +25,7 @@
         {
             get
             {
-                return "Addic7ed";
+                return "SubtitleSource";
             }
         }
 
@@ -37,7 +37,7 @@
         {
             get
             {
-                return "http://www.addic7ed.com/";
+                return "http://www.subtitlesource.com/";
             }
         }
 
@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-11 2:08 AM");
+                return Utils.DateTimeToVersion("2012-01-05 7:00 PM");
             }
         }
 
@@ -69,7 +69,7 @@
         /// Gets or sets the show IDs on the site.
         /// </summary>
         /// <value>The show IDs.</value>
-        public static Dictionary<int, string> ShowIDs { get; set; }
+        public static Dictionary<string, string> ShowIDs { get; set; }
 
         /// <summary>
         /// Searches for subtitles on the service.
@@ -82,40 +82,37 @@
             var ep = ShowNames.Parser.ExtractEpisode(query);
             var id = GetIDForShow(pr[0]);
 
-            if (!id.HasValue || ep == null)
+            if (id == null || ep == null)
             {
                 yield break;
             }
 
-            var iurl = Site + "re_episode.php?ep=" + id + "-" + ep.Season + "x" + ep.Episode;
-            var html = Utils.GetHTML(iurl, response: r => iurl = r.ResponseUri.ToString());
-            var subs = html.DocumentNode.SelectNodes("//a[starts-with(@href,'/original/')] | //a[starts-with(@href,'/updated/')]");
+            var html = Utils.GetHTML(Site + id + "-season-" + ep.Season + "-episode-" + ep.Episode + "-subtitles.html");
+            var subs = html.DocumentNode.SelectNodes("//table[@class='mainTable']/tbody/tr/td[@class='noColor']/a");
 
             if (subs == null)
             {
                 yield break;
             }
 
-            var head = Regex.Split(html.DocumentNode.SelectSingleNode("//div[@id='container']//tr[1]/td[1]/div/span").InnerText.Trim(), @" \- ");
+            var head1 = Regex.Match(html.DocumentNode.SelectSingleNode("//div[@id='contentBox']/h1").InnerText.Trim(), @"\s*(.*?)\sSeason\s\d{1,3}[^\-]+\-\s(.{6})");
+            var head = head1.Groups[1].Value + " " + head1.Groups[2].Value;
 
             foreach (var node in subs)
             {
-                if (Regex.IsMatch(node.GetTextValue("../.."), @"\d{1,3}(?:\.\d{1,2})?% Completed"))
-                {
-                    continue;
-                }
-
                 var sub = new Subtitle(this);
 
-                sub.Corrected   = node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null;
-                sub.HINotations = node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]") != null;
-                sub.Release     = head[0] + " " + head[1] + " - "
-                                + node.GetTextValue("../../../tr/td[contains(text(),'Version')]").Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
-                                + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
-                                + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty);
-                sub.Language    = Languages.Parse(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
-                sub.InfoURL     = iurl;
-                sub.FileURL     = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                var fid = Regex.Match(node.GetAttributeValue("href"), @"\-(\d+)\.html").Groups[1].Value;
+                var rip = node.GetTextValue("../../td[4]");
+                var rel = node.GetTextValue("../../td[5]");
+                var aut = node.GetTextValue("../../td[6]");
+
+                sub.Release     = head
+                                + (!string.IsNullOrWhiteSpace(rel) ? " - " + rel.Trim() : !string.IsNullOrWhiteSpace(rip) ? " - " + rip.Trim() : string.Empty)
+                                + (!string.IsNullOrWhiteSpace(aut) ? " - " + aut.Trim() : string.Empty);
+                sub.Language    = Languages.Parse(node.InnerText.Trim());
+                sub.InfoURL     = Site.TrimEnd('/') + node.GetAttributeValue("href");
+                sub.FileURL     = Site + "files/subtitles/" + fid + "/subtitle.zip";
 
                 yield return sub;
             }
@@ -126,7 +123,7 @@
         /// </summary>
         public override void TestSearchShow()
         {
-            Assert.Inconclusive("Addic7ed only supports searching for specific episodes.");
+            Assert.Inconclusive("SubtitleSource only supports searching for specific episodes.");
         }
 
         /// <summary>
@@ -134,10 +131,10 @@
         /// </summary>
         public void GetIDs()
         {
-            var page = Utils.GetHTML(Site);
-            var opts = page.DocumentNode.SelectNodes("//select[@name='qsShow']/option[position()!=1]");
+            var page = Utils.GetHTML(Site + "tv-shows.html");
+            var opts = page.DocumentNode.SelectNodes("//table[@class='mainTable']/tbody/tr/td[@class='noColor']/a");
 
-            ShowIDs = new Dictionary<int, string>();
+            ShowIDs = new Dictionary<string, string>();
 
             if (opts == null)
             {
@@ -146,15 +143,15 @@
 
             foreach (var opt in opts)
             {
-                int id;
+                var idx = Regex.Match(opt.GetAttributeValue("href") ?? string.Empty, @"/(.*?)\-subtitles\.html");
 
-                if (int.TryParse(opt.GetAttributeValue("value"), out id))
+                if (idx.Success && !string.IsNullOrWhiteSpace(idx.Groups[1].Value))
                 {
-                    ShowIDs.Add(id, HtmlEntity.DeEntitize(opt.NextSibling.InnerText));
+                    ShowIDs.Add(idx.Groups[1].Value, HtmlEntity.DeEntitize(opt.InnerText.Trim()));
                 }
             }
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "Addic7ed-IDs.bin")))
+            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "SubtitleSource-IDs.bin")))
             {
                 Serializer.Serialize(file, ShowIDs);
             }
@@ -165,9 +162,9 @@
         /// </summary>
         /// <param name="name">The show name.</param>
         /// <returns>Corresponding ID.</returns>
-        public int? GetIDForShow(string name)
+        public string GetIDForShow(string name)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "Addic7ed-IDs.bin");
+            var fn = Path.Combine(Path.GetTempPath(), "SubtitleSource-IDs.bin");
 
             if (ShowIDs == null)
             {
@@ -175,7 +172,7 @@
                 {
                     using (var file = File.OpenRead(fn))
                     {
-                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
+                        ShowIDs = Serializer.Deserialize<Dictionary<string, string>>(file);
                     }
                 }
                 else
@@ -187,7 +184,7 @@
             if (ShowIDs != null)
             {
                 var id = SearchForID(name);
-                if (id.HasValue)
+                if (id != null)
                 {
                     return id;
                 }
@@ -201,7 +198,7 @@
                 if (ShowIDs != null)
                 {
                     var id = SearchForID(name);
-                    if (id.HasValue)
+                    if (id != null)
                     {
                         return id;
                     }
@@ -216,7 +213,7 @@
         /// </summary>
         /// <param name="name">The show name.</param>
         /// <returns>Corresponding ID.</returns>
-        private int? SearchForID(string name)
+        private string SearchForID(string name)
         {
             var regex = Database.GetReleaseName(name);
 

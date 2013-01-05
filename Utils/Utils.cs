@@ -31,6 +31,8 @@
 
     using Newtonsoft.Json;
 
+    using RoliSoft.TVShowTracker.ShowNames;
+
     /// <summary>
     /// Provides various little utility functions.
     /// </summary>
@@ -1189,7 +1191,7 @@
             else
             {
                 // replace & to "and"
-                title = Regex.Replace(title, @"\s&\s", " and ");
+                title = Regexes.Ampersand.Replace(title, "and");
 
                 // remove year and special characters
                 title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|[^a-z0-9\s])", string.Empty).Trim();
