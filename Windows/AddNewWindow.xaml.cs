@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Windows;
@@ -231,7 +232,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void AddButtonClick(object sender, RoutedEventArgs e)
         {
-            AddShow(_shows.Where(show => show.Title == (string)listBox.SelectedValue).First());
+            AddShow(_shows.First(show => show.Title == (string)listBox.SelectedValue));
         }
 
         /// <summary>
@@ -239,7 +240,7 @@
         /// </summary>
         /// <param name="show">The show.</param>
         private void AddShow(ShowID show)
-        {/*
+        {
             working.Content           = "Downloading guide...";
             subworking.Content        = show.Title;
             selectTabItem.Visibility  = Visibility.Collapsed;
@@ -293,7 +294,7 @@
                     }
 
                     // try to see if duplicate
-                    if (Database.GetShowID(tv.Title) != int.MinValue)
+                    if (Database.TVShows.Values.FirstOrDefault(x => x.Title == tv.Title) != null)
                     {
                         Dispatcher.Invoke((Action)(() =>
                             {
@@ -316,100 +317,53 @@
                         return;
                     }
 
-                    // create transaction
-                    SQLiteTransaction tr;
-                    try
+                    // increment each rowid
+                    foreach (var tvs in Database.TVShows.Values)
                     {
-                        tr = Database.Connection.BeginTransaction();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex is ThreadAbortException)
-                        {
-                            return;
-                        }
-
-                        Dispatcher.Invoke((Action)(() =>
-                        {
-                            workingTabItem.Visibility = Visibility.Collapsed;
-                            addTabItem.Visibility     = Visibility.Visible;
-                            tabControl.SelectedIndex  = 0;
-
-                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                        }));
-
-                        new TaskDialog
-                            {
-                                Icon                = TaskDialogStandardIcon.Error,
-                                Caption             = "Couldn't create transaction",
-                                InstructionText     = tv.Title,
-                                Text                = "Couldn't create transaction on the database to insert the episodes. The TV show is added to the list, however, there aren't any episodes associated to it. Run an update to add the episodes.",
-                                DetailsExpandedText = ex.Message,
-                                Cancelable          = true
-                            }.Show();
-
-                        return;
+                        tvs.RowID++;
+                        tvs.SaveData();
                     }
 
-                    // insert into tvshows and let the autoincrementing field assign a showid
-                    Database.Execute("update tvshows set rowid = rowid + 1");
-                    Database.Execute("insert into tvshows values (1, null, ?, ?)", tv.Title, show.Title != tv.Title ? ShowNames.Parser.GenerateTitleRegex(show.Title).ToString() : string.Empty);
+                    // generate showid
+                    tv.RowID = 0;
+                    _dbid = tv.ID = Database.TVShows.Values.Max(x => x.ID) + 1;
+                    tv.Data = new Dictionary<string, string>();
+                    tv.Directory = Path.Combine(Database.DataPath, Utils.CreateSlug(tv.Title, false));
 
-                    // then get that showid
-                    _dbid = Database.Query("select showid from tvshows where name = ? limit 1", tv.Title)[0]["showid"].ToInteger();
+                    if (Directory.Exists(tv.Directory))
+                    {
+                        tv.Directory += "-" + tv.Source.ToLower();
+                    }
 
-                    // insert guide fields
-                    var gname = _guide.GetType().Name;
+                    if (Directory.Exists(tv.Directory))
+                    {
+                        tv.Directory += "-" + Utils.Rand.Next();
+                    }
 
-                    Database.ShowData(_dbid, "grabber",       gname);
-                    Database.ShowData(_dbid, gname + ".id",   show.ID);
-                    Database.ShowData(_dbid, gname + ".lang", lang);
+                    Directory.CreateDirectory(tv.Directory);
 
-                    // insert showdata fields
-                    Database.ShowData(_dbid, "genre",    tv.Genre);
-                    Database.ShowData(_dbid, "descr",    tv.Description);
-                    Database.ShowData(_dbid, "cover",    tv.Cover);
-                    Database.ShowData(_dbid, "airing",   tv.Airing.ToString());
-                    Database.ShowData(_dbid, "airtime",  tv.AirTime);
-                    Database.ShowData(_dbid, "airday",   tv.AirDay);
-                    Database.ShowData(_dbid, "network",  tv.Network);
-                    Database.ShowData(_dbid, "timezone", tv.TimeZone);
-                    Database.ShowData(_dbid, "runtime",  tv.Runtime.ToString());
-                    Database.ShowData(_dbid, "url",      tv.URL);
-
-                    // insert episodes
+                    // apply timezone corrections
                     foreach (var ep in tv.Episodes)
                     {
-                        try
+                        if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
                         {
-                            Database.ExecuteOnTransaction(tr, "insert into episodes values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                                          ep.Number + (ep.Season * 1000) + (_dbid * 100 * 1000),
-                                                          _dbid,
-                                                          ep.Season,
-                                                          ep.Number,
-                                                          tv.AirTime == String.Empty || ep.Airdate == Utils.UnixEpoch
-                                                            ? ep.Airdate.ToUnixTimestamp()
-                                                            : DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone).ToUnixTimestamp(),
-                                                          ep.Title,
-                                                          ep.Summary,
-                                                          ep.Picture,
-                                                          ep.URL);
-                        }
-                        catch
-                        {
-                            continue;
+                            ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
                         }
                     }
 
-                    // commit the changes
-                    tr.Commit();
+                    // save
+                    tv.Save();
+                    tv.SaveTracking();
 
                     // fire data change event
-                    Database.CopyToMemory();
+                    Database.LoadDatabase();
                     MainWindow.Active.DataChanged();
 
                     // asynchronously update lab.rolisoft.net's cache
-                    Updater.UpdateRemoteCache(new Tuple<string, string>(_guide.GetType().Name, show.ID), tv);
+                    if (tv.Language == "en")
+                    {
+                        Updater.UpdateRemoteCache(tv);
+                    }
                     
                     // show finish page
                     Dispatcher.Invoke((Action)(() =>
@@ -421,7 +375,7 @@
 
                             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-                            var shows = Database.Query("select season, episode, name, airdate from episodes where showid = ? order by (season * 1000 + episode) desc", _dbid);
+                            var shows = Database.TVShows[_dbid].Episodes.OrderByDescending(ep => ep.ID);
 
                             markUntil.Items.Clear();
 
@@ -429,9 +383,9 @@
 
                             foreach (var item in shows)
                             {
-                                markUntil.Items.Add("S{0:00}E{1:00} - {2}".FormatWith(item["season"].ToInteger(), item["episode"].ToInteger(), item["name"]));
+                                markUntil.Items.Add("S{0:00}E{1:00} - {2}".FormatWith(item.Season, item.Number, item.Title));
 
-                                if (!gotLast && item["airdate"].ToInteger() < DateTime.Now.ToUnixTimestamp() && item["airdate"] != "0")
+                                if (!gotLast && item.Airdate < DateTime.Now && item.Airdate != Utils.UnixEpoch)
                                 {
                                     gotLast = true;
                                     markUntil.Items[markUntil.Items.Count - 1] += " [last aired episode]";
@@ -439,7 +393,7 @@
                             }
                         }));
                 });
-            _worker.Start();*/
+            _worker.Start();
         }
 
         /// <summary>
@@ -454,11 +408,15 @@
             var season  = ((string)markUntil.SelectedValue).Substring(1, 2).ToInteger();
             var episode = ((string)markUntil.SelectedValue).Substring(4, 2).ToInteger();
 
-            /*Database.Execute("delete from tracking where showid = ?", _dbid);
-            Database.Execute("insert into tracking select showid, episodeid from episodes where showid = ? and episodeid <= ?", _dbid, episode + (season * 1000) + (_dbid * 100 * 1000));
+            Database.TVShows[_dbid].Episodes.ForEach(ep => ep.Watched = false);
 
-            Database.CopyToMemory();
-            MainWindow.Active.DataChanged();*/
+            foreach (var ep in Database.TVShows[_dbid].Episodes.Where(ep => ep.ID <= episode + (season * 1000) + (_dbid * 1000 * 1000)))
+            {
+                ep.Watched = true;
+            }
+
+            Database.TVShows[_dbid].SaveTracking();
+            MainWindow.Active.DataChanged();
         }
 
         /// <summary>

@@ -10,6 +10,7 @@
     using System.Linq;
     using System.Net;
     using System.Net.Security;
+    using System.Net.Sockets;
     using System.Runtime.InteropServices;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Cryptography;
@@ -189,6 +190,7 @@
             Rand       = new Random();
             CryptoRand = new RNGCryptoServiceProvider();
 
+            WebRequest.DefaultWebProxy = null;
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.UseNagleAlgorithm = false;
             ServicePointManager.DefaultConnectionLimit = 100;
@@ -481,6 +483,10 @@
 
                 req.Timeout += 20000;
             }
+            else
+            {
+                req.Proxy = null;
+            }
             
             req.Timeout   = timeout;
             req.UserAgent = userAgent ?? "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
@@ -595,6 +601,40 @@
                 }
 
                 return Encoding.GetEncoding(eenc).GetString(bs);
+            }
+        }
+
+        /// <summary>
+        /// Downloads the specified URL into a string using low-level sockets.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns>
+        /// Remote page's content.
+        /// </returns>
+        public static string GetFastURL(string url, int timeout = 10000)
+        {
+            var uri = new Uri(url);
+            var req = Encoding.UTF8.GetBytes("GET " + uri.PathAndQuery + " HTTP/1.1\r\nHost: " + uri.DnsSafeHost + (!uri.IsDefaultPort ? ":" + uri.Port : string.Empty) + "\r\nConnection: close\r\nUser-Agent: Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00\r\n\r\n");
+            var tcp = new TcpClient();
+
+            tcp.NoDelay = true;
+
+            tcp.Connect(uri.DnsSafeHost, uri.Port);
+
+            using (var st = tcp.GetStream())
+            using (var sr = new StreamReader(st))
+            {
+                st.Write(req, 0, req.Length);
+
+                var dnl = false;
+                while (!dnl)
+                {
+                    dnl = sr.ReadLine() == string.Empty;
+                }
+
+                var str = sr.ReadToEnd();
+                return str;
             }
         }
 
@@ -1118,7 +1158,7 @@
 
             foreach (Match m in mc)
             {
-                dic[m.Groups["key"].Value] = Utils.DecodeURL(m.Groups["value"].Value);
+                dic[m.Groups["key"].Value] = DecodeURL(m.Groups["value"].Value);
             }
 
             return dic;
@@ -1148,6 +1188,9 @@
             }
             else
             {
+                // replace & to "and"
+                title = Regex.Replace(title, @"\s&\s", " and ");
+
                 // remove year and special characters
                 title = Regex.Replace(title.ToLower(), @"(\s\(20\d{2}\)|[^a-z0-9\s])", string.Empty).Trim();
 

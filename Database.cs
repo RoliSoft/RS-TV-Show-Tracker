@@ -10,8 +10,6 @@
     using Parsers.ForeignTitles;
     using Parsers.Guides;
 
-    using VistaControls.TaskDialog;
-
     /// <summary>
     /// Provides access to the default database.
     /// </summary>
@@ -45,7 +43,13 @@
         /// <value>The data.</value>
         public static Dictionary<string, string> Data { get; set; }
 
-        private static string _dbPath = Path.Combine(Signature.FullPath, "db");
+        /// <summary>
+        /// Gets or sets the database directory.
+        /// </summary>
+        /// <value>
+        /// The database directory.
+        /// </value>
+        public static readonly string DataPath = Path.Combine(Signature.FullPath, "db");
 
         /// <summary>
         /// Initializes the <see cref="Database"/> class.
@@ -57,9 +61,9 @@
                 return;
             }
 
-            if (!Directory.Exists(_dbPath))
+            if (!Directory.Exists(DataPath))
             {
-                Directory.CreateDirectory(_dbPath);
+                Directory.CreateDirectory(DataPath);
             }
 
             LoadDatabase();
@@ -75,7 +79,7 @@
             TVShows   = new Dictionary<int, TVShow>();
             Episodes  = new List<Episode>();
 
-            foreach (var dir in Directory.EnumerateDirectories(_dbPath))
+            foreach (var dir in Directory.EnumerateDirectories(DataPath))
             {
                 if (!File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                 {
@@ -105,7 +109,7 @@
         {
             if (Data == null)
             {
-                using (var fs = File.OpenRead(Path.Combine(_dbPath, "conf")))
+                using (var fs = File.OpenRead(Path.Combine(DataPath, "conf")))
                 using (var br = new BinaryReader(fs))
                 {
                     var dver = br.ReadByte();
@@ -139,7 +143,7 @@
         {
             Data[key] = value;
 
-            using (var fs = File.OpenWrite(Path.Combine(_dbPath, "conf")))
+            using (var fs = File.OpenWrite(Path.Combine(DataPath, "conf")))
             using (var bw = new BinaryWriter(fs))
             {
                 bw.Write((byte)1);
