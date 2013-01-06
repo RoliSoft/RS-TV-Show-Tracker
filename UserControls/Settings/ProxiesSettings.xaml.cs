@@ -12,7 +12,7 @@
     using Parsers.WebSearch;
     using Parsers.WebSearch.Engines;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for ProxiesSettings.xaml
@@ -187,33 +187,56 @@
                 }
                 catch { }
 
-                new Thread(() => new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.SecurityWarning,
-                        Title       = sel.Name,
-                        Instruction = "Potentially dangerous",
-                        Content     = "This proxy points to a local loopback address on port " + uri.Port + ".\r\nYour requests will go to " + app + ", which will most likely forward them to an external server."
-                    }.Show()).Start();
+                        MainIcon        = VistaTaskDialogIcon.Warning,
+                        Title           = sel.Name,
+                        MainInstruction = "Potentially dangerous",
+                        Content         = "This proxy points to a local loopback address on port " + uri.Port + ".\r\nYour requests will go to " + app + ", which will most likely forward them to an external server.",
+                        CustomButtons   = new[] { "OK" }
+                    });
                 return;
             }
+            
+            var showmbp = false;
+            var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
+                {
+                    Title                   = sel.Name,
+                    MainInstruction         = "Testing proxy",
+                    Content                 = "Testing whether " + uri.Host + " is a known proxy...",
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowMarqueeProgressBar  = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
+                        {
+                            if (!showmbp)
+                            {
+                                dialog.SetProgressBarMarquee(true, 0);
+                                showmbp = true;
+                            }
 
-            var td  = new TaskDialog
-                {
-                    Title           = sel.Name,
-                    Instruction     = "Testing proxy",
-                    Content         = "Testing whether " + uri.Host + " is a known proxy...",
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    ShowProgressBar = true
-                };
-            td.ButtonClick += (s, v) =>
-                {
-                    if (!done)
-                    {
-                        try { action.Abort(); } catch { }
-                    }
-                };
-            td.SetMarqueeProgressBar(true);
-            new Thread(() => td.Show()).Start();
+                            if (args.ButtonId != 0)
+                            {
+                                if (!done)
+                                {
+                                    try { action.Abort(); } catch { }
+                                }
+
+                                return false;
+                            }
+
+                            if (done)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
+            mthd.SetApartmentState(ApartmentState.STA);
+            mthd.Start();
 
             action = new Thread(() =>
                 {
@@ -230,33 +253,30 @@
 
                         done = true;
 
-                        if (td.IsShowing)
-                        {
-                            td.SimulateButtonClick(-1);
-                        }
-
                         if (res.Count == 0)
                         {
-                            new TaskDialog
+                            TaskDialog.Show(new TaskDialogOptions
                                 {
-                                    CommonIcon  = TaskDialogIcon.SecuritySuccess,
-                                    Title       = sel.Name,
-                                    Instruction = "Not a known public proxy",
-                                    Content     = uri.Host + " does not seem to be a known public proxy." + Environment.NewLine + Environment.NewLine +
-                                                  "If your goal is to trick proxy detectors, you're probably safe for now. However, you shouldn't use public proxies if you don't want to potentially compromise your account."
-                                }.Show();
+                                    MainIcon        = VistaTaskDialogIcon.Information,
+                                    Title           = sel.Name,
+                                    MainInstruction = "Not a known public proxy",
+                                    Content         = uri.Host + " does not seem to be a known public proxy." + Environment.NewLine + Environment.NewLine +
+                                                      "If your goal is to trick proxy detectors, you're probably safe for now. However, you shouldn't use public proxies if you don't want to potentially compromise your account.",
+                                    CustomButtons   = new[] { "OK" }
+                                });
                             return;
                         }
                         else
                         {
-                            new TaskDialog
+                            TaskDialog.Show(new TaskDialogOptions
                                 {
-                                    CommonIcon  = TaskDialogIcon.SecurityError,
-                                    Title       = sel.Name,
-                                    Instruction = "Known public proxy",
-                                    Content     = uri.Host + " is a known public proxy according to " + new Uri(res[0].URL).Host.Replace("www.", string.Empty) + Environment.NewLine + Environment.NewLine +
-                                                  "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using a public proxy is not such a good idea, because you could compromise your account as public proxy operators are known to be evil sometimes."
-                                }.Show();
+                                    MainIcon        = VistaTaskDialogIcon.Error,
+                                    Title           = sel.Name,
+                                    MainInstruction = "Known public proxy",
+                                    Content         = uri.Host + " is a known public proxy according to " + new Uri(res[0].URL).Host.Replace("www.", string.Empty) + Environment.NewLine + Environment.NewLine +
+                                                      "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using a public proxy is not such a good idea, because you could compromise your account as public proxy operators are known to be evil sometimes.",
+                                    CustomButtons   = new[] { "OK" }
+                                });
                             return;
                         }
                     }
@@ -265,20 +285,15 @@
                     {
                         done = true;
 
-                        if (td.IsShowing)
-                        {
-                            td.SimulateButtonClick(-1);
-                        }
-
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon          = TaskDialogIcon.Stop,
-                                Title               = sel.Name,
-                                Instruction         = "Connection error",
-                                Content             = "An error occured while checking the proxy.",
-                                ExpandedControlText = "Show exception message",
-                                ExpandedInformation = ex.Message
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Error,
+                                Title           = sel.Name,
+                                MainInstruction = "Connection error",
+                                Content         = "An error occurred while checking the proxy.",
+                                ExpandedInfo    = ex.Message,
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                 });
             action.Start();
@@ -298,24 +313,47 @@
 
             var sel = (ProxiesListViewItem)proxiesListView.SelectedItem;
             var uri = new Uri(sel.Address.Replace("$domain.", string.Empty));
-            var td  = new TaskDialog
-                {
-                    Title           = sel.Name,
-                    Instruction     = "Testing proxy",
-                    Content         = "Testing connection through " + uri.Host + ":" + uri.Port + "...",
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    ShowProgressBar = true
-                };
-            td.ButtonClick += (s, v) =>
-                {
-                    if (!done)
-                    {
-                        try { action.Abort(); } catch { }
-                    }
-                };
-            td.SetMarqueeProgressBar(true);
-            new Thread(() => td.Show()).Start();
 
+            var showmbp = false;
+            var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
+                {
+                    Title                   = sel.Name,
+                    MainInstruction         = "Testing proxy",
+                    Content                 = "Testing connection through " + uri.Host + ":" + uri.Port + "...",
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowMarqueeProgressBar  = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
+                        {
+                            if (!showmbp)
+                            {
+                                dialog.SetProgressBarMarquee(true, 0);
+                                showmbp = true;
+                            }
+
+                            if (args.ButtonId != 0)
+                            {
+                                if (!done)
+                                {
+                                    try { action.Abort(); } catch { }
+                                }
+
+                                return false;
+                            }
+
+                            if (done)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
+            mthd.SetApartmentState(ApartmentState.STA);
+            mthd.Start();
+            
             action = new Thread(() =>
                 {
                     var s = Stopwatch.StartNew();
@@ -327,11 +365,6 @@
 
                         done = true;
 
-                        if (td.IsShowing)
-                        {
-                            td.SimulateButtonClick(-1);
-                        }
-
                         var tor  = b.DocumentNode.SelectSingleNode("//img[@class='tor']");
                         var ip   = b.DocumentNode.GetTextValue("//span[@class='ip'][1]");
                         var host = b.DocumentNode.GetTextValue("//span[@class='host'][1]");
@@ -339,55 +372,53 @@
 
                         if (tor != null)
                         {
-                            new TaskDialog
+                            TaskDialog.Show(new TaskDialogOptions
                                 {
-                                    CommonIcon  = TaskDialogIcon.SecurityError,
-                                    Title       = sel.Name,
-                                    Instruction = "TOR detected",
-                                    Content     = ip + " is a TOR exit node." + Environment.NewLine + Environment.NewLine +
-                                                  "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using TOR is not such a good idea, because you could compromise your account as TOR exit node operators are known to be evil sometimes."
-                                }.Show();
+                                    MainIcon        = VistaTaskDialogIcon.Error,
+                                    Title           = sel.Name,
+                                    MainInstruction = "TOR detected",
+                                    Content         = ip + " is a TOR exit node." + Environment.NewLine + Environment.NewLine +
+                                                      "If the site you're trying to access through this proxy forbids proxy usage, they're most likely use a detection mechanism too, which will trigger an alert when it sees this IP address. Your requests will be denied and your account might also get banned. Even if the site's detector won't recognize it, using TOR is not such a good idea, because you could compromise your account as TOR exit node operators are known to be evil sometimes.",
+                                    CustomButtons   = new[] { "OK" }
+                                });
                         }
 
                         if (ip == null)
                         {
-                            new TaskDialog
+                            TaskDialog.Show(new TaskDialogOptions
                                 {
-                                    CommonIcon  = TaskDialogIcon.Stop,
-                                    Title       = sel.Name,
-                                    Instruction = "Proxy error",
-                                    Content     = "The proxy did not return the requested resource, or greatly modified the structure of the page. Either way, it is not suitable for use with this software.",
-                                }.Show();
+                                    MainIcon        = VistaTaskDialogIcon.Error,
+                                    Title           = sel.Name,
+                                    MainInstruction = "Proxy error",
+                                    Content         = "The proxy did not return the requested resource, or greatly modified the structure of the page. Either way, it is not suitable for use with this software.",
+                                    CustomButtons   = new[] { "OK" }
+                                });
                             return;
                         }
 
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon  = TaskDialogIcon.Information,
-                                Title       = sel.Name,
-                                Instruction = "Test results",
-                                Content     = "Total time to get rolisoft.net/b: " + s.Elapsed + "\r\n\r\nIP address: " + ip + "\r\nHost name: " + host + "\r\nGeoIP lookup: " + geo,
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Information,
+                                Title           = sel.Name,
+                                MainInstruction = "Test results",
+                                Content         = "Total time to get rolisoft.net/b: " + s.Elapsed + "\r\n\r\nIP address: " + ip + "\r\nHost name: " + host + "\r\nGeoIP lookup: " + geo,
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                     catch (ThreadAbortException) { }
                     catch (Exception ex)
                     {
                         done = true;
 
-                        if (td.IsShowing)
-                        {
-                            td.SimulateButtonClick(-1);
-                        }
-
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon          = TaskDialogIcon.Stop,
-                                Title               = sel.Name,
-                                Instruction         = "Connection error",
-                                Content             = "An error occured while connecting to the proxy.",
-                                ExpandedControlText = "Show exception message",
-                                ExpandedInformation = ex.Message
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Error,
+                                Title           = sel.Name,
+                                MainInstruction = "Connection error",
+                                Content         = "An error occurred while connecting to the proxy.",
+                                ExpandedInfo    = ex.Message,
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                     finally
                     {

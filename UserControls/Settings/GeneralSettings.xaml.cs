@@ -11,7 +11,7 @@
 
     using Microsoft.Win32;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for GeneralSettings.xaml
@@ -185,13 +185,14 @@
 
             if (!Utils.IsAdmin)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.Warning,
-                        Title       = "Administrator right required",
-                        Instruction = "Administrator right required",
-                        Content     = "The software doesn't have administrator rights, which means it won't be able to access the MFT records on your NTFS partitions. Please restart the software by right-clicking on the executable and selecting \"Run as administrator\" from the menu."
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Warning,
+                        Title           = "Administrator right required",
+                        MainInstruction = "Administrator right required",
+                        Content         = "The software doesn't have administrator rights, which means it won't be able to access the MFT records on your NTFS partitions. Please restart the software by right-clicking on the executable and selecting \"Run as administrator\" from the menu.",
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
 

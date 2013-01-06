@@ -14,12 +14,13 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using Microsoft.WindowsAPICodePack.Dialogs;
-
     using ContextMenus;
     using ContextMenus.Menus;
     using Parsers.OnlineVideos;
     using Parsers.Guides;
+
+    using TaskDialogInterop;
+
     using TaskDialogs;
 
     /// <summary>
@@ -562,16 +563,16 @@
             
             var sel = (OverviewListViewItem)listView.SelectedItem;
 
-            var td = new TaskDialog
+            var res = TaskDialog.Show(new TaskDialogOptions
                 {
-                    Caption         = "Remove " + sel.Name,
-                    Icon            = TaskDialogStandardIcon.Warning,
-                    InstructionText = sel.Name,
-                    Text            = "Are you sure you want to remove " + sel.Name + " from the database?\r\n\r\nYou should still leave TV shows on your list, even if they ended or are on some kind of pause.",
-                    StandardButtons = TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No
-                };
+                    MainIcon        = VistaTaskDialogIcon.Warning,
+                    Title           = "Remove " + sel.Name,
+                    MainInstruction = sel.Name,
+                    Content         = "Are you sure you want to remove " + sel.Name + " from the database?\r\n\r\nYou should still leave TV shows on your list, even if they ended or are on some kind of pause.",
+                    CustomButtons   = new[] { "Yes", "No" }
+                });
 
-            if (td.Show() == TaskDialogResult.Yes)
+            if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value == 0)
             {
                 Directory.Delete(sel.Show.Directory, true);
                 Database.LoadDatabase();

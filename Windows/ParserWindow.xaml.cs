@@ -7,7 +7,7 @@
     using System.Windows.Documents;
     using System.Windows.Media.Effects;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for ParserWindow.xaml
@@ -107,24 +107,46 @@
             var user = usernameTextBox.Text;
             var pass = passwordTextBox.Password;
 
-            var td  = new TaskDialog
+            var showmbp = false;
+            var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
-                    Title           = Parser.Name,
-                    Instruction     = "Logging in",
-                    Content         = "Logging in to " + Parser.Name + " as " + user + "...",
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    ShowProgressBar = true
-                };
-            td.ButtonClick += (s, v) =>
-                {
-                    if (!done)
-                    {
-                        try { action.Abort(); } catch { }
-                    }
-                };
-            td.SetMarqueeProgressBar(true);
-            new Thread(() => td.Show()).Start();
+                    Title                   = Parser.Name,
+                    MainInstruction         = "Logging in",
+                    Content                 = "Logging in to " + Parser.Name + " as " + user + "...",
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowMarqueeProgressBar  = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
+                        {
+                            if (!showmbp)
+                            {
+                                dialog.SetProgressBarMarquee(true, 0);
+                                showmbp = true;
+                            }
 
+                            if (args.ButtonId != 0)
+                            {
+                                if (!done)
+                                {
+                                    try { action.Abort(); } catch { }
+                                }
+
+                                return false;
+                            }
+
+                            if (done)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
+            mthd.SetApartmentState(ApartmentState.STA);
+            mthd.Start();
+            
             action = new Thread(() =>
                 {
                     try
@@ -133,20 +155,16 @@
 
                         done = true;
 
-                        if (td.IsShowing)
-                        {
-                            td.SimulateButtonClick(-1);
-                        }
-
                         if (string.IsNullOrWhiteSpace(cookies))
                         {
-                            new TaskDialog
+                            TaskDialog.Show(new TaskDialogOptions
                                 {
-                                    CommonIcon  = TaskDialogIcon.Stop,
-                                    Title       = Parser.Name,
-                                    Instruction = "Login error",
-                                    Content     = "The site didn't return any cookies. The username and password combination is most likely wrong.",
-                                }.Show();
+                                    MainIcon        = VistaTaskDialogIcon.Error,
+                                    Title           = Parser.Name,
+                                    MainInstruction = "Login error",
+                                    Content         = "The site didn't return any cookies. The username and password combination is most likely wrong.",
+                                    CustomButtons   = new[] { "OK" }
+                                });
                             return;
                         }
 
@@ -157,20 +175,15 @@
                     {
                         done = true;
 
-                        if (td.IsShowing)
-                        {
-                            td.SimulateButtonClick(-1);
-                        }
-
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon          = TaskDialogIcon.Stop,
-                                Title               = Parser.Name,
-                                Instruction         = "Login error",
-                                Content             = "An error occured while logging in to the site.",
-                                ExpandedControlText = "Show exception message",
-                                ExpandedInformation = ex.Message
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Error,
+                                Title           = Parser.Name,
+                                MainInstruction = "Login error",
+                                Content         = "An error occured while logging in to the site.",
+                                ExpandedInfo    = ex.Message,
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                 });
             action.Start();

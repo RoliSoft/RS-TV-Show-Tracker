@@ -12,7 +12,7 @@
     using System.Windows.Input;
     using System.Windows.Media;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for XMLTVSettings.xaml
@@ -234,13 +234,9 @@
 
             if (MessageBox.Show("Are you sure you want to search for the foreign title of " + (sels.Count == 1 ? sels[0].Title : sels.Count + " shows") + " on an external service?", "Search foreign titles", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                var td = new TaskDialog
-                    {
-                        Title           = "Searching foreign titles...",
-                        Instruction     = "Searching foreign titles...",
-                        CommonButtons   = TaskDialogButton.Cancel,
-                        ShowProgressBar = true
-                    };
+                var done = false;
+                var prgpos = 0;
+                var prgstr = string.Empty;
                 
                 var thd = new Thread(() =>
                     {
@@ -248,29 +244,53 @@
                         foreach (var sel in sels)
                         {
                             sel.Show.Data["title." + sel.LangCode] = string.Empty;
-                            sel.Show.GetForeignTitle(sel.LangCode, true, s => td.Content = s);
+                            sel.Show.GetForeignTitle(sel.LangCode, true, s => prgstr = s);
 
-                            td.ProgressBarPosition = (int) Math.Round(((double) i/(double) sels.Count)*100d);
+                            prgpos = (int)Math.Round(((double) i/(double) sels.Count)*100d);
                             i++;
                         }
 
-                        td.SimulateButtonClick(-1);
+                        done = true;
                     });
 
-                td.ButtonClick += (o, a) =>
-                    {
-                        try
-                        {
-                            thd.Abort();
-                        }
-                        catch { }
-
-                        Dispatcher.Invoke((Action)ReloadTitles);
-                    };
-
-                new Thread(() => td.Show()).Start();
-
                 thd.Start();
+
+                var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
+                    {
+                        Title                   = "Searching foreign titles...",
+                        MainInstruction         = "Searching foreign titles...",
+                        CustomButtons           = new[] { "Cancel" },
+                        ShowProgressBar         = true,
+                        EnableCallbackTimer     = true,
+                        AllowDialogCancellation = true,
+                        Callback                = (dialog, args, data) =>
+                            {
+                                dialog.SetContent(prgstr);
+                                dialog.SetProgressBarPosition(prgpos);
+
+                                if (args.ButtonId != 0)
+                                {
+                                    if (!done)
+                                    {
+                                        try { thd.Abort(); } catch { }
+                                    }
+
+                                    Dispatcher.Invoke((Action)ReloadTitles);
+
+                                    return false;
+                                }
+
+                                if (done)
+                                {
+                                    dialog.ClickButton(500);
+                                    return false;
+                                }
+
+                                return true;
+                            }
+                    }));
+                mthd.SetApartmentState(ApartmentState.STA);
+                mthd.Start();
             }
         }
 

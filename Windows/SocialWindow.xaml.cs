@@ -11,7 +11,7 @@
 
     using Parsers.Social.Engines;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for SocialWindow.xaml
@@ -197,15 +197,15 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.Stop,
-                        Title               = "Twitter OAuth",
-                        Instruction         = "Error",
-                        Content             = "An error occured while generating an authorization link.",
-                        ExpandedControlText = "Show exception message",
-                        ExpandedInformation = ex.Message
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Twitter OAuth",
+                        MainInstruction = "Error",
+                        Content         = "An error occurred while generating an authorization link.",
+                        ExpandedInfo    = ex.Message,
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
 
@@ -237,15 +237,15 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.Stop,
-                        Title               = "Twitter OAuth",
-                        Instruction         = "Error",
-                        Content             = "An error occured while getting the tokens for the specified PIN.",
-                        ExpandedControlText = "Show exception message",
-                        ExpandedInformation = ex.Message
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Twitter OAuth",
+                        MainInstruction = "Error",
+                        Content         = "An error occurred while getting the tokens for the specified PIN.",
+                        ExpandedInfo    = ex.Message,
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
 
@@ -349,15 +349,15 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.Stop,
-                        Title               = "Identi.ca OAuth",
-                        Instruction         = "Error",
-                        Content             = "An error occured while generating an authorization link.",
-                        ExpandedControlText = "Show exception message",
-                        ExpandedInformation = ex.Message
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Identi.ca OAuth",
+                        MainInstruction = "Error",
+                        Content         = "An error occurred while generating an authorization link.",
+                        ExpandedInfo    = ex.Message,
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
 
@@ -389,15 +389,15 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.Stop,
-                        Title               = "Identi.ca OAuth",
-                        Instruction         = "Error",
-                        Content             = "An error occured while getting the tokens for the specified PIN.",
-                        ExpandedControlText = "Show exception message",
-                        ExpandedInformation = ex.Message
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Identi.ca OAuth",
+                        MainInstruction = "Error",
+                        Content         = "An error occurred while getting the tokens for the specified PIN.",
+                        ExpandedInfo    = ex.Message,
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
 
@@ -510,15 +510,15 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.Stop,
-                        Title               = "Facebook OAuth",
-                        Instruction         = "Error",
-                        Content             = "An error occured while generating an authorization link.",
-                        ExpandedControlText = "Show exception message",
-                        ExpandedInformation = ex.Message
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Facebook OAuth",
+                        MainInstruction = "Error",
+                        Content         = "An error occurred while generating an authorization link.",
+                        ExpandedInfo    = ex.Message,
+                        CustomButtons   = new[] { "OK" }
+                    });
                 return;
             }
 
@@ -538,15 +538,15 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.Stop,
-                        Title               = "Facebook OAuth",
-                        Instruction         = "Error",
-                        Content             = "An error occured while getting the tokens for the specified PIN.",
-                        ExpandedControlText = "Show exception message",
-                        ExpandedInformation = ex.Message
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Facebook OAuth",
+                        MainInstruction = "Error",
+                        Content         = "An error occurred while getting the tokens for the specified PIN.",
+                        ExpandedInfo    = ex.Message,
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
         /// <summary>

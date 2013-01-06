@@ -10,7 +10,8 @@
     using Scripting;
 
     using Microsoft.Scripting;
-    using Microsoft.WindowsAPICodePack.Dialogs;
+
+    using TaskDialogInterop;
 
     /// <summary>
     /// Provides support for loading external classes into the application.
@@ -298,13 +299,14 @@
         {
             if (ex is SyntaxErrorException)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Failed to parse plugin",
-                        InstructionText = "Failed to parse plugin",
-                        Text            = "Syntax error in {0} line {1} column {2}:\r\n\r\n{3}".FormatWith(Path.GetFileName(file), ((SyntaxErrorException)ex).Line, ((SyntaxErrorException)ex).Column, ex.Message.ToUppercaseFirst()),
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Failed to parse plugin",
+                        MainInstruction = "Failed to parse plugin",
+                        Content         = "Syntax error in {0} line {1} column {2}:\r\n\r\n{3}".FormatWith(Path.GetFileName(file), ((SyntaxErrorException)ex).Line, ((SyntaxErrorException)ex).Column, ex.Message.ToUppercaseFirst()),
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
             else
             {
@@ -320,16 +322,15 @@
                     goto parseException;
                 }
 
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        Icon                  = TaskDialogStandardIcon.Error,
-                        Caption               = "Failed to load plugin",
-                        InstructionText       = "Failed to load plugin",
-                        Text                  = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), Path.GetFileName(file)),
-                        DetailsExpandedText   = sb.ToString(),
-                        DetailsExpandedLabel  = "Hide stacktrace",
-                        DetailsCollapsedLabel = "Show stacktrace"
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Failed to load plugin",
+                        MainInstruction = "Failed to load plugin",
+                        Content         = "An exception of type {0} was thrown while trying to load plugin {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), Path.GetFileName(file)),
+                        ExpandedInfo    = sb.ToString(),
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
     }

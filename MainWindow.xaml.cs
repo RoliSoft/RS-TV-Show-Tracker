@@ -17,12 +17,11 @@
     using System.Windows.Media.Animation;
 
     using Microsoft.Windows.Shell;
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using Remote;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
@@ -30,7 +29,6 @@
     using WinMenuItem = System.Windows.Forms.MenuItem;
     using Timer       = System.Timers.Timer;
     using Application = System.Windows.Application;
-    using TaskDialog  = Microsoft.WindowsAPICodePack.Dialogs.TaskDialog;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -94,23 +92,25 @@
 
                     if (fid.Success)
                     {
-                        new VistaControls.TaskDialog.TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon  = TaskDialogIcon.Information,
-                                Title       = Signature.Software + " " + Signature.Version,
-                                Instruction = Path.GetFileNameWithoutExtension(args[1]),
-                                Content     = fid + " – " + ShowNames.Regexes.PartText.Replace(fid.Title, string.Empty) + " – " + fid.Quality
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Information,
+                                Title           = Signature.Software + " " + Signature.Version,
+                                MainInstruction = Path.GetFileNameWithoutExtension(args[1]),
+                                Content         = fid + " – " + ShowNames.Regexes.PartText.Replace(fid.Title, string.Empty) + " – " + fid.Quality,
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                     else
                     {
-                        new VistaControls.TaskDialog.TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon  = TaskDialogIcon.Stop,
-                                Title       = Signature.Software + " " + Signature.Version,
-                                Instruction = Path.GetFileNameWithoutExtension(args[1]),
-                                Content     = "Couldn't identify the specified file."
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Error,
+                                Title           = Signature.Software + " " + Signature.Version,
+                                MainInstruction = Path.GetFileNameWithoutExtension(args[1]),
+                                Content         = "Couldn't identify the specified file.",
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                     
                     Process.GetCurrentProcess().Kill();
@@ -802,21 +802,16 @@
 
             if (ask && IsVisible && Top != -999)
             {
-                var td = new VistaControls.TaskDialog.TaskDialog
+                var res = TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon      = TaskDialogIcon.SecurityWarning,
-                        UseCommandLinks = true,
+                        MainIcon        = VistaTaskDialogIcon.Information,
                         Title           = Signature.Software,
-                        Instruction     = "Update available",
+                        MainInstruction = "Update available",
                         Content         = "Version " + version + " has been downloaded and is ready to be installed!",
-                        CustomButtons   = new[]
-                            {
-                                new CustomButton(Result.Yes, "Install now"),
-                                new CustomButton(Result.No,  "Postpone")
-                            }
-                    };
+                        CommandButtons  = new[] { "Install now", "Postpone" }
+                    });
 
-                if (td.Show().CommonButton == Result.Yes)
+                if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value == 0)
                 {
                     UpdateMouseLeftButtonUp();
                 }
@@ -838,23 +833,17 @@
 
             if (IsVisible && Top != -999)
             {
-                var td = new VistaControls.TaskDialog.TaskDialog
+                var res = TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon          = TaskDialogIcon.SecurityWarning,
-                        UseCommandLinks     = true,
-                        Title               = Signature.Software,
-                        Instruction         = "Update error",
-                        Content             = "There was an error while downloading the latest update for the software.",
-                        ExpandedInformation = error,
-                        ExpandedControlText = "Show error",
-                        CustomButtons       = new[]
-                            {
-                                new CustomButton(Result.Yes, "Update manually"),
-                                new CustomButton(Result.No,  "Postpone")
-                            }
-                    };
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = Signature.Software,
+                        MainInstruction = "Update error",
+                        Content         = "There was an error while downloading the latest update for the software.",
+                        ExpandedInfo    = error,
+                        CommandButtons  = new[] { "Update manually", "Postpone" }
+                    });
 
-                if (td.Show().CommonButton == Result.Yes)
+                if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value == 0)
                 {
                     Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
                 }
@@ -944,41 +933,30 @@
                     loc = "in file {0} at line {1}".FormatWith(mc[0].Groups["file"].Value, mc[0].Groups["ln"].Value);
                 }
 
-                var td = new TaskDialog
-                    {
-                        Icon                  = TaskDialogStandardIcon.Error,
-                        Caption               = "An unexpected error occurred",
-                        InstructionText       = "An unexpected error occurred",
-                        Text                  = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), loc) + (isTerminating ? "\r\n\r\nUnfortunately this exception occured at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
-                        DetailsExpandedText   = sb.ToString(),
-                        DetailsExpandedLabel  = "Hide stacktrace",
-                        DetailsCollapsedLabel = "Show stacktrace",
-                        Cancelable            = true,
-                        StandardButtons       = TaskDialogStandardButtons.None
-                    };
-
-                if (Active != null)
+                if (Active != null && (bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
                 {
-                    if ((bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
-                    {
-                        td.Opened  += (s, r) => Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
-                        td.Closing += (s, r) => Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                    }
+                    Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
                 }
 
-                var fd = new TaskDialogCommandLink { Text = "Submit bug report" };
-                fd.Click += (s, r) =>
+                var res = TaskDialog.Show(new TaskDialogOptions
                     {
-                        td.Close();
-                        ReportException(sb.ToString());
-                    };
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "An unexpected error occurred",
+                        MainInstruction = "An unexpected error occurred",
+                        Content         = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), loc) + (isTerminating ? "\r\n\r\nUnfortunately this exception occured at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
+                        ExpandedInfo    = sb.ToString(),
+                        CommandButtons  = new[] { "Submit bug report", "Ignore exception" }
+                    });
 
-                var ig = new TaskDialogCommandLink { Text = "Ignore exception" };
-                ig.Click += (s, r) => td.Close();
+                if (Active != null &&(bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
+                {
+                    Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                }
 
-                td.Controls.Add(fd);
-                td.Controls.Add(ig);
-                td.Show();
+                if (res.CommandButtonResult.HasValue &&res.CommandButtonResult.Value == 0)
+                {
+                    ReportException(sb.ToString());
+                }
             }
             else
             {

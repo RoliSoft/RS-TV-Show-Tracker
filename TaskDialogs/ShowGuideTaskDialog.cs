@@ -32,41 +32,41 @@
 
             var showmbp = false;
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
+                {
+                    Title                   = "Searching...",
+                    MainInstruction         = show.ToUppercaseWords(),
+                    Content                 = "Searching on " + guide.Name + "...",
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowMarqueeProgressBar  = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
                         {
-                            Title                   = "Searching...",
-                            MainInstruction         = show.ToUppercaseWords(),
-                            Content                 = "Searching on " + guide.Name + "...",
-                            CustomButtons           = new[] { "Cancel" },
-                            ShowMarqueeProgressBar  = true,
-                            EnableCallbackTimer     = true,
-                            AllowDialogCancellation = true,
-                            Callback                = (dialog, args, data) =>
+                            if (!showmbp)
+                            {
+                                dialog.SetProgressBarMarquee(true, 0);
+                                showmbp = true;
+                            }
+
+                            if (args.ButtonId != 0)
+                            {
+                                if (_thd != null && _thd.IsAlive && !_cancel)
                                 {
-                                    if (!showmbp)
-                                    {
-                                        dialog.SetProgressBarMarquee(true, 0);
-                                        showmbp = true;
-                                    }
-
-                                    if (args.ButtonId != 0)
-                                    {
-                                        if (_thd != null && _thd.IsAlive && !_cancel)
-                                        {
-                                            _thd.Abort();
-                                        }
-
-                                        return false;
-                                    }
-
-                                    if (_cancel)
-                                    {
-                                        dialog.ClickButton(500);
-                                        return false;
-                                    }
-
-                                    return true;
+                                    _thd.Abort();
                                 }
-                        }));
+
+                                return false;
+                            }
+
+                            if (_cancel)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
             mthd.SetApartmentState(ApartmentState.STA);
             mthd.Start();
 

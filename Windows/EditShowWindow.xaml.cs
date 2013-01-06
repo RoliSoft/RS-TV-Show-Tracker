@@ -7,11 +7,11 @@
     using System.Windows.Media.Imaging;
 
     using Parsers.Guides;
+    using Parsers.Guides.Engines;
 
-    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
-    using RoliSoft.TVShowTracker.TaskDialogs;
+    using TaskDialogInterop;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogs;
 
     /// <summary>
     /// Interaction logic for EditShowWindow.xaml
@@ -164,13 +164,14 @@
             if (!_editWarn)
             {
                 _editWarn = true;
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.Warning,
-                        Title       = "Possible name mismatch after edit",
-                        Instruction = "Possible name mismatch after edit",
-                        Content     = "Don't edit the name for other purposes than capitalization, punctuation, country and year notations!\r\n\r\nIf you alter the words in the title, the software will use the new title to search for files, download links, subtitles, etc, and since you've altered the words, it might not find anything."
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Warning,
+                        Title           = "Possible name mismatch after edit",
+                        MainInstruction = "Possible name mismatch after edit",
+                        Content         = "Don't edit the name for other purposes than capitalization, punctuation, country and year notations!\r\n\r\nIf you alter the words in the title, the software will use the new title to search for files, download links, subtitles, etc, and since you've altered the words, it might not find anything.",
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
 
@@ -354,13 +355,14 @@
             }
             catch (Exception ex)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.Stop,
-                        Title       = "Invalid regex",
-                        Instruction = "Invalid regex",
-                        Content     = ex.Message.ToUppercaseFirst()
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Warning,
+                        Title           = "Invalid regular expression",
+                        MainInstruction = "Invalid regular expression",
+                        Content         = ex.Message.ToUppercaseFirst(),
+                        CustomButtons   = new[] { "OK" }
+                    });
                 return;
             }
 

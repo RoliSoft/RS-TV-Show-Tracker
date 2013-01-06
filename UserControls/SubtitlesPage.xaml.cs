@@ -20,7 +20,7 @@
     using Parsers.Subtitles;
     using TaskDialogs;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for SubtitlesPage.xaml
@@ -674,13 +674,14 @@
             }
             catch
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.Stop,
-                        Title       = "Mapping error",
-                        Instruction = textBox.Text.Trim(),
-                        Content     = "The query you've entered could not be mapped to an episode in the database. If this show is not on your list, add it, so the file search engine can find it."
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Mapping error",
+                        MainInstruction = textBox.Text.Trim(),
+                        Content         = "The query you've entered could not be mapped to an episode in the database. If this show is not on your list, add it, so the file search engine can find it.",
+                        CustomButtons   = new[] { "OK" }
+                    });
             }
         }
     }
