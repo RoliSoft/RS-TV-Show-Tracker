@@ -49,7 +49,7 @@
                 }
                 catch (Exception ex)
                 {
-                    UpdateError.Fire(this, "Could not get guide object for '" + r.Title + "'", ex, true, false);
+                    UpdateError.Fire(this, "Could not get guide object of type " + r.Source + " for " + r.Title + ".", ex, true, false);
                     continue;
                 }
 
@@ -60,7 +60,7 @@
                 }
                 catch (Exception ex)
                 {
-                    UpdateError.Fire(this, "Could not get guide data for '" + r.Title + "'", ex, true, false);
+                    UpdateError.Fire(this, "Could not get guide data for " + r.Source + "#" + r.SourceID + ".", ex, true, false);
                     continue;
                 }
 
@@ -87,7 +87,7 @@
                 }
                 catch (Exception ex)
                 {
-                    UpdateError.Fire(this, "Could not save database for '" + r.Title + "'", ex, true, false);
+                    UpdateError.Fire(this, "Could not save database for " + r.Title + ".", ex, true, false);
                     continue;
                 }
             }

@@ -234,7 +234,7 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void TaskDialogDestroyed(object sender, EventArgs e)
         {
-            if (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2))
+            if (_res == Result.Cancel)
             {
                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 

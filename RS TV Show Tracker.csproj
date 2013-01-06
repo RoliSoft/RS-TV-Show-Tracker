@@ -153,6 +153,10 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="TaskDialog, Version=1.0.4372.18283, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\TaskDialog.dll</HintPath>
+    </Reference>
     <Reference Include="Transitionals">
       <HintPath>.\Transitionals.dll</HintPath>
     </Reference>
@@ -312,6 +316,7 @@
     <Compile Include="FileNames\ShowFile.cs" />
     <Compile Include="FileNames\Tests.cs" />
     <Compile Include="Synchronization\SyncEngine.cs" />
+    <Compile Include="TaskDialogs\ShowGuideTaskDialog.cs" />
     <Compile Include="TaskDialogs\DatabaseUpdateTaskDialog.cs" />
     <Compile Include="TaskDialogs\GenericAsyncTaskDialog.cs" />
     <Compile Include="TaskDialogs\OpenArchiveTaskDialog.cs" />
@@ -961,6 +966,9 @@
     <Resource Include="Images\spell-check.png" />
     <Resource Include="Resources\Git Revision.txt" />
     <Resource Include="Images\tvtropes.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\TaskDialog.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

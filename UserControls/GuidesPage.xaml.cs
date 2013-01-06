@@ -799,6 +799,68 @@
         {
             new EditShowWindow(_activeShowID, showGeneralName.Text).ShowDialog();
         }
+
+        /// <summary>
+        /// Handles the MouseLeftButtonUp event of the showGeneralUpdate control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        public void ShowGeneralUpdateMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            new Thread(() =>
+                {
+                    var r = Database.TVShows[_activeShowID];
+
+                    SetStatus("Updating " + r.Title + "...", true);
+
+                    Guide guide;
+                    try
+                    {
+                        guide = Updater.CreateGuide(r.Source);
+                    }
+                    catch (Exception ex)
+                    {
+                        SetStatus("Could not get guide object of type " + r.Source + " for " + r.Title + ".");
+                        return;
+                    }
+
+                    TVShow tv;
+                    try
+                    {
+                        tv = guide.GetData(r.SourceID, r.Language);
+                    }
+                    catch (Exception ex)
+                    {
+                        SetStatus("Could not get guide data for " + r.Source + "#" + r.SourceID + ".");
+                        return;
+                    }
+
+                    tv.ID        = r.ID;
+                    tv.Data      = r.Data;
+                    tv.Directory = r.Directory;
+
+                    foreach (var ep in tv.Episodes)
+                    {
+                        if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
+                        {
+                            ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
+                        }
+                    }
+
+                    try
+                    {
+                        tv.Save();
+                    }
+                    catch (Exception ex)
+                    {
+                        SetStatus("Could not save database for " + r.Title + ".");
+                        return;
+                    }
+
+                    Database.LoadDatabase();
+                    MainWindow.Active.DataChanged();
+                }).Start();
+        }
         #endregion
 
         #region ListView keys

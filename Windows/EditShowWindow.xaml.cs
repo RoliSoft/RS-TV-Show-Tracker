@@ -8,6 +8,9 @@
 
     using Parsers.Guides;
 
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
+    using RoliSoft.TVShowTracker.TaskDialogs;
+
     using VistaControls.TaskDialog;
 
     /// <summary>
@@ -16,9 +19,9 @@
     public partial class EditShowWindow
     {
         private Guide _guide;
-        private int _id;
+        private int _id, _sidx;
         private string _show, _lang;
-        private bool _editWarn;
+        private bool _editWarn, _upReq, _loaded;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -70,7 +73,7 @@
                     database.SelectedIndex = 6;
                     break;
 
-                case "Anime News Network":
+                case "AnimeNewsNetwork":
                     database.SelectedIndex = 7;
                     break;
 
@@ -79,8 +82,10 @@
                     break;
             }
 
-            _guide = AddNewWindow.CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
-            _lang  = Database.TVShows[_id].Language;
+            _sidx = database.SelectedIndex;
+
+            _guide  = AddNewWindow.CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
+            _lang   = Database.TVShows[_id].Language;
 
             var sel = 0;
 
@@ -145,6 +150,8 @@
             {
                 SetAeroGlassTransparency();
             }
+
+            _loaded = true;
         }
 
         /// <summary>
@@ -210,6 +217,121 @@
         }
 
         /// <summary>
+        /// Handles the OnSelectionChanged event of the database control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DatabaseOnSelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded || _sidx == database.SelectedIndex)
+            {
+                return;
+            }
+
+            Guide guide;
+            switch (database.SelectedIndex)
+            {
+                case 1:
+                    guide = new TVRage();
+                    break;
+
+                case 2:
+                    guide = new TVDB();
+                    break;
+
+                case 3:
+                    guide = new TVcom();
+                    break;
+
+                case 4:
+                    guide = new EPisodeWorld();
+                    break;
+
+                case 5:
+                    guide = new IMDb();
+                    break;
+
+                case 6:
+                    guide = new AniDB();
+                    break;
+
+                case 7:
+                    guide = new AnimeNewsNetwork();
+                    break;
+
+                case 9:
+                    guide = new EPGuides();
+                    break;
+
+                case 10:
+                    guide = new EPGuides();
+                    break;
+
+                default:
+                    return;
+            }
+
+            new ShowGuideTaskDialog().Search(guide, nameTextBox.Text, (language.SelectedItem as StackPanel).Tag as string, (id, title, lang) =>
+                {
+                    if (id == null)
+                    {
+                        Dispatcher.Invoke((Action)(() =>
+                            {
+                                switch (Database.TVShows[_id].Source)
+                                {
+                                    case "TVRage":
+                                        database.SelectedIndex = 1;
+                                        break;
+
+                                    case "TVDB":
+                                        database.SelectedIndex = 2;
+                                        break;
+
+                                    case "TVcom":
+                                        database.SelectedIndex = 3;
+                                        break;
+
+                                    case "EPisodeWorld":
+                                        database.SelectedIndex = 4;
+                                        break;
+
+                                    case "IMDb":
+                                        database.SelectedIndex = 5;
+                                        break;
+
+                                    case "AniDB":
+                                        database.SelectedIndex = 6;
+                                        break;
+
+                                    case "AnimeNewsNetwork":
+                                        database.SelectedIndex = 7;
+                                        break;
+
+                                    case "EPGuides":
+                                        database.SelectedIndex = 10;
+                                        break;
+                                }
+                            }));
+                    }
+                    else
+                    {
+                        Database.TVShows[_id].Source   = guide.GetType().Name;
+                        Database.TVShows[_id].SourceID = id;
+                        Database.TVShows[_id].Title    = title;
+                        Database.TVShows[_id].Language = lang;
+
+                        _upReq = true;
+
+                        Dispatcher.Invoke((Action)(() =>
+                                                       {
+                                                           nameTextBox.Text = title;
+                                                           _sidx = database.SelectedIndex;
+                                                       }));
+                    }
+                });
+        }
+
+        /// <summary>
         /// Handles the Click event of the cancelButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -257,9 +379,21 @@
                 Database.TVShows[_id].Data.Remove("regex");
             }
 
-            //Database.TVShows[_id].Language = (language.SelectedItem as StackPanel).Tag as string;
+            if (Database.TVShows[_id].Language != (language.SelectedItem as StackPanel).Tag as string)
+            {
+                Database.TVShows[_id].Language = (language.SelectedItem as StackPanel).Tag as string;
+
+                _upReq = true;
+            }
 
             Database.TVShows[_id].SaveData();
+
+            MainWindow.Active.DataChanged();
+
+            if (_upReq)
+            {
+                MainWindow.Active.activeGuidesPage.ShowGeneralUpdateMouseLeftButtonUp(null, null);
+            }
 
             DialogResult = true;
         }
