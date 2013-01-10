@@ -807,59 +807,23 @@
         /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
         public void ShowGeneralUpdateMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            new Thread(() =>
+            new Thread(() => Database.Update(Database.TVShows[_activeShowID], (i, s) =>
                 {
-                    var r = Database.TVShows[_activeShowID];
-
-                    SetStatus("Updating " + r.Title + "...", true);
-
-                    Guide guide;
-                    try
+                    switch (i)
                     {
-                        guide = Updater.CreateGuide(r.Source);
-                    }
-                    catch (Exception ex)
-                    {
-                        SetStatus("Could not get guide object of type " + r.Source + " for " + r.Title + ".");
-                        return;
-                    }
+                        case 0:
+                            SetStatus(s, true);
+                            break;
 
-                    TVShow tv;
-                    try
-                    {
-                        tv = guide.GetData(r.SourceID, r.Language);
-                    }
-                    catch (Exception ex)
-                    {
-                        SetStatus("Could not get guide data for " + r.Source + "#" + r.SourceID + ".");
-                        return;
-                    }
+                        case -1:
+                            SetStatus(s);
+                            break;
 
-                    tv.ID        = r.ID;
-                    tv.Data      = r.Data;
-                    tv.Directory = r.Directory;
-
-                    foreach (var ep in tv.Episodes)
-                    {
-                        if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
-                        {
-                            ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
-                        }
+                        case 1:
+                            MainWindow.Active.DataChanged();
+                            break;
                     }
-
-                    try
-                    {
-                        tv.Save();
-                    }
-                    catch (Exception ex)
-                    {
-                        SetStatus("Could not save database for " + r.Title + ".");
-                        return;
-                    }
-
-                    Database.LoadDatabase();
-                    MainWindow.Active.DataChanged();
-                }).Start();
+                })).Start();
         }
         #endregion
 

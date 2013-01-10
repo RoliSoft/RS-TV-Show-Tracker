@@ -681,7 +681,7 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         public void UpdateError(object sender, EventArgs<string, Exception, bool, bool> e)
         {
-            if (!(e.Second is WebException))
+            if (e.Second != null && !(e.Second is WebException))
             {
                 HandleUnexpectedException(e.Second);
             }

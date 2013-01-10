@@ -148,14 +148,289 @@
         }
 
         /// <summary>
+        /// Adds the specified TV show to the database.
+        /// </summary>
+        /// <param name="gname">The guide to get the information from.</param>
+        /// <param name="guuid">The ID on the guide.</param>
+        /// <param name="glang">The language on the guide.</param>
+        /// <param name="callback">The status callback.</param>
+        /// <returns>
+        /// Added TV show or <c>null</c>.
+        /// </returns>
+        public static TVShow Add(string gname, string guuid, string glang, Action<int, string> callback = null)
+        {
+            if (callback != null)
+            {
+                callback(0, "Downloading guide...");
+            }
+
+            Guide guide;
+            try
+            {
+                guide = Updater.CreateGuide(gname);
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not get guide object of type " + gname + ".");
+                }
+
+                return null;
+            }
+
+            TVShow tv;
+            try
+            {
+                tv = guide.GetData(guuid, glang);
+
+                if (tv.Episodes.Count == 0)
+                {
+                    if (callback != null)
+                    {
+                        callback(-1, "There aren't any episodes associated to " + tv.Title + " on this guide.");
+                    }
+
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ThreadAbortException)
+                {
+                    return null;
+                }
+                
+                if (callback != null)
+                {
+                    callback(-1, "Couldn't download the episode listing and associated informations due to an unexpected error:" + Environment.NewLine + ex.Message);
+                }
+
+                return null;
+            }
+
+            if (TVShows.Values.FirstOrDefault(x => x.Title == tv.Title) != null)
+            {
+                if (callback != null)
+                {
+                    callback(-1, tv.Title + " is already in your database.");
+                }
+
+                return null;
+            }
+
+            foreach (var tvs in TVShows.Values)
+            {
+                tvs.RowID++;
+                tvs.SaveData();
+            }
+
+            tv.RowID       = 0;
+            tv.ID          = TVShows.Values.Max(x => x.ID) + 1;
+            tv.Data        = new Dictionary<string, string>();
+            tv.Directory   = Path.Combine(DataPath, Utils.CreateSlug(tv.Title, false));
+            tv.EpisodeByID = new Dictionary<int, Episode>();
+
+            if (Directory.Exists(tv.Directory))
+            {
+                tv.Directory += "-" + tv.Source.ToLower();
+            }
+
+            if (Directory.Exists(tv.Directory))
+            {
+                tv.Directory += "-" + Utils.Rand.Next();
+            }
+
+            try
+            {
+                Directory.CreateDirectory(tv.Directory);
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not create database for " + tv.Title + ".");
+                }
+
+                return null;
+            }
+
+            foreach (var ep in tv.Episodes)
+            {
+                ep.Show = tv;
+                ep.ID   = ep.Number + (ep.Season * 1000) + (tv.ID * 1000 * 1000);
+
+                tv.EpisodeByID[ep.Number + (ep.Season * 1000)] = ep;
+
+                if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
+                {
+                    ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
+                }
+            }
+
+            try
+            {
+                tv.Save();
+                tv.SaveTracking();
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not save database for " + tv.Title + ".");
+                }
+
+                return null;
+            }
+
+            TVShows[tv.ID] = tv;
+            DataChange = DateTime.Now;
+
+            if (callback != null)
+            {
+                callback(1, "Added " + tv.Title + ".");
+            }
+
+            return tv;
+        }
+
+        /// <summary>
+        /// Updates the specified TV show in the database.
+        /// </summary>
+        /// <param name="show">The TV show to update.</param>
+        /// <param name="callback">The status callback.</param>
+        /// <returns>
+        /// Updated TV show or <c>null</c>.
+        /// </returns>
+        public static TVShow Update(TVShow show, Action<int, string> callback = null)
+        {
+            if (callback != null)
+            {
+                callback(0, "Updating " + show.Title + "...");
+            }
+
+            Guide guide;
+            try
+            {
+                guide = Updater.CreateGuide(show.Source);
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not get guide object of type " + show.Source + " for " + show.Title + ".");
+                }
+
+                return null;
+            }
+
+            TVShow tv;
+            try
+            {
+                tv = guide.GetData(show.SourceID, show.Language);
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not get guide data for " + show.Source + "#" + show.SourceID + ".");
+                }
+
+                return null;
+            }
+
+            tv.ID          = show.ID;
+            tv.Data        = show.Data;
+            tv.Directory   = show.Directory;
+            tv.EpisodeByID = new Dictionary<int, Episode>();
+
+            if (tv.Title != show.Title)
+            {
+                tv.Title = show.Title;
+            }
+
+            foreach (var ep in tv.Episodes)
+            {
+                ep.Show = tv;
+                ep.ID   = ep.Number + (ep.Season * 1000) + (tv.ID * 1000 * 1000);
+
+                tv.EpisodeByID[ep.Number + (ep.Season * 1000)] = ep;
+
+                Episode op;
+                if (show.EpisodeByID.TryGetValue(ep.Number + (ep.Season * 1000), out op) && op.Watched)
+                {
+                    ep.Watched = true;
+                }
+
+                if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
+                {
+                    ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
+                }
+            }
+
+            try
+            {
+                tv.Save();
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not save database for " + show.Title + ".");
+                }
+
+                return null;
+            }
+
+            TVShows[tv.ID] = tv;
+            DataChange = DateTime.Now;
+
+            if (callback != null)
+            {
+                callback(1, "Updated " + show.Title + ".");
+            }
+
+            return tv;
+        }
+
+        /// <summary>
         /// Removes the specified TV show from the database.
         /// </summary>
-        /// <param name="tv">The TV show to remove.</param>
-        public static void Remove(TVShow tv)
+        /// <param name="show">The TV show to remove.</param>
+        /// <param name="callback">The status callback.</param>
+        /// <returns>
+        ///   <c>true</c> on success; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool Remove(TVShow show, Action<int, string> callback = null)
         {
-            Directory.Delete(tv.Directory, true);
-            TVShows.Remove(tv.ID);
+            if (callback != null)
+            {
+                callback(0, "Updating " + show.Title + "...");
+            }
+
+            try
+            {
+                Directory.Delete(show.Directory, true);
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Could not remove database for " + show.Title + ".");
+                }
+
+                return false;
+            }
+
+            TVShows.Remove(show.ID);
             DataChange = DateTime.Now;
+
+            if (callback != null)
+            {
+                callback(1, "Removed " + show.Title + ".");
+            }
+
+            return true;
         }
 
         /// <summary>

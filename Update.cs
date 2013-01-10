@@ -38,65 +38,28 @@
         {
             var i = 0d;
             var cnt = Database.TVShows.Values.Count(s => s.Airing);
-            foreach (var r in Database.TVShows.Values.Where(s => s.Airing).OrderBy(s => s.Title))
+            var ids = Database.TVShows.Values.Where(s => s.Airing).OrderBy(s => s.Title).Select(s => s.ID).ToList();
+
+            foreach (var id in ids)
             {
-                UpdateProgressChanged.Fire(this, r.Title, ++i / cnt * 100);
+                UpdateProgressChanged.Fire(this, Database.TVShows[id].Title, ++i / cnt * 100);
 
-                Guide guide;
-                try
-                {
-                    guide = CreateGuide(r.Source);
-                }
-                catch (Exception ex)
-                {
-                    UpdateError.Fire(this, "Could not get guide object of type " + r.Source + " for " + r.Title + ".", ex, true, false);
-                    continue;
-                }
-
-                TVShow tv;
-                try
-                {
-                    tv = guide.GetData(r.SourceID, r.Language);
-                }
-                catch (Exception ex)
-                {
-                    UpdateError.Fire(this, "Could not get guide data for " + r.Source + "#" + r.SourceID + ".", ex, true, false);
-                    continue;
-                }
-
-                tv.ID        = r.ID;
-                tv.Data      = r.Data;
-                tv.Directory = r.Directory;
-
-                foreach (var ep in tv.Episodes)
-                {
-                    if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
+                var tv = Database.Update(Database.TVShows[id], (e, s) =>
                     {
-                        ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
-                    }
-                }
+                        if (e == -1)
+                        {
+                            UpdateError.Fire(this, s, null, true, false);
+                        }
+                    });
 
-                if (tv.Language == "en")
+                if (tv != null && tv.Language == "en")
                 {
                     UpdateRemoteCache(tv);
-                }
-
-                try
-                {
-                    tv.Save();
-                }
-                catch (Exception ex)
-                {
-                    UpdateError.Fire(this, "Could not save database for " + r.Title + ".", ex, true, false);
-                    continue;
                 }
             }
 
             Database.Setting("update", DateTime.Now.ToUnixTimestamp().ToString());
-
-            Database.LoadDatabase();
             MainWindow.Active.DataChanged();
-
             UpdateDone.Fire(this);
         }
 
@@ -126,7 +89,7 @@
         /// <exception cref="NotSupportedException">When a name is specified which is not supported.</exception>
         public static Guide CreateGuide(string name)
         {
-            switch(name)
+            switch (name)
             {
                 case "TVRage":
                     return new TVRage();

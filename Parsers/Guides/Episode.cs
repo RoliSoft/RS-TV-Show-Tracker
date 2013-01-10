@@ -13,13 +13,13 @@
         /// Gets or sets the TV show associated with this episode.
         /// </summary>
         /// <value>The show.</value>
-        public TVShow Show { get; private set; }
+        public TVShow Show { get; set; }
 
         /// <summary>
         /// Gets or sets the episode ID.
         /// </summary>
         /// <value>The episode ID.</value>
-        public int ID { get; private set; }
+        public int ID { get; set; }
 
         /// <summary>
         /// Gets or sets the season number.
@@ -101,7 +101,7 @@
                 inbw.Write((byte)(Number - 255));
             }
 
-            inbw.Write((uint)Airdate.ToUnixTimestamp());
+            inbw.Write((int)Airdate.ToUnixTimestamp());
             inbw.Write(Title ?? string.Empty);
             inbw.Write(Summary ?? string.Empty);
             inbw.Write(Picture ?? string.Empty);
@@ -145,7 +145,7 @@
                 ep.Number += inbr.ReadByte();
             }
 
-            ep.Airdate = ((double)inbr.ReadUInt32()).GetUnixTimestamp();
+            ep.Airdate = ((double)inbr.ReadInt32()).GetUnixTimestamp();
             ep.Title   = inbr.ReadString();
             ep.Summary = inbr.ReadString();
             ep.Picture = inbr.ReadString();

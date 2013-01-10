@@ -10,11 +10,12 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Parsers.Guides;
-    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
+    using Parsers.Guides;
+    using Parsers.Guides.Engines;
+
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for AddNewWindow.xaml
@@ -157,16 +158,16 @@
 
                                 Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                             }));
-
-                        new TaskDialog
+                        
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                Icon                = TaskDialogStandardIcon.Error,
-                                Caption             = "Couldn't find TV show",
-                                InstructionText     = show.ToUppercaseWords(),
-                                Text                = "Couldn't find the specified TV show on this database.",
-                                DetailsExpandedText = "If this is a popular TV show, then you maybe just misspelled it or didn't enter the full official name.\r\nIf this is a rare or foreign TV show, try using another database.",
-                                Cancelable          = true
-                            }.Show();
+                                MainIcon        = VistaTaskDialogIcon.Error,
+                                Title           = "Couldn't find TV show",
+                                MainInstruction = show.ToUppercaseWords(),
+                                Content         = "Couldn't find the specified TV show on this database.",
+                                ExpandedInfo    = "If this is a popular TV show, then you maybe just misspelled it or didn't enter the full official name.\r\nIf this is a rare or foreign TV show, try using another database.",
+                                CustomButtons   = new[] { "OK" }
+                            });
 
                         return;
                     }
@@ -249,121 +250,45 @@
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
 
-            var lang = (language.SelectedValue as StackPanel).Tag.ToString();
-
             _worker = new Thread(() =>
                 {
-                    // get data from guide
-                    TVShow tv;
-                    try
-                    {
-                        tv = _guide.GetData(show.ID, lang);
-
-                        if (tv.Episodes.Count == 0)
+                    var tv = Database.Add(_guide.GetType().Name, show.ID, show.Language, (i, s) =>
                         {
-                            throw new Exception("There aren't any episodes associated to this TV show on this database.");
-                        }
-                    }
-                    catch (Exception ex)
+                            if (i == -1)
+                            {
+                                Dispatcher.Invoke((Action)(() =>
+                                    {
+                                        workingTabItem.Visibility = Visibility.Collapsed;
+                                        addTabItem.Visibility     = Visibility.Visible;
+                                        tabControl.SelectedIndex  = 0;
+
+                                        Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                                    }));
+
+                                TaskDialog.Show(new TaskDialogOptions
+                                    {
+                                        MainIcon        = VistaTaskDialogIcon.Error,
+                                        Title           = "Error",
+                                        MainInstruction = show.Title,
+                                        Content         = s,
+                                        CustomButtons   = new[] { "OK" }
+                                    });
+                            }
+                        });
+
+                    if (tv == null)
                     {
-                        if (ex is ThreadAbortException)
-                        {
-                            return;
-                        }
-
-                        Dispatcher.Invoke((Action)(() =>
-                            {
-                                workingTabItem.Visibility = Visibility.Collapsed;
-                                addTabItem.Visibility     = Visibility.Visible;
-                                tabControl.SelectedIndex  = 0;
-
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                            }));
-
-                        new TaskDialog
-                            {
-                                Icon                = TaskDialogStandardIcon.Error,
-                                Caption             = "Couldn't grab TV show",
-                                InstructionText     = show.Title,
-                                Text                = "Couldn't download the episode listing and associated informations due to an unexpected error.",
-                                DetailsExpandedText = ex.Message,
-                                Cancelable          = true
-                            }.Show();
-
                         return;
                     }
 
-                    // try to see if duplicate
-                    if (Database.TVShows.Values.FirstOrDefault(x => x.Title == tv.Title) != null)
-                    {
-                        Dispatcher.Invoke((Action)(() =>
-                            {
-                                workingTabItem.Visibility = Visibility.Collapsed;
-                                addTabItem.Visibility     = Visibility.Visible;
-                                tabControl.SelectedIndex  = 0;
-
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                            }));
-
-                        new TaskDialog
-                            {
-                                Icon            = TaskDialogStandardIcon.Error,
-                                Caption         = "Duplicate entry",
-                                InstructionText = tv.Title,
-                                Text            = "This TV show is already on your list.",
-                                Cancelable      = true
-                            }.Show();
-
-                        return;
-                    }
-
-                    // increment each rowid
-                    foreach (var tvs in Database.TVShows.Values)
-                    {
-                        tvs.RowID++;
-                        tvs.SaveData();
-                    }
-
-                    // generate showid
-                    tv.RowID = 0;
-                    _dbid = tv.ID = Database.TVShows.Values.Max(x => x.ID) + 1;
-                    tv.Data = new Dictionary<string, string>();
-                    tv.Directory = Path.Combine(Database.DataPath, Utils.CreateSlug(tv.Title, false));
-
-                    if (Directory.Exists(tv.Directory))
-                    {
-                        tv.Directory += "-" + tv.Source.ToLower();
-                    }
-
-                    if (Directory.Exists(tv.Directory))
-                    {
-                        tv.Directory += "-" + Utils.Rand.Next();
-                    }
-
-                    Directory.CreateDirectory(tv.Directory);
-
-                    // apply timezone corrections
-                    foreach (var ep in tv.Episodes)
-                    {
-                        if (!string.IsNullOrWhiteSpace(tv.AirTime) && ep.Airdate != Utils.UnixEpoch)
-                        {
-                            ep.Airdate = DateTime.Parse(ep.Airdate.ToString("yyyy-MM-dd ") + tv.AirTime).ToLocalTimeZone(tv.TimeZone);
-                        }
-                    }
-
-                    // save
-                    tv.Save();
-                    tv.SaveTracking();
-
-                    // fire data change event
-                    Database.LoadDatabase();
-                    MainWindow.Active.DataChanged();
-
-                    // asynchronously update lab.rolisoft.net's cache
                     if (tv.Language == "en")
                     {
                         Updater.UpdateRemoteCache(tv);
                     }
+
+                    _dbid = tv.ID;
+
+                    MainWindow.Active.DataChanged();
                     
                     // show finish page
                     Dispatcher.Invoke((Action)(() =>

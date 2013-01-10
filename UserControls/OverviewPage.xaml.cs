@@ -572,10 +572,9 @@
                     CustomButtons   = new[] { "Yes", "No" }
                 });
 
-            if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value == 0)
+            if (res.CustomButtonResult.HasValue && res.CustomButtonResult.Value == 0)
             {
-                Directory.Delete(sel.Show.Directory, true);
-                Database.LoadDatabase();
+                Database.Remove(sel.Show);
                 MainWindow.Active.DataChanged();
             }
         }
