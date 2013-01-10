@@ -68,13 +68,58 @@
         /// <value>
         /// 	<c>true</c> if the OS is Windows 7 or newer; otherwise, <c>false</c>.
         /// </value>
-        public static bool Is7
+        public static bool IsNT6
         {
             get
             {
                 return Environment.OSVersion.Platform == PlatformID.Win32NT &&
                      ((Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 1) ||
                        Environment.OSVersion.Version.Major >= 6);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the operating system is Windows 7.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the OS is Windows 7; otherwise, <c>false</c>.
+        /// </value>
+        public static bool Is7
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT &&
+                      (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 1);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the operating system is Windows 8
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the OS is Windows 8; otherwise, <c>false</c>.
+        /// </value>
+        public static bool Is8
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT &&
+                      (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 2);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the operating system is Windows XP.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the OS is Windows XP; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsXP
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT &&
+                      (Environment.OSVersion.Version.Major == 5 && Environment.OSVersion.Version.Minor == 1);
             }
         }
 
@@ -152,6 +197,9 @@
 
                                     case 1:
                                         return "Windows 7";
+
+                                    case 2:
+                                        return "Windows 8";
                                 }
                                 break;
                         }

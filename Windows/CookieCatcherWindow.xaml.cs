@@ -6,8 +6,9 @@
     using System.Windows;
     using System.Windows.Media.Imaging;
 
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
+
+    using TaskDialogInterop;
 
     using WebBrowser = System.Windows.Forms.WebBrowser;
 
@@ -99,25 +100,22 @@
 
             if (Engine.RequiredCookies != null && Engine.RequiredCookies.Length != 0 && !((string[])Engine.RequiredCookies).All(req => Regex.IsMatch(Cookies, @"(?:^|[\s;]){0}=".FormatWith(req), RegexOptions.IgnoreCase)))
             {
-                var td = new TaskDialog
+                var td = new TaskDialogOptions
                     {
-                        Icon            = TaskDialogStandardIcon.Error,
-                        Caption         = "Required cookies not found",
-                        InstructionText = Engine.Name,
-                        Text            = "Couldn't catch the required cookies for authentication.\r\nYou need to manually extract the following cookies from your browser:\r\n\r\n-> " + string.Join("\r\n-> ", Engine.RequiredCookies) + "\r\n\r\nAnd enter them in this way:\r\n\r\n" + string.Join("=VALUE; ", Engine.RequiredCookies) + "=VALUE",
-                        Cancelable      = true,
-                        StandardButtons = TaskDialogStandardButtons.Ok
+                        MainIcon                = VistaTaskDialogIcon.Error,
+                        Title                   = "Required cookies not found",
+                        MainInstruction         = Engine.Name,
+                        Content                 = "Couldn't catch the required cookies for authentication.\r\nYou need to manually extract the following cookies from your browser:\r\n\r\n-> " + string.Join("\r\n-> ", Engine.RequiredCookies) + "\r\n\r\nAnd enter them in this way:\r\n\r\n" + string.Join("=VALUE; ", Engine.RequiredCookies) + "=VALUE",
+                        AllowDialogCancellation = true,
+                        CommandButtons          = new[] { "How to extract cookies manually", "Close" }
                     };
 
-                var fd = new TaskDialogCommandLink { Text = "How to extract cookies manually" };
-                fd.Click += (s, r) =>
-                    {
-                        td.Close();
-                        Utils.Run("http://lab.rolisoft.net/tvshowtracker/extract-cookies.html");
-                    };
+                var res = TaskDialog.Show(td);
 
-                td.Controls.Add(fd);
-                td.Show();
+                if (res.CommandButtonResult.HasValue && res.CommandButtonResult == 0)
+                {
+                    Utils.Run("http://lab.rolisoft.net/tvshowtracker/extract-cookies.html");
+                }
             }
 
             DialogResult = true;

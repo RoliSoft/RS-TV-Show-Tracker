@@ -19,7 +19,7 @@
     using Microsoft.Windows.Shell;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using Remote;
+    using RoliSoft.TVShowTracker.Remote;
 
     using TaskDialogInterop;
 
@@ -58,13 +58,7 @@
         {
             Thread.CurrentThread.CurrentCulture   = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
-
-            if (!Utils.Is7)
-            {
-                MessageBox.Show("This software doesn't support " + Utils.OS + ", only Windows 7 or newer.", Utils.OS + " is not supported", MessageBoxButton.OK, MessageBoxImage.Error);
-                Process.GetCurrentProcess().Kill();
-            }
-
+            
             if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")))
             {
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();

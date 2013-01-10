@@ -4,10 +4,11 @@
     using System.Threading.Tasks;
     using System.Windows;
 
-    using Microsoft.WindowsAPICodePack.Dialogs;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using RoliSoft.TVShowTracker.Remote;
+
+    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for SendFeedbackWindow.xaml
@@ -91,14 +92,15 @@
                     {
                         progressBar.Visibility = Visibility.Collapsed;
 
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                Icon            = TaskDialogStandardIcon.Information,
-                                Caption         = "Feedback sent",
-                                InstructionText = "Feedback sent",
-                                Text            = "Thank you for your feedback!" + Environment.NewLine + Environment.NewLine + "If you specified an email address I'll answer shortly.",
-                                Cancelable      = true
-                            }.Show();
+                                MainIcon                = VistaTaskDialogIcon.Information,
+                                Title                   = "Feedback sent",
+                                MainInstruction         = "Feedback sent",
+                                Content                 = "Thank you for your feedback!" + Environment.NewLine + Environment.NewLine + "If you specified an email address I'll answer shortly.",
+                                AllowDialogCancellation = true,
+                                CustomButtons           = new[] { "OK" }
+                            });
 
                         Close();
                     }));
