@@ -982,7 +982,7 @@
             {
                 last[site] = DateTime.MinValue;
 
-                var cache = site.GetCache(showGeneralName.Text).ToList();
+                var cache = site.GetCache(showGeneralName.Text);
                 if (cache.Count == 0) continue;
 
                 last[site] = cache.First().Date;

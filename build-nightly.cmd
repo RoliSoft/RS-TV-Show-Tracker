@@ -44,6 +44,12 @@ if not exist %WinDir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe (
 
 %WinDir%\Microsoft.NET\Framework\v4.0.30319\MSBuild "RS TV Show Tracker.csproj" /p:Configuration=Nightly
 
+:: copy dependencies
+
+rmdir /S /Q bin\Nightly\libs
+mkdir bin\Nightly\libs
+xcopy /Y /C Dependencies\*.dll bin\Nightly\libs\
+
 :: create portable archive with 7-Zip or WinRAR
 
 if exist "%ProgramFiles%\7-Zip\7z.exe" (

@@ -155,11 +155,12 @@
         /// <returns>List of cached articles from the last search or <c>null</c>.</returns>
         public List<Article> GetCache(string query)
         {
+            var list = new List<Article>();
             var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
             if (!File.Exists(path))
             {
-                return null;
+                return list;
             }
 
             using (var fs = File.OpenRead(path))
@@ -168,7 +169,6 @@
                 var ver = br.ReadByte();
                 var upd = br.ReadUInt32();
                 var cnt = br.ReadUInt32();
-                var dat = new List<Article>();
 
                 for (var i = 0; i < cnt; i++)
                 {
@@ -179,11 +179,11 @@
                     article.Summary = br.ReadString();
                     article.Link    = br.ReadString();
 
-                    dat.Add(article);
+                    list.Add(article);
                 }
-
-                return dat;
             }
+
+            return list;
         }
 
         /// <summary>
