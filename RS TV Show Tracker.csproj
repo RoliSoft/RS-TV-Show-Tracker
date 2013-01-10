@@ -89,26 +89,20 @@
     </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BouncyCastle.Crypto, Version=1.7.4137.9688, Culture=neutral, PublicKeyToken=a4292a325f69b123, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>Dependencies\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="CookComputing.XmlRpcV2">
-      <HintPath>.\CookComputing.XmlRpcV2.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
-    <Reference Include="Hammock.ClientProfile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    <Reference Include="Hammock.ClientProfile">
+      <HintPath>Dependencies\Hammock.ClientProfile.dll</HintPath>
     </Reference>
     <Reference Include="HtmlAgilityPack">
-      <HintPath>.\HtmlAgilityPack.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+    <Reference Include="IronPython">
       <HintPath>Dependencies\IronPython.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>Dependencies\Microsoft.Dynamic.dll</HintPath>
@@ -121,32 +115,25 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Windows.Shell">
-      <HintPath>.\Microsoft.Windows.Shell.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\Microsoft.Windows.Shell.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack">
-      <HintPath>.\Microsoft.WindowsAPICodePack.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\Microsoft.WindowsAPICodePack.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack.Shell">
-      <HintPath>.\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>.\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.1.12217, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    <Reference Include="nunit.framework">
+      <HintPath>Dependencies\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.8.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    <Reference Include="SharpCompress">
+      <HintPath>Dependencies\SharpCompress.dll</HintPath>
     </Reference>
-    <Reference Include="Starksoft.Net.Proxy, Version=1.0.130.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    <Reference Include="Starksoft.Net.Proxy">
+      <HintPath>Dependencies\Starksoft.Net.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -161,18 +148,14 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="TaskDialog, Version=1.0.4372.18283, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="TaskDialog">
       <HintPath>Dependencies\TaskDialog.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Transitionals">
-      <HintPath>.\Transitionals.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\Transitionals.dll</HintPath>
     </Reference>
-    <Reference Include="VistaControls, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    <Reference Include="VistaControls">
+      <HintPath>Dependencies\VistaControls.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -841,18 +824,6 @@
     <Resource Include="Images\cross.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Dependencies\CookComputing.XmlRpcV2.dll" />
-    <None Include="Dependencies\HtmlAgilityPack.dll" />
-    <None Include="Dependencies\Microsoft.Windows.Shell.dll" />
-    <None Include="Dependencies\Microsoft.WindowsAPICodePack.dll" />
-    <None Include="Dependencies\Microsoft.WindowsAPICodePack.Shell.dll" />
-    <None Include="Dependencies\Newtonsoft.Json.dll" />
-    <None Include="Dependencies\Transitionals.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Dependencies\nunit.framework.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\folder-rename.png" />
   </ItemGroup>
   <ItemGroup>
@@ -864,9 +835,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\tick.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Dependencies\VistaControls.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\calendar-pencil.png" />
@@ -926,13 +894,6 @@
     <Resource Include="Images\animenewsnetwork.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Dependencies\BouncyCastle.Crypto.dll" />
-    <None Include="Dependencies\Hammock.ClientProfile.dll" />
-    <None Include="Dependencies\IronPython.dll" />
-    <None Include="Dependencies\Microsoft.Dynamic.dll" />
-    <None Include="Dependencies\Microsoft.Scripting.dll" />
-    <None Include="Dependencies\SharpCompress.dll" />
-    <None Include="Dependencies\Starksoft.Net.Proxy.dll" />
     <Resource Include="Images\feed.png" />
     <Resource Include="Images\serienjunkies.png" />
     <Resource Include="Images\netflix.png" />
@@ -976,9 +937,6 @@
     <Resource Include="Images\spell-check.png" />
     <Resource Include="Resources\Git Revision.txt" />
     <Resource Include="Images\tvtropes.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Dependencies\TaskDialog.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
