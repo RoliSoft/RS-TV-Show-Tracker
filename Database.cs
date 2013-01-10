@@ -30,14 +30,6 @@
         public static Dictionary<int, TVShow> TVShows { get; set; }
 
         /// <summary>
-        /// Gets or sets the contents of the episodes table in the database.
-        /// </summary>
-        /// <value>
-        /// The contents of the episodes table in the database.
-        /// </value>
-        public static List<Episode> Episodes { get; set; }
-
-        /// <summary>
         /// Gets or sets the key-value store associated with this database.
         /// </summary>
         /// <value>The data.</value>
@@ -75,9 +67,7 @@
         public static void LoadDatabase()
         {
             DataChange = DateTime.Now;
-
-            TVShows   = new Dictionary<int, TVShow>();
-            Episodes  = new List<Episode>();
+            TVShows    = new Dictionary<int, TVShow>();
 
             foreach (var dir in Directory.EnumerateDirectories(DataPath))
             {
@@ -91,7 +81,6 @@
                     var show = TVShow.Load(dir);
 
                     TVShows[show.ID] = show;
-                    Episodes.AddRange(show.Episodes);
                 }
                 catch (Exception ex)
                 {
@@ -156,6 +145,17 @@
                     bw.Write(kv.Value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Removes the specified TV show from the database.
+        /// </summary>
+        /// <param name="tv">The TV show to remove.</param>
+        public static void Remove(TVShow tv)
+        {
+            Directory.Delete(tv.Directory, true);
+            TVShows.Remove(tv.ID);
+            DataChange = DateTime.Now;
         }
 
         /// <summary>

@@ -296,7 +296,7 @@
         /// </summary>
         public void LoadUpcomingEpisodes()
         {
-            var episodes = Database.Episodes.Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Airdate).Take(100);
+            var episodes = Database.TVShows.Values.SelectMany(s => s.Episodes).Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Airdate).Take(100);
 
             UpcomingListViewItemCollection.RaiseListChangedEvents = false;
 

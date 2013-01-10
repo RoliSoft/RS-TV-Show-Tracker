@@ -146,7 +146,7 @@
         /// </returns>
         public static List<Episode> GetRecentUnwatchedEps()
         {
-            return Database.Episodes.Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21).ToList();
+            return Database.TVShows.Values.SelectMany(s => s.Episodes).Where(x => !x.Watched && x.Airdate < DateTime.Now && (DateTime.Now - x.Airdate).TotalDays < 21).ToList();
         }
 
         /// <summary>
