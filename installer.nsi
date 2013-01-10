@@ -55,14 +55,6 @@ RequestExecutionLevel admin
 ######################################################################
 
 Function .onInit
-	ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
-	IntCmp $R0 6 seven notseven seven
-	
-notseven:
-	MessageBox MB_OK|MB_ICONSTOP "This software doesn't support systems older than Windows 7."
-	Quit
-	
-seven:
 	IfSilent silent done
 	
 silent:
