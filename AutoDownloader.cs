@@ -6,9 +6,9 @@
     using System.Linq;
     using System.Threading;
 
-    using Helpers;
-    using Parsers.Downloads;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Helpers;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching and downloading links automatically.

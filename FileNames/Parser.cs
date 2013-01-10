@@ -7,12 +7,10 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using ProtoBuf;
-
-    using Parsers.Downloads;
-    using Parsers.Subtitles;
-    using Parsers.Guides;
-    using ShowNames;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.ShowNames;
 
     /// <summary>
     /// Provides support for parsing scene release file names.
@@ -182,7 +180,6 @@
         /// </returns>
         private static Tuple<string, string, DateTime> IdentifyShow(string name, ShowEpisode ep, bool askRemote = false)
         {
-            // TODO look over this
             var title = string.Empty;
             var date  = DateTime.MinValue;
             var match = false;
@@ -241,13 +238,30 @@
             {
                 if (AllKnownTVShows.Count == 0)
                 {
-                    var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin");
+                    var path = Path.Combine(Signature.FullPath, @"misc\tvshows");
 
-                    if (File.Exists(fn) && new FileInfo(fn).Length != 0)
+                    if (File.Exists(path) && new FileInfo(path).Length != 0)
                     {
-                        using (var file = File.OpenRead(fn))
+                        using (var fs = File.OpenRead(path))
+                        using (var br = new BinaryReader(fs))
                         {
-                            try { AllKnownTVShows = Serializer.Deserialize<List<KnownTVShow>>(file); } catch { }
+                            var ver = br.ReadByte();
+                            var upd = br.ReadUInt32();
+                            var cnt = br.ReadUInt32();
+
+                            AllKnownTVShows = new List<KnownTVShow>();
+
+                            for (var i = 0; i < cnt; i++)
+                            {
+                                var show = new KnownTVShow();
+
+                                show.Title      = br.ReadString();
+                                show.Slug       = br.ReadString();
+                                show.Database   = br.ReadString();
+                                show.DatabaseID = br.ReadString();
+
+                                AllKnownTVShows.Add(show);
+                            }
                         }
                     }
                     else
@@ -795,9 +809,27 @@
                     });
             }
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin")))
+            var path = Path.Combine(Signature.FullPath, @"misc\tvshows");
+
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
-                Serializer.Serialize(file, AllKnownTVShows);
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+
+            using (var fs = File.OpenWrite(path))
+            using (var bw = new BinaryWriter(fs))
+            {
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((uint)AllKnownTVShows.Count);
+
+                foreach (var show in AllKnownTVShows)
+                {
+                    bw.Write(show.Title ?? string.Empty);
+                    bw.Write(show.Slug ?? string.Empty);
+                    bw.Write(show.Database ?? string.Empty);
+                    bw.Write(show.DatabaseID ?? string.Empty);
+                }
             }
 
             return true;
@@ -846,7 +878,6 @@
         /// <summary>
         /// Represents a known TV show.
         /// </summary>
-        [ProtoContract]
         public class KnownTVShow
         {
             /// <summary>
@@ -855,7 +886,6 @@
             /// <value>
             /// The title of the TV show.
             /// </value>
-            [ProtoMember(1)]
             public string Title { get; set; }
 
             /// <summary>
@@ -864,7 +894,6 @@
             /// <value>
             /// The slug name of the TV show.
             /// </value>
-            [ProtoMember(2)]
             public string Slug { get; set; }
 
             /// <summary>
@@ -873,7 +902,6 @@
             /// <value>
             /// The database.
             /// </value>
-            [ProtoMember(3)]
             public string Database { get; set; }
 
             /// <summary>
@@ -882,7 +910,6 @@
             /// <value>
             /// The ID on the database.
             /// </value>
-            [ProtoMember(4)]
             public string DatabaseID { get; set; }
         }
     }

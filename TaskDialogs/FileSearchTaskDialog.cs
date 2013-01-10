@@ -9,8 +9,9 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using FileNames;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.FileNames;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+
     using VistaControls.TaskDialog;
 
     /// <summary>

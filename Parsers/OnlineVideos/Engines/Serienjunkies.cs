@@ -3,7 +3,7 @@
     using System;
     using System.Text.RegularExpressions;
 
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on Serienjunkies.

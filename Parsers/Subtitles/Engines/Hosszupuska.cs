@@ -10,8 +10,6 @@
 
     using NUnit.Framework;
 
-    using ProtoBuf;
-
     /// <summary>
     /// Provides support for scraping Hosszupuska Sub.
     /// </summary>
@@ -172,10 +170,7 @@
                 }
             }
             
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "Hosszupuska-IDs.bin")))
-            {
-                Serializer.Serialize(file, ShowIDs);
-            }
+            Database.SaveDict(@"misc\hosszupuska", ShowIDs);
         }
 
         /// <summary>
@@ -185,16 +180,13 @@
         /// <returns>Corresponding ID.</returns>
         public int? GetIDForShow(string name)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "Hosszupuska-IDs.bin");
+            var fn = Path.Combine(Database.DataPath, @"misc\hosszupuska");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    using (var file = File.OpenRead(fn))
-                    {
-                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
-                    }
+                    ShowIDs = Database.LoadDictIntStr(fn);
                 }
                 else
                 {

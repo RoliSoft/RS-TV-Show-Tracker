@@ -7,8 +7,6 @@
 
     using NUnit.Framework;
 
-    using ProtoBuf;
-
     /// <summary>
     /// Provides support for scraping feliratok.hu and/or its mirrors.
     /// </summary>
@@ -140,10 +138,7 @@
                 ShowIDs[(int)item["ID"]] = (string)item["name"];
             }
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "SuperSubtitles-IDs.bin")))
-            {
-                Serializer.Serialize(file, ShowIDs);
-            }
+            Database.SaveDict(@"misc\supersubtitles", ShowIDs);
         }
 
         /// <summary>
@@ -153,16 +148,13 @@
         /// <returns>Corresponding ID.</returns>
         public int? GetIDForShow(string name)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "SuperSubtitles-IDs.bin");
+            var fn = Path.Combine(Database.DataPath, @"misc\supersubtitles");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    using (var file = File.OpenRead(fn))
-                    {
-                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
-                    }
+                    ShowIDs = Database.LoadDictIntStr(fn);
                 }
                 else
                 {

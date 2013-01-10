@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Threading;
 
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     using TaskDialogInterop;
 

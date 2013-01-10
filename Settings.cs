@@ -8,7 +8,7 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
-    using Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
     /// Provides access to the default JSON settings file.

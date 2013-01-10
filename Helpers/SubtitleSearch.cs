@@ -6,7 +6,7 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
-    using Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
     /// Provides methods for searching subtitles on multiple provides asynchronously.

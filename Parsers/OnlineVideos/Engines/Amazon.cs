@@ -2,7 +2,7 @@
 {
     using System;
 
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on Amazon Instant Video.

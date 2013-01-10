@@ -9,9 +9,9 @@
     using System.Windows.Media;
     using System.Windows.Media.Effects;
 
-    using Parsers.Social.Engines;
-
     using TaskDialogInterop;
+
+    using RoliSoft.TVShowTracker.Parsers.Social.Engines;
 
     /// <summary>
     /// Interaction logic for SocialWindow.xaml

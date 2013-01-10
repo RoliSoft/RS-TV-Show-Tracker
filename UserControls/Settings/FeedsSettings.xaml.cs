@@ -7,7 +7,7 @@
     using System.Windows.Data;
     using System.Windows.Documents;
 
-    using Parsers.News;
+    using RoliSoft.TVShowTracker.Parsers.News;
 
     /// <summary>
     /// Interaction logic for FeedsSettings.xaml

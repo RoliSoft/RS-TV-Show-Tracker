@@ -7,13 +7,12 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    using FileNames;
-    using Parsers.Social;
-    using Dependencies.DetectOpenFiles;
-
+    using RoliSoft.TVShowTracker.FileNames;
+    using RoliSoft.TVShowTracker.Parsers.Social;
+    using RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles;
     using RoliSoft.TVShowTracker.Parsers.Guides;
 
-    using Parser = ShowNames.Parser;
+    using Parser = RoliSoft.TVShowTracker.ShowNames.Parser;
 
     /// <summary>
     /// Provides methods to monitor a given process for open file handles.

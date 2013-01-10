@@ -9,8 +9,6 @@
 
     using NUnit.Framework;
 
-    using ProtoBuf;
-
     /// <summary>
     /// Provides support for scraping SubtitleSource.
     /// </summary>
@@ -151,10 +149,7 @@
                 }
             }
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "SubtitleSource-IDs.bin")))
-            {
-                Serializer.Serialize(file, ShowIDs);
-            }
+            Database.SaveDict(@"misc\subtitlesource", ShowIDs);
         }
 
         /// <summary>
@@ -164,16 +159,13 @@
         /// <returns>Corresponding ID.</returns>
         public string GetIDForShow(string name)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "SubtitleSource-IDs.bin");
+            var fn = Path.Combine(Database.DataPath, @"misc\subtitlesource");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    using (var file = File.OpenRead(fn))
-                    {
-                        ShowIDs = Serializer.Deserialize<Dictionary<string, string>>(file);
-                    }
+                    ShowIDs = Database.LoadDictStrStr(fn);
                 }
                 else
                 {

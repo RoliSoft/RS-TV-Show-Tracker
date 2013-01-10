@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
     /// Extended class of the original Subtitle class for the listview.

@@ -17,13 +17,13 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using ContextMenus;
-    using ContextMenus.Menus;
-    using Downloaders.Engines;
-    using Helpers;
-    using Parsers;
-    using Parsers.Downloads;
-    using TaskDialogs;
+    using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
+    using RoliSoft.TVShowTracker.Helpers;
+    using RoliSoft.TVShowTracker.Parsers;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     using Image = System.Windows.Controls.Image;
 

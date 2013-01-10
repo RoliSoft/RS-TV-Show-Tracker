@@ -5,8 +5,8 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using Parsers.OnlineVideos;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     using VistaControls.TaskDialog;
 

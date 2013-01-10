@@ -9,7 +9,7 @@
 
     using HtmlAgilityPack;
 
-    using ProtoBuf;
+    using RoliSoft.TVShowTracker.FileNames;
 
     /// <summary>
     /// Various functions to discover TV shows in a specified input.
@@ -58,20 +58,37 @@
         {
             _results = new HashSet<string>();
 
-            if (FileNames.Parser.AllKnownTVShows.Count == 0)
+            if (Parser.AllKnownTVShows.Count == 0)
             {
-                var fn = Path.Combine(Path.GetTempPath(), "AllKnownTVShows.bin");
+                var path = Path.Combine(Signature.FullPath, @"misc\tvshows");
 
-                if (File.Exists(fn) && new FileInfo(fn).Length != 0)
+                if (File.Exists(path) && new FileInfo(path).Length != 0)
                 {
-                    using (var file = File.OpenRead(fn))
+                    using (var fs = File.OpenRead(path))
+                    using (var br = new BinaryReader(fs))
                     {
-                        try { FileNames.Parser.AllKnownTVShows = Serializer.Deserialize<List<FileNames.Parser.KnownTVShow>>(file); } catch { }
+                        var ver = br.ReadByte();
+                        var upd = br.ReadUInt32();
+                        var cnt = br.ReadUInt32();
+
+                        Parser.AllKnownTVShows = new List<Parser.KnownTVShow>();
+
+                        for (var i = 0; i < cnt; i++)
+                        {
+                            var show = new Parser.KnownTVShow();
+
+                            show.Title      = br.ReadString();
+                            show.Slug       = br.ReadString();
+                            show.Database   = br.ReadString();
+                            show.DatabaseID = br.ReadString();
+
+                            Parser.AllKnownTVShows.Add(show);
+                        }
                     }
                 }
                 else
                 {
-                    try { FileNames.Parser.GetAllKnownTVShows(); } catch { }
+                    try { Parser.GetAllKnownTVShows(); } catch { }
                 }
             }
 
@@ -86,7 +103,7 @@
 
                 var slug = Utils.CreateSlug(text);
 
-                foreach (var show in FileNames.Parser.AllKnownTVShows.Where(x => !string.IsNullOrWhiteSpace(x.Slug) && x.Slug != "episodes" && x.Slug != "popular"))
+                foreach (var show in Parser.AllKnownTVShows.Where(x => !string.IsNullOrWhiteSpace(x.Slug) && x.Slug != "episodes" && x.Slug != "popular"))
                 {
                     if (show.Slug == slug)
                     {

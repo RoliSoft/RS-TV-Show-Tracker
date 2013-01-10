@@ -1,6 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Represents a TV show on the overview list view.

@@ -2,7 +2,7 @@
 {
     using System.ComponentModel;
 
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Represents a TV show episode on the list view.

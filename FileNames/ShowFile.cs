@@ -4,8 +4,8 @@
     using System.IO;
     using System.Linq;
 
-    using ShowNames;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.ShowNames;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Represents a TV show video file.

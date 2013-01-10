@@ -3,7 +3,7 @@
     using System;
     using System.Xml.XPath;
 
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides support for searching videos on Hulu.

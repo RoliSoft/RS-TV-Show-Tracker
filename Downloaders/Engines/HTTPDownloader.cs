@@ -3,8 +3,8 @@
     using System;
     using System.Net;
 
-    using Parsers.Downloads;
-    using Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
     /// Provides a simple HTTP downloader.

@@ -6,7 +6,7 @@
 
     using NUnit.Framework;
 
-    using Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
     /// Provides unit tests for the file name matching methods.

@@ -14,13 +14,13 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using ContextMenus;
-    using ContextMenus.Menus;
-    using Helpers;
-    using Parsers.Subtitles;
-    using TaskDialogs;
-
     using TaskDialogInterop;
+
+    using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Helpers;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for SubtitlesPage.xaml

@@ -12,8 +12,6 @@
 
     using NUnit.Framework;
 
-    using ProtoBuf;
-
     /// <summary>
     /// Provides support for scraping tvstore.me.
     /// </summary>
@@ -245,10 +243,7 @@
                      .ToDictionary(match => match.Groups["id"].Value.ToInteger(),
                                    match => HtmlEntity.DeEntitize(match.Groups["name"].Value));
 
-            using (var file = File.Create(Path.Combine(Path.GetTempPath(), "TvStore-IDs.bin")))
-            {
-                Serializer.Serialize(file, ShowIDs);
-            }
+            Database.SaveDict(@"misc\tvstore", ShowIDs);
         }
 
         /// <summary>
@@ -258,16 +253,13 @@
         /// <returns>Corresponding show name.</returns>
         public string GetShowForID(int id)
         {
-            var fn = Path.Combine(Path.GetTempPath(), "TvStore-IDs.bin");
+            var fn = Path.Combine(Signature.FullPath, @"misc\tvstore");
 
             if (ShowIDs == null)
             {
                 if (File.Exists(fn))
                 {
-                    using (var file = File.OpenRead(fn))
-                    {
-                        ShowIDs = Serializer.Deserialize<Dictionary<int, string>>(file);
-                    }
+                    ShowIDs = Database.LoadDictIntStr(fn);
                 }
                 else
                 {

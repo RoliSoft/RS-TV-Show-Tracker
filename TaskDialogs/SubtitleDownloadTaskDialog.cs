@@ -14,12 +14,12 @@
 
     using VistaControls.TaskDialog;
 
-    using Downloaders;
-    using Parsers.Subtitles;
-    using ShowNames;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Downloaders;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
+    using RoliSoft.TVShowTracker.ShowNames;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
-    using Parser = FileNames.Parser;
+    using Parser = RoliSoft.TVShowTracker.FileNames.Parser;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>SubtitlesPage</c> links.

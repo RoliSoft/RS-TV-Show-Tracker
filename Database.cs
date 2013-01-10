@@ -7,8 +7,8 @@
     using System.Text.RegularExpressions;
     using System.Threading;
 
-    using Parsers.ForeignTitles;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.ForeignTitles;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides access to the default database.
@@ -144,6 +144,171 @@
                     bw.Write(kv.Key);
                     bw.Write(kv.Value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Saves a custom dictionary to the specified file in the database.
+        /// </summary>
+        /// <param name="name">The name in the database.</param>
+        /// <param name="dict">The dictionary to serialize.</param>
+        public static void SaveDict(string name, Dictionary<int, string> dict)
+        {
+            var path = Path.Combine(Signature.FullPath, name);
+
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+
+            using (var fs = File.OpenWrite(path))
+            using (var bw = new BinaryWriter(fs))
+            {
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((uint)dict.Count);
+
+                foreach (var kv in dict)
+                {
+                    bw.Write(kv.Key);
+                    bw.Write(kv.Value ?? string.Empty);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saves a custom dictionary to the specified file in the database.
+        /// </summary>
+        /// <param name="name">The name in the database.</param>
+        /// <param name="dict">The dictionary to serialize.</param>
+        public static void SaveDict(string name, Dictionary<string, int> dict)
+        {
+            var path = Path.Combine(Signature.FullPath, name);
+
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+
+            using (var fs = File.OpenWrite(path))
+            using (var bw = new BinaryWriter(fs))
+            {
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((uint)dict.Count);
+
+                foreach (var kv in dict)
+                {
+                    bw.Write(kv.Key ?? string.Empty);
+                    bw.Write(kv.Value);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Saves a custom dictionary to the specified file in the database.
+        /// </summary>
+        /// <param name="name">The name in the database.</param>
+        /// <param name="dict">The dictionary to serialize.</param>
+        public static void SaveDict(string name, Dictionary<string, string> dict)
+        {
+            var path = Path.Combine(Signature.FullPath, name);
+
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+
+            using (var fs = File.OpenWrite(path))
+            using (var bw = new BinaryWriter(fs))
+            {
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((uint)dict.Count);
+
+                foreach (var kv in dict)
+                {
+                    bw.Write(kv.Key ?? string.Empty);
+                    bw.Write(kv.Value ?? string.Empty);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads a custom dictionary from the specified file in the database.
+        /// </summary>
+        /// <param name="name">The name in the database.</param>
+        /// <returns>
+        /// Deserialized dictionary.
+        /// </returns>
+        public static Dictionary<string, string> LoadDictStrStr(string name)
+        {
+            using (var fs = File.OpenRead(Path.Combine(Path.GetDirectoryName(DataPath), name)))
+            using (var br = new BinaryReader(fs))
+            {
+                var ver = br.ReadByte();
+                var upd = br.ReadUInt32();
+                var cnt = br.ReadUInt32();
+                var dat = new Dictionary<string, string>();
+
+                for (var i = 0; i < cnt; i++)
+                {
+                    dat[br.ReadString()] = br.ReadString();
+                }
+
+                return dat;
+            }
+        }
+
+        /// <summary>
+        /// Loads a custom dictionary from the specified file in the database.
+        /// </summary>
+        /// <param name="name">The name in the database.</param>
+        /// <returns>
+        /// Deserialized dictionary.
+        /// </returns>
+        public static Dictionary<int, string> LoadDictIntStr(string name)
+        {
+            using (var fs = File.OpenRead(Path.Combine(Path.GetDirectoryName(DataPath), name)))
+            using (var br = new BinaryReader(fs))
+            {
+                var ver = br.ReadByte();
+                var upd = br.ReadUInt32();
+                var cnt = br.ReadUInt32();
+                var dat = new Dictionary<int, string>();
+
+                for (var i = 0; i < cnt; i++)
+                {
+                    dat[br.ReadInt32()] = br.ReadString();
+                }
+
+                return dat;
+            }
+        }
+
+        /// <summary>
+        /// Loads a custom dictionary from the specified file in the database.
+        /// </summary>
+        /// <param name="name">The name in the database.</param>
+        /// <returns>
+        /// Deserialized dictionary.
+        /// </returns>
+        public static Dictionary<string, int> LoadDictStrInt(string name)
+        {
+            using (var fs = File.OpenRead(Path.Combine(Path.GetDirectoryName(DataPath), name)))
+            using (var br = new BinaryReader(fs))
+            {
+                var ver = br.ReadByte();
+                var upd = br.ReadUInt32();
+                var cnt = br.ReadUInt32();
+                var dat = new Dictionary<string, int>();
+
+                for (var i = 0; i < cnt; i++)
+                {
+                    dat[br.ReadString()] = br.ReadInt32();
+                }
+
+                return dat;
             }
         }
 

@@ -12,8 +12,6 @@
 
     using NUnit.Framework;
 
-    using ProtoBuf;
-
     /// <summary>
     /// Represents a feed reader engine.
     /// </summary>
@@ -122,10 +120,10 @@
 
                 try
                 {
-                    article.Title = HtmlEntity.DeEntitize(item.Title.Text);
+                    article.Title   = HtmlEntity.DeEntitize(item.Title.Text);
                     article.Summary = Regex.Replace(HtmlEntity.DeEntitize(item.Summary.Text), @"\s*<[^>]+>\s*", string.Empty).Trim();
-                    article.Date = item.PublishDate.DateTime;
-                    article.Link = HtmlEntity.DeEntitize(item.Links[0].Uri.ToString());
+                    article.Date    = item.PublishDate.DateTime;
+                    article.Link    = HtmlEntity.DeEntitize(item.Links[0].Uri.ToString());
                 }
                 catch
                 {
@@ -143,11 +141,11 @@
         /// <returns>Date of last file write or <c>DateTime.MinValue</c>.</returns>
         public DateTime GetCacheDate(string query)
         {
-            var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
+            var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
-            return !File.Exists(fn)
+            return !File.Exists(path)
                   ? DateTime.MinValue
-                  : File.GetLastWriteTime(fn);
+                  : File.GetLastWriteTime(path);
         }
 
         /// <summary>
@@ -155,22 +153,36 @@
         /// </summary>
         /// <param name="query">The name of the TV show to get the cached articles for.</param>
         /// <returns>List of cached articles from the last search or <c>null</c>.</returns>
-        public IEnumerable<Article> GetCache(string query)
+        public List<Article> GetCache(string query)
         {
-            var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
+            var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
-            if (!File.Exists(fn))
+            if (!File.Exists(path))
             {
-                yield break;
+                return null;
             }
 
-            using (var file = File.OpenRead(fn))
+            using (var fs = File.OpenRead(path))
+            using (var br = new BinaryReader(fs))
             {
-                foreach (var article in Serializer.Deserialize<List<Article>>(file))
+                var ver = br.ReadByte();
+                var upd = br.ReadUInt32();
+                var cnt = br.ReadUInt32();
+                var dat = new List<Article>();
+
+                for (var i = 0; i < cnt; i++)
                 {
-                    article.Source = this;
-                    yield return article;
+                    var article = new Article(this);
+
+                    article.Title   = br.ReadString();
+                    article.Date    = ((double)br.ReadInt32()).GetUnixTimestamp();
+                    article.Summary = br.ReadString();
+                    article.Link    = br.ReadString();
+
+                    dat.Add(article);
                 }
+
+                return dat;
             }
         }
 
@@ -179,13 +191,29 @@
         /// </summary>
         /// <param name="query">The name of the TV show to set the cached aricles for.</param>
         /// <param name="articles">The articles to cache.</param>
-        protected void SetCache(string query, IEnumerable<Article> articles)
+        public void SetCache(string query, List<Article> articles)
         {
-            var fn = Path.Combine(Path.GetTempPath(), GetType().Name + "-" + Utils.CreateSlug(query, false).Replace('-', ' ').ToUppercaseWords().Replace(" ", string.Empty) + "-RSS.bin");
+            var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
-            using (var file = File.Create(fn))
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
-                Serializer.Serialize(file, articles);
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+
+            using (var fs = File.OpenWrite(path))
+            using (var bw = new BinaryWriter(fs))
+            {
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((uint)articles.Count);
+
+                foreach (var article in articles)
+                {
+                    bw.Write(article.Title ?? string.Empty);
+                    bw.Write((int)article.Date.ToUnixTimestamp());
+                    bw.Write(article.Summary ?? string.Empty);
+                    bw.Write(article.Link ?? string.Empty);
+                }
             }
         }
     }

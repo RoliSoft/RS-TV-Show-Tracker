@@ -8,7 +8,7 @@
 
     using NUnit.Framework;
 
-    using Parsers.Guides.Engines;
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
 
     /// <summary>
     /// Provides methods for getting and using covers.

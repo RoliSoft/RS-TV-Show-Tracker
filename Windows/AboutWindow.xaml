@@ -171,11 +171,6 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://code.google.com/p/protobuf-net/">protobuf-net</Hyperlink>
-                            </Paragraph>
-                        </ListItem>
-                        <ListItem>
-                            <Paragraph>
                                 <Hyperlink NavigateUri="http://www.xml-rpc.net/">XML-RPC.NET</Hyperlink>
                             </Paragraph>
                         </ListItem>

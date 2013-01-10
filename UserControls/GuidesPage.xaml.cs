@@ -16,12 +16,12 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using ContextMenus;
-    using ContextMenus.Menus;
-    using Parsers.News;
-    using Parsers.OnlineVideos;
-    using Parsers.Guides;
-    using TaskDialogs;
+    using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Parsers.News;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for GuidesPage.xaml

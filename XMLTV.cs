@@ -8,9 +8,7 @@
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
 
-    using ProtoBuf;
-
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides support for parsing XMLTV files and mapping the programming to shows in your database.
@@ -108,15 +106,35 @@
         {
             var xconfig = (XMLTVConfiguration) config;
             var listing = (List<XMLTVProgramme>) null;
-            var cache   = Path.Combine(Path.GetTempPath(), "XMLTV-" + (xconfig).File.GetHashCode().ToString("X") + "-" + (xconfig).Language + ".bin");
+            var cache   = Path.Combine(Signature.FullPath, @"misc\xmltv-" + xconfig.Language + "-" + xconfig.File.GetHashCode().ToString("x"));
             
             if (File.Exists(cache) && File.GetLastWriteTime(cache) > File.GetLastWriteTime(xconfig.File))
             {
                 try
                 {
-                    using (var file = File.OpenRead(cache))
+                    using (var fs = File.OpenRead(cache))
+                    using (var br = new BinaryReader(fs))
                     {
-                        listing = Serializer.Deserialize<List<XMLTVProgramme>>(file);
+                        var ver = br.ReadByte();
+                        var upd = br.ReadUInt32();
+                        var cnt = br.ReadUInt32();
+
+                        listing = new List<XMLTVProgramme>();
+
+                        for (var i = 0; i < cnt; i++)
+                        {
+                            var prog = new XMLTVProgramme();
+
+                            prog.ShowID      = br.ReadInt32();
+                            prog.Name        = br.ReadString();
+                            prog.Number      = br.ReadString();
+                            prog.Description = br.ReadString();
+                            prog.Channel     = br.ReadString();
+                            prog.Airdate     = ((double)br.ReadInt32()).GetUnixTimestamp();
+                            prog.URL         = br.ReadString();
+
+                            listing.Add(prog);
+                        }
                     }
                 }
                 catch
@@ -129,10 +147,29 @@
             {
                 listing = Filter(ParseFile(xconfig), xconfig).ToList();
             }
-
-            using (var file = File.Create(cache))
+            
+            if (!Directory.Exists(Path.GetDirectoryName(cache)))
             {
-                Serializer.Serialize(file, listing);
+                Directory.CreateDirectory(Path.GetDirectoryName(cache));
+            }
+
+            using (var fs = File.OpenWrite(cache))
+            using (var bw = new BinaryWriter(fs))
+            {
+                bw.Write((byte)1);
+                bw.Write((uint)DateTime.Now.ToUnixTimestamp());
+                bw.Write((uint)listing.Count);
+
+                foreach (var prog in listing)
+                {
+                    bw.Write(prog.ShowID);
+                    bw.Write(prog.Name ?? string.Empty);
+                    bw.Write(prog.Number ?? string.Empty);
+                    bw.Write(prog.Description ?? string.Empty);
+                    bw.Write(prog.Channel ?? string.Empty);
+                    bw.Write((int)prog.Airdate.ToUnixTimestamp());
+                    bw.Write(prog.URL ?? string.Empty);
+                }
             }
 
             foreach (var prog in listing.Where(p => p.Airdate.AddHours(xconfig.TZCorrection) > DateTime.Now))
@@ -353,7 +390,6 @@
         /// <summary>
         /// Represents a programme in the XMLTV listing.
         /// </summary>
-        [ProtoContract]
         public class XMLTVProgramme : Programme
         {
             /// <summary>
@@ -362,7 +398,6 @@
             /// <value>
             /// The ID of the show in the database.
             /// </value>
-            [ProtoMember(short.MaxValue)]
             public int ShowID
             {
                 get { return base.Show.ID; }
@@ -375,7 +410,6 @@
             /// <value>
             /// The name of the show.
             /// </value>
-            [ProtoMember(1)]
             public new string Name
             {
                 get { return base.Name; }
@@ -388,7 +422,6 @@
             /// <value>
             /// The episode number.
             /// </value>
-            [ProtoMember(2)]
             public new string Number
             {
                 get { return base.Number; }
@@ -401,7 +434,6 @@
             /// <value>
             /// The description.
             /// </value>
-            [ProtoMember(3)]
             public new string Description
             {
                 get { return base.Description; }
@@ -414,7 +446,6 @@
             /// <value>
             /// The channel.
             /// </value>
-            [ProtoMember(4)]
             public new string Channel
             {
                 get { return base.Channel; }
@@ -427,7 +458,6 @@
             /// <value>
             /// The airdate.
             /// </value>
-            [ProtoMember(5)]
             public new DateTime Airdate
             {
                 get { return base.Airdate; }
@@ -440,7 +470,6 @@
             /// <value>
             /// The URL to the listing or episode information.
             /// </value>
-            [ProtoMember(6)]
             public string URL
             {
                 get { return base.URL; }

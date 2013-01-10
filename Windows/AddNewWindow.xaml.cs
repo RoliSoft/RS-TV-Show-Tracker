@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Windows;
@@ -12,10 +11,10 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using Parsers.Guides;
-    using Parsers.Guides.Engines;
-
     using TaskDialogInterop;
+
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
 
     /// <summary>
     /// Interaction logic for AddNewWindow.xaml

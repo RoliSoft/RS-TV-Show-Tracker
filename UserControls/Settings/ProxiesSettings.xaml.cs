@@ -9,10 +9,10 @@
     using System.Windows;
     using System.Windows.Controls;
 
-    using Parsers.WebSearch;
-    using Parsers.WebSearch.Engines;
-
     using TaskDialogInterop;
+
+    using RoliSoft.TVShowTracker.Parsers.WebSearch;
+    using RoliSoft.TVShowTracker.Parsers.WebSearch.Engines;
 
     /// <summary>
     /// Interaction logic for ProxiesSettings.xaml

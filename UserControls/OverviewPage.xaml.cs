@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.IO;
     using System.Linq;
     using System.Timers;
     using System.Windows;
@@ -14,14 +13,13 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
-    using ContextMenus;
-    using ContextMenus.Menus;
-    using Parsers.OnlineVideos;
-    using Parsers.Guides;
-
     using TaskDialogInterop;
 
-    using TaskDialogs;
+    using RoliSoft.TVShowTracker.ContextMenus;
+    using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for OverviewPage.xaml

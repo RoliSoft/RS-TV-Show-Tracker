@@ -6,7 +6,7 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
-    using Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
     /// Provides methods for searching download links on multiple provides asynchronously.

@@ -7,9 +7,9 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Parsers.Guides;
-    using Parsers.Guides.Engines;
-    using Remote;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
+    using RoliSoft.TVShowTracker.Remote;
 
     /// <summary>
     /// Provides methods to keep the database up-to-date.

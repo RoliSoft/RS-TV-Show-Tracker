@@ -6,12 +6,11 @@
     using System.Windows.Controls;
     using System.Windows.Media.Imaging;
 
-    using Parsers.Guides;
-    using Parsers.Guides.Engines;
-
     using TaskDialogInterop;
 
-    using TaskDialogs;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
+    using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
     /// Interaction logic for EditShowWindow.xaml

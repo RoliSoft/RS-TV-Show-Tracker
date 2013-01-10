@@ -8,8 +8,8 @@
     using System.Text.RegularExpressions;
     using System.Threading;
 
-    using Dependencies.USNJournal;
-    using Parsers.Guides;
+    using RoliSoft.TVShowTracker.Dependencies.USNJournal;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides file search for finding the episodes on the disk.
