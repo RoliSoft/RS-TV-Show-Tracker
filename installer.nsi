@@ -154,7 +154,8 @@ FunctionEnd
 Section -MainProgram
 	${INSTALL_TYPE}
 	SetOverwrite ifnewer
-	SetOutPath "$INSTDIR"
+	
+	SetOutPath "$INSTDIR\libs"
 	
 	File "Dependencies\BouncyCastle.Crypto.dll"
 	File "Dependencies\CookComputing.XmlRpcV2.dll"
@@ -172,6 +173,9 @@ Section -MainProgram
 	File "Dependencies\Starksoft.Net.Proxy.dll"
 	File "Dependencies\Transitionals.dll"
 	File "Dependencies\VistaControls.dll"
+	
+	SetOutPath "$INSTDIR"
+	
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe.config"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.pdb"
@@ -235,22 +239,22 @@ SectionEnd
 
 Section Uninstall
 	${INSTALL_TYPE}
-	Delete "$INSTDIR\BouncyCastle.Crypto.dll"
-	Delete "$INSTDIR\CookComputing.XmlRpcV2.dll"
-	Delete "$INSTDIR\Hammock.ClientProfile.dll"
-	Delete "$INSTDIR\HtmlAgilityPack.dll"
-	Delete "$INSTDIR\IronPython.dll"
-	Delete "$INSTDIR\Microsoft.Dynamic.dll"
-	Delete "$INSTDIR\Microsoft.Scripting.dll"
-	Delete "$INSTDIR\Microsoft.Windows.Shell.dll"
-	Delete "$INSTDIR\Microsoft.WindowsAPICodePack.dll"
-	Delete "$INSTDIR\Microsoft.WindowsAPICodePack.Shell.dll"
-	Delete "$INSTDIR\Newtonsoft.Json.dll"
-	Delete "$INSTDIR\nunit.framework.dll"
-	Delete "$INSTDIR\SharpCompress.dll"
-	Delete "$INSTDIR\Starksoft.Net.Proxy.dll"
-	Delete "$INSTDIR\Transitionals.dll"
-	Delete "$INSTDIR\VistaControls.dll"
+	Delete "$INSTDIR\libs\BouncyCastle.Crypto.dll"
+	Delete "$INSTDIR\libs\CookComputing.XmlRpcV2.dll"
+	Delete "$INSTDIR\libs\Hammock.ClientProfile.dll"
+	Delete "$INSTDIR\libs\HtmlAgilityPack.dll"
+	Delete "$INSTDIR\libs\IronPython.dll"
+	Delete "$INSTDIR\libs\Microsoft.Dynamic.dll"
+	Delete "$INSTDIR\libs\Microsoft.Scripting.dll"
+	Delete "$INSTDIR\libs\Microsoft.Windows.Shell.dll"
+	Delete "$INSTDIR\libs\Microsoft.WindowsAPICodePack.dll"
+	Delete "$INSTDIR\libs\Microsoft.WindowsAPICodePack.Shell.dll"
+	Delete "$INSTDIR\libs\Newtonsoft.Json.dll"
+	Delete "$INSTDIR\libs\nunit.framework.dll"
+	Delete "$INSTDIR\libs\SharpCompress.dll"
+	Delete "$INSTDIR\libs\Starksoft.Net.Proxy.dll"
+	Delete "$INSTDIR\libs\Transitionals.dll"
+	Delete "$INSTDIR\libs\VistaControls.dll"
 	Delete "$INSTDIR\RSTVShowTracker.exe"
 	Delete "$INSTDIR\RSTVShowTracker.exe.config"
 	Delete "$INSTDIR\RSTVShowTracker.pdb"

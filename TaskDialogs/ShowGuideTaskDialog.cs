@@ -5,9 +5,9 @@
     using System.Linq;
     using System.Threading;
 
-    using RoliSoft.TVShowTracker.Parsers.Guides;
-
     using TaskDialogInterop;
+
+    using RoliSoft.TVShowTracker.Parsers.Guides;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to editing TV shows.
@@ -82,12 +82,13 @@
 
                         TaskDialog.Show(new TaskDialogOptions
                             {
-                                MainIcon        = VistaTaskDialogIcon.Error,
-                                Title           = "Search error",
-                                MainInstruction = show.ToUppercaseWords(),
-                                Content         = "Error while searching on " + _g.Name + ".",
-                                ExpandedInfo    = ex.Message,
-                                CustomButtons   = new[] { "OK" }
+                                MainIcon                = VistaTaskDialogIcon.Error,
+                                Title                   = "Search error",
+                                MainInstruction         = show.ToUppercaseWords(),
+                                Content                 = "Error while searching on " + _g.Name + ".",
+                                ExpandedInfo            = ex.Message,
+                                AllowDialogCancellation = true,
+                                CustomButtons           = new[] { "OK" }
                             });
 
                         done(null, null, null);
@@ -100,11 +101,12 @@
                     {
                         TaskDialog.Show(new TaskDialogOptions
                             {
-                                MainIcon        = VistaTaskDialogIcon.Warning,
-                                Title           = "Search result",
-                                MainInstruction = show.ToUppercaseWords(),
-                                Content         = "Couldn't find the specified show on " + _g.Name + ".",
-                                CustomButtons   = new[] { "OK" }
+                                MainIcon                = VistaTaskDialogIcon.Warning,
+                                Title                   = "Search result",
+                                MainInstruction         = show.ToUppercaseWords(),
+                                Content                 = "Couldn't find the specified show on " + _g.Name + ".",
+                                AllowDialogCancellation = true,
+                                CustomButtons           = new[] { "OK" }
                             });
 
                         done(null, null, null);
@@ -126,10 +128,11 @@
 
                         var td = new TaskDialogOptions
                             {
-                                Title           = "Search result",
-                                MainInstruction = show.ToUppercaseWords(),
-                                Content         = "More than one show matched the search criteria on " + _g.Name + ":",
-                                CommandButtons  = new string[_ids.Count + 1]
+                                Title                   = "Search result",
+                                MainInstruction         = show.ToUppercaseWords(),
+                                Content                 = "More than one show matched the search criteria on " + _g.Name + ":",
+                                AllowDialogCancellation = true,
+                                CommandButtons          = new string[_ids.Count + 1]
                             };
                         
                         var i = 0;

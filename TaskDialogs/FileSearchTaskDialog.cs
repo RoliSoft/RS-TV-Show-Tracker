@@ -38,11 +38,12 @@
             {
                 TaskDialog.Show(new TaskDialogOptions
                     {
-                        MainIcon        = VistaTaskDialogIcon.Error,
-                        Title           = "Search path not configured",
-                        MainInstruction = "Search path not configured",
-                        Content         = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        CustomButtons   = new[] { "OK" }
+                        MainIcon                = VistaTaskDialogIcon.Error,
+                        Title                   = "Search path not configured",
+                        MainInstruction         = "Search path not configured",
+                        Content                 = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
+                        AllowDialogCancellation = true,
+                        CustomButtons           = new[] { "OK" }
                     });
                 return;
             }
@@ -131,12 +132,13 @@
                 case 0:
                     TaskDialog.Show(new TaskDialogOptions
                         {
-                            MainIcon        = VistaTaskDialogIcon.Error,
-                            Title           = "No files found",
-                            MainInstruction = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
-                            Content         = "No files were found for this episode.",
-                            ExpandedInfo    = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
-                            CustomButtons   = new[] { "OK" }
+                            MainIcon                = VistaTaskDialogIcon.Error,
+                            Title                   = "No files found",
+                            MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                            Content                 = "No files were found for this episode.",
+                            ExpandedInfo            = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
+                            AllowDialogCancellation = true,
+                            CustomButtons           = new[] { "OK" }
                         });
                     break;
 
@@ -154,10 +156,11 @@
                 default:
                     var mfftd = new TaskDialogOptions
                         {
-                            Title           = "Multiple files found",
-                            MainInstruction = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
-                            Content         = "Multiple files were found for this episode:",
-                            CommandButtons  = new string[e.Data.Count + 1]
+                            Title                   = "Multiple files found",
+                            MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                            Content                 = "Multiple files were found for this episode:",
+                            AllowDialogCancellation = true,
+                            CommandButtons          = new string[e.Data.Count + 1]
                         };
 
                     var i = 0;

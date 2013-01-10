@@ -109,10 +109,11 @@
             
             var nvftd = new TaskDialogOptions
                 {
-                    MainIcon        = VistaTaskDialogIcon.Error,
-                    Title           = "No videos found",
-                    MainInstruction = e.First,
-                    Content         = e.Second
+                    MainIcon                = VistaTaskDialogIcon.Error,
+                    Title                   = "No videos found",
+                    MainInstruction         = e.First,
+                    AllowDialogCancellation = true,
+                    Content                 = e.Second
                 };
 
             if (!string.IsNullOrWhiteSpace(e.Third.Item3))

@@ -7,16 +7,17 @@
 
     using SharpCompress.Archive;
 
-    using VistaControls.TaskDialog;
+    using TaskDialogInterop;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend for unraring scene releases.
     /// </summary>
     public class OpenArchiveTaskDialog
     {
-        private TaskDialog _td;
         private Thread _thd;
-        private string _file, _ext;
+        private string _file, _ext, _tdstr;
+        private int _tdpos;
+        private volatile bool _active;
 
         /// <summary>
         /// Gets a list of supported archive file extensions.
@@ -37,46 +38,42 @@
         {
             _file = file;
 
-            _td = new TaskDialog
+            var res = TaskDialog.Show(new TaskDialogOptions
                 {
-                    Title           = "Open archive",
-                    Instruction     = Path.GetFileName(file),
-                    Content         = "The episode you are trying to play is compressed.",
-                    UseCommandLinks = true,
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    CustomButtons   = new[]
-                                          {
-                                              new CustomButton(0, "Open archive with default video player\nSome video players are be able to open files inside archives."), 
-                                              new CustomButton(1, "Decompress archive before opening"), 
-                                          },
-                };
+                    Title                   = "Open archive",
+                    MainInstruction         = Path.GetFileName(file),
+                    Content                 = "The episode you are trying to play is compressed.",
+                    AllowDialogCancellation = true,
+                    CommandButtons          = new[]
+                        {
+                            "Open archive with default video player\nSome video players are be able to open files inside archives.", 
+                            "Decompress archive before opening", 
+                            "None of the above"
+                        }
+                });
 
-            _td.ButtonClick += (s, e) => new Thread(() => TaskDialogButtonClick(s, e)).Start();
-
-            new Thread(() => _td.Show()).Start();
-        }
-
-        /// <summary>
-        /// Handles the ButtonClick event of the _td control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void TaskDialogButtonClick(object sender, EventArgs e)
-        {
-            switch (((ClickEventArgs)e).ButtonID)
+            if (!res.CommandButtonResult.HasValue)
+            {
+                return;
+            }
+            
+            switch (res.CommandButtonResult.Value)
             {
                 case 0:
                     var apps = Utils.GetDefaultVideoPlayers();
 
                     if (apps.Length == 0)
                     {
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon  = TaskDialogIcon.Stop,
-                                Title       = "No associations found",
-                                Instruction = "No associations found",
-                                Content     = "No application is registered to open any of the known video types."
-                            }.Show();
+                                MainIcon                = VistaTaskDialogIcon.Error,
+                                Title                   = "No associations found",
+                                MainInstruction         = "No associations found",
+                                Content                 = "No application is registered to open any of the known video types.",
+                                AllowDialogCancellation = true,
+                                CustomButtons           = new[] { "OK" }
+                            });
+
                         return;
                     }
 
@@ -93,43 +90,44 @@
                     }
                     else if (files.Count == 0)
                     {
-                        new TaskDialog
+                        TaskDialog.Show(new TaskDialogOptions
                             {
-                                CommonIcon  = TaskDialogIcon.Stop,
-                                Title       = "No files found",
-                                Instruction = "No files found",
-                                Content     = "The archive doesn't contain any video files."
-                            }.Show();
+                                MainIcon                = VistaTaskDialogIcon.Error,
+                                Title                   = "No files found",
+                                MainInstruction         = "No files found",
+                                Content                 = "The archive doesn't contain any video files.",
+                                AllowDialogCancellation = true,
+                                CustomButtons           = new[] { "OK" }
+                            });
+
                         return;
                     }
                     else
                     {
-                        var seltd = new TaskDialog
+                        var seltd = new TaskDialogOptions
                             {
-                                Title           = "Open archive",
-                                Instruction     = Path.GetFileName(_file),
-                                Content         = "The archive contains more than one video files.\r\nSelect the one to decompress and open:",
-                                CommonButtons   = TaskDialogButton.Cancel,
-                                CustomButtons   = new CustomButton[files.Count],
-                                UseCommandLinks = true
-                            };
-
-                        seltd.ButtonClick += (s, c) =>
-                            {
-                                if (c.ButtonID < files.Count)
-                                {
-                                    ExtractFile(files[c.ButtonID], archive);
-                                }
+                                Title                   = "Open archive",
+                                MainInstruction         = Path.GetFileName(_file),
+                                Content                 = "The archive contains more than one video files.\r\nSelect the one to decompress and open:",
+                                AllowDialogCancellation = true,
+                                CommandButtons          = new string[files.Count + 1]
                             };
 
                         var i = 0;
                         foreach (var c in files)
                         {
-                            seltd.CustomButtons[i] = new CustomButton(i, c.FilePath + "\n" + Utils.GetFileSize(c.Size) + "   –   " + c.LastModifiedTime);
+                            seltd.CommandButtons[i] = c.FilePath + "\n" + Utils.GetFileSize(c.Size) + "   –   " + c.LastModifiedTime;
                             i++;
                         }
 
-                        seltd.Show();
+                        seltd.CommandButtons[i] = "None of the above";
+
+                        var rez = TaskDialog.Show(seltd);
+
+                        if (rez.CommandButtonResult.HasValue && rez.CommandButtonResult.Value < files.Count)
+                        {
+                            ExtractFile(files[rez.CommandButtonResult.Value], archive);
+                        }
                     }
                     break;
             }
@@ -142,21 +140,53 @@
         /// <param name="archive">The archive.</param>
         private void ExtractFile(IArchiveEntry file, IArchive archive)
         {
-            _td = new TaskDialog
-                {
-                    Title           = "Extracting...",
-                    Instruction     = Path.GetFileName(file.FilePath),
-                    Content         = "Extracting file...",
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    ShowProgressBar = true
-                };
-
-            _td.Destroyed   += TaskDialogDestroyed;
-            _td.ButtonClick += TaskDialogDestroyed;
-
-            new Thread(() => _td.Show()).Start();
-
             _ext = Path.Combine(Path.GetDirectoryName(_file), Path.GetFileName(file.FilePath));
+            _active = true;
+            _tdstr = "Extracting file...";
+            var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
+                {
+                    Title                   = "Extracting...",
+                    MainInstruction         = Path.GetFileName(file.FilePath),
+                    Content                 = _tdstr,
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowProgressBar         = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
+                        {
+                            dialog.SetProgressBarPosition(_tdpos);
+                            dialog.SetContent(_tdstr);
+
+                            if (args.ButtonId != 0)
+                            {
+                                if (_active)
+                                {
+                                    try { _thd.Abort(); _thd = null; } catch { }
+
+                                    if (!string.IsNullOrWhiteSpace(_ext) && File.Exists(_ext))
+                                    {
+                                        new Thread(() =>
+                                            {
+                                                Thread.Sleep(1000);
+                                                try { File.Delete(_ext); } catch { }
+                                            }).Start();
+                                    }
+                                }
+
+                                return false;
+                            }
+
+                            if (!_active)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
+            mthd.SetApartmentState(ApartmentState.STA);
+            mthd.Start();
 
             var total = file.Size;
             var last = DateTime.MinValue;
@@ -176,12 +206,12 @@
                     last = DateTime.Now;
 
                     var perc = ((double)args.CurrentFilePartCompressedBytesRead / (double)total) * 100;
-                    _td.ProgressBarPosition = (int)perc;
-                    _td.Content = "Extracting file: " + Utils.GetFileSize(args.CurrentFilePartCompressedBytesRead) + " / " + perc.ToString("0.00") + "% done...";
+                    _tdpos = (int)perc;
+                    _tdstr = "Extracting file: " + Utils.GetFileSize(args.CurrentFilePartCompressedBytesRead) + " / " + perc.ToString("0.00") + "% done...";
                 };
             archive.EntryExtractionEnd += (sender, args) =>
                 {
-                    _td.SimulateButtonClick(-1);
+                    _active = false;
 
                     if (!File.Exists(_ext))
                     {
@@ -201,29 +231,7 @@
             _thd = new Thread(() => file.WriteToFile(_ext));
             _thd.Start();
         }
-
-        /// <summary>
-        /// Handles the Destroyed event of the _td control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void TaskDialogDestroyed(object sender, EventArgs e)
-        {
-            if (((ClickEventArgs)e).ButtonID == 2)
-            {
-                try { _thd.Abort(); _thd = null; } catch { }
-
-                if (!string.IsNullOrWhiteSpace(_ext) && File.Exists(_ext))
-                {
-                    new Thread(() =>
-                        {
-                            Thread.Sleep(1000);
-                            try { File.Delete(_ext); } catch { }
-                        }).Start();
-                }
-            }
-        }
-
+        
         /// <summary>
         /// Waits until the file is not in use anymore,
         /// and asks the user if s/he wants to remove it.
@@ -235,16 +243,17 @@
                 Thread.Sleep(1000);
             }
             
-            var res = new TaskDialog
+            var res = TaskDialog.Show(new TaskDialogOptions
                 {
-                    CommonIcon    = TaskDialogIcon.SecurityWarning,
-                    Title         = Signature.Software,
-                    Instruction   = "Extracted file not in use anymore",
-                    Content       = "Would you like to remove the extracted file " + Path.GetFileName(_ext) + " now that you've watched it?",
-                    CommonButtons = TaskDialogButton.Yes | TaskDialogButton.No
-                }.Show();
+                    MainIcon                = VistaTaskDialogIcon.Information,
+                    Title                   = Signature.Software,
+                    MainInstruction         = "Extracted file not in use anymore",
+                    Content                 = "Would you like to remove the extracted file " + Path.GetFileName(_ext) + " now that you've watched it?",
+                    AllowDialogCancellation = true,
+                    CustomButtons           = new[] { "Yes", "No" }
+                });
 
-            if (res.ButtonID == 6)
+            if (res.CustomButtonResult.HasValue && res.CustomButtonResult.Value == 0)
             {
                 try { File.Delete(_ext); } catch { }
             }

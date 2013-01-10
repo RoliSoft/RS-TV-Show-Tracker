@@ -124,11 +124,12 @@
             {
                 TaskDialog.Show(new TaskDialogOptions
                     {
-                        MainIcon        = VistaTaskDialogIcon.Error,
-                        Title           = "Download error",
-                        MainInstruction = _tdtit,
-                        Content         = "There was an error while downloading the requested file." + Environment.NewLine + "Try downloading another file from the list.",
-                        CustomButtons   = new[] { "OK" }
+                        MainIcon                = VistaTaskDialogIcon.Error,
+                        Title                   = "Download error",
+                        MainInstruction         = _tdtit,
+                        Content                 = "There was an error while downloading the requested file." + Environment.NewLine + "Try downloading another file from the list.",
+                        AllowDialogCancellation = true,
+                        CustomButtons           = new[] { "OK" }
                     });
 
                 return;
