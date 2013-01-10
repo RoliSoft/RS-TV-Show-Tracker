@@ -9,20 +9,19 @@
 
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using TaskDialogInterop;
+
     using RoliSoft.TVShowTracker.FileNames;
     using RoliSoft.TVShowTracker.Parsers.Guides;
-
-    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>FileSearch</c> class.
     /// </summary>
     public class FileSearchTaskDialog
     {
-        private TaskDialog _td;
-        private Result _res;
         private FileSearch _fs;
         private Episode _ep;
+        private string _tdstr;
         private volatile bool _active;
 
         /// <summary>
@@ -37,65 +36,68 @@
 
             if (paths.Count == 0)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.Stop,
-                        Title       = "Search path not configured",
-                        Instruction = "Search path not configured",
-                        Content     = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'."
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Search path not configured",
+                        MainInstruction = "Search path not configured",
+                        Content         = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
+                        CustomButtons   = new[] { "OK" }
+                    });
                 return;
             }
 
-            _td = new TaskDialog
-                {
-                    Title           = "Searching...",
-                    Instruction     = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
-                    Content         = "Searching for the episode...",
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    ShowProgressBar = true
-                };
-
-            _td.SetMarqueeProgressBar(true);
-            _td.Destroyed   += TaskDialogDestroyed;
-            _td.ButtonClick += TaskDialogDestroyed;
-
             _active = true;
-            new Thread(() =>
+            _tdstr = "Searching for the episode...";
+            var showmbp = false;
+            var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
-                    Thread.Sleep(500);
+                    Title                   = "Searching...",
+                    MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                    Content                 = "Searching for the episode...",
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowMarqueeProgressBar  = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
+                        {
+                            if (!showmbp)
+                            {
+                                dialog.SetProgressBarMarquee(true, 0);
+                                showmbp = true;
+                            }
 
-                    if (_active)
-                    {
-                        _res = _td.Show().CommonButton;
-                    }
-                }).Start();
-            
+                            dialog.SetContent(_tdstr);
+
+                            if (args.ButtonId != 0)
+                            {
+                                if (_active)
+                                {
+                                    try { _fs.CancelSearch(); } catch { }
+                                }
+
+                                return false;
+                            }
+
+                            if (!_active)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
+            mthd.SetApartmentState(ApartmentState.STA);
+            mthd.Start();
+
             _fs = new FileSearch(paths, _ep);
 
-            _fs.FileSearchDone += FileSearchDone;
+            _fs.FileSearchDone            += FileSearchDone;
             _fs.FileSearchProgressChanged += FileSearchProgressChanged;
             _fs.BeginSearch();
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-        }
-
-        /// <summary>
-        /// Handles the Destroyed event of the _td control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void TaskDialogDestroyed(object sender, EventArgs e)
-        {
-            if (_active && (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2)))
-            {
-                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-                _active = false;
-                _res    = Result.Cancel;
-
-                _fs.CancelSearch();
-            }
         }
 
         /// <summary>
@@ -105,10 +107,7 @@
         /// <param name="e">The <see cref="string"/> instance containing the event data.</param>
         private void FileSearchProgressChanged(object sender, EventArgs<string> e)
         {
-            if (_td != null)
-            {
-                _td.Content = e.Data;
-            }
+            _tdstr = e.Data;
         }
 
         /// <summary>
@@ -122,12 +121,7 @@
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-            if (_td != null && _td.IsShowing)
-            {
-                _td.SimulateButtonClick(-1);
-            }
-
-            if (_res == Result.Cancel || e.Data == null)
+            if (e.Data == null)
             {
                 return;
             }
@@ -135,16 +129,15 @@
             switch (e.Data.Count)
             {
                 case 0:
-                    new TaskDialog
+                    TaskDialog.Show(new TaskDialogOptions
                         {
-                            CommonIcon          = TaskDialogIcon.Stop,
-                            Title               = "No files found",
-                            Instruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
-                            Content             = "No files were found for this episode.",
-                            ExpandedControlText = "Troubleshoot",
-                            ExpandedInformation = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
-                            CommonButtons       = TaskDialogButton.OK
-                        }.Show();
+                            MainIcon        = VistaTaskDialogIcon.Error,
+                            Title           = "No files found",
+                            MainInstruction = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                            Content         = "No files were found for this episode.",
+                            ExpandedInfo    = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
+                            CustomButtons   = new[] { "OK" }
+                        });
                     break;
 
                 case 1:
@@ -159,36 +152,19 @@
                     break;
 
                 default:
-                    var mfftd = new TaskDialog
+                    var mfftd = new TaskDialogOptions
                         {
                             Title           = "Multiple files found",
-                            Instruction     = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                            MainInstruction = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
                             Content         = "Multiple files were found for this episode:",
-                            CommonButtons   = TaskDialogButton.Cancel,
-                            CustomButtons   = new CustomButton[e.Data.Count],
-                            UseCommandLinks = true
-                        };
-
-                    mfftd.ButtonClick += (s, c) =>
-                        {
-                            if (c.ButtonID < e.Data.Count)
-                            {
-                                if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(e.Data[c.ButtonID]).ToLower()))
-                                {
-                                    new OpenArchiveTaskDialog().OpenArchive(e.Data[c.ButtonID]);
-                                }
-                                else
-                                {
-                                    Utils.Run(e.Data[c.ButtonID]);
-                                }
-                            }
+                            CommandButtons  = new string[e.Data.Count + 1]
                         };
 
                     var i = 0;
-                    foreach (var file in e.Data)
+                    for (; i < e.Data.Count; i++)
                     {
-                        var fi      = new FileInfo(file);
-                        var quality = Parser.ParseQuality(file);
+                        var fi      = new FileInfo(e.Data[i]);
+                        var quality = Parser.ParseQuality(e.Data[i]);
                         var instr   = fi.Name + "\n";
 
                         if (quality != Parsers.Downloads.Qualities.Unknown)
@@ -196,11 +172,24 @@
                             instr += quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
                         }
 
-                        mfftd.CustomButtons[i] = new CustomButton(i, instr + Utils.GetFileSize(fi.Length) + "\n" + fi.DirectoryName);
-                        i++;
+                        mfftd.CommandButtons[i] = instr + Utils.GetFileSize(fi.Length) + "\n" + fi.DirectoryName;
                     }
 
-                    mfftd.Show();
+                    mfftd.CommandButtons[i] = "None of the above";
+
+                    var res = TaskDialog.Show(mfftd);
+
+                    if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value < e.Data.Count)
+                    {
+                        if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(e.Data[res.CommandButtonResult.Value]).ToLower()))
+                        {
+                            new OpenArchiveTaskDialog().OpenArchive(e.Data[res.CommandButtonResult.Value]);
+                        }
+                        else
+                        {
+                            Utils.Run(e.Data[res.CommandButtonResult.Value]);
+                        }
+                    }
                     break;
             }
         }
