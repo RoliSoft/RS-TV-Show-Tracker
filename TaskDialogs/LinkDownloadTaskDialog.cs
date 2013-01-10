@@ -7,20 +7,21 @@
     using Microsoft.Win32;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
+    using TaskDialogInterop;
+
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
-
-    using VistaControls.TaskDialog;
 
     /// <summary>
     /// Provides a <c>TaskDialog</c> frontend to the <c>DownloadLinksPage</c> links.
     /// </summary>
     public class LinkDownloadTaskDialog
     {
-        private TaskDialog _td;
-        private Result _res;
         private IDownloader _dl;
-
+        private volatile bool _active;
+        private string _tdstr, _tdtit;
+        private int _tdpos;
+        
         /// <summary>
         /// Downloads the specified link.
         /// </summary>
@@ -34,61 +35,78 @@
                 return;
             }
 
-            _td = new TaskDialog
+            _active = true;
+            _tdtit = link.Release;
+            _tdstr = "Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...";
+            var showmbp = false;
+            var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
-                    Title           = "Downloading...",
-                    Instruction     = link.Release,
-                    Content         = "Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...",
-                    CommonButtons   = TaskDialogButton.Cancel,
-                    ShowProgressBar = true
-                };
+                    Title                   = "Downloading...",
+                    MainInstruction         = _tdtit,
+                    Content                 = _tdstr,
+                    CustomButtons           = new[] { "Cancel" },
+                    ShowMarqueeProgressBar  = true,
+                    ShowProgressBar         = true,
+                    EnableCallbackTimer     = true,
+                    AllowDialogCancellation = true,
+                    Callback                = (dialog, args, data) =>
+                        {
+                            if (!showmbp && _tdpos == 0)
+                            {
+                                dialog.SetProgressBarMarquee(true, 0);
 
-            _td.SetMarqueeProgressBar(true);
-            _td.Destroyed   += TaskDialogDestroyed;
-            _td.ButtonClick += TaskDialogDestroyed;
+                                showmbp = true;
+                            }
 
-            new Thread(() => _res = _td.Show().CommonButton).Start();
+                            if (_tdpos > 0 && showmbp)
+                            {
+                                dialog.SetMarqueeProgressBar(false);
+                                dialog.SetProgressBarState(VistaProgressBarState.Normal);
+                                dialog.SetProgressBarPosition(_tdpos);
 
-            var prm = true;
+                                showmbp = false;
+                            }
+
+                            if (_tdpos > 0)
+                            {
+                                dialog.SetProgressBarPosition(_tdpos);
+                            }
+
+                            dialog.SetContent(_tdstr);
+
+                            if (args.ButtonId != 0)
+                            {
+                                if (_active)
+                                {
+                                    try { _dl.CancelAsync(); } catch { }
+                                }
+
+                                return false;
+                            }
+
+                            if (!_active)
+                            {
+                                dialog.ClickButton(500);
+                                return false;
+                            }
+
+                            return true;
+                        }
+                }));
+            mthd.SetApartmentState(ApartmentState.STA);
+            mthd.Start();
 
             _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += DownloadFileCompleted;
             _dl.DownloadProgressChanged += (s, a) =>
                 {
-                    if (_td != null && _td.IsShowing)
-                    {
-                        if (prm)
-                        {
-                            _td.SetMarqueeProgressBar(false);
-                            _td.Navigate(_td);
-                            prm = false;
-                        }
-
-                        _td.Content = "Downloading file... ({0}%)".FormatWith(a.Data);
-                        _td.ProgressBarPosition = a.Data;
-                    }
+                    _tdstr = "Downloading file... ({0}%)".FormatWith(a.Data);
+                    _tdpos = a.Data;
                 };
 
             _dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-        }
-
-        /// <summary>
-        /// Handles the Destroyed event of the _td control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void TaskDialogDestroyed(object sender, EventArgs e)
-        {
-            if (_res == Result.Cancel || (e is ClickEventArgs && (e as ClickEventArgs).ButtonID == 2))
-            {
-                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-                _res = Result.Cancel;
-
-                _dl.CancelAsync();
-            }
         }
 
         /// <summary>
@@ -98,27 +116,21 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
+            _active = false;
+
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
-            if (_td != null && _td.IsShowing)
-            {
-                _td.SimulateButtonClick(-1);
-            }
-
-            if (_res == Result.Cancel)
-            {
-                return;
-            }
-            
             if (e.First == null && e.Second == null)
             {
-                new TaskDialog
+                TaskDialog.Show(new TaskDialogOptions
                     {
-                        CommonIcon  = TaskDialogIcon.Stop,
-                        Title       = "Download error",
-                        Instruction = _td.Instruction,
-                        Content     = "There was an error while downloading the requested file." + Environment.NewLine + "Try downloading another file from the list."
-                    }.Show();
+                        MainIcon        = VistaTaskDialogIcon.Error,
+                        Title           = "Download error",
+                        MainInstruction = _tdtit,
+                        Content         = "There was an error while downloading the requested file." + Environment.NewLine + "Try downloading another file from the list.",
+                        CustomButtons   = new[] { "OK" }
+                    });
+
                 return;
             }
 
