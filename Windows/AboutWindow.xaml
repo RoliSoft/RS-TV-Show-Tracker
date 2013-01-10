@@ -206,11 +206,6 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://windowsformsaero.codeplex.com/">Windows Forms Aero</Hyperlink>
-                            </Paragraph>
-                        </ListItem>
-                        <ListItem>
-                            <Paragraph>
                                 <Hyperlink NavigateUri="http://code.msdn.microsoft.com/WindowsAPICodePack">Windows® API Code Pack for Microsoft® .NET Framework</Hyperlink>
                             </Paragraph>
                         </ListItem>

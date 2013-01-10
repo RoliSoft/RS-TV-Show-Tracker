@@ -104,7 +104,7 @@
                     _tdpos = a.Data;
                 };
 
-            _dl.Download(link, Utils.GetRandomFileName(link.Source.Type == Types.Torrent ? "torrent" : link.Source.Type == Types.Usenet ? "nzb" : null), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
+            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false) + (link.Source.Type == Types.Torrent ? ".torrent" : link.Source.Type == Types.Usenet ? ".nzb" : string.Empty)), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }

@@ -168,10 +168,6 @@
       <HintPath>Dependencies\Transitionals.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="VistaControls">
-      <HintPath>Dependencies\VistaControls.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

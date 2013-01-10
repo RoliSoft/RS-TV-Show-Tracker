@@ -172,7 +172,6 @@ Section -MainProgram
 	File "Dependencies\SharpCompress.dll"
 	File "Dependencies\Starksoft.Net.Proxy.dll"
 	File "Dependencies\Transitionals.dll"
-	File "Dependencies\VistaControls.dll"
 	
 	SetOutPath "$INSTDIR"
 	
@@ -254,7 +253,6 @@ Section Uninstall
 	Delete "$INSTDIR\libs\SharpCompress.dll"
 	Delete "$INSTDIR\libs\Starksoft.Net.Proxy.dll"
 	Delete "$INSTDIR\libs\Transitionals.dll"
-	Delete "$INSTDIR\libs\VistaControls.dll"
 	Delete "$INSTDIR\RSTVShowTracker.exe"
 	Delete "$INSTDIR\RSTVShowTracker.exe.config"
 	Delete "$INSTDIR\RSTVShowTracker.pdb"
