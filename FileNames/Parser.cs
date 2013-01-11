@@ -518,7 +518,7 @@
             {
                 return Qualities.WebDL1080p;
             }
-            if (AreMatching(release, @"1080[ip]", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
+            if (AreMatching(release, @"1080[ip]", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD|AVC)"))
             {
                 return Qualities.BluRay1080p;
             }
@@ -530,7 +530,7 @@
             {
                 return Qualities.WebDL720p;
             }
-            if (AreMatching(release, @"720p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
+            if (AreMatching(release, @"720p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD|AVC)"))
             {
                 return Qualities.BluRay720p;
             }
@@ -542,7 +542,7 @@
             {
                 return Qualities.WebDL576p;
             }
-            if (AreMatching(release, @"576p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
+            if (AreMatching(release, @"576p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD|AVC)"))
             {
                 return Qualities.BluRay576p;
             }
@@ -554,7 +554,7 @@
             {
                 return Qualities.WebDL480p;
             }
-            if (AreMatching(release, @"480p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD)"))
+            if (AreMatching(release, @"480p", @"(Blu[_\-\.\s]?Ray|HD[_\-\.\s]?DVD|AVC)"))
             {
                 return Qualities.BluRay480p;
             }

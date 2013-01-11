@@ -312,7 +312,7 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                 <GridViewColumnHeader Content="Episode" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Episode}" FontWeight="Normal" />
+                                        <TextBlock Text="{Binding Episode}" FontWeight="Normal" Foreground="{Binding Color}" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -320,7 +320,7 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                 <GridViewColumnHeader Content="Air date" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Airdate}" FontWeight="Normal" Width="130" Margin="-7,0" TextAlignment="Center" />
+                                        <TextBlock Text="{Binding Airdate}" FontWeight="Normal" Width="130" Margin="-7,0" TextAlignment="Center" Foreground="{Binding Color}" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -328,7 +328,7 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                 <GridViewColumnHeader Content="Title" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Title}" FontWeight="Normal" TextTrimming="CharacterEllipsis" ToolTipService.ShowDuration="120000" ToolTipService.IsEnabled="{Binding ShowTooltip}">
+                                        <TextBlock Text="{Binding Title}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Foreground="{Binding Color}" ToolTipService.ShowDuration="120000" ToolTipService.IsEnabled="{Binding ShowTooltip}">
                                             <TextBlock.ToolTip>
                                                 <StackPanel Orientation="Vertical">
                                                     <StackPanel Orientation="Horizontal">

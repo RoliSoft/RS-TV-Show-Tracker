@@ -3,12 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Timers;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
     using System.Windows.Input;
+    using System.Windows.Interop;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
@@ -683,7 +685,6 @@
 
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/next.png")) };
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep);
                 pla.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -700,10 +701,64 @@
                     {
                         Foreground = Brushes.DarkGray,
                         Content    = nextep,
-                        Padding    = new Thickness(0)
+                        Padding    = new Thickness(0, 1, 15, 0)
                     });
 
                 cm.Items.Add(pla);
+
+                // - Files
+
+                List<string> nextfn;
+                if (Library.Files.TryGetValue(dbep.ID, out nextfn) && nextfn.Count != 0)
+                {
+                    // Open folder
+
+                    var opf    = new MenuItem();
+                    opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
+                    opf.Header = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Margin      = new Thickness(0, 0, spm, 0)
+                        };
+
+                    (opf.Header as StackPanel).Children.Add(new Label
+                        {
+                            Foreground = Brushes.DarkGray,
+                            Content    = "➥",
+                            Padding    = new Thickness(0),
+                            Width      = 15
+                        });
+                    (opf.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = "Open folder",
+                            Padding = new Thickness(0),
+                            Width   = lbw - 15
+                        });
+                    cm.Items.Add(opf);
+
+                    foreach (var file in nextfn.OrderByDescending(f => new FileInfo(f).Length))
+                    {
+                        var plf    = new MenuItem();
+                        plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        plf.Tag    = file;
+                        plf.Header = Path.GetFileName(file);
+                        plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
+
+                        pla.Items.Add(plf);
+
+                        var off    = new MenuItem();
+                        off.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        off.Tag    = file;
+                        off.Header = Path.GetFileName(file);
+                        off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
+
+                        opf.Items.Add(off);
+                    }
+                }
+                else
+                {
+                    pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep);
+                }
 
                 // Search for download links
 
@@ -829,9 +884,10 @@
                 var lastdt = dbep2.Airdate.ToOriginalTimeZone(dbep2.Show.TimeZone).ToString("yyyy.MM.dd");
                 var lastep = "S{0:00}E{1:00}".FormatWith(dbep2.Season, dbep2.Number);
                 
+                // Play last aired episode
+
                 var pla    = new MenuItem();
                 pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep2);
                 pla.Header = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -848,10 +904,64 @@
                     {
                         Foreground = Brushes.DarkGray,
                         Content    = lastep,
-                        Padding    = new Thickness(0)
+                        Padding    = new Thickness(0, 1, 15, 0)
                     });
 
                 cm.Items.Add(pla);
+                
+                // - Files
+
+                List<string> lastfn;
+                if (Library.Files.TryGetValue(dbep2.ID, out lastfn) && lastfn.Count != 0)
+                {
+                    // Open folder
+
+                    var opf    = new MenuItem();
+                    opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
+                    opf.Header = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Margin      = new Thickness(0, 0, spm, 0)
+                        };
+
+                    (opf.Header as StackPanel).Children.Add(new Label
+                        {
+                            Foreground = Brushes.DarkGray,
+                            Content    = "➥",
+                            Padding    = new Thickness(0),
+                            Width      = 15
+                        });
+                    (opf.Header as StackPanel).Children.Add(new Label
+                        {
+                            Content = "Open folder",
+                            Padding = new Thickness(0),
+                            Width   = lbw - 15
+                        });
+                    cm.Items.Add(opf);
+
+                    foreach (var file in lastfn.OrderByDescending(f => new FileInfo(f).Length))
+                    {
+                        var plf    = new MenuItem();
+                        plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        plf.Tag    = file;
+                        plf.Header = Path.GetFileName(file);
+                        plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
+
+                        pla.Items.Add(plf);
+
+                        var off    = new MenuItem();
+                        off.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        off.Tag    = file;
+                        off.Header = Path.GetFileName(file);
+                        off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
+
+                        opf.Items.Add(off);
+                    }
+                }
+                else
+                {
+                    pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep2);
+                }
 
                 // Search for download links
 

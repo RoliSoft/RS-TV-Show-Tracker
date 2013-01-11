@@ -12,15 +12,18 @@
     using System.Windows.Controls;
     using System.Windows.Data;
     using System.Windows.Input;
+    using System.Windows.Interop;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.News;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.Parsers.Subtitles;
     using RoliSoft.TVShowTracker.TaskDialogs;
 
     /// <summary>
@@ -497,16 +500,43 @@
 
             foreach (var episode in episodes)
             {
+                var appttl = string.Empty;
+                List<string> fns;
+                if (Library.Files.TryGetValue(episode.ID, out fns) && fns.Count != 0)
+                {
+                    var fn = fns.OrderByDescending(f => new FileInfo(f).Length).First();
+                    var qu = FileNames.Parser.ParseQuality(fn);
+
+                    if (qu != Qualities.Unknown)
+                    {
+                        appttl += " [" + qu.GetAttribute<DescriptionAttribute>().Description + "]";
+                    }
+                    else
+                    {
+                        var ed = FileNames.Parser.ParseEdition(fn);
+
+                        if (ed != Editions.Unknown)
+                        {
+                            appttl += " [" + ed.GetAttribute<DescriptionAttribute>().Description + "]";
+                        }
+                        else
+                        {
+                            appttl += " [" + Path.GetExtension(fn) + "]";
+                        }
+                    }
+                }
+
                 GuideListViewItemCollection.Add(new GuideListViewItem
                     {
                         ID          = episode,
+                        Color       = appttl != string.Empty ? "Orange" : "White",
                         SeenIt      = episode.Watched,
                         Season      = "Season " + episode.Season,
                         Episode     = "S{0:00}E{1:00}".FormatWith(episode.Season, episode.Number),
                         Airdate     = episode.Airdate != Utils.UnixEpoch
                                       ? episode.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (episode.Airdate > DateTime.Now ? "*" : string.Empty)
                                       : "Unaired episode",
-                        Title       = episode.Name,
+                        Title       = episode.Title + appttl,
                         Summary     = episode.Summary,
                         Picture     = episode.Picture,
                         URL         = episode.URL,
@@ -850,14 +880,49 @@
 
             var pla    = new MenuItem();
             pla.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/play.png")) };
-            pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID);
             pla.Header = "Play episode";
             cm.Items.Add(pla);
 
+            // - Files
+
+            List<string> fn;
+            if (Library.Files.TryGetValue(episode.ID.ID, out fn) && fn.Count != 0)
+            {
+                // Open folder
+
+                var opf    = new MenuItem();
+                opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
+                opf.Header = "Open folder";
+                cm.Items.Add(opf);
+
+                foreach (var file in fn.OrderByDescending(f => new FileInfo(f).Length))
+                {
+                    var plf    = new MenuItem();
+                    plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                    plf.Tag    = file;
+                    plf.Header = Path.GetFileName(file);
+                    plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
+
+                    pla.Items.Add(plf);
+
+                    var off    = new MenuItem();
+                    off.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                    off.Tag    = file;
+                    off.Header = Path.GetFileName(file);
+                    off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
+
+                    opf.Items.Add(off);
+                }
+            }
+            else
+            {
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID);
+            }
+
+            // Details page
+
             if (!string.IsNullOrWhiteSpace(episode.URL))
             {
-                // Details page
-
                 var det    = new MenuItem();
                 det.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/page.png")) };
                 det.Click += OpenDetailsPageClick;

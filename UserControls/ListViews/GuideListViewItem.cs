@@ -29,6 +29,12 @@
         public bool SeenIt { get; set; }
 
         /// <summary>
+        /// Gets or sets the color.
+        /// </summary>
+        /// <value>The color.</value>
+        public string Color { get; set; }
+
+        /// <summary>
         /// Gets or sets the season.
         /// </summary>
         /// <value>The season.</value>
