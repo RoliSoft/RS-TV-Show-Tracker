@@ -504,7 +504,7 @@
                 List<string> fns;
                 if (Library.Files.TryGetValue(episode.ID, out fns) && fns.Count != 0)
                 {
-                    var fn = fns.OrderByDescending(f => new FileInfo(f).Length).First();
+                    var fn = fns.OrderByDescending(FileNames.Parser.ParseQuality).First();
                     var qu = FileNames.Parser.ParseQuality(fn);
 
                     if (qu != Qualities.Unknown)
@@ -895,7 +895,7 @@
                 opf.Header = "Open folder";
                 cm.Items.Add(opf);
 
-                foreach (var file in fn.OrderByDescending(f => new FileInfo(f).Length))
+                foreach (var file in fn.OrderByDescending(FileNames.Parser.ParseQuality))
                 {
                     var plf    = new MenuItem();
                     plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };

@@ -736,7 +736,7 @@
                         });
                     cm.Items.Add(opf);
 
-                    foreach (var file in nextfn.OrderByDescending(f => new FileInfo(f).Length))
+                    foreach (var file in nextfn.OrderByDescending(FileNames.Parser.ParseQuality))
                     {
                         var plf    = new MenuItem();
                         plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
@@ -939,7 +939,7 @@
                         });
                     cm.Items.Add(opf);
 
-                    foreach (var file in lastfn.OrderByDescending(f => new FileInfo(f).Length))
+                    foreach (var file in lastfn.OrderByDescending(FileNames.Parser.ParseQuality))
                     {
                         var plf    = new MenuItem();
                         plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
