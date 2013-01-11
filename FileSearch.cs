@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Security;
     using System.Text.RegularExpressions;
     using System.Threading;
@@ -22,11 +21,6 @@
         public event EventHandler<EventArgs<List<string>>> FileSearchDone;
 
         /// <summary>
-        /// Occurs when a multiple file search is done.
-        /// </summary>
-        public event EventHandler<EventArgs<List<string>[]>> MultiFileSearchDone;
-
-        /// <summary>
         /// Occurs when the progress of the file search has changed.
         /// </summary>
         public event EventHandler<EventArgs<string>> FileSearchProgressChanged;
@@ -37,10 +31,30 @@
         /// <value>The search thread.</value>
         public Thread SearchThread { get; internal set; }
 
+        /// <summary>
+        /// Gets or sets the found files.
+        /// </summary>
+        /// <value>The found files.</value>
+        public List<string> Result
+        {
+            get { return _files; }
+            set { _files = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the file checking function.
+        /// </summary>
+        /// <value>The file checking function.</value>
+        public Func<string, bool> CheckFile
+        {
+            get { return _checkFile; }
+            set { _checkFile = value; }
+        }
+
         private Dictionary<string, List<string>> _paths;
-        private List<string>[] _files; 
-        private Episode[] _episodes;
+        private List<string> _files;
         private Regex[] _titleRegex, _episodeRegex;
+        private Func<string, bool> _checkFile;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileSearch"/> class.
@@ -49,7 +63,7 @@
         /// <param name="episode">The episode to search for.</param>
         public FileSearch(IEnumerable<string> paths, Episode episode)
         {
-            _episodes     = new[] { episode };
+            _checkFile    = StandardCheckFile;
             _titleRegex   = new[] { episode.Show.GenerateRegex() };
             _episodeRegex = new[] { episode.GenerateRegex() };
 
@@ -61,17 +75,62 @@
         /// </summary>
         /// <param name="paths">The paths where to start the search.</param>
         /// <param name="episodes">The episodes to search for.</param>
-        public FileSearch(IEnumerable<string> paths, IEnumerable<Episode> episodes)
+        public FileSearch(IEnumerable<string> paths, IList<Episode> episodes)
         {
-            _episodes     = episodes.ToArray();
-            _titleRegex   = new Regex[_episodes.Length];
-            _episodeRegex = new Regex[_episodes.Length];
+            _checkFile    = StandardCheckFile;
+            _titleRegex   = new Regex[episodes.Count];
+            _episodeRegex = new Regex[episodes.Count];
 
-            for (var i = 0; i < _episodes.Length; i++)
+            for (var i = 0; i < episodes.Count; i++)
             {
-                _titleRegex[i]   = _episodes[i].Show.GenerateRegex();
-                _episodeRegex[i] = _episodes[i].GenerateRegex();
+                _titleRegex[i]   = episodes[i].Show.GenerateRegex();
+                _episodeRegex[i] = episodes[i].GenerateRegex();
             }
+
+            InitStartPaths(paths);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSearch"/> class.
+        /// </summary>
+        /// <param name="paths">The paths where to start the search.</param>
+        /// <param name="show">The show to search for.</param>
+        public FileSearch(IEnumerable<string> paths, TVShow show)
+        {
+            _checkFile    = StandardCheckFile;
+            _titleRegex   = new[] { show.GenerateRegex() };
+            _episodeRegex = new[] { default(Regex) };
+
+            InitStartPaths(paths);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSearch"/> class.
+        /// </summary>
+        /// <param name="paths">The paths where to start the search.</param>
+        /// <param name="shows">The shows to search for.</param>
+        public FileSearch(IEnumerable<string> paths, IList<TVShow> shows)
+        {
+            _checkFile    = StandardCheckFile;
+            _titleRegex   = new Regex[shows.Count];
+            _episodeRegex = new Regex[shows.Count];
+
+            for (var i = 0; i < shows.Count; i++)
+            {
+                _titleRegex[i] = shows[i].GenerateRegex();
+            }
+
+            InitStartPaths(paths);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSearch" /> class.
+        /// </summary>
+        /// <param name="paths">The paths where to start the search.</param>
+        /// <param name="checkFile">The file checking function.</param>
+        public FileSearch(IEnumerable<string> paths, Func<string, bool> checkFile)
+        {
+            _checkFile = checkFile;
 
             InitStartPaths(paths);
         }
@@ -120,12 +179,7 @@
         /// </summary>
         private void Search()
         {
-            _files = new List<string>[_episodes.Length];
-
-            for (var i = 0; i < _files.Length; i++)
-            {
-                _files[i] = new List<string>();
-            }
+            _files = new List<string>();
 
             foreach (var paths in _paths)
             {
@@ -165,14 +219,7 @@
                 }
             }
 
-            if (_files.Length == 1)
-            {
-                FileSearchDone.Fire(this, _files[0]);
-            }
-            else
-            {
-                MultiFileSearchDone.Fire(this, _files);
-            }
+            FileSearchDone.Fire(this, _files);
         }
 
         /// <summary>
@@ -188,7 +235,10 @@
                 {
                     try
                     {
-                        CheckFile(file);
+                        if (CheckFile(file))
+                        {
+                            _files.Add(file);
+                        }
                     }
                     catch (PathTooLongException)        { }
                     catch (SecurityException)           { }
@@ -250,7 +300,10 @@
             {
                 try
                 {
-                    CheckFile(file);
+                    if (CheckFile(file))
+                    {
+                        _files.Add(file);
+                    }
                 }
                 catch (PathTooLongException)        { }
                 catch (SecurityException)           { }
@@ -264,15 +317,18 @@
         }
 
         /// <summary>
-        /// Determines whether the specified file is a match and inserts it into <see cref="_files"/> if it is.
+        /// Determines whether the specified file is a match and inserts it into <see cref="_files" /> if it is.
         /// </summary>
         /// <param name="file">The file.</param>
-        private void CheckFile(string file)
+        /// <returns>
+        ///   <c>true</c> if matched; otherwise <c>false</c>.
+        /// </returns>
+        private bool StandardCheckFile(string file)
         {
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
 
-            for (var i = 0; i < _files.Length; i++)
+            for (var i = 0; i < _titleRegex.Length; i++)
             {
                 if (ShowNames.Parser.IsMatch(dirs + @"\" + name, _titleRegex[i], _episodeRegex[i]))
                 {
@@ -280,11 +336,12 @@
 
                     if (pf.Success)
                     {
-                        _files[i].Add(file);
-                        break;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
     }
 }

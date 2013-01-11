@@ -2,7 +2,6 @@
 {
     using System;
     using System.IO;
-    using System.Linq;
 
     using RoliSoft.TVShowTracker.ShowNames;
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -15,8 +14,36 @@
         /// <summary>
         /// Gets or sets a value indicating whether the file name was successfully parsed.
         /// </summary>
-        /// <value><c>true</c> if parsed successfully; otherwise, <c>false</c>.</value>
+        /// <value>
+        ///   <c>true</c> if parsed successfully; otherwise, <c>false</c>.
+        /// </value>
         public bool Success { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this show is in the local database.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if in the local database; otherwise, <c>false</c>.
+        /// </value>
+        public bool Local { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TV show in the local database.
+        /// </summary>
+        /// <remarks>
+        /// Only when <c>Local</c> is <c>true</c>.
+        /// </remarks>
+        /// <value>The TV show in the local database.</value>
+        public TVShow DbTVShow { get; set; }
+
+        /// <summary>
+        /// Gets or sets the episode in the local database.
+        /// </summary>
+        /// <remarks>
+        /// Only when <c>Local</c> is <c>true</c>.
+        /// </remarks>
+        /// <value>The episode in the local database.</value>
+        public Episode DbEpisode { get; set; }
 
         /// <summary>
         /// Gets or sets the parse error if the file wasn't identifiable.
@@ -92,16 +119,19 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ShowFile"/> class.
+        /// Initializes a new instance of the <see cref="ShowFile" /> class.
         /// </summary>
         /// <param name="name">The name of the original file.</param>
         /// <param name="show">The name of the show.</param>
         /// <param name="ep">The parsed season and episode.</param>
         /// <param name="title">The title of the episode.</param>
         /// <param name="quality">The quality of the file.</param>
+        /// <param name="group">The group.</param>
         /// <param name="airdate">The airdate of the episode.</param>
+        /// <param name="dbtvshow">The TV show in the local database.</param>
+        /// <param name="dbepisode">The episode in the local database.</param>
         /// <param name="success">if set to <c>true</c> the file was successfully parsed.</param>
-        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, string group, DateTime airdate, bool success = true)
+        public ShowFile(string name, string show, ShowEpisode ep, string title, string quality, string group, DateTime airdate, TVShow dbtvshow = null, Episode dbepisode = null, bool success = true)
         {
             Name          = name;
             Extension     = Path.GetExtension(Name);
@@ -112,29 +142,12 @@
             Group         = group;
             Airdate       = airdate;
             Success       = success;
-        }
+            DbTVShow      = dbtvshow;
+            DbEpisode     = dbepisode;
 
-        /// <summary>
-        /// Searches for this episode in the local database and returns a reference to it.
-        /// </summary>
-        /// <returns>
-        /// The reference to the equivalent object in the database.
-        /// </returns>
-        public Episode GetDatabaseEquivalent()
-        {
-            if (!Success)
+            if (DbTVShow != null || DbEpisode != null)
             {
-                return null;
-            }
-
-            try
-            {
-                return Database.TVShows.First(tv => tv.Value.Name == Show).Value
-                               .Episodes.First(ep => ep.Season == Episode.Season && ep.Number == Episode.Episode);
-            }
-            catch
-            {
-                return null;
+                Local = true;
             }
         }
 

@@ -186,7 +186,7 @@
         public static Dictionary<Episode, List<string>> SearchForFiles(List<Episode> episodes)
         {
             var files = new Dictionary<Episode, List<string>>();
-            var busy  = true;
+            /*var busy  = true;
 
             foreach (var episode in episodes)
             {
@@ -210,7 +210,7 @@
             while (busy)
             {
                 Thread.Sleep(TimeSpan.FromSeconds(1));
-            }
+            }*/
 
             return files;
         }

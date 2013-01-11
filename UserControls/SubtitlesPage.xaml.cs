@@ -654,18 +654,9 @@
             {
                 var sf = FileNames.Parser.ParseFile(textBox.Text, null, false);
 
-                if (sf.Success)
+                if (sf.Success && sf.DbEpisode != null)
                 {
-                    var ep = sf.GetDatabaseEquivalent();
-
-                    if (ep != null)
-                    {
-                        new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, ep);
-                    }
-                    else
-                    {
-                        throw new Exception();
-                    }
+                    new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, sf.DbEpisode);
                 }
                 else
                 {

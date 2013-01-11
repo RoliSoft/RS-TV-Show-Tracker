@@ -96,6 +96,8 @@
             var title = string.Empty;
             var date  = DateTime.MinValue;
             var match = false;
+            var ltvsh = default(TVShow);
+            var lepis = default(Episode);
 
             // try to identify show by file name
 
@@ -109,6 +111,8 @@
                     name  = info.Item1;
                     title = info.Item2;
                     date  = info.Item3;
+                    ltvsh = info.Item4;
+                    lepis = info.Item5;
                 }
             }
 
@@ -129,6 +133,8 @@
                         name  = dirinfo.Item1;
                         title = dirinfo.Item2;
                         date  = dirinfo.Item3;
+                        ltvsh = dirinfo.Item4;
+                        lepis = dirinfo.Item5;
 
                         break;
                     }
@@ -160,13 +166,13 @@
 
             if (!match)
             {
-                return new ShowFile(file, name.ToLower().ToUppercaseWords(), ep, title, quality, group, date, false)
+                return new ShowFile(file, name.ToLower().ToUppercaseWords(), ep, title, quality, group, date, ltvsh, lepis, false)
                     {
                         ParseError = ShowFile.FailureReasons.ShowNotIdentified
                     };
             }
 
-            return new ShowFile(file, name, ep, title, quality, group, date);
+            return new ShowFile(file, name, ep, title, quality, group, date, ltvsh, lepis);
         }
 
         /// <summary>
@@ -178,11 +184,13 @@
         /// <returns>
         /// A tuple containing the show's and episode's title and airdate.
         /// </returns>
-        private static Tuple<string, string, DateTime> IdentifyShow(string name, ShowEpisode ep, bool askRemote = false)
+        private static Tuple<string, string, DateTime, TVShow, Episode> IdentifyShow(string name, ShowEpisode ep, bool askRemote = false)
         {
             var title = string.Empty;
             var date  = DateTime.MinValue;
             var match = false;
+            var ltvsh = default(TVShow);
+            var lepis = default(Episode);
 
             // try to find show in local database
             
@@ -196,6 +204,7 @@
                     if (ep == null)
                     {
                         match = true;
+                        ltvsh = show.Value;
                         name  = show.Value.Name;
 
                         break;
@@ -206,7 +215,9 @@
                         if (episode.Count != 0)
                         {
                             match = true;
+                            ltvsh = show.Value;
                             name  = show.Value.Name;
+                            lepis = episode[0];
                             title = episode[0].Name;
                             date  = episode[0].Airdate;
 
@@ -222,7 +233,9 @@
                         if (show.Value.EpisodeByID.TryGetValue(ep.Season * 1000 + ep.Episode, out episode))
                         {
                             match = true;
+                            ltvsh = show.Value;
                             name  = show.Value.Name;
+                            lepis = episode;
                             title = episode.Name;
                             date  = episode.Airdate;
 
@@ -488,7 +501,7 @@
             // return
 
             return match
-                   ? new Tuple<string, string, DateTime>(name, title, date)
+                   ? new Tuple<string, string, DateTime, TVShow, Episode>(name, title, date, ltvsh, lepis)
                    : null;
         }
 
