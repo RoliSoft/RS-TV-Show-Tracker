@@ -5,7 +5,7 @@
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
-    using System.Timers;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
@@ -23,6 +23,8 @@
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.TaskDialogs;
+
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// Interaction logic for OverviewPage.xaml
@@ -578,6 +580,56 @@
                 Database.Remove(sel.Show);
                 MainWindow.Active.DataChanged();
             }
+        }
+
+        /// <summary>
+        /// Configures the selected show on the list.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void ConfigureShow(object sender = null, EventArgs e = null)
+        {
+            if (listView.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            var sel = (OverviewListViewItem)listView.SelectedItem;
+
+            new EditShowWindow(sel.Show.ID, sel.Show.Title).ShowDialog();
+        }
+
+        /// <summary>
+        /// Updates the selected show on the list.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        public void UpdateShow(object sender = null, EventArgs e = null)
+        {
+            if (listView.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            var sel = ((OverviewListViewItem)listView.SelectedItem).Show;
+            
+            new Thread(() => Database.Update(sel, (i, s) =>
+                {
+                    switch (i)
+                    {
+                        case 0:
+                            SetStatus(s, true);
+                            break;
+
+                        case -1:
+                            SetStatus(s);
+                            break;
+
+                        case 1:
+                            MainWindow.Active.DataChanged();
+                            break;
+                    }
+                })).Start();
         }
         #endregion
 
@@ -1379,6 +1431,7 @@
                     Content    = "     Ctrl+Up",
                     Padding    = new Thickness(0)
                 });
+            ((Image)mvu.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
             sti.Items.Add(mvu);
 
             // Move down
@@ -1405,6 +1458,7 @@
                     Content    = "Ctrl+Down",
                     Padding    = new Thickness(0)
                 });
+            ((Image)mvd.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
             sti.Items.Add(mvd);
 
             // --
@@ -1421,7 +1475,7 @@
             hed.Click      += HideEnded_Click;
             sti.Items.Add(hed);
             
-            // Hide ended
+            // Fade ended
 
             var fed         = new MenuItem();
             fed.IsCheckable = true;
@@ -1430,6 +1484,26 @@
             fed.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/table-select-row.png")) };
             fed.Click      += FadeEnded_Click;
             sti.Items.Add(fed);
+
+            // --
+
+            sti.Items.Add(new Separator { Margin = new Thickness(0, -5, 0, -3) });
+
+            // Edit
+
+            var cnf    = new MenuItem();
+            cnf.Header = "Edit";
+            cnf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/pencil.png")) };
+            cnf.Click += ConfigureShow;
+            sti.Items.Add(cnf);
+
+            // Update
+
+            var upd    = new MenuItem();
+            upd.Header = "Update";
+            upd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/refresh.png")) };
+            upd.Click += UpdateShow;
+            sti.Items.Add(upd);
 
             // Remove
 
