@@ -26,6 +26,7 @@
         public static readonly Dictionary<string, string> Pregenerated = new Dictionary<string, string>
             {
                 { "Apartment 23", @"(?:\b|_)(?:DON(?:\\?['`’\._])?T[^A-Z0-9]+TRUST[^A-Z0-9]+THE[^A-Z0-9]+B(?:ITCH|\-+)?[^A-Z0-9]+IN[^A-Z0-9]+)?APARTMENT[^A-Z0-9]+23(?:\b|_)" },
+                { "Hacktion Újratöltve", "(?:\b|_)HACKTION[^A-Z0-9]+[UÚú]JRAT[OÖö]LTVE(?:\b|_)" },
             };
 
         /// <summary>

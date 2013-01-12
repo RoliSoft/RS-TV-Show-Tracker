@@ -3,11 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Interop;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
     using System.Windows.Media.Imaging;
@@ -19,6 +21,7 @@
     using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.ContextMenus.Menus;
     using RoliSoft.TVShowTracker.Helpers;
+    using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
     using RoliSoft.TVShowTracker.TaskDialogs;
 
@@ -81,6 +84,7 @@
         public SubtitleSearch ActiveSearch { get; set; }
 
         private volatile bool _searching;
+        private Episode _dbep;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitlesPage"/> class.
@@ -470,6 +474,8 @@
 
             ActiveSearch.SearchAsync(textBox.Text);
 
+            _dbep = FileNames.Parser.ParseFile(textBox.Text, null, false).DbEpisode;
+
             Utils.Win7Taskbar(0, TaskbarProgressBarState.Normal);
         }
         
@@ -599,11 +605,25 @@
             dls.Click += DownloadSubtitleClick;
             cm.Items.Add(dls);
 
-            var dnv    = new MenuItem();
-            dnv.Header = "Download subtitle near video";
-            dnv.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/inbox-download.png")) };
-            dnv.Click += DownloadSubtitleNearVideoClick;
-            cm.Items.Add(dnv);
+            List<string> fn;
+            if (_dbep != null && Library.Files.TryGetValue(_dbep.ID, out fn) && fn.Count != 0)
+            {
+                var dnv    = new MenuItem();
+                dnv.Header = "Download subtitle near";
+                dnv.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/inbox-download.png")) };
+                cm.Items.Add(dnv);
+
+                foreach (var file in fn.OrderByDescending(FileNames.Parser.ParseQuality))
+                {
+                    var plf    = new MenuItem();
+                    plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                    plf.Tag    = file;
+                    plf.Header = Path.GetFileName(file);
+                    plf.Click += DownloadSubtitleNearVideoClick;
+
+                    dnv.Items.Add(plf);
+                }
+            }
 
             foreach (var dlcm in Extensibility.GetNewInstances<SubtitleContextMenu>())
             {
@@ -650,30 +670,7 @@
 
             var sub = (Subtitle)listView.SelectedValue;
 
-            try
-            {
-                var sf = FileNames.Parser.ParseFile(textBox.Text, null, false);
-
-                if (sf.Success && sf.DbEpisode != null)
-                {
-                    new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, sf.DbEpisode);
-                }
-                else
-                {
-                    throw new Exception();
-                }
-            }
-            catch
-            {
-                TaskDialog.Show(new TaskDialogOptions
-                    {
-                        MainIcon        = VistaTaskDialogIcon.Error,
-                        Title           = "Mapping error",
-                        MainInstruction = textBox.Text.Trim(),
-                        Content         = "The query you've entered could not be mapped to an episode in the database. If this show is not on your list, add it, so the file search engine can find it.",
-                        CustomButtons   = new[] { "OK" }
-                    });
-            }
+            new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, _dbep, (string)((MenuItem)sender).Tag);
         }
     }
 }

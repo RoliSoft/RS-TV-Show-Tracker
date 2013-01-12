@@ -135,6 +135,11 @@
             Indexing = false;
 
             SaveList();
+
+            if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+            {
+                MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+            }
         }
 
         /// <summary>
@@ -146,6 +151,11 @@
         /// </returns>
         private static bool CheckFile(string file)
         {
+            if (!ShowNames.Regexes.KnownVideo.IsMatch(file) || ShowNames.Regexes.SampleVideo.IsMatch(file))
+            {
+                return false;
+            }
+
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
             var pf   = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
@@ -168,6 +178,11 @@
                 if (!Indexing)
                 {
                     SaveList();
+
+                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbTVShow.ID)
+                    {
+                        MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                    }
                 }
             }
 

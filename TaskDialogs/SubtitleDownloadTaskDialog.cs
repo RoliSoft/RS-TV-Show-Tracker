@@ -27,10 +27,9 @@
     public class SubtitleDownloadTaskDialog
     {
         private IDownloader _dl;
-        private FileSearch _fs;
-        private List<string> _files; 
         private Subtitle _link;
         private Episode _ep;
+        private string _file;
         private bool _play;
         private volatile bool _active;
         private string _tdstr, _tdtit;
@@ -176,38 +175,25 @@
         /// </summary>
         /// <param name="link">The link.</param>
         /// <param name="episode">The episode to search for.</param>
-        public void DownloadNearVideo(Subtitle link, Episode episode)
+        /// <param name="file">The file.</param>
+        public void DownloadNearVideo(Subtitle link, Episode episode, string file)
         {
             _link = link;
             _ep   = episode;
-
-            var paths = Settings.Get<List<string>>("Download Paths");
-
-            if (paths.Count == 0)
-            {
-                TaskDialog.Show(new TaskDialogOptions
-                    {
-                        MainIcon                = VistaTaskDialogIcon.Error,
-                        Title                   = "Search path not configured",
-                        MainInstruction         = "Search path not configured",
-                        Content                 = "To use this feature you must set your download path." + Environment.NewLine + Environment.NewLine + "To do so, click on the logo on the upper left corner of the application, then select 'Configure Software'. On the new window click the 'Browse' button under 'Download Path'.",
-                        AllowDialogCancellation = true,
-                        CustomButtons           = new[] { "OK" }
-                    });
-                return;
-            }
-
+            _file = file;
+            
             _active = true;
-            _tdstr = "Searching for the episode...";
+            _tdtit = link.Release;
+            _tdstr = "Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...";
             var showmbp = false;
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
-                    Title                   = "Searching...",
-                    MainInstruction         = link.Release,
-                    Content                 = "Searching for the episode...",
+                    Title                   = "Downloading...",
+                    MainInstruction         = _tdtit,
+                    Content                 = _tdstr,
                     CustomButtons           = new[] { "Cancel" },
-                    ShowProgressBar         = true,
                     ShowMarqueeProgressBar  = true,
+                    ShowProgressBar         = true,
                     EnableCallbackTimer     = true,
                     AllowDialogCancellation = true,
                     Callback                = (dialog, args, data) =>
@@ -239,19 +225,7 @@
                             {
                                 if (_active)
                                 {
-                                    try
-                                    {
-                                        if (_fs != null)
-                                        {
-                                            _fs.CancelSearch();
-                                        }
-
-                                        if (_dl != null)
-                                        {
-                                            _dl.CancelAsync();
-                                        }
-                                    }
-                                    catch { }
+                                    try { _dl.CancelAsync(); } catch { }
                                 }
 
                                 return false;
@@ -268,56 +242,8 @@
                 }));
             mthd.SetApartmentState(ApartmentState.STA);
             mthd.Start();
-
-            _fs = new FileSearch(paths, _ep);
-
-            _fs.FileSearchDone += NearVideoFileSearchDone;
-            _fs.FileSearchProgressChanged += NearVideoFileSearchProgressChanged;
-            _fs.BeginSearch();
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-        }
-
-        /// <summary>
-        /// Event handler for <c>FileSearch.FileSearchProgressChanged</c>.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="string"/> instance containing the event data.</param>
-        private void NearVideoFileSearchProgressChanged(object sender, EventArgs<string> e)
-        {
-            _tdstr = e.Data;
-        }
-
-        /// <summary>
-        /// Event handler for <c>FileSearch.FileSearchDone</c>.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RoliSoft.TVShowTracker.EventArgs&lt;System.Collections.Generic.List&lt;System.String&gt;&gt;"/> instance containing the event data.</param>
-        private void NearVideoFileSearchDone(object sender, EventArgs<List<string>>  e)
-        {
-            _files = e.Data ?? new List<string>();
-
-            if (_files.Count == 0)
-            {
-                _active = false;
-
-                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                
-                TaskDialog.Show(new TaskDialogOptions
-                    {
-                        MainIcon                = VistaTaskDialogIcon.Error,
-                        Title                   = "No files found",
-                        MainInstruction         = _link.Release,
-                        Content                 = "No files were found for this episode.\r\nUse the first option to download the subtitle and locate the file manually.",
-                        AllowDialogCancellation = true,
-                        CustomButtons           = new[] { "OK" }
-                    });
-                return;
-            }
-
-            _tdstr = "Sending request to " + new Uri(_link.FileURL ?? _link.InfoURL).DnsSafeHost.Replace("www.", string.Empty) + "...";
-
-            _dl                          = _link.Source.Downloader;
+            
+            _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += NearVideoDownloadFileCompleted;
             _dl.DownloadProgressChanged += (s, a) =>
                 {
@@ -325,9 +251,11 @@
                     _tdpos = a.Data;
                 };
 
-            _dl.Download(_link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(_link.Release + " " + _link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
-        }
+            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
 
+            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
+        }
+        
         /// <summary>
         /// Handles the DownloadFileCompleted event of the HTTPDownloader control.
         /// </summary>
@@ -354,59 +282,43 @@
                 return;
             }
 
-            var dlsnvtd = new TaskDialogOptions
-                {
-                    Title                   = "Download subtitle near video",
-                    MainInstruction         = _link.Release,
-                    Content                 = "The following files were found for {0} S{1:00}E{2:00}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_ep.Show.Name, _ep.Season, _ep.Number),
-                    AllowDialogCancellation = true,
-                    CommandButtons          = new string[_files.Count + 1],
-                    VerificationText        = "Play video after subtitle is downloaded",
-                    VerificationByDefault   = Settings.Get("Play Video After Subtitle Download", false)
-                };
+            NearVideoFinishMove(_file, e.First, e.Second);
             
-            var i = 0;
-            for (; i < _files.Count; i++)
-            {
-                var fi      = new FileInfo(_files[i]);
-                var quality = Parser.ParseQuality(_files[i]);
-                var instr   = fi.Name + "\n";
-
-                if (quality != Parsers.Downloads.Qualities.Unknown)
+            var res = TaskDialog.Show(new TaskDialogOptions
                 {
-                    instr += quality.GetAttribute<DescriptionAttribute>().Description + "   –   ";
-                }
-
-                dlsnvtd.CommandButtons[i] = instr + Utils.GetFileSize(fi.Length) + "\n" + fi.DirectoryName;
-            }
-
-            dlsnvtd.CommandButtons[i] = "None of the above";
-
-            var res = TaskDialog.Show(dlsnvtd);
-
-            if (res.VerificationChecked.HasValue)
-            {
-                Settings.Set("Play Video After Subtitle Download", _play = res.VerificationChecked.Value);
-            }
-
-            if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value < _files.Count)
-            {
-                new Thread(() =>
-                    {
-                        NearVideoFinishMove(_files[res.CommandButtonResult.Value], e.First, e.Second);
-
-                        if (_play)
+                    Title                   = "Download finished",
+                    MainInstruction         = _link.Release,
+                    Content                 = "The subtitle has been downloaded, placed near the requested file and renamed to have the same name.",
+                    AllowDialogCancellation = true,
+                    CommandButtons          = new[]
                         {
-                            if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_files[res.CommandButtonResult.Value]).ToLower()))
-                            {
-                                new OpenArchiveTaskDialog().OpenArchive(_files[res.CommandButtonResult.Value]);
-                            }
-                            else
-                            {
-                                Utils.Run(_files[res.CommandButtonResult.Value]);
-                            }
+                            "Play video", 
+                            "Open folder", 
+                            "Close"
                         }
-                    }).Start();
+                });
+
+            if (!res.CommandButtonResult.HasValue)
+            {
+                return;
+            }
+
+            switch (res.CommandButtonResult.Value)
+            {
+                case 0:
+                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(_file).ToLower()))
+                    {
+                        new OpenArchiveTaskDialog().OpenArchive(_file);
+                    }
+                    else
+                    {
+                        Utils.Run(_file);
+                    }
+                    break;
+
+                case 1:
+                    Utils.Run("explorer.exe", "/select,\"" + _file + "\"");
+                    break;
             }
         }
 

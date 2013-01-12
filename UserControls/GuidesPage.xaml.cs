@@ -89,7 +89,7 @@
         /// <value>The news list view item collection.</value>
         public ObservableCollection<Article> NewsListViewItemCollection { get; set; }
 
-        private int _activeShowID;
+        internal int _activeShowID;
         private string _activeShowUrl;
         private Thread _workThd;
 
