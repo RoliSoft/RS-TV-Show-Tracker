@@ -81,6 +81,13 @@
             {
                 FileNames.Parser.GetAllKnownTVShows();
             }
+
+            var fn2 = Path.Combine(Signature.FullPath, @"misc\linkchecker");
+
+            if ((DateTime.Now - File.GetLastWriteTime(fn2)).TotalDays > 1)
+            {
+                Parsers.LinkCheckers.Engines.UniversalEngine.GetLinkCheckerDefinitions();
+            }
         }
     }
 }

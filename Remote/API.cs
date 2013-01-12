@@ -8,7 +8,7 @@
 
     using Newtonsoft.Json;
 
-    using Objects;
+    using RoliSoft.TVShowTracker.Remote.Objects;
 
     /// <summary>
     /// Provides method proxies for the lab.rolisoft.net API.
@@ -273,6 +273,15 @@
         public static General SetForeignTitle(string name, string translation, string language)
         {
             return InvokeRemoteMethod<General>("SetForeignTitle", name, translation, language);
+        }
+
+        /// <summary>
+        /// Gets the latest definitions for the link checker.
+        /// </summary>
+        /// <returns>List of link checking definitions.</returns>
+        public static Generic<List<string[]>> GetLinkCheckerDefinitions()
+        {
+            return InvokeRemoteMethod<Generic<List<string[]>>>("GetLinkCheckerDefinitions");
         }
 
         /// <summary>
