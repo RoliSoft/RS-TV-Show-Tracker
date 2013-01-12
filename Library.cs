@@ -18,6 +18,14 @@
         /// </value>
         public static Dictionary<int, List<string>> Files { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Library" /> is currently searching for files.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if currently searching for files; otherwise, <c>false</c>.
+        /// </value>
+        public static bool Indexing { get; set; }
+
         private static FileSystemWatcher[] _fsw;
 
         /// <summary>
@@ -113,6 +121,8 @@
         {
             var fs = new FileSearch(Settings.Get<List<string>>("Download Paths"), CheckFile);
 
+            Indexing = true;
+
             fs.BeginSearch();
             fs.SearchThread.Join(TimeSpan.FromMinutes(5));
 
@@ -121,6 +131,8 @@
                 // searching for more than 5 minutes, kill it
                 fs.SearchThread.Abort();
             }
+
+            Indexing = false;
 
             SaveList();
         }

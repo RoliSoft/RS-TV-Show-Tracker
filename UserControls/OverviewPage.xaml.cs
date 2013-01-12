@@ -19,6 +19,7 @@
 
     using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Dependencies.GreyableImage;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.TaskDialogs;
@@ -757,7 +758,9 @@
                 }
                 else
                 {
-                    pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep);
+                    ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                    pla.IsEnabled = false;
+                    //pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep);
                 }
 
                 // Search for download links
@@ -960,7 +963,9 @@
                 }
                 else
                 {
-                    pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep2);
+                    ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                    pla.IsEnabled = false;
+                    //pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep2);
                 }
 
                 // Search for download links

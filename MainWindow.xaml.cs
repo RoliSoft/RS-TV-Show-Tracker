@@ -224,7 +224,27 @@
             new Task(() =>
                 {
                     Thread.Sleep(5000);
+
+                    Run(() =>
+                        {
+                            ReindexDownloadPaths.IsEnabled = false;
+
+                            if (_statusTimer != null)
+                            {
+                                _statusTimer.Stop();
+                            }
+
+                            lastUpdatedLabel.Content = "indexing download paths";
+                        });
+
                     Library.Initialize();
+
+                    Run(() =>
+                            {
+                                ReindexDownloadPaths.IsEnabled = true;
+
+                                SetLastUpdated();
+                            });
                 }).Start();
 
             foreach (var plugin in Extensibility.GetNewInstances<StartupPlugin>())
@@ -539,6 +559,35 @@
 
         #region Main menu
         /// <summary>
+        /// Handles the Click event of the ReindexDownloadPaths control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        public void ReindexDownloadPathsClick(object sender = null, RoutedEventArgs e = null)
+        {
+            if (_statusTimer != null)
+            {
+                _statusTimer.Stop();
+            }
+
+            lastUpdatedLabel.Content = "indexing download paths";
+
+            ReindexDownloadPaths.IsEnabled = false;
+
+            new Task(() =>
+                {
+                    Library.Initialize();
+
+                    Run(() =>
+                            {
+                                ReindexDownloadPaths.IsEnabled = true;
+
+                                SetLastUpdated();
+                            });
+                }).Start();
+        }
+
+        /// <summary>
         /// Handles the Click event of the UpdateDatabase control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -546,6 +595,8 @@
         public void UpdateDatabaseClick(object sender = null, RoutedEventArgs e = null)
         {
             _statusTimer.Stop();
+
+            UpdateDatabase.IsEnabled = false;
 
             var updater = new Updater();
 
@@ -669,6 +720,7 @@
 
             Run(() =>
                 {
+                    UpdateDatabase.IsEnabled = true;
                     SetLastUpdated();
                     SetHeaderProgress(0);
                 });
@@ -692,6 +744,7 @@
 
                 Run(() =>
                     {
+                        UpdateDatabase.IsEnabled = true;
                         lastUpdatedLabel.Content = "update failed";
                         SetHeaderProgress(0);
                     });

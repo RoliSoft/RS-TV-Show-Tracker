@@ -19,6 +19,7 @@
 
     using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Dependencies.GreyableImage;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
     using RoliSoft.TVShowTracker.Parsers.News;
     using RoliSoft.TVShowTracker.Parsers.OnlineVideos;
@@ -916,7 +917,9 @@
             }
             else
             {
-                pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID);
+                ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                pla.IsEnabled = false;
+                //pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID);
             }
 
             // Details page
