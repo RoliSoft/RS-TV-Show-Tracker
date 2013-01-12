@@ -451,6 +451,8 @@
             TVShows[tv.ID] = tv;
             DataChange = DateTime.Now;
 
+            new Thread(Library.SearchForFiles).Start();
+
             if (callback != null)
             {
                 callback(1, "Added " + tv.Title + ".");
@@ -589,6 +591,19 @@
 
             TVShows.Remove(show.ID);
             DataChange = DateTime.Now;
+
+            if (Library.Files != null && Library.Files.Count != 0)
+            {
+                foreach (var ep in Library.Files)
+                {
+                    if (Math.Floor((double)ep.Key / 1000 / 1000) == show.ID)
+                    {
+                        ep.Value.Clear();
+                    }
+                }
+
+                Library.SaveList();
+            }
 
             if (callback != null)
             {

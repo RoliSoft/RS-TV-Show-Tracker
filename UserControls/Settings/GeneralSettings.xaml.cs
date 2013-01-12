@@ -103,6 +103,8 @@
                 dlPathsListBox.Items.Add(fbd.SelectedPath + Path.DirectorySeparatorChar);
             }
 
+            Library.AddPath(fbd.SelectedPath + Path.DirectorySeparatorChar);
+
             SaveDlPaths();
         }
 
@@ -159,6 +161,7 @@
         {
             if (dlPathsListBox.SelectedIndex == -1) return;
 
+            Library.RemovePath(dlPathsListBox.Items[dlPathsListBox.SelectedIndex].ToString());
             dlPathsListBox.Items.RemoveAt(dlPathsListBox.SelectedIndex);
 
             SaveDlPaths();

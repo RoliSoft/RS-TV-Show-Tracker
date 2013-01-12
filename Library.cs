@@ -164,9 +164,98 @@
                 {
                     Files[pf.DbEpisode.ID] = new List<string> { file };
                 }
+
+                if (!Indexing)
+                {
+                    SaveList();
+                }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Removes the any data associated to a path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        public static void RemovePath(string path)
+        {
+            foreach (var ep in Files)
+            {
+                var files = ep.Value.ToList();
+
+                foreach (var file in files)
+                {
+                    if (file.StartsWith(path))
+                    {
+                        ep.Value.Remove(path);
+                    }
+                }
+            }
+
+            foreach (var fsw in _fsw)
+            {
+                if (fsw.Path == path)
+                {
+                    fsw.EnableRaisingEvents = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a new path to the library.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        public static void AddPath(string path)
+        {
+            var i = _fsw.Length;
+            Array.Resize(ref _fsw, _fsw.Length + 1);
+
+            _fsw[i] = new FileSystemWatcher(path);
+
+            _fsw[i].Created += (s, a) => CheckFile(a.FullPath);
+            _fsw[i].Renamed += (s, a) =>
+            {
+                foreach (var ep in Files)
+                {
+                    if (ep.Value.Contains(a.OldFullPath))
+                    {
+                        ep.Value.Remove(a.OldFullPath);
+                        CheckFile(a.FullPath);
+                        return;
+                    }
+                }
+            };
+            _fsw[i].Deleted += (s, a) =>
+            {
+                foreach (var ep in Files)
+                {
+                    if (ep.Value.Contains(a.FullPath))
+                    {
+                        ep.Value.Remove(a.FullPath);
+                        return;
+                    }
+                }
+            };
+            _fsw[i].Error += (s, a) => StartWatching();
+
+            _fsw[i].EnableRaisingEvents = true;
+
+            var fs = new FileSearch(new[] { path }, CheckFile);
+
+            Indexing = true;
+
+            fs.BeginSearch();
+            fs.SearchThread.Join(TimeSpan.FromMinutes(5));
+
+            if (fs.SearchThread.IsAlive)
+            {
+                fs.SearchThread.Abort();
+            }
+
+            Indexing = false;
+
+            SaveList();
         }
 
         /// <summary>
