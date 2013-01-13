@@ -84,6 +84,12 @@
         public BindingList<UpcomingListViewItem> UpcomingListViewItemCollection { get; set; }
 
         /// <summary>
+        /// Gets or sets the downloaded list view item collection.
+        /// </summary>
+        /// <value>The downloaded list view item collection.</value>
+        public BindingList<DownloadedListViewItem> DownloadedListViewItemCollection { get; set; }
+
+        /// <summary>
         /// Gets or sets the news list view item collection.
         /// </summary>
         /// <value>The news list view item collection.</value>
@@ -162,6 +168,12 @@
                 ((CollectionViewSource)FindResource("cvs2")).Source = UpcomingListViewItemCollection;
             }
 
+            if (DownloadedListViewItemCollection == null)
+            {
+                DownloadedListViewItemCollection = new BindingList<DownloadedListViewItem>();
+                ((CollectionViewSource)FindResource("cvs4")).Source = DownloadedListViewItemCollection;
+            }
+
             if (NewsListViewItemCollection == null)
             {
                 NewsListViewItemCollection = new ObservableCollection<Article>();
@@ -205,6 +217,8 @@
                 }
             }
 
+            items.Add(new GuideDropDownDownloadedItem());
+
             items.AddRange(Database.TVShows.Values.OrderBy(s => s.Name).Select(s => new GuideDropDownTVShowItem(s)));
 
             var idx = comboBox.SelectedIndex;
@@ -223,11 +237,32 @@
         /// <param name="show">The TV show.</param>
         public void SelectShow(TVShow show)
         {
-            for (int i = 0; i < comboBox.Items.Count; i++)
+            for (var i = 0; i < comboBox.Items.Count; i++)
             {
                 if (comboBox.Items[i] is GuideDropDownTVShowItem && ((GuideDropDownTVShowItem)comboBox.Items[i]).Show == show)
                 {
                     comboBox.SelectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Selects the episode.
+        /// </summary>
+        /// <param name="ep">The episode.</param>
+        public void SelectEpisode(Episode ep)
+        {
+            SelectShow(ep.Show);
+
+            tabControl.SelectedIndex = 1;
+
+            for (var i = 0; i < listView.Items.Count; i++)
+            {
+                if (((GuideListViewItem)listView.Items[i]).ID == ep)
+                {
+                    listView.SelectedIndex = i;
+                    listView.ScrollIntoView(listView.Items[i]);
                     break;
                 }
             }
@@ -244,7 +279,7 @@
             // the dropdown's background is transparent and if it opens while the guide listview
             // is populated, then you won't be able to read the show names due to the mess
 
-            upcomingListView.Visibility = tabControl.Visibility = statusLabel.Visibility = Visibility.Collapsed;
+            upcomingListView.Visibility = downloadedListView.Visibility = tabControl.Visibility = statusLabel.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -257,6 +292,11 @@
             if (comboBox.SelectedItem is GuideDropDownUpcomingItem)
             {
                 upcomingListView.Visibility = statusLabel.Visibility = Visibility.Visible;
+            }
+
+            if (comboBox.SelectedItem is GuideDropDownDownloadedItem)
+            {
+                downloadedListView.Visibility = statusLabel.Visibility = Visibility.Visible;
             }
 
             if (comboBox.SelectedItem is GuideDropDownTVShowItem)
@@ -272,9 +312,10 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void ComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            upcomingListView.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
+            upcomingListView.Visibility = downloadedListView.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
             GuideListViewItemCollection.Clear();
             UpcomingListViewItemCollection.Clear();
+            DownloadedListViewItemCollection.Clear();
             NewsListViewItemCollection.Clear();
 
             if (comboBox.SelectedItem is GuideDropDownUpcomingItem)
@@ -288,6 +329,11 @@
                     LoadSelectedConfig();
                 }
             }
+
+            if (comboBox.SelectedItem is GuideDropDownDownloadedItem)
+            {
+                LoadDownloadedEpisodes();
+            }
             
             if (comboBox.SelectedItem is GuideDropDownTVShowItem)
             {
@@ -300,7 +346,7 @@
         /// </summary>
         public void LoadUpcomingEpisodes()
         {
-            var episodes = Database.TVShows.Values.SelectMany(s => s.Episodes).Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Airdate).Take(100);
+            var episodes = Database.TVShows.Values.SelectMany(s => s.Episodes).Where(ep => ep.Airdate > DateTime.Now).OrderBy(ep => ep.Airdate).Take(250);
 
             UpcomingListViewItemCollection.RaiseListChangedEvents = false;
 
@@ -327,6 +373,39 @@
 
             tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
             upcomingListView.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Loads the downloaded episodes.
+        /// </summary>
+        public void LoadDownloadedEpisodes()
+        {
+            var episodes = Library.Files.Where(kv => kv.Value.Count != 0).ToDictionary(k => Database.TVShows[(int)Math.Floor((double)k.Key / 1000 / 1000)].EpisodeByID[k.Key - (int)(Math.Floor((double)k.Key / 1000 / 1000) * 1000 * 1000)], v => v.Value).Where(e => e.Key.Airdate != Utils.UnixEpoch).OrderByDescending(e => e.Key.Airdate);
+
+            DownloadedListViewItemCollection.RaiseListChangedEvents = false;
+
+            foreach (var episode in episodes)
+            {
+                var qualities = string.Join("/", episode.Value.Select(FileNames.Parser.ParseQuality).Distinct().OrderByDescending(q => q).Select(q => q.GetAttribute<DescriptionAttribute>().Description));
+
+                DownloadedListViewItemCollection.Add(new DownloadedListViewItem
+                    {
+                        Episode      = episode.Key,
+                        Color        = episode.Key.Watched ? "#50FFFFFF" : "White",
+                        Show         = "{0} S{1:00}E{2:00}".FormatWith(episode.Key.Show.Name, episode.Key.Season, episode.Key.Number),
+                        Name         = " · " + episode.Key.Name,
+                        Airdate      = qualities + " · " + episode.Key.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")),
+                        RelativeDate = episode.Key.Airdate.ToShortRelativeDate(),
+                        Summary      = episode.Key.Summary,
+                        Picture      = episode.Key.Picture,
+                    });
+            }
+
+            DownloadedListViewItemCollection.RaiseListChangedEvents = true;
+            DownloadedListViewItemCollection.ResetBindings();
+
+            tabControl.Visibility = generalTab.Visibility = showGeneral.Visibility = episodeListTab.Visibility = listView.Visibility = newsTab.Visibility = rssListView.Visibility = Visibility.Collapsed;
+            downloadedListView.Visibility = Visibility.Visible;
         }
 
         /// <summary>
@@ -580,8 +659,27 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void OpenDetailsPageClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex == -1 || string.IsNullOrWhiteSpace(((GuideListViewItem)listView.SelectedValue).URL)) return;
-            Utils.Run(((GuideListViewItem)listView.SelectedValue).URL);
+            if ((comboBox.SelectedValue is GuideDropDownTVShowItem && listView.SelectedIndex == -1) || (comboBox.SelectedValue is GuideDropDownDownloadedItem && downloadedListView.SelectedIndex == -1)) return;
+
+            Episode episode;
+
+            if (comboBox.SelectedValue is GuideDropDownTVShowItem)
+            {
+                episode = ((GuideListViewItem)listView.SelectedValue).ID;
+            }
+            else if (comboBox.SelectedValue is GuideDropDownDownloadedItem)
+            {
+                episode = ((DownloadedListViewItem)downloadedListView.SelectedValue).Episode;
+            }
+            else
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(episode.URL))
+            {
+                Utils.Run(episode.URL);
+            }
         }
 
         /// <summary>
@@ -596,6 +694,20 @@
         #endregion
 
         /// <summary>
+        /// Handles the MouseDoubleClick event of the downloadedListView control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Input.MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void DownloadedListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (downloadedListView.SelectedIndex == -1) return;
+
+            var sel = (DownloadedListViewItem)downloadedListView.SelectedValue;
+
+            SelectEpisode(sel.Episode);
+        }
+
+        /// <summary>
         /// Handles the MouseDoubleClick event of the upcomingListView control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -608,13 +720,13 @@
 
             if (sel.Episode != null)
             {
-                if (!string.IsNullOrWhiteSpace(sel.Episode.URL))
+                /*if (!string.IsNullOrWhiteSpace(sel.Episode.URL))
                 {
                     Utils.Run(sel.Episode.URL);
                 }
-                else
+                else*/
                 {
-                    SelectShow(sel.Episode.Show);
+                    SelectEpisode(sel.Episode);
                 }
             }
             else if (sel.Programme != null)
@@ -638,9 +750,22 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchDownloadLinksClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex == -1) return;
+            if ((comboBox.SelectedValue is GuideDropDownTVShowItem && listView.SelectedIndex == -1) || (comboBox.SelectedValue is GuideDropDownDownloadedItem && downloadedListView.SelectedIndex == -1)) return;
 
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
+            Episode ep;
+
+            if (comboBox.SelectedValue is GuideDropDownTVShowItem)
+            {
+                ep = ((GuideListViewItem)listView.SelectedValue).ID;
+            }
+            else if (comboBox.SelectedValue is GuideDropDownDownloadedItem)
+            {
+                ep = ((DownloadedListViewItem)downloadedListView.SelectedValue).Episode;
+            }
+            else
+            {
+                return;
+            }
 
             MainWindow.Active.tabControl.SelectedIndex = 2;
             MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
@@ -655,9 +780,22 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchSubtitlesClick(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex == -1) return;
+            if ((comboBox.SelectedValue is GuideDropDownTVShowItem && listView.SelectedIndex == -1) || (comboBox.SelectedValue is GuideDropDownDownloadedItem && downloadedListView.SelectedIndex == -1)) return;
 
-            var ep = ((GuideListViewItem)listView.SelectedValue).ID;
+            Episode ep;
+
+            if (comboBox.SelectedValue is GuideDropDownTVShowItem)
+            {
+                ep = ((GuideListViewItem)listView.SelectedValue).ID;
+            }
+            else if (comboBox.SelectedValue is GuideDropDownDownloadedItem)
+            {
+                ep = ((DownloadedListViewItem)downloadedListView.SelectedValue).Episode;
+            }
+            else
+            {
+                return;
+            }
 
             MainWindow.Active.tabControl.SelectedIndex = 3;
             MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
@@ -868,11 +1006,25 @@
         {
             e.Handled = true;
 
-            if (listView.SelectedIndex == -1) return;
+            if ((comboBox.SelectedValue is GuideDropDownTVShowItem && listView.SelectedIndex == -1) || (comboBox.SelectedValue is GuideDropDownDownloadedItem && downloadedListView.SelectedIndex == -1)) return;
 
             var cm = new ContextMenu();
             (e.Source as FrameworkElement).ContextMenu = cm;
-            var episode = (GuideListViewItem)listView.SelectedValue;
+
+            Episode episode;
+
+            if (comboBox.SelectedValue is GuideDropDownTVShowItem)
+            {
+                episode = ((GuideListViewItem)listView.SelectedValue).ID;
+            }
+            else if (comboBox.SelectedValue is GuideDropDownDownloadedItem)
+            {
+                episode = ((DownloadedListViewItem)downloadedListView.SelectedValue).Episode;
+            }
+            else
+            {
+                return;
+            }
 
             var spm = -55;
             var lbw = 115;
@@ -887,7 +1039,7 @@
             // - Files
 
             List<string> fn;
-            if (Library.Files.TryGetValue(episode.ID.ID, out fn) && fn.Count != 0)
+            if (Library.Files.TryGetValue(episode.ID, out fn) && fn.Count != 0)
             {
                 // Open folder
 
@@ -972,7 +1124,7 @@
                 ovmi.Tag    = ovse;
                 ovmi.Header = ovse.Name;
                 ovmi.Icon   = new Image { Source = new BitmapImage(new Uri(ovse.Icon)) };
-                ovmi.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog((OnlineVideoSearchEngine)ovmi.Tag).Search(episode.ID);
+                ovmi.Click += (s, r) => new OnlineVideoSearchEngineTaskDialog((OnlineVideoSearchEngine)ovmi.Tag).Search(episode);
                 sov.Items.Add(ovmi);
             }
 
@@ -986,7 +1138,7 @@
             var gls    = new MenuItem();
             gls.Header = "Google search";
             gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(string.Format("{0} S{1:00}E{2:00}", episode.ID.Show.Name, episode.ID.Season, episode.ID.Number)));
+            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(string.Format("{0} S{1:00}E{2:00}", episode.Show.Name, episode.Season, episode.Number)));
 
             sov.Items.Add(gls);
 
@@ -994,13 +1146,13 @@
 
             foreach (var ovcm in Extensibility.GetNewInstances<EpisodeListingContextMenu>())
             {
-                foreach (var ovcmi in ovcm.GetMenuItems(episode.ID))
+                foreach (var ovcmi in ovcm.GetMenuItems(episode))
                 {
                     var cmi    = new MenuItem();
                     cmi.Tag    = ovcmi;
                     cmi.Header = ovcmi.Name;
                     cmi.Icon   = ovcmi.Icon;
-                    cmi.Click += (s, r) => ((ContextMenuItem<Episode>)cmi.Tag).Click(episode.ID);
+                    cmi.Click += (s, r) => ((ContextMenuItem<Episode>)cmi.Tag).Click(episode);
                     cm.Items.Add(cmi);
                 }
             }

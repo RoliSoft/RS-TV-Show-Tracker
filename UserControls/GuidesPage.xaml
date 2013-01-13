@@ -51,6 +51,11 @@
                 <cm:SortDescription PropertyName="Date" Direction="Descending"/>
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
+        <CollectionViewSource x:Key="cvs4">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="RelativeDate"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
 
         <!-- toggle button -->
         <ControlTemplate x:Key="ToggleButtonTemplate" TargetType="{x:Type ToggleButton}">
@@ -212,6 +217,79 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Airdate}" FontWeight="Normal" Width="250" Margin="-7,0" TextAlignment="Right" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <!-- downloaded episodes -->
+
+        <ListView Visibility="Collapsed" Name="downloadedListView" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" ItemsSource="{Binding Source={StaticResource cvs4}}" Margin="0,25,0,0" MouseDoubleClick="DownloadedListViewMouseDoubleClick" ContextMenuOpening="ListViewItemContextMenuOpening">
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Foreground" Value="#FFFFFFFF" />
+                            <Setter Property="Margin" Value="0,0,0,0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <StackPanel Orientation="Vertical">
+                                            <Grid Height="20">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="5,0,5,0" />
+                                                <Separator Grid.Column="1" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
+                                            </Grid>
+                                            <ItemsPresenter TextBlock.Foreground="#FFFFFFFF" Margin="5,0,0,0" />
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Width="600">
+                        <GridViewColumnHeader Margin="-3,0,0,0" Content="Title" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Show}" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{Binding Color}" />
+                                    <TextBlock Text="{Binding Name}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Foreground="{Binding Color}" ToolTipService.ShowDuration="120000" ToolTipService.IsEnabled="{Binding ShowTooltip}">
+                                        <TextBlock.ToolTip>
+                                            <StackPanel Orientation="Vertical">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" VerticalAlignment="Top" Margin="0,3,5,0" />
+                                                    <StackPanel Orientation="Vertical" Visibility="{Binding ShowSummary}">
+                                                        <TextBlock FontWeight="Bold" Margin="0,3,0,3">Summary:</TextBlock>
+                                                        <TextBlock Text="{Binding Summary}" Width="400" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                    <Image Source="{Binding Picture}" Visibility="{Binding ShowPicture}" MaxWidth="128" VerticalAlignment="Top" Margin="5,3,0,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </TextBlock.ToolTip>
+                                        </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="250">
+                        <GridViewColumnHeader Content="Quality / Air date" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Airdate}" Foreground="{Binding Color}" FontWeight="Normal" Width="250" Margin="-7,0" TextAlignment="Right" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
