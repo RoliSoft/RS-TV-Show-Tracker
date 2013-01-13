@@ -62,10 +62,10 @@
     <ApplicationIcon>tv.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>RoliSoft.TVShowTracker.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>RoliSoft.TVShowTracker.Private.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Nightly|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -143,8 +143,8 @@
       <HintPath>Dependencies\SharpCompress.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Starksoft.Net.Proxy">
-      <HintPath>Dependencies\Starksoft.Net.Proxy.dll</HintPath>
+    <Reference Include="StarksoftBiko">
+      <HintPath>Dependencies\StarksoftBiko.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -807,6 +807,7 @@
     <Resource Include="Images\inbox-download.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="RoliSoft.TVShowTracker.Private.snk" />
     <None Include="RoliSoft.TVShowTracker.snk" />
     <None Include="todo.txt" />
   </ItemGroup>

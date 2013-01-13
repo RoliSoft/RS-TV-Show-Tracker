@@ -162,7 +162,7 @@ Section -MainProgram
 	File "Dependencies\Newtonsoft.Json.dll"
 	File "Dependencies\nunit.framework.dll"
 	File "Dependencies\SharpCompress.dll"
-	File "Dependencies\Starksoft.Net.Proxy.dll"
+	File "Dependencies\StarksoftBiko.dll"
 	File "Dependencies\Transitionals.dll"
 	
 	SetOutPath "$INSTDIR"
@@ -243,7 +243,7 @@ Section Uninstall
 	Delete "$INSTDIR\libs\Newtonsoft.Json.dll"
 	Delete "$INSTDIR\libs\nunit.framework.dll"
 	Delete "$INSTDIR\libs\SharpCompress.dll"
-	Delete "$INSTDIR\libs\Starksoft.Net.Proxy.dll"
+	Delete "$INSTDIR\libs\StarksoftBiko.dll"
 	Delete "$INSTDIR\libs\Transitionals.dll"
 	Delete "$INSTDIR\RSTVShowTracker.exe"
 	Delete "$INSTDIR\RSTVShowTracker.exe.config"
