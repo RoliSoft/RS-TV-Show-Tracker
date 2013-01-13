@@ -55,7 +55,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-01-05 6:32 PM");
+                return Utils.DateTimeToVersion("2013-01-13 8:53 PM");
             }
         }
 
@@ -84,10 +84,13 @@
             {
                 var link = new Link(this);
 
+                int size;
+                int.TryParse(node.GetValue("size") ?? string.Empty, out size);
+                
                 link.Release = node.GetValue("title");
                 link.FileURL = node.GetNodeAttributeValue("enclosure", "url");
                 link.InfoURL = node.GetValue("link");
-                link.Size    = Utils.GetFileSize(node.GetValue("size").ToInteger());
+                link.Size    = Utils.GetFileSize(size);
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetValue("seeds"), node.GetValue("leechs"))
                              + (node.GetValue("verified") != "0" ? ", Verified" : string.Empty);
