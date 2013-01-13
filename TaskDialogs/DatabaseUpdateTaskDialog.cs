@@ -31,7 +31,7 @@
             {
                 using (var ufs = File.OpenRead(Path.Combine(Signature.FullPath, "TVShows.db3")))
                 using (var zfs = File.Create(Path.Combine(Signature.FullPath, "TVShows.db3.gz")))
-                using (var zip = new DeflateStream(zfs, CompressionMode.Compress))
+                using (var zip = new GZipStream(zfs, CompressionMode.Compress))
                 {
                     ufs.CopyTo(zip);
                 }
@@ -44,7 +44,7 @@
                     MainInstruction         = "Upgrade TVShows.db3",
                     Content                 = "From this version forward, SQLite3 is not used anymore as the database store for the software.\r\n\r\nYour database file needs to be upgraded to the new format, however, SQLite3 is not bundled anymore with the software, so it can't open it and convert it.\r\n\r\nThe TVShows.db3 file will be uploaded to one of my servers and converted there. This file only contains TV show information, it does NOT contain your settings, cookies, and site logins.\r\n\r\nIf you would like to continue, select a server close to you.",
                     AllowDialogCancellation = true,
-                    CommandButtons          = new[] { "lab.rolisoft.net\nAnaheim, California, United States", "Exit application" }
+                    CommandButtons          = new[] { "lab.rolisoft.net\nAnaheim, California, United States", "rolisoft.dreamhosters.com\nSame location, different server.", "Exit application" }
                 });
 
             if (res.CommandButtonResult.HasValue)
@@ -53,6 +53,10 @@
                 {
                     case 0:
                         Start(new Uri("http://ipv4.lab.rolisoft.net/api/migrate/"));
+                        break;
+
+                    case 1:
+                        Start(new Uri("http://rolisoft.dreamhosters.com/migrate.php"));
                         break;
 
                     default:
