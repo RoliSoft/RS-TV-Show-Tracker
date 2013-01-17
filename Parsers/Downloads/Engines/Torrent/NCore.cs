@@ -34,7 +34,7 @@
         {
             get
             {
-                return "http://ncore.cc/";
+                return "https://ncore.cc/";
             }
         }
 
@@ -46,7 +46,7 @@
         {
             get
             {
-                return "http://static.ncore.cc/styles/ncore.ico";
+                return "https://static.ncore.cc/styles/ncore.ico";
             }
         }
 
@@ -151,7 +151,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus[]=xvidser_hun&kivalasztott_tipus[]=xvidser&kivalasztott_tipus[]=dvdser_hun&kivalasztott_tipus[]=dvdser&kivalasztott_tipus[]=hdser_hun&kivalasztott_tipus[]=hdser&mire=" + Utils.EncodeURL(query) + "&miben=name&tipus=kivalasztottak_kozott&aktiv_inaktiv_ingyenes=mindehol", Cookies, Encoding.UTF8);
+            var html = Utils.GetHTML(Site + "torrents.php", "nyit_sorozat_resz=true&kivalasztott_tipus%5B%5D=xvidser_hun&kivalasztott_tipus%5B%5D=xvidser&kivalasztott_tipus%5B%5D=dvdser_hun&kivalasztott_tipus%5B%5D=dvdser&kivalasztott_tipus%5B%5D=hdser_hun&kivalasztott_tipus%5B%5D=hdser&mire=" + Utils.EncodeURL(query) + "&miben=name&tipus=kivalasztottak_kozott&submit.x=0&submit.y=0&submit=Ok&tags=", Cookies, Encoding.UTF8);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {
