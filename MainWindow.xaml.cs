@@ -1,6 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Globalization;
@@ -19,9 +21,9 @@
     using Microsoft.Windows.Shell;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
-    using RoliSoft.TVShowTracker.Remote;
-
     using TaskDialogInterop;
+
+    using RoliSoft.TVShowTracker.Remote;
 
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
@@ -50,6 +52,7 @@
         private Timer _statusTimer;
         private bool _hideOnStart, _dieOnStart;
         private bool _askUpdate, _askErrorUpdate;
+        private static ConcurrentDictionary<Type, int> _exCnt = new ConcurrentDictionary<Type, int>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -250,6 +253,22 @@
             foreach (var plugin in Extensibility.GetNewInstances<StartupPlugin>())
             {
                 plugin.Run();
+            }
+
+            for (var i = 0; i < 10; i++)
+            {
+                /*new Thread(() =>
+                               {
+                                   throw new AbandonedMutexException();
+                               }).Start();
+                new Thread(() =>
+                               {
+                                   throw new WebException("lolfuck", new AccessViolationException());
+                               }).Start();*/
+                new Thread(() =>
+                               {
+                                   throw new WebException("lolfuck", new AccessViolationException("fuckinglol", new ExecutionEngineException()));
+                               }).Start();
             }
         }
 
@@ -963,12 +982,57 @@
                 return;
             }
 
+            var type = ex.GetType();
+            var count = 0;
+
+            _exCnt.AddOrUpdate(type, 1, (t, i) => count = i + 1);
+
+            if (count > 3)
+            {
+                return;
+            }
+
             var show = Settings.Get<bool>("Show Unhandled Errors");
             var sb   = new StringBuilder();
+            var sbtd = new StringBuilder();
 
         parseException:
             sb.AppendLine(ex.GetType() + ": " + ex.Message);
             sb.AppendLine(ex.StackTrace);
+            sb.AppendLine();
+            
+            if (show)
+            {
+                if (sbtd.Length == 0)
+                {
+                    sbtd.AppendFormat("An exception of type <a href=\"https://www.google.com/search?q={0}\">{1}</a> was thrown at ", Utils.EncodeURL(ex.GetType() + " " + ex.Message), ex.GetType().ToString().Split(".".ToCharArray()).Last());
+                }
+                else
+                {
+                    sbtd.AppendFormat("\r\n\r\nContaining an inner exception of type <a href=\"https://www.google.com/search?q={0}\">{1}</a> originating from ", Utils.EncodeURL(ex.GetType() + " " + ex.Message), ex.GetType().ToString().Split(".".ToCharArray()).Last());
+                }
+
+                var mc = Regex.Matches(sb.ToString().Split(new[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries).Last(), @"(?<file>[a-z]{1,2}:\\.*?\.cs)(?::lig?ne|, sor:) (?<ln>[0-9]+)");
+
+                if (mc.Count != 0)
+                {
+                    var pr = mc[0].Groups["file"].Value.Trim().Replace('\\', '/');
+                    var sp = Properties.Resources.SourcePath.Trim().Replace('\\', '/');
+
+                    if (pr.StartsWith(sp, true, CultureInfo.InvariantCulture))
+                    {
+                        pr = pr.Substring(sp.Length);
+                    }
+
+                    sbtd.AppendFormat("<a href=\"https://github.com/RoliSoft/RS-TV-Show-Tracker/blob/{0}/{1}#L{3}\">{2}:{3}</a>", Properties.Resources.GitRevision, pr, Path.GetFileName(mc[0].Groups["file"].Value), mc[0].Groups["ln"].Value);
+                }
+                else
+                {
+                    sbtd.Append("a location where it was not expected");
+                }
+
+                sbtd.AppendFormat(" with the message:\r\n{0}", ex.Message);
+            }
 
             if (ex.InnerException != null)
             {
@@ -978,14 +1042,6 @@
 
             if (show)
             {
-                var mc  = Regex.Matches(sb.ToString(), @"\\(?<file>[^\\]+\.cs)(?::lig?ne|, sor:) (?<ln>[0-9]+)");
-                var loc = "at a location where it was not expected";
-
-                if (mc.Count != 0)
-                {
-                    loc = "in file {0} at line {1}".FormatWith(mc[0].Groups["file"].Value, mc[0].Groups["ln"].Value);
-                }
-
                 if (Active != null && (bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
                 {
                     Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
@@ -993,12 +1049,27 @@
 
                 var res = TaskDialog.Show(new TaskDialogOptions
                     {
-                        MainIcon        = VistaTaskDialogIcon.Error,
-                        Title           = "An unexpected error occurred",
-                        MainInstruction = "An unexpected error occurred",
-                        Content         = "An exception of type {0} was thrown {1}.".FormatWith(ex.GetType().ToString().Replace("System.", string.Empty), loc) + (isTerminating ? "\r\n\r\nUnfortunately this exception occured at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
-                        ExpandedInfo    = sb.ToString(),
-                        CommandButtons  = new[] { "Submit bug report", "Ignore exception" }
+                        MainIcon                = VistaTaskDialogIcon.Error,
+                        Title                   = "An unexpected error occurred",
+                        MainInstruction         = "An unexpected error occurred",
+                        Content                 = sbtd + (count == 2 ? "\r\n\r\nSince this type of exception has been fired three times already, future exceptions of this type in the current session will be automatically muted to avoid flooding you with error messages." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occured at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
+                        ExpandedInfo            = sb.ToString().TrimEnd(),
+                        CommandButtons          = new[] { "Submit bug report", "Ignore exception" },
+                        AllowDialogCancellation = true,
+                        Callback                = (dialog, args, data) =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(args.Hyperlink))
+                                {
+                                    Utils.Run(args.Hyperlink);
+                                }
+
+                                if (args.ButtonId != 0)
+                                {
+                                    return false;
+                                }
+
+                                return true;
+                            }
                     });
 
                 if (Active != null &&(bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))

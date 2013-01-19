@@ -445,7 +445,25 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             string fileName;
             s.RetValue = GetFileNameFromHandle(s.Handle, out fileName);
             s.FileName = fileName;
-            s.Set();
+
+            try
+            {
+                s.Set();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Fun fact of the day:
+                // For some reason on some occasions s.Set() may decide to fire
+                // ObjectDisposedException every single fucking call each ten minutes.
+                // If the user decided to enable exceptions, he/she will be flooded
+                // will thousands of TaskDialogs. Not fun for him/her.
+                // If the user didn't choose to view exceptions, the software would
+                // try to create thousands of HTTP connections to my server and send the exception report.
+                // Imagine this happening randomly when you have ~1k users online at any given time.
+                // I wondered why my server would spawn a bunch of php-cgi instances
+                // then die because the VPS ran out of memory...
+                // Lesson learned about rate-limiting things.
+            }
         }
 
         private static bool GetFileNameFromHandle(IntPtr handle, out string fileName)

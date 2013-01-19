@@ -1,6 +1,7 @@
 
 #ignore git revision resource file
 Resources/Git Revision.txt
+Resources/Source Path.txt
 #ignore my database and settings
 TVShows.db3
 Settings.json

@@ -191,6 +191,10 @@
                     {
                         drive = new DriveInfo(paths.Key);
                     }
+                    catch (DriveNotFoundException)
+                    {
+                        continue;
+                    }
                     catch (Exception ex)
                     {
                         MainWindow.HandleUnexpectedException(ex);

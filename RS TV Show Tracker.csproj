@@ -936,9 +936,13 @@
     <Resource Include="Resources\Git Revision.txt" />
     <Resource Include="Images\tvtropes.gif" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Source Path.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>git rev-parse HEAD &gt; "$(ProjectDir)\Resources\Git Revision.txt"</PreBuildEvent>
+    <PreBuildEvent>git rev-parse HEAD &gt; "$(ProjectDir)\Resources\Git Revision.txt"
+if not exist "$(ProjectDir)\Resources\Source Path.txt" echo $(ProjectDir) &gt; "$(ProjectDir)\Resources\Source Path.txt"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>if exist "$(ProjectDir)\sign.cmd" "$(ProjectDir)\sign.cmd" "$(TargetPath)"</PostBuildEvent>
