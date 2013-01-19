@@ -2,15 +2,14 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Diagnostics.Eventing.Reader;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Text;
-    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
@@ -52,7 +51,7 @@
         private Timer _statusTimer;
         private bool _hideOnStart, _dieOnStart;
         private bool _askUpdate, _askErrorUpdate;
-        private static ConcurrentDictionary<Type, int> _exCnt = new ConcurrentDictionary<Type, int>();
+        private static ConcurrentDictionary<string, int> _exCnt = new ConcurrentDictionary<string, int>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -253,22 +252,6 @@
             foreach (var plugin in Extensibility.GetNewInstances<StartupPlugin>())
             {
                 plugin.Run();
-            }
-
-            for (var i = 0; i < 10; i++)
-            {
-                /*new Thread(() =>
-                               {
-                                   throw new AbandonedMutexException();
-                               }).Start();
-                new Thread(() =>
-                               {
-                                   throw new WebException("lolfuck", new AccessViolationException());
-                               }).Start();*/
-                new Thread(() =>
-                               {
-                                   throw new WebException("lolfuck", new AccessViolationException("fuckinglol", new ExecutionEngineException()));
-                               }).Start();
             }
         }
 
@@ -982,7 +965,7 @@
                 return;
             }
 
-            var type = ex.GetType();
+            var type = ex.GetType().Name;
             var count = 0;
 
             _exCnt.AddOrUpdate(type, 1, (t, i) => count = i + 1);
@@ -995,49 +978,77 @@
             var show = Settings.Get<bool>("Show Unhandled Errors");
             var sb   = new StringBuilder();
             var sbtd = new StringBuilder();
+            var ecnt = 0;
 
-        parseException:
-            sb.AppendLine(ex.GetType() + ": " + ex.Message);
-            sb.AppendLine(ex.StackTrace);
-            sb.AppendLine();
-            
-            if (show)
+            while (ex != null)
             {
-                if (sbtd.Length == 0)
+                sb.AppendLine(ex.GetType() + ": " + ex.Message);
+
+                var st = new StackTrace(ex, true);
+
+                if (st.FrameCount != 0)
                 {
-                    sbtd.AppendFormat("An exception of type <a href=\"https://www.google.com/search?q={0}\">{1}</a> was thrown at ", Utils.EncodeURL(ex.GetType() + " " + ex.Message), ex.GetType().ToString().Split(".".ToCharArray()).Last());
+                    // TODO: StackTrace.ToString(TraceFormat.NoResourceLookup)
+                    sb.Append(st);
                 }
                 else
                 {
-                    sbtd.AppendFormat("\r\n\r\nContaining an inner exception of type <a href=\"https://www.google.com/search?q={0}\">{1}</a> originating from ", Utils.EncodeURL(ex.GetType() + " " + ex.Message), ex.GetType().ToString().Split(".".ToCharArray()).Last());
+                    sb.AppendLine("   no stacktrace");
                 }
 
-                var mc = Regex.Matches(sb.ToString().Split(new[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries).Last(), @"(?<file>[a-z]{1,2}:\\.*?\.cs)(?::lig?ne|, sor:) (?<ln>[0-9]+)");
+                sb.AppendLine();
 
-                if (mc.Count != 0)
+                if (show)
                 {
-                    var pr = mc[0].Groups["file"].Value.Trim().Replace('\\', '/');
-                    var sp = Properties.Resources.SourcePath.Trim().Replace('\\', '/');
-
-                    if (pr.StartsWith(sp, true, CultureInfo.InvariantCulture))
+                    if (sbtd.Length == 0)
                     {
-                        pr = pr.Substring(sp.Length);
+                        sbtd.AppendFormat("An exception of type <a href=\"https://www.google.com/search?q={0}\">{1}</a> was thrown", Utils.EncodeURL(ex.GetType() + " " + ex.Message), ex.GetType().ToString().Split(".".ToCharArray()).Last());
+                    }
+                    else
+                    {
+                        sbtd.AppendFormat("\r\n\r\nWith inner exception of type <a href=\"https://www.google.com/search?q={0}\">{1}</a>", Utils.EncodeURL(ex.GetType() + " " + ex.Message), ex.GetType().ToString().Split(".".ToCharArray()).Last());
                     }
 
-                    sbtd.AppendFormat("<a href=\"https://github.com/RoliSoft/RS-TV-Show-Tracker/blob/{0}/{1}#L{3}\">{2}:{3}</a>", Properties.Resources.GitRevision, pr, Path.GetFileName(mc[0].Groups["file"].Value), mc[0].Groups["ln"].Value);
-                }
-                else
-                {
-                    sbtd.Append("a location where it was not expected");
+                    var fs = st.GetFrames();
+
+                    if (fs != null)
+                    {
+                        foreach (var fr in fs)
+                        {
+                            var fn = fr.GetFileName();
+
+                            if (string.IsNullOrWhiteSpace(fn))
+                            {
+                                continue;
+                            }
+
+                            var pr = fn.Replace('\\', '/');
+                            var sp = Properties.Resources.SourcePath.Trim().Replace('\\', '/');
+
+                            if (pr.StartsWith(sp, true, CultureInfo.InvariantCulture))
+                            {
+                                pr = pr.Substring(sp.Length);
+                            }
+
+                            if (ecnt == 0)
+                            {
+                                sbtd.Append(" in ");
+                            }
+                            else
+                            {
+                                sbtd.Append(" originating from ");
+                            }
+
+                            sbtd.AppendFormat("<a href=\"https://github.com/RoliSoft/RS-TV-Show-Tracker/blob/{0}/{1}#L{2}\">{3}:{2}</a>", Properties.Resources.GitRevision, pr, fr.GetFileLineNumber(), Path.GetFileName(fn));
+                            break;
+                        }
+                    }
+
+                    sbtd.AppendFormat(":\r\n\r\n   {0}", ex.Message);
                 }
 
-                sbtd.AppendFormat(" with the message:\r\n{0}", ex.Message);
-            }
-
-            if (ex.InnerException != null)
-            {
                 ex = ex.InnerException;
-                goto parseException;
+                ecnt++;
             }
 
             if (show)
@@ -1052,7 +1063,7 @@
                         MainIcon                = VistaTaskDialogIcon.Error,
                         Title                   = "An unexpected error occurred",
                         MainInstruction         = "An unexpected error occurred",
-                        Content                 = sbtd + (count == 2 ? "\r\n\r\nSince this type of exception has been fired three times already, future exceptions of this type in the current session will be automatically muted to avoid flooding you with error messages." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occured at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
+                        Content                 = sbtd + (count == 2 ? "\r\n\r\nFuture exceptions of this type will be ignored automatically." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occurred at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
                         ExpandedInfo            = sb.ToString().TrimEnd(),
                         CommandButtons          = new[] { "Submit bug report", "Ignore exception" },
                         AllowDialogCancellation = true,
