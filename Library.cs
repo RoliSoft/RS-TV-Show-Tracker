@@ -210,7 +210,7 @@
 
             foreach (var fsw in _fsw)
             {
-                if (fsw.Path == path)
+                if (fsw != null && fsw.Path == path)
                 {
                     fsw.EnableRaisingEvents = false;
                 }
@@ -255,20 +255,6 @@
             _fsw[i].Error += (s, a) => StartWatching();
 
             _fsw[i].EnableRaisingEvents = true;
-
-            var fs = new FileSearch(new[] { path }, CheckFile);
-
-            Indexing = true;
-
-            fs.BeginSearch();
-            fs.SearchThread.Join(TimeSpan.FromMinutes(5));
-
-            if (fs.SearchThread.IsAlive)
-            {
-                fs.SearchThread.Abort();
-            }
-
-            Indexing = false;
 
             SaveList();
         }

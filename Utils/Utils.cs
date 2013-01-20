@@ -887,29 +887,6 @@
         }
 
         /// <summary>
-        /// Extracts the icon for a specified path.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns>WPF-compatible small icon.</returns>
-        public static BitmapSource ExtractIcon(string path)
-        {
-            try
-            {
-                var largeIcon = IntPtr.Zero;
-                var smallIcon = IntPtr.Zero;
-
-                Interop.ExtractIconExW(path, 0, ref largeIcon, ref smallIcon, 1);
-                Interop.DestroyIcon(largeIcon);
-
-                return Imaging.CreateBitmapSourceFromHBitmap(Icon.FromHandle(smallIcon).ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Gets the name and small icon of the specified executable.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -928,7 +905,7 @@
                 name = new FileInfo(path).Name.ToUppercaseFirst().Replace(".exe", string.Empty);
             }
 
-            var icon = ExtractIcon(path);
+            var icon = Imaging.CreateBitmapSourceFromHIcon(Icons.ExtractOne(path, 0, Icons.SystemIconSize.Small).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
             return new Tuple<string, BitmapSource>(name, icon);
         }

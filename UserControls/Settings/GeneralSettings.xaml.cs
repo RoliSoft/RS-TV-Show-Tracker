@@ -27,6 +27,7 @@
         }
 
         private bool _loaded;
+        internal bool _reindex;
 
         /// <summary>
         /// Handles the Loaded event of the UserControl control.
@@ -104,6 +105,8 @@
             }
 
             Library.AddPath(fbd.SelectedPath + Path.DirectorySeparatorChar);
+
+            _reindex = true;
 
             SaveDlPaths();
         }

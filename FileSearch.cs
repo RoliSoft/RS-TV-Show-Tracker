@@ -190,11 +190,10 @@
                     try
                     {
                         drive = new DriveInfo(paths.Key);
+                        var s = drive.AvailableFreeSpace;
                     }
-                    catch (DriveNotFoundException)
-                    {
-                        continue;
-                    }
+                    catch (DriveNotFoundException) { continue; }
+                    catch (IOException)            { continue; }
                     catch (Exception ex)
                     {
                         MainWindow.HandleUnexpectedException(ex);
@@ -254,10 +253,9 @@
                     }
                 }
             }
-            catch (PathTooLongException)        { }
+            catch (IOException)                 { }
             catch (SecurityException)           { }
             catch (UnauthorizedAccessException) { }
-            catch (DirectoryNotFoundException)  { }
             catch (Exception ex)
             {
                 MainWindow.HandleUnexpectedException(ex);
@@ -276,10 +274,9 @@
                     ScanDirectoryForFile(dir);
                 }
             }
-            catch (PathTooLongException)        { }
+            catch (IOException)                 { }
             catch (SecurityException)           { }
             catch (UnauthorizedAccessException) { }
-            catch (DirectoryNotFoundException)  { }
             catch (Exception ex)
             {
                 MainWindow.HandleUnexpectedException(ex);

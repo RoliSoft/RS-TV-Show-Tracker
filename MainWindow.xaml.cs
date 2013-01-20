@@ -4,7 +4,6 @@
     using System.Collections.Concurrent;
     using System.ComponentModel;
     using System.Diagnostics;
-    using System.Diagnostics.Eventing.Reader;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -567,6 +566,11 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         public void ReindexDownloadPathsClick(object sender = null, RoutedEventArgs e = null)
         {
+            if (!ReindexDownloadPaths.IsEnabled)
+            {
+                return;
+            }
+
             if (_statusTimer != null)
             {
                 _statusTimer.Stop();

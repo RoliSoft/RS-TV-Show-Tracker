@@ -90,28 +90,46 @@
         }
 
         /// <summary>
+        /// Loads the data from the database.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> on success; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool LoadData()
+        {
+            if (!File.Exists(Path.Combine(DataPath, "conf")))
+            {
+                return false;
+            }
+
+            using (var fs = File.OpenRead(Path.Combine(DataPath, "conf")))
+            using (var br = new BinaryReader(fs))
+            {
+                var dver = br.ReadByte();
+                var dupd = br.ReadUInt32();
+                var dcnt = br.ReadUInt16();
+
+                Data = new Dictionary<string, string>();
+
+                for (var i = 0; i < dcnt; i++)
+                {
+                    Data[br.ReadString()] = br.ReadString();
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Retrieves the key from the SQL settings.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns>Stored value or empty string.</returns>
         public static string Setting(string key)
         {
-            if (Data == null)
+            if (Data == null && !LoadData())
             {
-                using (var fs = File.OpenRead(Path.Combine(DataPath, "conf")))
-                using (var br = new BinaryReader(fs))
-                {
-                    var dver = br.ReadByte();
-                    var dupd = br.ReadUInt32();
-                    var dcnt = br.ReadUInt16();
-
-                    Data = new Dictionary<string, string>();
-
-                    for (var i = 0; i < dcnt; i++)
-                    {
-                        Data[br.ReadString()] = br.ReadString();
-                    }
-                }
+                return string.Empty;
             }
 
             string value;
@@ -130,6 +148,11 @@
         /// <param name="value">The value.</param>
         public static void Setting(string key, string value)
         {
+            if (Data == null && !LoadData())
+            {
+                Data = new Dictionary<string, string>();
+            }
+
             Data[key] = value;
 
             using (var fs = File.OpenWrite(Path.Combine(DataPath, "conf")))
@@ -391,7 +414,7 @@
             }
 
             tv.RowID       = 0;
-            tv.ID          = TVShows.Values.Max(x => x.ID) + 1;
+            tv.ID          = TVShows.Values.Count > 0 ? TVShows.Values.Max(x => x.ID) + 1 : 1;
             tv.Data        = new Dictionary<string, string>();
             tv.Directory   = Path.Combine(DataPath, Utils.CreateSlug(tv.Title, false));
             tv.EpisodeByID = new Dictionary<int, Episode>();

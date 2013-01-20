@@ -791,8 +791,33 @@
 
                     foreach (var file in nextfn.OrderByDescending(FileNames.Parser.ParseQuality))
                     {
+                        BitmapSource bmp;
+
+                        try
+                        {
+                            var ext = Path.GetExtension(file);
+
+                            if (string.IsNullOrWhiteSpace(ext))
+                            {
+                                throw new Exception();
+                            }
+
+                            var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+
+                            if (ico == null || ico.Handle == IntPtr.Zero)
+                            {
+                                throw new Exception();
+                            }
+
+                            bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        }
+                        catch (Exception)
+                        {
+                            bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
+                        }
+
                         var plf    = new MenuItem();
-                        plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                         plf.Tag    = file;
                         plf.Header = Path.GetFileName(file);
                         plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
@@ -800,7 +825,7 @@
                         pla.Items.Add(plf);
 
                         var off    = new MenuItem();
-                        off.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                         off.Tag    = file;
                         off.Header = Path.GetFileName(file);
                         off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
@@ -996,8 +1021,33 @@
 
                     foreach (var file in lastfn.OrderByDescending(FileNames.Parser.ParseQuality))
                     {
+                        BitmapSource bmp;
+
+                        try
+                        {
+                            var ext = Path.GetExtension(file);
+
+                            if (string.IsNullOrWhiteSpace(ext))
+                            {
+                                throw new Exception();
+                            }
+
+                            var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+
+                            if (ico == null || ico.Handle == IntPtr.Zero)
+                            {
+                                throw new Exception();
+                            }
+
+                            bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        }
+                        catch (Exception)
+                        {
+                            bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
+                        }
+
                         var plf    = new MenuItem();
-                        plf.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                         plf.Tag    = file;
                         plf.Header = Path.GetFileName(file);
                         plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
@@ -1005,7 +1055,7 @@
                         pla.Items.Add(plf);
 
                         var off    = new MenuItem();
-                        off.Icon   = new Image { Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(file).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), Height = 16, Width = 16 };
+                        off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                         off.Tag    = file;
                         off.Header = Path.GetFileName(file);
                         off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");

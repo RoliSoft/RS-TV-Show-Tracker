@@ -61,7 +61,7 @@ namespace RoliSoft.TVShowTracker.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to d1152d451d91ee455449e6b2af165d38bbe954ed
+        ///   Looks up a localized string similar to 71e26f93ba3449d512908d301ea1d170ee945c75
         ///.
         /// </summary>
         internal static string GitRevision {
