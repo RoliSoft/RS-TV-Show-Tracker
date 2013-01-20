@@ -1,7 +1,8 @@
 ﻿<Window x:Class="RoliSoft.TVShowTracker.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:TVShowTracker="clr-namespace:RoliSoft.TVShowTracker" xmlns:Transitionals="clr-namespace:Transitionals.Controls;assembly=Transitionals" xmlns:Transitions="clr-namespace:Transitionals.Transitions;assembly=Transitionals" xmlns:Shell="clr-namespace:Microsoft.Windows.Shell;assembly=Microsoft.Windows.Shell" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" Title="RS TV Show Tracker" WindowStartupLocation="CenterScreen"
+        xmlns:TVShowTracker="clr-namespace:RoliSoft.TVShowTracker" xmlns:Transitionals="clr-namespace:Transitionals.Controls;assembly=Transitionals" xmlns:Transitions="clr-namespace:Transitionals.Transitions;assembly=Transitionals" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage"
+        xmlns:Shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework" Title="RS TV Show Tracker" WindowStartupLocation="CenterScreen"
         Height="490" Width="900" MinWidth="900" MinHeight="300" Margin="0" Padding="0" TextOptions.TextFormattingMode="Display" RenderOptions.BitmapScalingMode="HighQuality"
         UseLayoutRounding="True" SourceInitialized="WindowSourceInitialized" Loaded="WindowLoaded" IsVisibleChanged="WindowIsVisibleChanged" KeyUp="WindowKeyUp" Closing="WindowClosing" Icon="/RSTVShowTracker;component/tv.ico">
     <Window.Resources>

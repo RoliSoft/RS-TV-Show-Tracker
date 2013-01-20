@@ -13,10 +13,11 @@
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Input;
+    using System.Windows.Interop;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
+    using System.Windows.Shell;
 
-    using Microsoft.Windows.Shell;
     using Microsoft.WindowsAPICodePack.Taskbar;
 
     using TaskDialogInterop;
@@ -47,9 +48,12 @@
         /// <value>The notify icon.</value>
         public static NotifyIcon NotifyIcon { get; set; }
 
+        public static readonly int WM_SHOWFIRSTINSTANCE = Utils.Interop.RegisterWindowMessage("WM_SHOWFIRSTINSTANCE|{0}", Signature.Software);
+
         private Timer _statusTimer;
         private bool _hideOnStart, _dieOnStart;
         private bool _askUpdate, _askErrorUpdate;
+        private Mutex _mutex;
         private static ConcurrentDictionary<string, int> _exCnt = new ConcurrentDictionary<string, int>();
 
         /// <summary>
@@ -59,7 +63,17 @@
         {
             Thread.CurrentThread.CurrentCulture   = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
-            
+
+            var uniq = false;
+            _mutex = new Mutex(true, "Local\\" + Signature.Software, out uniq);
+
+            if (!uniq)
+            {
+                Utils.Interop.PostMessage((IntPtr)Utils.Interop.HWND_BROADCAST, WM_SHOWFIRSTINSTANCE, IntPtr.Zero, IntPtr.Zero);
+                Process.GetCurrentProcess().Kill();
+                return;
+            }
+
             if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")))
             {
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
@@ -135,13 +149,15 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void WindowSourceInitialized(object sender, EventArgs e)
         {
+            HwndSource.FromHwnd((new WindowInteropHelper(this)).Handle).AddHook(new HwndSourceHook(WndProc));
+
             if (_dieOnStart)
             {
                 Visibility = Visibility.Hidden;
                 return;
             }
 
-            if (Settings.Get("Enable Aero", true) && SystemParameters2.Current.IsGlassEnabled)
+            if (Settings.Get("Enable Aero", true) && SystemParameters.IsGlassEnabled)
             {
                 ActivateAero();
             }
@@ -150,7 +166,7 @@
                 ActivateNonAero();
             }
 
-            SystemParameters2.Current.PropertyChanged += AeroChanged;
+            SystemParameters.StaticPropertyChanged += AeroChanged;
 
             if (Settings.Get("Enable Animations", true))
             {
@@ -160,6 +176,20 @@
             {
                 DeactivateAnimation();
             }
+        }
+
+        /// <summary>
+        /// Processes Windows messages.
+        /// </summary>
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == WM_SHOWFIRSTINSTANCE)
+            {
+                ShowMenuClick();
+                handled = true;
+            }
+
+            return IntPtr.Zero;
         }
 
         /// <summary>
@@ -265,7 +295,7 @@
             {
                 Run(() =>
                     {
-                        if (SystemParameters2.Current.IsGlassEnabled)
+                        if (SystemParameters.IsGlassEnabled)
                         {
                             ActivateAero();
                         }
@@ -440,7 +470,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        public void ShowMenuClick(object sender, EventArgs e)
+        public void ShowMenuClick(object sender = null, EventArgs e = null)
         {
             if (Visibility == Visibility.Visible)
             {

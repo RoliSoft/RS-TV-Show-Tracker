@@ -122,10 +122,6 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.Windows.Shell">
-      <HintPath>Dependencies\Microsoft.Windows.Shell.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack">
       <HintPath>Dependencies\Microsoft.WindowsAPICodePack.dll</HintPath>
       <Private>False</Private>
