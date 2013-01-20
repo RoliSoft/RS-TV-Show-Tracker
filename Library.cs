@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading;
 
     /// <summary>
     /// Provides methods for monitoring files.
@@ -71,8 +72,11 @@
             {
                 for (var i = 0; i < _fsw.Length; i++)
                 {
-                    _fsw[i].EnableRaisingEvents = false;
-                    _fsw[i].Dispose();
+                    if (_fsw[i] != null)
+                    {
+                        _fsw[i].EnableRaisingEvents = false;
+                        _fsw[i].Dispose();
+                    }
                 }
             }
 
@@ -84,34 +88,84 @@
             {
                 _fsw[i] = new FileSystemWatcher(paths[i]);
 
-                _fsw[i].Created += (s, a) => CheckFile(a.FullPath);
-                _fsw[i].Renamed += (s, a) =>
-                    {
-                        foreach (var ep in Files)
-                        {
-                            if (ep.Value.Contains(a.OldFullPath))
-                            {
-                                ep.Value.Remove(a.OldFullPath);
-                                CheckFile(a.FullPath);
-                                return;
-                            }
-                        }
-                    };
-                _fsw[i].Deleted += (s, a) =>
-                    {
-                        foreach (var ep in Files)
-                        {
-                            if (ep.Value.Contains(a.FullPath))
-                            {
-                                ep.Value.Remove(a.FullPath);
-                                return;
-                            }
-                        }
-                    };
-                _fsw[i].Error += (s, a) => StartWatching();
+                _fsw[i].Created += FileSystemWatcher_OnCreated;
+                _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
+                _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
+                _fsw[i].Error   += FileSystemWatcher_OnError;
 
                 _fsw[i].EnableRaisingEvents = true;
             }
+        }
+
+        /// <summary>
+        /// Handles the OnCreated event of the FileSystemWatcher control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="fileSystemEventArgs">The <see cref="FileSystemEventArgs" /> instance containing the event data.</param>
+        private static void FileSystemWatcher_OnCreated(object sender, FileSystemEventArgs fileSystemEventArgs)
+        {
+            new Thread(s => CheckFile((string)s)).Start(fileSystemEventArgs.FullPath);
+        }
+
+        /// <summary>
+        /// Handles the OnRenamed event of the FileSystemWatcher control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="renamedEventArgs">The <see cref="RenamedEventArgs" /> instance containing the event data.</param>
+        private static void FileSystemWatcher_OnRenamed(object sender, RenamedEventArgs renamedEventArgs)
+        {
+            new Thread(s =>
+                {
+                    var path = (string[])s;
+
+                    lock (Files)
+                    {
+                        foreach (var ep in Files)
+                        {
+                            if (ep.Value.Contains(path[0]))
+                            {
+                                ep.Value.Remove(path[0]);
+                                CheckFile(path[1]);
+                                return;
+                            }
+                        }
+                    }
+                }).Start(new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath });
+        }
+
+        /// <summary>
+        /// Handles the OnDeleted event of the FileSystemWatcher control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="fileSystemEventArgs">The <see cref="FileSystemEventArgs" /> instance containing the event data.</param>
+        private static void FileSystemWatcher_OnDeleted(object sender, FileSystemEventArgs fileSystemEventArgs)
+        {
+            new Thread(s =>
+                {
+                    var path = (string)s;
+
+                    lock (Files)
+                    {
+                        foreach (var ep in Files)
+                        {
+                            if (ep.Value.Contains(path))
+                            {
+                                ep.Value.Remove(path);
+                                return;
+                            }
+                        }
+                    }
+                }).Start(fileSystemEventArgs.FullPath);
+        }
+
+        /// <summary>
+        /// Handles the OnError event of the FileSystemWatcher control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="errorEventArgs">The <see cref="ErrorEventArgs" /> instance containing the event data.</param>
+        private static void FileSystemWatcher_OnError(object sender, ErrorEventArgs errorEventArgs)
+        {
+            new Thread(StartWatching).Start();
         }
 
         /// <summary>
@@ -228,31 +282,10 @@
 
             _fsw[i] = new FileSystemWatcher(path);
 
-            _fsw[i].Created += (s, a) => CheckFile(a.FullPath);
-            _fsw[i].Renamed += (s, a) =>
-            {
-                foreach (var ep in Files)
-                {
-                    if (ep.Value.Contains(a.OldFullPath))
-                    {
-                        ep.Value.Remove(a.OldFullPath);
-                        CheckFile(a.FullPath);
-                        return;
-                    }
-                }
-            };
-            _fsw[i].Deleted += (s, a) =>
-            {
-                foreach (var ep in Files)
-                {
-                    if (ep.Value.Contains(a.FullPath))
-                    {
-                        ep.Value.Remove(a.FullPath);
-                        return;
-                    }
-                }
-            };
-            _fsw[i].Error += (s, a) => StartWatching();
+            _fsw[i].Created += FileSystemWatcher_OnCreated;
+            _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
+            _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
+            _fsw[i].Error   += FileSystemWatcher_OnError;
 
             _fsw[i].EnableRaisingEvents = true;
 

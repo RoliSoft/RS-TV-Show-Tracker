@@ -15,6 +15,14 @@
         /// <value>The task timer.</value>
         public static Timer TaskTimer { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the background tasks are currently being run.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the background tasks are currently being run; otherwise, <c>false</c>.
+        /// </value>
+        public static bool InProgress { get; set; }
+
         private static DateTime _lastSoftwareUpdate = Utils.UnixEpoch;
 
         /// <summary>
@@ -41,10 +49,20 @@
         /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
         private static void Tasks(object sender, ElapsedEventArgs e)
         {
+            if (InProgress)
+            {
+                return;
+            }
+
+            InProgress = true;
+
+            try { Library.StartWatching(); }         catch { }
             try { CheckSoftwareUpdate(); }           catch { }
             try { CheckDatabaseUpdate(); }           catch { }
             try { CheckShowListUpdate(); }           catch { }
             try { ProcessMonitor.CheckOpenFiles(); } catch { }
+
+            InProgress = false;
         }
 
         /// <summary>
