@@ -34,10 +34,10 @@
             compile.Text        = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss");
             github1.NavigateUri = new Uri("https://github.com/RoliSoft/RS-TV-Show-Tracker/commits/v" + Signature.Version);
 
-            if (Properties.Resources.GitRevision.Length > 7)
+            if (Signature.GitRevision.Length > 7)
             {
-                revision.Text       = Properties.Resources.GitRevision.Substring(0, 8);
-                revision.ToolTip    = Properties.Resources.GitRevision.Trim();
+                revision.Text       = Signature.GitRevision.Substring(0, 8);
+                revision.ToolTip    = Signature.GitRevision.Trim();
                 github2.NavigateUri = new Uri("https://github.com/RoliSoft/RS-TV-Show-Tracker/tree/" + revision.ToolTip);
             }
 

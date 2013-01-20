@@ -123,7 +123,7 @@
                 var resp = Utils.GetURL(
                     url:       "http{0}://{1}".FormatWith(secure ? "s" : string.Empty, EndPoint),
                     postData:  post,
-                    userAgent: "{0}/{1}{2}".FormatWith(Signature.Software, Signature.Version, Signature.IsNightly ? "-" + Properties.Resources.GitRevision.Substring(0, 8) : string.Empty),
+                    userAgent: "{0}/{1}{2}".FormatWith(Signature.Software, Signature.Version, Signature.IsNightly ? "-" + Signature.GitRevision.Substring(0, 8) : string.Empty),
                     timeout:   120000,
                     headers:   head
                 );

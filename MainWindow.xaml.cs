@@ -1057,7 +1057,7 @@
                             }
 
                             var pr = fn.Replace('\\', '/');
-                            var sp = Properties.Resources.SourcePath.Trim().Replace('\\', '/');
+                            var sp = Signature.BuildDirectory.Replace('\\', '/');
 
                             if (pr.StartsWith(sp, true, CultureInfo.InvariantCulture))
                             {
@@ -1073,7 +1073,7 @@
                                 sbtd.Append(" originating from ");
                             }
 
-                            sbtd.AppendFormat("<a href=\"https://github.com/RoliSoft/RS-TV-Show-Tracker/blob/{0}/{1}#L{2}\">{3}:{2}</a>", Properties.Resources.GitRevision, pr, fr.GetFileLineNumber(), Path.GetFileName(fn));
+                            sbtd.AppendFormat("<a href=\"https://github.com/RoliSoft/RS-TV-Show-Tracker/blob/{0}/{1}#L{2}\">{3}:{2}</a>", Signature.GitRevision, pr, fr.GetFileLineNumber(), Path.GetFileName(fn));
                             break;
                         }
                     }

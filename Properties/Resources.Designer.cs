@@ -59,25 +59,5 @@ namespace RoliSoft.TVShowTracker.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 71e26f93ba3449d512908d301ea1d170ee945c75
-        ///.
-        /// </summary>
-        internal static string GitRevision {
-            get {
-                return ResourceManager.GetString("GitRevision", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to C:\Users\RoliSoft\Documents\Visual Studio 2012\Projects\RS TV Show Tracker\RS TV Show Tracker\ 
-        ///.
-        /// </summary>
-        internal static string SourcePath {
-            get {
-                return ResourceManager.GetString("SourcePath", resourceCulture);
-            }
-        }
     }
 }
