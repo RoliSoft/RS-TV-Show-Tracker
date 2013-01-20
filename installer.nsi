@@ -55,6 +55,14 @@ RequestExecutionLevel admin
 ######################################################################
 
 Function .onInit
+	ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
+	IntCmp $R0 6 seven notseven seven
+	
+notseven:
+	MessageBox MB_OK|MB_ICONSTOP "This software doesn't support systems older than Windows 7."
+	Quit
+	
+seven:
 	IfSilent silent done
 	
 silent:
@@ -177,17 +185,21 @@ SectionEnd
 Section -Prerequisites
 	SetOutPath "$INSTDIR"
 	
-	; Check .Net Framework 4 Extended Profile
+	; Check .Net Framework 4.5
 	
-	IfFileExists "$WINDIR\Microsoft.NET\Framework\v4.0.30319\System.Web.dll" done1 installNetFx4
+	ClearErrors
+	ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Release"
 	
-installNetFx4:
-	Banner::show /NOUNLOAD /set 76 ".Net Framework 4 Extended Profile" "Downloading setup..."
-	NSISdl::download_quiet http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe "$INSTDIR\dotNetFx40_Full_setup.exe"
+	IfErrors installNetFx45
+	IntCmp $0 378389 done1 installNetFx45 done1
+    
+installNetFx45:
+	Banner::show /NOUNLOAD /set 76 ".Net Framework 4.5" "Downloading web installer..."
+	NSISdl::download_quiet http://download.microsoft.com/download/B/A/4/BA4A7E71-2906-4B2D-A0E1-80CF16844F5F/dotNetFx45_Full_setup.exe "$INSTDIR\dotNetFx45_Full_setup.exe"
 	Banner::destroy
-	Banner::show /NOUNLOAD /set 76 ".Net Framework 4 Extended Profile" "Waiting for installation to finish..."
-	ExecWait "$INSTDIR\dotNetFx40_Full_setup.exe /passive /norestart"
-	Delete "$INSTDIR\dotNetFx40_Full_setup.exe"
+	Banner::show /NOUNLOAD /set 76 ".Net Framework 4.5" "Waiting for installation to finish..."
+	ExecWait "$INSTDIR\dotNetFx45_Full_setup.exe /passive /norestart"
+	Delete "$INSTDIR\dotNetFx45_Full_setup.exe"
 	Banner::destroy
 	
 done1:

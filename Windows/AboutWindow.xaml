@@ -211,11 +211,6 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://code.msdn.microsoft.com/WPFShell">WPF Shell Integration Library</Hyperlink>
-                            </Paragraph>
-                        </ListItem>
-                        <ListItem>
-                            <Paragraph>
                                 <Hyperlink NavigateUri="http://transitionals.codeplex.com/">Transitionals</Hyperlink>
                             </Paragraph>
                         </ListItem>
