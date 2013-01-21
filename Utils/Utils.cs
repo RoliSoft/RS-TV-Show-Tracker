@@ -13,6 +13,7 @@
     using System.Net.Sockets;
     using System.Runtime.InteropServices;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Security.AccessControl;
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using System.Security.Principal;
@@ -342,6 +343,85 @@
             catch (Win32Exception) { }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Determines whether the specified path is writable by the Users group.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified path is writable; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsUserWritable(string path)
+        {
+            try
+            {
+                var ds = Directory.GetAccessControl(path);
+                var si = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+
+                foreach (var rule in ds.GetAccessRules(true, true, typeof(SecurityIdentifier)))
+                {
+                    if (((AuthorizationRule)rule).IdentityReference == si)
+                    {
+                        var rights = ((FileSystemAccessRule)rule);
+                        if (rights.AccessControlType == AccessControlType.Allow)
+                        {
+                            if (rights.FileSystemRights == (rights.FileSystemRights | FileSystemRights.Modify))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Adds permission the specified path so it will be writable by the Users groups.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns>
+        ///   <c>true</c> if the operation was successfull; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool MakeUserWritable(string path)
+        {
+            try
+            {
+                var rule = new FileSystemAccessRule(@"BUILTIN\Users", FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.InheritOnly, AccessControlType.Allow);
+
+                var di = new DirectoryInfo(path);
+                var ds = di.GetAccessControl(AccessControlSections.Access);
+
+                var res = false;
+                ds.ModifyAccessRule(AccessControlModification.Set, rule, out res);
+
+                if (!res)
+                {
+                    return false;
+                }
+
+                res = false;
+                ds.ModifyAccessRule(AccessControlModification.Add, rule, out res);
+
+                if (!res)
+                {
+                    return false;
+                }
+
+                di.SetAccessControl(ds);
+
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
         }
 
         /// <summary>

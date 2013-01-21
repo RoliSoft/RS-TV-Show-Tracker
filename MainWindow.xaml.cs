@@ -9,6 +9,8 @@
     using System.Linq;
     using System.Net;
     using System.Reflection;
+    using System.Security.AccessControl;
+    using System.Security.Principal;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -62,11 +64,15 @@
         /// </summary>
         public MainWindow()
         {
+            // set global language and unhandled exception handler
+
             Thread.CurrentThread.CurrentCulture   = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
 
             Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
             AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
+
+            // set up mutex so only one instance will run
 
             var uniq = false;
             _mutex = new Mutex(true, "Local\\" + Signature.Software, out uniq);
@@ -78,11 +84,39 @@
                 return;
             }
 
+            // check if the database is user writable
+
+            if (!Utils.IsUserWritable(Signature.FullPath))
+            {
+                if (!Utils.IsAdmin)
+                {
+                    // if not admin, elevate
+
+                    _mutex.ReleaseMutex();
+                    Utils.RunElevated(Assembly.GetExecutingAssembly().Location);
+                    Process.GetCurrentProcess().Kill();
+                    return;
+                }
+                else
+                {
+                    // if admin, add permissions
+
+                    if (!Utils.MakeUserWritable(Signature.FullPath) || !Utils.IsUserWritable(Signature.FullPath))
+                    {
+                        MessageBox.Show("Failed to add permissions to the database. You will most likely experience issues later during the execution of the software.", "Permission error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    }
+                }
+            }
+
+            // if old database exists somewhere, update
+
             if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")) || File.Exists(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3")))
             {
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
                 _dieOnStart = true;
             }
+
+            // live a long and fulfilling life! unless told not to.
 
             if (_dieOnStart)
             {
@@ -90,6 +124,8 @@
                 return;
             }
             
+            // handle command line arguments, if there are any
+
             var args = Environment.GetCommandLineArgs();
 
             if (args.Length != 1)
@@ -129,6 +165,8 @@
                     Process.GetCurrentProcess().Kill();
                 }
             }
+
+            // init interface
 
             InitializeComponent();
         }

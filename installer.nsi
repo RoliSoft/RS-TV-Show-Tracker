@@ -30,6 +30,7 @@
 var SM_Folder
 
 !include "FileFunc.nsh"
+!include "UAC.nsh"
 
 ######################################################################
 
@@ -72,18 +73,19 @@ done:
 FunctionEnd
 
 Function .onInstSuccess
+	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
+	AccessControl::EnableFileInheritance "$INSTDIR"
+	
+	ClearErrors
+	
 	${GetParameters} $R0
 	${GetOptions} $R0 "/AR" $R1
 	IfErrors done run
 	
 run:
-	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
-	AccessControl::EnableFileInheritance "$INSTDIR"
-	Exec "$INSTDIR\${MAIN_APP_EXE}"
+	!insertmacro UAC_AsUser_ExecShell "open" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR" SW_SHOWNORMAL
 	
 done:
-	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
-	AccessControl::EnableFileInheritance "$INSTDIR"
 FunctionEnd
 
 ######################################################################
