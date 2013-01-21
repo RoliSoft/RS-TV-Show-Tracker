@@ -80,14 +80,6 @@
 
             if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")) || File.Exists(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3")))
             {
-                if (!Utils.IsAdmin)
-                {
-                    _mutex.ReleaseMutex();
-                    Utils.RunElevated(Assembly.GetExecutingAssembly().Location);
-                    Process.GetCurrentProcess().Kill();
-                    return;
-                }
-
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
                 _dieOnStart = true;
             }
