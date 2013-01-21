@@ -40,4 +40,4 @@ _ReSharper*/
 /post-build.cmd
 /sign.cmd
 /RoliSoft.TVShowTracker.Private.snk
-/Signature1.cs
+/SignatureGen.cs
