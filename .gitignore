@@ -1,10 +1,4 @@
 
-#ignore git revision resource file
-Resources/Git Revision.txt
-Resources/Source Path.txt
-#ignore my database and settings
-TVShows.db3
-Settings.json
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
@@ -34,6 +28,7 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 #ignore other private stuff
+/Settings.json
 /todo.txt
 /sqlite3.exe
 /upload-nightly.cmd
@@ -41,3 +36,4 @@ _ReSharper*/
 /sign.cmd
 /RoliSoft.TVShowTracker.Private.snk
 /SignatureGen.cs
+/*.db3

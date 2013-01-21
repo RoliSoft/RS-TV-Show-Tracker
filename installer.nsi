@@ -1,7 +1,7 @@
 !define APP_NAME "RS TV Show Tracker"
 !define COMP_NAME "RoliSoft"
 !define WEB_SITE "http://lab.rolisoft.net"
-!define VERSION "2.2"
+!define VERSION "2.2.0.0"
 !define COPYRIGHT "© 2013 RoliSoft"
 !define DESCRIPTION "RS TV Show Tracker"
 !ifndef INSTALLER_NAME
