@@ -1,18 +1,8 @@
-//
-//  Based on http://vmccontroller.codeplex.com/SourceControl/changeset/view/47386#195318
-//  Modifications to OpenFiles:
-//   - Filters against a list of process IDs, not just one.
-//   - Returns full path as string, and not as FileSystemInfo.
-//   - Added support for shared files.
-//   - Removed helper function and changed constructor to public.
-//  
-//  Big thanks to the developers of Windows Media Center TCP/IP Controller for writing and sharing this awesome class!
-//
-
 namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using System.Runtime.ConstrainedExecution;
     using System.Runtime.InteropServices;
@@ -21,640 +11,383 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
     using System.Threading;
     using Microsoft.Win32.SafeHandles;
 
-    #region ENUMs
-    internal enum NT_STATUS
+    public class DetectOpenFiles
     {
-        STATUS_SUCCESS = 0x00000000,
-        STATUS_BUFFER_OVERFLOW = unchecked((int)0x80000005L),
-        STATUS_INFO_LENGTH_MISMATCH = unchecked((int)0xC0000004L)
-    }
-
-    internal enum SYSTEM_INFORMATION_CLASS
-    {
-        SystemBasicInformation = 0,
-        SystemPerformanceInformation = 2,
-        SystemTimeOfDayInformation = 3,
-        SystemProcessInformation = 5,
-        SystemProcessorPerformanceInformation = 8,
-        SystemHandleInformation = 16,
-        SystemInterruptInformation = 23,
-        SystemExceptionInformation = 33,
-        SystemRegistryQuotaInformation = 37,
-        SystemLookasideInformation = 45
-    }
-
-    internal enum OBJECT_INFORMATION_CLASS
-    {
-        ObjectBasicInformation = 0,
-        ObjectNameInformation = 1,
-        ObjectTypeInformation = 2,
-        ObjectAllTypesInformation = 3,
-        ObjectHandleInformation = 4
-    }
-
-    [Flags]
-    internal enum ProcessAccessRights
-    {
-        PROCESS_DUP_HANDLE = 0x00000040
-    }
-
-    [Flags]
-    internal enum DuplicateHandleOptions
-    {
-        DUPLICATE_CLOSE_SOURCE = 0x1,
-        DUPLICATE_SAME_ACCESS = 0x2
-    }
-    #endregion
-
-    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-    internal sealed class SafeObjectHandle : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        private SafeObjectHandle()
-            : base(true)
-        { }
-
-        internal SafeObjectHandle(IntPtr preexistingHandle, bool ownsHandle)
-            : base(ownsHandle)
+        /// <summary>
+        /// Return a list of file locks held by the process.
+        /// </summary>
+        public static List<string> GetFilesLockedBy(List<int> pids)
         {
-            base.SetHandle(preexistingHandle);
-        }
+            var outp = new List<string>();
 
-        protected override bool ReleaseHandle()
-        {
-            return NativeMethods.CloseHandle(base.handle);
-        }
-    }
-
-    [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
-    internal sealed class SafeProcessHandle : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        private SafeProcessHandle()
-            : base(true)
-        { }
-
-        internal SafeProcessHandle(IntPtr preexistingHandle, bool ownsHandle)
-            : base(ownsHandle)
-        {
-            base.SetHandle(preexistingHandle);
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            return NativeMethods.CloseHandle(base.handle);
-        }
-    }
-
-    #region Native Methods
-    internal static class NativeMethods
-    {
-        [DllImport("ntdll.dll")]
-        internal static extern NT_STATUS NtQuerySystemInformation(
-            [In] SYSTEM_INFORMATION_CLASS SystemInformationClass,
-            [In] IntPtr SystemInformation,
-            [In] int SystemInformationLength,
-            [Out] out int ReturnLength);
-
-        [DllImport("ntdll.dll")]
-        internal static extern NT_STATUS NtQueryObject(
-            [In] IntPtr Handle,
-            [In] OBJECT_INFORMATION_CLASS ObjectInformationClass,
-            [In] IntPtr ObjectInformation,
-            [In] int ObjectInformationLength,
-            [Out] out int ReturnLength);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern SafeProcessHandle OpenProcess(
-            [In] ProcessAccessRights dwDesiredAccess,
-            [In, MarshalAs(UnmanagedType.Bool)] bool bInheritHandle,
-            [In] int dwProcessId);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool DuplicateHandle(
-            [In] IntPtr hSourceProcessHandle,
-            [In] IntPtr hSourceHandle,
-            [In] IntPtr hTargetProcessHandle,
-            [Out] out SafeObjectHandle lpTargetHandle,
-            [In] int dwDesiredAccess,
-            [In, MarshalAs(UnmanagedType.Bool)] bool bInheritHandle,
-            [In] DuplicateHandleOptions dwOptions);
-
-        [DllImport("kernel32.dll")]
-        internal static extern IntPtr GetCurrentProcess();
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern int GetProcessId(
-            [In] IntPtr Process);
-
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CloseHandle(
-            [In] IntPtr hObject);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern int QueryDosDevice(
-            [In] string lpDeviceName,
-            [Out] StringBuilder lpTargetPath,
-            [In] int ucchMax);
-    }
-    #endregion
-
-    [ComVisible(true)]
-    public static class DetectOpenFiles
-    {
-        private static Dictionary<string, string> deviceMap;
-        private const string networkDevicePrefix = "\\Device\\LanmanRedirector\\";
-
-        private const int MAX_PATH = 260;
-
-        private enum SystemHandleType
-        {
-            OB_TYPE_UNKNOWN = 0,
-            OB_TYPE_TYPE = 1,
-            OB_TYPE_DIRECTORY,
-            OB_TYPE_SYMBOLIC_LINK,
-            OB_TYPE_TOKEN,
-            OB_TYPE_PROCESS,
-            OB_TYPE_THREAD,
-            OB_TYPE_UNKNOWN_7,
-            OB_TYPE_EVENT,
-            OB_TYPE_EVENT_PAIR,
-            OB_TYPE_MUTANT,
-            OB_TYPE_UNKNOWN_11,
-            OB_TYPE_SEMAPHORE,
-            OB_TYPE_TIMER,
-            OB_TYPE_PROFILE,
-            OB_TYPE_WINDOW_STATION,
-            OB_TYPE_DESKTOP,
-            OB_TYPE_SECTION,
-            OB_TYPE_KEY,
-            OB_TYPE_PORT,
-            OB_TYPE_WAITABLE_PORT,
-            OB_TYPE_UNKNOWN_21,
-            OB_TYPE_UNKNOWN_22,
-            OB_TYPE_UNKNOWN_23,
-            OB_TYPE_UNKNOWN_24,
-            //OB_TYPE_CONTROLLER,
-            //OB_TYPE_DEVICE,
-            //OB_TYPE_DRIVER,
-            OB_TYPE_IO_COMPLETION,
-            OB_TYPE_FILE
-        };
-
-        private const int handleTypeTokenCount = 27;
-        private static readonly string[] handleTypeTokens = new string[] { 
-                "", "", "Directory", "SymbolicLink", "Token",
-                "Process", "Thread", "Unknown7", "Event", "EventPair", "Mutant",
-                "Unknown11", "Semaphore", "Timer", "Profile", "WindowStation",
-                "Desktop", "Section", "Key", "Port", "WaitablePort",
-                "Unknown21", "Unknown22", "Unknown23", "Unknown24", 
-                "IoCompletion", "File"
+            ThreadStart ts = delegate
+            {
+                try
+                {
+                    outp = UnsafeGetFilesLockedBy(pids);
+                }
+                catch { Ignore(); }
             };
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct SYSTEM_HANDLE_ENTRY
-        {
-            public int OwnerPid;
-            public byte ObjectType;
-            public byte HandleFlags;
-            public short HandleValue;
-            public int ObjectPointer;
-            public int AccessMask;
-        }
-
-        public sealed class OpenFiles : IEnumerable<string>
-        {
-            private readonly List<int> processIds;
-
-            public OpenFiles(List<int> processIds)
-            {
-                this.processIds = processIds;
-            }
-
-            #region IEnumerable<FileSystemInfo> Members
-
-            public IEnumerator<string> GetEnumerator()
-            {
-                NT_STATUS ret;
-                int length = 0x10000;
-                // Loop, probing for required memory.
-
-
-                do
-                {
-                    IntPtr ptr = IntPtr.Zero;
-                    RuntimeHelpers.PrepareConstrainedRegions();
-                    try
-                    {
-                        RuntimeHelpers.PrepareConstrainedRegions();
-                        try { }
-                        finally
-                        {
-                            // CER guarantees that the address of the allocated 
-                            // memory is actually assigned to ptr if an 
-                            // asynchronous exception occurs.
-                            ptr = Marshal.AllocHGlobal(length);
-                        }
-                        int returnLength;
-                        ret = NativeMethods.NtQuerySystemInformation(SYSTEM_INFORMATION_CLASS.SystemHandleInformation, ptr, length, out returnLength);
-                        if (ret == NT_STATUS.STATUS_INFO_LENGTH_MISMATCH)
-                        {
-                            // Round required memory up to the nearest 64KB boundary.
-                            length = ((returnLength + 0xffff) & ~0xffff);
-                        }
-                        else if (ret == NT_STATUS.STATUS_SUCCESS)
-                        {
-                            int handleCount = Marshal.ReadInt32(ptr);
-                            int offset = sizeof(int);
-                            int size = Marshal.SizeOf(typeof(SYSTEM_HANDLE_ENTRY));
-                            for (int i = 0; i < handleCount; i++)
-                            {
-                                SYSTEM_HANDLE_ENTRY handleEntry = (SYSTEM_HANDLE_ENTRY)Marshal.PtrToStructure((IntPtr)((int)ptr + offset), typeof(SYSTEM_HANDLE_ENTRY));
-                                if (processIds.Contains(handleEntry.OwnerPid))
-                                {
-                                    IntPtr handle = (IntPtr)handleEntry.HandleValue;
-                                    SystemHandleType handleType;
-
-                                    if (GetHandleType(handle, handleEntry.OwnerPid, out handleType) && handleType == SystemHandleType.OB_TYPE_FILE)
-                                    {
-                                        string devicePath;
-                                        if (GetFileNameFromHandle(handle, handleEntry.OwnerPid, out devicePath))
-                                        {string dosPath;
-                                            if (devicePath.StartsWith(@"\Device\Mup\"))
-                                            {
-                                                yield return @"\\" + devicePath.Substring(12);
-                                            }
-                                            else if (ConvertDevicePathToDosPath(devicePath, out dosPath))
-                                            {
-                                                yield return dosPath;
-                                            }
-                                        }
-                                    }
-                                }
-                                offset += size;
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        // CER guarantees that the allocated memory is freed, 
-                        // if an asynchronous exception occurs. 
-                        Marshal.FreeHGlobal(ptr);
-                        //sw.Flush();
-                        //sw.Close();
-                    }
-                }
-                while (ret == NT_STATUS.STATUS_INFO_LENGTH_MISMATCH);
-            }
-
-            #endregion
-
-            #region IEnumerable Members
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-
-            #endregion
-        }
-
-        #region Private Members
-
-        private static bool GetFileNameFromHandle(IntPtr handle, int processId, out string fileName)
-        {
-            IntPtr currentProcess = NativeMethods.GetCurrentProcess();
-            bool remote = (processId != NativeMethods.GetProcessId(currentProcess));
-            SafeProcessHandle processHandle = null;
-            SafeObjectHandle objectHandle = null;
             try
             {
-                if (remote)
+                var t = new Thread(ts);
+                t.IsBackground = true;
+                t.Start();
+                if (!t.Join(60000))
                 {
-                    processHandle = NativeMethods.OpenProcess(ProcessAccessRights.PROCESS_DUP_HANDLE, true, processId);
-                    if (NativeMethods.DuplicateHandle(processHandle.DangerousGetHandle(), handle, currentProcess, out objectHandle, 0, false, DuplicateHandleOptions.DUPLICATE_SAME_ACCESS))
+                    try
                     {
-                        handle = objectHandle.DangerousGetHandle();
+                        t.Interrupt();
+                        t.Abort();
                     }
+                    catch { Ignore(); }
                 }
-                return GetFileNameFromHandle(handle, out fileName, 200);
             }
-            finally
+            catch { Ignore(); }
+
+            return outp;
+        }
+
+        #region Inner Workings
+        private static void Ignore() { }
+        public static List<string> UnsafeGetFilesLockedBy(List<int> pids)
+        {
+            var handles = GetHandles(pids);
+            var files = new List<string>();
+
+            foreach (var handle in handles)
             {
-                if (remote)
+                var file = GetFilePath(handle);
+
+                if (file != null)
                 {
-                    if (processHandle != null)
-                    {
-                        processHandle.Close();
-                    }
-                    if (objectHandle != null)
-                    {
-                        objectHandle.Close();
-                    }
+                    files.Add(file);
                 }
+            }
+
+            return files;
+        }
+
+        const int CNST_SYSTEM_HANDLE_INFORMATION = 16;
+        private static string GetFilePath(Win32API.SYSTEM_HANDLE_INFORMATION systemHandleInformation)
+        {
+            var ipProcessHwnd = Win32API.OpenProcess(Win32API.ProcessAccessFlags.All, false, systemHandleInformation.ProcessID);
+            var objBasic = new Win32API.OBJECT_BASIC_INFORMATION();
+            var objObjectType = new Win32API.OBJECT_TYPE_INFORMATION();
+            var objObjectName = new Win32API.OBJECT_NAME_INFORMATION();
+            var strObjectName = "";
+            var nLength = 0;
+            IntPtr ipTemp, ipHandle;
+
+            if (!Win32API.DuplicateHandle(ipProcessHwnd, systemHandleInformation.Handle, Win32API.GetCurrentProcess(), out ipHandle, 0, false, Win32API.DUPLICATE_SAME_ACCESS))
+                return null;
+
+            IntPtr ipBasic = Marshal.AllocHGlobal(Marshal.SizeOf(objBasic));
+            Win32API.NtQueryObject(ipHandle, (int)Win32API.ObjectInformationClass.ObjectBasicInformation, ipBasic, Marshal.SizeOf(objBasic), ref nLength);
+            objBasic = (Win32API.OBJECT_BASIC_INFORMATION)Marshal.PtrToStructure(ipBasic, objBasic.GetType());
+            Marshal.FreeHGlobal(ipBasic);
+
+            IntPtr ipObjectType = Marshal.AllocHGlobal(objBasic.TypeInformationLength);
+            nLength = objBasic.TypeInformationLength;
+            // this one never locks...
+            while ((uint)(Win32API.NtQueryObject(ipHandle, (int)Win32API.ObjectInformationClass.ObjectTypeInformation, ipObjectType, nLength, ref nLength)) == Win32API.STATUS_INFO_LENGTH_MISMATCH)
+            {
+                if (nLength == 0)
+                {
+                    Console.WriteLine("nLength returned at zero! ");
+                    return null;
+                }
+                Marshal.FreeHGlobal(ipObjectType);
+                ipObjectType = Marshal.AllocHGlobal(nLength);
+            }
+
+            objObjectType = (Win32API.OBJECT_TYPE_INFORMATION)Marshal.PtrToStructure(ipObjectType, objObjectType.GetType());
+            if (Is64Bits())
+            {
+                ipTemp = new IntPtr(Convert.ToInt64(objObjectType.Name.Buffer.ToString(), 10) >> 32);
+            }
+            else
+            {
+                ipTemp = objObjectType.Name.Buffer;
+            }
+
+            var strObjectTypeName = Marshal.PtrToStringUni(ipTemp, objObjectType.Name.Length >> 1);
+            Marshal.FreeHGlobal(ipObjectType);
+            if (strObjectTypeName != "File")
+                return null;
+
+            nLength = objBasic.NameInformationLength;
+
+            var ipObjectName = Marshal.AllocHGlobal(nLength);
+
+            // ...this call sometimes hangs. Is a Windows error.
+            while ((uint)(Win32API.NtQueryObject(ipHandle, (int)Win32API.ObjectInformationClass.ObjectNameInformation, ipObjectName, nLength, ref nLength)) == Win32API.STATUS_INFO_LENGTH_MISMATCH)
+            {
+                Marshal.FreeHGlobal(ipObjectName);
+                if (nLength == 0)
+                {
+                    Console.WriteLine("nLength returned at zero! " + strObjectTypeName);
+                    return null;
+                }
+                ipObjectName = Marshal.AllocHGlobal(nLength);
+            }
+            objObjectName = (Win32API.OBJECT_NAME_INFORMATION)Marshal.PtrToStructure(ipObjectName, objObjectName.GetType());
+
+            if (Is64Bits())
+            {
+                ipTemp = new IntPtr(Convert.ToInt64(objObjectName.Name.Buffer.ToString(), 10) >> 32);
+            }
+            else
+            {
+                ipTemp = objObjectName.Name.Buffer;
+            }
+
+            if (ipTemp != IntPtr.Zero)
+            {
+
+                var baTemp = new byte[nLength];
+                try
+                {
+                    Marshal.Copy(ipTemp, baTemp, 0, nLength);
+
+                    strObjectName = Marshal.PtrToStringUni(Is64Bits() ? new IntPtr(ipTemp.ToInt64()) : new IntPtr(ipTemp.ToInt32()));
+                }
+                catch (AccessViolationException)
+                {
+                    return null;
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(ipObjectName);
+                    Win32API.CloseHandle(ipHandle);
+                }
+            }
+
+            string path = GetRegularFileNameFromDevice(strObjectName);
+            try
+            {
+                return path;
+            }
+            catch
+            {
+                return null;
             }
         }
-        private static bool GetFileNameFromHandle(IntPtr handle, out string fileName, int wait)
+
+        private static string GetRegularFileNameFromDevice(string strRawName)
         {
-            using (FileNameFromHandleState f = new FileNameFromHandleState(handle))
+            string strFileName = strRawName;
+            foreach (string strDrivePath in Environment.GetLogicalDrives())
             {
-                ThreadPool.QueueUserWorkItem(new WaitCallback(GetFileNameFromHandle), f);
-                if (f.WaitOne(wait))
+                var sbTargetPath = new StringBuilder(Win32API.MAX_PATH);
+                if (Win32API.QueryDosDevice(strDrivePath.Substring(0, 2), sbTargetPath, Win32API.MAX_PATH) == 0)
                 {
-                    fileName = f.FileName;
-                    return f.RetValue;
+                    return strRawName;
+                }
+                string strTargetPath = sbTargetPath.ToString();
+                if (strFileName.StartsWith(strTargetPath))
+                {
+                    strFileName = strFileName.Replace(strTargetPath, strDrivePath.Substring(0, 2));
+                    break;
+                }
+            }
+            return strFileName;
+        }
+
+        private static List<Win32API.SYSTEM_HANDLE_INFORMATION> GetHandles(List<int> pids)
+        {
+            var nHandleInfoSize = 0x10000;
+            var ipHandlePointer = Marshal.AllocHGlobal(nHandleInfoSize);
+            var nLength = 0;
+            IntPtr ipHandle;
+
+            while (Win32API.NtQuerySystemInformation(CNST_SYSTEM_HANDLE_INFORMATION, ipHandlePointer, nHandleInfoSize, ref nLength) == Win32API.STATUS_INFO_LENGTH_MISMATCH)
+            {
+                nHandleInfoSize = nLength;
+                Marshal.FreeHGlobal(ipHandlePointer);
+                ipHandlePointer = Marshal.AllocHGlobal(nLength);
+            }
+
+            var baTemp = new byte[nLength];
+            Marshal.Copy(ipHandlePointer, baTemp, 0, nLength);
+
+            long lHandleCount;
+            if (Is64Bits())
+            {
+                lHandleCount = Marshal.ReadInt64(ipHandlePointer);
+                ipHandle = new IntPtr(ipHandlePointer.ToInt64() + 8);
+            }
+            else
+            {
+                lHandleCount = Marshal.ReadInt32(ipHandlePointer);
+                ipHandle = new IntPtr(ipHandlePointer.ToInt32() + 4);
+            }
+
+            var lst = new List<Win32API.SYSTEM_HANDLE_INFORMATION>();
+
+            for (long lIndex = 0; lIndex < lHandleCount; lIndex++)
+            {
+                var shHandle = new Win32API.SYSTEM_HANDLE_INFORMATION();
+                if (Is64Bits())
+                {
+                    shHandle = (Win32API.SYSTEM_HANDLE_INFORMATION)Marshal.PtrToStructure(ipHandle, shHandle.GetType());
+                    ipHandle = new IntPtr(ipHandle.ToInt64() + Marshal.SizeOf(shHandle) + 8);
                 }
                 else
                 {
-                    fileName = string.Empty;
-                    return false;
+                    ipHandle = new IntPtr(ipHandle.ToInt64() + Marshal.SizeOf(shHandle));
+                    shHandle = (Win32API.SYSTEM_HANDLE_INFORMATION)Marshal.PtrToStructure(ipHandle, shHandle.GetType());
+                }
+
+                if (pids.Contains(shHandle.ProcessID))
+                {
+                    lst.Add(shHandle);
                 }
             }
+
+            return lst;
         }
 
-        private class FileNameFromHandleState : IDisposable
+        private static bool Is64Bits()
         {
-            private ManualResetEvent _mr;
-            private IntPtr _handle;
-            private string _fileName;
-            private bool _retValue;
-
-            public IntPtr Handle
-            {
-                get
-                {
-                    return _handle;
-                }
-            }
-
-            public string FileName
-            {
-                get
-                {
-                    return _fileName;
-                }
-                set
-                {
-                    _fileName = value;
-                }
-
-            }
-
-            public bool RetValue
-            {
-                get
-                {
-                    return _retValue;
-                }
-                set
-                {
-                    _retValue = value;
-                }
-            }
-
-            public FileNameFromHandleState(IntPtr handle)
-            {
-                _mr = new ManualResetEvent(false);
-                this._handle = handle;
-            }
-
-            public bool WaitOne(int wait)
-            {
-               return _mr.WaitOne(wait, false);
-            }
-
-            public void Set()
-            {
-                _mr.Set();
-            }
-            #region IDisposable Members
-
-            public void Dispose()
-            {
-                if (_mr != null)
-                    _mr.Close();
-            }
-
-            #endregion
+            return Marshal.SizeOf(typeof(IntPtr)) == 8;
         }
 
-        private static void GetFileNameFromHandle(object state)
+        internal class Win32API
         {
-            FileNameFromHandleState s = (FileNameFromHandleState)state;
-            string fileName;
-            s.RetValue = GetFileNameFromHandle(s.Handle, out fileName);
-            s.FileName = fileName;
+            [DllImport("ntdll.dll")]
+            public static extern int NtQueryObject(IntPtr ObjectHandle, int
+                ObjectInformationClass, IntPtr ObjectInformation, int ObjectInformationLength,
+                ref int returnLength);
 
-            try
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern uint QueryDosDevice(string lpDeviceName, StringBuilder lpTargetPath, int ucchMax);
+
+            [DllImport("ntdll.dll")]
+            public static extern uint NtQuerySystemInformation(int
+                SystemInformationClass, IntPtr SystemInformation, int SystemInformationLength,
+                ref int returnLength);
+
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr OpenProcess(ProcessAccessFlags dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
+            [DllImport("kernel32.dll")]
+            public static extern int CloseHandle(IntPtr hObject);
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool DuplicateHandle(IntPtr hSourceProcessHandle,
+               ushort hSourceHandle, IntPtr hTargetProcessHandle, out IntPtr lpTargetHandle,
+               uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
+            [DllImport("kernel32.dll")]
+            public static extern IntPtr GetCurrentProcess();
+
+            public enum ObjectInformationClass
             {
-                s.Set();
+                ObjectBasicInformation = 0,
+                ObjectNameInformation = 1,
+                ObjectTypeInformation = 2,
+                ObjectAllTypesInformation = 3,
+                ObjectHandleInformation = 4
             }
-            catch (ObjectDisposedException)
+
+            [Flags]
+            public enum ProcessAccessFlags : uint
             {
-                // Fun fact of the day:
-                // For some reason on some occasions s.Set() may decide to fire
-                // ObjectDisposedException every single fucking call each ten minutes.
-                // If the user decided to enable exceptions, he/she will be flooded
-                // will thousands of TaskDialogs. Not fun for him/her.
-                // If the user didn't choose to view exceptions, the software would
-                // try to create thousands of HTTP connections to my server and send the exception report.
-                // Imagine this happening randomly when you have ~1k users online at any given time.
-                // I wondered why my server would spawn a bunch of php-cgi instances
-                // then die because the VPS ran out of memory...
-                // Lesson learned about rate-limiting things.
+                All = 0x001F0FFF,
+                Terminate = 0x00000001,
+                CreateThread = 0x00000002,
+                VMOperation = 0x00000008,
+                VMRead = 0x00000010,
+                VMWrite = 0x00000020,
+                DupHandle = 0x00000040,
+                SetInformation = 0x00000200,
+                QueryInformation = 0x00000400,
+                Synchronize = 0x00100000
             }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct OBJECT_BASIC_INFORMATION
+            { // Information Class 0
+                public int Attributes;
+                public int GrantedAccess;
+                public int HandleCount;
+                public int PointerCount;
+                public int PagedPoolUsage;
+                public int NonPagedPoolUsage;
+                public int Reserved1;
+                public int Reserved2;
+                public int Reserved3;
+                public int NameInformationLength;
+                public int TypeInformationLength;
+                public int SecurityDescriptorLength;
+                public System.Runtime.InteropServices.ComTypes.FILETIME CreateTime;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct OBJECT_TYPE_INFORMATION
+            { // Information Class 2
+                public UNICODE_STRING Name;
+                public int ObjectCount;
+                public int HandleCount;
+                public int Reserved1;
+                public int Reserved2;
+                public int Reserved3;
+                public int Reserved4;
+                public int PeakObjectCount;
+                public int PeakHandleCount;
+                public int Reserved5;
+                public int Reserved6;
+                public int Reserved7;
+                public int Reserved8;
+                public int InvalidAttributes;
+                public GENERIC_MAPPING GenericMapping;
+                public int ValidAccess;
+                public byte Unknown;
+                public byte MaintainHandleDatabase;
+                public int PoolType;
+                public int PagedPoolUsage;
+                public int NonPagedPoolUsage;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct OBJECT_NAME_INFORMATION
+            { // Information Class 1
+                public UNICODE_STRING Name;
+            }
+
+            [StructLayout(LayoutKind.Sequential, Pack = 1)]
+            public struct UNICODE_STRING
+            {
+                public ushort Length;
+                public ushort MaximumLength;
+                public IntPtr Buffer;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct GENERIC_MAPPING
+            {
+                public int GenericRead;
+                public int GenericWrite;
+                public int GenericExecute;
+                public int GenericAll;
+            }
+
+            [StructLayout(LayoutKind.Sequential, Pack = 1)]
+            public struct SYSTEM_HANDLE_INFORMATION
+            { // Information Class 16
+                public int ProcessID;
+                public byte ObjectTypeNumber;
+                public byte Flags; // 0x01 = PROTECT_FROM_CLOSE, 0x02 = INHERIT
+                public ushort Handle;
+                public int Object_Pointer;
+                public UInt32 GrantedAccess;
+            }
+
+            public const int MAX_PATH = 260;
+            public const uint STATUS_INFO_LENGTH_MISMATCH = 0xC0000004;
+            public const int DUPLICATE_SAME_ACCESS = 0x2;
+            public const uint FILE_SEQUENTIAL_ONLY = 0x00000004;
         }
-
-        private static bool GetFileNameFromHandle(IntPtr handle, out string fileName)
-        {
-            IntPtr ptr = IntPtr.Zero;
-            RuntimeHelpers.PrepareConstrainedRegions();
-            try
-            {
-                int length = 0x200;  // 512 bytes
-                RuntimeHelpers.PrepareConstrainedRegions();
-                try { }
-                finally
-                {
-                    // CER guarantees the assignment of the allocated 
-                    // memory address to ptr, if an ansynchronous exception 
-                    // occurs.
-                    ptr = Marshal.AllocHGlobal(length);
-                }
-                NT_STATUS ret = NativeMethods.NtQueryObject(handle, OBJECT_INFORMATION_CLASS.ObjectNameInformation, ptr, length, out length);
-                if (ret == NT_STATUS.STATUS_BUFFER_OVERFLOW)
-                {
-                    RuntimeHelpers.PrepareConstrainedRegions();
-                    try { }
-                    finally
-                    {
-                        // CER guarantees that the previous allocation is freed,
-                        // and that the newly allocated memory address is 
-                        // assigned to ptr if an asynchronous exception occurs.
-                        Marshal.FreeHGlobal(ptr);
-                        ptr = Marshal.AllocHGlobal(length);
-                    }
-                    ret = NativeMethods.NtQueryObject(handle, OBJECT_INFORMATION_CLASS.ObjectNameInformation, ptr, length, out length);
-                }
-                if (ret == NT_STATUS.STATUS_SUCCESS)
-                {
-                    fileName = Marshal.PtrToStringUni((IntPtr)((int)ptr + 8), (length - 9) / 2);
-                    return fileName.Length != 0;
-                }
-            }
-            finally
-            {
-                // CER guarantees that the allocated memory is freed, 
-                // if an asynchronous exception occurs.
-                Marshal.FreeHGlobal(ptr);
-            }
-
-            fileName = string.Empty;
-            return false;
-        }
-
-        private static bool GetHandleType(IntPtr handle, int processId, out SystemHandleType handleType)
-        {
-            string token = GetHandleTypeToken(handle, processId);
-            return GetHandleTypeFromToken(token, out handleType);
-        }
-
-        private static bool GetHandleType(IntPtr handle, out SystemHandleType handleType)
-        {
-            string token = GetHandleTypeToken(handle);
-            return GetHandleTypeFromToken(token, out handleType);
-        }
-
-        private static bool GetHandleTypeFromToken(string token, out SystemHandleType handleType)
-        {
-            for (int i = 1; i < handleTypeTokenCount; i++)
-            {
-                if (handleTypeTokens[i] == token)
-                {
-                    handleType = (SystemHandleType)i;
-                    return true;
-                }
-            }
-            handleType = SystemHandleType.OB_TYPE_UNKNOWN;
-            return false;
-        }
-
-        private static string GetHandleTypeToken(IntPtr handle, int processId)
-        {
-            IntPtr currentProcess = NativeMethods.GetCurrentProcess();
-            bool remote = (processId != NativeMethods.GetProcessId(currentProcess));
-            SafeProcessHandle processHandle = null;
-            SafeObjectHandle objectHandle = null;
-            try
-            {
-                if (remote)
-                {
-                    processHandle = NativeMethods.OpenProcess(ProcessAccessRights.PROCESS_DUP_HANDLE, true, processId);
-                    if (NativeMethods.DuplicateHandle(processHandle.DangerousGetHandle(), handle, currentProcess, out objectHandle, 0, false, DuplicateHandleOptions.DUPLICATE_SAME_ACCESS))
-                    {
-                        handle = objectHandle.DangerousGetHandle();
-                    }
-                }
-                return GetHandleTypeToken(handle);
-            }
-            finally
-            {
-                if (remote)
-                {
-                    if (processHandle != null)
-                    {
-                        processHandle.Close();
-                    }
-                    if (objectHandle != null)
-                    {
-                        objectHandle.Close();
-                    }
-                }
-            }
-        }
-
-        private static string GetHandleTypeToken(IntPtr handle)
-        {
-            int length;
-            NativeMethods.NtQueryObject(handle, OBJECT_INFORMATION_CLASS.ObjectTypeInformation, IntPtr.Zero, 0, out length);
-            if (length < 0)
-            {
-                return string.Empty;
-            }
-            IntPtr ptr = IntPtr.Zero;
-            RuntimeHelpers.PrepareConstrainedRegions();
-            try
-            {
-                RuntimeHelpers.PrepareConstrainedRegions();
-                try { }
-                finally
-                {
-                    ptr = Marshal.AllocHGlobal(length);
-                }
-                if (NativeMethods.NtQueryObject(handle, OBJECT_INFORMATION_CLASS.ObjectTypeInformation, ptr, length, out length) == NT_STATUS.STATUS_SUCCESS)
-                {
-                    return Marshal.PtrToStringUni((IntPtr)((int)ptr + 0x60));
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            return string.Empty;
-        }
-
-        private static bool ConvertDevicePathToDosPath(string devicePath, out string dosPath)
-        {
-            EnsureDeviceMap();
-            int i = devicePath.Length;
-            while (i > 0 && (i = devicePath.LastIndexOf('\\', i - 1)) != -1)
-            {
-                string drive;
-                if (deviceMap.TryGetValue(devicePath.Substring(0, i), out drive))
-                {
-                    dosPath = string.Concat(drive, devicePath.Substring(i));
-                    return dosPath.Length != 0;
-                }
-            }
-            dosPath = string.Empty;
-            return false;
-        }
-
-        private static void EnsureDeviceMap()
-        {
-            if (deviceMap == null)
-            {
-                Dictionary<string, string> localDeviceMap = BuildDeviceMap();
-                Interlocked.CompareExchange<Dictionary<string, string>>(ref deviceMap, localDeviceMap, null);
-            }
-        }
-
-        private static Dictionary<string, string> BuildDeviceMap()
-        {
-            string[] logicalDrives = Environment.GetLogicalDrives();
-            Dictionary<string, string> localDeviceMap = new Dictionary<string, string>(logicalDrives.Length);
-            StringBuilder lpTargetPath = new StringBuilder(MAX_PATH);
-            foreach (string drive in logicalDrives)
-            {
-                string lpDeviceName = drive.Substring(0, 2);
-                NativeMethods.QueryDosDevice(lpDeviceName, lpTargetPath, MAX_PATH);
-                localDeviceMap.Add(NormalizeDeviceName(lpTargetPath.ToString()), lpDeviceName);
-            }
-            localDeviceMap.Add(networkDevicePrefix.Substring(0, networkDevicePrefix.Length - 1), "\\");
-            return localDeviceMap;
-        }
-
-        private static string NormalizeDeviceName(string deviceName)
-        {
-            if (string.Compare(deviceName, 0, networkDevicePrefix, 0, networkDevicePrefix.Length, StringComparison.InvariantCulture) == 0)
-            {
-                string shareName = deviceName.Substring(deviceName.IndexOf('\\', networkDevicePrefix.Length) + 1);
-                return string.Concat(networkDevicePrefix, shareName);
-            }
-            return deviceName;
-        }
-
         #endregion
     }
 }

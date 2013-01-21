@@ -59,7 +59,7 @@
         /// <returns>List of the open files.</returns>
         public static IEnumerable<FileInfo> GetHandleList(List<int> pids)
         {
-            foreach (var file in new DetectOpenFiles.OpenFiles(pids))
+            foreach (var file in DetectOpenFiles.UnsafeGetFilesLockedBy(pids))
             {
                 FileInfo fi;
 
