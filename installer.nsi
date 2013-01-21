@@ -72,6 +72,9 @@ done:
 FunctionEnd
 
 Function .onInstSuccess
+	AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "FullAccess"
+	AccessControl::EnableFileInheritance "$INSTDIR"
+	
 	${GetParameters} $R0
 	${GetOptions} $R0 "/AR" $R1
 	IfErrors done run
