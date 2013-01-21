@@ -1,4 +1,4 @@
-﻿<#@ template language="C#" hostspecific="true" #>
+﻿<#@ template language="C#" hostspecific="true" debug="false" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
@@ -7,6 +7,7 @@
 <#@ import namespace="System.Text.RegularExpressions" #>
 <#@ import namespace="System.Diagnostics" #>
 <#@ import namespace="System.Linq" #>
+<#@ output extension=".cs" #>
 using System;
 using System.Reflection;
 
