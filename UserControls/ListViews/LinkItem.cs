@@ -25,6 +25,18 @@
             FileURL = link.FileURL;
             Infos   = link.Infos;
             Color   = "White";
+
+            if (Source.Type == Types.Torrent)
+            {
+                if (Infos.StartsWith("0 seed"))
+                {
+                    Color = "#50FFFFFF";
+                }
+                else if (Infos.Contains("Free"))
+                {
+                    Color = "GreenYellow";
+                }
+            }
         }
 
         /// <summary>

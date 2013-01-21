@@ -160,7 +160,7 @@
 
                 if (release != null && !release.Trim().Contains("Not Available"))
                 {
-                    link.Release = HtmlEntity.DeEntitize(release);
+                    link.Release = HtmlEntity.DeEntitize(release).Replace("\\", string.Empty);
                     link.Quality = FileNames.Parser.ParseQuality(link.Release);
                 }
                 else
@@ -177,6 +177,7 @@
                 link.FileURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("span/a[contains(@href, 'action=download')]", "href"));
                 link.Size    = node.GetTextValue("../td[5]").Trim();
                 link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../td[6]").Trim(), node.GetTextValue("../td[7]").Trim())
+                             + ", Free"
                              + (node.GetHtmlValue("../td[4]/img[@title='FastTorrent']") != null ? ", Fast" : string.Empty)
                              + (node.GetHtmlValue("../td[4]/img[@title='Official BTN AutoUp']") != null ? ", Official Up." : string.Empty);
 
