@@ -27,9 +27,34 @@
         /// </summary>
         public void Ask()
         {
+            var old = Path.Combine(Signature.FullPath, "TVShows.db3");
+            var uac = Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3");
+            
+            if (File.Exists(uac) && File.Exists(old))
+            {
+                try
+                {
+                    if (new FileInfo(old).Length < new FileInfo(uac).Length)
+                    {
+                        var tmp = old;
+                        old = uac;
+                        File.Move(tmp, tmp + ".old");
+                    }
+                    else
+                    {
+                        File.Move(uac, uac + ".old");
+                    }
+                }
+                catch { }
+            }
+            else if (!File.Exists(old))
+            {
+                old = uac;
+            }
+
             if (!File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3.gz")))
             {
-                using (var ufs = File.OpenRead(Path.Combine(Signature.FullPath, "TVShows.db3")))
+                using (var ufs = File.OpenRead(old))
                 using (var zfs = File.Create(Path.Combine(Signature.FullPath, "TVShows.db3.gz")))
                 using (var zip = new GZipStream(zfs, CompressionMode.Compress))
                 {

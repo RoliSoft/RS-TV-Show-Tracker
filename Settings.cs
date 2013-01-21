@@ -34,7 +34,21 @@
             }
 
             _jsFile = Path.Combine(Signature.FullPath, "Settings.json");
-            
+            var tmp = Path.Combine(Signature.UACVirtualizedPath, "Settings.json");
+
+            if (!File.Exists(_jsFile) && File.Exists(tmp))
+            {
+                try
+                {
+                    if (new FileInfo(_jsFile).Length < new FileInfo(tmp).Length)
+                    {
+                        File.Copy(tmp, _jsFile);
+                        File.Delete(tmp);
+                    }
+                }
+                catch {  }
+            }
+
             try
             {
                 Keys = (Dictionary<string, object>)ConvertJToNet(
@@ -62,9 +76,7 @@
             {
                 Keys["Tracker Order"] = new List<string>
                     {
-                        "BroadcasTheNet", "Tv Torrents Ro", "TvStore", "BitMeTV", "TvTorrents", "FileList",
-                        "nCore", "bitHUmen", "The Pirate Bay", "DirectDownload.tv", "Zunox", "SceneReleases",
-                        "ReleaseLog", "NZBIndex", "NZBClub", "Twilight", "PhazeDDL"
+                        "BroadcasTheNet", "Tv Torrents Ro", "TvStore", "BitMeTV", "TvTorrents", "FileList", "nCore", "bitHUmen"
                     };
             }
 

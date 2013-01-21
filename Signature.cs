@@ -9,6 +9,7 @@
     using System.Reflection;
     using System.Security.Cryptography;
     using System.Text;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Contains informations about the assembly.
@@ -79,6 +80,12 @@
         public static string FullPath { get; private set; }
 
         /// <summary>
+        /// Gets the UAC virtualized path.
+        /// </summary>
+        /// <value>The UAC virtualized path.</value>
+        public static string UACVirtualizedPath { get; private set; }
+
+        /// <summary>
         /// This number is used for various purposes where a non-random unique number is required.
         /// </summary>
         public static long MagicNumber
@@ -116,7 +123,12 @@
             Software = "RS TV Show Tracker";
             Version = ver.Major + "." + ver.Minor + "." + ver.Build + "." + ver.Revision;
             VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty) + " b" + ver.Revision + (IsNightly ? " nightly" : string.Empty);
-            try { FullPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar; }
+
+            try
+            {
+                FullPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar;
+                UACVirtualizedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VirtualStore", Regex.Replace(FullPath, @"^[a-zA-Z]{1,2}:[\\/]", string.Empty));
+            }
             catch (ArgumentException) { }
         }
 

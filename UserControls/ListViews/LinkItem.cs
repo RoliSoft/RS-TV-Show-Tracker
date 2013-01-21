@@ -55,7 +55,7 @@
 
                     if (typ == "white")
                     {
-                        if (string.IsNullOrWhiteSpace(FileURL) && !lst.Any(d => FileURL.Contains(d)))
+                        if (string.IsNullOrWhiteSpace(FileURL) || !lst.Any(d => FileURL.Contains(d)))
                         {
                             Color = "#50FFFFFF";
                         }

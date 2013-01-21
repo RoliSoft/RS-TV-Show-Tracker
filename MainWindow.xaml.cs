@@ -51,8 +51,8 @@
         public static readonly int WM_SHOWFIRSTINSTANCE = Utils.Interop.RegisterWindowMessage("WM_SHOWFIRSTINSTANCE|{0}", Signature.Software);
 
         private Timer _statusTimer;
-        private bool _hideOnStart, _dieOnStart;
-        private bool _askUpdate, _askErrorUpdate;
+        private static bool _initialized;
+        private bool _hideOnStart, _dieOnStart, _askUpdate, _askErrorUpdate;
         private Mutex _mutex;
         private static ConcurrentDictionary<string, int> _exCnt = new ConcurrentDictionary<string, int>();
 
@@ -74,7 +74,7 @@
                 return;
             }
 
-            if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")))
+            if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")) || File.Exists(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3")))
             {
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
                 _dieOnStart = true;
@@ -277,6 +277,8 @@
                                 SetLastUpdated();
                             });
                 }).Start();
+
+            _initialized = true;
 
             foreach (var plugin in Extensibility.GetNewInstances<StartupPlugin>())
             {
@@ -1009,7 +1011,7 @@
                 return;
             }
 
-            var show = Settings.Get<bool>("Show Unhandled Errors");
+            var show = !_initialized || Settings.Get<bool>("Show Unhandled Errors");
             var sb   = new StringBuilder();
             var sbtd = new StringBuilder();
             var ecnt = 0;

@@ -58,6 +58,40 @@
                 Directory.CreateDirectory(DataPath);
             }
 
+            var tmp = Path.Combine(Signature.UACVirtualizedPath, "db");
+
+            if (Directory.Exists(tmp))
+            {
+                foreach (var dir in Directory.EnumerateDirectories(tmp))
+                {
+                    var nir = Path.Combine(DataPath, Path.GetFileName(dir));
+
+                    if (Directory.Exists(nir) || !File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        var show = TVShow.Load(dir);
+
+                        show.ID += 1000;
+                        show.Directory = nir;
+
+                        Directory.CreateDirectory(show.Directory);
+
+                        show.Save();
+                        show.SaveTracking();
+
+                        Directory.Delete(dir, true);
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+            }
+
             LoadDatabase();
         }
 
