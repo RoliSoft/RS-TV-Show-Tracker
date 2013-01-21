@@ -269,6 +269,23 @@
         }
 
         /// <summary>
+        /// Runs the specified process with admin rights.
+        /// </summary>
+        /// <param name="process">The process.</param>
+        /// <param name="arguments">The arguments.</param>
+        public static void RunElevated(string process, string arguments = null)
+        {
+            var pi = new ProcessStartInfo
+                         {
+                             Verb      = "runas",
+                             FileName  = process,
+                             Arguments = arguments
+                         };
+
+            try { Process.Start(pi); } catch (Win32Exception) { }
+        }
+
+        /// <summary>
         /// Runs the specified process, waits until it finishes and returns the console content.
         /// </summary>
         /// <param name="process">The process.</param>

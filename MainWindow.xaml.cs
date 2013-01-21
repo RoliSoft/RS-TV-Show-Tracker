@@ -8,6 +8,7 @@
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -64,6 +65,9 @@
             Thread.CurrentThread.CurrentCulture   = CultureInfo.CreateSpecificCulture("en-US");
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
 
+            Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
+
             var uniq = false;
             _mutex = new Mutex(true, "Local\\" + Signature.Software, out uniq);
 
@@ -76,6 +80,14 @@
 
             if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")) || File.Exists(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3")))
             {
+                if (!Utils.IsAdmin)
+                {
+                    _mutex.ReleaseMutex();
+                    Utils.RunElevated(Assembly.GetExecutingAssembly().Location);
+                    Process.GetCurrentProcess().Kill();
+                    return;
+                }
+
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
                 _dieOnStart = true;
             }
@@ -127,9 +139,6 @@
             }
 
             InitializeComponent();
-
-            Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
         }
 
         /// <summary>

@@ -109,24 +109,31 @@
                     AllowDialogCancellation = true,
                     Callback                = (dialog, args, data) =>
                         {
-                            dialog.SetProgressBarPosition(_tdpos);
-                            dialog.SetContent(_tdstr);
-
-                            if (args.ButtonId != 0)
+                            try
                             {
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                                dialog.SetProgressBarPosition(_tdpos);
+                                dialog.SetContent(_tdstr);
 
-                                if (!_cancel)
+                                if (args.ButtonId != 0)
                                 {
-                                    try { _wc.CancelAsync(); } catch { }
+                                    Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+
+                                    if (!_cancel)
+                                    {
+                                        try { _wc.CancelAsync(); } catch { }
+                                    }
+
+                                    return false;
                                 }
 
-                                return false;
+                                if (_cancel)
+                                {
+                                    dialog.ClickButton(500);
+                                    return false;
+                                }
                             }
-
-                            if (_cancel)
+                            catch
                             {
-                                dialog.ClickButton(500);
                                 return false;
                             }
 
@@ -229,8 +236,9 @@
                 _tdstr = "Finished extracting files!";
             }
 
-            File.Move(Path.Combine(Signature.FullPath, "TVShows.db3"), Path.Combine(Signature.FullPath, "TVShows.db3.old"));
-            File.Delete(Path.Combine(Signature.FullPath, "TVShows.db3.gz"));
+            try { File.Move(Path.Combine(Signature.FullPath, "TVShows.db3"), Path.Combine(Signature.FullPath, "TVShows.db3.old")); } catch { }
+            try { File.Move(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3"), Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3.old")); } catch { }
+            try { File.Delete(Path.Combine(Signature.FullPath, "TVShows.db3.gz")); } catch { }
 
             _cancel = true;
 
