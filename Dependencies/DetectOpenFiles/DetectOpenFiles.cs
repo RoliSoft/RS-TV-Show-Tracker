@@ -1,72 +1,48 @@
+//
+//  Code originates from http://stackoverflow.com/a/3504251/156626
+//  The earlier implementation was not compatible with x64, and after
+//  rewriting half of the pointer-related codes, it still wouldn't work.
+//  This code was modified slightly to use yield and recognize networked paths.
+//  Also, to prevent lock-ups in GetFilePath(), I added thread abortion logic
+//  similar to the one used in the earlier DetectOpenFiles implementation.
+//
+
 namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.ConstrainedExecution;
     using System.Runtime.InteropServices;
-    using System.Security.Permissions;
     using System.Text;
     using System.Threading;
-    using Microsoft.Win32.SafeHandles;
 
     public class DetectOpenFiles
     {
-        /// <summary>
-        /// Return a list of file locks held by the process.
-        /// </summary>
-        public static List<string> GetFilesLockedBy(List<int> pids)
+        private static void Ignore() { }
+        public static IEnumerable<string> UnsafeGetFilesLockedBy(List<int> pids)
         {
-            var outp = new List<string>();
-
-            ThreadStart ts = delegate
+            foreach (var handle in GetHandles(pids))
             {
-                try
-                {
-                    outp = UnsafeGetFilesLockedBy(pids);
-                }
-                catch { Ignore(); }
-            };
+                var path = string.Empty;
 
-            try
-            {
-                var t = new Thread(ts);
-                t.IsBackground = true;
-                t.Start();
-                if (!t.Join(60000))
+                var thd = new Thread(ptr => path = GetFilePath((Win32API.SYSTEM_HANDLE_INFORMATION)ptr)) { IsBackground = true };
+
+                thd.Start(handle);
+
+                if (!thd.Join(200))
                 {
                     try
                     {
-                        t.Interrupt();
-                        t.Abort();
+                        thd.Interrupt();
+                        thd.Abort();
                     }
-                    catch { Ignore(); }
+                    catch { }
                 }
-            }
-            catch { Ignore(); }
 
-            return outp;
-        }
-
-        #region Inner Workings
-        private static void Ignore() { }
-        public static List<string> UnsafeGetFilesLockedBy(List<int> pids)
-        {
-            var handles = GetHandles(pids);
-            var files = new List<string>();
-
-            foreach (var handle in handles)
-            {
-                var file = GetFilePath(handle);
-
-                if (file != null)
+                if (!string.IsNullOrEmpty(path))
                 {
-                    files.Add(file);
+                    yield return path;
                 }
             }
-
-            return files;
         }
 
         const int CNST_SYSTEM_HANDLE_INFORMATION = 16;
@@ -95,7 +71,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             {
                 if (nLength == 0)
                 {
-                    Console.WriteLine("nLength returned at zero! ");
+                    //Console.WriteLine("nLength returned at zero! ");
                     return null;
                 }
                 Marshal.FreeHGlobal(ipObjectType);
@@ -127,7 +103,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 Marshal.FreeHGlobal(ipObjectName);
                 if (nLength == 0)
                 {
-                    Console.WriteLine("nLength returned at zero! " + strObjectTypeName);
+                    //Console.WriteLine("nLength returned at zero! " + strObjectTypeName);
                     return null;
                 }
                 ipObjectName = Marshal.AllocHGlobal(nLength);
@@ -164,10 +140,19 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 }
             }
 
-            string path = GetRegularFileNameFromDevice(strObjectName);
+            if (strObjectName == null)
+            {
+                return null;
+            }
+
+            if (strObjectName.StartsWith(@"\Device\Mup\"))
+            {
+                return @"\\" + strObjectName.Substring(12);
+            }
+
             try
             {
-                return path;
+                return GetRegularFileNameFromDevice(strObjectName);
             }
             catch
             {
@@ -195,7 +180,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             return strFileName;
         }
 
-        private static List<Win32API.SYSTEM_HANDLE_INFORMATION> GetHandles(List<int> pids)
+        private static IEnumerable<Win32API.SYSTEM_HANDLE_INFORMATION> GetHandles(List<int> pids)
         {
             var nHandleInfoSize = 0x10000;
             var ipHandlePointer = Marshal.AllocHGlobal(nHandleInfoSize);
@@ -224,8 +209,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 ipHandle = new IntPtr(ipHandlePointer.ToInt32() + 4);
             }
 
-            var lst = new List<Win32API.SYSTEM_HANDLE_INFORMATION>();
-
             for (long lIndex = 0; lIndex < lHandleCount; lIndex++)
             {
                 var shHandle = new Win32API.SYSTEM_HANDLE_INFORMATION();
@@ -242,11 +225,9 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
                 if (pids.Contains(shHandle.ProcessID))
                 {
-                    lst.Add(shHandle);
+                    yield return shHandle;
                 }
             }
-
-            return lst;
         }
 
         private static bool Is64Bits()
@@ -388,6 +369,5 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             public const int DUPLICATE_SAME_ACCESS = 0x2;
             public const uint FILE_SEQUENTIAL_ONLY = 0x00000004;
         }
-        #endregion
     }
 }
