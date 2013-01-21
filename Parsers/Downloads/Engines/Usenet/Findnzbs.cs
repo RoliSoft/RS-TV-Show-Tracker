@@ -10,10 +10,10 @@
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for scraping NZB-Matrix.
+    /// Provides support for scraping Findnzbs.
     /// </summary>
     [TestFixture]
-    public class NZBMatrix : DownloadSearchEngine
+    public class Findnzbs : DownloadSearchEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -23,7 +23,7 @@
         {
             get
             {
-                return "NZB-Matrix";
+                return "Findnzbs";
             }
         }
 
@@ -35,7 +35,7 @@
         {
             get
             {
-                return "http://nzb-matrix.eu/";
+                return "http://findnzbs.info/";
             }
         }
 
@@ -71,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-01-21 3:28 AM");
+                return Utils.DateTimeToVersion("2013-01-21 3:37 AM");
             }
         }
 

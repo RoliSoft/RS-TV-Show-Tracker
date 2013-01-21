@@ -108,7 +108,7 @@
                         FileURL = (string)item["nzb"],
                         Size    = Utils.GetFileSize((long)item["size"]),
                         Quality = FileNames.Parser.ParseQuality((string)item["name"]),
-                        Infos   = Utils.DetermineAge(((int)item["postdate"]*1.0).GetUnixTimestamp())
+                        Infos   = Utils.DetermineAge(((int)item["postdate"]*1.0).GetUnixTimestamp(), true)
                     };
             }
         }

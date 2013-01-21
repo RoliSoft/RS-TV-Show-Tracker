@@ -1271,9 +1271,12 @@
         /// Converts the specified DateTime a Usenet indexer-style relative age.
         /// </summary>
         /// <param name="dateTime">The DateTime to convert.</param>
-        /// <returns>A string value based on the relative date
-        /// of the datetime as compared to the current date.</returns>
-        public static string DetermineAge(DateTime dateTime)
+        /// <param name="forceDay">if set to <c>true</c> the maximum unit will be days.</param>
+        /// <returns>
+        /// A string value based on the relative date
+        /// of the datetime as compared to the current date.
+        /// </returns>
+        public static string DetermineAge(DateTime dateTime, bool forceDay = false)
         {
             var timeSpan = DateTime.Now - dateTime;
      
@@ -1292,7 +1295,7 @@
                 return FormatNumber(timeSpan.Hours, "hour") + " old";
             }
 
-            if (timeSpan <= TimeSpan.FromDays(30))
+            if (timeSpan <= TimeSpan.FromDays(30) || forceDay)
             {
                 return FormatNumber(timeSpan.Days, "day") + " old";
             }

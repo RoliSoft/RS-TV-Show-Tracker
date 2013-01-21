@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
 
@@ -26,16 +27,47 @@
             Infos   = link.Infos;
             Color   = "White";
 
-            if (Source.Type == Types.Torrent)
+            switch (Source.Type)
             {
-                if (Infos.StartsWith("0 seed"))
-                {
-                    Color = "#50FFFFFF";
-                }
-                else if (Infos.Contains("Free"))
-                {
-                    Color = "GreenYellow";
-                }
+                case Types.Torrent:
+                    if (Infos.StartsWith("0 seed"))
+                    {
+                        Color = "#50FFFFFF";
+                    }
+                    else if (Infos.Contains("Free"))
+                    {
+                        Color = "GreenYellow";
+                    }
+                    break;
+
+                case Types.Usenet:
+                    var ret = Settings.Get("Usenet Retention", 0);
+
+                    if (ret != 0 && Infos.Contains("day") && int.Parse(Infos.Replace(",", string.Empty).Split(" ".ToCharArray()).First()) > ret)
+                    {
+                        Color = "#50FFFFFF";
+                    }
+                    break;
+
+                case Types.DirectHTTP:
+                    var typ = Settings.Get("One-Click Hoster List Type", "white");
+                    var lst = Settings.Get<List<string>>("One-Click Hoster List");
+
+                    if (typ == "white")
+                    {
+                        if (string.IsNullOrWhiteSpace(FileURL) && !lst.Any(d => FileURL.Contains(d)))
+                        {
+                            Color = "#50FFFFFF";
+                        }
+                    }
+                    else if (typ == "black")
+                    {
+                        if (string.IsNullOrWhiteSpace(FileURL) || lst.Any(d => FileURL.Contains(d)))
+                        {
+                            Color = "#50FFFFFF";
+                        }
+                    }
+                    break;
             }
         }
 

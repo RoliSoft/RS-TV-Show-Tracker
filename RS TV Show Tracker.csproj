@@ -212,6 +212,7 @@
     <Compile Include="Parsers\Downloads\Engines\Torrent\Torrentz.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\KickassTorrents.cs" />
     <Compile Include="Parsers\Downloads\Engines\Torrent\TorrentDay.cs" />
+    <Compile Include="Parsers\Downloads\Engines\Usenet\Findnzbs.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\nzbX.cs" />
     <Compile Include="Parsers\Guides\Episode.cs" />
