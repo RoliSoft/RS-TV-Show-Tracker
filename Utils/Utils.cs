@@ -393,7 +393,7 @@
         {
             try
             {
-                var rule = new FileSystemAccessRule(@"BUILTIN\Users", FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.InheritOnly, AccessControlType.Allow);
+                var rule = new FileSystemAccessRule(@"BUILTIN\Users", FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow);
 
                 var di = new DirectoryInfo(path);
                 var ds = di.GetAccessControl(AccessControlSections.Access);
