@@ -30,6 +30,7 @@
 var SM_Folder
 
 !include "FileFunc.nsh"
+!include "UAC.nsh"
 
 ######################################################################
 
@@ -77,7 +78,7 @@ Function .onInstSuccess
 	IfErrors done run
 	
 run:
-	Exec "$INSTDIR\${MAIN_APP_EXE}"
+	!insertmacro UAC_AsUser_ExecShell "open" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR" SW_SHOWNORMAL
 	
 done:
 FunctionEnd
