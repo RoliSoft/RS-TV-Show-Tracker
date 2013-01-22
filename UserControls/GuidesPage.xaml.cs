@@ -380,7 +380,7 @@
         /// </summary>
         public void LoadDownloadedEpisodes()
         {
-            var episodes = Library.Files.Where(kv => kv.Value.Count != 0).ToDictionary(k => Database.TVShows[(int)Math.Floor((double)k.Key / 1000 / 1000)].EpisodeByID[k.Key - (int)(Math.Floor((double)k.Key / 1000 / 1000) * 1000 * 1000)], v => v.Value).Where(e => e.Key.Airdate != Utils.UnixEpoch).OrderByDescending(e => e.Key.Airdate);
+            var episodes = Library.Files.Where(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000))).ToDictionary(k => Database.TVShows[(int)Math.Floor((double)k.Key / 1000 / 1000)].EpisodeByID[k.Key - (int)(Math.Floor((double)k.Key / 1000 / 1000) * 1000 * 1000)], v => v.Value).Where(e => e.Key.Airdate != Utils.UnixEpoch).OrderByDescending(e => e.Key.Airdate);
 
             DownloadedListViewItemCollection.RaiseListChangedEvents = false;
 
@@ -584,25 +584,11 @@
                 List<string> fns;
                 if (Library.Files.TryGetValue(episode.ID, out fns) && fns.Count != 0)
                 {
-                    var fn = fns.OrderByDescending(FileNames.Parser.ParseQuality).First();
-                    var qu = FileNames.Parser.ParseQuality(fn);
+                    var qualities = string.Join("/", fns.Select(FileNames.Parser.ParseQuality).Distinct().OrderByDescending(q => q).Select(q => q.GetAttribute<DescriptionAttribute>().Description));
 
-                    if (qu != Qualities.Unknown)
+                    if (!string.IsNullOrWhiteSpace(qualities))
                     {
-                        appttl += " [" + qu.GetAttribute<DescriptionAttribute>().Description + "]";
-                    }
-                    else
-                    {
-                        var ed = FileNames.Parser.ParseEdition(fn);
-
-                        if (ed != Editions.Unknown)
-                        {
-                            appttl += " [" + ed.GetAttribute<DescriptionAttribute>().Description + "]";
-                        }
-                        else
-                        {
-                            appttl += " [" + Path.GetExtension(fn) + "]";
-                        }
+                        appttl = " [" + qualities + "]";
                     }
                 }
 

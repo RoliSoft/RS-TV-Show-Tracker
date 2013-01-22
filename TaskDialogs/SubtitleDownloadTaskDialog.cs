@@ -184,7 +184,7 @@
             
             _active = true;
             _tdtit = link.Release;
-            _tdstr = "Sending request to " + new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty) + "...";
+            _tdstr = "Sending request to " + (string.IsNullOrWhiteSpace(link.FileURL) ? link.Source.Name : new Uri(link.FileURL).DnsSafeHost.Replace("www.", string.Empty)) + "...";
             var showmbp = false;
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {

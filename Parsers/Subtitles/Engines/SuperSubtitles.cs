@@ -57,7 +57,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-12-31 12:13 PM");
+                return Utils.DateTimeToVersion("2013-01-22 3:57 PM");
             }
         }
 
@@ -78,12 +78,13 @@
             var ep = ShowNames.Parser.ExtractEpisode(query);
             var id = GetIDForShow(pr[0]);
 
-            if (!id.HasValue && ep != null)
+            if (!id.HasValue)
             {
                 yield break;
             }
 
-            var html = Utils.GetHTML(Site + "/index.php?sid=" + id + "&complexsearch=true&evad=" + ep.Season + "&epizod1=" + ep.Episode + "&tab=sorozat");
+            var surl = Site + "index.php?sid=" + id + "&complexsearch=true&tab=sorozat" + (ep != null ? "&evad=" + ep.Season + "&epizod1=" + ep.Episode : string.Empty);
+            var html = Utils.GetHTML(surl);
             var subs = html.DocumentNode.SelectNodes("//tr[@id='vilagit']");
 
             if (subs == null)
@@ -97,7 +98,7 @@
 
                 sub.Release  = node.GetTextValue("td[3]/div[2]").Trim();
                 sub.Language = ParseLanguage(node.GetTextValue("td[@class='lang']").Trim());
-                sub.InfoURL = Site + "/index.php?sid=" + id + "&complexsearch=true&evad=" + ep.Season + "&epizod1=" + ep.Episode + "&tab=sorozat";
+                sub.InfoURL  = surl;
                 sub.FileURL  = Site.TrimEnd('/') + node.GetNodeAttributeValue("td[6]/a", "href");
 
                 yield return sub;

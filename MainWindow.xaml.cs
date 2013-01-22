@@ -1100,7 +1100,7 @@
 
                             if (pr.StartsWith(sp, true, CultureInfo.InvariantCulture))
                             {
-                                pr = pr.Substring(sp.Length);
+                                pr = pr.Substring(sp.Length).Trim("/".ToCharArray());
                             }
 
                             if (ecnt == 0)
@@ -1136,7 +1136,7 @@
                         MainIcon                = VistaTaskDialogIcon.Error,
                         Title                   = "An unexpected error occurred",
                         MainInstruction         = "An unexpected error occurred",
-                        Content                 = sbtd + (count == 2 ? "\r\n\r\nFuture exceptions of this type will be ignored automatically." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occurred at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
+                        Content                 = sbtd.ToString() + (count == 3 ? "\r\n\r\nFuture exceptions of this type will be ignored automatically." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occurred at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
                         ExpandedInfo            = sb.ToString().TrimEnd(),
                         CommandButtons          = new[] { "Submit bug report", "Ignore exception" },
                         AllowDialogCancellation = true,
