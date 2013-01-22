@@ -30,11 +30,11 @@
             switch (Source.Type)
             {
                 case Types.Torrent:
-                    if (Infos.StartsWith("0 seed"))
+                    if (Infos.StartsWith("0 seed") && Settings.Get("Fade Dead Torrents", true))
                     {
                         Color = "#50FFFFFF";
                     }
-                    else if (Infos.Contains("Free"))
+                    else if (Infos.Contains("Free") && Settings.Get<bool>("Highlight Free Torrents"))
                     {
                         Color = "GreenYellow";
                     }

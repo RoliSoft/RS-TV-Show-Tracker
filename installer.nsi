@@ -178,6 +178,7 @@ Section -MainProgram
 	File "Dependencies\StarksoftBiko.dll"
 	File "Dependencies\TaskDialog.dll"
 	File "Dependencies\Transitionals.dll"
+	File "Dependencies\WPFToolkit.Extended.dll"
 	
 	SetOutPath "$INSTDIR"
 	
@@ -263,6 +264,7 @@ Section Uninstall
 	Delete "$INSTDIR\libs\StarksoftBiko.dll"
 	Delete "$INSTDIR\libs\TaskDialog.dll"
 	Delete "$INSTDIR\libs\Transitionals.dll"
+	Delete "$INSTDIR\libs\WPFToolkit.Extended.dll"
 	Delete "$INSTDIR\RSTVShowTracker.exe"
 	Delete "$INSTDIR\RSTVShowTracker.exe.config"
 	Delete "$INSTDIR\RSTVShowTracker.pdb"

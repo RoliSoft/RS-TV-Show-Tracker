@@ -181,6 +181,9 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WPFToolkit.Extended">
+      <HintPath>Dependencies\WPFToolkit.Extended.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -381,6 +384,9 @@
     <Compile Include="UserControls\Settings\AssociationsSettings.xaml.cs">
       <DependentUpon>AssociationsSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Settings\ListingSettings.xaml.cs">
+      <DependentUpon>ListingSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Settings\FeedsSettings.xaml.cs">
       <DependentUpon>FeedsSettings.xaml</DependentUpon>
     </Compile>
@@ -509,6 +515,10 @@
     <Page Include="UserControls\Settings\AssociationsSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControls\Settings\ListingSettings.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1015,6 +1025,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\money-coin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\headstone-rip.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />

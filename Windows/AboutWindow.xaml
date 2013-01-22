@@ -148,7 +148,7 @@
                     <Paragraph Margin="0">
                         <Hyperlink Name="github1" NavigateUri="http://github.com/RoliSoft/RS-TV-Show-Tracker/commits"><Run Name="version">v2</Run></Hyperlink> / rev <Hyperlink Name="github2" NavigateUri="http://github.com/RoliSoft/RS-TV-Show-Tracker"><Run Name="revision">00000000</Run></Hyperlink>
                         <LineBreak />
-                        Compiled on <Run Name="compile">2012</Run>
+                        Compiled on <Run Name="compile">21st century</Run>
                     </Paragraph>
                     <Paragraph Margin="0,10,0,0">
                         This software is licensed under the
@@ -181,7 +181,7 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://www.starksoft.com/prod_proxy.html">Starksoft Proxy Library</Hyperlink>
+                                <Hyperlink NavigateUri="http://biko.codeplex.com/">Starksoft Biko</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>
@@ -211,17 +211,17 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://wpftoolkit.codeplex.com/">Extended WPF Toolkit™ Community Edition</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://transitionals.codeplex.com/">Transitionals</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>
                             <Paragraph>
                                 <Hyperlink NavigateUri="http://greyableimage.codeplex.com/">GreyableImage</Hyperlink>
-                            </Paragraph>
-                        </ListItem>
-                        <ListItem>
-                            <Paragraph>
-                                <Hyperlink NavigateUri="http://technet.microsoft.com/en-us/sysinternals/bb896655">SysInternals Handle</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>

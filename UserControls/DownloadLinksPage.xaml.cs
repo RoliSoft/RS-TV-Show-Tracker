@@ -103,6 +103,8 @@
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
 
                 filterResults.IsChecked = Settings.Get<bool>("Filter Download Links");
+                highlightFree.IsChecked = Settings.Get<bool>("Highlight Free Torrents");
+                fadeDead.IsChecked      = Settings.Get("Fade Dead Torrents", true);
             }
 
             LoadEngines();
@@ -322,6 +324,46 @@
         private void FilterResultsUnchecked(object sender, RoutedEventArgs e)
         {
             Settings.Set("Filter Download Links", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the hightlightFree control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void HighlightFreeChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Highlight Free Torrents", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the highlightFree control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void HighlightFreeUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Highlight Free Torrents", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the fadeDead control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FadeDeadChecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Fade Dead Torrents", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the fadeDead control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void FadeDeadUnchecked(object sender, RoutedEventArgs e)
+        {
+            Settings.Set("Fade Dead Torrents", false);
         }
 
         /// <summary>
