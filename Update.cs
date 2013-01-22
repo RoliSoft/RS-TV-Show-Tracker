@@ -17,6 +17,14 @@
     public class Updater
     {
         /// <summary>
+        /// Gets or sets a value indicating whether an update is currently in progress.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if an update is currently in progress; otherwise, <c>false</c>.
+        /// </value>
+        public static bool InProgress { get; set; }
+
+        /// <summary>
         /// Occurs when the update is done.
         /// </summary>
         public event EventHandler<EventArgs> UpdateDone;
@@ -36,6 +44,8 @@
         /// </summary>
         public void Update()
         {
+            InProgress = true;
+
             var i = 0d;
             var cnt = Database.TVShows.Values.Count(s => s.Airing);
             var ids = Database.TVShows.Values.Where(s => s.Airing).OrderBy(s => s.Title).Select(s => s.ID).ToList();
@@ -61,6 +71,8 @@
             Database.Setting("update", DateTime.Now.ToUnixTimestamp().ToString());
             MainWindow.Active.DataChanged();
             UpdateDone.Fire(this);
+
+            InProgress = false;
         }
 
         /// <summary>

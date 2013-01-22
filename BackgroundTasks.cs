@@ -82,7 +82,7 @@
         /// </summary>
         public static void CheckDatabaseUpdate()
         {
-            if ((DateTime.Now - (Database.Setting("update") ?? "0").ToDouble().GetUnixTimestamp()).TotalHours > 10)
+            if ((DateTime.Now - (Database.Setting("update") ?? "0").ToDouble().GetUnixTimestamp()).TotalHours > 10 && !Updater.InProgress)
             {
                 MainWindow.Active.Run(() => MainWindow.Active.UpdateDatabaseClick());
             }
