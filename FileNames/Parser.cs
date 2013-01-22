@@ -325,7 +325,9 @@
                             var eps = local.Episodes.Where(ch => ch.Airdate.Date == ep.AirDate.Value.Date).ToList();
                             if (eps.Count() != 0)
                             {
+                                ltvsh = eps[0].Show;
                                 title = eps[0].Name;
+                                lepis = eps[0];
                                 date  = eps[0].Airdate;
 
                                 ep.Season  = eps[0].Season;
@@ -337,7 +339,9 @@
                             var eps = local.Episodes.Where(ch => ch.Season == ep.Season && ch.Number == ep.Episode).ToList();
                             if (eps.Count() != 0)
                             {
+                                ltvsh = eps[0].Show;
                                 title = eps[0].Name;
+                                lepis = eps[0];
                                 date  = eps[0].Airdate;
                             }
                         }
