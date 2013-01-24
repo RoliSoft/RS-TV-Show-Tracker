@@ -172,7 +172,7 @@
                                     Text            = "Play one!",
                                     Cursor          = Cursors.Hand,
                                     TextDecorations = TextDecorations.Underline,
-                                    ToolTip         = new ToolTip { Content = "Plays a random unseen downloaded episode." }
+                                    ToolTip         = new ToolTip { Content = "Plays the next unseen downloaded episode from a randomly selected TV show." }
                                 });
                             (statusLabel.Content as StackPanel).Children[1].MouseLeftButtonDown += PlayRandomEpisodeClick;
                         }
@@ -1695,11 +1695,13 @@
         {
             if (Signature.IsActivated && Library.Files != null)
             {
-                var files = Library.Files.Where(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)) && !Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID[kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)].Watched).ToList();
+                var ids = Library.Files.Where(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)) && !Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID[kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)].Watched).ToList();
+                var id = (int)Math.Floor((double)ids[Utils.Rand.Next(0, ids.Count - 1)].Key / 1000 / 1000);
+                var ep = Database.TVShows[id].Episodes.Where(x => !x.Watched && Library.Files.ContainsKey(x.ID)).OrderBy(x => x.ID).FirstOrDefault();
 
-                if (files.Count != 0)
+                if (ep != null)
                 {
-                    var file = files[Utils.Rand.Next(0, files.Count - 1)].Value.OrderByDescending(FileNames.Parser.ParseQuality).First();
+                    var file = Library.Files[ep.ID].OrderByDescending(FileNames.Parser.ParseQuality).First();
 
                     if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(file).ToLower()))
                     {
