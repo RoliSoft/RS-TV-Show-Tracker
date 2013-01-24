@@ -217,7 +217,10 @@
                 }
             }
 
-            items.Add(new GuideDropDownDownloadedItem());
+            if (Signature.IsActivated)
+            {
+                items.Add(new GuideDropDownDownloadedItem());
+            }
 
             items.AddRange(Database.TVShows.Values.OrderBy(s => s.Name).Select(s => new GuideDropDownTVShowItem(s)));
 
@@ -581,26 +584,43 @@
             foreach (var episode in episodes)
             {
                 var appttl = string.Empty;
-                List<string> fns;
-                if (Library.Files.TryGetValue(episode.ID, out fns) && fns.Count != 0)
-                {
-                    var qualities = string.Join("/", fns.Select(FileNames.Parser.ParseQuality).Distinct().OrderByDescending(q => q).Select(q => q.GetAttribute<DescriptionAttribute>().Description));
 
-                    if (!string.IsNullOrWhiteSpace(qualities))
+                if (Signature.IsActivated)
+                {
+                    List<string> fns;
+                    if (Library.Files.TryGetValue(episode.ID, out fns) && fns.Count != 0)
                     {
-                        appttl = " [" + qualities + "]";
+                        var qualities = string.Join("/", fns.Select(FileNames.Parser.ParseQuality).Distinct().OrderByDescending(q => q).Select(q => q.GetAttribute<DescriptionAttribute>().Description));
+
+                        if (qualities == "Unknown")
+                        {
+                            var ed = FileNames.Parser.ParseEdition(fns[0]);
+
+                            if (ed != Editions.Unknown)
+                            {
+                                appttl += " [" + ed.GetAttribute<DescriptionAttribute>().Description + "]";
+                            }
+                            else
+                            {
+                                appttl += " [" + Path.GetExtension(fns[0]) + "]";
+                            }
+                        }
+                        else if (!string.IsNullOrWhiteSpace(qualities))
+                        {
+                            appttl = " [" + qualities + "]";
+                        }
                     }
                 }
 
                 GuideListViewItemCollection.Add(new GuideListViewItem
                     {
                         ID          = episode,
-                        Color       = appttl != string.Empty ? "Orange" : "White",
+                        Color       = appttl != string.Empty ? "Orange" : episode.Airdate > DateTime.Now || episode.Airdate == Utils.UnixEpoch ? "#50FFFFFF" : "White",
                         SeenIt      = episode.Watched,
                         Season      = "Season " + episode.Season,
                         Episode     = "S{0:00}E{1:00}".FormatWith(episode.Season, episode.Number),
                         Airdate     = episode.Airdate != Utils.UnixEpoch
-                                      ? episode.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")) + (episode.Airdate > DateTime.Now ? "*" : string.Empty)
+                                      ? episode.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US"))
                                       : "Unaired episode",
                         Title       = episode.Title + appttl,
                         Summary     = episode.Summary,
@@ -1024,65 +1044,71 @@
 
             // - Files
 
-            List<string> fn;
-            if (Library.Files.TryGetValue(episode.ID, out fn) && fn.Count != 0)
+            if (Signature.IsActivated)
             {
-                // Open folder
-
-                var opf    = new MenuItem();
-                opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
-                opf.Header = "Open folder";
-                cm.Items.Add(opf);
-
-                foreach (var file in fn.OrderByDescending(FileNames.Parser.ParseQuality))
+                List<string> fn;
+                if (Library.Files.TryGetValue(episode.ID, out fn) && fn.Count != 0)
                 {
-                    BitmapSource bmp;
+                    // Open folder
 
-                    try
+                    var opf    = new MenuItem();
+                    opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
+                    opf.Header = "Open folder";
+                    cm.Items.Add(opf);
+
+                    foreach (var file in fn.OrderByDescending(FileNames.Parser.ParseQuality))
                     {
-                        var ext = Path.GetExtension(file);
+                        BitmapSource bmp;
 
-                        if (string.IsNullOrWhiteSpace(ext))
+                        try
                         {
-                            throw new Exception();
+                            var ext = Path.GetExtension(file);
+
+                            if (string.IsNullOrWhiteSpace(ext))
+                            {
+                                throw new Exception();
+                            }
+
+                            var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+
+                            if (ico == null || ico.Handle == IntPtr.Zero)
+                            {
+                                throw new Exception();
+                            }
+
+                            bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        }
+                        catch (Exception)
+                        {
+                            bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
                         }
 
-                        var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+                        var plf    = new MenuItem();
+                        plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                        plf.Tag    = file;
+                        plf.Header = Path.GetFileName(file);
+                        plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
 
-                        if (ico == null || ico.Handle == IntPtr.Zero)
-                        {
-                            throw new Exception();
-                        }
+                        pla.Items.Add(plf);
 
-                        bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        var off    = new MenuItem();
+                        off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                        off.Tag    = file;
+                        off.Header = Path.GetFileName(file);
+                        off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
+
+                        opf.Items.Add(off);
                     }
-                    catch (Exception)
-                    {
-                        bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
-                    }
-
-                    var plf    = new MenuItem();
-                    plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                    plf.Tag    = file;
-                    plf.Header = Path.GetFileName(file);
-                    plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
-                    
-                    pla.Items.Add(plf);
-
-                    var off    = new MenuItem();
-                    off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                    off.Tag    = file;
-                    off.Header = Path.GetFileName(file);
-                    off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
-
-                    opf.Items.Add(off);
+                }
+                else
+                {
+                    ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                    pla.IsEnabled = false;
                 }
             }
             else
             {
-                ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
-                pla.IsEnabled = false;
-                //pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode.ID);
+                pla.Click += (s, r) => new FileSearchTaskDialog().Search(episode);
             }
 
             // Details page

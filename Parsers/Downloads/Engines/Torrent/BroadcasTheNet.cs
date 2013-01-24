@@ -58,7 +58,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-07-28 7:28 PM");
+                return Utils.DateTimeToVersion("2013-01-24 2:52 AM");
             }
         }
 
@@ -176,7 +176,7 @@
                 link.InfoURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("a[2]", "href"));
                 link.FileURL = Site + HtmlEntity.DeEntitize(node.GetNodeAttributeValue("span/a[contains(@href, 'action=download')]", "href"));
                 link.Size    = node.GetTextValue("../td[5]").Trim();
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../td[6]").Trim(), node.GetTextValue("../td[7]").Trim())
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetTextValue("../td[7]").Trim(), node.GetTextValue("../td[8]").Trim())
                              + ", Free"
                              + (node.GetHtmlValue("../td[4]/img[@title='FastTorrent']") != null ? ", Fast" : string.Empty)
                              + (node.GetHtmlValue("../td[4]/img[@title='Official BTN AutoUp']") != null ? ", Official Up." : string.Empty);

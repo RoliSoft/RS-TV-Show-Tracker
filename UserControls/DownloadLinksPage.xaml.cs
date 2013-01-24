@@ -103,8 +103,16 @@
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
 
                 filterResults.IsChecked = Settings.Get<bool>("Filter Download Links");
-                highlightFree.IsChecked = Settings.Get<bool>("Highlight Free Torrents");
-                fadeDead.IsChecked      = Settings.Get("Fade Dead Torrents", true);
+
+                if (Signature.IsActivated)
+                {
+                    highlightFree.IsChecked = Settings.Get<bool>("Highlight Free Torrents");
+                    fadeDead.IsChecked      = Settings.Get("Fade Dead Torrents", true);
+                }
+                else
+                {
+                    highlightFree.IsEnabled = fadeDead.IsEnabled = false;
+                }
             }
 
             LoadEngines();

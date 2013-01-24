@@ -2,16 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Windows;
-    using System.Windows.Controls;
-
-    using Microsoft.Win32;
-
-    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for ListingSettings.xaml
@@ -38,22 +31,29 @@
             if (_loaded) return;
 
             try
-            { 
-                nzbDays.Value         = Settings.Get<int>("Usenet Retention");
-                filterUrlTextBox.Text = string.Join(",", Settings.Get<List<string>>("One-Click Hoster List"));
-                linkChecker.IsChecked = Settings.Get<bool>("One-Click Hoster Link Checker");
-
-                switch (Settings.Get("One-Click Hoster List Type", "white"))
+            {
+                if (Signature.IsActivated)
                 {
-                    case "black":
-                        blackListRadioButton.IsChecked = true;
-                        listTypeText.Text = "Enter a comma-separated list of domains or partial URLs to filter links if they match:";
-                        break;
+                    nzbDays.Value         = Settings.Get<int>("Usenet Retention");
+                    filterUrlTextBox.Text = string.Join(",", Settings.Get<List<string>>("One-Click Hoster List"));
+                    linkChecker.IsChecked = Settings.Get<bool>("One-Click Hoster Link Checker");
 
-                    case "white":
-                        whiteListRadioButton.IsChecked = true;
-                        listTypeText.Text = "Enter a comma-separated list of domains or partial URLs to filter links if they don't match:";
-                        break;
+                    switch (Settings.Get("One-Click Hoster List Type", "white"))
+                    {
+                        case "black":
+                            blackListRadioButton.IsChecked = true;
+                            listTypeText.Text = "Enter a comma-separated list of domains or partial URLs to filter links if they match:";
+                            break;
+
+                        case "white":
+                            whiteListRadioButton.IsChecked = true;
+                            listTypeText.Text = "Enter a comma-separated list of domains or partial URLs to filter links if they don't match:";
+                            break;
+                    }
+                }
+                else
+                {
+                    nzbDays.IsEnabled = blackListRadioButton.IsEnabled = whiteListRadioButton.IsEnabled = filterUrlTextBox.IsEnabled = linkChecker.IsEnabled = false;
                 }
 
                 var fn = Path.Combine(Signature.FullPath, @"misc\linkchecker");

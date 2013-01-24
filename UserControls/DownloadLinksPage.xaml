@@ -1,6 +1,6 @@
 ﻿<UserControl x:Class="RoliSoft.TVShowTracker.DownloadLinksPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Loaded="UserControlLoaded" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" Loaded="UserControlLoaded" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -48,12 +48,12 @@
                 </MenuItem>
                 <MenuItem Header="Highlight free torrents" Name="highlightFree" IsCheckable="True" Checked="HighlightFreeChecked" Unchecked="HighlightFreeUnchecked">
                     <MenuItem.Icon>
-                        <Image Source="/RSTVShowTracker;component/Images/money-coin.png" Height="16" Width="16" />
+                        <Image Source="/RSTVShowTracker;component/Images/money-coin.png" Height="16" Width="16" GreyableImage:ImageGreyer.IsGreyable="True" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Fade dead torrents" Name="fadeDead" IsCheckable="True" Checked="FadeDeadChecked" Unchecked="FadeDeadUnchecked">
                     <MenuItem.Icon>
-                        <Image Source="/RSTVShowTracker;component/Images/headstone-rip.png" Height="16" Width="16" />
+                        <Image Source="/RSTVShowTracker;component/Images/headstone-rip.png" Height="16" Width="16" GreyableImage:ImageGreyer.IsGreyable="True" />
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>

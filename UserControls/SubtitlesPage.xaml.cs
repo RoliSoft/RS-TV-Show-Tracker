@@ -605,49 +605,60 @@
             dls.Click += DownloadSubtitleClick;
             cm.Items.Add(dls);
 
-            List<string> fn;
-            if (_dbep != null && Library.Files.TryGetValue(_dbep.ID, out fn) && fn.Count != 0)
+            if (Signature.IsActivated)
+            {
+                List<string> fn;
+                if (_dbep != null && Library.Files.TryGetValue(_dbep.ID, out fn) && fn.Count != 0)
+                {
+                    var dnv    = new MenuItem();
+                    dnv.Header = "Download subtitle near";
+                    dnv.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/inbox-download.png")) };
+                    cm.Items.Add(dnv);
+
+                    foreach (var file in fn.OrderByDescending(FileNames.Parser.ParseQuality))
+                    {
+                        BitmapSource bmp;
+
+                        try
+                        {
+                            var ext = Path.GetExtension(file);
+
+                            if (string.IsNullOrWhiteSpace(ext))
+                            {
+                                throw new Exception();
+                            }
+
+                            var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+
+                            if (ico == null || ico.Handle == IntPtr.Zero)
+                            {
+                                throw new Exception();
+                            }
+
+                            bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        }
+                        catch (Exception)
+                        {
+                            bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
+                        }
+
+                        var plf    = new MenuItem();
+                        plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                        plf.Tag    = file;
+                        plf.Header = Path.GetFileName(file);
+                        plf.Click += DownloadSubtitleNearVideoClick;
+
+                        dnv.Items.Add(plf);
+                    }
+                }
+            }
+            else
             {
                 var dnv    = new MenuItem();
-                dnv.Header = "Download subtitle near";
+                dnv.Header = "Download subtitle near video";
                 dnv.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/inbox-download.png")) };
+                dnv.Click += DownloadSubtitleNearVideoClick;
                 cm.Items.Add(dnv);
-
-                foreach (var file in fn.OrderByDescending(FileNames.Parser.ParseQuality))
-                {
-                    BitmapSource bmp;
-
-                    try
-                    {
-                        var ext = Path.GetExtension(file);
-
-                        if (string.IsNullOrWhiteSpace(ext))
-                        {
-                            throw new Exception();
-                        }
-
-                        var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
-
-                        if (ico == null || ico.Handle == IntPtr.Zero)
-                        {
-                            throw new Exception();
-                        }
-
-                        bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                    }
-                    catch (Exception)
-                    {
-                        bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
-                    }
-
-                    var plf    = new MenuItem();
-                    plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                    plf.Tag    = file;
-                    plf.Header = Path.GetFileName(file);
-                    plf.Click += DownloadSubtitleNearVideoClick;
-
-                    dnv.Items.Add(plf);
-                }
             }
 
             foreach (var dlcm in Extensibility.GetNewInstances<SubtitleContextMenu>())
@@ -695,7 +706,28 @@
 
             var sub = (Subtitle)listView.SelectedValue;
 
-            new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, _dbep, (string)((MenuItem)sender).Tag);
+            if (Signature.IsActivated)
+            {
+                new SubtitleDownloadTaskDialog().DownloadNearVideo(sub, _dbep, (string)((MenuItem)sender).Tag);
+            }
+            else
+            {
+                if (_dbep != null)
+                {
+                    new SubtitleDownloadTaskDialog().DownloadNearVideoOld(sub, _dbep);
+                }
+                else
+                {
+                    TaskDialog.Show(new TaskDialogOptions
+                        {
+                            MainIcon        = VistaTaskDialogIcon.Error,
+                            Title           = "Mapping error",
+                            MainInstruction = textBox.Text.Trim(),
+                            Content         = "The query you've entered could not be mapped to an episode in the database. If this show is not on your list, add it, so the file search engine can find it.",
+                            CustomButtons   = new[] { "OK" }
+                        });
+                }
+            }
         }
     }
 }

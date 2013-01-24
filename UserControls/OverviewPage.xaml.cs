@@ -761,83 +761,89 @@
 
                 // - Files
 
-                List<string> nextfn;
-                if (Library.Files.TryGetValue(dbep.ID, out nextfn) && nextfn.Count != 0)
+                if (Signature.IsActivated)
                 {
-                    // Open folder
-
-                    var opf    = new MenuItem();
-                    opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
-                    opf.Header = new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            Margin      = new Thickness(0, 0, spm, 0)
-                        };
-
-                    (opf.Header as StackPanel).Children.Add(new Label
-                        {
-                            Foreground = Brushes.DarkGray,
-                            Content    = "➥",
-                            Padding    = new Thickness(0),
-                            Width      = 15
-                        });
-                    (opf.Header as StackPanel).Children.Add(new Label
-                        {
-                            Content = "Open folder",
-                            Padding = new Thickness(0),
-                            Width   = lbw - 15
-                        });
-                    cm.Items.Add(opf);
-
-                    foreach (var file in nextfn.OrderByDescending(FileNames.Parser.ParseQuality))
+                    List<string> nextfn;
+                    if (Library.Files.TryGetValue(dbep.ID, out nextfn) && nextfn.Count != 0)
                     {
-                        BitmapSource bmp;
+                        // Open folder
 
-                        try
+                        var opf    = new MenuItem();
+                        opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
+                        opf.Header = new StackPanel
+                                         {
+                                             Orientation = Orientation.Horizontal,
+                                             Margin      = new Thickness(0, 0, spm, 0)
+                                         };
+
+                        (opf.Header as StackPanel).Children.Add(new Label
+                                                                    {
+                                                                        Foreground = Brushes.DarkGray,
+                                                                        Content    = "➥",
+                                                                        Padding    = new Thickness(0),
+                                                                        Width      = 15
+                                                                    });
+                        (opf.Header as StackPanel).Children.Add(new Label
+                                                                    {
+                                                                        Content = "Open folder",
+                                                                        Padding = new Thickness(0),
+                                                                        Width   = lbw - 15
+                                                                    });
+                        cm.Items.Add(opf);
+
+                        foreach (var file in nextfn.OrderByDescending(FileNames.Parser.ParseQuality))
                         {
-                            var ext = Path.GetExtension(file);
+                            BitmapSource bmp;
 
-                            if (string.IsNullOrWhiteSpace(ext))
+                            try
                             {
-                                throw new Exception();
+                                var ext = Path.GetExtension(file);
+
+                                if (string.IsNullOrWhiteSpace(ext))
+                                {
+                                    throw new Exception();
+                                }
+
+                                var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+
+                                if (ico == null || ico.Handle == IntPtr.Zero)
+                                {
+                                    throw new Exception();
+                                }
+
+                                bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                            }
+                            catch (Exception)
+                            {
+                                bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
                             }
 
-                            var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+                            var plf    = new MenuItem();
+                            plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                            plf.Tag    = file;
+                            plf.Header = Path.GetFileName(file);
+                            plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
 
-                            if (ico == null || ico.Handle == IntPtr.Zero)
-                            {
-                                throw new Exception();
-                            }
+                            pla.Items.Add(plf);
 
-                            bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                            var off    = new MenuItem();
+                            off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                            off.Tag    = file;
+                            off.Header = Path.GetFileName(file);
+                            off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
+
+                            opf.Items.Add(off);
                         }
-                        catch (Exception)
-                        {
-                            bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
-                        }
-
-                        var plf    = new MenuItem();
-                        plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                        plf.Tag    = file;
-                        plf.Header = Path.GetFileName(file);
-                        plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
-
-                        pla.Items.Add(plf);
-
-                        var off    = new MenuItem();
-                        off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                        off.Tag    = file;
-                        off.Header = Path.GetFileName(file);
-                        off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
-
-                        opf.Items.Add(off);
+                    }
+                    else
+                    {
+                        ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                        pla.IsEnabled = false;
                     }
                 }
                 else
                 {
-                    ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
-                    pla.IsEnabled = false;
-                    //pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep);
+                    pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep);
                 }
 
                 // Search for download links
@@ -990,84 +996,89 @@
                 cm.Items.Add(pla);
                 
                 // - Files
-
-                List<string> lastfn;
-                if (Library.Files.TryGetValue(dbep2.ID, out lastfn) && lastfn.Count != 0)
+                if (Signature.IsActivated)
                 {
-                    // Open folder
-
-                    var opf    = new MenuItem();
-                    opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
-                    opf.Header = new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            Margin      = new Thickness(0, 0, spm, 0)
-                        };
-
-                    (opf.Header as StackPanel).Children.Add(new Label
-                        {
-                            Foreground = Brushes.DarkGray,
-                            Content    = "➥",
-                            Padding    = new Thickness(0),
-                            Width      = 15
-                        });
-                    (opf.Header as StackPanel).Children.Add(new Label
-                        {
-                            Content = "Open folder",
-                            Padding = new Thickness(0),
-                            Width   = lbw - 15
-                        });
-                    cm.Items.Add(opf);
-
-                    foreach (var file in lastfn.OrderByDescending(FileNames.Parser.ParseQuality))
+                    List<string> lastfn;
+                    if (Library.Files.TryGetValue(dbep2.ID, out lastfn) && lastfn.Count != 0)
                     {
-                        BitmapSource bmp;
+                        // Open folder
 
-                        try
+                        var opf    = new MenuItem();
+                        opf.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-film.png")) };
+                        opf.Header = new StackPanel
+                                         {
+                                             Orientation = Orientation.Horizontal,
+                                             Margin      = new Thickness(0, 0, spm, 0)
+                                         };
+
+                        (opf.Header as StackPanel).Children.Add(new Label
+                                                                    {
+                                                                        Foreground = Brushes.DarkGray,
+                                                                        Content    = "➥",
+                                                                        Padding    = new Thickness(0),
+                                                                        Width      = 15
+                                                                    });
+                        (opf.Header as StackPanel).Children.Add(new Label
+                                                                    {
+                                                                        Content = "Open folder",
+                                                                        Padding = new Thickness(0),
+                                                                        Width   = lbw - 15
+                                                                    });
+                        cm.Items.Add(opf);
+
+                        foreach (var file in lastfn.OrderByDescending(FileNames.Parser.ParseQuality))
                         {
-                            var ext = Path.GetExtension(file);
+                            BitmapSource bmp;
 
-                            if (string.IsNullOrWhiteSpace(ext))
+                            try
                             {
-                                throw new Exception();
+                                var ext = Path.GetExtension(file);
+
+                                if (string.IsNullOrWhiteSpace(ext))
+                                {
+                                    throw new Exception();
+                                }
+
+                                var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+
+                                if (ico == null || ico.Handle == IntPtr.Zero)
+                                {
+                                    throw new Exception();
+                                }
+
+                                bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                            }
+                            catch (Exception)
+                            {
+                                bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
                             }
 
-                            var ico = Utils.Icons.GetFileIcon(ext, Utils.Icons.SHGFI_SMALLICON);
+                            var plf    = new MenuItem();
+                            plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                            plf.Tag    = file;
+                            plf.Header = Path.GetFileName(file);
+                            plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
 
-                            if (ico == null || ico.Handle == IntPtr.Zero)
-                            {
-                                throw new Exception();
-                            }
+                            pla.Items.Add(plf);
 
-                            bmp = Imaging.CreateBitmapSourceFromHBitmap(ico.ToBitmap().GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                            var off    = new MenuItem();
+                            off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
+                            off.Tag    = file;
+                            off.Header = Path.GetFileName(file);
+                            off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
+
+                            opf.Items.Add(off);
                         }
-                        catch (Exception)
-                        {
-                            bmp = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/film-timeline.png"));
-                        }
-
-                        var plf    = new MenuItem();
-                        plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                        plf.Tag    = file;
-                        plf.Header = Path.GetFileName(file);
-                        plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
-
-                        pla.Items.Add(plf);
-
-                        var off    = new MenuItem();
-                        off.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
-                        off.Tag    = file;
-                        off.Header = Path.GetFileName(file);
-                        off.Click += (s, r) => Utils.Run("explorer.exe", "/select,\"" + (string)((MenuItem)s).Tag + "\"");
-
-                        opf.Items.Add(off);
+                    }
+                    else
+                    {
+                        ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                        pla.IsEnabled = false;
                     }
                 }
                 else
                 {
-                    ((Image)pla.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
-                    pla.IsEnabled = false;
-                    //pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep2);
+                    pla.Click += (s, r) => new FileSearchTaskDialog().Search(dbep2);
                 }
 
                 // Search for download links

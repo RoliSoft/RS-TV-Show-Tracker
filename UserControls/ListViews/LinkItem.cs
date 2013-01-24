@@ -27,6 +27,11 @@
             Infos   = link.Infos;
             Color   = "White";
 
+            if (!Signature.IsActivated)
+            {
+                return;
+            }
+
             switch (Source.Type)
             {
                 case Types.Torrent:

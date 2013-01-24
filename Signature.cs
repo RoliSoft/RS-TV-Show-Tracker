@@ -64,12 +64,8 @@
         {
             get
             {
-#if ACTIVATE_WITHOUT_DONATION
-                return true;
-#else
                 // TODO check for activation.
                 return true;
-#endif
             }
         }
 
