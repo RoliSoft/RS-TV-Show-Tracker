@@ -1087,7 +1087,7 @@
                         plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                         plf.Tag    = file;
                         plf.Header = Path.GetFileName(file);
-                        plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
+                        plf.Click += PlayEpisodeOnClick;
 
                         pla.Items.Add(plf);
 
@@ -1199,6 +1199,25 @@
             RenderOptions.SetBitmapScalingMode(cm, BitmapScalingMode.HighQuality);
 
             cm.IsOpen = true;
+        }
+
+        /// <summary>
+        /// Handles the onClick event of the PlayEpisode control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="routedEventArgs">The <see cref="RoutedEventArgs" /> instance containing the event data.</param>
+        private void PlayEpisodeOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            var file = (string)((MenuItem)sender).Tag;
+
+            if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(file).ToLower()))
+            {
+                new OpenArchiveTaskDialog().OpenArchive(file);
+            }
+            else
+            {
+                Utils.Run(file);
+            }
         }
         #endregion
         

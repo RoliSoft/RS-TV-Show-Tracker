@@ -9,6 +9,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
+    using System.Windows.Documents;
     using System.Windows.Input;
     using System.Windows.Interop;
     using System.Windows.Media;
@@ -120,7 +121,7 @@
         /// <param name="activity">if set to <c>true</c> an animating spinner will be displayed.</param>
         public void SetStatus(string message, bool activity = false)
         {
-            Dispatcher.Invoke((Action)(() =>
+            Dispatcher.Invoke(() =>
                 {
                     statusLabel.Content = message;
 
@@ -136,7 +137,7 @@
                         statusThrobber.Visibility = Visibility.Hidden;
                         statusLabel.Padding = new Thickness(7, 0, 7, 0);
                     }
-                }));
+                });
         }
 
         /// <summary>
@@ -144,7 +145,39 @@
         /// </summary>
         public void ResetStatus()
         {
-            Dispatcher.Invoke((Action)(() => SetStatus(_eps == 0 ? "No new episodes." : Utils.FormatNumber(_eps, "new episode") + "!")));
+            Dispatcher.Invoke((Action)(() =>
+                {
+                    if (_eps == 0)
+                    {
+                        SetStatus("No new episodes.");
+                    }
+                    else
+                    {
+                        ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Stop();
+                        statusThrobber.Visibility = Visibility.Hidden;
+                        statusLabel.Padding = new Thickness(7, 0, 7, 0);
+                        statusLabel.Content = new StackPanel { Orientation = Orientation.Horizontal };
+                        (statusLabel.Content as StackPanel).Children.Add(new Label
+                                                                             {
+                                                                                 Margin = new Thickness(0),
+                                                                                 Padding = new Thickness(0),
+                                                                                 Foreground = Brushes.White,
+                                                                                 Content = Utils.FormatNumber(_eps, "new episode") + "! "
+                                                                             });
+
+                        if (Signature.IsActivated && Library.Files != null && Library.Files.Any(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)) && !Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID[kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)].Watched))
+                        {
+                            (statusLabel.Content as StackPanel).Children.Add(new TextBlock
+                                {
+                                    Text            = "Play one!",
+                                    Cursor          = Cursors.Hand,
+                                    TextDecorations = TextDecorations.Underline,
+                                    ToolTip         = new ToolTip { Content = "Plays a random unseen downloaded episode." }
+                                });
+                            (statusLabel.Content as StackPanel).Children[1].MouseLeftButtonDown += PlayRandomEpisodeClick;
+                        }
+                    }
+                }));
         }
 
         #region Loading
@@ -822,7 +855,7 @@
                             plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                             plf.Tag    = file;
                             plf.Header = Path.GetFileName(file);
-                            plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
+                            plf.Click += PlayEpisodeOnClick;
 
                             pla.Items.Add(plf);
 
@@ -1057,7 +1090,7 @@
                             plf.Icon   = new Image { Source = bmp, Height = 16, Width = 16 };
                             plf.Tag    = file;
                             plf.Header = Path.GetFileName(file);
-                            plf.Click += (s, r) => Utils.Run((string)((MenuItem)s).Tag);
+                            plf.Click += PlayEpisodeOnClick;
 
                             pla.Items.Add(plf);
 
@@ -1576,6 +1609,25 @@
         }
 
         /// <summary>
+        /// Handles the onClick event of the PlayEpisode control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="routedEventArgs">The <see cref="RoutedEventArgs" /> instance containing the event data.</param>
+        private void PlayEpisodeOnClick(object sender, RoutedEventArgs routedEventArgs)
+        {
+            var file = (string)((MenuItem)sender).Tag;
+
+            if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(file).ToLower()))
+            {
+                new OpenArchiveTaskDialog().OpenArchive(file);
+            }
+            else
+            {
+                Utils.Run(file);
+            }
+        }
+
+        /// <summary>
         /// Handles the Click event of the SortBy control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -1633,5 +1685,32 @@
             Refresh();
         }
         #endregion
+
+        /// <summary>
+        /// Handles the Click event of the PlayRandomEpisode control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="mouseButtonEventArgs">The <see cref="MouseButtonEventArgs" /> instance containing the event data.</param>
+        public void PlayRandomEpisodeClick(object sender = null, MouseButtonEventArgs mouseButtonEventArgs = null)
+        {
+            if (Signature.IsActivated && Library.Files != null)
+            {
+                var files = Library.Files.Where(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)) && !Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID[kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)].Watched).ToList();
+
+                if (files.Count != 0)
+                {
+                    var file = files[Utils.Rand.Next(0, files.Count - 1)].Value.OrderByDescending(FileNames.Parser.ParseQuality).First();
+
+                    if (OpenArchiveTaskDialog.SupportedArchives.Contains(Path.GetExtension(file).ToLower()))
+                    {
+                        new OpenArchiveTaskDialog().OpenArchive(file);
+                    }
+                    else
+                    {
+                        Utils.Run(file);
+                    }
+                }
+            }
+        }
     }
 }
