@@ -464,7 +464,10 @@
         {
             lock (_results)
             {
-                _results.Add(new LinkItem(e.Data));
+                if (Signature.IsActivated || !Regex.IsMatch(e.Data.Source.Site + e.Data.InfoURL + e.Data.FileURL, @"(?:sceneaccess|thegft)\.(?:[a-z]{2,3})/", RegexOptions.IgnoreCase))
+                {
+                    _results.Add(new LinkItem(e.Data));
+                }
             }
 
             Dispatcher.Invoke((Action)(() =>
