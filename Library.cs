@@ -183,7 +183,7 @@
             if (fs.SearchThread.IsAlive)
             {
                 // searching for more than 5 minutes, kill it
-                fs.SearchThread.Abort();
+                try { fs.SearchThread.Abort(); } catch { }
             }
 
             Indexing = false;
@@ -233,7 +233,7 @@
                 {
                     SaveList();
 
-                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbTVShow.ID)
+                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbEpisode.Show.ID)
                     {
                         MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
                     }

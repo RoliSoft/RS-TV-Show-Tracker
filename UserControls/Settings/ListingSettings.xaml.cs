@@ -20,6 +20,7 @@
         }
 
         private bool _loaded;
+        internal bool _reindex;
 
         /// <summary>
         /// Handles the Loaded event of the UserControl control.
@@ -34,9 +35,10 @@
             {
                 if (Signature.IsActivated)
                 {
-                    nzbDays.Value         = Settings.Get<int>("Usenet Retention");
-                    filterUrlTextBox.Text = string.Join(",", Settings.Get<List<string>>("One-Click Hoster List"));
-                    linkChecker.IsChecked = Settings.Get<bool>("One-Click Hoster Link Checker");
+                    nzbDays.Value              = Settings.Get<int>("Usenet Retention");
+                    filterUrlTextBox.Text      = string.Join(",", Settings.Get<List<string>>("One-Click Hoster List"));
+                    linkChecker.IsChecked      = Settings.Get<bool>("One-Click Hoster Link Checker");
+                    shortestNotation.IsChecked = Settings.Get<bool>("Enable Shortest Notation");
 
                     switch (Settings.Get("One-Click Hoster List Type", "white"))
                     {
@@ -159,6 +161,36 @@
             if (!_loaded) return;
 
             Settings.Set("One-Click Hoster Link Checker", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the shortestNotation control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ShortestNotationChecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Enable Shortest Notation", true);
+
+            _reindex = true;
+            ShowNames.Regexes.AdvNumbering = ShowNames.Parser.GenerateEpisodeRegexes(generateExtractor: true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the shortestNotation control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ShortestNotationUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Enable Shortest Notation", false);
+
+            _reindex = true;
+            ShowNames.Regexes.AdvNumbering = ShowNames.Parser.GenerateEpisodeRegexes(generateExtractor: true);
         }
     }
 }

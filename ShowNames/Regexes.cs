@@ -132,6 +132,6 @@
         /// <summary>
         /// More advanced regular expression to detect season and episode number in various forms in a string.
         /// </summary>
-        public static readonly Regex AdvNumbering  = Parser.GenerateEpisodeRegexes(generateExtractor: true);
+        public static          Regex AdvNumbering  = Parser.GenerateEpisodeRegexes(generateExtractor: true);
     }
 }

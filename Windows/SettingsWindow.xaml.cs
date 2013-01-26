@@ -38,7 +38,7 @@
         /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
         private void GlassWindowClosing(object sender, CancelEventArgs e)
         {
-            if (activeGeneralPage._reindex)
+            if (activeGeneralPage._reindex || activeListingPage._reindex)
             {
                 Dispatcher.Invoke(() => MainWindow.Active.ReindexDownloadPathsClick());
             }

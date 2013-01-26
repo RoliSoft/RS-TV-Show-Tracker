@@ -1033,6 +1033,9 @@
   <ItemGroup>
     <Resource Include="Images\headstone-rip.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\layer-resize-replicate.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>

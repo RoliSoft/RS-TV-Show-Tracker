@@ -386,10 +386,16 @@
                     // 2x[13-]14
                     @"0?{0}x(?:(?<em>\d{{1,2}})\-)?0?{1}".FormatWith(season, episode),
                     // [S[e[ason|ries]]] 1[ - ]E[p[isode]] [1 - ]2
-                    @"S(?:e(?:ason|ries)?)?[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode),
-                    // 213; must be followed by quality notation
-                    @"(?:{0}{1:00})[\.\s_](?:\d{{3,4}}[ip]|hdtv|xvid)".FormatWith(generateExtractor ? @"(?<s>\d)" : season, generateExtractor ? (object)episode : (object)episode.ToInteger())
+                    @"S(?:e(?:ason|ries)?)?[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
                 };
+
+            if (Settings.Get<bool>("Enable Shortest Notation"))
+            {
+                regexes.Add(
+                    // 213
+                    @"(?:{0}{1:00})(?:(?=[\.\s_])|$)".FormatWith(season, generateExtractor ? (object)@"(?<e>\d{2})" : (object)episode.ToInteger())
+                );
+            }
 
             if (airdate.HasValue)
             {
