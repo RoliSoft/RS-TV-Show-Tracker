@@ -1695,9 +1695,8 @@
         {
             if (Signature.IsActivated && Library.Files != null)
             {
-                var ids = Library.Files.Where(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)) && !Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID[kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)].Watched).ToList();
-                var id = (int)Math.Floor((double)ids[Utils.Rand.Next(0, ids.Count - 1)].Key / 1000 / 1000);
-                var ep = Database.TVShows[id].Episodes.Where(x => !x.Watched && Library.Files.ContainsKey(x.ID)).OrderBy(x => x.ID).FirstOrDefault();
+                var ids = Library.Files.Where(kv => kv.Value.Count != 0 && Database.TVShows.ContainsKey((int)Math.Floor((double)kv.Key / 1000 / 1000)) && Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID.ContainsKey(kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)) && !Database.TVShows[(int)Math.Floor((double)kv.Key / 1000 / 1000)].EpisodeByID[kv.Key - (int)(Math.Floor((double)kv.Key / 1000 / 1000) * 1000 * 1000)].Watched).Select(kv => (int)Math.Floor((double)kv.Key / 1000 / 1000)).Distinct().ToList();
+                var ep  = Database.TVShows[ids[Utils.Rand.Next(0, ids.Count - 1)]].Episodes.Where(x => !x.Watched && Library.Files.ContainsKey(x.ID)).OrderBy(x => x.ID).FirstOrDefault();
 
                 if (ep != null)
                 {
