@@ -40,6 +40,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "http://kat.ph/favicon.ico";
+            }
+        }
+
+        /// <summary>
         /// Gets the name of the plugin's developer.
         /// </summary>
         /// <value>The name of the plugin's developer.</value>
@@ -59,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-01-05 7:00 PM");
+                return Utils.DateTimeToVersion("2013-01-05 7:00 PM");
             }
         }
 
