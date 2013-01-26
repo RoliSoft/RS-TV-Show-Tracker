@@ -1,10 +1,13 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading;
+
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// Provides methods for monitoring files.
@@ -28,6 +31,10 @@
         public static bool Indexing { get; set; }
 
         private static FileSystemWatcher[] _fsw;
+        private static Dictionary<int, List<string>> _tmp;
+        private static ConcurrentQueue<Tuple<WatcherChangeTypes, string[]>> _queue;
+        private static Thread _qthd;
+        private static Timer _stmr;
 
         /// <summary>
         /// Initializes the <see cref="Library" /> class.
@@ -51,13 +58,24 @@
 
                     foreach (var file in files)
                     {
-                        if (!File.Exists(file))
+                        try
                         {
-                            ep.Value.Remove(file);
+                            if (!File.Exists(file))
+                            {
+                                ep.Value.Remove(file);
+                            }
                         }
+                        catch { }
                     }
                 }
             }
+
+            _stmr = new Timer
+                        {
+                            AutoReset = false,
+                            Interval = 3000
+                        };
+            _stmr.Elapsed += (sender, args) => SaveList();
 
             StartWatching();
             SearchForFiles();
@@ -72,28 +90,43 @@
             {
                 for (var i = 0; i < _fsw.Length; i++)
                 {
-                    if (_fsw[i] != null)
+                    try
                     {
-                        _fsw[i].EnableRaisingEvents = false;
-                        _fsw[i].Dispose();
+                        if (_fsw[i] != null)
+                        {
+                            _fsw[i].EnableRaisingEvents = false;
+                            _fsw[i].Dispose();
+                        }
                     }
+                    catch { }
                 }
+            }
+
+            if (_qthd != null && _qthd.IsAlive)
+            {
+                try { _qthd.Abort(); } catch { }
             }
 
             var paths = Settings.Get<List<string>>("Download Paths");
 
-            _fsw = new FileSystemWatcher[paths.Count];
+            _fsw   = new FileSystemWatcher[paths.Count];
+            _queue = new ConcurrentQueue<Tuple<WatcherChangeTypes, string[]>>();
+            _qthd  = new Thread(ProcessChangesQueue);
 
             for (var i = 0; i < paths.Count; i++)
             {
-                _fsw[i] = new FileSystemWatcher(paths[i]);
+                try
+                {
+                    _fsw[i] = new FileSystemWatcher(paths[i]);
 
-                _fsw[i].Created += FileSystemWatcher_OnCreated;
-                _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
-                _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
-                _fsw[i].Error   += FileSystemWatcher_OnError;
+                    _fsw[i].Created += FileSystemWatcher_OnCreated;
+                    _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
+                    _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
+                    _fsw[i].Error   += FileSystemWatcher_OnError;
 
-                _fsw[i].EnableRaisingEvents = true;
+                    _fsw[i].EnableRaisingEvents = true;
+                }
+                catch { }
             }
         }
 
@@ -104,7 +137,13 @@
         /// <param name="fileSystemEventArgs">The <see cref="FileSystemEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnCreated(object sender, FileSystemEventArgs fileSystemEventArgs)
         {
-            new Thread(s => CheckFile((string)s)).Start(fileSystemEventArgs.FullPath);
+            _queue.Enqueue(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
+            
+            if (_qthd == null || !_qthd.IsAlive)
+            {
+                _qthd = new Thread(ProcessChangesQueue);
+                try { _qthd.Start(); } catch { }
+            }
         }
 
         /// <summary>
@@ -114,23 +153,13 @@
         /// <param name="renamedEventArgs">The <see cref="RenamedEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnRenamed(object sender, RenamedEventArgs renamedEventArgs)
         {
-            new Thread(s =>
-                {
-                    var path = (string[])s;
+            _queue.Enqueue(Tuple.Create(renamedEventArgs.ChangeType, new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath }));
 
-                    lock (Files)
-                    {
-                        foreach (var ep in Files)
-                        {
-                            if (ep.Value.Contains(path[0]))
-                            {
-                                ep.Value.Remove(path[0]);
-                                CheckFile(path[1]);
-                                return;
-                            }
-                        }
-                    }
-                }).Start(new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath });
+            if (_qthd == null || !_qthd.IsAlive)
+            {
+                _qthd = new Thread(ProcessChangesQueue);
+                try { _qthd.Start(); } catch { }
+            }
         }
 
         /// <summary>
@@ -140,22 +169,13 @@
         /// <param name="fileSystemEventArgs">The <see cref="FileSystemEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnDeleted(object sender, FileSystemEventArgs fileSystemEventArgs)
         {
-            new Thread(s =>
-                {
-                    var path = (string)s;
-
-                    lock (Files)
-                    {
-                        foreach (var ep in Files)
-                        {
-                            if (ep.Value.Contains(path))
-                            {
-                                ep.Value.Remove(path);
-                                return;
-                            }
-                        }
-                    }
-                }).Start(fileSystemEventArgs.FullPath);
+            _queue.Enqueue(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
+            
+            if (_qthd == null || !_qthd.IsAlive)
+            {
+                _qthd = new Thread(ProcessChangesQueue);
+                try { _qthd.Start(); } catch { }
+            }
         }
 
         /// <summary>
@@ -169,6 +189,105 @@
         }
 
         /// <summary>
+        /// Pops events recursively from the file system changes queue and processes it.
+        /// </summary>
+        private static void ProcessChangesQueue()
+        {
+            Tuple<WatcherChangeTypes, string[]> evt;
+            if (!_queue.TryDequeue(out evt) || evt == null || Indexing)
+            {
+                return;
+            }
+
+            try
+            {
+                switch (evt.Item1)
+                {
+                    case WatcherChangeTypes.Created:
+                        {
+                            CheckFile(evt.Item2[0]);
+                        }
+                        break;
+
+                    case WatcherChangeTypes.Renamed:
+                        {
+                            CheckFile(evt.Item2[1]);
+
+                            lock (Files)
+                            {
+                                foreach (var ep in Files)
+                                {
+                                    if (ep.Value.Contains(evt.Item2[0]))
+                                    {
+                                        ep.Value.Remove(evt.Item2[0]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!Indexing)
+                        {
+                            if (_stmr.Enabled)
+                            {
+                                _stmr.Stop();
+                            }
+
+                            _stmr.Start();
+
+                            try
+                            {
+                                if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+                                {
+                                    MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                                }
+                            }
+                            catch { }
+                        }
+                        break;
+
+                    case WatcherChangeTypes.Deleted:
+                        {
+                            lock (Files)
+                            {
+                                foreach (var ep in Files)
+                                {
+                                    if (ep.Value.Contains(evt.Item2[0]))
+                                    {
+                                        ep.Value.Remove(evt.Item2[0]);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!Indexing)
+                            {
+                                if (_stmr.Enabled)
+                                {
+                                    _stmr.Stop();
+                                }
+
+                                _stmr.Start();
+
+                                try
+                                {
+                                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+                                    {
+                                        MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                        break;
+                }
+            }
+            catch { }
+
+            ProcessChangesQueue();
+        }
+
+        /// <summary>
         /// Searches for matching files in the download paths.
         /// </summary>
         public static void SearchForFiles()
@@ -176,6 +295,8 @@
             var fs = new FileSearch(Settings.Get<List<string>>("Download Paths"), CheckFile);
 
             Indexing = true;
+
+            _tmp = new Dictionary<int, List<string>>();
 
             fs.BeginSearch();
             fs.SearchThread.Join(TimeSpan.FromMinutes(5));
@@ -186,14 +307,20 @@
                 try { fs.SearchThread.Abort(); } catch { }
             }
 
+            Files = _tmp;
+
             Indexing = false;
 
             SaveList();
 
-            if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+            try
             {
-                MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+                {
+                    MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                }
             }
+            catch { }
         }
 
         /// <summary>
@@ -216,8 +343,10 @@
 
             if (pf.DbEpisode != null)
             {
+                var dict = Indexing ? _tmp : Files;
                 List<string> list;
-                if (Files.TryGetValue(pf.DbEpisode.ID, out list))
+
+                if (dict.TryGetValue(pf.DbEpisode.ID, out list))
                 {
                     if (!list.Contains(file))
                     {
@@ -226,17 +355,26 @@
                 }
                 else
                 {
-                    Files[pf.DbEpisode.ID] = new List<string> { file };
+                    dict[pf.DbEpisode.ID] = new List<string> { file };
                 }
 
                 if (!Indexing)
                 {
-                    SaveList();
-
-                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbEpisode.Show.ID)
+                    if (_stmr.Enabled)
                     {
-                        MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                        _stmr.Stop();
                     }
+
+                    _stmr.Start();
+
+                    try
+                    {
+                        if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbEpisode.Show.ID)
+                        {
+                            MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                        }
+                    }
+                    catch { }
                 }
             }
 
@@ -249,6 +387,8 @@
         /// <param name="path">The path.</param>
         public static void RemovePath(string path)
         {
+            if (Indexing) return;
+
             foreach (var ep in Files)
             {
                 var files = ep.Value.ToList();
@@ -264,10 +404,14 @@
 
             foreach (var fsw in _fsw)
             {
-                if (fsw != null && fsw.Path == path)
+                try
                 {
-                    fsw.EnableRaisingEvents = false;
+                    if (fsw != null && fsw.Path == path)
+                    {
+                        fsw.EnableRaisingEvents = false;
+                    }
                 }
+                catch { }
             }
         }
 
@@ -277,19 +421,23 @@
         /// <param name="path">The path.</param>
         public static void AddPath(string path)
         {
+            if (Indexing) return;
+
             var i = _fsw.Length;
             Array.Resize(ref _fsw, _fsw.Length + 1);
 
-            _fsw[i] = new FileSystemWatcher(path);
+            try
+            {
+                _fsw[i] = new FileSystemWatcher(path);
 
-            _fsw[i].Created += FileSystemWatcher_OnCreated;
-            _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
-            _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
-            _fsw[i].Error   += FileSystemWatcher_OnError;
+                _fsw[i].Created += FileSystemWatcher_OnCreated;
+                _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
+                _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
+                _fsw[i].Error   += FileSystemWatcher_OnError;
 
-            _fsw[i].EnableRaisingEvents = true;
-
-            SaveList();
+                _fsw[i].EnableRaisingEvents = true;
+            }
+            catch { }
         }
 
         /// <summary>
@@ -313,11 +461,6 @@
 
                 foreach (var show in Files)
                 {
-                    if (show.Value.Count == 0)
-                    {
-                        continue;
-                    }
-
                     bw.Write(show.Key);
                     bw.Write((uint)show.Value.Count);
 
