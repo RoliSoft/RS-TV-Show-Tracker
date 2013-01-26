@@ -185,6 +185,33 @@ Section -MainProgram
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe.config"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.pdb"
+	
+	# remove old leftover files
+	
+	Delete "BouncyCastle.Crypto.dll"
+	Delete "CookComputing.XmlRpcV2.dll"
+	Delete "Hammock.ClientProfile.dll"
+	Delete "HtmlAgilityPack.dll"
+	Delete "Ionic.Zip.Reduced.dll"
+	Delete "IronPython.dll"
+	Delete "Microsoft.Dynamic.dll"
+	Delete "Microsoft.Scripting.dll"
+	Delete "Microsoft.Windows.Shell.dll"
+	Delete "Microsoft.WindowsAPICodePack.dll"
+	Delete "Microsoft.WindowsAPICodePack.Shell.dll"
+	Delete "Newtonsoft.Json.dll"
+	Delete "nunit.framework.dll"
+	Delete "protobuf-net.dll"
+	Delete "SharpCompress.dll"
+	Delete "StarksoftBiko.dll"
+	Delete "Starksoft.Net.Proxy.dll"
+	Delete "System.Data.SQLite.dll"
+	Delete "TaskDialog.dll"
+	Delete "Transitionals.dll"
+	Delete "Twitterizer2.dll"
+	Delete "VistaControls.dll"
+	Delete "WPFToolkit.Extended.dll"
+	Delete "handle.exe"
 SectionEnd
 
 ######################################################################
