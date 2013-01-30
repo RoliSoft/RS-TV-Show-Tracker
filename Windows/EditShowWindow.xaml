@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.EditShowWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
-        Title="Edit TV show" Height="429" Width="565" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Edit TV show" Height="439" Width="575" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
             <TabControl.Effect>

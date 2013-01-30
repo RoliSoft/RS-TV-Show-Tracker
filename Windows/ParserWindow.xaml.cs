@@ -66,7 +66,7 @@
                 {
                     try
                     {
-                        var ua = Utils.Decrypt(login, Parser.GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+                        var ua = Utils.Decrypt(Parser.GetType(), login);
 
                         usernameTextBox.Text     = _original["user"] = ua[0];
                         passwordTextBox.Password = _original["pass"] = ua[1];
@@ -91,7 +91,7 @@
                 }
             }
 
-            cookiesTextBox.Text = _original["cookies"] = Settings.Get(Parser.Name + " Cookies");
+            cookiesTextBox.Text = _original["cookies"] = Utils.Decrypt(Parser.GetType(), Settings.Get(Parser.Name + " Cookies"))[0];
         }
 
         /// <summary>
@@ -229,13 +229,13 @@
                 }
                 else
                 {
-                    Settings.Set(Parser.Name + " Login", Utils.Encrypt(usernameTextBox.Text + '\0' + passwordTextBox.Password, Parser.GetType().FullName + Environment.NewLine + Utils.GetUUID()));
+                    Settings.Set(Parser.Name + " Login", Utils.Encrypt(Parser.GetType(), usernameTextBox.Text, passwordTextBox.Password));
                 }
             }
 
             if (_original.Get("cookies") != cookiesTextBox.Text)
             {
-                Settings.Set(Parser.Name + " Cookies", cookiesTextBox.Text);
+                Settings.Set(Parser.Name + " Cookies", Utils.Encrypt(Parser.GetType(), cookiesTextBox.Text));
             }
 
             DialogResult = true;

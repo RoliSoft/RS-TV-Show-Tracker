@@ -154,11 +154,11 @@
 
                         try
                         {
-                            var usrpwd  = Utils.Decrypt(info, GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+                            var usrpwd  = Utils.Decrypt(this, info);
                             var cookies = Login(usrpwd[0], usrpwd[1]);
 
                             Cookies = cookies;
-                            Settings.Set(Name + " Cookies", cookies);
+                            Settings.Set(Name + " Cookies", Utils.Encrypt(this, cookies));
 
                             var list = Search(query);
 
@@ -206,7 +206,7 @@
         {
             if (Private)
             {
-                Cookies = Settings.Get(Name + " Cookies");
+                Cookies = Utils.Decrypt(this, Settings.Get(Name + " Cookies"))[0];
 
                 if (string.IsNullOrWhiteSpace(Cookies))
                 {
@@ -233,7 +233,7 @@
         {
             if (Private)
             {
-                Cookies = Settings.Get(Name + " Cookies");
+                Cookies = Utils.Decrypt(this, Settings.Get(Name + " Cookies"))[0];
 
                 if (string.IsNullOrWhiteSpace(Cookies))
                 {
@@ -269,7 +269,7 @@
                 Assert.Inconclusive("Login information is required to test the authentication.");
             }
 
-            var usrpwd = Utils.Decrypt(info, GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+            var usrpwd = Utils.Decrypt(this, info);
 
             Console.WriteLine("Logging in as '" + usrpwd[0] + "':");
 

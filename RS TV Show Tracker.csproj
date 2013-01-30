@@ -254,6 +254,7 @@
     <Compile Include="Parsers\News\Article.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Serienjunkies.cs" />
     <Compile Include="Parsers\OnlineVideos\Engines\Netflix.cs" />
+    <Compile Include="Parsers\Senders\Engines\SABnzbd.cs" />
     <Compile Include="Parsers\Senders\Engines\JDownloaderWebUI.cs" />
     <Compile Include="Parsers\Senders\Engines\JDownloaderRemoteControl.cs" />
     <Compile Include="Parsers\Senders\Engines\UniversalShareDownloaderWebUI.cs" />
@@ -459,6 +460,9 @@
     <Compile Include="Windows\CaptchaWindow.xaml.cs">
       <DependentUpon>CaptchaWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\SenderSettingsWindow.xaml.cs">
+      <DependentUpon>SenderSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\XMLTVWindow.xaml.cs">
       <DependentUpon>XMLTVWindow.xaml</DependentUpon>
     </Compile>
@@ -635,6 +639,10 @@
     <Page Include="Windows\CaptchaWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\SenderSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

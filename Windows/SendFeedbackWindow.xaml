@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SendFeedbackWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True"
-        Title="Send feedback" Height="423" Width="615" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/smiley.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Send feedback" Height="433" Width="615" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/smiley.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
             <TabControl.Effect>

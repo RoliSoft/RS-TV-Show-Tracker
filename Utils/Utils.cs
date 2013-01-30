@@ -1206,6 +1206,32 @@
         }
 
         /// <summary>
+        /// Encrypts the specified text with AES-256.
+        /// </summary>
+        /// <param name="type">The type the secret belongs to.</param>
+        /// <param name="secrets">The secrets to be encrypted.</param>
+        /// <returns>
+        /// Base64-encoded encrypted text.
+        /// </returns>
+        public static string Encrypt(Type type, params string[] secrets)
+        {
+            return Encrypt(string.Join("\0", secrets), Signature.Software + '\0' + type.FullName + '\0' + GetUUID());
+        }
+
+        /// <summary>
+        /// Encrypts the specified text with AES-256.
+        /// </summary>
+        /// <param name="plugin">The plugin the secret belongs to.</param>
+        /// <param name="secrets">The secrets to be encrypted.</param>
+        /// <returns>
+        /// Base64-encoded encrypted text.
+        /// </returns>
+        public static string Encrypt(IPlugin plugin, params string[] secrets)
+        {
+            return Encrypt(plugin.GetType(), secrets);
+        }
+
+        /// <summary>
         /// Decrypts the specified text with AES-256.
         /// </summary>
         /// <param name="secret">The Base64-encoded encrypted text.</param>
@@ -1232,6 +1258,37 @@
 
                 return Encoding.UTF8.GetString(ms.ToArray());
             }
+        }
+
+        /// <summary>
+        /// Decrypts the specified text with AES-256.
+        /// </summary>
+        /// <param name="type">The type the secret belongs to.</param>
+        /// <param name="secret">The Base64-encoded encrypted text.</param>
+        /// <returns>
+        /// Decrypted texts.
+        /// </returns>
+        public static string[] Decrypt(Type type, string secret)
+        {
+            if (string.IsNullOrWhiteSpace(secret))
+            {
+                return new[] { secret, secret };
+            }
+
+            return Decrypt(secret, Signature.Software + '\0' + type.FullName + '\0' + GetUUID()).Split(new[] { "\0" }, StringSplitOptions.None);
+        }
+
+        /// <summary>
+        /// Decrypts the specified text with AES-256.
+        /// </summary>
+        /// <param name="plugin">The plugin the secret belongs to.</param>
+        /// <param name="secret">The Base64-encoded encrypted text.</param>
+        /// <returns>
+        /// Decrypted texts.
+        /// </returns>
+        public static string[] Decrypt(IPlugin plugin, string secret)
+        {
+            return Decrypt(plugin.GetType(), secret);
         }
 
         /// <summary>

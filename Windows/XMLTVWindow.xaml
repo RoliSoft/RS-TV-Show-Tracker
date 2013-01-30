@@ -1,7 +1,7 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.XMLTVWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
-        Title="Add XML file" Height="490" Width="398" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/table-select-row.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Add XML file" Height="500" Width="408" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/table-select-row.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
             <TabControl.Effect>

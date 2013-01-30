@@ -264,7 +264,7 @@
                         {
                             try
                             {
-                                var ua = Utils.Decrypt(login, engine.GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+                                var ua = Utils.Decrypt(engine, login);
                                 tooltip = "You have supplied login credentials for " + ua[0] + ".";
                             }
                             catch (Exception ex)
@@ -274,18 +274,26 @@
                         }
                         else if (!string.IsNullOrWhiteSpace(cookies))
                         {
-                            tooltip = "You have supplied the following cookies:";
-
-                            foreach (var cookie in cookies.Split(';'))
+                            try
                             {
-                                if (cookie.TrimStart().StartsWith("pass"))
+                                var cs = Utils.Decrypt(engine, cookies)[0];
+                                tooltip = "You have supplied the following cookies:";
+
+                                foreach (var cookie in cs.Split(';'))
                                 {
-                                    tooltip += "\r\n - " + Regex.Replace(cookie.Trim(), "(?<=pass=.{4})(.+)", m => new string('▪', m.Groups[1].Value.Length)).CutIfLonger(60);
+                                    if (cookie.TrimStart().StartsWith("pass"))
+                                    {
+                                        tooltip += "\r\n - " + Regex.Replace(cookie.Trim(), "(?<=pass=.{4})(.+)", m => new string('▪', m.Groups[1].Value.Length)).CutIfLonger(60);
+                                    }
+                                    else
+                                    {
+                                        tooltip += "\r\n - " + cookie.Trim().CutIfLonger(60);
+                                    }
                                 }
-                                else
-                                {
-                                    tooltip += "\r\n - " + cookie.Trim().CutIfLonger(60);
-                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                tooltip = "Error while decrypting cookies: " + ex.Message;
                             }
                         }
 

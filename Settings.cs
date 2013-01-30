@@ -104,6 +104,58 @@
 
                 Keys.Remove("Download Path");
             }
+            
+            // update encryption on logins and encrypt cookies
+            // -> revision 9465c36466739ade0ad556d498d7e17aec379bbb
+
+            if (!Keys.ContainsKey("Revision") || (int)Keys["Revision"] < 1)
+            {
+                var keys = Keys.Keys.ToList();
+                var plugins = Extensibility.GetNewInstances<IPlugin>().ToList();
+
+                foreach (var key in keys)
+                {
+                    if (key.EndsWith(" Login"))
+                    {
+                        try
+                        {
+                            var plugin = plugins.FirstOrDefault(p => p.Name == key.Substring(0, key.Length - 6));
+                            if (plugin == null)
+                            {
+                                Keys.Remove(key);
+                                continue;
+                            }
+
+                            var ua = Utils.Decrypt((string)Keys[key], plugin.GetType().FullName + Environment.NewLine + Utils.GetUUID()).Split(new[] { '\0' }, 2);
+                            Keys[key] = Utils.Encrypt(plugin, ua[0], ua[1]);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+                    else if (key.EndsWith(" Cookies"))
+                    {
+                        try
+                        {
+                            var plugin = plugins.FirstOrDefault(p => p.Name == key.Substring(0, key.Length - 8));
+                            if (plugin == null)
+                            {
+                                Keys.Remove(key);
+                                continue;
+                            }
+
+                            Keys[key] = Utils.Encrypt(plugin, (string)Keys[key]);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                Set("Revision", 1);
+            }
         }
 
         /// <summary>
@@ -281,7 +333,7 @@
         {
             File.WriteAllText(
                 _jsFile,
-                JsonConvert.SerializeObject(Keys, Formatting.Indented)
+                JsonConvert.SerializeObject(new SortedDictionary<string, object>(Keys), Formatting.Indented)
             );
         }
     }
