@@ -35,6 +35,18 @@
         }
 
         /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png";
+            }
+        }
+
+        /// <summary>
         /// Gets the name of the plugin's developer.
         /// </summary>
         /// <value>The name of the plugin's developer.</value>

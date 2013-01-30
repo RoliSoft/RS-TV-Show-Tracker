@@ -3,14 +3,13 @@
     using System;
     using System.IO;
     using System.Net;
-    using System.Text.RegularExpressions;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
     /// <summary>
-    /// Provides support for sending files to the Vuze Swing Web UI.
+    /// Provides support for sending files to the Azureus HTML Web UI.
     /// </summary>
-    public class VuzeSwingWebUI : SenderEngine
+    public class AzureusHTMLWebUI : SenderEngine
     {
         /// <summary>
         /// Gets the name of the site.
@@ -20,7 +19,7 @@
         {
             get
             {
-                return "Vuze Swing Web UI";
+                return "Azureus HTML Web UI";
             }
         }
 
@@ -33,6 +32,18 @@
             get
             {
                 return "http://www.vuze.com/";
+            }
+        }
+
+        /// <summary>
+        /// Gets the URL to the favicon of the site.
+        /// </summary>
+        /// <value>The icon location.</value>
+        public override string Icon
+        {
+            get
+            {
+                return "pack://application:,,,/RSTVShowTracker;component/Images/azureus.png";
             }
         }
 
@@ -56,7 +67,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-01-29 9:02 PM");
+                return Utils.DateTimeToVersion("2013-01-29 8:49 PM");
             }
         }
 
@@ -103,7 +114,7 @@
             using (var sw = new StreamWriter(ms))
             {
                 sw.WriteLine("--AJAX-----------------------d41d8cd98f00b204e9800998ecf8427e");
-                sw.WriteLine("Content-Disposition: form-data; name=\"upfile\"; filename=\"file.torrent\"");
+                sw.WriteLine("Content-Disposition: form-data; name=\"upfile_1\"; filename=\"file.torrent\"");
                 sw.WriteLine("Content-Type: application/x-bittorrent");
                 sw.WriteLine();
                 sw.Flush();
@@ -115,13 +126,11 @@
                 data = ms.ToArray();
             }
 
-            var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/upload.cgi", data, request: r =>
+            Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/index.tmpl?d=u&local=1", data, request: r =>
                 {
                     r.Credentials = Login;
                     r.ContentType = "multipart/form-data; boundary=AJAX-----------------------d41d8cd98f00b204e9800998ecf8427e";
                 });
-
-            CheckResponse(req);
         }
 
         /// <summary>
@@ -130,28 +139,7 @@
         /// <param name="link">The link to send.</param>
         public override void SendLink(string link)
         {
-            throw new NotSupportedException("Magnet links are not supported as this is an antiquated UI.");
-        }
-
-        /// <summary>
-        /// Checks the server's response.
-        /// </summary>
-        /// <param name="resp">The response.</param>
-        /// <exception cref="System.Exception">Invalid response received from the server.</exception>
-        private void CheckResponse(string resp)
-        {
-            if (!resp.Contains("Upload OK"))
-            {
-                var err = Regex.Match(resp, @"Upload Failed: ([^<]+)");
-                if (err.Success)
-                {
-                    throw new Exception("Error received from the server: " + err.Groups[1].Value);
-                }
-                else
-                {
-                    throw new Exception("There was an error while sending the torrent.");
-                }
-            }
+            Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/index.tmpl?d=u&upurl=" + Utils.EncodeURL(link), request: r => r.Credentials = Login);
         }
     }
 }

@@ -5,6 +5,7 @@
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.Parsers.Senders;
 
@@ -25,7 +26,27 @@
 
             foreach (var se in Extensibility.GetNewInstances<SenderEngine>())
             {
-                senderComboBox.Items.Add(new SenderEngineItem { Name = se.Name, Engine = se });
+                var sp = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Tag         = se
+                    };
+
+                sp.Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri(se.Icon)),
+                        Height = 16,
+                        Width  = 16,
+                        Margin = new Thickness(0, 0, 0, 0)
+                    });
+
+                sp.Children.Add(new Label
+                    {
+                        Content = " " + se.Name,
+                        Padding = new Thickness(0)
+                    });
+
+                senderComboBox.Items.Add(sp);
             }
 
             senderComboBox.SelectedIndex = 0;
@@ -54,7 +75,27 @@
             var e = default(SenderEngine);
             foreach (var se in Extensibility.GetNewInstances<SenderEngine>())
             {
-                senderComboBox.Items.Add(new SenderEngineItem { Name = se.Name, Engine = se });
+                var sp = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Tag         = se
+                    };
+
+                sp.Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri(se.Icon)),
+                        Height = 16,
+                        Width  = 16,
+                        Margin = new Thickness(0, 0, 0, 0)
+                    });
+
+                sp.Children.Add(new Label
+                    {
+                        Content = " " + se.Name,
+                        Padding = new Thickness(0)
+                    });
+
+                senderComboBox.Items.Add(sp);
 
                 if (se.Name == (string)sobj["Sender"])
                 {
@@ -125,12 +166,12 @@
             var sdic = (Dictionary<string, object>)obj;
 
             sdic["Name"]     = string.IsNullOrWhiteSpace(nameTextBox.Text) ? GenerateDefaultName() : nameTextBox.Text.Trim();
-            sdic["Sender"]   = ((SenderEngineItem)senderComboBox.SelectedItem).Name;
+            sdic["Sender"]   = ((SenderEngine)(((StackPanel)senderComboBox.SelectedItem).Tag)).Name;
             sdic["Location"] = locationTextBox.Text.Trim();
 
             if (!string.IsNullOrEmpty(usernameTextBox.Text) || !string.IsNullOrEmpty(passwordTextBox.Password))
             {
-                sdic["Login"] = Utils.Encrypt(((SenderEngineItem)senderComboBox.SelectedItem).Engine, usernameTextBox.Text, passwordTextBox.Password);
+                sdic["Login"] = Utils.Encrypt((SenderEngine)(((StackPanel)senderComboBox.SelectedItem).Tag), usernameTextBox.Text, passwordTextBox.Password);
             }
             else if (sdic.ContainsKey("Login"))
             {
@@ -176,7 +217,7 @@
         /// </returns>
         private string GenerateDefaultName()
         {
-            var str = Regex.Replace(((SenderEngineItem)senderComboBox.SelectedItem).Name, @"\s(Web|Remote).+", string.Empty);
+            var str = Regex.Replace(((SenderEngine)(((StackPanel)senderComboBox.SelectedItem).Tag)).Name, @"\s(Web|Remote).+", string.Empty);
 
             Uri uri;
             if (!string.IsNullOrWhiteSpace(locationTextBox.Text) && Uri.TryCreate(locationTextBox.Text, UriKind.Absolute, out uri))
@@ -185,35 +226,6 @@
             }
 
             return str;
-        }
-
-        /// <summary>
-        /// Represents a sender engine on the combobox drop-down.
-        /// </summary>
-        private class SenderEngineItem
-        {
-            /// <summary>
-            /// Gets or sets the name.
-            /// </summary>
-            /// <value>The name.</value>
-            public string Name { get; set; }
-
-            /// <summary>
-            /// Gets or sets the engine.
-            /// </summary>
-            /// <value>The engine.</value>
-            public SenderEngine Engine { get; set; }
-
-            /// <summary>
-            /// Returns a <see cref="System.String" /> that represents this instance.
-            /// </summary>
-            /// <returns>
-            /// A <see cref="System.String" /> that represents this instance.
-            /// </returns>
-            public override string ToString()
-            {
-                return Name;
-            }
         }
     }
 }
