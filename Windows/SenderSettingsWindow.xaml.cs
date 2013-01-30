@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
@@ -181,6 +182,18 @@
             dict[_id] = sdic;
 
             Settings.Set("Sender Destinations", dict);
+
+            var inst = (SenderEngine)Activator.CreateInstance(((SenderEngine)(((StackPanel)senderComboBox.SelectedItem).Tag)).GetType());
+
+            inst.Title = (string)sdic["Name"];
+            inst.Location = (string)sdic["Location"];
+
+            if (sdic.ContainsKey("Login"))
+            {
+                inst.Login = new NetworkCredential(usernameTextBox.Text, passwordTextBox.Password);
+            }
+
+            MainWindow.Active.activeDownloadLinksPage.Senders[_id] = inst;
 
             DialogResult = true;
         }

@@ -23,6 +23,7 @@
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
+    using RoliSoft.TVShowTracker.Parsers.Senders;
     using RoliSoft.TVShowTracker.TaskDialogs;
 
     using Image = System.Windows.Controls.Image;
@@ -43,7 +44,7 @@
         private ListSortDirection _lastSortDirection;
         private GridViewColumnHeader _lastClickedHeader;
 
-        private Tuple<string, BitmapSource> _defaultTorrent, _assocTorrent, _assocUsenet;
+        private Tuple<string, BitmapSource> _defaultTorrent, _defaultUsenet, _assocTorrent, _assocUsenet;
 
         private string _jDlPath;
 
@@ -54,6 +55,12 @@
         /// </summary>
         /// <value>The active search.</value>
         public DownloadSearch ActiveSearch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the senders.
+        /// </summary>
+        /// <value>The senders.</value>
+        public Dictionary<string, SenderEngine> Senders { get; set; } 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitlesPage"/> class.
@@ -116,11 +123,18 @@
             }
 
             LoadEngines();
+            LoadSenders();
 
             var tdl = Settings.Get("Torrent Downloader");
             if (!string.IsNullOrWhiteSpace(tdl))
             {
                 _defaultTorrent = Utils.GetExecutableInfo(tdl);
+            }
+
+            var udl = Settings.Get("Usenet Downloader");
+            if (!string.IsNullOrWhiteSpace(udl))
+            {
+                _defaultUsenet = Utils.GetExecutableInfo(udl);
             }
 
             var atr = Utils.GetApplicationForExtension(".torrent");
@@ -289,6 +303,45 @@
                             break;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Loads the senders.
+        /// </summary>
+        public void LoadSenders()
+        {
+            Senders = new Dictionary<string, SenderEngine>();
+
+            var plugins = Extensibility.GetNewInstances<SenderEngine>().ToList();
+            var actives = Settings.Get<Dictionary<string, object>>("Sender Destinations");
+
+            if (actives.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var activekv in actives)
+            {
+                var active = (Dictionary<string, object>)activekv.Value;
+                var plugin = plugins.FirstOrDefault(p => p.Name == (string)active["Sender"]);
+                if (plugin == null)
+                {
+                    continue;
+                }
+
+                var inst = (SenderEngine)Activator.CreateInstance(plugin.GetType());
+
+                inst.Title = (string)active["Name"];
+                inst.Location = (string)active["Location"];
+
+                if (active.ContainsKey("Login"))
+                {
+                    var login = Utils.Decrypt(inst, (string)active["Login"]);
+                    inst.Login = new NetworkCredential(login[0], login[1]);
+                }
+
+                Senders[activekv.Key] = inst;
             }
         }
 
@@ -687,8 +740,17 @@
             {
                 var sap    = new MenuItem();
                 sap.Header = "Send to " + _defaultTorrent.Item1;
-                sap.Icon   = new Image { Source = _defaultTorrent.Item2 };
+                sap.Icon   = new Image { Source = _defaultTorrent.Item2, Height = 16, Width = 16 };
                 sap.Click += (s, r) => DownloadFileClick("SendToTorrent", r);
+                cm.Items.Add(sap);
+            }
+
+            if (_defaultUsenet != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Usenet && !(link.Source.Downloader is ExternalDownloader))
+            {
+                var sap    = new MenuItem();
+                sap.Header = "Send to " + _defaultUsenet.Item1;
+                sap.Icon   = new Image { Source = _defaultUsenet.Item2, Height = 16, Width = 16 };
+                sap.Click += (s, r) => DownloadFileClick("SendToUsenet", r);
                 cm.Items.Add(sap);
             }
 
@@ -702,7 +764,7 @@
 
                 var sap    = new MenuItem();
                 sap.Header = "Send to " + (target != null ? target.Item1 : "associated");
-                sap.Icon   = new Image { Source = target != null ? target.Item2 : new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")) };
+                sap.Icon   = new Image { Source = target != null ? target.Item2 : new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")), Height = 16, Width = 16 };
                 sap.Click += (s, r) => DownloadFileClick("SendToAssociated", r);
                 cm.Items.Add(sap);
             }
@@ -711,9 +773,26 @@
             {
                 var jd    = new MenuItem();
                 jd.Header = "Send to JDownloader";
-                jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")) };
+                jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")), Height = 16, Width = 16 };
                 jd.Click += (s, r) => ProcessLink(link, x => SendToJDownloader(x.FileURL.Split('\0')));
                 cm.Items.Add(jd);
+            }
+
+            if (Signature.IsActivated)
+            { 
+                foreach (var se in Senders)
+                {
+                    if (se.Value.Type == link.Source.Type)
+                    {
+                        var id     = se.Key;
+                        var cmi    = new MenuItem();
+                        cmi.Tag    = se;
+                        cmi.Header = "Send to " + se.Value.Title;
+                        cmi.Icon   = new Image { Source = new BitmapImage(new Uri(se.Value.Icon)), Height = 16, Width = 16 };
+                        cmi.Click += (s, r) => DownloadFileClick("SendToSender|" + id, r);
+                        cm.Items.Add(cmi);
+                    }
+                }
             }
 
             foreach (var dlcm in Extensibility.GetNewInstances<DownloadLinkContextMenu>())
@@ -750,6 +829,10 @@
             if (_defaultTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
             {
                 DownloadFileClick("SendToTorrent", e);
+            }
+            else if (_defaultUsenet != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Usenet && !(link.Source.Downloader is ExternalDownloader))
+            {
+                DownloadFileClick("SendToUsenet", e);
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
             {

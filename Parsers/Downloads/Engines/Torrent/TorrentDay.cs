@@ -148,7 +148,14 @@
         {
             var json = Utils.GetJSON(Site + "V3/API/API.php", "/browse.php?&search=" + Utils.EncodeURL(query) + "&cata=yes&jxt=8&jxw=b", Cookies, request: req => req.Referer = Site + "browse.php");
 
-            if ((int)json["er"] != 0 || json["Fs"][0]["Cn"]["torrents"].Count == 0)
+            try
+            {
+                if ((int)json["er"] != 0 || json["Fs"][0]["Cn"]["torrents"].Count == 0)
+                {
+                    yield break;
+                }
+            }
+            catch
             {
                 yield break;
             }

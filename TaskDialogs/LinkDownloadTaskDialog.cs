@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Text.RegularExpressions;
     using System.Threading;
 
     using Microsoft.Win32;
@@ -29,7 +30,7 @@
         /// <param name="token">The token.</param>
         public void Download(Link link, string token)
         {
-            if (link.FileURL.StartsWith("magnet:"))
+            if ((link.FileURL.StartsWith("magnet:") || link.Source.Type == Types.DirectHTTP || link.Source.Type == Types.HTTP) && !token.StartsWith("SendToSender|"))
             {
                 DownloadFileCompleted(null, new EventArgs<string, string, string>(link.FileURL, null, token));
                 return;
@@ -96,6 +97,12 @@
             mthd.SetApartmentState(ApartmentState.STA);
             mthd.Start();
 
+            if ((link.FileURL.StartsWith("magnet:") || link.Source.Type == Types.DirectHTTP || link.Source.Type == Types.HTTP) && token.StartsWith("SendToSender|"))
+            {
+                DownloadFileCompleted(null, new EventArgs<string, string, string>(link.FileURL, null, token));
+                return;
+            }
+
             _dl                          = link.Source.Downloader;
             _dl.DownloadFileCompleted   += DownloadFileCompleted;
             _dl.DownloadProgressChanged += (s, a) =>
@@ -116,9 +123,12 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void DownloadFileCompleted(object sender, EventArgs<string, string, string> e)
         {
-            _active = false;
+            if (!(e.First == null && e.Second == null) && !e.Third.StartsWith("SendToSender|"))
+            {
+                _active = false;
 
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+            }
 
             if (e.First == null && e.Second == null)
             {
@@ -133,6 +143,13 @@
                     });
 
                 return;
+            }
+
+            var id = string.Empty;
+            if (e.Third.StartsWith("SendToSender|"))
+            {
+                id = e.Third.Split("|".ToCharArray())[1];
+                e.Third = "SendToSender";
             }
 
             switch (e.Third)
@@ -165,6 +182,55 @@
 
                 case "SendToTorrent":
                     Utils.Run(Settings.Get("Torrent Downloader"), e.First);
+                    break;
+
+                case "SendToUsenet":
+                    Utils.Run(Settings.Get("Usenet Downloader"), e.First);
+                    break;
+
+                case "SendToSender":
+                    var se = MainWindow.Active.activeDownloadLinksPage.Senders[id];
+
+                    _tdstr = "Sending file to " + se.Title + "...";
+
+                    try
+                    {
+                        if (Regex.IsMatch(e.First, "^(https?|s?ftps?|magnet):", RegexOptions.IgnoreCase))
+                        {
+                            se.SendLink(e.First);
+                        }
+                        else if (File.Exists(e.First))
+                        {
+                            se.SendFile(e.First);
+                        }
+                        else
+                        {
+                            throw new Exception("'" + e.First + "' is not recognized as either a file or link.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _active = false;
+
+                        Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
+
+                        TaskDialog.Show(new TaskDialogOptions
+                            {
+                                MainIcon                = VistaTaskDialogIcon.Error,
+                                Title                   = "Send error",
+                                MainInstruction         = _tdtit,
+                                Content                 = "There was an error while sending the requested file.",
+                                AllowDialogCancellation = true,
+                                ExpandedInfo            = ex.Message,
+                                CustomButtons           = new[] { "OK" }
+                            });
+
+                        return;
+                    }
+
+                    _active = false;
+
+                    Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                     break;
             }
         }
