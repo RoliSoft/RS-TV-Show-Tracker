@@ -12,8 +12,8 @@
 
     using NUnit.Framework;
 
-    using Downloaders;
-    using Downloaders.Engines;
+    using RoliSoft.TVShowTracker.Downloaders;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
 
     /// <summary>
     /// Represents a download link search engine.

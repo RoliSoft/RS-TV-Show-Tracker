@@ -461,7 +461,7 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static HtmlDocument GetHTML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static HtmlDocument GetHTML(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var doc = new HtmlDocument();
             var htm = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
@@ -487,7 +487,7 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static XDocument GetXML(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static XDocument GetXML(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var xml = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
 
@@ -511,7 +511,7 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static XmlDocument GetXML2(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static XmlDocument GetXML2(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var xml = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
             var doc = new XmlDocument();
@@ -538,7 +538,7 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static dynamic GetJSON(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static dynamic GetJSON(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var json = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
 
@@ -563,7 +563,7 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static T GetJSON<T>(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static T GetJSON<T>(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var json = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
 
@@ -587,7 +587,7 @@
         /// <returns>
         /// Remote page's content.
         /// </returns>
-        public static string GetURL(string url, string postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static string GetURL(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var req = (HttpWebRequest)WebRequest.Create(url);
             var domain = new Uri(url).Host.Replace("www.", string.Empty);
@@ -640,11 +640,11 @@
             req.ConnectionGroupName    = Guid.NewGuid().ToString();
             req.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
-            if (!string.IsNullOrWhiteSpace(postData))
+            if ((postData is string && !string.IsNullOrWhiteSpace(postData as string)) || (postData is byte[] && (postData as byte[]).Length != 0))
             {
-                req.Method                    = "POST";
-                req.ContentType               = "application/x-www-form-urlencoded";
-                req.AllowWriteStreamBuffering = true;
+                    req.Method                    = "POST";
+                    req.ContentType               = "application/x-www-form-urlencoded";
+                    req.AllowWriteStreamBuffering = true;
             }
 
             req.CookieContainer = new CookieContainer();
@@ -668,12 +668,20 @@
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(postData))
+            if (postData is string && !string.IsNullOrWhiteSpace(postData as string))
             {
                 using (var sw = new StreamWriter(req.GetRequestStream(), Encoding.ASCII))
                 {
-                    sw.Write(postData);
+                    sw.Write(postData as string);
                     sw.Flush();
+                }
+            }
+            else if (postData is byte[] && (postData as byte[]).Length != 0)
+            {
+                using (var bw = new BinaryWriter(req.GetRequestStream()))
+                {
+                    bw.Write(postData as byte[]);
+                    bw.Flush();
                 }
             }
 
