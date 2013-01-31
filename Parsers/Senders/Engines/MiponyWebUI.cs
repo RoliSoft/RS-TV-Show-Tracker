@@ -106,7 +106,8 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
             throw new NotSupportedException("Files cannot be sent to this type.");
         }
@@ -115,13 +116,29 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
+            if (status != null)
+            {
+                status("Checking status of " + Title + "...");
+            }
+
             var init = Utils.GetURL(Location);
 
             if (init.Contains("frmLogin"))
             {
+                if (status != null)
+                {
+                    status("Logging in to " + Title + "...");
+                }
+
                 Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/Login.asp", "Password=" + Utils.EncodeURL(Login.Password) + "&button=OK");
+            }
+
+            if (status != null)
+            {
+                status("Sending links to linkgrabber in " + Title + "...");
             }
 
             var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/addlinks.asp", "textLinks=" + Utils.EncodeURL(link.Replace("\0", "\r\n")) + "&op=addLinks");
@@ -129,7 +146,12 @@
 
             if (mc.Count == 0)
             {
-                return;
+                throw new Exception("The linkgrabber is empty or all the links were offline/unrecognized.");
+            }
+
+            if (status != null)
+            {
+                status("Accepting links from the linkgrabber in " + Title + "...");
             }
 
             var post = mc.Cast<Match>().Aggregate(string.Empty, (c, m) => c + ("file_" + m.Groups[1].Value + "=on&")) + "op=downloadLinks";

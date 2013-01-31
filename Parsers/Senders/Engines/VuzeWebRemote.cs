@@ -106,7 +106,8 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
             byte[] data;
 
@@ -140,7 +141,8 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
             var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/transmission/rpc", "{\"method\":\"torrent-add\",\"arguments\":{\"paused\":\"false\",\"filename\":\"" + link + "\"}}", request: r => r.Credentials = Login);
 

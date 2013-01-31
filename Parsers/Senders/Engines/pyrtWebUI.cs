@@ -105,14 +105,25 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
+            if (status != null)
+            {
+                status("Logging in to " + Title + "...");
+            }
+
             var cookies = string.Empty;
             var login = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/", "password=" + Utils.EncodeURL(Login.Password), response: r => cookies = Utils.EatCookieCollection(r.Cookies));
 
             if (login.Contains("Incorrect Password"))
             {
                 throw new Exception("Unable to login with the specified credentials.");
+            }
+
+            if (status != null)
+            {
+                status("Uploading torrent to " + Title + "...");
             }
 
             byte[] data;
@@ -159,7 +170,8 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
             throw new NotSupportedException("Magnet links are not supported as this is an antiquated UI.");
         }

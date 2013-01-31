@@ -107,7 +107,8 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
             throw new NotSupportedException("Files cannot be sent to this type.");
         }
@@ -116,9 +117,20 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
+            if (status != null)
+            {
+                status("Sending links to linkgrabber in " + Title + "...");
+            }
+
             Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/link_adder.tmpl", "do=Add&addlinks=" + Utils.EncodeURL(link.Replace("\0", "\r\n")), request: r => r.Credentials = Login);
+
+            if (status != null)
+            {
+                status("Waiting until linkgrabber finishes checking links in " + Title + "...");
+            }
 
             Thread.Sleep(100);
 
@@ -126,7 +138,7 @@
 
             if (!check.Contains("LinkGrabber still Running!") && !check.Contains("value=\"Unchecked\""))
             {
-                return;
+                throw new Exception("For reasons yet unknown, the links didn't make it to the linkgrabber.");
             }
 
             var done = false;
@@ -140,14 +152,25 @@
 
             if (!done)
             {
-                return;
+                throw new Exception("The linkgrabber is empty or all the links were offline/unrecognized.");
             }
 
+            if (status != null)
+            {
+                status("Accepting links from the linkgrabber in " + Title + "...");
+            }
+            
             var post = "do=Submit&checkallbox=on&selected_dowhat_link_adder=add&"
                      + Regex.Matches(check, @"(?<key>adder_package_name_(?<num>\d))"" value=""(?<value>[^""]+)""").Cast<Match>().Aggregate(string.Empty, (c, m) => c + ("package_all_add=" + m.Groups["num"].Value + "&" + m.Groups["key"].Value + "=" + m.Groups["value"].Value + "&"))
                      + Regex.Matches(check, @"package_single_add"" value=""([^""]+)""").Cast<Match>().Aggregate(string.Empty, (c, m) => c + "package_single_add=" + m.Groups[1].Value.Replace(" ", "+") + "&");
             
             Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/index.tmpl", post, request: r => r.Credentials = Login);
+
+            if (status != null)
+            {
+                status("Starting download in " + Title + "...");
+            }
+
             Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/index.tmpl", "do=start&autoreconnect=on&selected_dowhat_index=activate", request: r => r.Credentials = Login);
         }
     }

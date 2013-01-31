@@ -1,5 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker.Parsers.Senders
 {
+    using System;
     using System.Net;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -37,12 +38,14 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public abstract void SendFile(string path);
+        /// <param name="status">The callback to report status to.</param>
+        public abstract void SendFile(string path, Action<string> status = null);
 
         /// <summary>
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public abstract void SendLink(string link);
+        /// <param name="status">The callback to report status to.</param>
+        public abstract void SendLink(string link, Action<string> status = null);
     }
 }

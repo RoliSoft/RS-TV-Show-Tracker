@@ -99,7 +99,7 @@
 
             if ((link.FileURL.StartsWith("magnet:") || link.Source.Type == Types.DirectHTTP || link.Source.Type == Types.HTTP) && token.StartsWith("SendToSender|"))
             {
-                DownloadFileCompleted(null, new EventArgs<string, string, string>(link.FileURL, null, token));
+                new Thread(() => DownloadFileCompleted(null, new EventArgs<string, string, string>(link.FileURL, null, token))).Start();
                 return;
             }
 
@@ -191,17 +191,17 @@
                 case "SendToSender":
                     var se = MainWindow.Active.activeDownloadLinksPage.Senders[id];
 
-                    _tdstr = "Sending file to " + se.Title + "...";
-
                     try
                     {
                         if (Regex.IsMatch(e.First, "^(https?|s?ftps?|magnet):", RegexOptions.IgnoreCase))
                         {
-                            se.SendLink(e.First);
+                            _tdstr = "Sending link to " + se.Title + "...";
+                            se.SendLink(e.First, s => _tdstr = s);
                         }
                         else if (File.Exists(e.First))
                         {
-                            se.SendFile(e.First);
+                            _tdstr = "Sending file to " + se.Title + "...";
+                            se.SendFile(e.First, s => _tdstr = s);
                         }
                         else
                         {

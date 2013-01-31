@@ -106,7 +106,8 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
             byte[] data;
 
@@ -142,7 +143,8 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
             var login = string.IsNullOrWhiteSpace(Login.UserName) && Login.Password.Length == 32 ? "&apikey=" + Login.Password : "&ma_username=" + Utils.EncodeURL(Login.UserName) + "&ma_password=" + Utils.EncodeURL(Login.Password);
 

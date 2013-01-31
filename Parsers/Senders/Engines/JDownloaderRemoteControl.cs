@@ -104,7 +104,8 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
             throw new NotSupportedException("Files cannot be sent to this type.");
         }
@@ -113,7 +114,8 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
             Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/action/add/links/grabber0/start1/" + link.Replace("\0", " "));
         }

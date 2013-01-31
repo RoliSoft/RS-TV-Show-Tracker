@@ -106,7 +106,8 @@
         /// Sends the specified file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        public override void SendFile(string path)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendFile(string path, Action<string> status = null)
         {
             byte[] data;
 
@@ -127,7 +128,18 @@
                 data = ms.ToArray();
             }
 
+            if (status != null)
+            {
+                status("Getting token from " + Title + "...");
+            }
+
             var token = GetToken();
+
+            if (status != null)
+            {
+                status("Uploading torrent to " + Title + "...");
+            }
+
             var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/?token=" + token.Item1 + "&action=add-file", data, token.Item2, request: r =>
                 {
                     r.Credentials = Login;
@@ -141,9 +153,21 @@
         /// Sends the specified link.
         /// </summary>
         /// <param name="link">The link to send.</param>
-        public override void SendLink(string link)
+        /// <param name="status">The callback to report status to.</param>
+        public override void SendLink(string link, Action<string> status = null)
         {
+            if (status != null)
+            {
+                status("Getting token from " + Title + "...");
+            }
+
             var token = GetToken();
+
+            if (status != null)
+            {
+                status("Sending link to " + Title + "...");
+            }
+
             var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/?token=" + token.Item1 + "&action=add-url&s=" + Utils.EncodeURL(link), cookies: token.Item2, request: r => r.Credentials = Login);
 
             CheckResponse(req);
