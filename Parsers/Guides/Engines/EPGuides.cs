@@ -152,7 +152,7 @@
                      db = tmp[1];
             }
 
-            var listing = Utils.GetURL(id, "list=" + db, autoDetectEncoding: true);
+            var listing = Utils.GetURL(id, "list=" + db);
             var show = new TVShow
                 {
                     Source   = GetType().Name,

@@ -484,7 +484,22 @@
             var cover = CoverManager.GetCoverLocation(show.Name);
             if (File.Exists(cover))
             {
-                showGeneralCover.Source = new BitmapImage(new Uri(cover, UriKind.Absolute));
+                try
+                {
+                    var bi = new BitmapImage();
+
+                    bi.BeginInit();
+                    bi.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+                    bi.UriSource = new Uri(cover, UriKind.Absolute);
+                    bi.EndInit();
+
+                    showGeneralCover.Source = bi;
+                }
+                catch
+                {
+                    cover = null;
+                    showGeneralCover.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
+                }
             }
             else
             {

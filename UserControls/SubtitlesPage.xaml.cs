@@ -20,6 +20,7 @@
 
     using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Downloaders.Engines;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
@@ -607,13 +608,16 @@
                 cm.Items.Add(oib);
             }
 
-            var dls    = new MenuItem();
-            dls.Header = "Download subtitle";
-            dls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
-            dls.Click += DownloadSubtitleClick;
-            cm.Items.Add(dls);
+            if (!string.IsNullOrWhiteSpace(sub.FileURL) || !(sub.Source.Downloader is ExternalDownloader))
+            { 
+                var dls    = new MenuItem();
+                dls.Header = "Download subtitle";
+                dls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/torrents.png")) };
+                dls.Click += DownloadSubtitleClick;
+                cm.Items.Add(dls);
+            }
 
-            if (Signature.IsActivated)
+            if (Signature.IsActivated && (!string.IsNullOrWhiteSpace(sub.FileURL) || !(sub.Source.Downloader is ExternalDownloader)))
             {
                 List<string> fn;
                 if (_dbep != null && Library.Files.TryGetValue(_dbep.ID, out fn) && fn.Count != 0)
@@ -660,7 +664,7 @@
                     }
                 }
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(sub.FileURL) || !(sub.Source.Downloader is ExternalDownloader))
             {
                 var dnv    = new MenuItem();
                 dnv.Header = "Download subtitle near video";
@@ -700,7 +704,14 @@
 
             var sub = (Subtitle)listView.SelectedValue;
 
-            new SubtitleDownloadTaskDialog().Download(sub);
+            if (!string.IsNullOrWhiteSpace(sub.FileURL) || !(sub.Source.Downloader is ExternalDownloader))
+            {
+                new SubtitleDownloadTaskDialog().Download(sub);
+            }
+            else if (!string.IsNullOrWhiteSpace(sub.InfoURL))
+            {
+                Utils.Run(sub.InfoURL);
+            }
         }
 
         /// <summary>

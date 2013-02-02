@@ -1,6 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Drawing;
+    using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
+    using System.Drawing.Text;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -71,40 +75,55 @@
             // try to find it on The TVDB
 
             status("Searching for cover on The TVDB...");
-            if ((url = GetCoverFromTVDB(show)) != null)
+            try
             {
-                status("Downloading cover from " + new Uri(url).Host + "...");
-                if (DownloadCover(url, cover))
+                if ((url = GetCoverFromTVDB(show)) != null)
                 {
-                    goto success;
+                    status("Downloading cover from " + new Uri(url).Host + "...");
+                    if (DownloadCover(url, cover))
+                    {
+                        goto success;
+                    }
                 }
             }
+            catch { }
 
             // try to find it on IMDb
 
             status("Searching for cover on IMDb...");
-            if ((url = GetCoverFromIMDb(show)) != null)
+            try
             {
-                status("Downloading cover from " + new Uri(url).Host + "...");
-                if (DownloadCover(url, cover))
+                if ((url = GetCoverFromIMDb(show)) != null)
                 {
-                    goto success;
+                    status("Downloading cover from " + new Uri(url).Host + "...");
+                    if (DownloadCover(url, cover))
+                    {
+                        goto success;
+                    }
                 }
             }
+            catch { }
 
             // try to find it on Amazon
 
             status("Searching for cover on Amazon...");
-            if ((url = GetCoverFromAmazon(show)) != null)
+            try
             {
-                status("Downloading cover from " + new Uri(url).Host + "...");
-                if (DownloadCover(url, cover))
+                if ((url = GetCoverFromAmazon(show)) != null)
                 {
-                    goto success;
+                    status("Downloading cover from " + new Uri(url).Host + "...");
+                    if (DownloadCover(url, cover))
+                    {
+                        goto success;
+                    }
                 }
             }
+            catch { }
 
-            return null;
+            // we were out of luck, but fuck that, we'll draw our own cover! with blackjack. and hookers. in fact, forget the cover.
+
+            status("Drawing a cover...");
+            DrawCover(show, cover);
 
           success:
             return cover;
@@ -199,6 +218,49 @@
             }
 
             return File.Exists(path) && new FileInfo(path).Length != 0;
+        }
+
+        /// <summary>
+        /// Draws a cover for the show if none were found.
+        /// </summary>
+        /// <param name="title">The title of the show.</param>
+        /// <param name="path">The path where to store the cover image.</param>
+        private static void DrawCover(string title, string path)
+        {
+            var help = "covers/" + Utils.CreateSlug(title, false) + ".jpg";
+            var font = new Font("Calibri", 72, FontStyle.Bold);
+            var fon2 = new Font("Calibri", 48);
+            var imag = new Bitmap(1, 1);
+            var grap = Graphics.FromImage(imag);
+            var size = grap.MeasureString(title, font);
+            var siz2 = grap.MeasureString(help, fon2);
+            var nwsz = size.Width > siz2.Width ? size.Width : siz2.Width;
+
+            imag.Dispose();
+            grap.Dispose();
+
+            imag = new Bitmap((int)nwsz + 100, (int)((nwsz + 100) * 1.47));
+            grap = Graphics.FromImage(imag);
+
+            grap.Clear(Color.Black);
+
+            grap.TextRenderingHint = TextRenderingHint.AntiAlias;
+            grap.DrawString(title, font, Brushes.White, (int)((imag.Width - size.Width) / 2), (int)((imag.Height - size.Height) / 4));
+            grap.DrawString(help, fon2, Brushes.DimGray, (int)((imag.Width - siz2.Width) / 2), (int)(((imag.Height - siz2.Height) - ((imag.Height - siz2.Height) / 4))));
+
+            var ima2 = new Bitmap(680, 1000);
+            var gra2 = Graphics.FromImage(ima2);
+
+            gra2.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            gra2.DrawImage(imag, 0, 0, 680, 1000);
+
+            grap.Dispose();
+            imag.Dispose();
+
+            try { ima2.Save(path, ImageFormat.Jpeg); } catch { }
+
+            gra2.Dispose();
+            ima2.Dispose();
         }
 
         /// <summary>

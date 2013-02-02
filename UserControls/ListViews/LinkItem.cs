@@ -155,6 +155,11 @@
         /// </summary>
         public void CheckLink()
         {
+            if (string.IsNullOrWhiteSpace(FileURL))
+            {
+                return;
+            }
+
             var checker = Extensibility.GetNewInstances<LinkCheckerEngine>().FirstOrDefault(x => x.CanCheck(FileURL));
 
             if (checker == null)

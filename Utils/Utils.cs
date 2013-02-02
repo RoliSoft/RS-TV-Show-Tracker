@@ -451,7 +451,6 @@
         /// <param name="postData">The data to POST.</param>
         /// <param name="cookies">The cookies.</param>
         /// <param name="encoding">The encoding.</param>
-        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
@@ -461,10 +460,10 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static HtmlDocument GetHTML(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static HtmlDocument GetHTML(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var doc = new HtmlDocument();
-            var htm = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            var htm = GetURL(url, postData, cookies, encoding, userAgent, timeout, headers, proxy, request, response);
             doc.LoadHtml(htm);
 
             return doc;
@@ -477,7 +476,6 @@
         /// <param name="postData">The data to POST.</param>
         /// <param name="cookies">The cookies.</param>
         /// <param name="encoding">The encoding.</param>
-        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
@@ -487,9 +485,9 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static XDocument GetXML(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static XDocument GetXML(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
-            var xml = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            var xml = GetURL(url, postData, cookies, encoding, userAgent, timeout, headers, proxy, request, response);
 
             return XDocument.Parse(xml);
         }
@@ -501,7 +499,6 @@
         /// <param name="postData">The data to POST.</param>
         /// <param name="cookies">The cookies.</param>
         /// <param name="encoding">The encoding.</param>
-        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
@@ -511,9 +508,9 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static XmlDocument GetXML2(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static XmlDocument GetXML2(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
-            var xml = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            var xml = GetURL(url, postData, cookies, encoding, userAgent, timeout, headers, proxy, request, response);
             var doc = new XmlDocument();
 
             doc.LoadXml(xml);
@@ -528,7 +525,6 @@
         /// <param name="postData">The data to POST.</param>
         /// <param name="cookies">The cookies.</param>
         /// <param name="encoding">The encoding.</param>
-        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
@@ -538,9 +534,9 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static dynamic GetJSON(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static dynamic GetJSON(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
-            var json = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            var json = GetURL(url, postData, cookies, encoding, userAgent, timeout, headers, proxy, request, response);
 
             return JsonConvert.DeserializeObject(json);
         }
@@ -553,7 +549,6 @@
         /// <param name="postData">The data to POST.</param>
         /// <param name="cookies">The cookies.</param>
         /// <param name="encoding">The encoding.</param>
-        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The request timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
@@ -563,9 +558,9 @@
         /// <returns>
         /// Remote page's parsed content.
         /// </returns>
-        public static T GetJSON<T>(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static T GetJSON<T>(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
-            var json = GetURL(url, postData, cookies, encoding, autoDetectEncoding, userAgent, timeout, headers, proxy, request, response);
+            var json = GetURL(url, postData, cookies, encoding, userAgent, timeout, headers, proxy, request, response);
 
             return JsonConvert.DeserializeObject<T>(json);
         }
@@ -577,7 +572,6 @@
         /// <param name="postData">The data to POST.</param>
         /// <param name="cookies">The cookies.</param>
         /// <param name="encoding">The encoding.</param>
-        /// <param name="autoDetectEncoding">if set to <c>true</c> it will automatically detect the encoding. Not guaranteed to work.</param>
         /// <param name="userAgent">The user agent to send.</param>
         /// <param name="timeout">The requrest timeout in milliseconds.</param>
         /// <param name="headers">The additional headers to send.</param>
@@ -587,7 +581,7 @@
         /// <returns>
         /// Remote page's content.
         /// </returns>
-        public static string GetURL(string url, object postData = null, string cookies = null, Encoding encoding = null, bool autoDetectEncoding = false, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
+        public static string GetURL(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var req = (HttpWebRequest)WebRequest.Create(url);
             var domain = new Uri(url).Host.Replace("www.", string.Empty);
@@ -690,7 +684,24 @@
                 request(req);
             }
 
-            var resp = (HttpWebResponse)req.GetResponse();
+            HttpWebResponse resp;
+
+            try
+            {
+                resp = (HttpWebResponse)req.GetResponse();
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    resp = (HttpWebResponse)ex.Response;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             var rstr = resp.GetResponseStream();
 
             if (response != null)
@@ -698,64 +709,28 @@
                 response(resp);
             }
 
-            if (!autoDetectEncoding)
+            if (encoding is Base64Encoding)
             {
-                if (encoding is Base64Encoding)
-                {
-                    using (var ms = new MemoryStream())
-                    {
-                        int read;
-                        do
-                        {
-                            var bs = new byte[8192];
-                            read = rstr.Read(bs, 0, bs.Length);
-                            ms.Write(bs, 0, read);
-                        }
-                        while (read > 0);
-
-                        return Convert.ToBase64String(ms.ToArray());
-                    }
-                }
-                else
-                {
-                    using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
-                    {
-                        return sr.ReadToEnd();
-                    }
-                }
-            }
-            else
-            {
-                byte[] bs;
-
                 using (var ms = new MemoryStream())
                 {
                     int read;
                     do
                     {
-                        bs = new byte[8192];
+                        var bs = new byte[8192];
                         read = rstr.Read(bs, 0, bs.Length);
                         ms.Write(bs, 0, read);
                     }
                     while (read > 0);
 
-                    bs = ms.ToArray();
+                    return Convert.ToBase64String(ms.ToArray());
                 }
-
-                var rgx = Regex.Match(Encoding.ASCII.GetString(bs), @"charset=([^""]+)", RegexOptions.IgnoreCase);
-                var eenc = "utf-8";
-
-                if (rgx.Success)
+            }
+            else
+            {
+                using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
                 {
-                    eenc = rgx.Groups[1].Value;
-
-                    if (eenc == "iso-8859-1") // .NET won't recognize iso-8859-1
-                    {
-                        eenc = "windows-1252";
-                    }
+                    return sr.ReadToEnd();
                 }
-
-                return Encoding.GetEncoding(eenc).GetString(bs);
             }
         }
 

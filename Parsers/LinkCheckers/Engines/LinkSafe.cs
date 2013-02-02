@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using System.Net;
+    using System.Text.RegularExpressions;
 
     using NUnit.Framework;
 
@@ -70,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-21 11:08 PM");
+                return Utils.DateTimeToVersion("2013-02-02 2:33 AM");
             }
         }
 
@@ -96,7 +97,7 @@
                         loc = r.Headers[HttpResponseHeader.Location];
                     });
 
-            if (string.IsNullOrWhiteSpace(loc) && !CanCheck(loc))
+            if (string.IsNullOrWhiteSpace(loc) || !CanCheck(loc))
             {
                 return false;
             }
@@ -120,7 +121,7 @@
         /// </returns>
         public override bool CanCheck(string url)
         {
-            return new Uri(url).Host.EndsWith("linksafe.me");
+            return Regex.IsMatch(url, @"[/\.]linksafe.me/", RegexOptions.IgnoreCase);
         }
 
         /// <summary>

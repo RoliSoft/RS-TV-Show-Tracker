@@ -194,29 +194,29 @@
 
             // try to find show in local database
             
-            foreach (var show in Database.TVShows)
+            foreach (var show in Database.TVShows.Values.ToList())
             {
-                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Value.Name).Match(name);
-                var releaseMatch = !string.IsNullOrWhiteSpace(show.Value.Release) ? Regex.Match(name, show.Value.Release) : null;
+                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Name).Match(name);
+                var releaseMatch = !string.IsNullOrWhiteSpace(show.Release) ? Regex.Match(name, show.Release) : null;
 
                 if ((titleMatch.Success && titleMatch.Value == name) || (releaseMatch != null && releaseMatch.Success && releaseMatch.Value == name))
                 {
                     if (ep == null)
                     {
                         match = true;
-                        ltvsh = show.Value;
-                        name  = show.Value.Name;
+                        ltvsh = show;
+                        name  = show.Name;
 
                         break;
                     }
                     else if (ep.AirDate != null)
                     {
-                        var episode = show.Value.Episodes.Where(x => x.Airdate.ToOriginalTimeZone(x.Show.TimeZone).Date == ep.AirDate.Value.Date).ToList();
+                        var episode = show.Episodes.Where(x => x.Airdate.ToOriginalTimeZone(x.Show.TimeZone).Date == ep.AirDate.Value.Date).ToList();
                         if (episode.Count != 0)
                         {
                             match = true;
-                            ltvsh = show.Value;
-                            name  = show.Value.Name;
+                            ltvsh = show;
+                            name  = show.Name;
                             lepis = episode[0];
                             title = episode[0].Name;
                             date  = episode[0].Airdate;
@@ -230,11 +230,11 @@
                     else
                     {
                         Episode episode;
-                        if (show.Value.EpisodeByID.TryGetValue(ep.Season * 1000 + ep.Episode, out episode))
+                        if (show.EpisodeByID.TryGetValue(ep.Season * 1000 + ep.Episode, out episode))
                         {
                             match = true;
-                            ltvsh = show.Value;
-                            name  = show.Value.Name;
+                            ltvsh = show;
+                            name  = show.Name;
                             lepis = episode;
                             title = episode.Name;
                             date  = episode.Airdate;

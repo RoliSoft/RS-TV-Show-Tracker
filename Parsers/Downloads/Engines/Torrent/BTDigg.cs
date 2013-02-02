@@ -57,7 +57,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-07-19 12:00 AM");
+                return Utils.DateTimeToVersion("2013-02-02 2:29 AM");
             }
         }
 
@@ -95,9 +95,9 @@
                 link.Release = node.InnerText;
                 link.FileURL = HtmlEntity.DeEntitize(node.GetNodeAttributeValue("../../../..//td[@class='ttth']/a", "href"));
                 link.InfoURL = Site.TrimEnd('/') + node.GetAttributeValue("href");
-                link.Size    = node.GetTextValue("../../../..//td[2]/span[@class='attr_val']").Replace("&nbsp;", " ");
+                link.Size    = node.GetTextValue("../../../..//td[3]/span[@class='attr_val']").Replace("&nbsp;", " ");
                 link.Quality = FileNames.Parser.ParseQuality(node.InnerText);
-                link.Infos   = "Reqs: " + node.GetTextValue("../../../..//td[4]/span[@class='attr_val']");
+                link.Infos   = "Reqs: " + node.GetTextValue("../../../..//td[5]/span[@class='attr_val']");
 
                 yield return link;
             }
