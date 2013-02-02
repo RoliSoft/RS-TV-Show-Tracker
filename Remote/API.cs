@@ -172,8 +172,11 @@
         /// <summary>
         /// Check for software update.
         /// </summary>
-        /// <returns>URL of the new version, if available.</returns>
-        public static UpdateCheck CheckForUpdate()
+        /// <param name="nightly">if set to <c>true</c>, will update to nightlies.</param>
+        /// <returns>
+        /// URL of the new version, if available.
+        /// </returns>
+        public static UpdateCheck CheckForUpdate(bool nightly = false)
         {
             return InvokeRemoteMethod<UpdateCheck>("CheckForUpdate");
         }

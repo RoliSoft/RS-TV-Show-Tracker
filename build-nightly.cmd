@@ -19,8 +19,6 @@
 
 @echo off
 
-:: check for upload-nightly.cmd
-
 if not exist upload-nightly.cmd (
 	echo You have not written a batch script to upload the files somewhere.
 	echo Copy upload-nightly.sample.cmd to upload-nightly.cmd then edit it.
@@ -28,13 +26,17 @@ if not exist upload-nightly.cmd (
 	exit
 )
 
-:: remove previous build
+::
+title [01/12] Removing previous build...
+::
 
 if exist bin\Nightly (
 	rmdir /S /Q bin\Nightly
 )
 
-:: compile solution
+::
+title [02/12] Building solution...
+::
 
 if not exist %WinDir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe (
 	echo MSBuild.exe was not found in %WinDir%\Microsoft.NET\Framework\v4.0.30319
@@ -44,13 +46,17 @@ if not exist %WinDir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe (
 
 %WinDir%\Microsoft.NET\Framework\v4.0.30319\MSBuild "RS TV Show Tracker.csproj" /p:Configuration=Nightly
 
-:: copy dependencies
+::
+title [03/12] Copying dependencies...
+::
 
 rmdir /S /Q bin\Nightly\libs
 mkdir bin\Nightly\libs
 xcopy /Y /C Dependencies\*.dll bin\Nightly\libs\
 
-:: create portable archive with 7-Zip or WinRAR
+::
+title [04/12] Creating ZIP archive...
+::
 
 if exist "%ProgramFiles%\7-Zip\7z.exe" (
 	"%ProgramFiles%\7-Zip\7z" a -tzip tvshowtracker_v2_nightly_portable .\bin\Nightly\*
@@ -65,7 +71,9 @@ if exist "%ProgramFiles%\7-Zip\7z.exe" (
 	)
 )
 
-:: create installer with NSIS
+::
+title [05/12] Creating installer...
+::
 
 if exist "%ProgramFiles(x86)%\NSIS\makensis.exe" (
 	"%ProgramFiles(x86)%\NSIS\makensis" /DINSTALLER_NAME=tvshowtracker_v2_nightly_setup.exe /DTARGET_DIR=Nightly installer.nsi
@@ -79,15 +87,21 @@ if exist "%ProgramFiles(x86)%\NSIS\makensis.exe" (
 	)
 )
 
-:: sign the installer
+::
+title [06/12] Signing installer...
+::
 
 if exist sign.cmd call sign tvshowtracker_v2_nightly_setup.exe
 
-:: remove build
+::
+title [07/12] Removing build...
+::
 
 rmdir /S /Q bin\Nightly
 
-:: upload portable archive
+::
+title [08/12] Uploading ZIP archive...
+::
 
 if exist tvshowtracker_v2_nightly_portable.zip (
 	call upload-nightly tvshowtracker_v2_nightly_portable.zip
@@ -97,7 +111,9 @@ if exist tvshowtracker_v2_nightly_portable.zip (
 	pause
 )
 
-:: upload installer
+::
+title [09/12] Uploading installer...
+::
 
 if exist tvshowtracker_v2_nightly_setup.exe (
 	call upload-nightly tvshowtracker_v2_nightly_setup.exe
@@ -107,17 +123,24 @@ if exist tvshowtracker_v2_nightly_setup.exe (
 	pause
 )
 
-:: create JSON with compile date and commit hash
+::
+title [10/12] Creating JSON file...
+::
 
 for /f "tokens=2,3,4,5,6 usebackq delims=:/ " %%a in ('%date% %time%') do set datum=%%c-%%a-%%b %%d:%%e
+for /f "tokens=1 delims=" %%a in (version.txt) do set version=%%a
 for /f "tokens=1 delims=" %%a in ('git rev-parse HEAD') do set commit=%%a
-echo. | set /p={"date":"%datum%","commit":"%commit%"} > tvshowtracker_v2_nightly_info.js
+echo. | set /p={"date":"%datum%","version":"%version%","commit":"%commit%"} > tvshowtracker_v2_nightly_info.js
 
-:: upload JSON
+::
+title [11/12] Uploading JSON file...
+::
 
 call upload-nightly tvshowtracker_v2_nightly_info.js
 del tvshowtracker_v2_nightly_info.js
 
-:: call post-build script, if exists
+::
+title [12/12] Finishing up...
+::
 
 if exist post-build.cmd call post-build.cmd 

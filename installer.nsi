@@ -1,7 +1,6 @@
 !define APP_NAME "RS TV Show Tracker"
 !define COMP_NAME "RoliSoft"
 !define WEB_SITE "http://lab.rolisoft.net"
-!define VERSION "2.2.0.0"
 !define COPYRIGHT "© 2013 RoliSoft"
 !define DESCRIPTION "RS TV Show Tracker"
 !ifndef INSTALLER_NAME
@@ -9,6 +8,9 @@
 !endif
 !ifndef TARGET_DIR
 	!define TARGET_DIR "Release"
+!endif
+!ifndef VERSION
+	!include "version.nsh"
 !endif
 !define MAIN_APP_EXE "RSTVShowTracker.exe"
 !define INSTALL_TYPE "SetShellVarContext current"
@@ -30,7 +32,6 @@
 var SM_Folder
 
 !include "FileFunc.nsh"
-!include "UAC.nsh"
 
 ######################################################################
 
@@ -83,7 +84,7 @@ Function .onInstSuccess
 	IfErrors done run
 	
 run:
-	!insertmacro UAC_AsUser_ExecShell "open" "$INSTDIR\${MAIN_APP_EXE}" "" "$INSTDIR" SW_SHOWNORMAL
+	ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
 	
 done:
 FunctionEnd
@@ -117,8 +118,10 @@ FunctionEnd
 !define MUI_PAGE_CUSTOMFUNCTION_PRE HeaderChangeFonts
 !insertmacro MUI_PAGE_INSTFILES
 
-!define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}"
-!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_TEXT "Start ${APP_NAME}"
+!define MUI_FINISHPAGE_RUN_FUNCTION FinishLaunchApplication
+!define MUI_FINISHPAGE_SHOWREADME
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
 !define MUI_FINISHPAGE_SHOWREADME_FUNCTION FinishCreateDesktopShortcut
@@ -153,6 +156,10 @@ FunctionEnd
 
 Function FinishCreateDesktopShortcut
 	CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
+FunctionEnd
+
+Function FinishLaunchApplication
+	ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
 FunctionEnd
 
 ######################################################################

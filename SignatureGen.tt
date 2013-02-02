@@ -11,7 +11,7 @@
 using System;
 using System.Reflection;
 
-[assembly: AssemblyVersion("2.2.0.<#= Regex.Matches(Run("git", "shortlog -s"), @"(\d+)").Cast<Match>().Select(c => c.Groups[1].Value).Select(int.Parse).Sum() #>")]
+[assembly: AssemblyVersion("<#= GenerateVersion() #>")]
 
 namespace RoliSoft.TVShowTracker
 {
@@ -35,7 +35,7 @@ namespace RoliSoft.TVShowTracker
         /// <value>The git commit hash.</value>
         public static string GitRevision
         {
-            get { return "<#= Run("git", "rev-parse HEAD").Trim() #>"; }
+            get { return "<#= GetRevision() #>"; }
         }
 
         /// <summary>
@@ -92,5 +92,21 @@ namespace RoliSoft.TVShowTracker
         catch (Win32Exception) { }
 
         return sb.ToString();
+    }
+
+    public string GetRevision()
+    {
+        return Run("git", "rev-parse HEAD").Trim();
+    }
+
+    public string GenerateVersion()
+    {
+        var prefix = "2.2.0.";
+        var count = Regex.Matches(Run("git", "shortlog -s"), @"(\d+)").Cast<Match>().Select(c => c.Groups[1].Value).Select(int.Parse).Sum();
+        
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "version.txt"), prefix + count.ToString());
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "version.nsh"), "!define VERSION \"" + prefix + count.ToString() + "\"");
+
+        return prefix + count;
     }
 #>

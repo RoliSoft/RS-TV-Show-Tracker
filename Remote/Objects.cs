@@ -196,16 +196,16 @@
         public string Version { get; set; }
 
         /// <summary>
-        /// Gets or sets the URL.
+        /// Gets or sets the URL to the installer.
         /// </summary>
-        /// <value>The URL.</value>
+        /// <value>The URL to the installer.</value>
         public string URL { get; set; }
 
         /// <summary>
-        /// Gets or sets the change list.
+        /// Gets or sets the URL to the ZIP archive.
         /// </summary>
-        /// <value>The change list.</value>
-        public string Description { get; set; }
+        /// <value>The URL to the ZIP archive.</value>
+        public string ZIP { get; set; }
     }
 
     /// <summary>
