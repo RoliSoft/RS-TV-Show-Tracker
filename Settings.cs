@@ -59,7 +59,7 @@
             }
             catch
             {
-                Keys = new Dictionary<string, object>();
+                Keys = new Dictionary<string, object> { { "Revision", 2 } };
             }
 
             // set defaults, if they're missing
@@ -155,6 +155,56 @@
                 }
 
                 Set("Revision", 1);
+            }
+
+            if ((int)Keys["Revision"] < 2)
+            {
+                var altdl = Get<Dictionary<string, List<string>>>("Alternative Associations");
+
+                if (Keys.ContainsKey("Torrent Downloader") && !string.IsNullOrWhiteSpace((string)Keys["Torrent Downloader"]))
+                {
+                    if (altdl.ContainsKey(".torrent"))
+                    {
+                        altdl[".torrent"].Add((string)Keys["Torrent Downloader"]);
+                    }
+                    else
+                    {
+                        altdl[".torrent"] = new List<string> { (string)Keys["Torrent Downloader"] };
+                    }
+
+                    Keys.Remove("Torrent Downloader");
+                }
+
+                if (Keys.ContainsKey("Usenet Downloader") && !string.IsNullOrWhiteSpace((string)Keys["Usenet Downloader"]))
+                {
+                    if (altdl.ContainsKey(".nzb"))
+                    {
+                        altdl[".nzb"].Add((string)Keys["Usenet Downloader"]);
+                    }
+                    else
+                    {
+                        altdl[".nzb"] = new List<string> { (string)Keys["Usenet Downloader"] };
+                    }
+
+                    Keys.Remove("Usenet Downloader");
+                }
+
+                if (Keys.ContainsKey("JDownloader") && !string.IsNullOrWhiteSpace((string)Keys["JDownloader"]))
+                {
+                    if (altdl.ContainsKey(".dlc"))
+                    {
+                        altdl[".dlc"].Add((string)Keys["JDownloader"]);
+                    }
+                    else
+                    {
+                        altdl[".dlc"] = new List<string> { (string)Keys["JDownloader"] };
+                    }
+
+                    Keys.Remove("JDownloader");
+                }
+
+                Set("Alternative Associations", altdl);
+                Set("Revision", 2);
             }
         }
 

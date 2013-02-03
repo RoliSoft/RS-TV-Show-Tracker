@@ -581,9 +581,12 @@
                     textBox.IsEnabled    = true;
                     searchButton.Content = "Search";
 
-                    foreach (var item in DownloadLinksListViewItemCollection.Where(x => x.Source.Type == Types.DirectHTTP).ToList())
+                    if (Signature.IsActivated && Settings.Get<bool>("One-Click Hoster Link Checker"))
                     {
-                        new Thread(item.CheckLink).Start();
+                        foreach (var item in DownloadLinksListViewItemCollection.Where(x => x.Source.Type == Types.DirectHTTP).ToList())
+                        {
+                            new Thread(item.CheckLink).Start();
+                        }
                     }
 
                     if (DownloadLinksListViewItemCollection.Count != 0)

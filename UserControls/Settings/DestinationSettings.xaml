@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="RoliSoft.TVShowTracker.UserControls.DestinationSettings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
+        Loaded="UserControlLoaded">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/RSTVShowTracker;component/Images/inbox-download.png" Height="16" Width="16" Margin="0,1,5,0" />
+                    <Label Content="Destinations" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                </StackPanel>
+                <TextBlock TextWrapping="Wrap" Margin="3,5" Padding="20,0,0,0">
+                    <Image Source="/RSTVShowTracker;component/Images/information.png" Height="12" Width="12" Margin="-20,0,0,-1" />You can add the destinations - such as local downloader applications, remote seedboxes and download stations, watched folders, etc - where the software will send/save torrents, NZB files and DLC containers. These destinations will be available from the context menu.
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" Height="299">
+                    <ListView Name="destinationsListView" SelectionChanged="DestinationsListViewSelectionChanged" Margin="0,0,5,-91" Width="481" Padding="-2,-1">
+                        <ListView.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Margin" Value="0,0,0,0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <Grid Height="20">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Image Grid.Column="0" Source="{Binding Path=Items[0].GroupIcon}" Height="16" Width="16" Margin="6,0,0,2" />
+                                                            <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="13" Text="{Binding Path=Name}" Margin="3,0,5,0" />
+                                                            <Separator Grid.Column="2" VerticalAlignment="Center" Opacity="0.3" Margin="0,0,3,0" />
+                                                        </Grid>
+                                                        <ItemsPresenter Margin="0" />
+                                                    </StackPanel>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                        </ListView.GroupStyle>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Width="458">
+                                    <GridViewColumnHeader Content="Name" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding Icon}" Height="16" Width="16" />
+                                                <TextBlock Text="{Binding Name}" Padding="5,0,0,0" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <StackPanel Orientation="Vertical">
+                        <Button Name="destinationsAddButton" Click="DestinationsAddButtonClick" ToolTip="Add a new destination">
+                            <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                        <Button Name="destinationsEditButton" Click="DestinationsEditButtonClick" ToolTip="Edit the selected destination">
+                            <Image Source="/RSTVShowTracker;component/Images/pencil.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                        <Button Name="destinationsRemoveButton" Click="DestinationsRemoveButtonClick" ToolTip="Remove the selected destination">
+                            <Image Source="/RSTVShowTracker;component/Images/cross.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -962,6 +962,14 @@
                     cmd = cmds[1];
                 }
             }
+            else if (cmd.Contains("\""))
+            {
+                var cmds = Regex.Split(cmd, "\"([^\"]+)");
+                if (cmds.Length > 1)
+                {
+                    cmd = cmds[0];
+                }
+            }
 
             return cmd.Trim(" \"'".ToCharArray());
         }
