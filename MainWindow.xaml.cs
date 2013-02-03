@@ -920,8 +920,11 @@
 
                         if (upd.Type == UpdateCheck.Release.Nightly && File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length != 0)
                         {
-                            Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/S /" + (IsVisible && Top != -999 ? "A" : "S") + "R /D=" + Signature.FullPath);
-                            NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+                            Run(() =>
+                                {
+                                    Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/S /" + (IsVisible && Top != -999 ? "A" : "S") + "R /D=" + Signature.FullPath);
+                                    NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+                                });
                         }
                         else
                         {
