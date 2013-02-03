@@ -178,7 +178,7 @@
         /// </returns>
         public static UpdateCheck CheckForUpdate(bool nightly = false)
         {
-            return InvokeRemoteMethod<UpdateCheck>("CheckForUpdate");
+            return InvokeRemoteMethod<UpdateCheck>("CheckForUpdate", nightly);
         }
 
         /// <summary>
