@@ -172,7 +172,7 @@
         /// <summary>
         /// Check for software update.
         /// </summary>
-        /// <param name="nightly">if set to <c>true</c>, will update to nightlies.</param>
+        /// <param name="nightly">if set to <c>true</c> will update to nightlies.</param>
         /// <returns>
         /// URL of the new version, if available.
         /// </returns>

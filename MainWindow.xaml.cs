@@ -24,6 +24,7 @@
     using TaskDialogInterop;
 
     using RoliSoft.TVShowTracker.Remote;
+    using RoliSoft.TVShowTracker.Remote.Objects;
 
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
@@ -53,7 +54,7 @@
 
         private Timer _statusTimer;
         private static bool _initialized;
-        private bool _hideOnStart, _dieOnStart, _askUpdate, _askErrorUpdate;
+        private bool _hideOnStart, _dieOnStart, _askUpdate, _askErrorUpdate, _isNightlyUpdate;
         private Mutex _mutex;
         private static ConcurrentDictionary<string, int> _exCnt = new ConcurrentDictionary<string, int>();
 
@@ -847,13 +848,21 @@
         /// </summary>
         public void CheckForUpdate()
         {
-            var upd = API.CheckForUpdate();
+            var upd = API.CheckForUpdate(Settings.Get<bool>("Update to Nightly Builds"));
             if (upd.Success && upd.New)
             {
                 Run(() =>
                     {
-                        update.Tag              = upd.Version;
-                        updateOuter.Visibility  = Visibility.Visible;
+                        update.Tag = upd.Version;
+
+                        if (upd.Type == UpdateCheck.Release.Nightly)
+                        {
+                            _isNightlyUpdate = true;
+                            updateLabel.Content = "New nightly available!";
+                        }
+
+                        updateOuter.Visibility = Visibility.Visible;
+
                         updateToolTipTitle.Text = "v" + upd.Version + " is available";
                         updateToolTipText.Text  = "Downloading update...";
                     });
@@ -909,7 +918,15 @@
                             return;
                         }
 
-                        Run(() => UpdateDownloaded(upd.Version, true));
+                        if (upd.Type == UpdateCheck.Release.Nightly && File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length != 0)
+                        {
+                            Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/S /" + (IsVisible && Top != -999 ? "A" : "S") + "R /D=" + Signature.FullPath);
+                            NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
+                        }
+                        else
+                        {
+                            Run(() => UpdateDownloaded(upd.Version, true));
+                        }
                     };
 
                 wc.DownloadFileAsync(new Uri(upd.URL), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"));
@@ -973,7 +990,7 @@
 
                 if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value == 0)
                 {
-                    Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
+                    Process.Start("http://lab.rolisoft.net/tvshowtracker/" + (_isNightlyUpdate ? "nightly" : "downloads") + ".html");
                 }
             }
             else if (!IsVisible || Top == -999)
@@ -1011,7 +1028,7 @@
         {
             if (_askErrorUpdate)
             {
-                Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
+                Process.Start("http://lab.rolisoft.net/tvshowtracker/" + (_isNightlyUpdate ? "nightly" : "downloads") + ".html");
             }
             else if (File.Exists(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")).Length != 0)
             {
@@ -1020,7 +1037,7 @@
             }
             else
             {
-                Process.Start("http://lab.rolisoft.net/tvshowtracker/downloads.html");
+                Process.Start("http://lab.rolisoft.net/tvshowtracker/" + (_isNightlyUpdate ? "nightly" : "downloads") + ".html");
             }
         }
         #endregion

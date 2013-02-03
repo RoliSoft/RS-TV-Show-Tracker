@@ -81,10 +81,20 @@ Function .onInstSuccess
 	
 	${GetParameters} $R0
 	${GetOptions} $R0 "/AR" $R1
-	IfErrors done run
+	IfErrors checkSilent runNormal
 	
-run:
+runNormal:
 	ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
+	
+checkSilent:
+	ClearErrors
+	
+	${GetParameters} $R0
+	${GetOptions} $R0 "/SR" $R1
+	IfErrors done runSilent
+	
+runSilent:
+	ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"' "-hide"
 	
 done:
 FunctionEnd

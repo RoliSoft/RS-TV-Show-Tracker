@@ -27,7 +27,7 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-#ignore other private stuff
+#ignore other private or generated stuff
 /Settings.json
 /todo.txt
 /sqlite3.exe
@@ -37,3 +37,5 @@ _ReSharper*/
 /RoliSoft.TVShowTracker.Private.snk
 /SignatureGen.cs
 /*.db3
+/version.txt
+/version.nsh

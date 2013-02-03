@@ -710,7 +710,7 @@
                         </StackPanel>
                     </Border.ToolTip>
                     <Grid>
-                        <Label FontSize="11" HorizontalAlignment="Left" Foreground="White" Content="New version available!" Padding="6,2" Height="18">
+                        <Label FontSize="11" HorizontalAlignment="Left" Foreground="White" Content="New version available!" Name="updateLabel" Padding="6,2" Height="18">
                             <Label.Effect>
                                 <DropShadowEffect BlurRadius="5" Color="Gray" Direction="316" ShadowDepth="0" />
                             </Label.Effect>

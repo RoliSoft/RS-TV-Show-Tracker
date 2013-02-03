@@ -190,6 +190,12 @@
         public bool New { get; set; }
 
         /// <summary>
+        /// Gets or sets the release type.
+        /// </summary>
+        /// <value>The release type.</value>
+        public Release Type { get; set; }
+
+        /// <summary>
         /// Gets or sets the new version.
         /// </summary>
         /// <value>The new version.</value>
@@ -206,6 +212,22 @@
         /// </summary>
         /// <value>The URL to the ZIP archive.</value>
         public string ZIP { get; set; }
+
+        /// <summary>
+        /// A list of release types.
+        /// </summary>
+        public enum Release
+        {
+            /// <summary>
+            /// A stable release.
+            /// </summary>
+            Stable,
+
+            /// <summary>
+            /// A nightly release.
+            /// </summary>
+            Nightly
+        }
     }
 
     /// <summary>
