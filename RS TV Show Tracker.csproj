@@ -1074,6 +1074,9 @@
     <Resource Include="Images\utorrent.png" />
     <Resource Include="Images\vuze.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\weather-moon-half.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>

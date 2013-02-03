@@ -39,6 +39,7 @@
                     filterUrlTextBox.Text      = string.Join(",", Settings.Get<List<string>>("One-Click Hoster List"));
                     linkChecker.IsChecked      = Settings.Get<bool>("One-Click Hoster Link Checker");
                     shortestNotation.IsChecked = Settings.Get<bool>("Enable Shortest Notation");
+                    updateToNightly.IsChecked  = Settings.Get<bool>("Update to Nightly Builds");
 
                     switch (Settings.Get("One-Click Hoster List Type", "white"))
                     {
@@ -191,6 +192,30 @@
 
             _reindex = true;
             ShowNames.Regexes.AdvNumbering = ShowNames.Parser.GenerateEpisodeRegexes(generateExtractor: true);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the updateToNightly control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void UpdateToNightlyChecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Update to Nightly Builds", true);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the updateToNightly control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void UpdateToNightlyUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Update to Nightly Builds", false);
         }
     }
 }
