@@ -1089,6 +1089,14 @@
     <Resource Include="Images\application-blue.png" />
     <Resource Include="Images\application.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\application-plus.png" />
+    <Resource Include="Images\folder.png" />
+    <Resource Include="Images\server-plus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\folder-open-document.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>

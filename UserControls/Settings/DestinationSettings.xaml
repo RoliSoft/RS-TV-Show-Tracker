@@ -59,8 +59,14 @@
                         </ListView.View>
                     </ListView>
                     <StackPanel Orientation="Vertical">
-                        <Button Name="destinationsAddButton" Click="DestinationsAddButtonClick" ToolTip="Add a new destination">
-                            <Image Source="/RSTVShowTracker;component/Images/plus.png" Height="16" Width="16" Margin="1,0,0,0" />
+                        <Button Name="destinationsAddAssocButton" Click="DestinationsAddAssocButtonClick" ToolTip="Add a new local association">
+                            <Image Source="/RSTVShowTracker;component/Images/application-plus.png" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                        <Button Name="destinationsAddRemoteButton" Click="DestinationsAddRemoteButtonClick" ToolTip="Add a new remote destination">
+                            <Image Source="/RSTVShowTracker;component/Images/server-plus.png" Height="16" Width="16" Margin="1,0,0,0" />
+                        </Button>
+                        <Button Name="destinationsAddFolderButton" Click="DestinationsAddFolderButtonClick" ToolTip="Add a new folder destination">
+                            <Image Source="/RSTVShowTracker;component/Images/folder-plus.png" Height="16" Width="16" Margin="1,0,0,0" />
                         </Button>
                         <Button Name="destinationsEditButton" Click="DestinationsEditButtonClick" ToolTip="Edit the selected destination">
                             <Image Source="/RSTVShowTracker;component/Images/pencil.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="1,0,0,0" />

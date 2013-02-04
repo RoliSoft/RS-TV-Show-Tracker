@@ -978,8 +978,11 @@
         /// Gets the name and small icon of the specified executable.
         /// </summary>
         /// <param name="path">The path.</param>
-        /// <returns>Tuple containing the name and icon.</returns>
-        public static Tuple<string, BitmapSource> GetExecutableInfo(string path)
+        /// <param name="getIcon">if set to <c>true</c> the associated icon will be extracted.</param>
+        /// <returns>
+        /// Tuple containing the name and icon.
+        /// </returns>
+        public static Tuple<string, BitmapSource> GetExecutableInfo(string path, bool getIcon = true)
         {
             if (!File.Exists(path))
             {
@@ -993,7 +996,12 @@
                 name = new FileInfo(path).Name.ToUppercaseFirst().Replace(".exe", string.Empty);
             }
 
-            var icon = Imaging.CreateBitmapSourceFromHIcon(Icons.ExtractOne(path, 0, Icons.SystemIconSize.Small).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            var icon = default(BitmapSource);
+
+            if (getIcon)
+            {
+                try { icon = Imaging.CreateBitmapSourceFromHIcon(Icons.ExtractOne(path, 0, Icons.SystemIconSize.Small).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()); } catch { }
+            }
 
             return new Tuple<string, BitmapSource>(name, icon);
         }

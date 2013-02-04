@@ -8,9 +8,14 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
+    using System.Windows.Forms;
     using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.Parsers.Senders;
+
+    using TaskDialogInterop;
+
+    using MessageBox = System.Windows.MessageBox;
 
     /// <summary>
     /// Interaction logic for DestinationSettings.xaml
@@ -132,6 +137,12 @@
             foreach (var alt in Settings.Get<Dictionary<string, object>>("Alternative Associations"))
             {
                 var lst = (List<string>)alt.Value;
+
+                if (lst == null || lst.Count == 0)
+                {
+                    continue;
+                }
+
                 foreach (var app in lst)
                 {
                     Tuple<string, BitmapSource> sci;
@@ -178,6 +189,44 @@
                     });
             }
 
+            // load folders
+
+            foreach (var alt in Settings.Get<Dictionary<string, object>>("Folder Destinations"))
+            {
+                var lst = (List<string>)alt.Value;
+
+                if (lst == null || lst.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var app in lst)
+                {
+                    if (Directory.Exists(app))
+                    {
+                        DestinationsListViewItemCollection.Add(new DestinationListViewItem
+                            {
+                                ID        = alt.Key + "|" + app,
+                                Icon      = "pack://application:,,,/RSTVShowTracker;component/Images/folder-open-document.png",
+                                Name      = Path.GetFileName(app) + " for " + alt.Key,
+                                Type      = "Folder destinations",
+                                GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/folder.png"
+                            });
+                    }
+                    else
+                    {
+                        DestinationsListViewItemCollection.Add(new DestinationListViewItem
+                            {
+                                ID        = alt.Key + "|" + app,
+                                Icon      = "pack://application:,,,/RSTVShowTracker;component/Images/exclamation.png",
+                                Name      = Path.GetFileName(app) + " for " + alt.Key + " [Folder not found!]",
+                                Type      = "Folder destinations",
+                                GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/folder.png"
+                            });
+                    }
+                }
+            }
+
             DestinationsListViewSelectionChanged();
         }
 
@@ -190,20 +239,120 @@
         {
             if (!_loaded) return;
 
-            destinationsEditButton.IsEnabled = destinationsRemoveButton.IsEnabled = destinationsListView.SelectedIndex != -1 && ((DestinationListViewItem)destinationsListView.SelectedItem).Type == "Remote servers";
+            destinationsEditButton.IsEnabled = destinationsRemoveButton.IsEnabled = destinationsListView.SelectedIndex != -1 && ((DestinationListViewItem)destinationsListView.SelectedItem).Type != "Default local associations";
         }
         
         /// <summary>
-        /// Handles the Click event of the destinationsAddButton control.
+        /// Handles the Click event of the destinationsAddAssocButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void DestinationsAddButtonClick(object sender, RoutedEventArgs e)
+        private void DestinationsAddAssocButtonClick(object sender, RoutedEventArgs e)
+        {
+            var ofd = new OpenFileDialog
+                {
+                    Title           = "Select an executable file",
+                    CheckFileExists = true,
+                    CheckPathExists = true,
+                    Multiselect     = false,
+                    Filter          = "Executable|*.exe"
+                };
+
+            if (ofd.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            var inf = Utils.GetExecutableInfo(ofd.FileName, false);
+            var types = new[] { ".torrent", ".nzb", ".dlc" };
+            var res = TaskDialog.Show(new TaskDialogOptions
+                {
+                    Title                   = "Add a new local association",
+                    AllowDialogCancellation = true,
+                    Content                 = "Please select the file type you want to be associated with " + inf.Item1 + ":",
+                    CommandButtons          = types
+                });
+
+            if (!res.CommandButtonResult.HasValue || res.CommandButtonResult.Value < 0 || res.CommandButtonResult.Value >= types.Length)
+            {
+                return;
+            }
+
+            var dict = Settings.Get<Dictionary<string, object>>("Alternative Associations");
+
+            if (!dict.ContainsKey(types[res.CommandButtonResult.Value]) || dict[types[res.CommandButtonResult.Value]] == null)
+            {
+                dict[types[res.CommandButtonResult.Value]] = new List<string>();
+            }
+
+            var skey = (List<string>)dict[types[res.CommandButtonResult.Value]];
+
+            skey.Add(ofd.FileName);
+
+            Settings.Set("Alternative Associations", dict);
+
+            ReloadList();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the destinationsAddRemoteButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DestinationsAddRemoteButtonClick(object sender, RoutedEventArgs e)
         {
             if (new SenderSettingsWindow().ShowDialog().GetValueOrDefault())
             {
                 ReloadList();
             }
+        }
+
+        /// <summary>
+        /// Handles the Click event of the destinationsAddFolderButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DestinationsAddFolderButtonClick(object sender, RoutedEventArgs e)
+        {
+            var fbd = new FolderBrowserDialog
+                {
+                    ShowNewFolderButton = true,
+                    Description         = "Select a folder to save files to:"
+                };
+
+            if (fbd.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            var types = new[] { ".torrent", ".nzb", ".dlc" };
+            var res = TaskDialog.Show(new TaskDialogOptions
+                {
+                    Title                   = "Add a new folder destination",
+                    AllowDialogCancellation = true,
+                    Content                 = "Please select the file type you want to save into " + Path.GetFileName(fbd.SelectedPath) + ":",
+                    CommandButtons          = types
+                });
+
+            if (!res.CommandButtonResult.HasValue || res.CommandButtonResult.Value < 0 || res.CommandButtonResult.Value >= types.Length)
+            {
+                return;
+            }
+
+            var dict = Settings.Get<Dictionary<string, object>>("Folder Destinations");
+
+            if (!dict.ContainsKey(types[res.CommandButtonResult.Value]) || dict[types[res.CommandButtonResult.Value]] == null)
+            {
+                dict[types[res.CommandButtonResult.Value]] = new List<string>();
+            }
+
+            var skey = (List<string>)dict[types[res.CommandButtonResult.Value]];
+
+            skey.Add(fbd.SelectedPath);
+
+            Settings.Set("Folder Destinations", dict);
+
+            ReloadList();
         }
 
         /// <summary>
@@ -217,11 +366,169 @@
 
             var sel = (DestinationListViewItem)destinationsListView.SelectedItem;
 
-            if (sel.Type != "Remote servers") return;
-
-            if (new SenderSettingsWindow(sel.ID).ShowDialog().GetValueOrDefault())
+            switch (sel.Type)
             {
-                ReloadList();
+                case "Remote servers":
+                {
+                    if (new SenderSettingsWindow(sel.ID).ShowDialog().GetValueOrDefault())
+                    {
+                        ReloadList();
+                    }
+                }
+                break;
+
+                case "Alternative local associations":
+                {
+                    var ids  = sel.ID.Split("|".ToCharArray(), 2);
+                    var dict = Settings.Get<Dictionary<string, object>>("Alternative Associations");
+                    var skey = (List<string>)dict[ids[0]];
+
+                    var res = TaskDialog.Show(new TaskDialogOptions
+                        {
+                            Title                   = "Edit a local association",
+                            AllowDialogCancellation = true,
+                            Content                 = "What would you like to change about " + sel.Name + "?",
+                            CommandButtons          = new[] { "Associated file type", "Executable location", "Nothing" }
+                        });
+
+                    if (!res.CommandButtonResult.HasValue || res.CommandButtonResult.Value == 2)
+                    {
+                        return;
+                    }
+
+                    switch (res.CommandButtonResult.Value)
+                    {
+                        case 0:
+                        {
+                            var types = new[] { ".torrent", ".nzb", ".dlc" };
+                            var res2 = TaskDialog.Show(new TaskDialogOptions
+                                {
+                                    Title                   = "Edit a local association",
+                                    AllowDialogCancellation = true,
+                                    Content                 = "Please select a new file type you want to be associated with " + sel.Name + ":",
+                                    CommandButtons          = types
+                                });
+
+                            if (!res2.CommandButtonResult.HasValue || res2.CommandButtonResult.Value < 0 || res2.CommandButtonResult.Value >= types.Length)
+                            {
+                                return;
+                            }
+
+                            skey.Remove(ids[1]);
+
+                            if (!dict.ContainsKey(types[res2.CommandButtonResult.Value]) || dict[types[res2.CommandButtonResult.Value]] == null)
+                            {
+                                dict[types[res2.CommandButtonResult.Value]] = new List<string>();
+                            }
+
+                            skey = (List<string>)dict[types[res2.CommandButtonResult.Value]];
+
+                            skey.Add(ids[1]);
+                        }
+                        break;
+
+                        case 1:
+                        {
+                            var ofd = new OpenFileDialog
+                                {
+                                    Title = "Select a new executable file for " + sel.Name,
+                                    CheckFileExists = true,
+                                    CheckPathExists = true,
+                                    Multiselect = false,
+                                    Filter = "Executable|*.exe",
+                                    InitialDirectory = Path.GetDirectoryName(ids[1])
+                                };
+
+                            if (ofd.ShowDialog() != DialogResult.OK)
+                            {
+                                return;
+                            }
+
+                            skey[skey.IndexOf(ids[1])] = ofd.FileName;
+                        }
+                        break;
+                    }
+
+                    Settings.Set("Alternative Associations", dict);
+
+                    ReloadList();
+                }
+                break;
+
+                case "Folder destinations":
+                {
+                    var ids  = sel.ID.Split("|".ToCharArray(), 2);
+                    var dict = Settings.Get<Dictionary<string, object>>("Folder Destinations");
+                    var skey = (List<string>)dict[ids[0]];
+
+                    var res = TaskDialog.Show(new TaskDialogOptions
+                        {
+                            Title                   = "Edit a folder destination",
+                            AllowDialogCancellation = true,
+                            Content                 = "What would you like to change about " + sel.Name + "?",
+                            CommandButtons          = new[] { "Associated file type", "Folder location", "Nothing" }
+                        });
+
+                    if (!res.CommandButtonResult.HasValue || res.CommandButtonResult.Value == 2)
+                    {
+                        return;
+                    }
+
+                    switch (res.CommandButtonResult.Value)
+                    {
+                        case 0:
+                        {
+                            var types = new[] { ".torrent", ".nzb", ".dlc" };
+                            var res2 = TaskDialog.Show(new TaskDialogOptions
+                                {
+                                    Title                   = "Edit a folder destination",
+                                    AllowDialogCancellation = true,
+                                    Content                 = "Please select a new file type you want to be associated with " + sel.Name + ":",
+                                    CommandButtons          = types
+                                });
+
+                            if (!res2.CommandButtonResult.HasValue || res2.CommandButtonResult.Value < 0 || res2.CommandButtonResult.Value >= types.Length)
+                            {
+                                return;
+                            }
+
+                            skey.Remove(ids[1]);
+
+                            if (!dict.ContainsKey(types[res2.CommandButtonResult.Value]) || dict[types[res2.CommandButtonResult.Value]] == null)
+                            {
+                                dict[types[res2.CommandButtonResult.Value]] = new List<string>();
+                            }
+
+                            skey = (List<string>)dict[types[res2.CommandButtonResult.Value]];
+
+                            skey.Add(ids[1]);
+                        }
+                        break;
+
+                        case 1:
+                        {
+                            var fbd = new FolderBrowserDialog
+                                {
+                                    ShowNewFolderButton = true,
+                                    Description         = "Select a new folder to save the files previously saved in " + sel.Name + ":",
+                                    SelectedPath        = ids[1]
+                                };
+
+                            if (fbd.ShowDialog() != DialogResult.OK)
+                            {
+                                return;
+                            }
+
+                            skey[skey.IndexOf(ids[1])] = fbd.SelectedPath;
+                        }
+                        break;
+                    }
+
+                    Settings.Set("Folder Destinations", dict);
+
+                    ReloadList();
+                }
+                break;
             }
         }
 
@@ -236,17 +543,50 @@
 
             var sel = (DestinationListViewItem)destinationsListView.SelectedItem;
 
-            if (sel.Type != "Remote servers") return;
-
-            if (MessageBox.Show("Are you sure you want to remove " + sel.Name + "?", "Remove " + sel.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            switch (sel.Type)
             {
-                var dict = Settings.Get<Dictionary<string, object>>("Sender Destinations");
+                case "Remote servers":
+                    if (MessageBox.Show("Are you sure you want to remove " + sel.Name + "?", "Remove " + sel.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        var dict = Settings.Get<Dictionary<string, object>>("Sender Destinations");
 
-                dict.Remove(sel.ID);
+                        dict.Remove(sel.ID);
 
-                Settings.Set("Sender Destinations", dict);
+                        Settings.Set("Sender Destinations", dict);
 
-                ReloadList();
+                        ReloadList();
+                    }
+                    break;
+
+                case "Alternative local associations":
+                    if (MessageBox.Show("Are you sure you want to remove " + sel.Name + "?", "Remove " + sel.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        var ids  = sel.ID.Split("|".ToCharArray(), 2);
+                        var dict = Settings.Get<Dictionary<string, object>>("Alternative Associations");
+                        var skey = (List<string>)dict[ids[0]];
+
+                        skey.Remove(ids[1]);
+
+                        Settings.Set("Alternative Associations", dict);
+
+                        ReloadList();
+                    }
+                    break;
+
+                case "Folder destinations":
+                    if (MessageBox.Show("Are you sure you want to remove " + sel.Name + "?", "Remove " + sel.Name, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        var ids  = sel.ID.Split("|".ToCharArray(), 2);
+                        var dict = Settings.Get<Dictionary<string, object>>("Folder Destinations");
+                        var skey = (List<string>)dict[ids[0]];
+
+                        skey.Remove(ids[1]);
+
+                        Settings.Set("Folder Destinations", dict);
+
+                        ReloadList();
+                    }
+                    break;
             }
         }
     }
