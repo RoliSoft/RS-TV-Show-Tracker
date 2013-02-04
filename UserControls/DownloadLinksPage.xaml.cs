@@ -39,17 +39,6 @@
         /// <value>The download links list view item collection.</value>
         public ObservableCollection<LinkItem> DownloadLinksListViewItemCollection { get; set; }
 
-        private List<LinkItem> _results;
-
-        private ListSortDirection _lastSortDirection;
-        private GridViewColumnHeader _lastClickedHeader;
-
-        private Tuple<string, BitmapSource> _defaultTorrent, _defaultUsenet, _assocTorrent, _assocUsenet;
-
-        private string _jDlPath;
-
-        private volatile bool _searching;
-
         /// <summary>
         /// Gets or sets the active search.
         /// </summary>
@@ -60,7 +49,25 @@
         /// Gets or sets the senders.
         /// </summary>
         /// <value>The senders.</value>
-        public Dictionary<string, SenderEngine> Senders { get; set; } 
+        public Dictionary<string, SenderEngine> Senders { get; set; }
+
+        private List<LinkItem> _results;
+
+        private ListSortDirection _lastSortDirection;
+        private GridViewColumnHeader _lastClickedHeader;
+
+        private Tuple<string, BitmapSource> _assocTorrent, _assocUsenet, _assocLinks;
+        private Dictionary<string, List<Tuple<string, string, BitmapSource>>> _altAssoc;
+        private Dictionary<string, List<string>> _destDirs;
+
+        private static Dictionary<Types, string> _typeAssocMap = new Dictionary<Types, string>
+            {
+                { Types.Torrent, ".torrent" },
+                { Types.Usenet, ".nzb" },
+                { Types.DirectHTTP, ".dlc" }
+            };
+
+        private volatile bool _searching;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitlesPage"/> class.
@@ -123,33 +130,7 @@
             }
 
             LoadEngines();
-            LoadSenders();
-
-            var tdl = Settings.Get("Torrent Downloader");
-            if (!string.IsNullOrWhiteSpace(tdl))
-            {
-                _defaultTorrent = Utils.GetExecutableInfo(tdl);
-            }
-
-            var udl = Settings.Get("Usenet Downloader");
-            if (!string.IsNullOrWhiteSpace(udl))
-            {
-                _defaultUsenet = Utils.GetExecutableInfo(udl);
-            }
-
-            var atr = Utils.GetApplicationForExtension(".torrent");
-            if (!string.IsNullOrWhiteSpace(atr))
-            {
-                _assocTorrent = Utils.GetExecutableInfo(atr);
-            }
-
-            var anz = Utils.GetApplicationForExtension(".nzb");
-            if (!string.IsNullOrWhiteSpace(anz))
-            {
-                _assocUsenet = Utils.GetExecutableInfo(anz);
-            }
-
-            _jDlPath = Settings.Get("JDownloader");
+            LoadDestinations();
         }
 
         #region Settings
@@ -307,10 +288,87 @@
         }
 
         /// <summary>
-        /// Loads the senders.
+        /// Loads the destinations.
         /// </summary>
-        public void LoadSenders()
+        public void LoadDestinations()
         {
+            // load default associations
+
+            var atr = Utils.GetApplicationForExtension(".torrent");
+            if (!string.IsNullOrWhiteSpace(atr))
+            {
+                _assocTorrent = Utils.GetExecutableInfo(atr);
+            }
+
+            var anz = Utils.GetApplicationForExtension(".nzb");
+            if (!string.IsNullOrWhiteSpace(anz))
+            {
+                _assocUsenet = Utils.GetExecutableInfo(anz);
+            }
+
+            var adl = Utils.GetApplicationForExtension(".dlc");
+            if (!string.IsNullOrWhiteSpace(adl))
+            {
+                _assocLinks = Utils.GetExecutableInfo(adl);
+            }
+
+            // load alternative associations
+
+            _altAssoc = new Dictionary<string, List<Tuple<string, string, BitmapSource>>>
+                {
+                    { ".torrent", new List<Tuple<string, string, BitmapSource>>() },
+                    { ".nzb",     new List<Tuple<string, string, BitmapSource>>() },
+                    { ".dlc",     new List<Tuple<string, string, BitmapSource>>() }
+                };
+
+            foreach (var alt in Settings.Get<Dictionary<string, object>>("Alternative Associations"))
+            {
+                var lst = (List<string>)alt.Value;
+
+                if (lst == null || lst.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var app in lst)
+                {
+                    Tuple<string, BitmapSource> sci;
+                    if ((sci = Utils.GetExecutableInfo(app)) != null)
+                    {
+                        _altAssoc[alt.Key].Add(new Tuple<string, string, BitmapSource>(sci.Item1, app, sci.Item2));
+                    }
+                }
+            }
+
+            // load folder destinations
+
+            _destDirs = new Dictionary<string, List<string>>
+                {
+                    { ".torrent", new List<string>() },
+                    { ".nzb",     new List<string>() },
+                    { ".dlc",     new List<string>() }
+                };
+
+            foreach (var alt in Settings.Get<Dictionary<string, object>>("Folder Destinations"))
+            {
+                var lst = (List<string>)alt.Value;
+
+                if (lst == null || lst.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var app in lst)
+                {
+                    if (Directory.Exists(app))
+                    {
+                        _destDirs[alt.Key].Add(app);
+                    }
+                }
+            }
+
+            // load remote servers
+
             Senders = new Dictionary<string, SenderEngine>();
 
             var plugins = Extensibility.GetNewInstances<SenderEngine>().ToList();
@@ -739,46 +797,53 @@
                 cm.Items.Add(df);
             }
 
-            if (_defaultTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
+            if (_assocTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
             {
                 var sap    = new MenuItem();
-                sap.Header = "Send to " + _defaultTorrent.Item1;
-                sap.Icon   = new Image { Source = _defaultTorrent.Item2, Height = 16, Width = 16 };
-                sap.Click += (s, r) => DownloadFileClick("SendToTorrent", r);
+                sap.Header = "Send to " + CleanExeName(_assocTorrent.Item1);
+                sap.Icon   = new Image { Source = _assocTorrent.Item2, Height = 16, Width = 16 };
+                sap.Click += (s, r) => DownloadFileClick("UseAssociated", r); // was SendToTorrent
                 cm.Items.Add(sap);
             }
 
-            if (_defaultUsenet != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Usenet && !(link.Source.Downloader is ExternalDownloader))
+            if (_assocUsenet != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Usenet && !(link.Source.Downloader is ExternalDownloader))
             {
                 var sap    = new MenuItem();
-                sap.Header = "Send to " + _defaultUsenet.Item1;
-                sap.Icon   = new Image { Source = _defaultUsenet.Item2, Height = 16, Width = 16 };
-                sap.Click += (s, r) => DownloadFileClick("SendToUsenet", r);
+                sap.Header = "Send to " + CleanExeName(_assocUsenet.Item1);
+                sap.Icon   = new Image { Source = _assocUsenet.Item2, Height = 16, Width = 16 };
+                sap.Click += (s, r) => DownloadFileClick("UseAssociated", r); // was SendToUsenet
                 cm.Items.Add(sap);
             }
 
-            if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
-            {
-                var target = link.Source.Type == Types.Torrent
-                           ? _assocTorrent
-                           : link.Source.Type == Types.Usenet
-                             ? _assocUsenet
-                             : null;
-
-                var sap    = new MenuItem();
-                sap.Header = "Send to " + (target != null ? target.Item1 : "associated");
-                sap.Icon   = new Image { Source = target != null ? target.Item2 : new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/defapp.png")), Height = 16, Width = 16 };
-                sap.Click += (s, r) => DownloadFileClick("SendToAssociated", r);
-                cm.Items.Add(sap);
-            }
-
-            if (!string.IsNullOrWhiteSpace(link.FileURL) && !string.IsNullOrWhiteSpace(_jDlPath) && link.Source.Type == Types.DirectHTTP)
+            if (_assocLinks != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.DirectHTTP)
             {
                 var jd    = new MenuItem();
-                jd.Header = "Send to JDownloader";
-                jd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/jdownloader.png")), Height = 16, Width = 16 };
-                jd.Click += (s, r) => ProcessLink(link, x => SendToJDownloader(x.FileURL.Split('\0')));
+                jd.Header = "Send to " + CleanExeName(_assocLinks.Item1);
+                jd.Icon   = new Image { Source = _assocLinks.Item2, Height = 16, Width = 16 };
+                jd.Click += (s, r) => ProcessLink(link, SendToLinkContainerDownloader);
                 cm.Items.Add(jd);
+            }
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && _typeAssocMap.ContainsKey(link.Source.Type) && _altAssoc[_typeAssocMap[link.Source.Type]].Count != 0)
+            {
+                foreach (var alt in _altAssoc[_typeAssocMap[link.Source.Type]])
+                {
+                    var app    = alt;
+                    var snd    = new MenuItem();
+                    snd.Header = "Send to " + CleanExeName(app.Item1);
+                    snd.Icon   = new Image { Source = app.Item3, Height = 16, Width = 16 };
+
+                    if (link.Source.Type == Types.DirectHTTP)
+                    {
+                        snd.Click += (s, r) => ProcessLink(link, x => new LinkDownloadTaskDialog().Download(RewriteHTTPLinksToDLC(x), "SendTo|" + app.Item2));
+                    }
+                    else
+                    {
+                        snd.Click += (s, r) => DownloadFileClick("SendTo|" + app.Item2, r);
+                    }
+
+                    cm.Items.Add(snd);
+                }
             }
 
             if (Signature.IsActivated)
@@ -795,6 +860,28 @@
                         cmi.Click += (s, r) => DownloadFileClick("SendToSender|" + id, r);
                         cm.Items.Add(cmi);
                     }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(link.FileURL) && _typeAssocMap.ContainsKey(link.Source.Type) && _destDirs[_typeAssocMap[link.Source.Type]].Count != 0)
+            {
+                foreach (var alt in _destDirs[_typeAssocMap[link.Source.Type]])
+                {
+                    var app    = alt;
+                    var snd    = new MenuItem();
+                    snd.Header = "Save to " + Path.GetFileName(app);
+                    snd.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/folder-open-document.png")), Height = 16, Width = 16 };
+
+                    if (link.Source.Type == Types.DirectHTTP)
+                    {
+                        snd.Click += (s, r) => ProcessLink(link, x => new LinkDownloadTaskDialog().Download(RewriteHTTPLinksToDLC(x), "SendToFolder|" + app));
+                    }
+                    else
+                    {
+                        snd.Click += (s, r) => DownloadFileClick("SendToFolder|" + app, r);
+                    }
+
+                    cm.Items.Add(snd);
                 }
             }
 
@@ -829,25 +916,25 @@
 
             var link = (Link)listView.SelectedValue;
 
-            if (_defaultTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
+            if (_assocTorrent != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Torrent && !(link.Source.Downloader is ExternalDownloader))
             {
-                DownloadFileClick("SendToTorrent", e);
+                DownloadFileClick("UseAssociated", e); // was SendToTorrent
             }
-            else if (_defaultUsenet != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Usenet && !(link.Source.Downloader is ExternalDownloader))
+            else if (_assocUsenet != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.Usenet && !(link.Source.Downloader is ExternalDownloader))
             {
-                DownloadFileClick("SendToUsenet", e);
+                DownloadFileClick("UseAssociated", e); // was SendToUsenet
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type != Types.HTTP && !(link.Source.Downloader is ExternalDownloader))
             {
-                DownloadFileClick("SendToAssociated", e);
+                DownloadFileClick("UseAssociated", e);
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL) && !(link.Source.Downloader is ExternalDownloader))
             {
                 DownloadFileClick(null, e);
             }
-            else if (!string.IsNullOrWhiteSpace(link.FileURL) && !string.IsNullOrWhiteSpace(_jDlPath) && link.Source.Type == Types.DirectHTTP)
+            else if (_assocLinks != null && !string.IsNullOrWhiteSpace(link.FileURL) && link.Source.Type == Types.DirectHTTP)
             {
-                ProcessLink(link, x => SendToJDownloader(x.FileURL.Split('\0')));
+                ProcessLink(link, SendToLinkContainerDownloader);
             }
             else if (!string.IsNullOrWhiteSpace(link.FileURL))
             {
@@ -866,14 +953,44 @@
         }
 
         /// <summary>
-        /// Creates a temporary container and sends it to jDownloader.
+        /// Creates a temporary container and sends it to the default associated application to DLC.
         /// </summary>
-        /// <param name="urls">The links.</param>
-        private void SendToJDownloader(string[] urls)
+        /// <param name="link">The link.</param>
+        private void SendToLinkContainerDownloader(Link link)
         {
-            var tmp = Utils.GetRandomFileName("rsdf");
-            File.WriteAllText(tmp, DLCAPI.CreateRSDF(urls));
-            Utils.Run(_jDlPath, tmp);
+            var tmp = Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release.Replace('.', ' ').Replace('_', ' ') + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false) + ".dlc");
+            File.WriteAllText(tmp, DLCAPI.CreateDLC(link.Release, link.FileURL.Split('\0')));
+            Utils.Run(tmp);
+        }
+
+        /// <summary>
+        /// Rewrites a list of HTTP links to a local DLC container path.
+        /// </summary>
+        /// <param name="link">The link.</param>
+        /// <returns>New copy of the link pointing to a DLC container.</returns>
+        private Link RewriteHTTPLinksToDLC(Link link)
+        {
+            var tmp = Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release.Replace('.', ' ').Replace('_', ' ') + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false) + ".dlc");
+            File.WriteAllText(tmp, DLCAPI.CreateDLC(link.Release, link.FileURL.Split('\0')));
+            return new Link(link.Source)
+                {
+                    Release = link.Release,
+                    InfoURL = link.InfoURL,
+                    FileURL = tmp,
+                    Infos   = link.Infos,
+                    Quality = link.Quality,
+                    Size    = link.Size
+                };
+        }
+
+        /// <summary>
+        /// Cleans the name of the executable.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>Cleaned name.</returns>
+        public static string CleanExeName(string name)
+        {
+            return Regex.Replace(name, @"\s*(?:Web Browser|Launcher|for Windows|\-Qt).+", string.Empty, RegexOptions.IgnoreCase);
         }
 
         /// <summary>

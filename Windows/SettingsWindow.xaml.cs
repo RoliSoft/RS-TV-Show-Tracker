@@ -46,6 +46,7 @@
             new Thread(() => Dispatcher.Invoke(() =>
                 {
                     MainWindow.Active.activeDownloadLinksPage.LoadEngines(true);
+                    MainWindow.Active.activeDownloadLinksPage.LoadDestinations();
                     MainWindow.Active.activeSubtitlesPage.LoadEngines(true);
                 })).Start();
         }

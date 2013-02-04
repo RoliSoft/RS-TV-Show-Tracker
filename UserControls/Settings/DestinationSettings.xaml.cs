@@ -81,7 +81,7 @@
                 DestinationsListViewItemCollection.Add(new DestinationListViewItem
                     {
                         Icon      = tri.Item2,
-                        Name      = tri.Item1 + " for .torrent",
+                        Name      = DownloadLinksPage.CleanExeName(tri.Item1) + " for .torrent",
                         Type      = "Default local associations",
                         GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/application-blue.png"
                     });
@@ -96,7 +96,7 @@
                 DestinationsListViewItemCollection.Add(new DestinationListViewItem
                     {
                         Icon      = nzi.Item2,
-                        Name      = nzi.Item1 + " for .nzb",
+                        Name      = DownloadLinksPage.CleanExeName(nzi.Item1) + " for .nzb",
                         Type      = "Default local associations",
                         GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/application-blue.png"
                     });
@@ -111,7 +111,7 @@
                 DestinationsListViewItemCollection.Add(new DestinationListViewItem
                     {
                         Icon      = dli.Item2,
-                        Name      = dli.Item1 + " for .dlc",
+                        Name      = DownloadLinksPage.CleanExeName(dli.Item1) + " for .dlc",
                         Type      = "Default local associations",
                         GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/application-blue.png"
                     });
@@ -126,7 +126,7 @@
                 DestinationsListViewItemCollection.Add(new DestinationListViewItem
                     {
                         Icon      = hti.Item2,
-                        Name      = hti.Item1 + " for .html",
+                        Name      = DownloadLinksPage.CleanExeName(hti.Item1) + " for .html",
                         Type      = "Default local associations",
                         GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/application-blue.png"
                     });
@@ -152,7 +152,7 @@
                             {
                                 ID        = alt.Key + "|" + app,
                                 Icon      = sci.Item2,
-                                Name      = sci.Item1 + " for " + alt.Key,
+                                Name      = DownloadLinksPage.CleanExeName(sci.Item1) + " for " + alt.Key,
                                 Type      = "Alternative local associations",
                                 GroupIcon = "pack://application:,,,/RSTVShowTracker;component/Images/application.png"
                             });

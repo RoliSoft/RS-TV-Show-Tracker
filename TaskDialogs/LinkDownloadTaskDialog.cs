@@ -111,7 +111,7 @@
                     _tdpos = a.Data;
                 };
 
-            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false) + (link.Source.Type == Types.Torrent ? ".torrent" : link.Source.Type == Types.Usenet ? ".nzb" : string.Empty)), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
+            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release.Replace('.', ' ').Replace('_', ' ') + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false) + (link.Source.Type == Types.Torrent ? ".torrent" : link.Source.Type == Types.Usenet ? ".nzb" : string.Empty)), !string.IsNullOrWhiteSpace(token) ? token : "DownloadFile");
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
@@ -146,10 +146,11 @@
             }
 
             var id = string.Empty;
-            if (e.Third.StartsWith("SendToSender|"))
+            if (e.Third.StartsWith("SendTo"))
             {
-                id = e.Third.Split("|".ToCharArray())[1];
-                e.Third = "SendToSender";
+                var ids = e.Third.Split("|".ToCharArray(), 2);
+                e.Third = ids[0];
+                id = ids[1];
             }
 
             switch (e.Third)
@@ -176,16 +177,16 @@
                     }
                     break;
 
-                case "SendToAssociated":
+                case "UseAssociated":
                     Utils.Run(e.First);
                     break;
 
-                case "SendToTorrent":
-                    Utils.Run(Settings.Get("Torrent Downloader"), e.First);
+                case "SendTo":
+                    Utils.Run(id, e.First);
                     break;
 
-                case "SendToUsenet":
-                    Utils.Run(Settings.Get("Usenet Downloader"), e.First);
+                case "SendToFolder":
+                    File.Move(e.First, Path.Combine(id, Path.GetFileName(e.First)));
                     break;
 
                 case "SendToSender":

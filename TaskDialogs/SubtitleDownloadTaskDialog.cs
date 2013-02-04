@@ -113,7 +113,7 @@
                     _tdpos = a.Data;
                 };
 
-            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
+            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release.Replace('.', ' ').Replace('_', ' ') + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
@@ -253,7 +253,7 @@
                     _tdpos = a.Data;
                 };
 
-            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
+            _dl.Download(link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(link.Release.Replace('.', ' ').Replace('_', ' ') + " " + link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
         }
@@ -566,7 +566,7 @@
                     _tdpos = a.Data;
                 };
 
-            _dl.Download(_link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(_link.Release + " " + _link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
+            _dl.Download(_link, Path.Combine(Path.GetTempPath(), Utils.CreateSlug(_link.Release.Replace('.', ' ').Replace('_', ' ') + " " + _link.Source.Name + " " + Utils.Rand.Next().ToString("x"), false)));
         }
 
         /// <summary>
