@@ -1099,6 +1099,15 @@
   <ItemGroup>
     <Resource Include="Images\folder-open-document.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\smiley-wink.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\thumb-up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\smiley-cool.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>

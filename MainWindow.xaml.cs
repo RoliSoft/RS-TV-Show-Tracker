@@ -17,6 +17,7 @@
     using System.Windows.Interop;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
+    using System.Windows.Media.Imaging;
     using System.Windows.Shell;
 
     using Microsoft.WindowsAPICodePack.Taskbar;
@@ -620,6 +621,8 @@
             logoMenuItem.IsSubmenuOpen = true;
         }
 
+        private Thread _supportArrowThd = null;
+
         /// <summary>
         /// Handles the SubmenuClosed event of the logoMenuItem control.
         /// </summary>
@@ -629,6 +632,74 @@
         {
             logo.Background  = (Brush)FindResource("HeadGradient");
             logo.BorderBrush = Brushes.DimGray;
+
+            if (_supportArrowThd != null && _supportArrowThd.IsAlive)
+            {
+                try { _supportArrowThd.Abort(); } catch { }
+                _supportArrowThd = null;
+            }
+        }
+
+        /// <summary>
+        /// Handles the SubmenuOpened event of the logoMenuItem control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void LogoMenuItemSubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            supportArrow.Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/" + (Signature.IsActivated ? "smiley-cool" : "smiley") + ".png"));
+
+            if (_supportArrowThd != null && _supportArrowThd.IsAlive)
+            {
+                try { _supportArrowThd.Abort(); } catch { }
+                _supportArrowThd = null;
+            }
+
+            _supportArrowThd = new Thread(() =>
+                {
+                    Thread.Sleep(1000);
+
+                    Dispatcher.Invoke((Action)(() =>
+                        {
+                            if (logoMenuItem.IsSubmenuOpen)
+                            {
+                                supportArrow.Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/" + (Signature.IsActivated ? "thumb-up" : "smiley-wink") + ".png"));
+                            }
+                            else
+                            {
+                                _supportArrowThd.Abort();
+                            }
+                        }));
+
+                    Thread.Sleep(1000);
+
+                    Dispatcher.Invoke((Action)(() =>
+                        {
+                            if (logoMenuItem.IsSubmenuOpen)
+                            {
+                                supportArrow.Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/" + (Signature.IsActivated ? "smiley-cool" : "smiley") + ".png"));
+                            }
+                            else
+                            {
+                                _supportArrowThd.Abort();
+                            }
+                        }));
+
+                    Thread.Sleep(5000);
+
+                    Dispatcher.Invoke((Action)(() =>
+                        {
+                            if (logoMenuItem.IsSubmenuOpen)
+                            {
+                                LogoMenuItemSubmenuOpened(null, null);
+                            }
+                            else
+                            {
+                                _supportArrowThd.Abort();
+                            }
+                        }));
+                });
+            _supportArrowThd.Start();
         }
         #endregion
 

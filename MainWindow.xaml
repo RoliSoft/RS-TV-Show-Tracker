@@ -616,7 +616,7 @@
             <!-- logo menu -->
 
             <Menu Name="logoMenu" IsMainMenu="True" Margin="7,-1,0,0" Padding="0" Width="157" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <MenuItem Header="Main menu" Name="logoMenuItem" SubmenuClosed="LogoMenuItemSubmenuClosed">
+                <MenuItem Header="Main menu" Name="logoMenuItem" SubmenuOpened="LogoMenuItemSubmenuOpened" SubmenuClosed="LogoMenuItemSubmenuClosed">
                     <MenuItem Header="Add new TV show" Click="AddNewTVShowClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/plus.png" />
@@ -654,13 +654,19 @@
                     </MenuItem>
                     <MenuItem Header="Send feedback" Click="SendFeedbackClick">
                         <MenuItem.Icon>
-                            <Image Source="/RSTVShowTracker;component/Images/smiley.png" />
+                            <Image Source="/RSTVShowTracker;component/Images/mail-pencil.png" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Support the software" Click="SupportSoftwareClick">
+                    <MenuItem Click="SupportSoftwareClick">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/heart.png" />
                         </MenuItem.Icon>
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,-100,0">
+                                <Label Padding="0">Support the software</Label>
+                                <Image Name="supportArrow" Source="/RSTVShowTracker;component/Images/smiley.png" Height="16" Width="16" Margin="30,0,0,0" />
+                            </StackPanel>
+                        </MenuItem.Header>
                     </MenuItem>
                     <MenuItem Header="About the software" Click="AboutSoftwareClick">
                         <MenuItem.Icon>
