@@ -109,6 +109,11 @@
                         { "X-UUID", "{0}/{1}/{2}".FormatWith(Utils.GetUUID(), Environment.UserDomainName, Environment.UserName) }
                     };
 
+                if (Signature.IsActivated)
+                {
+                    head["X-Key"] = Signature.ActivationChecksum;
+                }
+
                 if (!string.IsNullOrWhiteSpace(user))
                 {
                     head["X-UUID"] += "/" + user;
@@ -125,7 +130,8 @@
                     postData:  post,
                     userAgent: "{0}/{1}{2}".FormatWith(Signature.Software, Signature.Version, Signature.IsNightly ? "-" + Signature.GitRevision.Substring(0, 8) : string.Empty),
                     timeout:   120000,
-                    headers:   head
+                    headers:   head,
+                    response:  Signature.CheckAPIResponse
                 );
 
                 obj = JsonConvert.DeserializeObject<T>(resp);

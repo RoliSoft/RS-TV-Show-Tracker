@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Management;
+    using System.Net;
     using System.Numerics;
     using System.Reflection;
     using System.Security.Cryptography;
@@ -84,6 +85,18 @@
             get
             {
                 return _licenseStatus;
+            }
+        }
+
+        /// <summary>
+        /// Gets the activation checksum.
+        /// </summary>
+        /// <value>The activation checksum.</value>
+        public static string ActivationChecksum
+        {
+            get
+            {
+                return _licenseHash;
             }
         }
 
@@ -276,6 +289,7 @@
 
         private static bool _isActivated;
         private static LicenseStatus _licenseStatus = LicenseStatus.Uninitialized;
+        private static string _licenseHash = null;
 
         /// <summary>
         /// Initializes static members of the <see cref="Signature"/> class. 
@@ -476,11 +490,13 @@
         /// </summary>
         public static void InitLicense()
         {
+            _isActivated = false;
+            _licenseHash = null;
+
             var licfile = Path.Combine(AppDataPath, ".license");
 
             if (!File.Exists(licfile))
             {
-                _isActivated   = false;
                 _licenseStatus = LicenseStatus.NotAvailable;
                 return;
             }
@@ -493,6 +509,14 @@
                 using (var fs = File.OpenRead(licfile))
                 using (var br = new BinaryReader(fs))
                 {
+                    var status = br.ReadByte();
+
+                    if (status > 200)
+                    {
+                        _licenseStatus = LicenseStatus.KeyStatusError;
+                        return;
+                    }
+
                     user = br.ReadString();
                     xkey = br.ReadBytes(br.Read7BitEncodedInt());
                     lic  = br.ReadBytes(br.Read7BitEncodedInt());
@@ -506,14 +530,12 @@
                 }
                 catch
                 {
-                    _isActivated   = false;
                     _licenseStatus = LicenseStatus.LicenseDecryptError;
                     return;
                 }
 
                 if (!VerifyKey(user, key))
                 {
-                    _isActivated   = false;
                     _licenseStatus = LicenseStatus.KeyCryptoError;
                     return;
                 }
@@ -582,7 +604,11 @@
 
                     _isActivated = rsa.VerifyData(verify, SHA512.Create(), lic);
 
-                    if (!_isActivated)
+                    if (_isActivated)
+                    {
+                        _licenseHash = BitConverter.ToString(new HMACSHA512(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(user.ToLower().Trim()))).ComputeHash(Encoding.UTF8.GetBytes(key.Trim()))).ToLower().Replace("-", string.Empty);
+                    }
+                    else
                     {
                         _licenseStatus = LicenseStatus.LicenseInvalid;
                     }
@@ -590,7 +616,6 @@
             }
             catch
             {
-                _isActivated   = false;
                 _licenseStatus = LicenseStatus.LicenseException;
             }
         }
@@ -604,15 +629,50 @@
 
             var xkey = ProtectedData.Protect(Encoding.UTF8.GetBytes(key), null, DataProtectionScope.LocalMachine);
             var lic  = ProtectedData.Protect(license, null, DataProtectionScope.LocalMachine);
-               
+            
             using (var fs = File.Create(licfile))
             using (var bw = new BinaryWriter(fs))
             {
+                bw.Write((byte)Utils.Rand.Next(0, 200));
                 bw.Write(user);
                 bw.Write7BitEncodedInt(xkey.Length);
                 bw.Write(xkey);
                 bw.Write7BitEncodedInt(lic.Length);
                 bw.Write(lic);
+            }
+        }
+
+        /// <summary>
+        /// Checks the response of the REST API.
+        /// </summary>
+        /// <param name="resp">The response.</param>
+        public static void CheckAPIResponse(HttpWebResponse resp)
+        {
+            if (!_isActivated)
+            {
+                return;
+            }
+
+            var kst = KeyStatus.Unchecked;
+
+            try { kst = (KeyStatus)int.Parse(resp.Headers["X-Key"]); } catch { }
+
+            if (kst != KeyStatus.Valid && kst != KeyStatus.Unchecked)
+            {
+                _isActivated   = false;
+                _licenseHash   = null;
+                _licenseStatus = LicenseStatus.KeyStatusError;
+
+                try
+                {
+                    using (var fs = File.OpenWrite(Path.Combine(AppDataPath, ".license")))
+                    {
+                        fs.Position = 0;
+                        fs.WriteByte((byte)((int)kst + 200));
+                        fs.Flush(true);
+                    }
+                }
+                catch { }
             }
         }
 
