@@ -122,8 +122,6 @@
                 Visibility = Visibility.Hidden;
                 return;
             }
-            
-            Signature.InitLicense();
 
             // handle command line arguments, if there are any
 
@@ -166,6 +164,10 @@
                     Process.GetCurrentProcess().Kill();
                 }
             }
+
+            // check license in the background
+
+            new Thread(Signature.InitLicense).Start();
 
             // init interface
 
