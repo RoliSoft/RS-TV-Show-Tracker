@@ -106,7 +106,7 @@
         {
             var xconfig = (XMLTVConfiguration) config;
             var listing = (List<XMLTVProgramme>) null;
-            var cache   = Path.Combine(Signature.FullPath, @"misc\xmltv-" + xconfig.Language + "-" + xconfig.File.GetHashCode().ToString("x"));
+            var cache   = Path.Combine(Signature.InstallPath, @"misc\xmltv-" + xconfig.Language + "-" + xconfig.File.GetHashCode().ToString("x"));
             
             if (File.Exists(cache) && File.GetLastWriteTime(cache) > File.GetLastWriteTime(xconfig.File))
             {

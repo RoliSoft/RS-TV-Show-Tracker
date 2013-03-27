@@ -64,7 +64,7 @@
             ExternalPlugins = new List<Type>();
             Scripts         = new List<ExternalType>();
 
-            var plugins = Directory.GetFiles(Signature.FullPath, "*.Plugin.*");
+            var plugins = Directory.GetFiles(Signature.InstallPath, "*.Plugin.*");
 
             foreach (var file in plugins.Where(f => f.EndsWith(".dll")))
             {

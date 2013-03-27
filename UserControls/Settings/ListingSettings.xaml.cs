@@ -59,7 +59,7 @@
                     nzbDays.IsEnabled = blackListRadioButton.IsEnabled = whiteListRadioButton.IsEnabled = filterUrlTextBox.IsEnabled = linkChecker.IsEnabled = false;
                 }
 
-                var fn = Path.Combine(Signature.FullPath, @"misc\linkchecker");
+                var fn = Path.Combine(Signature.InstallPath, @"misc\linkchecker");
 
                 if (!File.Exists(fn))
                 {

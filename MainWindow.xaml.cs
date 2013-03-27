@@ -85,7 +85,7 @@
 
             // check if the database is user writable
 
-            if (!Utils.IsUserWritable(Signature.FullPath))
+            if (!Utils.IsUserWritable(Signature.InstallPath))
             {
                 if (!Utils.IsAdmin)
                 {
@@ -100,7 +100,7 @@
                 {
                     // if admin, add permissions
 
-                    if (!Utils.MakeUserWritable(Signature.FullPath) || !Utils.IsUserWritable(Signature.FullPath))
+                    if (!Utils.MakeUserWritable(Signature.InstallPath) || !Utils.IsUserWritable(Signature.InstallPath))
                     {
                         MessageBox.Show("Failed to add permissions to the database. You will most likely experience issues later during the execution of the software.", "Permission error", MessageBoxButton.OK, MessageBoxImage.Stop);
                     }
@@ -109,7 +109,7 @@
 
             // if old database exists somewhere, update
 
-            if (File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3")) || File.Exists(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3")))
+            if (File.Exists(Path.Combine(Signature.InstallPath, "TVShows.db3")) || File.Exists(Path.Combine(Signature.UACVirtualPath, "TVShows.db3")))
             {
                 new TaskDialogs.DatabaseUpdateTaskDialog().Ask();
                 _dieOnStart = true;
@@ -123,6 +123,8 @@
                 return;
             }
             
+            Signature.InitLicense();
+
             // handle command line arguments, if there are any
 
             var args = Environment.GetCommandLineArgs();
@@ -269,15 +271,15 @@
 
             new Task(() =>
                 {
-                    var uf = Directory.GetFiles(Signature.FullPath).Where(f => Path.GetFileName(f).StartsWith("update_") && f.EndsWith(".exe")).ToList();
+                    var uf = Directory.GetFiles(Signature.InstallPath).Where(f => Path.GetFileName(f).StartsWith("update_") && f.EndsWith(".exe")).ToList();
 
                     if (uf.Count != 0)
                     {
                         var ver = Path.GetFileNameWithoutExtension(uf[0]).Replace("update_", string.Empty);
 
-                        if (Version.Parse(ver) <= Version.Parse(Signature.Version) || new FileInfo(Path.Combine(Signature.FullPath, uf[0])).Length == 0)
+                        if (Version.Parse(ver) <= Version.Parse(Signature.Version) || new FileInfo(Path.Combine(Signature.InstallPath, uf[0])).Length == 0)
                         {
-                            try { File.Delete(Path.Combine(Signature.FullPath, uf[0])); } catch { }
+                            try { File.Delete(Path.Combine(Signature.InstallPath, uf[0])); } catch { }
                         }
                         else
                         {
@@ -867,16 +869,16 @@
                         updateToolTipText.Text  = "Downloading update...";
                     });
 
-                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length != 0)
+                if (File.Exists(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe")).Length != 0)
                 {
                     return;
                 }
 
-                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")))
+                if (File.Exists(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe")))
                 {
                     try
                     {
-                        File.Delete(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
+                        File.Delete(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe"));
                     }
                     catch (Exception ex)
                     {
@@ -885,11 +887,11 @@
                     }
                 }
 
-                if (File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp")))
+                if (File.Exists(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".tmp")))
                 {
                     try
                     {
-                        File.Delete(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"));
+                        File.Delete(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".tmp"));
                     }
                     catch (Exception ex)
                     {
@@ -905,9 +907,9 @@
                     {
                         try
                         {
-                            File.Move(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe"));
+                            File.Move(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".tmp"), Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe"));
 
-                            if (new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length == 0)
+                            if (new FileInfo(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe")).Length == 0)
                             {
                                 throw new Exception("The downloaded binary is 0 bytes long.");
                             }
@@ -918,11 +920,11 @@
                             return;
                         }
 
-                        if (upd.Type == UpdateCheck.Release.Nightly && File.Exists(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + upd.Version + ".exe")).Length != 0)
+                        if (upd.Type == UpdateCheck.Release.Nightly && File.Exists(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe")) && new FileInfo(Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".exe")).Length != 0)
                         {
                             Run(() =>
                                 {
-                                    Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/S /" + (IsVisible && Top != -999 ? "A" : "S") + "R /D=" + Signature.FullPath);
+                                    Utils.Run(Path.Combine(Signature.InstallPath, "update_" + update.Tag + ".exe"), "/S /" + (IsVisible && Top != -999 ? "A" : "S") + "R /D=" + Signature.InstallPath);
                                     NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
                                 });
                         }
@@ -932,7 +934,7 @@
                         }
                     };
 
-                wc.DownloadFileAsync(new Uri(upd.URL), Path.Combine(Signature.FullPath, "update_" + upd.Version + ".tmp"));
+                wc.DownloadFileAsync(new Uri(upd.URL), Path.Combine(Signature.InstallPath, "update_" + upd.Version + ".tmp"));
             }
         }
 
@@ -1033,9 +1035,9 @@
             {
                 Process.Start("http://lab.rolisoft.net/tvshowtracker/" + (_isNightlyUpdate ? "nightly" : "downloads") + ".html");
             }
-            else if (File.Exists(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")) && new FileInfo(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe")).Length != 0)
+            else if (File.Exists(Path.Combine(Signature.InstallPath, "update_" + update.Tag + ".exe")) && new FileInfo(Path.Combine(Signature.InstallPath, "update_" + update.Tag + ".exe")).Length != 0)
             {
-                Utils.Run(Path.Combine(Signature.FullPath, "update_" + update.Tag + ".exe"), "/D=" + Signature.FullPath);
+                Utils.Run(Path.Combine(Signature.InstallPath, "update_" + update.Tag + ".exe"), "/D=" + Signature.InstallPath);
                 NotifyIcon.ContextMenu.MenuItems[1].PerformClick();
             }
             else

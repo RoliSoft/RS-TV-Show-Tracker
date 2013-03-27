@@ -41,14 +41,14 @@
         /// <value>
         /// The database directory.
         /// </value>
-        public static readonly string DataPath = Path.Combine(Signature.FullPath, "db");
+        public static readonly string DataPath = Path.Combine(Signature.InstallPath, "db");
 
         /// <summary>
         /// Initializes the <see cref="Database"/> class.
         /// </summary>
         static Database()
         {
-            if (string.IsNullOrWhiteSpace(Signature.FullPath))
+            if (string.IsNullOrWhiteSpace(Signature.InstallPath))
             {
                 return;
             }
@@ -58,7 +58,7 @@
                 Directory.CreateDirectory(DataPath);
             }
 
-            var tmp = Path.Combine(Signature.UACVirtualizedPath, "db");
+            var tmp = Path.Combine(Signature.UACVirtualPath, "db");
 
             if (Directory.Exists(tmp))
             {
@@ -211,7 +211,7 @@
         /// <param name="dict">The dictionary to serialize.</param>
         public static void SaveDict(string name, Dictionary<int, string> dict)
         {
-            var path = Path.Combine(Signature.FullPath, name);
+            var path = Path.Combine(Signature.InstallPath, name);
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
@@ -240,7 +240,7 @@
         /// <param name="dict">The dictionary to serialize.</param>
         public static void SaveDict(string name, Dictionary<string, int> dict)
         {
-            var path = Path.Combine(Signature.FullPath, name);
+            var path = Path.Combine(Signature.InstallPath, name);
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
@@ -269,7 +269,7 @@
         /// <param name="dict">The dictionary to serialize.</param>
         public static void SaveDict(string name, Dictionary<string, string> dict)
         {
-            var path = Path.Combine(Signature.FullPath, name);
+            var path = Path.Combine(Signature.InstallPath, name);
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {

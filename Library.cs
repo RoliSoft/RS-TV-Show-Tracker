@@ -445,7 +445,7 @@
         /// </summary>
         public static void SaveList()
         {
-            var path = Path.Combine(Signature.FullPath, @"misc\library");
+            var path = Path.Combine(Signature.InstallPath, @"misc\library");
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
@@ -477,7 +477,7 @@
         /// </summary>
         public static void LoadList()
         {
-            var path = Path.Combine(Signature.FullPath, @"misc\library");
+            var path = Path.Combine(Signature.InstallPath, @"misc\library");
 
             if (!File.Exists(path))
             {

@@ -253,7 +253,7 @@
         /// <returns>Corresponding show name.</returns>
         public string GetShowForID(int id)
         {
-            var fn = Path.Combine(Signature.FullPath, @"misc\tvstore");
+            var fn = Path.Combine(Signature.InstallPath, @"misc\tvstore");
 
             if (ShowIDs == null)
             {

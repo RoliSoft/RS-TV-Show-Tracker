@@ -192,6 +192,17 @@
         }
 
         /// <summary>
+        /// Get a machine key.
+        /// </summary>
+        /// <param name="hash">The hash of the key.</param>
+        /// <param name="identity">The basic computer information to use for machine key.</param>
+        /// <returns>Key status.</returns>
+        public static Generic<string> GetMachineKey(string hash, object identity)
+        {
+            return InvokeRemoteMethod<Generic<string>>("GetMachineKey", hash, identity);
+        }
+
+        /// <summary>
         /// Gets a list of known shows on the server.
         /// </summary>
         /// <returns>List of shows.</returns>
@@ -298,7 +309,7 @@
         }
 
         /// <summary>
-        /// Reports the unhandled exception anonymously.
+        /// Sends the user's feedback to the developer.
         /// </summary>
         /// <param name="type">The type of the feedback.</param>
         /// <param name="name">The name of the user.</param>

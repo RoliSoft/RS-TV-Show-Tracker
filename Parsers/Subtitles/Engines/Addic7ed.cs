@@ -162,7 +162,7 @@
         /// <returns>Corresponding ID.</returns>
         public int? GetIDForShow(string name)
         {
-            var fn = Path.Combine(Signature.FullPath, @"misc\addic7ed");
+            var fn = Path.Combine(Signature.InstallPath, @"misc\addic7ed");
 
             if (ShowIDs == null)
             {

@@ -816,7 +816,7 @@
         /// <returns>Unique ID.</returns>
         public static string GetUUID()
         {
-            if (string.IsNullOrWhiteSpace(Signature.FullPath))
+            if (string.IsNullOrWhiteSpace(Signature.InstallPath))
             {
                 return string.Empty;
             }

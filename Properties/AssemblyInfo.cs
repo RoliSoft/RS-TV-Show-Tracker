@@ -2,15 +2,17 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 
+using RoliSoft.TVShowTracker;
+
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RS TV Show Tracker")]
+[assembly: AssemblyTitle(Signature.Software)]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("RoliSoft")]
-[assembly: AssemblyProduct("RS TV Show Tracker")]
-[assembly: AssemblyCopyright("Copyright © RoliSoft 2012")]
+[assembly: AssemblyCompany(Signature.Developer)]
+[assembly: AssemblyProduct(Signature.Software)]
+[assembly: AssemblyCopyright("Copyright ©" + Signature.Developer + " " + Signature.CompileYear)]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

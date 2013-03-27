@@ -86,7 +86,7 @@
         public override List<ExternalType> LoadScript(string file)
         {
             var engine = Python.CreateEngine();
-            engine.SetSearchPaths(new[] { Signature.FullPath });
+            engine.SetSearchPaths(new[] { Signature.InstallPath });
 
             var source = engine.CreateScriptSourceFromFile(file);
             var scope  = engine.CreateScope();

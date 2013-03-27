@@ -93,14 +93,14 @@
         /// </summary>
         public static void CheckShowListUpdate()
         {
-            var fn = Path.Combine(Signature.FullPath, @"misc\tvshows");
+            var fn = Path.Combine(Signature.InstallPath, @"misc\tvshows");
 
             if ((DateTime.Now - File.GetLastWriteTime(fn)).TotalDays > 1)
             {
                 FileNames.Parser.GetAllKnownTVShows();
             }
 
-            var fn2 = Path.Combine(Signature.FullPath, @"misc\linkchecker");
+            var fn2 = Path.Combine(Signature.InstallPath, @"misc\linkchecker");
 
             if ((DateTime.Now - File.GetLastWriteTime(fn2)).TotalDays > 1)
             {

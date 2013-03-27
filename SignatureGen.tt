@@ -21,6 +21,12 @@ namespace RoliSoft.TVShowTracker
     public static partial class Signature
     {
         /// <summary>
+        /// Gets the year when the executing assembly was compiled.
+        /// </summary>
+        /// <value>The compilation year.</value>
+        public const string CompileYear = "<#= DateTime.Now.Year #>";
+
+        /// <summary>
         /// Gets the date and time when the executing assembly was compiled.
         /// </summary>
         /// <value>The compile time.</value>

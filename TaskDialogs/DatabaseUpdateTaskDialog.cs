@@ -27,8 +27,8 @@
         /// </summary>
         public void Ask()
         {
-            var old = Path.Combine(Signature.FullPath, "TVShows.db3");
-            var uac = Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3");
+            var old = Path.Combine(Signature.InstallPath, "TVShows.db3");
+            var uac = Path.Combine(Signature.UACVirtualPath, "TVShows.db3");
             
             if (File.Exists(uac) && File.Exists(old))
             {
@@ -52,10 +52,10 @@
                 old = uac;
             }
 
-            if (!File.Exists(Path.Combine(Signature.FullPath, "TVShows.db3.gz")))
+            if (!File.Exists(Path.Combine(Signature.InstallPath, "TVShows.db3.gz")))
             {
                 using (var ufs = File.OpenRead(old))
-                using (var zfs = File.Create(Path.Combine(Signature.FullPath, "TVShows.db3.gz")))
+                using (var zfs = File.Create(Path.Combine(Signature.InstallPath, "TVShows.db3.gz")))
                 using (var zip = new GZipStream(zfs, CompressionMode.Compress))
                 {
                     ufs.CopyTo(zip);
@@ -144,7 +144,7 @@
             mthd.Start();
 
             _wc = new WebClient();
-            _wc.UploadFileAsync(server, Path.Combine(Signature.FullPath, "TVShows.db3.gz"));
+            _wc.UploadFileAsync(server, Path.Combine(Signature.InstallPath, "TVShows.db3.gz"));
 
             _wc.UploadProgressChanged += (s, a) =>
                 {
@@ -205,10 +205,10 @@
                         var file = br.ReadBytes((int)br.ReadUInt32());
 
                         _tdstr = "Extracting file " + name + "...";
-                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(Signature.FullPath, "db", name)));
+                        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(Signature.InstallPath, "db", name)));
                         
                         using (var mz = new MemoryStream(file))
-                        using (var fs = File.Create(Path.Combine(Signature.FullPath, "db", name)))
+                        using (var fs = File.Create(Path.Combine(Signature.InstallPath, "db", name)))
                         using (var gz = new DeflateStream(mz, CompressionMode.Decompress))
                         {
                             gz.CopyTo(fs);
@@ -236,9 +236,9 @@
                 _tdstr = "Finished extracting files!";
             }
 
-            try { File.Move(Path.Combine(Signature.FullPath, "TVShows.db3"), Path.Combine(Signature.FullPath, "TVShows.db3.old")); } catch { }
-            try { File.Move(Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3"), Path.Combine(Signature.UACVirtualizedPath, "TVShows.db3.old")); } catch { }
-            try { File.Delete(Path.Combine(Signature.FullPath, "TVShows.db3.gz")); } catch { }
+            try { File.Move(Path.Combine(Signature.InstallPath, "TVShows.db3"), Path.Combine(Signature.InstallPath, "TVShows.db3.old")); } catch { }
+            try { File.Move(Path.Combine(Signature.UACVirtualPath, "TVShows.db3"), Path.Combine(Signature.UACVirtualPath, "TVShows.db3.old")); } catch { }
+            try { File.Delete(Path.Combine(Signature.InstallPath, "TVShows.db3.gz")); } catch { }
 
             _cancel = true;
 

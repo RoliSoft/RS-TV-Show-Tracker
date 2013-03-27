@@ -76,7 +76,7 @@
         /// </summary>
         static UniversalEngine()
         {
-            var path = Path.Combine(Signature.FullPath, @"misc\linkchecker");
+            var path = Path.Combine(Signature.InstallPath, @"misc\linkchecker");
 
             if (File.Exists(path) && new FileInfo(path).Length != 0)
             {
@@ -215,7 +215,7 @@
                     });
             }
 
-            var path = Path.Combine(Signature.FullPath, @"misc\linkchecker");
+            var path = Path.Combine(Signature.InstallPath, @"misc\linkchecker");
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {

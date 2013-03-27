@@ -28,13 +28,13 @@
         /// </summary>
         static Settings()
         {
-            if (string.IsNullOrWhiteSpace(Signature.FullPath))
+            if (string.IsNullOrWhiteSpace(Signature.InstallPath))
             {
                 return;
             }
 
-            _jsFile = Path.Combine(Signature.FullPath, "Settings.json");
-            var tmp = Path.Combine(Signature.UACVirtualizedPath, "Settings.json");
+            _jsFile = Path.Combine(Signature.InstallPath, "Settings.json");
+            var tmp = Path.Combine(Signature.UACVirtualPath, "Settings.json");
 
             if (!File.Exists(_jsFile) && File.Exists(tmp))
             {

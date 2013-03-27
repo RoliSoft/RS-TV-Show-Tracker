@@ -141,7 +141,7 @@
         /// <returns>Date of last file write or <c>DateTime.MinValue</c>.</returns>
         public DateTime GetCacheDate(string query)
         {
-            var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
+            var path = Path.Combine(Signature.InstallPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
             return !File.Exists(path)
                   ? DateTime.MinValue
@@ -156,7 +156,7 @@
         public List<Article> GetCache(string query)
         {
             var list = new List<Article>();
-            var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
+            var path = Path.Combine(Signature.InstallPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
             if (!File.Exists(path))
             {
@@ -193,7 +193,7 @@
         /// <param name="articles">The articles to cache.</param>
         public void SetCache(string query, List<Article> articles)
         {
-            var path = Path.Combine(Signature.FullPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
+            var path = Path.Combine(Signature.InstallPath, @"feeds\" + Utils.CreateSlug(Name, false) + @"\" + Utils.CreateSlug(query, false));
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {

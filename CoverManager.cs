@@ -26,7 +26,7 @@
         {
             get
             {
-                return Path.Combine(Signature.FullPath, "covers/");
+                return Path.Combine(Signature.InstallPath, "covers/");
             }
         }
 

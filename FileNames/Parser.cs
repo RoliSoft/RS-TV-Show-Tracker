@@ -251,7 +251,7 @@
             {
                 if (AllKnownTVShows.Count == 0)
                 {
-                    var path = Path.Combine(Signature.FullPath, @"misc\tvshows");
+                    var path = Path.Combine(Signature.InstallPath, @"misc\tvshows");
 
                     if (File.Exists(path) && new FileInfo(path).Length != 0)
                     {
@@ -826,7 +826,7 @@
                     });
             }
 
-            var path = Path.Combine(Signature.FullPath, @"misc\tvshows");
+            var path = Path.Combine(Signature.InstallPath, @"misc\tvshows");
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
