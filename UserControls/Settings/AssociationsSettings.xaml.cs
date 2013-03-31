@@ -68,6 +68,11 @@
 
                 monitorNetworkShare.IsChecked = Settings.Get<bool>("Monitor Network Shares");
                 upnpShare.IsChecked           = Settings.Get<bool>("Enable UPnP AV Media Server");
+
+                if (!Signature.IsActivated)
+                {
+                    upnpShare.IsEnabled = monitorNetworkShare.IsEnabled = false;
+                }
             }
             catch (Exception ex)
             {

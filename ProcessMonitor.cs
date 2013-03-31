@@ -72,7 +72,10 @@
                     continue;
                 }
 
-                yield return fi;
+                if (fi.Exists)
+                {
+                    yield return fi;
+                }
             }
         }
 
@@ -81,18 +84,20 @@
         /// </summary>
         public static void CheckOpenFiles()
         {
+            var netmon = Settings.Get<bool>("Monitor Network Shares");
+
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
             try { procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName)); } catch { }
 
-            if (!procs.Any())
+            if (!procs.Any() && !netmon)
             {
                 return;
             }
 
             var pids = GetPIDs(procs).Distinct().ToList();
 
-            if (!pids.Any())
+            if (!pids.Any() && !netmon)
             {
                 return;
             }
@@ -102,6 +107,11 @@
             if (Signature.IsActivated && UPnP.IsRunning)
             {
                 try { files.AddRange(UPnP.GetActiveTransfers()); } catch { }
+            }
+
+            if (Signature.IsActivated && netmon)
+            {
+                try { files.AddRange(NetworkShares.GetActiveTransfers()); } catch { }
             }
 
             foreach (var show in Database.TVShows)
