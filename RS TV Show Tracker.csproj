@@ -182,18 +182,22 @@
     <Reference Include="UPnP, Version=1.0.4818.17309, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Dependencies\UPnP.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UPNPAVCDSML, Version=1.0.4818.17310, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Dependencies\UPNPAVCDSML.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UPNPAVMSDV, Version=1.0.4818.17311, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Dependencies\UPNPAVMSDV.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UPNP_AV, Version=1.0.4818.17310, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Dependencies\UPNP_AV.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
