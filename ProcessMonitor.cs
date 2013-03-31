@@ -99,6 +99,11 @@
 
             var files = GetHandleList(pids).ToList();
 
+            if (Signature.IsActivated && UPnP.IsRunning)
+            {
+                try { files.AddRange(UPnP.GetActiveTransfers()); } catch { }
+            }
+
             foreach (var show in Database.TVShows)
             {
                 var titleRegex   = Parser.GenerateTitleRegex(show.Value.Name);

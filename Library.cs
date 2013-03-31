@@ -196,6 +196,11 @@
             Tuple<WatcherChangeTypes, string[]> evt;
             if (!_queue.TryDequeue(out evt) || evt == null || Indexing)
             {
+                if (UPnP.IsRunning)
+                {
+                    try { UPnP.RebuildList(); } catch { }
+                }
+
                 return;
             }
 
@@ -321,6 +326,11 @@
                 }
             }
             catch { }
+
+            if (UPnP.IsRunning)
+            {
+                try { UPnP.RebuildList(); } catch { }
+            }
         }
 
         /// <summary>

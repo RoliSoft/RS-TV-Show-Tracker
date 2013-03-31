@@ -179,6 +179,22 @@
       <HintPath>Dependencies\Transitionals.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UPnP, Version=1.0.4818.17309, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\UPnP.dll</HintPath>
+    </Reference>
+    <Reference Include="UPNPAVCDSML, Version=1.0.4818.17310, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\UPNPAVCDSML.dll</HintPath>
+    </Reference>
+    <Reference Include="UPNPAVMSDV, Version=1.0.4818.17311, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\UPNPAVMSDV.dll</HintPath>
+    </Reference>
+    <Reference Include="UPNP_AV, Version=1.0.4818.17310, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\UPNP_AV.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -394,6 +410,7 @@
     <Compile Include="ShowNames\ShowEpisode.cs" />
     <Compile Include="ShowNames\ShowEqualityComparer.cs" />
     <Compile Include="ShowNames\Tests.cs" />
+    <Compile Include="UPnP.cs" />
     <Compile Include="UserControls\ListViews\DownloadedListViewItem.cs" />
     <Compile Include="UserControls\ListViews\UpcomingListViewItem.cs" />
     <Compile Include="UserControls\ListViews\SubtitleItem.cs" />
@@ -1107,6 +1124,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\smiley-cool.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\tv32.png" />
+    <Resource Include="Images\tv48.png" />
+    <Resource Include="Images\tv64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\upnp.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />

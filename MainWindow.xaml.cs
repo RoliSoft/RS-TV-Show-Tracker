@@ -313,6 +313,11 @@
 
                     Library.Initialize();
 
+                    if (Signature.IsActivated && Settings.Get<bool>("Enable UPnP AV Media Server"))
+                    {
+                        UPnP.Start();
+                    }
+
                     Run(() =>
                             {
                                 ReindexDownloadPaths.IsEnabled = true;

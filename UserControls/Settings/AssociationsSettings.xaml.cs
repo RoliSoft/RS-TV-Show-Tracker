@@ -67,6 +67,7 @@
                 processTextBox.Text = string.Join(",", Settings.Get<List<string>>("Processes to Monitor"));
 
                 monitorNetworkShare.IsChecked = Settings.Get<bool>("Monitor Network Shares");
+                upnpShare.IsChecked           = Settings.Get<bool>("Enable UPnP AV Media Server");
             }
             catch (Exception ex)
             {
@@ -98,6 +99,37 @@
             if (!_loaded) return;
 
             Settings.Set("Monitor Network Shares", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the upnpShare control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void UpnpShareChecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Enable UPnP AV Media Server", true);
+
+            if (Signature.IsActivated)
+            {
+                UPnP.Start();
+            }
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the upnpShare control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void UpnpShareUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Enable UPnP AV Media Server", false);
+
+            UPnP.Stop();
         }
 
         /// <summary>
