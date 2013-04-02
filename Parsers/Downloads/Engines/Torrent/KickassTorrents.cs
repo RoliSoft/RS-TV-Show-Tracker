@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Xml.Linq;
 
     using NUnit.Framework;
 
@@ -55,7 +56,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-01-13 8:53 PM");
+                return Utils.DateTimeToVersion("2013-04-02 11:31 PM");
             }
         }
 
@@ -78,21 +79,22 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var xml = Utils.GetXML(Site + "usearch/" + Utils.EncodeURL(query) + "/?rss=1");
+            var url = Utils.GetURL(Site + "usearch/" + Utils.EncodeURL(query) + "/?rss=1").Replace("<torrent:", "<").Replace("</torrent:", "</").Replace("<enclosure url=\"", "<enclosure>").Replace("\" length=\"", "</enclosure><stuff length=\"");
+            var xml = XDocument.Parse(url);
 
             foreach (var node in xml.Descendants("item"))
             {
                 var link = new Link(this);
 
                 int size;
-                int.TryParse(node.GetValue("size") ?? string.Empty, out size);
+                int.TryParse(node.GetValue("contentLength") ?? string.Empty, out size);
                 
                 link.Release = node.GetValue("title");
-                link.FileURL = node.GetNodeAttributeValue("enclosure", "url");
+                link.FileURL = node.GetValue("enclosure");
                 link.InfoURL = node.GetValue("link");
                 link.Size    = Utils.GetFileSize(size);
                 link.Quality = FileNames.Parser.ParseQuality(link.Release);
-                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetValue("seeds"), node.GetValue("leechs"))
+                link.Infos   = Link.SeedLeechFormat.FormatWith(node.GetValue("seeds"), node.GetValue("peers"))
                              + (node.GetValue("verified") != "0" ? ", Verified" : string.Empty);
 
                 yield return link;
