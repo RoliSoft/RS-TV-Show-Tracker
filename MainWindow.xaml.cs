@@ -311,11 +311,25 @@
                             lastUpdatedLabel.Content = "indexing download paths";
                         });
 
-                    Library.Initialize();
+                    try
+                    {
+                        Library.Initialize();
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleUnexpectedException(ex);
+                    }
 
                     if (Signature.IsActivated && Settings.Get<bool>("Enable UPnP AV Media Server"))
                     {
-                        UPnP.Start();
+                        try
+                        {
+                            UPnP.Start();
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleUnexpectedException(ex);
+                        }
                     }
 
                     Run(() =>
