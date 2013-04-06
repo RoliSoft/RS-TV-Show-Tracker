@@ -199,7 +199,7 @@ Section -MainProgram
 	File "Dependencies\UPNP_AV.dll"
 	File "Dependencies\UPNPAVCDSML.dll"
 	File "Dependencies\UPNPAVMSDV.dll"
-	File "Dependencies\WPFToolkit.Extended.dll"
+	File "Dependencies\Xceed.Wpf.Toolkit.dll"
 	
 	SetOutPath "$INSTDIR"
 	
@@ -209,6 +209,7 @@ Section -MainProgram
 	
 	# remove old leftover files
 	
+	Delete "Dependencies\WPFToolkit.Extended.dll"
 	Delete "BouncyCastle.Crypto.dll"
 	Delete "CookComputing.XmlRpcV2.dll"
 	Delete "Hammock.ClientProfile.dll"
@@ -316,7 +317,7 @@ Section Uninstall
 	Delete "$INSTDIR\libs\UPNP_AV.dll"
 	Delete "$INSTDIR\libs\UPNPAVCDSML.dll"
 	Delete "$INSTDIR\libs\UPNPAVMSDV.dll"
-	Delete "$INSTDIR\libs\WPFToolkit.Extended.dll"
+	Delete "$INSTDIR\libs\Xceed.Wpf.Toolkit.dll"
 	Delete "$INSTDIR\RSTVShowTracker.exe"
 	Delete "$INSTDIR\RSTVShowTracker.exe.config"
 	Delete "$INSTDIR\RSTVShowTracker.pdb"
