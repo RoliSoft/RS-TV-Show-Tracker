@@ -7,6 +7,7 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
@@ -477,6 +478,43 @@
 
             _activeShowID = show.ID;
 
+            var st = show.Title.StartsWith("Star Trek");
+            var sd = default(Dictionary<int, string>);
+
+            if (st)
+            {
+                airdateHeader.Content = "Stardate";
+
+                if (show.Title.EndsWith("The Animated Series"))
+                {
+                    sd = Utils.GetStarTrekTheAnimatedSeriesStardates();
+                }
+                else if (show.Title.EndsWith("The Next Generation"))
+                {
+                    sd = Utils.GetStarTrekTheNextGenerationStardates();
+                }
+                else if (show.Title.EndsWith("Voyager"))
+                {
+                    sd = Utils.GetStarTrekVoyagerStardates();
+                }
+                else if (show.Title.EndsWith("Deep Space Nine"))
+                {
+                    sd = Utils.GetStarTrekDeepSpaceNineStardates();
+                }
+                else if (show.Title.EndsWith("Enterprise"))
+                {
+                    // will be generated later
+                }
+                else
+                {
+                    sd = Utils.GetStarTrekTheOriginalSeriesStardates();
+                }
+            }
+            else
+            {
+                airdateHeader.Content = "Air date";
+            }
+
             // fill up general informations
 
             showGeneralName.Text = show.Name;
@@ -643,6 +681,23 @@
                         URL         = episode.URL,
                         GrabberIcon = guide.Icon
                     });
+
+                if (st)
+                {
+                    var glvi = GuideListViewItemCollection[GuideListViewItemCollection.Count - 1];
+
+                    if (sd == null)
+                    {
+                        glvi.Airdate = glvi.ID.Airdate.AddYears(150).ToStardate(false); // 2001 -> 2151 (airdate -> timeline)
+                    }
+                    else
+                    {
+                        string ed;
+                        glvi.Airdate = sd.TryGetValue(glvi.ID.Season * 1000 + glvi.ID.Number, out ed) ? ed : "Unknown";
+                    }
+
+                    glvi.Summary = Regex.Replace(glvi.Summary, @"^Stardate:?\s(?:\d+(?:\.\d+)?)(?:\r?\n|\s\-\s*)", string.Empty);
+                }
             }
 
             GuideListViewItemCollection.RaiseListChangedEvents = true;

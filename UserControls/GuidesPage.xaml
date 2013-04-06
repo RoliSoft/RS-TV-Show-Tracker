@@ -395,7 +395,7 @@ Episode listing provided by TVRage" Name="showGeneralSub" FontWeight="Bold" Marg
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Width="130">
-                                <GridViewColumnHeader Content="Air date" />
+                                <GridViewColumnHeader Content="Air date" Name="airdateHeader" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Airdate}" FontWeight="Normal" Width="130" Margin="-7,0" TextAlignment="Center" Foreground="{Binding Color}" />

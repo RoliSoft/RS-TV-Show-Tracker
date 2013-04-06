@@ -687,6 +687,21 @@ namespace RoliSoft.TVShowTracker
         {
             return Math.Floor((date - Utils.UnixEpoch).TotalSeconds);
         }
+
+        /// <summary>
+        /// Extension method to DateTime to convert it into a stardate.
+        /// </summary>
+        /// <remarks>
+        /// In order to keep dates non-negative, 377 years are added to the passed date.
+        /// Stardate 0 is 2323-01-01, according to "Star Trek Chronology", page 95.
+        /// </remarks>
+        /// <param name="date">The date.</param>
+        /// <param name="fix">if set to <c>true</c> 377 years will be added to the year to get a non-negative stardate.</param>
+        /// <returns>Converted stardate.</returns>
+        public static string ToStardate(this DateTime date, bool fix = true)
+        {
+            return (Math.Floor((date.AddYears(fix ? 377 : 0) - new DateTime(2323, 1, 1, 0, 0, 0)).TotalMilliseconds / 31556926.08 * 100) / 100).ToString("0.0");
+        }
         #endregion
 
         #region TimeSpan
