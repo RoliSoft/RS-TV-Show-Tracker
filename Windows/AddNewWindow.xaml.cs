@@ -25,6 +25,7 @@
         private List<ShowID> _shows;
         private Thread _worker;
         private int _dbid;
+        private bool _loaded;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -52,8 +53,34 @@
                 SetAeroGlassTransparency();
             }
 
-            DatabaseSelectionChanged(null, null);
+            DatabaseSelectionChanged(database, null);
             ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
+
+            _loaded = true;
+            language.SelectedIndex = batchLanguage.SelectedIndex = 0;
+            TabControlOnSelectionChanged(null, null);
+        }
+
+        /// <summary>
+        /// Handles the OnSelectionChanged event of the TabControl control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="SelectionChangedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void TabControlOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            switch (tabControl.SelectedIndex)
+            {
+                case 0:
+                    Height = 239;
+                    break;
+
+                case 1:
+                    Height = 336;
+                    break;
+            }
         }
 
         /// <summary>
@@ -76,10 +103,21 @@
         /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
         private void DatabaseSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if ((database.SelectedValue as ComboBoxItem).Content == null) return;
-            _guide = CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
+            if (((sender as ComboBox).SelectedValue as ComboBoxItem).Content == null) return;
+
+            if (sender == database && batchDatabase.SelectedIndex != database.SelectedIndex)
+            {
+                batchDatabase.SelectedIndex = database.SelectedIndex;
+            }
+            else if (sender == batchDatabase && database.SelectedIndex != batchDatabase.SelectedIndex)
+            {
+                database.SelectedIndex = batchDatabase.SelectedIndex;
+            }
+
+            _guide = CreateGuide(((((sender as ComboBox).SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
 
             language.Items.Clear();
+            batchLanguage.Items.Clear();
 
             foreach (var lang in _guide.SupportedLanguages)
             {
@@ -102,11 +140,51 @@
                         Content = " " + Languages.List[lang],
                         Padding = new Thickness(0)
                     });
+                
+                var sp2 = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Tag         = lang
+                    };
+
+                sp2.Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/flag-" + lang + ".png", UriKind.Relative)),
+                        Height = 16,
+                        Width  = 16,
+                        Margin = new Thickness(0, 1, 0, 0)
+                    });
+
+                sp2.Children.Add(new Label
+                    {
+                        Content = " " + Languages.List[lang],
+                        Padding = new Thickness(0)
+                    });
 
                 language.Items.Add(sp);
+                batchLanguage.Items.Add(sp2);
             }
 
-            language.SelectedIndex = 0;
+            language.SelectedIndex = batchLanguage.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Handles the SelectionChanged event of the language control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            if (sender == language && batchLanguage.SelectedIndex != language.SelectedIndex)
+            {
+                batchLanguage.SelectedIndex = language.SelectedIndex;
+            }
+            else if (sender == batchLanguage && language.SelectedIndex != batchLanguage.SelectedIndex)
+            {
+                language.SelectedIndex = batchLanguage.SelectedIndex;
+            }
         }
 
         /// <summary>

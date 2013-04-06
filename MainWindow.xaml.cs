@@ -834,7 +834,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void AddNewTVShowClick(object sender, RoutedEventArgs e)
         {
-            new AddNewWindow().ShowDialog();
+            new AddNewWindow2().ShowDialog();
         }
 
         /// <summary>

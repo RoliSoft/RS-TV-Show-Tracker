@@ -203,8 +203,8 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="WPFToolkit.Extended">
-      <HintPath>Dependencies\WPFToolkit.Extended.dll</HintPath>
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>Dependencies\Xceed.Wpf.Toolkit.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -488,6 +488,9 @@
     <Compile Include="Windows\CaptchaWindow.xaml.cs">
       <DependentUpon>CaptchaWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\AddNewWindow2.xaml.cs">
+      <DependentUpon>AddNewWindow2.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\SenderSettingsWindow.xaml.cs">
       <DependentUpon>SenderSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -671,6 +674,10 @@
     <Page Include="Windows\CaptchaWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\AddNewWindow2.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
