@@ -172,9 +172,9 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
 
       var text = _rtb.CaretPosition.GetTextInRun( LogicalDirection.Backward );
       var token = ResolveToken( text );
-      if( token != null )
+      if (token != null )
       {
-        ReplaceTextWithToken( text.Trim(), token );
+          ReplaceTextWithToken(text.Trim(), token);
       }
     }
 
@@ -215,7 +215,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
 
     #region Methods
 
-    private void InitializeTokensFromText()
+    public void InitializeTokensFromText()
     {
       if( !String.IsNullOrEmpty( Text ) )
       {
@@ -297,6 +297,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
     {
       _surpressTextChangedEvent = true;
 
+        var ok = !string.IsNullOrWhiteSpace(inputText.Trim().Trim(TokenDelimiter.ToCharArray()));
       var para = _rtb.CaretPosition.Paragraph;
 
       var matchedRun = para.Inlines.FirstOrDefault( inline =>
@@ -308,7 +309,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
       if( matchedRun != null ) // Found a Run that matched the inputText
       {
         var tokenContainer = CreateTokenContainer( token );
-        para.Inlines.InsertBefore( matchedRun, tokenContainer );
+        para.Inlines.InsertBefore(matchedRun, tokenContainer);
 
         // Remove only if the Text in the Run is the same as inputText, else split up
         if( matchedRun.Text == inputText )
@@ -324,7 +325,8 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
         }
 
         //now append the Text with the token key
-        SetTextInternal( Text + token.TokenKey );
+        if (ok) SetTextInternal(Text + token.TokenKey);
+        else para.Inlines.Remove(tokenContainer);
       }
 
       _surpressTextChangedEvent = false;
@@ -380,7 +382,19 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
       SetTextInternal( Text.Replace( e.Parameter.ToString(), "" ) );
     }
 
-    private void SetTextInternal( string text )
+    public void DeleteAllTokens()
+    {
+        var para = _rtb.CaretPosition.Paragraph;
+
+        var inlinesToRemove = para.Inlines.Where(inline => inline is InlineUIContainer && ((inline as InlineUIContainer).Child as TokenItem).TokenKey != null).ToList();
+
+        foreach (var inlineToRemove in inlinesToRemove)
+        {
+            para.Inlines.Remove(inlineToRemove);
+        }
+      }
+
+    public void SetTextInternal( string text )
     {
       _surpressTextChanged = true;
       Text = text;

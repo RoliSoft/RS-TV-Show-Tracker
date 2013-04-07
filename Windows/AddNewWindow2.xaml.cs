@@ -59,8 +59,6 @@
             PendingShowListViewItemCollection = new ObservableCollection<PendingShow>();
             listView.ItemsSource = PendingShowListViewItemCollection;
             listView.Items.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
-
-            //namesTextBox.Text = "House;Star Trek;";
         }
 
         /// <summary>
@@ -211,6 +209,8 @@
 
             _searchThd = new Thread(() =>
                 {
+                    var ok = false;
+
                     foreach (var item in _list)
                     {
                         var err = false;
@@ -249,6 +249,8 @@
                         }
                         else
                         {
+                            ok = true;
+                            
                             Dispatcher.Invoke(() =>
                                 {
                                     foreach (var cand in item.Candidates)
@@ -298,16 +300,12 @@
                         Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
                     }
 
-                    Dispatcher.Invoke(() => nextButton.IsEnabled = true);
+                    if (ok)
+                    {
+                        Dispatcher.Invoke(() => nextButton.IsEnabled = true);
+                    }
                 });
             _searchThd.Start();
-
-            /*_list[0].Status = "Searching on " + _guides[0].Name + "...";
-            _list[1].ShowStatus = "Collapsed";
-            _list[1].ShowCandidates = "Visible";
-            _list[1].Candidates = new List<ShowID> { new ShowID { Title = "fuck" }, new ShowID { Title = "shit" } };
-
-            CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh();*/
         }
 
         /// <summary>
@@ -354,6 +352,108 @@
             listTabItem.Visibility   = Visibility.Collapsed;
             addTabItem.Visibility    = Visibility.Visible;
             tabControl.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Handles the OnClick event of the nextButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void NextButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            nextButton.IsEnabled = false;
+
+            foreach (var item in _list.Where(x => x.Candidates.Count != 0))
+            {
+                item.Name           = item.Candidates[item.SelectedCandidate].Title;
+                item.Group          = "Pending";
+                item.Status         = string.Empty;
+                item.ShowCandidates = "Collapsed";
+                item.ShowStatus     = "Visible";
+            }
+
+            CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh();
+
+            _searchThd = new Thread(() =>
+                {
+                    foreach (var item in _list.Where(x => x.Candidates.Count != 0))
+                    {
+                        var err = false;
+
+                        Dispatcher.Invoke(() => listView.ScrollIntoView(item));
+
+                        item.Status = "Downloading from " + item.Candidates[item.SelectedCandidate].Guide.Name + "...";
+
+                        Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+
+                        try
+                        {
+                            //item.Candidates.AddRange(guide.GetID(item.Name));
+                        }
+                        catch (Exception ex)
+                        {
+                            err = true;
+                            MainWindow.HandleUnexpectedException(ex);
+                        }
+
+                        if (err)
+                        {
+                            item.Group  = "Failed";
+                            item.Status = "Error while downloading guide.";
+                        }
+                        else
+                        {
+                            /*Dispatcher.Invoke(() =>
+                                {
+                                    foreach (var cand in item.Candidates)
+                                    {
+                                        var sp = new StackPanel
+                                            {
+                                                Orientation = Orientation.Horizontal
+                                            };
+                                
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content    = cand.Title,
+                                                FontWeight = FontWeights.Bold,
+                                                Padding    = new Thickness(0)
+                                            });
+                                
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content = " at ",
+                                                Opacity = 0.5,
+                                                Padding = new Thickness(0)
+                                            });
+
+                                        sp.Children.Add(new Image
+                                            {
+                                                Source = new BitmapImage(new Uri(cand.Guide.Icon, UriKind.Absolute)),
+                                                Height = 16,
+                                                Width  = 16,
+                                                Margin = new Thickness(0, 0, 0, 0)
+                                            });
+
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content = " " + cand.Guide.Name,
+                                                Padding = new Thickness(0)
+                                            });
+
+                                        item.CandidateSP.Add(sp);
+                                    }
+                                });
+
+                            item.ShowStatus     = "Collapsed";
+                            item.ShowCandidates = "Visible";*/
+                            item.Group = "Added";
+                        }
+
+                        Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+                    }
+                });
+            _searchThd.Start();
         }
 
         /// <summary>

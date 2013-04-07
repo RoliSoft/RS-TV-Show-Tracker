@@ -9,8 +9,8 @@
             <Setter Property="BorderBrush" Value="#BBD8FB" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Arrow" />
-            <Setter Property="Padding" Value="5,1,5,1" />
-            <Setter Property="Margin" Value="1,0" />
+            <Setter Property="Padding" Value="3,1,3,1" />
+            <Setter Property="Margin" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type xctk2:TokenItem}">
@@ -21,7 +21,7 @@
                        Margin="{TemplateBinding Margin}">
                             <StackPanel Orientation="Horizontal" Margin="1">
                                 <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                <Button Margin="3,0,0,0" Cursor="Hand" Command="xctk2:TokenizedTextBoxCommands.Delete" CommandParameter="{TemplateBinding TokenKey}">
+                                <Button Margin="5,0,0,0" Cursor="Hand" Command="xctk2:TokenizedTextBoxCommands.Delete" CommandParameter="{TemplateBinding TokenKey}">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <ContentPresenter />
@@ -45,7 +45,7 @@
                        BorderBrush="{TemplateBinding BorderBrush}"
                        BorderThickness="{TemplateBinding BorderThickness}">
                             <Grid>
-                                <RichTextBox x:Name="PART_ContentHost" AcceptsReturn="False" IsDocumentEnabled="True" Padding="-3,0,0,0" />
+                                <RichTextBox x:Name="PART_ContentHost" AcceptsReturn="False" IsDocumentEnabled="True" Padding="-3,2,0,2" VerticalScrollBarVisibility="Auto" />
                                 <!--<Popup>
                                 <Grid Background="White">
                                     <ItemsPresenter />
@@ -268,7 +268,7 @@
                                     <TextBlock Text="Back" Margin="0,0,3,0" />
                                 </StackPanel>
                             </Button>
-                            <Button Height="23" HorizontalAlignment="Right" Name="nextButton" VerticalAlignment="Bottom" Width="75" Click="SearchButtonClick">
+                            <Button Height="23" HorizontalAlignment="Right" Name="nextButton" VerticalAlignment="Bottom" Width="75" Click="NextButtonOnClick">
                                 <StackPanel Orientation="Horizontal" Margin="3,0">
                                     <TextBlock Text="Next" Margin="3,0,0,0" />
                                     <Image Source="/RSTVShowTracker;component/Images/play.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="5,0,0,0" />
