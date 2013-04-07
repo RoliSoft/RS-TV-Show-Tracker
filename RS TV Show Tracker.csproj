@@ -564,6 +564,10 @@
     <Compile Include="Update.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="XMLTV.cs" />
+    <Compile Include="Dependencies\TokenizedTextBox\Token.cs" />
+    <Compile Include="Dependencies\TokenizedTextBox\TokenItem.cs" />
+    <Compile Include="Dependencies\TokenizedTextBox\TokenizedTextBox.cs" />
+    <Compile Include="Dependencies\TokenizedTextBox\TokenizedTextBoxCommands.cs" />
     <Page Include="UserControls\Settings\AssociationsSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

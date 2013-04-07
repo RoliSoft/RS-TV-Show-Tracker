@@ -1,8 +1,64 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.AddNewWindow2"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" xmlns:xctk2="clr-namespace:RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox"
         TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
         Title="Add new TV shows" Height="295" Width="550" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/plus.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="{x:Type xctk2:TokenItem}">
+            <Setter Property="Background" Value="#F3F7FD" />
+            <Setter Property="BorderBrush" Value="#BBD8FB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Arrow" />
+            <Setter Property="Padding" Value="5,1,5,1" />
+            <Setter Property="Margin" Value="1,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type xctk2:TokenItem}">
+                        <Border Background="{TemplateBinding Background}"
+                       BorderBrush="{TemplateBinding BorderBrush}"
+                       BorderThickness="{TemplateBinding BorderThickness}"
+                       Padding="{TemplateBinding Padding}"
+                       Margin="{TemplateBinding Margin}">
+                            <StackPanel Orientation="Horizontal" Margin="1">
+                                <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                <Button Margin="3,0,0,0" Cursor="Hand" Command="xctk2:TokenizedTextBoxCommands.Delete" CommandParameter="{TemplateBinding TokenKey}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <Image Source="/RSTVShowTracker;component/Images/cross.png" Width="8" Height="8" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type xctk2:TokenizedTextBox}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type xctk2:TokenizedTextBox}">
+                        <Border x:Name="Bd"
+                       Background="{TemplateBinding Background}"
+                       BorderBrush="{TemplateBinding BorderBrush}"
+                       BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <RichTextBox x:Name="PART_ContentHost" AcceptsReturn="False" IsDocumentEnabled="True" Padding="-3,0,0,0" />
+                                <!--<Popup>
+                                <Grid Background="White">
+                                    <ItemsPresenter />
+                                </Grid>
+                            </Popup>-->
+                            </Grid>
+                        </Border>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
             <TabControl.Effect>
@@ -27,7 +83,7 @@
                                     <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" Margin="0,1,5,0" />
                                     <Label Content="Show names" FontSize="16" Foreground="DarkBlue" Padding="0" />
                                 </StackPanel>
-                                <xctk:TokenizedTextBox Name="namesTextBox" Foreground="Black" Margin="0,5,0,7" Height="108" Width="301" />
+                                <xctk2:TokenizedTextBox x:Name="namesTextBox" Foreground="Black" Margin="0,5,0,7" Height="108" Width="301" />
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
                                     <Button Height="23" Name="discUrlButton" Margin="0,0,5,0">

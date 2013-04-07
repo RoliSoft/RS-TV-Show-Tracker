@@ -1,7 +1,6 @@
 ﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage"
-        xmlns:UserControls="clr-namespace:RoliSoft.TVShowTracker.UserControls"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell" xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage" xmlns:UserControls="clr-namespace:RoliSoft.TVShowTracker.UserControls"
         TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
         Title="Settings" Height="562" Width="570" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/settings.png" Loaded="WindowLoaded" ResizeMode="NoResize" Closing="GlassWindowClosing">
     <Grid>
