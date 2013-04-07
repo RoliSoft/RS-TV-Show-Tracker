@@ -124,7 +124,7 @@
             {
                 if (!Regex.IsMatch(result.URL, @"^http://(?:www\.)?epguides\.com/(?!menu|current|grid|spring|dvds|faq|search)([a-z0-9_]+)/$", RegexOptions.IgnoreCase)) continue;
 
-                yield return new ShowID
+                yield return new ShowID(this)
                     {
                         ID       = result.URL,
                         Title    = Regex.Replace(result.Title, @"\s+\(a Titles (?:&|and) (?:Air Dates|Seasons) Guide\).*$", string.Empty, RegexOptions.IgnoreCase),

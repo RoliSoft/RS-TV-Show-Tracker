@@ -160,7 +160,7 @@
                 var title = html.DocumentNode.GetTextValue("//div[@class='orangecorner_content']//h1");
                 if (!string.IsNullOrWhiteSpace(title))
                 {
-                    var id  = new ShowID();
+                    var id  = new ShowID(this);
                 
                     id.URL      = Site.TrimEnd('/') + HtmlEntity.DeEntitize(html.DocumentNode.GetNodeAttributeValue("//td[@class='boxes']/a[contains(text(), 'All Seasons')]", "href"));
                     id.ID       = Regex.Match(id.URL, @"show/([^/$]+)").Groups[1].Value;
@@ -175,7 +175,7 @@
 
             foreach (var show in shows)
             {
-                var id  = new ShowID();
+                var id  = new ShowID(this);
                 
                 id.URL      = Site.TrimEnd('/') + HtmlEntity.DeEntitize(show.GetNodeAttributeValue("..", "href"));
                 id.ID       = Regex.Match(id.URL, @"show/([^/$]+)").Groups[1].Value;

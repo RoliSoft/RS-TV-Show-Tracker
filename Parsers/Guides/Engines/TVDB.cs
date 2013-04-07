@@ -124,7 +124,7 @@
 
             foreach (var show in list.Descendants("Series"))
             {
-                var id = new ShowID();
+                var id = new ShowID(this);
 
                 id.ID       = show.GetValue("seriesid");
                 id.Title    = show.GetValue("SeriesName");

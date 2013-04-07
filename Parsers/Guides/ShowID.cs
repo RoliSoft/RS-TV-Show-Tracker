@@ -6,6 +6,12 @@
     public class ShowID
     {
         /// <summary>
+        /// Gets or sets the guide associated with this show ID.
+        /// </summary>
+        /// <value>The guide.</value>
+        public Guide Guide { get; set; }
+
+        /// <summary>
         /// Gets or sets the ID of the show.
         /// </summary>
         /// <value>The ID.</value>
@@ -34,5 +40,31 @@
         /// </summary>
         /// <value>The URL.</value>
         public string URL { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShowID"/> class.
+        /// </summary>
+        public ShowID()
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShowID"/> class.
+        /// </summary>
+        /// <param name="guide">The guide.</param>
+        public ShowID(Guide guide)
+        {
+            Guide = guide;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
+        public override string ToString()
+        {
+            return Title + " at " + Guide.Name;
+        }
     }
 }

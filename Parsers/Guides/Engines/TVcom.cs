@@ -94,7 +94,7 @@
 
             foreach (var show in shows)
             {
-                var id  = new ShowID();
+                var id  = new ShowID(this);
                 
                 id.URL      = Site.TrimEnd('/') + HtmlEntity.DeEntitize(show.GetAttributeValue("href"));
                 id.ID       = Regex.Match(id.URL, @"/shows/([^/]+)/").Groups[1].Value;

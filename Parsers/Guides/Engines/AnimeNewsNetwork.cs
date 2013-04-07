@@ -94,7 +94,7 @@
                     continue;
                 }
 
-                var id = new ShowID();
+                var id = new ShowID(this);
 
                 id.Title    = GetDescendantItemValue(show, "info", "type", "Main title");
                 id.Language = "en";

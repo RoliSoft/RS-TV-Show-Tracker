@@ -93,7 +93,7 @@
                 {
                     if (show["type"] != "tv_series") continue;
 
-                    var id = new ShowID();
+                    var id = new ShowID(this);
 
                     id.URL      = "http://www.imdb.com/title/" + (string)show["tconst"] + "/";
                     id.ID       = ((string)show["tconst"]).Substring(2);

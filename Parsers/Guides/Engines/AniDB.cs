@@ -96,7 +96,7 @@
 
             foreach (var show in list.Descendants("anime"))
             {
-                var id = new ShowID();
+                var id = new ShowID(this);
                 
                 try
                 {
