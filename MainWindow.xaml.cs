@@ -491,7 +491,7 @@
         /// </summary>
         public void Restart()
         {
-            Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location);
+            Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location, "-hide");
             Application.Current.Shutdown();
         }
         #endregion

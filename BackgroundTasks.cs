@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Timers;
 
@@ -61,6 +62,7 @@
             try { CheckDatabaseUpdate(); }           catch { }
             try { CheckShowListUpdate(); }           catch { }
             try { ProcessMonitor.CheckOpenFiles(); } catch { }
+            try { RestartIfNeeded(); }               catch { }
 
             InProgress = false;
         }
@@ -105,6 +107,24 @@
             if ((DateTime.Now - File.GetLastWriteTime(fn2)).TotalDays > 1)
             {
                 Parsers.LinkCheckers.Engines.UniversalEngine.GetLinkCheckerDefinitions();
+            }
+        }
+
+        /// <summary>
+        /// Restarts if needed.
+        /// </summary>
+        public static void RestartIfNeeded()
+        {
+            var memlimit = Settings.Get("Memory Usage Limit", 512l);
+
+            if (memlimit < 256)
+            {
+                return;
+            }
+
+            if ((memlimit * 1048576) < Process.GetCurrentProcess().WorkingSet64)
+            {
+                MainWindow.Active.Restart();
             }
         }
     }

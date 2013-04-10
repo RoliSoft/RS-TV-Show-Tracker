@@ -73,6 +73,8 @@
                 {
                     upnpShare.IsEnabled = monitorNetworkShare.IsEnabled = false;
                 }
+
+                memLimit.Value = Settings.Get("Memory Usage Limit", 512);
             }
             catch (Exception ex)
             {
@@ -154,6 +156,19 @@
             }
 
             Settings.Set("Processes to Monitor", proc);
+        }
+
+        /// <summary>
+        /// Handles the OnLostFocus event of the memLimit control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs" /> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void MemLimitOnLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Memory Usage Limit", memLimit.Value);
         }
     }
 }
