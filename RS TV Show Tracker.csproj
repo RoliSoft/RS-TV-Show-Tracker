@@ -417,6 +417,10 @@
     <Compile Include="ShowNames\Tests.cs" />
     <Compile Include="UPnP.cs" />
     <Compile Include="UserControls\ListViews\DownloadedListViewItem.cs" />
+    <Compile Include="Windows\SupportWindow.xaml.cs">
+      <DependentUpon>SupportWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ListViews\PendingShowListViewItem.cs" />
     <Compile Include="UserControls\ListViews\UpcomingListViewItem.cs" />
     <Compile Include="UserControls\ListViews\SubtitleItem.cs" />
     <Compile Include="UserControls\ListViews\GuideListViewItem.cs" />
@@ -682,6 +686,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\AddNewWindow2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\SupportWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -1148,6 +1156,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\upnp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\donate.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\leaf-plant.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\bitcoin.png" />
+    <Resource Include="Images\paypal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />

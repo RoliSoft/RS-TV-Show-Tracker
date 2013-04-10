@@ -12,6 +12,7 @@
     using System.Windows.Media.Imaging;
 
     using RoliSoft.TVShowTracker.Parsers.Guides;
+    using RoliSoft.TVShowTracker.ListViews;
 
     using Xceed.Wpf.Toolkit.Primitives;
 
@@ -23,14 +24,14 @@
         private bool _loaded;
         private List<Guide> _guides; 
         private string _lang;
-        private List<PendingShow> _list;
+        private List<PendingShowListViewItem> _list;
         private Thread _searchThd;
 
         /// <summary>
         /// Gets or sets the pending show list view item collection.
         /// </summary>
         /// <value>The pending show list view item collection.</value>
-        public ObservableCollection<PendingShow> PendingShowListViewItemCollection { get; set; }
+        public ObservableCollection<PendingShowListViewItem> PendingShowListViewItemCollection { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -56,7 +57,7 @@
             _loaded = true;
             databaseCheckListBox.SelectedItems.Add(databaseCheckListBox.Items[1]);
 
-            PendingShowListViewItemCollection = new ObservableCollection<PendingShow>();
+            PendingShowListViewItemCollection = new ObservableCollection<PendingShowListViewItem>();
             listView.ItemsSource = PendingShowListViewItemCollection;
             listView.Items.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
         }
@@ -189,13 +190,13 @@
                 }
             }
 
-            _list = new List<PendingShow>();
+            _list = new List<PendingShowListViewItem>();
 
             foreach (var name in namesTextBox.Text.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
             {
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    _list.Add(new PendingShow(name.Trim()));
+                    _list.Add(new PendingShowListViewItem(name.Trim()));
                 }
             }
 
@@ -317,7 +318,7 @@
         private void SelectorOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var cb = sender as ComboBox;
-            var ps = cb.DataContext as PendingShow;
+            var ps = cb.DataContext as PendingShowListViewItem;
 
             if (cb.SelectedIndex == -1 || ps == null) return;
 
@@ -454,88 +455,6 @@
                     }
                 });
             _searchThd.Start();
-        }
-
-        /// <summary>
-        /// Represents a show to be added to the database.
-        /// </summary>
-        public class PendingShow
-        {
-            /// <summary>
-            /// Gets or sets the name.
-            /// </summary>
-            /// <value>The name.</value>
-            public string Name { get; set; }
-
-            /// <summary>
-            /// Gets or sets the show.
-            /// </summary>
-            /// <value>The show.</value>
-            public TVShow Show { get; set; }
-
-            /// <summary>
-            /// Gets or sets the candidates.
-            /// </summary>
-            /// <value>The candidates.</value>
-            public List<ShowID> Candidates { get; set; }
-
-            /// <summary>
-            /// Gets or sets the rendered candidates.
-            /// </summary>
-            /// <value>The rendered candidates.</value>
-            public List<StackPanel> CandidateSP { get; set; } 
-
-            /// <summary>
-            /// Gets or sets the ID.
-            /// </summary>
-            /// <value>The ID.</value>
-            public int ID { get; set; }
-
-            /// <summary>
-            /// Gets or sets the status.
-            /// </summary>
-            /// <value>The status.</value>
-            public string Status { get; set; }
-
-            /// <summary>
-            /// Gets or sets the group.
-            /// </summary>
-            /// <value>The group.</value>
-            public string Group { get; set; }
-
-            /// <summary>
-            /// Gets or sets a value indicating whether show status.
-            /// </summary>
-            /// <value><c>true</c> if show status; otherwise, <c>false</c>.</value>
-            public string ShowStatus { get; set; }
-
-            /// <summary>
-            /// Gets or sets a value indicating whether to show candidates.
-            /// </summary>
-            /// <value><c>true</c> if show candidates; otherwise, <c>false</c>.</value>
-            public string ShowCandidates { get; set; }
-
-            /// <summary>
-            /// Gets or sets the selected candidate index.
-            /// </summary>
-            /// <value>The selected candidate index.</value>
-            public int SelectedCandidate { get; set; }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="PendingShow"/> class.
-            /// </summary>
-            /// <param name="name">The name.</param>
-            public PendingShow(string name)
-            {
-                Name        = name;
-                Status      = string.Empty;
-                Group       = "Pending";
-                Candidates  = new List<ShowID>();
-                CandidateSP = new List<StackPanel>();
-
-                ShowStatus     = "Visible";
-                ShowCandidates = "Collapsed";
-            }
         }
     }
 }
