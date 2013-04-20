@@ -52,6 +52,15 @@ namespace RoliSoft.TVShowTracker
         {
             get { return @"<#= Path.GetDirectoryName(Host.TemplateFile) #>"; }
         }
+
+        /// <summary>
+        /// Gets the name of the machine where the project was built.
+        /// </summary>
+        /// <value>The name of the machine where the project was built.</value>
+        public static string BuildMachine
+        {
+            get { return @"<#= Environment.MachineName #>"; }
+        }
     }
 }
 <#+

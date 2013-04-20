@@ -301,17 +301,30 @@
             Version = ver.Major + "." + ver.Minor + "." + ver.Build + "." + ver.Revision;
             VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty) + " b" + ver.Revision + (IsNightly ? " nightly" : string.Empty);
 
+            Log.Info(Software + " " + VersionFormatted);
+            Log.Info("Compiled on " + BuildMachine + " from commit " + GitRevision + " at " + CompileTime.ToString("u"));
+
             try
             {
                 AppDataPath    = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Developer, Software) + Path.DirectorySeparatorChar;
                 InstallPath    = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar;
                 UACVirtualPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VirtualStore", Regex.Replace(InstallPath, @"^[a-zA-Z]{1,2}:[\\/]", string.Empty));
             }
-            catch (ArgumentException) { }
+            catch (ArgumentException ex)
+            {
+                Log.Debug("Error while loading AppDataPath/InstallPath/UACVirtualPath.", ex);
+            }
 
             if (AppDataPath != null && !Directory.Exists(AppDataPath))
             {
-                try { Directory.CreateDirectory(AppDataPath); } catch { }
+                try
+                {
+                    Directory.CreateDirectory(AppDataPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("AppDataPath='" + AppDataPath + "' doesn't exist and can't be created.", ex);
+                }
             }
         }
 
@@ -501,6 +514,8 @@
                 return;
             }
 
+            Log.Debug("Loading licensing information...");
+
             try
             {
                 string user, key;
@@ -514,6 +529,7 @@
                     if (status > 200)
                     {
                         _licenseStatus = LicenseStatus.KeyStatusError;
+                        Log.Error("The license is cryptographically valid, but has been denied by the activation server. Your key was most likely revoked. Please contact rolisoft@gmail.com for more information.");
                         return;
                     }
 
@@ -531,12 +547,14 @@
                 catch
                 {
                     _licenseStatus = LicenseStatus.LicenseDecryptError;
+                    Log.Error("The license is not for this computer or Windows machine keys were reset.");
                     return;
                 }
 
                 if (!VerifyKey(user, key))
                 {
                     _licenseStatus = LicenseStatus.KeyCryptoError;
+                    Log.Error("The key within the license is cryptographically invalid. If you have recently updated the software, the keying scheme might have been changed. If you did not receive an email containing a new key, please contact rolisoft@gmail.com for more information.");
                     return;
                 }
 
@@ -607,16 +625,19 @@
                     if (_isActivated)
                     {
                         _licenseHash = BitConverter.ToString(new HMACSHA512(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(user.ToLower().Trim()))).ComputeHash(Encoding.UTF8.GetBytes(key.Trim()))).ToLower().Replace("-", string.Empty);
+                        Log.Info("License validated for " + user + ". Thank you for supporting the software!");
                     }
                     else
                     {
                         _licenseStatus = LicenseStatus.LicenseInvalid;
+                        Log.Error("The license is not for this computer or hardware S/Ns have changed recently.");
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 _licenseStatus = LicenseStatus.LicenseException;
+                Log.Error("Exception occurred during license validation.", ex);
             }
         }
 

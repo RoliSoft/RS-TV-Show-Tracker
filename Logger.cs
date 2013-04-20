@@ -1,289 +1,446 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Diagnostics;
+    using System.Collections.Concurrent;
     using System.IO;
+    using System.Runtime.CompilerServices;
     using System.Text;
+    using System.Threading;
 
     /// <summary>
-    /// Provides methods for logging.
+    /// An event handler for new log messages.
     /// </summary>
-    public static class Logger
+    /// <param name="log">The message.</param>
+    public delegate void LogMessageHandler(Log.LogItem log);
+
+    /// <summary>
+    /// Provides support for primitive logging.
+    /// </summary>
+    public static class Log
     {
-        /// <summary>
-        /// Gets or sets a value indicating whether the logging of trace messages is enabled.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the logging of trace messages is enabled; otherwise, <c>false</c>.
-        /// </value>
-        public static bool IsTraceEnabled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the logging of debug messages is enabled.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the logging of debug messages is enabled; otherwise, <c>false</c>.
-        /// </value>
-        public static bool IsDebugEnabled { get; set; }
-
+        #region level(msg)
         /// <summary>
         /// Writes the diagnostic message at Trace level.
         /// </summary>
         /// <param name="message">The message to log.</param>
-        public static void Trace(string message)
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Trace(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            if (IsTraceEnabled)
-            {
-                Write(Level.Trace, message);
-            }
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Trace level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Trace(string message, params object[] args)
-        {
-            if (IsTraceEnabled)
-            {
-                Write(Level.Trace, string.Format(message, args));
-            }
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Trace level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Trace(string message, Exception exception)
-        {
-            if (IsTraceEnabled)
-            {
-                Write(Level.Trace, message + Environment.NewLine + ParseException(exception));
-            }
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Trace level.
-        /// </summary>
-        /// <param name="getMessage">A method which returns the message to log when called.</param>
-        public static void Trace(Func<string> getMessage)
-        {
-            if (IsTraceEnabled)
-            {
-                Write(Level.Trace, getMessage());
-            }
-        }
-
-
-        /// <summary>
-        /// Writes the diagnostic message at Info level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        public static void Debug(string message)
-        {
-            if (IsDebugEnabled)
-            {
-                Write(Level.Debug, message);
-            }
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Info level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Debug(string message, params object[] args)
-        {
-            if (IsDebugEnabled)
-            {
-                Write(Level.Debug, string.Format(message, args));
-            }
+            Write(Level.Trace, message, file, method, line);
         }
 
         /// <summary>
         /// Writes the diagnostic message at Debug level.
         /// </summary>
         /// <param name="message">The message to log.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Debug(string message, Exception exception)
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Debug(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            if (IsDebugEnabled)
+            Write(Level.Debug, message, file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Info level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Info(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Info, message, file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Warn level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Warn(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Warn, message, file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Error level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Error(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Error, message, file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Fatal level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Fatal(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Fatal, message, file, method, line);
+        }
+        #endregion
+
+        #region level(bytes)
+        /// <summary>
+        /// Writes the diagnostic message at Trace level.
+        /// </summary>
+        /// <param name="bytes">The byte array to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Trace(byte[] bytes, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Trace, bytes.HexDump(), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Debug level.
+        /// </summary>
+        /// <param name="bytes">The byte array to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Debug(byte[] bytes, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Debug, bytes.HexDump(), file, method, line);
+        }
+        #endregion
+
+        #region level(object)
+        /// <summary>
+        /// Writes the diagnostic message at Trace level.
+        /// </summary>
+        /// <param name="obj">The object to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Trace(object obj, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Trace, obj.ObjDump(), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Debug level.
+        /// </summary>
+        /// <param name="obj">The object to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Debug(object obj, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Debug, obj.ObjDump(), file, method, line);
+        }
+        #endregion
+
+        #region level(msg, ex)
+        /// <summary>
+        /// Writes the diagnostic message at Fatal level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">The associated exception.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Trace(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Trace, message + Environment.NewLine + ParseException(exception), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Debug level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">The associated exception.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Debug(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Debug, message + Environment.NewLine + ParseException(exception), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Info level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">The associated exception.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Info(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Info, message + Environment.NewLine + ParseException(exception), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Warn level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">The associated exception.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Warn(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Warn, message + Environment.NewLine + ParseException(exception), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Error level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">The associated exception.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Error(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Error, message + Environment.NewLine + ParseException(exception), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Fatal level.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="exception">The associated exception.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Fatal(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Fatal, message + Environment.NewLine + ParseException(exception), file, method, line);
+        }
+        #endregion
+
+        #region level(msg, args)
+        /// <summary>
+        /// Writes the diagnostic message at Trace level.
+        /// </summary>
+        /// <param name="message">The message format to log.</param>
+        /// <param name="fmtargs">The arguments to use to format the message.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Trace(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Trace, string.Format(message, fmtargs), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Debug level.
+        /// </summary>
+        /// <param name="message">The message format to log.</param>
+        /// <param name="fmtargs">The arguments to use to format the message.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Debug(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Debug, string.Format(message, fmtargs), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Info level.
+        /// </summary>
+        /// <param name="message">The message format to log.</param>
+        /// <param name="fmtargs">The arguments to use to format the message.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Info(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Info, string.Format(message, fmtargs), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Warn level.
+        /// </summary>
+        /// <param name="message">The message format to log.</param>
+        /// <param name="fmtargs">The arguments to use to format the message.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Warn(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Warn, string.Format(message, fmtargs), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Error level.
+        /// </summary>
+        /// <param name="message">The message format to log.</param>
+        /// <param name="fmtargs">The arguments to use to format the message.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Error(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Error, string.Format(message, fmtargs), file, method, line);
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Fatal level.
+        /// </summary>
+        /// <param name="message">The message format to log.</param>
+        /// <param name="fmtargs">The arguments to use to format the message.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Fatal(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            Write(Level.Fatal, string.Format(message, fmtargs), file, method, line);
+        }
+        #endregion
+
+        #region level(msgfunc)
+        /// <summary>
+        /// Writes the diagnostic message at Trace level.
+        /// </summary>
+        /// <param name="messagefunc">The function to call to get the message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Trace(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            try
             {
-                Write(Level.Debug, message + Environment.NewLine + ParseException(exception));
+                Write(Level.Trace, messagefunc(), file, method, line);
+            }
+            catch (Exception ex)
+            {
+                Warn("Exception during the evaluation of the message callback function.", ex, file, method, line);
+            }
+        }
+
+        /// <summary>
+        /// Writes the diagnostic message at Debug level.
+        /// </summary>
+        /// <param name="messagefunc">The function to call to get the message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        //[Conditional("DEBUG")]
+        public static void Debug(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        {
+            try
+            {
+                Write(Level.Debug, messagefunc(), file, method, line);
+            }
+            catch (Exception ex)
+            {
+                Warn("Exception during the evaluation of the message callback function.", ex, file, method, line);
             }
         }
 
         /// <summary>
         /// Writes the diagnostic message at Info level.
         /// </summary>
-        /// <param name="getMessage">A method which returns the message to log when called.</param>
-        public static void Debug(Func<string> getMessage)
+        /// <param name="messagefunc">The function to call to get the message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Info(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            if (IsDebugEnabled)
+            try
             {
-                Write(Level.Debug, getMessage());
+                Write(Level.Info, messagefunc(), file, method, line);
+            }
+            catch (Exception ex)
+            {
+                Warn("Exception during the evaluation of the message callback function.", ex, file, method, line);
             }
         }
 
         /// <summary>
-        /// Writes the diagnostic message at Info level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        public static void Info(string message)
-        {
-            Write(Level.Info, message);
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Info level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Info(string message, params object[] args)
-        {
-            Write(Level.Info, string.Format(message, args));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Info level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Info(string message, Exception exception)
-        {
-            Write(Level.Info, message + Environment.NewLine + ParseException(exception));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Info level.
-        /// </summary>
-        /// <param name="getMessage">A method which returns the message to log when called.</param>
-        public static void Info(Func<string> getMessage)
-        {
-            Write(Level.Info, getMessage());
-        }
-
-        /// <summary>
         /// Writes the diagnostic message at Warn level.
         /// </summary>
-        /// <param name="message">The message to log.</param>
-        public static void Warn(string message)
+        /// <param name="messagefunc">The function to call to get the message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Warn(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Warn, message);
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Warn level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Warn(string message, params object[] args)
-        {
-            Write(Level.Warn, string.Format(message, args));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Warn level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Warn(string message, Exception exception)
-        {
-            Write(Level.Warn, message + Environment.NewLine + ParseException(exception));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Warn level.
-        /// </summary>
-        /// <param name="getMessage">A method which returns the message to log when called.</param>
-        public static void Warn(Func<string> getMessage)
-        {
-            Write(Level.Warn, getMessage());
+            try
+            {
+                Write(Level.Warn, messagefunc(), file, method, line);
+            }
+            catch (Exception ex)
+            {
+                Warn("Exception during the evaluation of the message callback function.", ex, file, method, line);
+            }
         }
 
         /// <summary>
         /// Writes the diagnostic message at Error level.
         /// </summary>
-        /// <param name="message">The message to log.</param>
-        public static void Error(string message)
+        /// <param name="messagefunc">The function to call to get the message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Error(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Error, message);
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Error level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Error(string message, params object[] args)
-        {
-            Write(Level.Error, string.Format(message, args));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Error level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Error(string message, Exception exception)
-        {
-            Write(Level.Error, message + Environment.NewLine + ParseException(exception));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Error level.
-        /// </summary>
-        /// <param name="getMessage">A method which returns the message to log when called.</param>
-        public static void Error(Func<string> getMessage)
-        {
-            Write(Level.Error, getMessage());
+            try
+            {
+                Write(Level.Error, messagefunc(), file, method, line);
+            }
+            catch (Exception ex)
+            {
+                Warn("Exception during the evaluation of the message callback function.", ex, file, method, line);
+            }
         }
 
         /// <summary>
         /// Writes the diagnostic message at Fatal level.
         /// </summary>
-        /// <param name="message">The message to log.</param>
-        public static void Fatal(string message)
+        /// <param name="messagefunc">The function to call to get the message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Fatal(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Fatal, message);
+            try
+            {
+                Write(Level.Fatal, messagefunc(), file, method, line);
+            }
+            catch (Exception ex)
+            {
+                Warn("Exception during the evaluation of the message callback function.", ex, file, method, line);
+            }
         }
+        #endregion
 
+        #region assert(...)
         /// <summary>
-        /// Writes the diagnostic message at Fatal level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Fatal(string message, params object[] args)
-        {
-            Write(Level.Fatal, string.Format(message, args));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Fatal level.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Fatal(string message, Exception exception)
-        {
-            Write(Level.Fatal, message + Environment.NewLine + ParseException(exception));
-        }
-
-        /// <summary>
-        /// Writes the diagnostic message at Fatal level.
-        /// </summary>
-        /// <param name="getMessage">A method which returns the message to log when called.</param>
-        public static void Fatal(Func<string> getMessage)
-        {
-            Write(Level.Fatal, getMessage());
-        }
-
-        /// <summary>
-        /// Calls the specified method and logs it if it returns false or throws an exception.
+        /// Calls the specified method and logs the result.
         /// </summary>
         /// <param name="assertion">A method which will return a boolean indicating whether the assertion was successful.</param>
-        public static void Assert(Func<bool> assertion)
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Assert(Func<bool> assertion, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
             bool result;
 
@@ -293,34 +450,90 @@
             }
             catch (Exception ex)
             {
-                Write(Level.Warn, "Assertion thrown an unexpected exception:" + Environment.NewLine + ParseException(ex));
+                Write(Level.Warn, "Assertion threw an unexpected exception:" + Environment.NewLine + ParseException(ex), file, method, line);
                 return;
             }
 
             if (result)
             {
-                Write(Level.Debug, "Assertion successful.");
+                Write(Level.Debug, "Assertion successful.", file, method, line);
             }
             else
             {
-                Write(Level.Warn, "Assertion failed.");
+                Write(Level.Warn, "Assertion failed.", file, method, line);
             }
         }
 
         /// <summary>
-        /// Creates a log entry when the specified argument is false.
+        /// Logs the assertion result.
         /// </summary>
         /// <param name="result">A boolean indicating whether the assertion was successful.</param>
-        public static void Assert(bool result)
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        public static void Assert(bool result, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
             if (result)
             {
-                Write(Level.Debug, "Assertion successful.");
+                Write(Level.Debug, "Assertion successful.", file, method, line);
             }
             else
             {
-                Write(Level.Warn, "Assertion failed.");
+                Write(Level.Warn, "Assertion failed.", file, method, line);
             }
+        }
+        #endregion
+
+        /// <summary>
+        /// Gets or sets the current logging level.
+        /// </summary>
+        /// <value>The current logging level.</value>
+        public static Level LoggingLevel = Level.Debug;
+
+        /// <summary>
+        /// Occurs when a new message was added to the log.
+        /// </summary>
+        public static event LogMessageHandler NewMessage;
+
+        /// <summary>
+        /// Gets or sets the message container.
+        /// </summary>
+        /// <value>
+        /// The message container.
+        /// </value>
+        public static ConcurrentBag<LogItem> Messages { get; set; }
+
+        /// <summary>
+        /// Initializes the <see cref="Log" /> class.
+        /// </summary>
+        static Log()
+        {
+            Messages = new ConcurrentBag<LogItem>();
+        }
+
+        /// <summary>
+        /// Writes the specified diagnostic message to the log.
+        /// </summary>
+        /// <param name="level">The weight of the message.</param>
+        /// <param name="message">The message to log.</param>
+        /// <param name="file">The file where this message originates from.</param>
+        /// <param name="method">The method where this message originates from.</param>
+        /// <param name="line">The line where this message originates from.</param>
+        private static void Write(Level level, string message, string file, string method, int line)
+        {
+            if (level > LoggingLevel) return;
+
+            new Thread(() =>
+                {
+                    var log = new LogItem(DateTime.Now, level, file, method, line, message);
+
+                    Messages.Add(log);
+
+                    if (NewMessage != null)
+                    {
+                        NewMessage(log);
+                    }
+                }).Start();
         }
 
         /// <summary>
@@ -338,7 +551,7 @@
             sb.AppendLine(exception.GetType() + ": " + exception.Message);
             sb.AppendLine(exception.StackTrace);
 
-        if (exception.InnerException != null)
+            if (exception.InnerException != null)
             {
                 exception = exception.InnerException;
                 goto parseException;
@@ -346,29 +559,103 @@
 
             return sb.ToString();
         }
-        
-        /// <summary>
-        /// Writes the specified messages to the log.
-        /// </summary>
-        /// <param name="level">The weight of the message.</param>
-        /// <param name="message">The message to log.</param>
-        private static void Write(Level level, string message)
-        {
-            var frm = new StackTrace(2, true).GetFrame(0);
-            var log = string.Format("[{0:yyyy-MM-dd HH:mm:ss} / {1}] {2}:{3} / {4}.{5}(): {6}", DateTime.Now, level.ToString().ToUpper(), Path.GetFileName(frm.GetFileName()), frm.GetFileLineNumber(), frm.GetMethod().DeclaringType.FullName, frm.GetMethod().Name, message);
-        }
 
         /// <summary>
         /// The weight of the message.
         /// </summary>
-        private enum Level
+        public enum Level : int
         {
-            Trace,
-            Debug,
-            Info,
-            Warn,
-            Error,
-            Fatal
+            None  = 0,
+            Fatal = 1,
+            Error = 1 << 1,
+            Warn  = 1 << 2,
+            Info  = 1 << 3,
+            Debug = 1 << 4,
+            Trace = 1 << 5
+        }
+
+        /// <summary>
+        /// Represents a log message.
+        /// </summary>
+        public class LogItem
+        {
+            /// <summary>
+            /// Gets or sets the time when the logged message occurred.
+            /// </summary>
+            /// <value>
+            /// The time when the logged message occurred.
+            /// </value>
+            public readonly DateTime Time;
+
+            /// <summary>
+            /// Gets or sets the weight of the logged message.
+            /// </summary>
+            /// <value>
+            /// The weight of the logged message.
+            /// </value>
+            public readonly Level Level;
+
+            /// <summary>
+            /// Gets or sets the file where the logged message occurred.
+            /// </summary>
+            /// <value>
+            /// The file where the logged message occurred.
+            /// </value>
+            public readonly string File;
+
+            /// <summary>
+            /// Gets or sets the method in which the logged message occurred.
+            /// </summary>
+            /// <value>
+            /// The method in which the logged message occurred.
+            /// </value>
+            public readonly string Method;
+
+            /// <summary>
+            /// Gets or sets the line where the logged message occurred.
+            /// </summary>
+            /// <value>
+            /// The line where the logged message occurred.
+            /// </value>
+            public readonly int Line;
+
+            /// <summary>
+            /// Gets or sets the logged message.
+            /// </summary>
+            /// <value>
+            /// The logged message.
+            /// </value>
+            public readonly string Message;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="LogItem" /> class.
+            /// </summary>
+            /// <param name="time">The time when the logged message occurred.</param>
+            /// <param name="level">The weight of the logged message.</param>
+            /// <param name="file">The file where the logged message occurred.</param>
+            /// <param name="method">The method in which the logged message occurred.</param>
+            /// <param name="line">The line where the logged message occurred.</param>
+            /// <param name="message">The logged message.</param>
+            public LogItem(DateTime time, Level level, string file, string method, int line, string message)
+            {
+                Time    = time;
+                Level   = level;
+                File    = file;
+                Method  = method;
+                Line    = line;
+                Message = message;
+            }
+
+            /// <summary>
+            /// Returns a <see cref="System.String" /> that represents this instance.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="System.String" /> that represents this instance.
+            /// </returns>
+            public override string ToString()
+            {
+                return string.Format("{0:HH:mm:ss.fff} {1} {2}/{3}():{4} - {5}{6}", Time, Level.ToString().ToUpper(), Path.GetFileName(File), Method, Line, Message, Environment.NewLine);
+            }
         }
     }
 }

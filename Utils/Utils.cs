@@ -34,6 +34,8 @@
 
     using RoliSoft.TVShowTracker.ShowNames;
 
+    using Formatting = Newtonsoft.Json.Formatting;
+
     /// <summary>
     /// Provides various little utility functions.
     /// </summary>
@@ -266,7 +268,16 @@
         /// <param name="arguments">The arguments.</param>
         public static void Run(string process, string arguments = null)
         {
-            try { Process.Start(process, arguments); } catch { }
+            Log.Debug("Running process: {0} {1}", new[] { process, arguments });
+
+            try
+            {
+                Process.Start(process, arguments);
+            }
+            catch (Win32Exception ex)
+            {
+                Log.Warn("Exception while running: " + process + " " + arguments, ex);
+            }
         }
 
         /// <summary>
@@ -276,6 +287,8 @@
         /// <param name="arguments">The arguments.</param>
         public static void RunElevated(string process, string arguments = null)
         {
+            Log.Debug("Running process with elevation: runas {0} {1}", new[] { process, arguments });
+
             var pi = new ProcessStartInfo
                          {
                              Verb      = "runas",
@@ -283,7 +296,14 @@
                              Arguments = arguments
                          };
 
-            try { Process.Start(pi); } catch (Win32Exception) { }
+            try
+            {
+                Process.Start(pi);
+            }
+            catch (Win32Exception ex)
+            {
+                Log.Warn("Exception while running: " + process + " " + arguments, ex);
+            }
         }
 
         /// <summary>
@@ -295,6 +315,8 @@
         /// <returns>Console output.</returns>
         public static string RunAndRead(string process, string arguments = null, bool elevate = false)
         {
+            Log.Debug("Running process with I/O redirection{0} {1} {2}", new[] { elevate ? " and elevation: runas" : ":", process, arguments });
+
             var sb = new StringBuilder();
             var p  = new Process
                 {
@@ -340,7 +362,10 @@
                 p.BeginErrorReadLine();
                 p.WaitForExit();
             }
-            catch (Win32Exception) { }
+            catch (Win32Exception ex)
+            {
+                Log.Warn("Exception while running: " + process + " " + arguments, ex);
+            }
 
             return sb.ToString();
         }
@@ -583,6 +608,9 @@
         /// </returns>
         public static string GetURL(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
+            var id = Rand.Next(short.MaxValue);
+            Log.Debug("HTTP#{0} {1} {2}", new[] { id.ToString(), postData != null ? "POST" : "GET", url });
+
             var req = (HttpWebRequest)WebRequest.Create(url);
             var domain = new Uri(url).Host.Replace("www.", string.Empty);
 
@@ -623,6 +651,7 @@
                 }
 
                 req.Timeout += 20000;
+                Log.Debug("HTTP#" + id + " is proxied.");
             }
             else
             {
@@ -636,9 +665,9 @@
 
             if ((postData is string && !string.IsNullOrWhiteSpace(postData as string)) || (postData is byte[] && (postData as byte[]).Length != 0))
             {
-                    req.Method                    = "POST";
-                    req.ContentType               = "application/x-www-form-urlencoded";
-                    req.AllowWriteStreamBuffering = true;
+                req.Method                    = "POST";
+                req.ContentType               = "application/x-www-form-urlencoded";
+                req.AllowWriteStreamBuffering = true;
             }
 
             req.CookieContainer = new CookieContainer();
@@ -692,6 +721,8 @@
             }
             catch (WebException ex)
             {
+                Log.Debug("HTTP#" + id + " threw an exception, " + (ex.Response == null ? "without a response; rethrowing exception" : "with response; returning response") + ".", ex);
+
                 if (ex.Response != null)
                 {
                     resp = (HttpWebResponse)ex.Response;
@@ -780,6 +811,7 @@
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
+                Log.Debug("Certificate " + certificate.Subject + " has been deemed valid by Windows.");
                 return true;
             }
 
@@ -788,15 +820,18 @@
                 if (TrustedCertificates.ContainsKey(element.Certificate.Subject)
                  && TrustedCertificates[element.Certificate.Subject] == element.Certificate.GetPublicKeyString())
                 {
+                    Log.Debug("Certificate " + certificate.Subject + " contains a software-trusted certificate in its chain.");
                     return true;
                 }
             }
 
             if (sender is HttpWebRequest && IgnoreInvalidCertificatesFor.Contains(Regex.Replace((sender as HttpWebRequest).Host, @"^www\.", string.Empty)))
             {
+                Log.Debug("Certificate " + certificate.Subject + " is invalid, but " + (sender as HttpWebRequest).Host + " is force-accepted.");
                 return true;
             }
 
+            Log.Debug("Certificate " + certificate.Subject + " is invalid, dropping connection to " + (sender as HttpWebRequest).Host + ".");
             return false;
         }
 
@@ -1057,7 +1092,9 @@
             finally
             {
                 if (stream != null)
+                {
                     stream.Close();
+                }
             }
 
             return false;
@@ -1553,6 +1590,114 @@
             }
 
             return cookiez.ToString();
+        }
+
+        /// <summary>
+        /// Dumps the byte array into a readable format for debugging purposes.
+        /// </summary>
+        /// <param name="bytes">The byte array to dump.</param>
+        /// <param name="bytesPerLine">The number of bytes to display on each line.</param>
+        /// <param name="lowAscii">if set to <c>true</c> low ASCII characters, <code>0x00</code> - <code>0x1F</code>, will be represented with their counterpart Unicode symbols.</param>
+        /// <returns>Readable hex dump.</returns>
+        public static string HexDump(this byte[] bytes, int bytesPerLine = 26, bool lowAscii = false)
+        {
+            if (bytes == null)
+            {
+                return "<null>";
+            }
+
+            var chars = "0123456789ABCDEF".ToCharArray();
+            var firstHexCol = 8 + 2;
+            var firstCharCol = firstHexCol + bytesPerLine * 3 + 1;
+            var lineLength = firstCharCol + bytesPerLine + Environment.NewLine.Length;
+            var line = (new String(' ', lineLength - 2) + Environment.NewLine).ToCharArray();
+            var expectedLines = (bytes.Length + bytesPerLine - 1) / bytesPerLine;
+            var sb = new StringBuilder(expectedLines * lineLength);
+
+            for (var i = 0; i < bytes.Length; i += bytesPerLine)
+            {
+                line[0] = chars[(i >> 28) & 0xF];
+                line[1] = chars[(i >> 24) & 0xF];
+                line[2] = chars[(i >> 20) & 0xF];
+                line[3] = chars[(i >> 16) & 0xF];
+                line[4] = chars[(i >> 12) & 0xF];
+                line[5] = chars[(i >> 8) & 0xF];
+                line[6] = chars[(i >> 4) & 0xF];
+                line[7] = chars[(i >> 0) & 0xF];
+
+                var hexCol = firstHexCol;
+                var charCol = firstCharCol;
+
+                for (var j = 0; j < bytesPerLine; j++)
+                {
+                    if (i + j >= bytes.Length)
+                    {
+                        line[hexCol] = ' ';
+                        line[hexCol + 1] = ' ';
+                        line[charCol] = ' ';
+                    }
+                    else
+                    {
+                        var b = bytes[i + j];
+                        var c = (char)b;
+
+                        if (b < 32)
+                        {
+                            if (lowAscii)
+                            {
+                                c = (char)(9216 + b);
+                            }
+                            else
+                            {
+                                c = '·';
+                            }
+                        }
+
+                        line[hexCol] = chars[(b >> 4) & 0xF];
+                        line[hexCol + 1] = chars[b & 0xF];
+                        line[charCol] = c;
+                    }
+
+                    hexCol += 3;
+                    charCol++;
+                }
+
+                sb.Append("  ");
+                sb.Append(line);
+            }
+
+            return "Dump of byte[" + bytes.Length + "]:" + Environment.NewLine + sb.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Dumps the object into a readable format for debugging purposes.
+        /// </summary>
+        /// <param name="value">The object to dump.</param>
+        /// <returns>
+        /// Object in string format.
+        /// </returns>
+        public static string ObjDump(this object value)
+        {
+            if (value == null)
+            {
+                return "<null>";
+            }
+
+            var json = JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
+            
+            return "Dump of type " + CleanTypeName(value.GetType().ToString()) + ":" + Environment.NewLine + json;
+        }
+
+        /// <summary>
+        /// Cleans the name of the type.
+        /// </summary>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// Clean type name.
+        /// </returns>
+        public static string CleanTypeName(string name)
+        {
+            return Regex.Replace(Regex.Replace(name, @"System\.(?:[A-z]+\.)*", string.Empty), @"`\d{1,2}\[", "<").Replace(']', '>');
         }
 
         /// <summary>
