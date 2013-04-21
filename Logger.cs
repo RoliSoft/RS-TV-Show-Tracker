@@ -557,7 +557,7 @@
                 goto parseException;
             }
 
-            return sb.ToString();
+            return sb.ToString().TrimEnd();
         }
 
         /// <summary>

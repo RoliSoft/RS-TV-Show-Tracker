@@ -302,7 +302,7 @@
             VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty) + " b" + ver.Revision + (IsNightly ? " nightly" : string.Empty);
 
             Log.Info(Software + " " + VersionFormatted);
-            Log.Info("Compiled on " + BuildMachine + " from commit " + GitRevision + " at " + CompileTime.ToString("u"));
+            Log.Info("Compiled on " + BuildMachine + " at " + CompileTime.ToString("yyyy'-'MM'-'dd HH':'mm':'ss") + " from commit " + GitRevision);
 
             try
             {
@@ -312,7 +312,7 @@
             }
             catch (ArgumentException ex)
             {
-                Log.Debug("Error while loading AppDataPath/InstallPath/UACVirtualPath.", ex);
+                Log.Warn("Error while loading AppDataPath/InstallPath/UACVirtualPath.", ex);
             }
 
             if (AppDataPath != null && !Directory.Exists(AppDataPath))

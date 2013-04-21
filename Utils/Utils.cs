@@ -609,6 +609,7 @@
         public static string GetURL(string url, object postData = null, string cookies = null, Encoding encoding = null, string userAgent = null, int timeout = 10000, Dictionary<string, string> headers = null, string proxy = null, Action<HttpWebRequest> request = null, Action<HttpWebResponse> response = null)
         {
             var id = Rand.Next(short.MaxValue);
+            var st = DateTime.Now;
             Log.Debug("HTTP#{0} {1} {2}", new[] { id.ToString(), postData != null ? "POST" : "GET", url });
 
             var req = (HttpWebRequest)WebRequest.Create(url);
@@ -721,7 +722,7 @@
             }
             catch (WebException ex)
             {
-                Log.Debug("HTTP#" + id + " threw an exception, " + (ex.Response == null ? "without a response; rethrowing exception" : "with response; returning response") + ".", ex);
+                Log.Warn("HTTP#" + id + " threw an exception, " + (ex.Response == null ? "without a response; rethrowing exception" : "with response; returning response") + ".", ex);
 
                 if (ex.Response != null)
                 {
@@ -740,6 +741,7 @@
                 response(resp);
             }
 
+
             if (encoding is Base64Encoding)
             {
                 using (var ms = new MemoryStream())
@@ -753,6 +755,9 @@
                     }
                     while (read > 0);
 
+                    Log.Debug("HTTP#" + id + " is " + GetFileSize(ms.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                    Log.Trace("HTTP#" + id + " is binary data; trace not available.");
+
                     return Convert.ToBase64String(ms.ToArray());
                 }
             }
@@ -760,7 +765,12 @@
             {
                 using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
                 {
-                    return sr.ReadToEnd();
+                    var str = sr.ReadToEnd();
+
+                    Log.Debug("HTTP#" + id + " is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                    Log.Trace("HTTP#" + id + Environment.NewLine + str);
+
+                    return str;
                 }
             }
         }
@@ -811,7 +821,7 @@
         {
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
-                Log.Debug("Certificate " + certificate.Subject + " has been deemed valid by Windows.");
+                Log.Debug(certificate.Subject + " has been deemed valid by Windows.");
                 return true;
             }
 
@@ -820,18 +830,18 @@
                 if (TrustedCertificates.ContainsKey(element.Certificate.Subject)
                  && TrustedCertificates[element.Certificate.Subject] == element.Certificate.GetPublicKeyString())
                 {
-                    Log.Debug("Certificate " + certificate.Subject + " contains a software-trusted certificate in its chain.");
+                    Log.Debug(certificate.Subject + " contains a software-trusted certificate in its chain.");
                     return true;
                 }
             }
 
             if (sender is HttpWebRequest && IgnoreInvalidCertificatesFor.Contains(Regex.Replace((sender as HttpWebRequest).Host, @"^www\.", string.Empty)))
             {
-                Log.Debug("Certificate " + certificate.Subject + " is invalid, but " + (sender as HttpWebRequest).Host + " is force-accepted.");
+                Log.Debug(certificate.Subject + " is invalid, but " + (sender as HttpWebRequest).Host + " is force-accepted.");
                 return true;
             }
 
-            Log.Debug("Certificate " + certificate.Subject + " is invalid, dropping connection to " + (sender as HttpWebRequest).Host + ".");
+            Log.Warn(certificate.Subject + " is invalid, dropping connection to " + (sender as HttpWebRequest).Host + ".");
             return false;
         }
 

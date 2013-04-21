@@ -226,6 +226,8 @@
         /// </summary>
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
+            Log.Trace("Received Windows message 0x" + msg.ToString("X"));
+
             if (msg == WM_SHOWFIRSTINSTANCE)
             {
                 ShowMenuClick();
@@ -777,6 +779,26 @@
             updater.UpdateAsync();
         }
 
+        private LogWindow _logWnd;
+
+        /// <summary>
+        /// Handles the Click event of the ViewSoftwareLogs control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void ViewSoftwareLogsClick(object sender, RoutedEventArgs e)
+        {
+            if (_logWnd == null || !_logWnd.IsVisible)
+            {
+                _logWnd = new LogWindow();
+                _logWnd.Show();
+            }
+            else
+            {
+                _logWnd.Activate();
+            }
+        }
+
         /// <summary>
         /// Handles the Click event of the MinimizeToTray control.
         /// </summary>
@@ -1150,8 +1172,11 @@
         {
             if (ex is ThreadAbortException)
             {
+                Log.Trace("Unhandled ThreadAbortException.", ex);
                 return;
             }
+
+            Log.Error("Unhandled exception.", ex);
 
             var type = ex.GetType().Name;
             var count = 0;
@@ -1293,7 +1318,19 @@
         /// <param name="ex">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
         private static void ReportException(string ex)
         {
-            new Task(() => { try { API.ReportError(ex); } catch { } }).Start();
+            new Task(() =>
+                {
+                    Log.Info("Sending exception to lab.rolisoft.net for analysis." + Environment.NewLine + ex);
+
+                    try
+                    {
+                        API.ReportError(ex);
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log.Error("Exception while sending exception to lab.rolisoft.net. Yo dwag.", ex2);
+                    }
+                }).Start();
         }
         #endregion
     }

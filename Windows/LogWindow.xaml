@@ -1,0 +1,68 @@
+﻿<Shell:GlassWindow x:Class="RoliSoft.TVShowTracker.LogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Shell="clr-namespace:Microsoft.WindowsAPICodePack.Shell;assembly=Microsoft.WindowsAPICodePack.Shell"
+        TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
+        Title="Logging" Height="505" Width="1000" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/log.png" Loaded="WindowLoaded" Closing="WindowClosing" ResizeMode="NoResize">
+    <Grid>
+        <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
+            <TabControl.Effect>
+                <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
+            </TabControl.Effect>
+            <TabItem Header="Log viewer" Name="introTabItem" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
+                <Grid Name="introGrid">
+                    <Rectangle Height="20" VerticalAlignment="Top">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                <GradientStop Color="White" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+
+                    <ListView Name="logListView" Margin="10" Padding="-2,-1">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Width="30">
+                                    <GridViewColumnHeader>
+                                        <Image Source="/RSTVShowTracker;component/Images/document-insert.png" Margin="0,0,0,-2" Height="16" Width="16" />
+                                    </GridViewColumnHeader>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Width="30" Margin="0" HorizontalAlignment="Center">
+                                                <Image Source="{Binding Icon}" ToolTip="{Binding Level}" Height="16" Width="16" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Time" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Time}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Location" Width="250" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Location}" Width="230" TextAlignment="Right" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
+                                    <GridViewColumnHeader Content="Message" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Message}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Shell:GlassWindow>
