@@ -493,6 +493,8 @@
         /// </summary>
         public void Restart()
         {
+            Log.Info("The application is silently restarting.");
+
             Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location, "-hide");
             Application.Current.Shutdown();
         }

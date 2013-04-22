@@ -41,6 +41,8 @@
         public static void Start()
         {
             TaskTimer.Start();
+
+            Log.Debug("Started background tasks timer.");
         }
 
         /// <summary>
@@ -52,19 +54,72 @@
         {
             if (InProgress)
             {
+                Log.Warn("It is time to run Tasks(), but the last one didn't finish yet so it'll be dropped.");
                 return;
             }
 
+            var st = DateTime.Now;
+            Log.Debug("Running background tasks...");
+
             InProgress = true;
 
-            try { Library.StartWatching(); }         catch { }
-            try { CheckSoftwareUpdate(); }           catch { }
-            try { CheckDatabaseUpdate(); }           catch { }
-            try { CheckShowListUpdate(); }           catch { }
-            try { ProcessMonitor.CheckOpenFiles(); } catch { }
-            try { RestartIfNeeded(); }               catch { }
+            try
+            {
+                Library.StartWatching();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while reindexing the library during background tasks.", ex);
+            }
+
+            try
+            {
+                CheckSoftwareUpdate();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while checking for software update during background tasks.", ex);
+            }
+
+            try
+            {
+                CheckDatabaseUpdate();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while checking for database update during background tasks.", ex);
+            }
+
+            try
+            {
+                CheckShowListUpdate();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while checking for show list update during background tasks.", ex);
+            }
+
+            try
+            {
+                ProcessMonitor.CheckOpenFiles();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while checking for open files during background tasks.", ex);
+            }
+
+            try
+            {
+                RestartIfNeeded();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while checking if a software restart is required during background tasks.", ex);
+            }
 
             InProgress = false;
+
+            Log.Debug("Background tasks took " + (DateTime.Now - st).TotalSeconds + "s.");
         }
 
         /// <summary>
@@ -84,8 +139,10 @@
         /// </summary>
         public static void CheckDatabaseUpdate()
         {
-            if ((DateTime.Now - (Database.Setting("update") ?? "0").ToDouble().GetUnixTimestamp()).TotalHours > 10 && !Updater.InProgress)
+            var ts = DateTime.Now - (Database.Setting("update") ?? "0").ToDouble().GetUnixTimestamp();
+            if (ts.TotalHours > 10 && !Updater.InProgress)
             {
+                Log.Debug("The database was last updated " + ts.TotalHours + " hours ago, starting new update.");
                 MainWindow.Active.Run(() => MainWindow.Active.UpdateDatabaseClick());
             }
         }
@@ -97,15 +154,18 @@
         {
             var fn = Path.Combine(Signature.InstallPath, @"misc\tvshows");
 
-            if ((DateTime.Now - File.GetLastWriteTime(fn)).TotalDays > 1)
+            var ts1 = DateTime.Now - File.GetLastWriteTime(fn);
+            if (ts1.TotalDays > 1)
             {
+                Log.Debug("The known TV show names were last updated " + ts.TotalHours + " hours ago, downloading new list.");
                 FileNames.Parser.GetAllKnownTVShows();
             }
 
             var fn2 = Path.Combine(Signature.InstallPath, @"misc\linkchecker");
-
-            if ((DateTime.Now - File.GetLastWriteTime(fn2)).TotalDays > 1)
+            var ts2 = DateTime.Now - File.GetLastWriteTime(fn2);
+            if (ts2.TotalDays > 1)
             {
+                Log.Debug("The link checker definitions were last updated " + ts2.TotalHours + " hours ago, downloading new list.");
                 Parsers.LinkCheckers.Engines.UniversalEngine.GetLinkCheckerDefinitions();
             }
         }
@@ -116,13 +176,16 @@
         public static void RestartIfNeeded()
         {
             var memlimit = Settings.Get("Memory Usage Limit", 512l);
+            var memusage = Process.GetCurrentProcess().WorkingSet64;
+
+            Log.Debug("The current memory usage is " + Utils.GetFileSize(memusage) + "; " + (memlimit < 256 ? "auto-restart is disabled." : "auto-restarting when it exceeds " + memlimit + " MB."));
 
             if (memlimit < 256)
             {
                 return;
             }
 
-            if ((memlimit * 1048576) < Process.GetCurrentProcess().WorkingSet64)
+            if ((memlimit * 1048576) < memusage)
             {
                 MainWindow.Active.Restart();
             }

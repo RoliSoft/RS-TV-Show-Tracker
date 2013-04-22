@@ -60,6 +60,8 @@
                 };
 
             MediaObject.ENCODE_UTF8 = false;
+
+            Log.Debug("Initialized UPnP device info.");
         }
 
         /// <summary>
@@ -69,13 +71,17 @@
         {
             if (IsRunning)
             {
+                Log.Info("An UPnP/DLNA server start was requested, but it is already running.");
                 Stop();
             }
 
             if (!Signature.IsActivated)
             {
+                Log.Error("An UPnP/DLNA server start was requested, but the software is not activated.");
                 return;
             }
+
+            Log.Info("Starting UPnP/DLNA server...");
 
             _ms = new MediaServerDevice(_di, null, true, "http-get:*:*:*", "");
             _dw = new UPnPDeviceWatcher(_ms._Device);
@@ -107,6 +113,8 @@
         /// </summary>
         public static void Stop()
         {
+            Log.Info("Stopping UPnP/DLNA server...");
+
             IsRunning = false;
 
             _ms.Stop();
@@ -125,6 +133,9 @@
                 Stop();
                 return;
             }
+
+            var st = DateTime.Now;
+            Log.Debug("Rebuilding UPnP/DLNA library...");
 
             MediaBuilder.SetNextID(0);
 
@@ -205,6 +216,8 @@
                     _ms.Root.AddObject(tvs.Value, true);
                 }
             }
+
+            Log.Debug("Rebuilt UPnP/DLNA library in " + (DateTime.Now - st).TotalSeconds + "s, all episodes menu has " + allEps.ChildCount + " entries.");
         }
 
         /// <summary>

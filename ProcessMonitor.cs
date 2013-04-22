@@ -84,21 +84,25 @@
         /// </summary>
         public static void CheckOpenFiles()
         {
+            Log.Debug("Checking for open files...");
+
             var netmon = Settings.Get<bool>("Monitor Network Shares");
 
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
             try { procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName)); } catch { }
 
-            if (!procs.Any() && !netmon)
+            if (!procs.Any() && !netmon && !UPnP.IsRunning)
             {
+                Log.Debug("No processes specified to monitor and network share monitoring is disabled.");
                 return;
             }
 
             var pids = GetPIDs(procs).Distinct().ToList();
 
-            if (!pids.Any() && !netmon)
+            if (!pids.Any() && !netmon && !UPnP.IsRunning)
             {
+                Log.Debug("Unable to get at least one PID for the specified processes and network share monitoring is disabled.");
                 return;
             }
 
@@ -106,13 +110,29 @@
 
             if (Signature.IsActivated && UPnP.IsRunning)
             {
-                try { files.AddRange(UPnP.GetActiveTransfers()); } catch { }
+                try
+                {
+                    files.AddRange(UPnP.GetActiveTransfers());
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Cannot get active transfer list from the UPnP/DLNA server due to an exception.", ex);
+                }
             }
 
             if (Signature.IsActivated && netmon)
             {
-                try { files.AddRange(NetworkShares.GetActiveTransfers()); } catch { }
+                try
+                {
+                    files.AddRange(NetworkShares.GetActiveTransfers());
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Cannot get active network share transfer list from Windows due to an exception.", ex);
+                }
             }
+
+            Log.Debug(files.Count + " open file handles detected for PID: " + string.Join(", ", pids).TrimEnd(", ".ToCharArray()) + ".");
 
             foreach (var show in Database.TVShows)
             {
@@ -126,6 +146,8 @@
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
                         if (pf.Success && show.Value.Name == pf.Show)
                         {
+                            Log.Debug("Identified open file " + file.Name + " as " + pf + ".");
+
                             if (!OpenFiles.Contains(file.ToString()))
                             {
                                 // add to open files list
@@ -170,6 +192,7 @@
 
             if (@new)
             {
+                Log.Debug("Marking " + file + " as seen.");
                 Database.TVShows[showid].SaveTracking();
                 PostToSocial(file);
             }
@@ -185,6 +208,7 @@
         {
             if (Settings.Get("Post only recent", true) && (DateTime.Now - file.Airdate).TotalDays > 21)
             {
+                Log.Debug("Not posting " + file + " to social networks because it is not a recent episode.");
                 return;
             }
 
@@ -196,6 +220,7 @@
                 case "black":
                     if (listed)
                     {
+                        Log.Debug("Not posting " + file + " to social networks because the show is blacklisted.");
                         return;
                     }
                     break;
@@ -203,6 +228,7 @@
                 case "white":
                     if (!listed)
                     {
+                        Log.Debug("Not posting " + file + " to social networks because the show is not whitelisted.");
                         return;
                     }
                     break;
@@ -225,6 +251,7 @@
                     }
                     else
                     {
+                        Log.Debug("Not posting " + file + " to " + engine.Name + " because it required OAuth tokens are missing.");
                         continue;
                     }
                 }
@@ -236,7 +263,15 @@
                     return;
                 }
 
-                try { engine.PostMessage(FileNames.Parser.FormatFileName(format, file)); } catch { }
+                try
+                {
+                    engine.PostMessage(FileNames.Parser.FormatFileName(format, file));
+                    Log.Debug("Successfully posted " + file + " to " + engine.Name + ".");
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Unhandled exception while posting " + file + " to " + engine.Name + ".", ex);
+                }
             }
         }
     }

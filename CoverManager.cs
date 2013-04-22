@@ -37,7 +37,14 @@
         {
             if (!Directory.Exists(Location))
             {
-                try { Directory.CreateDirectory(Location); } catch { }
+                try
+                {
+                    Directory.CreateDirectory(Location);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Unable to create cover directory to " + Location, ex);
+                }
             }
         }
 
@@ -70,6 +77,8 @@
                 goto success;
             }
 
+            Log.Info("Getting cover for " + show + "...");
+
             string url;
 
             // try to find it on The TVDB
@@ -86,7 +95,10 @@
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception while searching for cover for " + show + " on TVDB.", ex);
+            }
 
             // try to find it on IMDb
 
@@ -102,7 +114,10 @@
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception while searching for cover for " + show + " on IMDb.", ex);
+            }
 
             // try to find it on Amazon
 
@@ -118,7 +133,10 @@
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception while searching for cover for " + show + " on Amazon.", ex);
+            }
 
             // we were out of luck, but fuck that, we'll draw our own cover! with blackjack. and hookers. in fact, forget the cover.
 
@@ -138,6 +156,8 @@
         /// </returns>
         public static string GetCoverFromTVDB(string show)
         {
+            Log.Debug("Getting cover for " + show + " from TVDB...");
+
             var tvdb = new TVDB();
             var res  = tvdb.GetID(show).ToList();
 
@@ -149,7 +169,16 @@
                 {
                     return guide.Cover;
                 }
+                else
+                {
+                    Log.Debug("TVDB doesn't have a cover associated to " + show + ".");
+                }
             }
+            else
+            {
+                Log.Debug("No shows were found on TVDB matching " + show + ".");
+            }
+
             return null;
         }
 
@@ -162,12 +191,18 @@
         /// </returns>
         public static string GetCoverFromIMDb(string show)
         {
+            Log.Debug("Getting cover for " + show + " from IMDb...");
+
             var imdb = new IMDb();
             var res  = imdb.GetID(show).ToList();
 
             if (res.Count != 0 && !string.IsNullOrWhiteSpace(res[0].Cover) && !res[0].Cover.EndsWith("/tv_series.gif"))
             {
                 return Regex.Replace(res[0].Cover, @"@@.+\.", "@@.");
+            }
+            else
+            {
+                Log.Debug("No shows or covers were found on IMDb matching " + show + ".");
             }
 
             return null;
@@ -182,6 +217,8 @@
         /// </returns>
         public static string GetCoverFromAmazon(string show)
         {
+            Log.Debug("Getting cover for " + show + " from Amazon...");
+
             var html = Utils.GetHTML("http://www.amazon.com/gp/search/ref=sr_in_-2_p_n_format_browse-bi_5?rh=n%3A2625373011%2Ck%3A%2Cp_n_format_browse-bin%3A2650304011%7C2650305011%7C2650307011%7C2650308011%7C2650310011%7C2650309011&bbn=2625373011&ie=UTF8&qid=1324847845&rnid=2650303011&keywords=" + Utils.EncodeURL(show));
             var imgs = html.DocumentNode.SelectNodes("//img[@class='productImage' or @alt='Product Details']");
 
@@ -193,6 +230,14 @@
                 {
                     return Regex.Replace(src, @"\._[^_]+_\.", "._SCRM_.");
                 }
+                else
+                {
+                    Log.Debug("Amazon entries don't have a cover associated to " + show + ".");
+                }
+            }
+            else
+            {
+                Log.Debug("No shows were found on Amazon matching " + show + ".");
             }
 
             return null;
@@ -208,12 +253,15 @@
         /// </returns>
         private static bool DownloadCover(string url, string path)
         {
+            Log.Debug("Downloading cover " + url + " to " + path + "...");
+
             try
             {
                 new WebClient().DownloadFile(url, path);
             }
-            catch
+            catch (Exception ex)
             {
+                Log.Warn("Unable to download cover due to exception.", ex);
                 return false;
             }
 
@@ -227,6 +275,8 @@
         /// <param name="path">The path where to store the cover image.</param>
         private static void DrawCover(string title, string path)
         {
+            Log.Debug("Drawing a cover for " + title + "...");
+
             var help = "covers/" + Utils.CreateSlug(title, false) + ".jpg";
             var font = new Font("Calibri", 72, FontStyle.Bold);
             var fon2 = new Font("Calibri", 48);
@@ -257,7 +307,14 @@
             grap.Dispose();
             imag.Dispose();
 
-            try { ima2.Save(path, ImageFormat.Jpeg); } catch { }
+            try
+            {
+                ima2.Save(path, ImageFormat.Jpeg);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception while saving made-up cover for " + title + ".", ex);
+            }
 
             gra2.Dispose();
             ima2.Dispose();

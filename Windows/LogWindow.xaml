@@ -46,7 +46,7 @@
                                     <GridViewColumnHeader Content="Location" Width="250" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Location}" Width="230" TextAlignment="Right" />
+                                            <TextBlock Text="{Binding Location}" Width="240" TextAlignment="Right" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>

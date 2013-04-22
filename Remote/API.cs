@@ -114,7 +114,7 @@
 
                 if (Signature.IsActivated)
                 {
-                    head["X-Key"] = Signature.ActivationChecksum;
+                    head["X-Key-Crc"] = Signature.ActivationChecksum;
                 }
 
                 if (!string.IsNullOrWhiteSpace(user))
