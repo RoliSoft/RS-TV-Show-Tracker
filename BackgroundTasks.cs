@@ -157,7 +157,7 @@
             var ts1 = DateTime.Now - File.GetLastWriteTime(fn);
             if (ts1.TotalDays > 1)
             {
-                Log.Debug("The known TV show names were last updated " + ts.TotalHours + " hours ago, downloading new list.");
+                Log.Debug("The known TV show names were last updated " + ts1.TotalHours + " hours ago, downloading new list.");
                 FileNames.Parser.GetAllKnownTVShows();
             }
 

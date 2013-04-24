@@ -60,8 +60,6 @@
                 };
 
             MediaObject.ENCODE_UTF8 = false;
-
-            Log.Debug("Initialized UPnP device info.");
         }
 
         /// <summary>
