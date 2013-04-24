@@ -226,7 +226,7 @@
         /// </summary>
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            Log.Trace("Received Windows message 0x" + msg.ToString("X"));
+            Log.Trace("Received Windows message 0x{0:X}", new[] { msg });
 
             if (msg == WM_SHOWFIRSTINSTANCE)
             {

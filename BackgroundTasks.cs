@@ -40,9 +40,9 @@
         /// </summary>
         public static void Start()
         {
-            TaskTimer.Start();
+            Log.Debug("Starting background tasks timer...");
 
-            Log.Debug("Started background tasks timer.");
+            TaskTimer.Start();
         }
 
         /// <summary>

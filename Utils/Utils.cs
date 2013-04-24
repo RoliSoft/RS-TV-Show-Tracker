@@ -5,7 +5,6 @@
     using System.Compat.Web;
     using System.ComponentModel;
     using System.Diagnostics;
-    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -255,10 +254,11 @@
         /// </summary>
         /// <param name="number">The number.</param>
         /// <param name="unit">The unit.</param>
+        /// <param name="addis">if set to <c>true</c> "is" or "are" will be appended.</param>
         /// <returns>Formatted number.</returns>
-        public static string FormatNumber(int number, string unit)
+        public static string FormatNumber(int number, string unit, bool addis = false)
         {
-            return number + " " + unit + (number != 1 ? "s" : string.Empty);
+            return number + " " + unit + (number != 1 ? "s" : string.Empty) + (addis ? " " + (number != 1 ? "are" : "is") : string.Empty);
         }
 
         /// <summary>
@@ -744,6 +744,8 @@
 
             if (encoding is Base64Encoding)
             {
+                byte[] res;
+
                 using (var ms = new MemoryStream())
                 {
                     int read;
@@ -755,11 +757,13 @@
                     }
                     while (read > 0);
 
-                    Log.Debug("HTTP#" + id + " is " + GetFileSize(ms.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                    Log.Trace("HTTP#" + id + " is binary data; trace not available.");
-
-                    return Convert.ToBase64String(ms.ToArray());
+                    res = ms.ToArray();
                 }
+
+                Log.Debug("HTTP#" + id + " is " + GetFileSize(res.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                Log.Trace("HTTP#" + id, res);
+
+                return Convert.ToBase64String(res);
             }
             else
             {

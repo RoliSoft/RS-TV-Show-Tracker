@@ -231,7 +231,7 @@
     <Compile Include="KeyValueList.cs" />
     <Compile Include="Library.cs" />
     <Compile Include="LocalProgrammingPlugin.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="NetworkShares.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\DDLValley.cs" />
     <Compile Include="Parsers\Downloads\Engines\HTTP\TVRelease.cs" />

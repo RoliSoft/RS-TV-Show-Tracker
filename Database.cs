@@ -50,11 +50,13 @@
         {
             if (string.IsNullOrWhiteSpace(Signature.InstallPath))
             {
+                Log.Fatal("Stopping database initialization because $InstallPath is null or empty.");
                 return;
             }
 
             if (!Directory.Exists(DataPath))
             {
+                Log.Info("Creating database folder: " + DataPath);
                 Directory.CreateDirectory(DataPath);
             }
 
@@ -62,12 +64,18 @@
 
             if (Directory.Exists(tmp))
             {
+                Log.Info("$UACVirtualPath\\db exists, initiating migration to $DataPath...");
+
                 foreach (var dir in Directory.EnumerateDirectories(tmp))
                 {
-                    var nir = Path.Combine(DataPath, Path.GetFileName(dir));
+                    var fn  = Path.GetFileName(dir);
+                    var nir = Path.Combine(DataPath, fn);
+
+                    Log.Info("Migrating " + fn + "...");
 
                     if (Directory.Exists(nir) || !File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                     {
+                        Log.Info(fn + " already exists in the target directory or is not a valid TV show directory.");
                         continue;
                     }
 
@@ -85,11 +93,14 @@
 
                         Directory.Delete(dir, true);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        Log.Warn("Exception while migrating data.", ex);
                         continue;
                     }
                 }
+
+                Log.Info("Migration finished.");
             }
 
             LoadDatabase();
@@ -100,13 +111,20 @@
         /// </summary>
         public static void LoadDatabase()
         {
+            Log.Info("Loading database...");
+
             DataChange = DateTime.Now;
             TVShows    = new Dictionary<int, TVShow>();
 
             foreach (var dir in Directory.EnumerateDirectories(DataPath))
             {
+                var fn = Path.GetFileName(dir);
+
+                Log.Trace("Reading " + fn + "...");
+
                 if (!File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                 {
+                    Log.Warn(fn + " is not a valid TV show directory.");
                     continue;
                 }
 
@@ -118,9 +136,13 @@
                 }
                 catch (Exception ex)
                 {
-                    MainWindow.HandleUnexpectedException(new Exception("Couldn't load db\\" + Path.GetFileName(dir) + " due to an error.", ex));
+                    Log.Error("Error while loading TV show data " + fn + ".", ex);
+                    continue;
+                    //MainWindow.HandleUnexpectedException(new Exception("Couldn't load db\\" + fn + " due to an error.", ex));
                 }
             }
+
+            Log.Debug("Database loaded in " + (DateTime.Now - DataChange).TotalSeconds + "s, containing " + TVShows.Count + " shows.");
         }
 
         /// <summary>
@@ -133,6 +155,7 @@
         {
             if (!File.Exists(Path.Combine(DataPath, "conf")))
             {
+                Log.Debug("$DataPath\\conf doesn't exist.");
                 return false;
             }
 
@@ -381,6 +404,10 @@
         /// </returns>
         public static TVShow Add(string gname, string guuid, string glang, Action<int, string> callback = null)
         {
+            Log.Info("Adding " + gname + "/" + guuid + "...");
+
+            var st = DateTime.Now;
+
             if (callback != null)
             {
                 callback(0, "Downloading guide...");
@@ -393,6 +420,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while creating guide object for " + gname + "/" + guuid + ".", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not get guide object of type " + gname + ".");
@@ -408,6 +437,8 @@
 
                 if (tv.Episodes.Count == 0)
                 {
+                    Log.Error("Downloaded guide for " + tv.Title + " (" + gname + "/" + guuid + ") has no episodes.");
+
                     if (callback != null)
                     {
                         callback(-1, "There aren't any episodes associated to " + tv.Title + " on this guide.");
@@ -420,9 +451,12 @@
             {
                 if (ex is ThreadAbortException)
                 {
+                    Log.Warn("Thread aborted while downloading data from guide for " + gname + "/" + guuid + ".", ex);
                     return null;
                 }
-                
+
+                Log.Error("Error while downloading data from guide for " + gname + "/" + guuid + ".", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Couldn't download the episode listing and associated informations due to an unexpected error:" + Environment.NewLine + ex.Message);
@@ -433,6 +467,8 @@
 
             if (TVShows.Values.FirstOrDefault(x => x.Title == tv.Title) != null)
             {
+                Log.Error("Duplicate entry detected for " + tv.Title + " (" + gname + "/" + guuid + ").");
+
                 if (callback != null)
                 {
                     callback(-1, tv.Title + " is already in your database.");
@@ -469,6 +505,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while creating directory db\\" + Path.GetFileName(tv.Directory) + " for " + tv.Title + " (" + gname + "/" + guuid + ").", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not create database for " + tv.Title + ".");
@@ -497,6 +535,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while saving database to db\\" + Path.GetFileName(tv.Directory) + " for " + tv.Title + " (" + gname + "/" + guuid + ").", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not save database for " + tv.Title + ".");
@@ -515,6 +555,8 @@
                 callback(1, "Added " + tv.Title + ".");
             }
 
+            Log.Debug("Successfully added " + tv.Title + " (" + gname + "/" + guuid + ") in " + (DateTime.Now - st).TotalSeconds + "s.");
+
             return tv;
         }
 
@@ -528,6 +570,10 @@
         /// </returns>
         public static TVShow Update(TVShow show, Action<int, string> callback = null)
         {
+            Log.Info("Updating " + show.Title + "...");
+
+            var st = DateTime.Now;
+
             if (callback != null)
             {
                 callback(0, "Updating " + show.Title + "...");
@@ -540,6 +586,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while creating guide object for " + show.Title + ".", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not get guide object of type " + show.Source + " for " + show.Title + ".");
@@ -555,6 +603,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while downloading data from guide for " + show.Title + ".", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not get guide data for " + show.Source + "#" + show.SourceID + ".");
@@ -598,6 +648,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while saving updated database for " + show.Title + ".", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not save database for " + show.Title + ".");
@@ -614,6 +666,8 @@
                 callback(1, "Updated " + show.Title + ".");
             }
 
+            Log.Debug("Successfully updated " + show.Title + " in " + (DateTime.Now - st).TotalSeconds + "s.");
+
             return tv;
         }
 
@@ -627,9 +681,11 @@
         /// </returns>
         public static bool Remove(TVShow show, Action<int, string> callback = null)
         {
+            Log.Info("Removing " + show.Title + "...");
+
             if (callback != null)
             {
-                callback(0, "Updating " + show.Title + "...");
+                callback(0, "Removing " + show.Title + "...");
             }
 
             try
@@ -638,6 +694,8 @@
             }
             catch (Exception ex)
             {
+                Log.Error("Error while removing " + show.Title + ".", ex);
+
                 if (callback != null)
                 {
                     callback(-1, "Could not remove database for " + show.Title + ".");

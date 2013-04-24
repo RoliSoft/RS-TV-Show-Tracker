@@ -30,6 +30,7 @@
         {
             if (string.IsNullOrWhiteSpace(Signature.InstallPath))
             {
+                Log.Fatal("Stopping settings initialization because $InstallPath is null or empty.");
                 return;
             }
 
@@ -38,16 +39,30 @@
 
             if (!File.Exists(_jsFile) && File.Exists(tmp))
             {
+                Log.Info("$UACVirtualPath\\Settings.json exists, initiating migration to $InstallPath...");
+
                 try
                 {
-                    if (new FileInfo(_jsFile).Length < new FileInfo(tmp).Length)
-                    {
-                        File.Copy(tmp, _jsFile);
-                        File.Delete(tmp);
-                    }
+                    File.Copy(tmp, _jsFile);
+                    File.Delete(tmp);
                 }
-                catch {  }
+                catch (Exception ex)
+                {
+                    Log.Error("Error while migrating settings file from $UACVirtualPath to $InstallPath.", ex);
+                }
             }
+
+            LoadSettings();
+        }
+
+        /// <summary>
+        /// Loads the settings.
+        /// </summary>
+        public static void LoadSettings()
+        {
+            Log.Info("Loading settings...");
+
+            var st = DateTime.Now;
 
             try
             {
@@ -57,10 +72,14 @@
                     )
                 );
             }
-            catch
+            catch (Exception ex)
             {
+                Log.Error("Error while loading settings file, resetting all settings to default.");
+
                 Keys = new Dictionary<string, object> { { "Revision", 2 } };
             }
+
+            Log.Debug("Settings loaded in " + (DateTime.Now - st).TotalSeconds + "s, containing " + Keys.Count + " entries.");
 
             // set defaults, if they're missing
 
@@ -97,6 +116,8 @@
 
             if (Keys.ContainsKey("Download Path"))
             {
+                Log.Info("Updating settings file to revision 0...");
+
                 Keys["Download Paths"] = new List<string>
                     {
                         (string)Keys["Download Path"]
@@ -110,6 +131,8 @@
 
             if (!Keys.ContainsKey("Revision") || (int)Keys["Revision"] < 1)
             {
+                Log.Info("Updating settings file to revision 1...");
+
                 var keys = Keys.Keys.ToList();
                 var plugins = Extensibility.GetNewInstances<IPlugin>().ToList();
 
@@ -159,6 +182,8 @@
 
             if ((int)Keys["Revision"] < 2)
             {
+                Log.Info("Updating settings file to revision 2...");
+
                 var altdl = Get<Dictionary<string, List<string>>>("Alternative Associations");
 
                 if (Keys.ContainsKey("Torrent Downloader") && !string.IsNullOrWhiteSpace((string)Keys["Torrent Downloader"]))

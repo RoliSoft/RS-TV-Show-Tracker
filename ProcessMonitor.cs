@@ -108,11 +108,23 @@
 
             var files = GetHandleList(pids).ToList();
 
+            if (files.Count != 0)
+            {
+                Log.Debug(Utils.FormatNumber(files.Count, "file handle", true) + " open for the PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray()) + ".");
+            }
+
             if (Signature.IsActivated && UPnP.IsRunning)
             {
                 try
                 {
+                    var cnt = files.Count;
+
                     files.AddRange(UPnP.GetActiveTransfers());
+
+                    if (files.Count != cnt)
+                    {
+                        Log.Debug(Utils.FormatNumber(files.Count - cnt, "file handle", true) + " open through the UPnP/DLNA server.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -124,7 +136,14 @@
             {
                 try
                 {
+                    var cnt = files.Count;
+
                     files.AddRange(NetworkShares.GetActiveTransfers());
+
+                    if (files.Count != cnt)
+                    {
+                        Log.Debug(Utils.FormatNumber(files.Count - cnt, "file handle", true) + " open through Windows file sharing.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -132,7 +151,11 @@
                 }
             }
 
-            Log.Debug(files.Count + " open file handles detected for PID: " + string.Join(", ", pids).TrimEnd(", ".ToCharArray()) + ".");
+            if (files.Count == 0)
+            {
+                Log.Debug("No file handles open for the specified processes and services.");
+                return;
+            }
 
             foreach (var show in Database.TVShows)
             {
