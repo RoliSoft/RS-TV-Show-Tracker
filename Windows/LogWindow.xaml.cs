@@ -2,6 +2,7 @@
 {
     using System;
     using System.ComponentModel;
+    using System.Linq;
     using System.Windows;
 
     /// <summary>
@@ -16,11 +17,9 @@
         {
             InitializeComponent();
 
-            var logs = Log.Messages.ToArray();
-
-            for (var i = logs.Length - 1; i >= 0; i--)
+            foreach (var entry in Log.Messages.ToArray().OrderBy(x => x.Time))
             {
-                logListView.Items.Add(new LogListViewItem(logs[i]));
+                logListView.Items.Add(new LogListViewItem(entry));
             }
 
             logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
@@ -45,13 +44,13 @@
         /// Adds the message to the listview.
         /// </summary>
         /// <param name="item">The item.</param>
-        private void AddMessage(Log.LogItem item)
+        private void AddMessage(object item)
         {
             lock (logListView)
             {
                 Dispatcher.Invoke((Action)(() =>
                     {
-                        logListView.Items.Add(new LogListViewItem(item));
+                        logListView.Items.Add(new LogListViewItem(item as Log.Entry));
                         logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
                     }));
             }

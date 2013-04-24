@@ -11,7 +11,7 @@
         /// Gets or sets the original log entry.
         /// </summary>
         /// <value>The original log entry.</value>
-        public Log.LogItem Item { get; set; }
+        public Log.Entry Item { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
@@ -59,10 +59,10 @@
         /// Initializes a new instance of the <see cref="LogListViewItem" /> class.
         /// </summary>
         /// <param name="item">The item.</param>
-        public LogListViewItem(Log.LogItem item)
+        public LogListViewItem(Log.Entry item)
         {
             Item     = item;
-            Time     = item.Time.ToString("HH:mm:ss");
+            Time     = item.Time.ToString("HH:mm:ss.fff");
             Location = Path.GetFileName(item.File) + "/" + item.Method + "():" + item.Line;
 
             switch (item.Level)

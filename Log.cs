@@ -8,12 +8,6 @@
     using System.Threading;
 
     /// <summary>
-    /// An event handler for new log messages.
-    /// </summary>
-    /// <param name="log">The message.</param>
-    public delegate void LogMessageHandler(Log.LogItem log);
-
-    /// <summary>
     /// Provides support for primitive logging.
     /// </summary>
     public static class Log
@@ -26,10 +20,9 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Trace(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Trace, message, file, method, line);
+            if (IsTraceEnabled) Write(Level.Trace, message, file, method, line);
         }
 
         /// <summary>
@@ -39,10 +32,9 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Debug(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Debug, message, file, method, line);
+            if (IsDebugEnabled) Write(Level.Debug, message, file, method, line);
         }
 
         /// <summary>
@@ -54,7 +46,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Info(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Info, message, file, method, line);
+            if (IsInfoEnabled) Write(Level.Info, message, file, method, line);
         }
 
         /// <summary>
@@ -66,7 +58,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Warn(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Warn, message, file, method, line);
+            if (IsWarnEnabled) Write(Level.Warn, message, file, method, line);
         }
 
         /// <summary>
@@ -78,7 +70,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Error(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Error, message, file, method, line);
+            if (IsErrorEnabled) Write(Level.Error, message, file, method, line);
         }
 
         /// <summary>
@@ -90,63 +82,63 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Fatal(string message, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Fatal, message, file, method, line);
+            if (IsFatalEnabled) Write(Level.Fatal, message, file, method, line);
         }
         #endregion
 
-        #region level(bytes)
+        #region level(msg, bytes)
         /// <summary>
         /// Writes the diagnostic message at Trace level.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         /// <param name="bytes">The byte array to log.</param>
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
-        public static void Trace(byte[] bytes, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        public static void Trace(string message, byte[] bytes, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Trace, bytes.HexDump(), file, method, line);
+            if (IsTraceEnabled) Write(Level.Trace, message + Environment.NewLine + bytes.HexDump(), file, method, line);
         }
 
         /// <summary>
         /// Writes the diagnostic message at Debug level.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         /// <param name="bytes">The byte array to log.</param>
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
-        public static void Debug(byte[] bytes, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        public static void Debug(string message, byte[] bytes, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Debug, bytes.HexDump(), file, method, line);
+            if (IsDebugEnabled) Write(Level.Debug, message + Environment.NewLine + bytes.HexDump(), file, method, line);
         }
         #endregion
 
-        #region level(object)
+        #region level(msg, obj)
         /// <summary>
         /// Writes the diagnostic message at Trace level.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         /// <param name="obj">The object to log.</param>
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
-        public static void Trace(object obj, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        public static void Trace(string message, object obj, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Trace, obj.ObjDump(), file, method, line);
+            if (IsTraceEnabled) Write(Level.Trace, message + Environment.NewLine + obj.ObjDump(), file, method, line);
         }
 
         /// <summary>
         /// Writes the diagnostic message at Debug level.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         /// <param name="obj">The object to log.</param>
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
-        public static void Debug(object obj, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
+        public static void Debug(string message, object obj, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Debug, obj.ObjDump(), file, method, line);
+            if (IsDebugEnabled) Write(Level.Debug, message + Environment.NewLine + obj.ObjDump(), file, method, line);
         }
         #endregion
 
@@ -159,10 +151,9 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Trace(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Trace, message + Environment.NewLine + ParseException(exception), file, method, line);
+            if (IsTraceEnabled) Write(Level.Trace, message + Environment.NewLine + ParseException(exception), file, method, line);
         }
 
         /// <summary>
@@ -173,10 +164,9 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Debug(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Debug, message + Environment.NewLine + ParseException(exception), file, method, line);
+            if (IsDebugEnabled) Write(Level.Debug, message + Environment.NewLine + ParseException(exception), file, method, line);
         }
 
         /// <summary>
@@ -189,7 +179,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Info(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Info, message + Environment.NewLine + ParseException(exception), file, method, line);
+            if (IsInfoEnabled) Write(Level.Info, message + Environment.NewLine + ParseException(exception), file, method, line);
         }
 
         /// <summary>
@@ -202,7 +192,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Warn(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Warn, message + Environment.NewLine + ParseException(exception), file, method, line);
+            if (IsWarnEnabled) Write(Level.Warn, message + Environment.NewLine + ParseException(exception), file, method, line);
         }
 
         /// <summary>
@@ -215,7 +205,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Error(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Error, message + Environment.NewLine + ParseException(exception), file, method, line);
+            if (IsErrorEnabled) Write(Level.Error, message + Environment.NewLine + ParseException(exception), file, method, line);
         }
 
         /// <summary>
@@ -228,7 +218,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Fatal(string message, Exception exception, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Fatal, message + Environment.NewLine + ParseException(exception), file, method, line);
+            if (IsFatalEnabled) Write(Level.Fatal, message + Environment.NewLine + ParseException(exception), file, method, line);
         }
         #endregion
 
@@ -241,10 +231,9 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Trace(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Trace, string.Format(message, fmtargs), file, method, line);
+            if (IsTraceEnabled) Write(Level.Trace, string.Format(message, fmtargs), file, method, line);
         }
 
         /// <summary>
@@ -255,10 +244,9 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Debug(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Debug, string.Format(message, fmtargs), file, method, line);
+            if (IsDebugEnabled) Write(Level.Debug, string.Format(message, fmtargs), file, method, line);
         }
 
         /// <summary>
@@ -271,7 +259,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Info(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Info, string.Format(message, fmtargs), file, method, line);
+            if (IsInfoEnabled) Write(Level.Info, string.Format(message, fmtargs), file, method, line);
         }
 
         /// <summary>
@@ -284,7 +272,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Warn(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Warn, string.Format(message, fmtargs), file, method, line);
+            if (IsWarnEnabled) Write(Level.Warn, string.Format(message, fmtargs), file, method, line);
         }
 
         /// <summary>
@@ -297,7 +285,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Error(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Error, string.Format(message, fmtargs), file, method, line);
+            if (IsErrorEnabled) Write(Level.Error, string.Format(message, fmtargs), file, method, line);
         }
 
         /// <summary>
@@ -310,7 +298,7 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Fatal(string message, object[] fmtargs, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
-            Write(Level.Fatal, string.Format(message, fmtargs), file, method, line);
+            if (IsFatalEnabled) Write(Level.Fatal, string.Format(message, fmtargs), file, method, line);
         }
         #endregion
 
@@ -322,9 +310,10 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Trace(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
+            if (!IsTraceEnabled) return;
+
             try
             {
                 Write(Level.Trace, messagefunc(), file, method, line);
@@ -342,9 +331,10 @@
         /// <param name="file">The file where this message originates from.</param>
         /// <param name="method">The method where this message originates from.</param>
         /// <param name="line">The line where this message originates from.</param>
-        //[Conditional("DEBUG")]
         public static void Debug(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
+            if (!IsDebugEnabled) return;
+
             try
             {
                 Write(Level.Debug, messagefunc(), file, method, line);
@@ -364,6 +354,8 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Info(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
+            if (!IsInfoEnabled) return;
+
             try
             {
                 Write(Level.Info, messagefunc(), file, method, line);
@@ -383,6 +375,8 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Warn(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
+            if (!IsWarnEnabled) return;
+
             try
             {
                 Write(Level.Warn, messagefunc(), file, method, line);
@@ -402,6 +396,8 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Error(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
+            if (!IsErrorEnabled) return;
+
             try
             {
                 Write(Level.Error, messagefunc(), file, method, line);
@@ -421,6 +417,8 @@
         /// <param name="line">The line where this message originates from.</param>
         public static void Fatal(Func<string> messagefunc, [CallerFilePath] string file = "", [CallerMemberName] string method = "", [CallerLineNumber] int line = 0)
         {
+            if (!IsFatalEnabled) return;
+
             try
             {
                 Write(Level.Fatal, messagefunc(), file, method, line);
@@ -450,17 +448,17 @@
             }
             catch (Exception ex)
             {
-                Write(Level.Warn, "Assertion threw an unexpected exception:" + Environment.NewLine + ParseException(ex), file, method, line);
+                if (IsWarnEnabled) Write(Level.Warn, "Assertion threw an unexpected exception:" + Environment.NewLine + ParseException(ex), file, method, line);
                 return;
             }
 
             if (result)
             {
-                Write(Level.Debug, "Assertion successful.", file, method, line);
+                if (IsDebugEnabled) Write(Level.Debug, "Assertion successful.", file, method, line);
             }
             else
             {
-                Write(Level.Warn, "Assertion failed.", file, method, line);
+                if (IsWarnEnabled) Write(Level.Warn, "Assertion failed.", file, method, line);
             }
         }
 
@@ -475,40 +473,74 @@
         {
             if (result)
             {
-                Write(Level.Debug, "Assertion successful.", file, method, line);
+                if (IsDebugEnabled) Write(Level.Debug, "Assertion successful.", file, method, line);
             }
             else
             {
-                Write(Level.Warn, "Assertion failed.", file, method, line);
+                if (IsWarnEnabled) Write(Level.Warn, "Assertion failed.", file, method, line);
             }
         }
         #endregion
 
         /// <summary>
-        /// Gets or sets the current logging level.
+        /// Contains a value indicating whether trace level messages are currently enabled.
         /// </summary>
-        /// <value>The current logging level.</value>
-        public static Level LoggingLevel = Level.Debug;
+        public static volatile bool IsTraceEnabled = false;
+
+        /// <summary>
+        /// Contains a value indicating whether debug level messages are currently enabled.
+        /// </summary>
+        public static volatile bool IsDebugEnabled = true;
+
+        /// <summary>
+        /// Contains a value indicating whether info level messages are currently enabled.
+        /// </summary>
+        public static volatile bool IsInfoEnabled = true;
+
+        /// <summary>
+        /// Contains a value indicating whether warn level messages are currently enabled.
+        /// </summary>
+        public static volatile bool IsWarnEnabled = true;
+
+        /// <summary>
+        /// Contains a value indicating whether error level messages are currently enabled.
+        /// </summary>
+        public static volatile bool IsErrorEnabled = true;
+
+        /// <summary>
+        /// Contains a value indicating whether fatal level messages are currently enabled.
+        /// </summary>
+        public static volatile bool IsFatalEnabled = true;
+
+        /// <summary>
+        /// The current logging level.
+        /// </summary>
+        public static volatile Level LoggingLevel = Level.Debug;
 
         /// <summary>
         /// Occurs when a new message was added to the log.
         /// </summary>
-        public static event LogMessageHandler NewMessage;
+        public static event WaitCallback NewMessage;
 
         /// <summary>
-        /// Gets or sets the message container.
-        /// </summary>
-        /// <value>
         /// The message container.
-        /// </value>
-        public static ConcurrentBag<LogItem> Messages { get; set; }
-
-        /// <summary>
-        /// Initializes the <see cref="Log" /> class.
         /// </summary>
-        static Log()
+        public static readonly ConcurrentBag<Entry> Messages = new ConcurrentBag<Entry>();
+        
+        /// <summary>
+        /// Sets the debugging level.
+        /// </summary>
+        /// <param name="level">The level.</param>
+        public static void SetLevel(Level level)
         {
-            Messages = new ConcurrentBag<LogItem>();
+            LoggingLevel = level;
+
+            IsTraceEnabled = level >= Level.Trace;
+            IsDebugEnabled = level >= Level.Debug;
+            IsInfoEnabled  = level >= Level.Info;
+            IsWarnEnabled  = level >= Level.Warn;
+            IsErrorEnabled = level >= Level.Error;
+            IsFatalEnabled = level >= Level.Fatal;
         }
 
         /// <summary>
@@ -521,19 +553,15 @@
         /// <param name="line">The line where this message originates from.</param>
         private static void Write(Level level, string message, string file, string method, int line)
         {
-            if (level > LoggingLevel) return;
+            var log = new Entry(DateTime.Now, level, file, method, line, message);
 
-            new Thread(() =>
-                {
-                    var log = new LogItem(DateTime.Now, level, file, method, line, message);
+            Messages.Add(log);
 
-                    Messages.Add(log);
-
-                    if (NewMessage != null)
-                    {
-                        NewMessage(log);
-                    }
-                }).Start();
+            if (NewMessage != null)
+            {
+                ThreadPool.QueueUserWorkItem(NewMessage, log);
+                //new Thread(new ParameterizedThreadStart(NewMessage)).Start(log);
+            }
         }
 
         /// <summary>
@@ -549,7 +577,7 @@
 
         parseException:
             sb.AppendLine(exception.GetType() + ": " + exception.Message);
-            sb.AppendLine(exception.StackTrace);
+            sb.AppendLine(exception.StackTrace.Replace(Signature.BuildDirectory.Replace("C:\\", "c:\\") + "\\", string.Empty));
 
             if (exception.InnerException != null)
             {
@@ -577,7 +605,7 @@
         /// <summary>
         /// Represents a log message.
         /// </summary>
-        public class LogItem
+        public class Entry
         {
             /// <summary>
             /// Gets or sets the time when the logged message occurred.
@@ -628,7 +656,7 @@
             public readonly string Message;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="LogItem" /> class.
+            /// Initializes a new instance of the <see cref="Entry" /> class.
             /// </summary>
             /// <param name="time">The time when the logged message occurred.</param>
             /// <param name="level">The weight of the logged message.</param>
@@ -636,7 +664,7 @@
             /// <param name="method">The method in which the logged message occurred.</param>
             /// <param name="line">The line where the logged message occurred.</param>
             /// <param name="message">The logged message.</param>
-            public LogItem(DateTime time, Level level, string file, string method, int line, string message)
+            public Entry(DateTime time, Level level, string file, string method, int line, string message)
             {
                 Time    = time;
                 Level   = level;

@@ -1692,7 +1692,7 @@
             {
                 return "<null>";
             }
-
+            
             var json = JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
             
             return "Dump of type " + CleanTypeName(value.GetType().ToString()) + ":" + Environment.NewLine + json;
