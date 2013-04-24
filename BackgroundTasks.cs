@@ -119,7 +119,7 @@
 
             InProgress = false;
 
-            Log.Debug("Background tasks took " + (DateTime.Now - st).TotalSeconds + "s.");
+            Log.Debug("Background tasks completed in " + (DateTime.Now - st).TotalSeconds + "s.");
         }
 
         /// <summary>

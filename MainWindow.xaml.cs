@@ -476,6 +476,8 @@
         {
             Database.DataChange = DateTime.Now;
 
+            Log.Debug("Invalidating data caches" + (invokeRefresh ? " and requesting refresh" : string.Empty) + ".");
+
             if (invokeRefresh)
             {
                 Run(() =>
@@ -495,8 +497,11 @@
         {
             Log.Info("The application is silently restarting.");
 
-            Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location, "-hide");
-            Application.Current.Shutdown();
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location, "-hide");
+                    Application.Current.Shutdown();
+                }));
         }
         #endregion
 
