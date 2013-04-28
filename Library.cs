@@ -42,7 +42,15 @@
         static Library()
         {
             Files = new Dictionary<int, List<string>>();
-            LoadList();
+
+            try
+            {
+                LoadList();
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Error while loading library. It will be regenerated on next search.", ex);
+            }
         }
 
         /// <summary>
@@ -52,6 +60,8 @@
         {
             if (Files.Count != 0)
             {
+                Log.Debug("Library data loaded; checking to see if files still exist.");
+
                 foreach (var ep in Files)
                 {
                     var files = ep.Value.ToList();
@@ -86,6 +96,8 @@
         /// </summary>
         public static void StartWatching()
         {
+            Log.Info("Starting file system watchers...");
+
             if (_fsw != null && _fsw.Length != 0)
             {
                 for (var i = 0; i < _fsw.Length; i++)
@@ -126,7 +138,10 @@
 
                     _fsw[i].EnableRaisingEvents = true;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Log.Warn("Error while creating file system watcher for " + paths[i] + ".", ex);
+                }
             }
         }
 
@@ -137,6 +152,8 @@
         /// <param name="fileSystemEventArgs">The <see cref="FileSystemEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnCreated(object sender, FileSystemEventArgs fileSystemEventArgs)
         {
+            if (Log.IsTraceEnabled) Log.Trace("File created: " + fileSystemEventArgs.FullPath);
+
             _queue.Enqueue(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
             
             if (_qthd == null || !_qthd.IsAlive)
@@ -153,6 +170,8 @@
         /// <param name="renamedEventArgs">The <see cref="RenamedEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnRenamed(object sender, RenamedEventArgs renamedEventArgs)
         {
+            if (Log.IsTraceEnabled) Log.Trace("File renamed: " + renamedEventArgs.OldFullPath + " -> " + renamedEventArgs.FullPath);
+
             _queue.Enqueue(Tuple.Create(renamedEventArgs.ChangeType, new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath }));
 
             if (_qthd == null || !_qthd.IsAlive)
@@ -169,6 +188,8 @@
         /// <param name="fileSystemEventArgs">The <see cref="FileSystemEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnDeleted(object sender, FileSystemEventArgs fileSystemEventArgs)
         {
+            if (Log.IsTraceEnabled) Log.Trace("File deleted: " + fileSystemEventArgs.FullPath);
+
             _queue.Enqueue(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
             
             if (_qthd == null || !_qthd.IsAlive)
@@ -185,6 +206,7 @@
         /// <param name="errorEventArgs">The <see cref="ErrorEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnError(object sender, ErrorEventArgs errorEventArgs)
         {
+            Log.Warn("Error occurred while watching specified directories, restarting watcher...", errorEventArgs.GetException());
             new Thread(StartWatching).Start();
         }
 
@@ -198,7 +220,14 @@
             {
                 if (UPnP.IsRunning)
                 {
-                    try { UPnP.RebuildList(); } catch { }
+                    try
+                    {
+                        UPnP.RebuildList();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Error while rebuilding UPnP/DLNA library.", ex);
+                    }
                 }
 
                 return;
@@ -287,7 +316,10 @@
                         break;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warn("Error while processing change " + evt.Item1 + " for " + evt.Item2.FirstOrDefault() + ".", ex);
+            }
 
             ProcessChangesQueue();
         }
@@ -297,6 +329,9 @@
         /// </summary>
         public static void SearchForFiles()
         {
+            Log.Info("Starting library update...");
+
+            var st = DateTime.Now;
             var fs = new FileSearch(Settings.Get<List<string>>("Download Paths"), CheckFile);
 
             Indexing = true;
@@ -308,13 +343,15 @@
 
             if (fs.SearchThread.IsAlive)
             {
-                // searching for more than 5 minutes, kill it
+                Log.Error("Library update timed out after 5 minutes of file searching. Please optimize your download paths, and, if possible, please refrain from using network-attached paths.");
                 try { fs.SearchThread.Abort(); } catch { }
             }
 
             Files = _tmp;
 
             Indexing = false;
+
+            Log.Info("Library update finished in " + (DateTime.Now - st).TotalSeconds + "s.");
 
             SaveList();
 
@@ -329,7 +366,14 @@
 
             if (UPnP.IsRunning)
             {
-                try { UPnP.RebuildList(); } catch { }
+                try
+                {
+                    UPnP.RebuildList();
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Error while rebuilding UPnP/DLNA library.", ex);
+                }
             }
         }
 
@@ -355,6 +399,8 @@
             {
                 var dict = Indexing ? _tmp : Files;
                 List<string> list;
+
+                if (Log.IsTraceEnabled) Log.Trace("Identified file " + name + " as " + pf + ".");
 
                 if (dict.TryGetValue(pf.DbEpisode.ID, out list))
                 {
@@ -399,6 +445,8 @@
         {
             if (Indexing) return;
 
+            Log.Info("Removing path from library: " + path);
+
             foreach (var ep in Files)
             {
                 var files = ep.Value.ToList();
@@ -433,6 +481,8 @@
         {
             if (Indexing) return;
 
+            Log.Info("Adding path to library: " + path);
+
             var i = _fsw.Length;
             Array.Resize(ref _fsw, _fsw.Length + 1);
 
@@ -447,7 +497,10 @@
 
                 _fsw[i].EnableRaisingEvents = true;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warn("Error while creating file system watcher for " + path + ".", ex);
+            }
         }
 
         /// <summary>
@@ -455,11 +508,23 @@
         /// </summary>
         public static void SaveList()
         {
+            Log.Debug("Saving library...");
+
             var path = Path.Combine(Signature.InstallPath, @"misc\library");
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                Log.Debug("$InstallPath\\misc does not exist, creating it...");
+
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error while creating directory $InstallPath\\misc, library will not be saved.", ex);
+                    return;
+                }
             }
 
             using (var fs = File.OpenWrite(path))

@@ -17,7 +17,7 @@
         {
             InitializeComponent();
 
-            foreach (var entry in Log.Messages.ToArray().OrderBy(x => x.Time))
+            foreach (var entry in Log.Messages.ToArray().Reverse().OrderBy(x => x.Time))
             {
                 logListView.Items.Add(new LogListViewItem(entry));
             }

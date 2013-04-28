@@ -120,7 +120,7 @@
             {
                 var fn = Path.GetFileName(dir);
 
-                Log.Trace("Reading " + fn + "...");
+                if (Log.IsTraceEnabled) Log.Trace("Reading " + fn + "...");
 
                 if (!File.Exists(Path.Combine(dir, "info")) || !File.Exists(Path.Combine(dir, "conf")))
                 {

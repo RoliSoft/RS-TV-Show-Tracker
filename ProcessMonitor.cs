@@ -90,7 +90,15 @@
 
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
-            try { procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName)); } catch { }
+
+            try
+            {
+                procs.AddRange(Utils.GetDefaultVideoPlayers().Select(Path.GetFileName));
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Error while getting list of default video players.", ex);
+            }
 
             if (!procs.Any() && !netmon && !UPnP.IsRunning)
             {
@@ -153,7 +161,7 @@
 
             if (files.Count == 0)
             {
-                Log.Debug("No file handles open for the specified processes and services.");
+                Log.Debug("No file handles open for the specified processes (" + (pids.Count == 0 ? "none running" : "PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray())) + ") and services.");
                 return;
             }
 

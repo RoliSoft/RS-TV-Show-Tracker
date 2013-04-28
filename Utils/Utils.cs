@@ -761,7 +761,7 @@
                 }
 
                 Log.Debug("HTTP#" + id + " is " + GetFileSize(res.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                Log.Trace("HTTP#" + id, res);
+                if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id, res);
 
                 return Convert.ToBase64String(res);
             }
@@ -772,7 +772,7 @@
                     var str = sr.ReadToEnd();
 
                     Log.Debug("HTTP#" + id + " is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                    Log.Trace("HTTP#" + id + Environment.NewLine + str);
+                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + Environment.NewLine + str);
 
                     return str;
                 }

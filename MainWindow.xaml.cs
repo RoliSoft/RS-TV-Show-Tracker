@@ -499,6 +499,7 @@
 
             Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
+                    NotifyIcon.Visible = false;
                     Application.Current.Exit += (sender, e) => Process.Start(Application.ResourceAssembly.Location, "-hide");
                     Application.Current.Shutdown();
                 }));

@@ -312,7 +312,7 @@
             }
             catch (ArgumentException ex)
             {
-                Log.Warn("Error while loading AppDataPath/InstallPath/UACVirtualPath.", ex);
+                Log.Warn("Error while loading $AppDataPath/$InstallPath/$UACVirtualPath.", ex);
             }
 
             if (AppDataPath != null && !Directory.Exists(AppDataPath))
@@ -323,7 +323,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("AppDataPath='" + AppDataPath + "' doesn't exist and can't be created.", ex);
+                    Log.Error("$AppDataPath (" + AppDataPath + ") doesn't exist and can't be created.", ex);
                 }
             }
         }
@@ -511,6 +511,7 @@
             if (!File.Exists(licfile))
             {
                 _licenseStatus = LicenseStatus.NotAvailable;
+                Log.Debug("Licensing data does not exist.");
                 return;
             }
 
