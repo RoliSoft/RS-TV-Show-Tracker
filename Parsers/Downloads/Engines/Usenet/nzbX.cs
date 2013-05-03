@@ -69,7 +69,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-12-30 10:59 PM");
+                return Utils.DateTimeToVersion("2013-05-03 7:20 PM");
             }
         }
 
@@ -103,7 +103,7 @@
             {
                 yield return new Link(this)
                     {
-                        Release = (string)item["name"],
+                        Release = ((string)item["name"]).Trim(),
                         InfoURL = Site + "d?" + (string)item["guid"],
                         FileURL = (string)item["nzb"],
                         Size    = Utils.GetFileSize((long)item["size"]),

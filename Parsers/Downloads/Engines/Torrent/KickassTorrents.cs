@@ -56,7 +56,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-04-02 11:31 PM");
+                return Utils.DateTimeToVersion("2013-05-03 7:21 PM");
             }
         }
 
@@ -80,7 +80,17 @@
         public override IEnumerable<Link> Search(string query)
         {
             var url = Utils.GetURL(Site + "usearch/" + Utils.EncodeURL(query) + "/?rss=1").Replace("<torrent:", "<").Replace("</torrent:", "</").Replace("<enclosure url=\"", "<enclosure>").Replace("\" length=\"", "</enclosure><stuff length=\"");
-            var xml = XDocument.Parse(url);
+
+            XDocument xml;
+
+            try
+            {
+                xml = XDocument.Parse(url);
+            }
+            catch
+            {
+                yield break;
+            }
 
             foreach (var node in xml.Descendants("item"))
             {

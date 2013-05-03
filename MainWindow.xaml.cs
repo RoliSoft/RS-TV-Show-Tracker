@@ -646,7 +646,7 @@
             logoMenuItem.IsSubmenuOpen = true;
         }
 
-        private Thread _supportArrowThd = null;
+        private CancellationTokenSource _supportArrowCts = null;
 
         /// <summary>
         /// Handles the SubmenuClosed event of the logoMenuItem control.
@@ -658,10 +658,9 @@
             logo.Background  = (Brush)FindResource("HeadGradient");
             logo.BorderBrush = Brushes.DimGray;
 
-            if (_supportArrowThd != null && _supportArrowThd.IsAlive)
+            if (_supportArrowCts != null && !_supportArrowCts.IsCancellationRequested)
             {
-                try { _supportArrowThd.Abort(); } catch { }
-                _supportArrowThd = null;
+                _supportArrowCts.Cancel();
             }
         }
 
@@ -674,15 +673,19 @@
         {
             supportArrow.Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/" + (Signature.IsActivated ? "smiley-cool" : "smiley") + ".png"));
 
-            if (_supportArrowThd != null && _supportArrowThd.IsAlive)
+            if (_supportArrowCts != null && !_supportArrowCts.IsCancellationRequested)
             {
-                try { _supportArrowThd.Abort(); } catch { }
-                _supportArrowThd = null;
+                _supportArrowCts.Cancel();
             }
 
-            _supportArrowThd = new Thread(() =>
+            _supportArrowCts  = new CancellationTokenSource();
+            
+            Task.Factory.StartNew(() =>
                 {
-                    Thread.Sleep(1000);
+                  start:
+                    if (_supportArrowCts.IsCancellationRequested) return;
+                    _supportArrowCts.Token.WaitHandle.WaitOne(1000);
+                    if (_supportArrowCts.IsCancellationRequested) return;
 
                     Dispatcher.Invoke((Action)(() =>
                         {
@@ -692,11 +695,16 @@
                             }
                             else
                             {
-                                _supportArrowThd.Abort();
+                                if (_supportArrowCts != null && !_supportArrowCts.IsCancellationRequested)
+                                {
+                                    _supportArrowCts.Cancel();
+                                }
                             }
                         }));
 
-                    Thread.Sleep(1000);
+                    if (_supportArrowCts.IsCancellationRequested) return;
+                    _supportArrowCts.Token.WaitHandle.WaitOne(1000);
+                    if (_supportArrowCts.IsCancellationRequested) return;
 
                     Dispatcher.Invoke((Action)(() =>
                         {
@@ -706,25 +714,33 @@
                             }
                             else
                             {
-                                _supportArrowThd.Abort();
+                                if (_supportArrowCts != null && !_supportArrowCts.IsCancellationRequested)
+                                {
+                                    _supportArrowCts.Cancel();
+                                }
                             }
                         }));
 
-                    Thread.Sleep(5000);
+                    if (_supportArrowCts.IsCancellationRequested) return;
+                    _supportArrowCts.Token.WaitHandle.WaitOne(5000);
+                    if (_supportArrowCts.IsCancellationRequested) return;
 
-                    Dispatcher.Invoke((Action)(() =>
+                    var jump = false;
+
+                    Dispatcher.Invoke((Action)(() => jump = logoMenuItem.IsSubmenuOpen));
+
+                    if (jump)
+                    {
+                        goto start;
+                    }
+                    else
+                    {
+                        if (_supportArrowCts != null && !_supportArrowCts.IsCancellationRequested)
                         {
-                            if (logoMenuItem.IsSubmenuOpen)
-                            {
-                                LogoMenuItemSubmenuOpened(null, null);
-                            }
-                            else
-                            {
-                                _supportArrowThd.Abort();
-                            }
-                        }));
-                });
-            _supportArrowThd.Start();
+                            _supportArrowCts.Cancel();
+                        }
+                    }
+                }, _supportArrowCts.Token);
         }
         #endregion
 

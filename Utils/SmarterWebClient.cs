@@ -22,6 +22,12 @@
             public Uri ResponseUri { get; private set; }
 
             /// <summary>
+            /// Gets the type of the content.
+            /// </summary>
+            /// <value>The type of the content.</value>
+            public string ContentType { get; private set; }
+
+            /// <summary>
             /// Gets the name of the file.
             /// </summary>
             /// <value>The name of the file.</value>
@@ -63,6 +69,7 @@
                 if (response != null)
                 {
                     this.ResponseUri = response.ResponseUri;
+                    this.ContentType = response.ContentType;
                 }
                 return response;
             }
@@ -81,6 +88,7 @@
                 if (response != null)
                 {
                     this.ResponseUri = response.ResponseUri;
+                    this.ContentType = response.ContentType;
                 }
                 return response;
             }

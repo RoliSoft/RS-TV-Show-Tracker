@@ -30,12 +30,17 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
                 if (!thd.Join(200))
                 {
+                    Log.Debug("GetFilePath(0x" + handle.Handle.ToString("X") + ") thread decided to hang, trying to kill it...");
+
                     try
                     {
                         thd.Interrupt();
                         thd.Abort();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("GetFilePath(0x" + handle.Handle.ToString("X") + ") thread was not killed successfully.", ex);
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(path))

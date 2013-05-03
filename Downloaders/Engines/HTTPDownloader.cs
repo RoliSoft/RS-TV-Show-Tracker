@@ -1,6 +1,8 @@
 ﻿namespace RoliSoft.TVShowTracker.Downloaders.Engines
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
     using System.Net;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -34,6 +36,9 @@
         /// <param name="token">The user token.</param>
         public void Download(object link, string target, string token = null)
         {
+            var id = Utils.Rand.Next(short.MaxValue);
+            var st = DateTime.Now;
+            
             _wc  = new Utils.SmarterWebClient();
             Uri uri;
 
@@ -64,12 +69,28 @@
                 throw new Exception("The link object is an unsupported type.");
             }
 
+            var domain = uri.Host.Replace("www.", string.Empty);
+
+            Log.Debug("HTTP#{0} GET {1}", new[] { id.ToString(), uri.ToString() });
+            
             _wc.Headers[HttpRequestHeader.Referer] = "http://" + uri.DnsSafeHost + "/";
             _wc.DownloadProgressChanged           += (s, e) => DownloadProgressChanged.Fire(this, e.ProgressPercentage);
-            _wc.DownloadFileCompleted             += (s, e) => DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
-            
-            var proxy = Settings.Get(uri.Host.Replace("www.", string.Empty) + " proxy");
-            if (!string.IsNullOrEmpty(proxy))
+            _wc.DownloadFileCompleted             += (s, e) =>
+                {
+                    Log.Debug("HTTP#" + id + " [" + domain + "] is " + Utils.GetFileSize(new FileInfo(target).Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " [" + domain + "] is " + (s as Utils.SmarterWebClient).ContentType + ", saved to " + target + " with token " + token);
+                    DownloadFileCompleted.Fire(this, target, (s as Utils.SmarterWebClient).FileName, token ?? string.Empty);
+                };
+
+            var proxy = default(string);
+            var proxyId = default(object);
+
+            if (Settings.Get<Dictionary<string, object>>("Proxied Domains").TryGetValue(domain, out proxyId))
+            {
+                proxy = (string)Settings.Get<Dictionary<string, object>>("Proxies")[(string)proxyId];
+            }
+
+            if (proxy != null)
             {
                 var proxyUri = new Uri(proxy.Replace("$domain.", string.Empty));
 
@@ -98,6 +119,8 @@
                         _wc.Proxy = (WebProxy)tunnel.LocalProxy;
                         break;
                 }
+
+                Log.Debug("HTTP#" + id + " [" + domain + "] is proxied through " + proxyId + " (" + proxyUri + ")");
             }
 
             _wc.DownloadFileAsync(uri, target);

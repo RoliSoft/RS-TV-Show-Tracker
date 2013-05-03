@@ -219,11 +219,66 @@
                     {
                         case WatcherChangeTypes.Created:
                             {
-                                var success = CheckFile(evt.Item2[0]);
+                                var success = false;
 
-                                if (success)
+                                if (File.Exists(evt.Item2[0]))
                                 {
-                                    Log.Debug("Added file " + Path.GetFileName(evt.Item2[0]) + " to the library.");
+                                    success = CheckFile(evt.Item2[0]);
+
+                                    if (success)
+                                    {
+                                        Log.Debug("Added file " + Path.GetFileName(evt.Item2[0]) + " to the library.");
+                                    }
+                                }
+                                else if (Directory.Exists(evt.Item2[0]))
+                                {
+                                    Log.Debug("Scanning new directory " + Path.GetFileName(evt.Item2[0]) + " for episodes...");
+
+                                    var fs = new FileSearch(new[] { evt.Item2[0] }, CheckFile);
+
+                                    fs.FileSearchDone += (sender, args) =>
+                                        {
+                                            if (args.Data == null || args.Data.Count == 0)
+                                            {
+                                                Log.Debug("No episodes found in " + evt.Item2[0] + ".");
+                                            }
+                                            else
+                                            {
+                                                success = true;
+
+                                                foreach (var file in args.Data)
+                                                {
+                                                    Log.Debug("Added file " + Path.GetFileName(file) + " to the library.");
+                                                }
+                                            }
+                                        };
+
+                                    fs.BeginSearch();
+
+                                    fs.Cancellation.CancelAfter(TimeSpan.FromMinutes(5));
+
+                                    try
+                                    {
+                                        if (!fs.SearchTask.Wait(TimeSpan.FromMinutes(5.5)))
+                                        {
+                                            fs.SearchTask.Dispose();
+                                        }
+                                    }
+                                    catch (AggregateException ex)
+                                    {
+                                        if (ex.InnerException is OperationCanceledException)
+                                        {
+                                            Log.Error("Directory scan timed out after 5 minutes of file searching.");
+                                        }
+                                        else
+                                        {
+                                            Log.Warn("Aggregate exceptions upon FileSearch._task completion.", ex);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Warn("'" + evt.Item2[0] + "' is neither a file or directory.");
                                 }
 
                                 if (success && !Indexing)
@@ -278,13 +333,27 @@
                                     {
                                         ep.Value.Remove(evt.Item2[0]);
                                         success = true;
+                                        Log.Debug("Removed file " + Path.GetFileName(evt.Item2[0]) + " from the library.");
                                         break;
                                     }
                                 }
 
-                                if (success)
+                                if (!success)
                                 {
-                                    Log.Debug("Removed file " + Path.GetFileName(evt.Item2[0]) + " from the library.");
+                                    foreach (var ep in Files)
+                                    {
+                                        var lst = ep.Value.ToList();
+
+                                        foreach (var file in lst)
+                                        {
+                                            if (file.StartsWith(evt.Item2[0] + Path.DirectorySeparatorChar))
+                                            {
+                                                ep.Value.Remove(file);
+                                                success = true;
+                                                Log.Debug("Removed file " + Path.GetFileName(file) + " from the library.");
+                                            }
+                                        }
+                                    }
                                 }
 
                                 if (success && !Indexing)

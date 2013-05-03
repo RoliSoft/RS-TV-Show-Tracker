@@ -100,6 +100,8 @@
                 Log.Warn("Error while getting list of default video players.", ex);
             }
 
+            if (Log.IsTraceEnabled) Log.Trace("Requested processes:", procs);
+
             if (!procs.Any() && !netmon && !UPnP.IsRunning)
             {
                 Log.Debug("No processes specified to monitor and network share monitoring is disabled.");
@@ -107,6 +109,8 @@
             }
 
             var pids = GetPIDs(procs).Distinct().ToList();
+
+            if (Log.IsTraceEnabled) Log.Trace("Running PIDs:", pids);
 
             if (!pids.Any() && !netmon && !UPnP.IsRunning)
             {
@@ -158,6 +162,8 @@
                     Log.Warn("Cannot get active network share transfer list from Windows due to an exception.", ex);
                 }
             }
+
+            if (Log.IsTraceEnabled) Log.Trace("Open file handles:", files.Select(fi => fi.FullName));
 
             if (files.Count == 0)
             {

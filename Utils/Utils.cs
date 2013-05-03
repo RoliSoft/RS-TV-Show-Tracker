@@ -610,12 +610,13 @@
         {
             var id = Rand.Next(short.MaxValue);
             var st = DateTime.Now;
+            var domain = new Uri(url).Host.Replace("www.", string.Empty);
+
             Log.Debug("HTTP#{0} {1} {2}", new[] { id.ToString(), postData != null ? "POST" : "GET", url });
 
             var req = (HttpWebRequest)WebRequest.Create(url);
-            var domain = new Uri(url).Host.Replace("www.", string.Empty);
+            var proxyId = default(object);
 
-            object proxyId;
             if (proxy == null && Settings.Get<Dictionary<string, object>>("Proxied Domains").TryGetValue(domain, out proxyId))
             {
                 proxy = (string)Settings.Get<Dictionary<string, object>>("Proxies")[(string)proxyId];
@@ -652,7 +653,7 @@
                 }
 
                 req.Timeout += 20000;
-                Log.Debug("HTTP#" + id + " is proxied.");
+                Log.Debug("HTTP#" + id + " [" + domain + "] is proxied through " + proxyId + " (" + proxyUri + ")");
             }
             else
             {
@@ -722,7 +723,7 @@
             }
             catch (WebException ex)
             {
-                Log.Warn("HTTP#" + id + " threw an exception, " + (ex.Response == null ? "without a response; rethrowing exception" : "with response; returning response") + ".", ex);
+                Log.Warn("HTTP#" + id + " [" + domain + "] threw an exception, " + (ex.Response == null ? "without a response; rethrowing exception" : "with response; returning response") + ".", ex);
 
                 if (ex.Response != null)
                 {
@@ -760,8 +761,8 @@
                     res = ms.ToArray();
                 }
 
-                Log.Debug("HTTP#" + id + " is " + GetFileSize(res.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " is " + resp.ContentType + ", dumping first 156 bytes", res.Take(156).ToArray());
+                Log.Debug("HTTP#" + id + " [" + domain + "] is " + GetFileSize(res.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " [" + domain + "] is " + resp.ContentType + ", dumping first 156 bytes", res.Take(156).ToArray());
 
                 return Convert.ToBase64String(res);
             }
@@ -771,8 +772,8 @@
                 {
                     var str = sr.ReadToEnd();
 
-                    Log.Debug("HTTP#" + id + " is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " is " + resp.ContentType + ", dumping text content" + Environment.NewLine + Regex.Replace(Regex.Replace(Regex.Replace(str, @"<\s*(script|style)[^>]*>.*?<\s*/\s*\1[^>]*>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase), "<[^>]+>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase).Replace("&quot;", "\"").Replace("&nbsp;", " "), @"\s\s*", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase));
+                    Log.Debug("HTTP#" + id + " [" + domain + "] is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " [" + domain + "] is " + resp.ContentType + ", dumping text content" + Environment.NewLine + Regex.Replace(Regex.Replace(Regex.Replace(str, @"<\s*(script|style)[^>]*>.*?<\s*/\s*\1[^>]*>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase), "<[^>]+>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase).Replace("&quot;", "\"").Replace("&nbsp;", " "), @"\s\s*", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase));
 
                     return str;
                 }
@@ -823,9 +824,20 @@
         /// <returns>A Boolean value that determines whether the specified certificate is accepted for authentication.</returns>
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
+            string host;
+
+            if (sender is HttpWebRequest)
+            {
+                host = Regex.Replace((sender as HttpWebRequest).Host, @"^www\.", string.Empty);
+            }
+            else
+            {
+                host = sender.ToString();
+            }
+
             if (sslPolicyErrors == SslPolicyErrors.None)
             {
-                Log.Debug(certificate.Subject + " has been deemed valid by Windows.");
+                Log.Debug("HTTPS [" + host + "] " + certificate.Subject + " has been deemed valid by Windows.");
                 return true;
             }
 
@@ -834,18 +846,18 @@
                 if (TrustedCertificates.ContainsKey(element.Certificate.Subject)
                  && TrustedCertificates[element.Certificate.Subject] == element.Certificate.GetPublicKeyString())
                 {
-                    Log.Debug(certificate.Subject + " contains a software-trusted certificate in its chain.");
+                    Log.Debug("HTTPS [" + host + "] " + certificate.Subject + " contains a software-trusted certificate in its chain.");
                     return true;
                 }
             }
 
-            if (sender is HttpWebRequest && IgnoreInvalidCertificatesFor.Contains(Regex.Replace((sender as HttpWebRequest).Host, @"^www\.", string.Empty)))
+            if (sender is HttpWebRequest && IgnoreInvalidCertificatesFor.Contains(host))
             {
-                Log.Debug(certificate.Subject + " is invalid, but " + (sender as HttpWebRequest).Host + " is force-accepted.");
+                Log.Debug("HTTPS [" + host + "] " + certificate.Subject + " is invalid, but host is whitelisted.");
                 return true;
             }
 
-            Log.Warn(certificate.Subject + " is invalid, dropping connection to " + (sender as HttpWebRequest).Host + ".");
+            Log.Warn("HTTPS [" + host + "] " + certificate.Subject + " is invalid, dropping connection.");
             return false;
         }
 
