@@ -619,7 +619,7 @@
 
             if (Signature.IsActivated && (!string.IsNullOrWhiteSpace(sub.FileURL) || !(sub.Source.Downloader is ExternalDownloader)))
             {
-                List<string> fn;
+                HashSet<string> fn;
                 if (_dbep != null && Library.Files.TryGetValue(_dbep.ID, out fn) && fn.Count != 0)
                 {
                     var dnv    = new MenuItem();

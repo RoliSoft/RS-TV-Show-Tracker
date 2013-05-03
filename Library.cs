@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Threading;
+    using System.Threading.Tasks;
 
     using Timer = System.Timers.Timer;
 
@@ -20,7 +20,7 @@
         /// <value>
         /// The list of episode-mapped downloaded files.
         /// </value>
-        public static Dictionary<int, List<string>> Files { get; set; }
+        public static Dictionary<int, HashSet<string>> Files { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="Library" /> is currently searching for files.
@@ -28,20 +28,21 @@
         /// <value>
         ///   <c>true</c> if currently searching for files; otherwise, <c>false</c>.
         /// </value>
-        public static bool Indexing { get; set; }
+        public static volatile bool Indexing;
 
         private static FileSystemWatcher[] _fsw;
-        private static Dictionary<int, List<string>> _tmp;
-        private static ConcurrentQueue<Tuple<WatcherChangeTypes, string[]>> _queue;
-        private static Thread _qthd;
+        private static Dictionary<int, HashSet<string>> _tmp;
+        private static BlockingCollection<Tuple<WatcherChangeTypes, string[]>> _producer;
+        private static Task _consumer;
         private static Timer _stmr;
+        private static volatile bool _isStarting;
 
         /// <summary>
         /// Initializes the <see cref="Library" /> class.
         /// </summary>
         static Library()
         {
-            Files = new Dictionary<int, List<string>>();
+            Files = new Dictionary<int, HashSet<string>>();
 
             try
             {
@@ -83,11 +84,10 @@
             _stmr = new Timer
                         {
                             AutoReset = false,
-                            Interval = 3000
+                            Interval  = 3000
                         };
             _stmr.Elapsed += (sender, args) => SaveList();
 
-            StartWatching();
             SearchForFiles();
         }
 
@@ -96,7 +96,14 @@
         /// </summary>
         public static void StartWatching()
         {
-            Log.Info("Starting file system watchers...");
+            if (_isStarting)
+            {
+                return;
+            }
+
+            _isStarting = true;
+
+            Log.Debug(((_fsw != null && _fsw.Length != 0) ? "Res" : "S") + "tarting file system watchers...");
 
             if (_fsw != null && _fsw.Length != 0)
             {
@@ -114,16 +121,20 @@
                 }
             }
 
-            if (_qthd != null && _qthd.IsAlive)
-            {
-                try { _qthd.Abort(); } catch { }
-            }
-
             var paths = Settings.Get<List<string>>("Download Paths");
 
-            _fsw   = new FileSystemWatcher[paths.Count];
-            _queue = new ConcurrentQueue<Tuple<WatcherChangeTypes, string[]>>();
-            _qthd  = new Thread(ProcessChangesQueue);
+            if (_producer != null)
+            {
+                _producer.CompleteAdding();
+                _producer.Dispose();
+                _producer = null;
+            }
+
+            _fsw      = new FileSystemWatcher[paths.Count];
+            _producer = new BlockingCollection<Tuple<WatcherChangeTypes, string[]>>();
+            _consumer = new Task(ProcessChangesQueue, TaskCreationOptions.LongRunning);
+
+            _consumer.Start();
 
             for (var i = 0; i < paths.Count; i++)
             {
@@ -143,6 +154,8 @@
                     Log.Warn("Error while creating file system watcher for " + paths[i] + ".", ex);
                 }
             }
+
+            _isStarting = false;
         }
 
         /// <summary>
@@ -154,13 +167,7 @@
         {
             if (Log.IsTraceEnabled) Log.Trace("File created: " + fileSystemEventArgs.FullPath);
 
-            _queue.Enqueue(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
-            
-            if (_qthd == null || !_qthd.IsAlive)
-            {
-                _qthd = new Thread(ProcessChangesQueue);
-                try { _qthd.Start(); } catch { }
-            }
+            _producer.Add(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
         }
 
         /// <summary>
@@ -172,13 +179,7 @@
         {
             if (Log.IsTraceEnabled) Log.Trace("File renamed: " + renamedEventArgs.OldFullPath + " -> " + renamedEventArgs.FullPath);
 
-            _queue.Enqueue(Tuple.Create(renamedEventArgs.ChangeType, new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath }));
-
-            if (_qthd == null || !_qthd.IsAlive)
-            {
-                _qthd = new Thread(ProcessChangesQueue);
-                try { _qthd.Start(); } catch { }
-            }
+            _producer.Add(Tuple.Create(renamedEventArgs.ChangeType, new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath }));
         }
 
         /// <summary>
@@ -190,13 +191,7 @@
         {
             if (Log.IsTraceEnabled) Log.Trace("File deleted: " + fileSystemEventArgs.FullPath);
 
-            _queue.Enqueue(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
-            
-            if (_qthd == null || !_qthd.IsAlive)
-            {
-                _qthd = new Thread(ProcessChangesQueue);
-                try { _qthd.Start(); } catch { }
-            }
+            _producer.Add(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
         }
 
         /// <summary>
@@ -206,122 +201,105 @@
         /// <param name="errorEventArgs">The <see cref="ErrorEventArgs" /> instance containing the event data.</param>
         private static void FileSystemWatcher_OnError(object sender, ErrorEventArgs errorEventArgs)
         {
-            Log.Warn("Error occurred while watching specified directories, restarting watcher...", errorEventArgs.GetException());
-            new Thread(StartWatching).Start();
+            Log.Warn("Error occurred while watching specified directories.", errorEventArgs.GetException());
+
+            StartWatching();
         }
 
         /// <summary>
-        /// Pops events recursively from the file system changes queue and processes it.
+        /// Consumes the file system changes blocking collection.
         /// </summary>
         private static void ProcessChangesQueue()
         {
-            Tuple<WatcherChangeTypes, string[]> evt;
-            if (!_queue.TryDequeue(out evt) || evt == null || Indexing)
+            foreach (var evt in _producer.GetConsumingEnumerable())
             {
-                if (UPnP.IsRunning)
+                try
                 {
-                    try
+                    switch (evt.Item1)
                     {
-                        UPnP.RebuildList();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn("Error while rebuilding UPnP/DLNA library.", ex);
-                    }
-                }
-
-                return;
-            }
-
-            try
-            {
-                switch (evt.Item1)
-                {
-                    case WatcherChangeTypes.Created:
-                        {
-                            CheckFile(evt.Item2[0]);
-                        }
-                        break;
-
-                    case WatcherChangeTypes.Renamed:
-                        {
-                            CheckFile(evt.Item2[1]);
-
-                            lock (Files)
+                        case WatcherChangeTypes.Created:
                             {
+                                var success = CheckFile(evt.Item2[0]);
+
+                                if (success)
+                                {
+                                    Log.Debug("Added file " + Path.GetFileName(evt.Item2[0]) + " to the library.");
+                                }
+
+                                if (success && !Indexing)
+                                {
+                                    DataChanged();
+                                }
+                            }
+                            break;
+
+                        case WatcherChangeTypes.Renamed:
+                            {
+                                var successAdd = CheckFile(evt.Item2[1]);
+                                var successDel = false;
+
                                 foreach (var ep in Files)
                                 {
                                     if (ep.Value.Contains(evt.Item2[0]))
                                     {
                                         ep.Value.Remove(evt.Item2[0]);
+                                        successDel = true;
                                         break;
                                     }
                                 }
-                            }
-                        }
 
-                        if (!Indexing)
-                        {
-                            if (_stmr.Enabled)
-                            {
-                                _stmr.Stop();
-                            }
-
-                            _stmr.Start();
-
-                            try
-                            {
-                                if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+                                if (successAdd && successDel)
                                 {
-                                    MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                                    Log.Debug("Renamed file " + Path.GetFileName(evt.Item2[0]) + " to " + Path.GetFileName(evt.Item2[1]) + " in the library.");
+                                }
+                                else if (successAdd)
+                                {
+                                    Log.Debug("Added file " + Path.GetFileName(evt.Item2[1]) + " to the library.");
+                                }
+                                else
+                                {
+                                    Log.Debug("Removed file " + Path.GetFileName(evt.Item2[0]) + " from the library.");
+                                }
+
+                                if ((successAdd || successDel) && !Indexing)
+                                {
+                                    DataChanged();
                                 }
                             }
-                            catch { }
-                        }
-                        break;
+                            break;
 
-                    case WatcherChangeTypes.Deleted:
-                        {
-                            lock (Files)
+                        case WatcherChangeTypes.Deleted:
                             {
+                                var success = false;
+
                                 foreach (var ep in Files)
                                 {
                                     if (ep.Value.Contains(evt.Item2[0]))
                                     {
                                         ep.Value.Remove(evt.Item2[0]);
+                                        success = true;
                                         break;
                                     }
                                 }
-                            }
 
-                            if (!Indexing)
-                            {
-                                if (_stmr.Enabled)
+                                if (success)
                                 {
-                                    _stmr.Stop();
+                                    Log.Debug("Removed file " + Path.GetFileName(evt.Item2[0]) + " from the library.");
                                 }
 
-                                _stmr.Start();
-
-                                try
+                                if (success && !Indexing)
                                 {
-                                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
-                                    {
-                                        MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
-                                    }
+                                    DataChanged();
                                 }
-                                catch { }
                             }
-                        }
-                        break;
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Error while processing change " + evt.Item1 + " for " + evt.Item2.FirstOrDefault() + ".", ex);
                 }
             }
-            catch (Exception ex)
-            {
-                Log.Warn("Error while processing change " + evt.Item1 + " for " + evt.Item2.FirstOrDefault() + ".", ex);
-            }
-
-            ProcessChangesQueue();
         }
 
         /// <summary>
@@ -331,12 +309,35 @@
         {
             Log.Info("Starting library update...");
 
+            if (_fsw != null && _fsw.Length != 0)
+            {
+                for (var i = 0; i < _fsw.Length; i++)
+                {
+                    try
+                    {
+                        if (_fsw[i] != null)
+                        {
+                            _fsw[i].EnableRaisingEvents = false;
+                            _fsw[i].Dispose();
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            if (_producer != null)
+            {
+                _producer.CompleteAdding();
+                _producer.Dispose();
+                _producer = null;
+            }
+
             var st = DateTime.Now;
             var fs = new FileSearch(Settings.Get<List<string>>("Download Paths"), CheckFile);
 
             Indexing = true;
 
-            _tmp = new Dictionary<int, List<string>>();
+            _tmp = new Dictionary<int, HashSet<string>>();
 
             fs.BeginSearch();
             fs.SearchThread.Join(TimeSpan.FromMinutes(5));
@@ -353,7 +354,29 @@
 
             Log.Info("Library update finished in " + (DateTime.Now - st).TotalSeconds + "s.");
 
-            SaveList();
+            StartWatching();
+            DataChanged(false);
+        }
+
+        /// <summary>
+        /// Propagates data changes.
+        /// </summary>
+        /// <param name="delaySave">if set to <c>true</c> the database commit will be delayed for 3 seconds.</param>
+        private static void DataChanged(bool delaySave = true)
+        {
+            if (delaySave)
+            {
+                if (_stmr.Enabled)
+                {
+                    _stmr.Stop();
+                }
+
+                _stmr.Start();
+            }
+            else
+            {
+                SaveList();
+            }
 
             try
             {
@@ -395,46 +418,48 @@
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
             var pf   = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 
-            if (pf.DbEpisode != null)
+            if (pf.DbEpisode == null)
             {
-                var dict = Indexing ? _tmp : Files;
-                List<string> list;
-
-                if (Log.IsTraceEnabled) Log.Trace("Identified file " + name + " as " + pf + ".");
-
-                if (dict.TryGetValue(pf.DbEpisode.ID, out list))
-                {
-                    if (!list.Contains(file))
-                    {
-                        list.Add(file);
-                    }
-                }
-                else
-                {
-                    dict[pf.DbEpisode.ID] = new List<string> { file };
-                }
-
-                if (!Indexing)
-                {
-                    if (_stmr.Enabled)
-                    {
-                        _stmr.Stop();
-                    }
-
-                    _stmr.Start();
-
-                    try
-                    {
-                        if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbEpisode.Show.ID)
-                        {
-                            MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
-                        }
-                    }
-                    catch { }
-                }
+                return false;
             }
 
-            return false;
+            var dict = Indexing ? _tmp : Files;
+            HashSet<string> list;
+
+            if (Log.IsTraceEnabled) Log.Trace("Identified file " + name + " as " + pf + ".");
+
+            if (dict.TryGetValue(pf.DbEpisode.ID, out list))
+            {
+                if (!list.Contains(file))
+                {
+                    list.Add(file);
+                }
+            }
+            else
+            {
+                dict[pf.DbEpisode.ID] = new HashSet<string> { file };
+            }
+
+            if (!Indexing)
+            {
+                if (_stmr.Enabled)
+                {
+                    _stmr.Stop();
+                }
+
+                _stmr.Start();
+
+                try
+                {
+                    if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID == pf.DbEpisode.Show.ID)
+                    {
+                        MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                    }
+                }
+                catch { }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -571,11 +596,11 @@
                     var sid = br.ReadInt32();
                     var snr = br.ReadUInt32();
 
-                    List<string> lst;
+                    HashSet<string> lst;
 
                     if (!Files.TryGetValue(sid, out lst))
                     {
-                        Files[sid] = lst = new List<string>();
+                        Files[sid] = lst = new HashSet<string>();
                     }
 
                     for (var j = 0; j < snr; j++)

@@ -761,7 +761,7 @@
                 }
 
                 Log.Debug("HTTP#" + id + " is " + GetFileSize(res.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id, res);
+                if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " is " + resp.ContentType + ", dumping first 156 bytes", res.Take(156).ToArray());
 
                 return Convert.ToBase64String(res);
             }
@@ -772,7 +772,7 @@
                     var str = sr.ReadToEnd();
 
                     Log.Debug("HTTP#" + id + " is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + Environment.NewLine + str);
+                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " is " + resp.ContentType + ", dumping text content" + Environment.NewLine + Regex.Replace(Regex.Replace(Regex.Replace(str, @"<\s*(script|style)[^>]*>.*?<\s*/\s*\1[^>]*>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase), "<[^>]+>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase).Replace("&quot;", "\"").Replace("&nbsp;", " "), @"\s\s*", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase));
 
                     return str;
                 }

@@ -6,6 +6,7 @@
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Provides support for primitive logging.
@@ -485,7 +486,7 @@
         /// <summary>
         /// Contains a value indicating whether trace level messages are currently enabled.
         /// </summary>
-        public static volatile bool IsTraceEnabled = false;
+        public static volatile bool IsTraceEnabled = true;
 
         /// <summary>
         /// Contains a value indicating whether debug level messages are currently enabled.
@@ -515,12 +516,12 @@
         /// <summary>
         /// The current logging level.
         /// </summary>
-        public static volatile Level LoggingLevel = Level.Debug;
+        public static volatile Level LoggingLevel = Level.Trace;
 
         /// <summary>
         /// Occurs when a new message was added to the log.
         /// </summary>
-        public static event WaitCallback NewMessage;
+        public static event Action<object> NewMessage;
 
         /// <summary>
         /// The message container.
@@ -559,7 +560,9 @@
 
             if (NewMessage != null)
             {
-                ThreadPool.QueueUserWorkItem(NewMessage, log);
+                Task.Factory.StartNew(NewMessage, log);
+                //NewMessage(log);
+                //ThreadPool.QueueUserWorkItem(NewMessage, log);
                 //new Thread(new ParameterizedThreadStart(NewMessage)).Start(log);
             }
         }
@@ -574,13 +577,15 @@
         private static string ParseException(Exception exception)
         {
             var sb = new StringBuilder();
+            var cn = 0;
 
         parseException:
             sb.AppendLine(exception.GetType() + ": " + exception.Message);
             sb.AppendLine(exception.StackTrace.Replace(Signature.BuildDirectory.Replace("C:\\", "c:\\") + "\\", string.Empty));
 
-            if (exception.InnerException != null)
+            if (exception.InnerException != null && cn < 20)
             {
+                cn++;
                 exception = exception.InnerException;
                 goto parseException;
             }

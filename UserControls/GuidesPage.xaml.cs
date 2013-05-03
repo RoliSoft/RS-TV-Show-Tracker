@@ -640,14 +640,14 @@
 
                 if (Signature.IsActivated)
                 {
-                    List<string> fns;
+                    HashSet<string> fns;
                     if (Library.Files.TryGetValue(episode.ID, out fns) && fns.Count != 0)
                     {
                         var qualities = string.Join("/", fns.Select(FileNames.Parser.ParseQuality).Distinct().OrderByDescending(q => q).Select(q => q.GetAttribute<DescriptionAttribute>().Description));
 
                         if (qualities == "Unknown")
                         {
-                            var ed = FileNames.Parser.ParseEdition(fns[0]);
+                            var ed = FileNames.Parser.ParseEdition(fns.First());
 
                             if (ed != Editions.Unknown)
                             {
@@ -655,7 +655,7 @@
                             }
                             else
                             {
-                                appttl += " [" + Path.GetExtension(fns[0]) + "]";
+                                appttl += " [" + Path.GetExtension(fns.First()) + "]";
                             }
                         }
                         else if (!string.IsNullOrWhiteSpace(qualities))
@@ -1116,7 +1116,7 @@
 
             if (Signature.IsActivated)
             {
-                List<string> fn;
+                HashSet<string> fn;
                 if (Library.Files.TryGetValue(episode.ID, out fn) && fn.Count != 0)
                 {
                     // Open folder

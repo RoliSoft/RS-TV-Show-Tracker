@@ -796,7 +796,7 @@
 
                 if (Signature.IsActivated)
                 {
-                    List<string> nextfn;
+                    HashSet<string> nextfn;
                     if (Library.Files.TryGetValue(dbep.ID, out nextfn) && nextfn.Count != 0)
                     {
                         // Open folder
@@ -1031,7 +1031,7 @@
                 // - Files
                 if (Signature.IsActivated)
                 {
-                    List<string> lastfn;
+                    HashSet<string> lastfn;
                     if (Library.Files.TryGetValue(dbep2.ID, out lastfn) && lastfn.Count != 0)
                     {
                         // Open folder
