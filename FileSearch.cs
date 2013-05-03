@@ -6,6 +6,7 @@
     using System.Security;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Dependencies.USNJournal;
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -24,12 +25,6 @@
         /// Occurs when the progress of the file search has changed.
         /// </summary>
         public event EventHandler<EventArgs<string>> FileSearchProgressChanged;
-
-        /// <summary>
-        /// Gets the search thread.
-        /// </summary>
-        /// <value>The search thread.</value>
-        public Thread SearchThread { get; internal set; }
 
         /// <summary>
         /// Gets or sets the found files.
@@ -51,6 +46,26 @@
             set { _checkFile = value; }
         }
 
+        /// <summary>
+        /// Gets the search task.
+        /// </summary>
+        /// <value>The search task.</value>
+        public Task SearchTask
+        {
+            get { return _task; }
+        }
+
+        /// <summary>
+        /// Gets the cancellation token.
+        /// </summary>
+        /// <value>The cancellation token.</value>
+        public CancellationTokenSource Cancellation
+        {
+            get { return _cts; }
+        }
+
+        private Task _task;
+        private CancellationTokenSource _cts;
         private Dictionary<string, List<string>> _paths;
         private List<string> _files;
         private Regex[] _titleRegex, _episodeRegex;
@@ -162,8 +177,8 @@
         /// </summary>
         public void BeginSearch()
         {
-            SearchThread = new Thread(Search);
-            SearchThread.Start();
+            _cts  = new CancellationTokenSource();
+            _task = Task.Factory.StartNew(Search, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         }
 
         /// <summary>
@@ -171,7 +186,25 @@
         /// </summary>
         public void CancelSearch()
         {
-            try { SearchThread.Abort(); } catch { }
+            _cts.Cancel();
+
+            try
+            {
+                if (!_task.Wait(500))
+                {
+                    Log.Warn("Unable to cancel FileSearch._task after 500ms. Killing it.");
+
+                    _task.Dispose();
+                }
+            }
+            catch (AggregateException ex)
+            {
+                Log.Warn("Aggregate exceptions upon FileSearch._task completion.", ex);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Error while canceling FileSearch._task.", ex);
+            }
         }
 
         /// <summary>
@@ -183,6 +216,8 @@
 
             foreach (var paths in _paths)
             {
+                _cts.Token.ThrowIfCancellationRequested();
+
                 DriveInfo drive = null;
 
                 if (paths.Key != string.Empty)
@@ -190,7 +225,7 @@
                     try
                     {
                         drive = new DriveInfo(paths.Key);
-                        var s = drive.AvailableFreeSpace;
+                        var s = drive.AvailableFreeSpace; // make sure disk is ready
                     }
                     catch (DriveNotFoundException) { continue; }
                     catch (IOException)            { continue; }
@@ -205,6 +240,10 @@
                     try
                     {
                         ScanNtfsMftForFile(drive, paths.Value.Count == 1 && paths.Value[0].Length == 3 ? null : paths.Value);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -231,14 +270,18 @@
         /// <param name="path">The path to start the search from.</param>
         private void ScanDirectoryForFile(string path)
         {
+            _cts.Token.ThrowIfCancellationRequested();
+
             // search for matching files
             try
             {
                 foreach (var file in Directory.EnumerateFiles(path))
                 {
+                    _cts.Token.ThrowIfCancellationRequested();
+
                     try
                     {
-                        if (CheckFile(file))
+                        if (_checkFile(file))
                         {
                             _files.Add(file);
                         }
@@ -249,23 +292,31 @@
                     catch (DirectoryNotFoundException)  { }
                     catch (Exception ex)
                     {
-                        MainWindow.HandleUnexpectedException(ex);
+                        Log.Error("Error while checking file.", ex);
                     }
                 }
             }
             catch (IOException)                 { }
             catch (SecurityException)           { }
             catch (UnauthorizedAccessException) { }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                MainWindow.HandleUnexpectedException(ex);
+                Log.Error("Error while enumerating files.", ex);
             }
+
+            _cts.Token.ThrowIfCancellationRequested();
 
             // WE MUST GO DEEPER!
             try
             {
                 foreach (var dir in Directory.EnumerateDirectories(path))
                 {
+                    _cts.Token.ThrowIfCancellationRequested();
+
                     if (string.IsNullOrWhiteSpace(dir))
                     {
                         continue;
@@ -277,9 +328,13 @@
             catch (IOException)                 { }
             catch (SecurityException)           { }
             catch (UnauthorizedAccessException) { }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                MainWindow.HandleUnexpectedException(ex);
+                Log.Error("Error while enumerating directories.", ex);
             }
         }
 
@@ -292,16 +347,39 @@
         {
             FileSearchProgressChanged.Fire(this, "Reading the MFT records of the " + drive.Name[0] + " partition...");
 
-            var usn  = new NtfsUsnJournal(drive);
-            var list = usn.GetParsedPaths(ShowNames.Regexes.KnownVideo, paths);
+            IEnumerable<string> list;
+
+            Log.Debug("Reading the MFT records of the " + drive.Name[0] + " partition...");
+
+            try
+            {
+                _cts.Token.ThrowIfCancellationRequested();
+                var usn = new NtfsUsnJournal(drive);
+
+                _cts.Token.ThrowIfCancellationRequested();
+                list = usn.GetParsedPaths(ShowNames.Regexes.KnownVideo, paths);
+
+                _cts.Token.ThrowIfCancellationRequested();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error while reading the MFT records of the " + drive.Name[0] + " partition.", ex);
+                return;
+            }
 
             FileSearchProgressChanged.Fire(this, "Searching for matching files in the " + drive.Name[0] + " partition...");
 
             foreach (var file in list)
             {
+                _cts.Token.ThrowIfCancellationRequested();
+
                 try
                 {
-                    if (CheckFile(file))
+                    if (_checkFile(file))
                     {
                         _files.Add(file);
                     }
@@ -312,7 +390,7 @@
                 catch (DirectoryNotFoundException)  { }
                 catch (Exception ex)
                 {
-                    MainWindow.HandleUnexpectedException(ex);
+                    Log.Error("Error while checking file.", ex);
                 }
             }
         }
@@ -337,6 +415,8 @@
 
                     if (pf.Success)
                     {
+                        if (Log.IsTraceEnabled) Log.Trace("Identified file " + name + " as " + pf + ".");
+
                         return true;
                     }
                 }

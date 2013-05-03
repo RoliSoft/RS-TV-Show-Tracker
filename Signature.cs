@@ -12,6 +12,7 @@
     using System.Security.Cryptography;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -332,6 +333,21 @@
                 {
                     Log.Error("$AppDataPath (" + AppDataPath + ") doesn't exist and can't be created.", ex);
                 }
+            }
+
+            int minWorkThd = 0, maxWorkThd = 0, minIOWait = 0, maxIOWait = 0, cpu = Environment.ProcessorCount, destCpu = cpu * 8;
+            ThreadPool.GetMinThreads(out minWorkThd, out minIOWait);
+            ThreadPool.GetMaxThreads(out maxWorkThd, out maxIOWait);
+
+            Log.Debug("Thread pool status: " + minWorkThd + "/" + minIOWait + " min, " + maxWorkThd + "/" + maxIOWait + " max, " + cpu + " cpu.");
+
+            if (ThreadPool.SetMinThreads(destCpu, destCpu))
+            {
+                Log.Debug("Set thread pool minimum to " + destCpu + " threads.");
+            }
+            else
+            {
+                Log.Warn("Failed to set thread pool minimum to " + destCpu + " threads.");
             }
 
             Task.Factory.StartNew(() =>

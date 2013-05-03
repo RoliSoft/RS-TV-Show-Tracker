@@ -577,17 +577,23 @@
         private static string ParseException(Exception exception)
         {
             var sb = new StringBuilder();
+            var ex = exception;
             var cn = 0;
 
         parseException:
-            sb.AppendLine(exception.GetType() + ": " + exception.Message);
-            sb.AppendLine(exception.StackTrace.Replace(Signature.BuildDirectory.Replace("C:\\", "c:\\") + "\\", string.Empty));
+            sb.AppendLine(ex.GetType() + ": " + ex.Message);
+            sb.AppendLine(!string.IsNullOrWhiteSpace(ex.StackTrace) ? ex.StackTrace.Replace(Signature.BuildDirectory.Replace("C:\\", "c:\\") + "\\", string.Empty) : "   -- no stacktrace --");
 
-            if (exception.InnerException != null && cn < 20)
+            if (ex.InnerException != null && cn < 20)
             {
                 cn++;
-                exception = exception.InnerException;
+                ex = ex.InnerException;
                 goto parseException;
+            }
+
+            if (cn >= 19)
+            {
+                sb.AppendLine("   --- inner exception dumping depth reached ---");
             }
 
             return sb.ToString().TrimEnd();

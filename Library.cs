@@ -340,12 +340,26 @@
             _tmp = new Dictionary<int, HashSet<string>>();
 
             fs.BeginSearch();
-            fs.SearchThread.Join(TimeSpan.FromMinutes(5));
 
-            if (fs.SearchThread.IsAlive)
+            fs.Cancellation.CancelAfter(TimeSpan.FromMinutes(5));
+
+            try
             {
-                Log.Error("Library update timed out after 5 minutes of file searching. Please optimize your download paths, and, if possible, please refrain from using network-attached paths.");
-                try { fs.SearchThread.Abort(); } catch { }
+                if (!fs.SearchTask.Wait(TimeSpan.FromMinutes(5.5)))
+                {
+                    fs.SearchTask.Dispose();
+                }
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerException is OperationCanceledException)
+                {
+                    Log.Error("Library update timed out after 5 minutes of file searching. Please optimize your download paths, and, if possible, please refrain from using network-attached paths.");
+                }
+                else
+                {
+                    Log.Warn("Aggregate exceptions upon FileSearch._task completion.", ex);
+                }
             }
 
             Files = _tmp;
