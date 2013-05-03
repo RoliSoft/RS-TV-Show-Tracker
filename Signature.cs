@@ -12,6 +12,7 @@
     using System.Security.Cryptography;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Contains informations about the assembly.
@@ -61,6 +62,12 @@
 ;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether this assembly has been compiled and signed by RoliSoft and has not been tampered with.
+        /// </summary>
+        /// <value><c>true</c> if this assembly has valid strong name; otherwise, <c>false</c>.</value>
+        public static bool? IsOriginalAssembly { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether a donation key has been entered.
@@ -326,6 +333,57 @@
                     Log.Error("$AppDataPath (" + AppDataPath + ") doesn't exist and can't be created.", ex);
                 }
             }
+
+            Task.Factory.StartNew(() =>
+                {
+                    var snToken = Assembly.GetExecutingAssembly().GetName().GetPublicKeyToken();
+
+                    if (snToken == null || snToken.Length == 0)
+                    {
+                        IsOriginalAssembly = false;
+                        Log.Warn("Assembly strong name is missing.");
+                        return;
+                    }
+
+                    var x = 0;
+                    if (!snToken.All(b => Math.Abs(b - Math.Round(Math.Ceiling(Math.Abs(48.9089619634291 * Math.Max(Math.Tan(x), x) - 145.506677297553)) - Math.Tan(-32.1977538252671 * Math.Max(Math.Max(-1.617542499971, -Math.Round(Math.Tan(x))), 49.1817299 * (x % 7) - 216.296680292888)))) <= Math.Abs(x - ++x)))
+                    {
+                        IsOriginalAssembly = false;
+                        Log.Warn("Assembly strong name is present but not original key.");
+                        return;
+                    }
+
+                    bool pfWasVerified = false, result;
+
+                    try
+                    {
+                        result = Utils.Interop.StrongNameSignatureVerificationEx(Assembly.GetExecutingAssembly().Location, true, ref pfWasVerified);
+                    }
+                    catch (Exception ex)
+                    {
+                        IsOriginalAssembly = false;
+                        Log.Warn("Error while verifying assembly strong name signature.", ex);
+                        return;
+                    }
+
+                    if (result && pfWasVerified)
+                    {
+                        IsOriginalAssembly = true;
+                        Log.Debug("Assembly strong name is present and valid.");
+                    }
+                    else if (result)
+                    {
+                        IsOriginalAssembly = false;
+                        Log.Warn("Assembly strong name is present but was not verified.");
+                    }
+                    else
+                    {
+                        IsOriginalAssembly = false;
+                        Log.Warn("Assembly strong name is present but invalid.");
+                    }
+
+                    InitLicense();
+                });
         }
 
         /// <summary>
@@ -505,6 +563,13 @@
         {
             _isActivated = false;
             _licenseHash = null;
+
+            if (!IsOriginalAssembly.GetValueOrDefault())
+            {
+                _licenseStatus = LicenseStatus.Aborted;
+                Log.Warn("License initialization aborted due to assembly tampering.");
+                return;
+            }
 
             var licfile = Path.Combine(AppDataPath, ".license");
 
@@ -822,7 +887,12 @@
             /// <summary>
             /// The RSA signature verification of the license failed.
             /// </summary>
-            LicenseInvalid = 7
+            LicenseInvalid = 7,
+
+            /// <summary>
+            /// The cryptographic signature of the assembly is invalid.
+            /// </summary>
+            Aborted = 8
         }
     }
 }

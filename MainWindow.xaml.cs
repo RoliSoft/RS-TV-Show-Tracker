@@ -166,10 +166,6 @@
                 }
             }
 
-            // check license in the background
-
-            new Thread(Signature.InitLicense).Start();
-
             // init interface
 
             InitializeComponent();
