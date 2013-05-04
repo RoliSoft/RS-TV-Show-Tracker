@@ -59,7 +59,30 @@
         /// <returns>List of the open files.</returns>
         public static IEnumerable<FileInfo> GetHandleList(List<int> pids)
         {
-            foreach (var file in DetectOpenFiles.UnsafeGetFilesLockedBy(pids))
+            Func<List<int>, IEnumerable<string>> getFilesLockedBy;
+
+            var method = Settings.Get("Process Monitoring Method", "Internal");
+
+            switch (method)
+            {
+                default:
+                case "Internal":
+                    Log.Trace("Using internal unsafe NtQuerySystemInformation()-based implementation as the process monitoring method.");
+                    getFilesLockedBy = DetectOpenFiles.UnsafeGetFilesLockedBy; 
+                   break;
+
+                case "Sysinternals":
+                   Log.Trace("Using third-party application Sysinternals Handle as the process monitoring method.");
+                    getFilesLockedBy = DetectOpenFiles.SysinternalsGetFilesLockedBy;
+                    break;
+
+                case "NirSoft":
+                    Log.Trace("Using third-party application NirSoft OpenedFilesView as the process monitoring method.");
+                    getFilesLockedBy = DetectOpenFiles.NirSoftGetFilesLockedBy;
+                    break;
+            }
+
+            foreach (var file in getFilesLockedBy(pids))
             {
                 FileInfo fi;
 

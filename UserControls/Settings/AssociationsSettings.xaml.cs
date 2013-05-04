@@ -2,13 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
-    using System.Windows.Forms;
-    using System.Windows.Media.Imaging;
 
     using Label = System.Windows.Controls.Label;
 
@@ -66,6 +63,22 @@
 
                 processTextBox.Text = string.Join(",", Settings.Get<List<string>>("Processes to Monitor"));
 
+                switch (Settings.Get("Process Monitoring Method", "Internal"))
+                {
+                    default:
+                    case "Internal":
+                        methodComboBox.SelectedIndex = 0;
+                        break;
+
+                    case "Sysinternals":
+                        methodComboBox.SelectedIndex = 1;
+                        break;
+
+                    case "NirSoft":
+                        methodComboBox.SelectedIndex = 2;
+                        break;
+                }
+
                 monitorNetworkShare.IsChecked = Settings.Get<bool>("Monitor Network Shares");
                 upnpShare.IsChecked           = Settings.Get<bool>("Enable UPnP AV Media Server");
 
@@ -106,6 +119,50 @@
             if (!_loaded) return;
 
             Settings.Set("Monitor Network Shares", false);
+        }
+
+        /// <summary>
+        /// Handles the OnSelectionChanged event of the MethodComboBox control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="SelectionChangedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void MethodComboBoxOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (methodComboBox.SelectedIndex)
+            {
+                case 0:
+                    sysinternalsInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
+                    internalInfo.Visibility = Visibility.Visible;
+                    break;
+
+                case 1:
+                    internalInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
+                    sysinternalsInfo.Visibility = Visibility.Visible;
+                    break;
+
+                case 2:
+                    sysinternalsInfo.Visibility = internalInfo.Visibility = Visibility.Collapsed;
+                    nirsoftInfo.Visibility = Visibility.Visible;
+                    break;
+            }
+
+            if (!_loaded) return;
+
+            switch (methodComboBox.SelectedIndex)
+            {
+                case 0:
+                    Settings.Set("Process Monitoring Method", "Internal");
+                    break;
+
+                case 1:
+                    Settings.Set("Process Monitoring Method", "Sysinternals");
+                    break;
+
+                case 2:
+                    Settings.Set("Process Monitoring Method", "NirSoft");
+                    break;
+            }
         }
 
         /// <summary>
@@ -169,6 +226,16 @@
             if (!_loaded) return;
 
             Settings.Set("Memory Usage Limit", memLimit.Value);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the Hyperlink control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void HyperlinkClick(object sender, RoutedEventArgs e)
+        {
+            Utils.Run(((Hyperlink)sender).NavigateUri.ToString());
         }
     }
 }

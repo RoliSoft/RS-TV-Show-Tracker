@@ -5,41 +5,196 @@
 //  This code was modified slightly to use yield and recognize networked paths.
 //  Also, to prevent lock-ups in GetFilePath(), I added thread abortion logic
 //  similar to the one used in the earlier DetectOpenFiles implementation.
+//  Added Handle and OpenedFilesView output parser implementations as backup.
 //
 
 namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading;
 
-    public class DetectOpenFiles
+    public static class DetectOpenFiles
     {
-        private static void Ignore() { }
+        public static IEnumerable<string> SysinternalsGetFilesLockedBy(List<int> pids)
+        {
+            var res = Utils.RunAndRead("handle", "-accepteula", true).Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (res.Length < 3)
+            {
+                Log.Error("Empty or erroneous result from third-party process monitoring application handle.exe. Make sure it exists in your %PATH% and you can elevate to admin rights.");
+                yield break;
+            }
+
+            var pid = -1;
+            var skip = true;
+            var need = false;
+
+            for (int i = 0; i < res.Length; i++)
+            {
+                if (skip && res[i] == "Initialization error:")
+                {
+                    Log.Error("Third-party process monitoring application handle.exe failed to initialize due to an error: " + res[i + 1]);
+                    yield break;
+                }
+
+                if (skip && res[i] == "------------------------------------------------------------------------------")
+                {
+                    skip = false;
+                    continue;
+                }
+
+                if (skip)
+                {
+                    continue;
+                }
+
+                if (res[i] == "------------------------------------------------------------------------------")
+                {
+                    pid = -1;
+                    need = false;
+                    continue;
+                }
+
+                if (pid == -1)
+                {
+                    var m = Regex.Match(res[i], @" pid: (\d+) ");
+
+                    if (!m.Success || !m.Groups[1].Success)
+                    {
+                        continue;
+                    }
+
+                    pid = int.Parse(m.Groups[1].Value);
+                    need = pids.Contains(pid);
+                    continue;
+                }
+
+                if (need)
+                {
+                    var m = Regex.Match(res[i], @"^ *[0-9A-F]+: File  \(...\)   (.+)$");
+
+                    if (!m.Success || !m.Groups[1].Success)
+                    {
+                        continue;
+                    }
+
+                    yield return m.Groups[1].Value;
+                }
+            }
+        }
+
+        public static IEnumerable<string> NirSoftGetFilesLockedBy(List<int> pids)
+        {
+            var lst = Utils.GetRandomFileName(".txt");
+
+            if (Utils.IsAdmin)
+            {
+                Utils.Run("OpenedFilesView", "/nosort /stab \"" + lst + "\"");
+            }
+            else
+            {
+                Utils.RunElevated("OpenedFilesView", "/nosort /stab \"" + lst + "\"");
+            }
+
+            if (!File.Exists(lst) || new FileInfo(lst).Length < 3)
+            {
+                try { File.Delete(lst); } catch { }
+                Log.Error("Empty or erroneous result from third-party process monitoring application OpenedFilesView.exe. Make sure it exists in your %PATH%, you can elevate to admin rights and test driver signing is enabled if you're on a 64-bit operating system.");
+                yield break;
+            }
+
+            string[] res;
+
+            try
+            {
+                res = File.ReadAllLines(lst);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error while reading third-party process monitoring application OpenedFilesView.exe output from " + lst, ex);
+                yield break;
+            }
+            finally
+            {
+                try { File.Delete(lst); } catch { }
+            }
+
+            if (res.Length < 3)
+            {
+                Log.Error("Empty or erroneous result from third-party process monitoring application OpenedFilesView.exe. Make sure it exists in your %PATH%, you can elevate to admin rights and test driver signing is enabled if you're on a 64-bit operating system.");
+                yield break;
+            }
+
+            foreach (var ln in res)
+            {
+                var lns = ln.Split("\t".ToCharArray(), StringSplitOptions.None);
+
+                int pid;
+                if (lns.Length > 15 && int.TryParse(lns[15], out pid) && pids.Contains(pid))
+                {
+                    yield return lns[1];
+                }
+            }
+        }
+
         public static IEnumerable<string> UnsafeGetFilesLockedBy(List<int> pids)
         {
+            if (!Utils.IsAdmin)
+            {
+                Log.Error("You are not running with administrator rights, therefore you cannot use the internal implementation.");
+                yield break;
+            }
+
             foreach (var handle in GetHandles(pids))
             {
                 var path = string.Empty;
+                var hwnd = IntPtr.Zero;
+                var hinf = handle;
 
-                var thd = new Thread(ptr => path = GetFilePath((Win32API.SYSTEM_HANDLE_INFORMATION)ptr)) { IsBackground = true };
+                var thd = new Thread(() => path = GetFilePath(hinf, ref hwnd)) { IsBackground = true };
 
-                thd.Start(handle);
+                thd.Start();
 
                 if (!thd.Join(200))
                 {
-                    Log.Debug("GetFilePath(0x" + handle.Handle.ToString("X") + ") thread decided to hang, trying to kill it...");
+                    Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") thread decided to hang, trying to cancel I/O ops and close handle...");
 
-                    try
+                    if (Win32API.CancelIo(hwnd))
                     {
-                        thd.Interrupt();
-                        thd.Abort();
+                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") canceled the I/O operations successfully.");
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Log.Warn("GetFilePath(0x" + handle.Handle.ToString("X") + ") thread was not killed successfully.", ex);
+                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") failed to cancel the I/O operations.");
+                    }
+
+                    if (Win32API.CloseHandle(hwnd))
+                    {
+                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") closed the handle successfully.");
+                    }
+                    else
+                    {
+                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") failed to close the handle.");
+                    }
+
+                    if (!thd.Join(100))
+                    {
+                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") thread is still hanging, trying to forcefully abort thread...");
+
+                        try
+                        {
+                            thd.Interrupt();
+                            thd.Abort();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") thread was not killed successfully.", ex);
+                        }
                     }
                 }
 
@@ -51,7 +206,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
         }
 
         const int CNST_SYSTEM_HANDLE_INFORMATION = 16;
-        private static string GetFilePath(Win32API.SYSTEM_HANDLE_INFORMATION systemHandleInformation)
+        private static string GetFilePath(Win32API.SYSTEM_HANDLE_INFORMATION systemHandleInformation, ref IntPtr ipHandle)
         {
             var ipProcessHwnd = Win32API.OpenProcess(Win32API.ProcessAccessFlags.All, false, systemHandleInformation.ProcessID);
             var objBasic = new Win32API.OBJECT_BASIC_INFORMATION();
@@ -59,10 +214,13 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             var objObjectName = new Win32API.OBJECT_NAME_INFORMATION();
             var strObjectName = "";
             var nLength = 0;
-            IntPtr ipTemp, ipHandle;
+            IntPtr ipTemp;
 
             if (!Win32API.DuplicateHandle(ipProcessHwnd, systemHandleInformation.Handle, Win32API.GetCurrentProcess(), out ipHandle, 0, false, Win32API.DUPLICATE_SAME_ACCESS))
+            {
+                Log.Trace("GetFilePath(" + systemHandleInformation.ProcessID + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") : DuplicateHandle(0x" + ipProcessHwnd.ToString("X") + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") returned false.");
                 return null;
+            }
 
             IntPtr ipBasic = Marshal.AllocHGlobal(Marshal.SizeOf(objBasic));
             Win32API.NtQueryObject(ipHandle, (int)Win32API.ObjectInformationClass.ObjectBasicInformation, ipBasic, Marshal.SizeOf(objBasic), ref nLength);
@@ -76,7 +234,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             {
                 if (nLength == 0)
                 {
-                    //Console.WriteLine("nLength returned at zero! ");
+                    Log.Trace("GetFilePath(" + systemHandleInformation.ProcessID + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") : NtQueryObject(0x" + ipHandle.ToString("X") + ", ObjectTypeInformation) returned !STATUS_INFO_LENGTH_MISMATCH when nLength == 0.");
                     return null;
                 }
                 Marshal.FreeHGlobal(ipObjectType);
@@ -108,7 +266,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 Marshal.FreeHGlobal(ipObjectName);
                 if (nLength == 0)
                 {
-                    //Console.WriteLine("nLength returned at zero! " + strObjectTypeName);
+                    Log.Trace("GetFilePath(" + systemHandleInformation.ProcessID + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") : NtQueryObject(0x" + ipHandle.ToString("X") + ", ObjectNameInformation) returned !STATUS_INFO_LENGTH_MISMATCH when nLength == 0.");
                     return null;
                 }
                 ipObjectName = Marshal.AllocHGlobal(nLength);
@@ -134,8 +292,9 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
                     strObjectName = Marshal.PtrToStringUni(Is64Bits() ? new IntPtr(ipTemp.ToInt64()) : new IntPtr(ipTemp.ToInt32()));
                 }
-                catch (AccessViolationException)
+                catch (AccessViolationException ex)
                 {
+                    Log.Trace("GetFilePath(" + systemHandleInformation.ProcessID + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") Error while marshaling file name.", ex);
                     return null;
                 }
                 finally
@@ -258,7 +417,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             [DllImport("kernel32.dll")]
             public static extern IntPtr OpenProcess(ProcessAccessFlags dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
             [DllImport("kernel32.dll")]
-            public static extern int CloseHandle(IntPtr hObject);
+            public static extern bool CloseHandle(IntPtr hObject);
             [DllImport("kernel32.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool DuplicateHandle(IntPtr hSourceProcessHandle,
@@ -266,6 +425,11 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, uint dwOptions);
             [DllImport("kernel32.dll")]
             public static extern IntPtr GetCurrentProcess();
+            [DllImport("kernel32.dll", SetLastError = true)]
+            public static extern int GetFinalPathNameByHandle(IntPtr handle, [In, Out] StringBuilder path, int bufLen, int flags);
+            [DllImport("kernel32.dll")]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool CancelIo(IntPtr hFile);
 
             public enum ObjectInformationClass
             {

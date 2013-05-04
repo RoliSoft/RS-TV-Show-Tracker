@@ -315,7 +315,7 @@
         /// <returns>Console output.</returns>
         public static string RunAndRead(string process, string arguments = null, bool elevate = false)
         {
-            Log.Debug("Running process with I/O redirection{0} {1} {2}", new[] { elevate ? " and elevation: runas" : ":", process, arguments });
+            Log.Debug("Running process with I/O redirection{0} {1} {2}", new[] { elevate && !IsAdmin ? " and elevation: runas" : ":", process, arguments });
 
             var sb = new StringBuilder();
             var p  = new Process

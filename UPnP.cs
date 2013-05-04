@@ -260,9 +260,10 @@
             {
                 _mimes.Add(mime);
                 var ps = new ProtocolInfoString[_mimes.Count];
+                var i = 0;
                 foreach (var mime2 in _mimes)
                 {
-                    ps[i] = new ProtocolInfoString("http-get:*:" + mime2 + ":*");
+                    ps[i++] = new ProtocolInfoString("http-get:*:" + mime2 + ":*");
                 }
                 _ms.SourceProtocolInfoSet = ps;
             }
