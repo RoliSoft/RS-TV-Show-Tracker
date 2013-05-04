@@ -27,7 +27,7 @@
         private static UPnPDeviceWatcher _dw;
         private static Image _icon, _icon2;
         private static Icon _favicon;
-        private static List<string> _mimes; 
+        private static HashSet<string> _mimes;
 
         /// <summary>
         /// Gets or sets a value indicating whether this server is running.
@@ -101,7 +101,7 @@
 
             IsRunning = true;
 
-            _mimes = new List<string>();
+            _mimes = new HashSet<string>();
 
             RebuildList();
         }
@@ -142,7 +142,7 @@
 
             _ms.Root.AddObject(allEps, true);
             _ms.Root.AddObject(unwEps, true);
-
+            
             var shows = new Dictionary<int, DvMediaContainer>();
 
             foreach (var tvs in Database.TVShows.OrderBy(t => t.Value.Title))
@@ -260,9 +260,9 @@
             {
                 _mimes.Add(mime);
                 var ps = new ProtocolInfoString[_mimes.Count];
-                for (var i = 0; i < _mimes.Count; i++)
+                foreach (var mime2 in _mimes)
                 {
-                    ps[i] = new ProtocolInfoString("http-get:*:" + _mimes[i] + ":*");
+                    ps[i] = new ProtocolInfoString("http-get:*:" + mime2 + ":*");
                 }
                 _ms.SourceProtocolInfoSet = ps;
             }

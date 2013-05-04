@@ -56,6 +56,18 @@
         }
 
         /// <summary>
+        /// Gets the thread.
+        /// </summary>
+        /// <value>The thread.</value>
+        public string Thread
+        {
+            get
+            {
+                return Item.Thread.ToString();
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="LogListViewItem" /> class.
         /// </summary>
         /// <param name="item">The item.</param>

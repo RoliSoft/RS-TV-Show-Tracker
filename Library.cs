@@ -82,11 +82,33 @@
             }
 
             _stmr = new Timer
+                {
+                    AutoReset = false,
+                    Interval  = 3000
+                };
+            _stmr.Elapsed += (sender, args) =>
+                {
+                    try
+                    {
+                        SaveList();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Error while saving library.", ex);
+                    }
+
+                    if (UPnP.IsRunning)
+                    {
+                        try
                         {
-                            AutoReset = false,
-                            Interval  = 3000
-                        };
-            _stmr.Elapsed += (sender, args) => SaveList();
+                            UPnP.RebuildList();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn("Error while rebuilding UPnP/DLNA library.", ex);
+                        }
+                    }
+                };
 
             SearchForFiles();
         }
@@ -167,7 +189,7 @@
         {
             if (Log.IsTraceEnabled) Log.Trace("File created: " + fileSystemEventArgs.FullPath);
 
-            _producer.Add(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
+            _producer.Add(Tuple.Create(WatcherChangeTypes.Created, new[] { fileSystemEventArgs.FullPath }));
         }
 
         /// <summary>
@@ -179,7 +201,8 @@
         {
             if (Log.IsTraceEnabled) Log.Trace("File renamed: " + renamedEventArgs.OldFullPath + " -> " + renamedEventArgs.FullPath);
 
-            _producer.Add(Tuple.Create(renamedEventArgs.ChangeType, new[] { renamedEventArgs.OldFullPath, renamedEventArgs.FullPath }));
+            _producer.Add(Tuple.Create(WatcherChangeTypes.Deleted, new[] { renamedEventArgs.OldFullPath }));
+            _producer.Add(Tuple.Create(WatcherChangeTypes.Created, new[] { renamedEventArgs.FullPath }));
         }
 
         /// <summary>
@@ -191,7 +214,7 @@
         {
             if (Log.IsTraceEnabled) Log.Trace("File deleted: " + fileSystemEventArgs.FullPath);
 
-            _producer.Add(Tuple.Create(fileSystemEventArgs.ChangeType, new[] { fileSystemEventArgs.FullPath }));
+            _producer.Add(Tuple.Create(WatcherChangeTypes.Deleted, new[] { fileSystemEventArgs.FullPath }));
         }
 
         /// <summary>
@@ -282,41 +305,6 @@
                                 }
 
                                 if (success && !Indexing)
-                                {
-                                    DataChanged();
-                                }
-                            }
-                            break;
-
-                        case WatcherChangeTypes.Renamed:
-                            {
-                                var successAdd = CheckFile(evt.Item2[1]);
-                                var successDel = false;
-
-                                foreach (var ep in Files)
-                                {
-                                    if (ep.Value.Contains(evt.Item2[0]))
-                                    {
-                                        ep.Value.Remove(evt.Item2[0]);
-                                        successDel = true;
-                                        break;
-                                    }
-                                }
-
-                                if (successAdd && successDel)
-                                {
-                                    Log.Debug("Renamed file " + Path.GetFileName(evt.Item2[0]) + " to " + Path.GetFileName(evt.Item2[1]) + " in the library.");
-                                }
-                                else if (successAdd)
-                                {
-                                    Log.Debug("Added file " + Path.GetFileName(evt.Item2[1]) + " to the library.");
-                                }
-                                else
-                                {
-                                    Log.Debug("Removed file " + Path.GetFileName(evt.Item2[0]) + " from the library.");
-                                }
-
-                                if ((successAdd || successDel) && !Indexing)
                                 {
                                     DataChanged();
                                 }
@@ -447,6 +435,15 @@
         /// <param name="delaySave">if set to <c>true</c> the database commit will be delayed for 3 seconds.</param>
         private static void DataChanged(bool delaySave = true)
         {
+            try
+            {
+                if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
+                {
+                    MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
+                }
+            }
+            catch { }
+
             if (delaySave)
             {
                 if (_stmr.Enabled)
@@ -458,27 +455,25 @@
             }
             else
             {
-                SaveList();
-            }
-
-            try
-            {
-                if (MainWindow.Active != null && MainWindow.Active.activeGuidesPage != null && MainWindow.Active.activeGuidesPage._activeShowID != 0)
-                {
-                    MainWindow.Active.Run(MainWindow.Active.activeGuidesPage.Refresh);
-                }
-            }
-            catch { }
-
-            if (UPnP.IsRunning)
-            {
                 try
                 {
-                    UPnP.RebuildList();
+                    SaveList();
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("Error while rebuilding UPnP/DLNA library.", ex);
+                    Log.Warn("Error while saving library.", ex);
+                }
+
+                if (UPnP.IsRunning)
+                {
+                    try
+                    {
+                        UPnP.RebuildList();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Error while rebuilding UPnP/DLNA library.", ex);
+                    }
                 }
             }
         }

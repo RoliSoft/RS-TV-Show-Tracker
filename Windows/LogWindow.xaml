@@ -43,6 +43,14 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
                                 <GridViewColumn>
+                                    <GridViewColumnHeader Content="Thd" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Thread}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn>
                                     <GridViewColumnHeader Content="Location" Width="250" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>

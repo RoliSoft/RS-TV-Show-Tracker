@@ -667,6 +667,14 @@
             public readonly string Message;
 
             /// <summary>
+            /// Gets or sets the managed ID of the thread in the thread pool.
+            /// </summary>
+            /// <value>
+            /// The managed ID of the thread in the thread pool.
+            /// </value>
+            public readonly int Thread;
+
+            /// <summary>
             /// Initializes a new instance of the <see cref="Entry" /> class.
             /// </summary>
             /// <param name="time">The time when the logged message occurred.</param>
@@ -683,6 +691,7 @@
                 Method  = method;
                 Line    = line;
                 Message = message;
+                Thread  = System.Threading.Thread.CurrentThread.ManagedThreadId;
             }
 
             /// <summary>
@@ -693,7 +702,7 @@
             /// </returns>
             public override string ToString()
             {
-                return string.Format("{0:HH:mm:ss.fff} {1} {2}/{3}():{4} - {5}{6}", Time, Level.ToString().ToUpper(), Path.GetFileName(File), Method, Line, Message, Environment.NewLine);
+                return string.Format("{0:HH:mm:ss.fff} {1} {2} {3}/{4}():{5} - {6}{7}", Time, Level.ToString().ToUpper(), Thread, Path.GetFileName(File), Method, Line, Message, Environment.NewLine);
             }
         }
     }
