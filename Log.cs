@@ -527,7 +527,7 @@
         /// The message container.
         /// </summary>
         public static readonly ConcurrentBag<Entry> Messages = new ConcurrentBag<Entry>();
-        
+
         /// <summary>
         /// Sets the debugging level.
         /// </summary>
@@ -702,7 +702,7 @@
             /// </returns>
             public override string ToString()
             {
-                return string.Format("{0:HH:mm:ss.fff} {1} {2} {3}/{4}():{5} - {6}{7}", Time, Level.ToString().ToUpper(), Thread, Path.GetFileName(File), Method, Line, Message, Environment.NewLine);
+                return string.Format("{0:HH:mm:ss.fff} {1} {2} {3}/{4}():{5} - {6}", Time, Level.ToString().ToUpper(), Thread, Path.GetFileName(File), Method, Line, Message);
             }
         }
     }

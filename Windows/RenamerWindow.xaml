@@ -17,82 +17,80 @@
                             </LinearGradientBrush>
                         </Rectangle.Fill>
                     </Rectangle>
-                    <Border BorderBrush="LightGray" BorderThickness="1" Margin="10,10,10,39">
-                        <ListView Name="listView" AllowDrop="True" Drop="ListViewDrop" BorderThickness="0">
-                            <ListView.View>
-                                <GridView AllowsColumnReorder="False">
-                                    <GridViewColumn Width="26">
-                                        <GridViewColumnHeader />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Grid>
-                                                    <CheckBox Name="Enabled" Tag="{Binding File}" IsChecked="{Binding Checked}" IsEnabled="{Binding Enabled}" Visibility="{Binding ShowCheckBox}" />
-                                                    <Image Source="{Binding StatusImage}" Width="16" Height="16" Margin="-1,0,0,0" Visibility="{Binding ShowStatusImage}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="300">
-                                        <GridViewColumnHeader Content="File" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Information.Name}" ToolTip="{Binding Information.Name}" IsEnabled="{Binding Enabled}" Opacity="{Binding Opacity}" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Width="350">
-                                        <GridViewColumnHeader Content="New name" />
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Target}" ToolTip="{Binding Target}" IsEnabled="{Binding Enabled}" Opacity="{Binding Opacity}" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView>
-                            </ListView.View>
-                            <ListView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Add files" Click="AddFilesButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/document-plus.png" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Add folders" Click="AddFoldersButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/folder-plus.png" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <Separator />
-                                    <MenuItem Header="Select all" Click="SelectAllButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/documents-stack.png" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Clear selection" Click="SelectNoneButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/documents-stack.png" Opacity="0.5" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <Separator />
-                                    <MenuItem Header="Mark selected" Click="MarkSelectedButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/checked.png" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Unmark selected" Click="UnmarkSelectedButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/unchecked.png" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Remove selected" Click="RemoveSelectedButtonClick">
-                                        <MenuItem.Icon>
-                                            <Image Source="/RSTVShowTracker;component/Images/cross.png" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </ContextMenu>
-                            </ListView.ContextMenu>
-                        </ListView>
-                    </Border>
+                    <ListView Name="listView" AllowDrop="True" Drop="ListViewDrop" Margin="10,10,10,50" Padding="-2,-1">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Width="26">
+                                    <GridViewColumnHeader />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <CheckBox Name="Enabled" Tag="{Binding File}" IsChecked="{Binding Checked}" IsEnabled="{Binding Enabled}" Visibility="{Binding ShowCheckBox}" />
+                                                <Image Source="{Binding StatusImage}" Width="16" Height="16" Margin="-1,0,0,0" Visibility="{Binding ShowStatusImage}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="300">
+                                    <GridViewColumnHeader Content="File" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Information.Name}" ToolTip="{Binding Information.Name}" IsEnabled="{Binding Enabled}" Opacity="{Binding Opacity}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="350">
+                                    <GridViewColumnHeader Content="New name" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Target}" ToolTip="{Binding Target}" IsEnabled="{Binding Enabled}" Opacity="{Binding Opacity}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add files" Click="AddFilesButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/document-plus.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Add folders" Click="AddFoldersButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/folder-plus.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="Select all" Click="SelectAllButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/documents-stack.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Clear selection" Click="SelectNoneButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/documents-stack.png" Opacity="0.5" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="Mark selected" Click="MarkSelectedButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/checked.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Unmark selected" Click="UnmarkSelectedButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/unchecked.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Remove selected" Click="RemoveSelectedButtonClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="/RSTVShowTracker;component/Images/cross.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                    </ListView>
 
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
                         <Grid>

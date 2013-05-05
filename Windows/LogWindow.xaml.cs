@@ -1,15 +1,23 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Concurrent;
     using System.ComponentModel;
     using System.Linq;
+    using System.Text;
     using System.Windows;
+    using System.Windows.Controls;
+    using System.IO;
+
+    using Microsoft.Win32;
 
     /// <summary>
     /// Interaction logic for LogWindow.xaml
     /// </summary>
     public partial class LogWindow
     {
+        private bool _loaded;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LogWindow"/> class.
         /// </summary>
@@ -22,7 +30,8 @@
                 logListView.Items.Add(new LogListViewItem(entry));
             }
 
-            logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
+            if (logListView.Items.Count != 0) logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
+            msgCount.Text = logListView.Items.Count.ToString();
 
             Log.NewMessage += AddMessage;
         }
@@ -38,6 +47,21 @@
             {
                 SetAeroGlassTransparency();
             }
+
+            var log = Settings.Get("Logging Level", Log.Level.Info);
+
+            switch (log)
+            {
+                case Log.Level.Trace: level.SelectedIndex = 0; break;
+                case Log.Level.Debug: level.SelectedIndex = 1; break;
+                case Log.Level.Info:  level.SelectedIndex = 2; break;
+                case Log.Level.Warn:  level.SelectedIndex = 3; break;
+                case Log.Level.Error: level.SelectedIndex = 4; break;
+                case Log.Level.Fatal: level.SelectedIndex = 5; break;
+                case Log.Level.None:  level.SelectedIndex = 6; break;
+            }
+
+            _loaded = true;
         }
 
         /// <summary>
@@ -52,6 +76,7 @@
                     {
                         logListView.Items.Add(new LogListViewItem(item as Log.Entry));
                         logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
+                        msgCount.Text = logListView.Items.Count.ToString();
                     }));
             }
         }
@@ -65,6 +90,106 @@
         private void WindowClosing(object sender, CancelEventArgs e)
         {
             Log.NewMessage -= AddMessage;
+        }
+
+        /// <summary>
+        /// Handles the OnSelectionChanged event of the Level control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="SelectionChangedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void LevelOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            var log = Log.Level.None;
+
+            switch (level.SelectedIndex)
+            {
+                case 0: log = Log.Level.Trace; break;
+                case 1: log = Log.Level.Debug; break;
+                case 2: log = Log.Level.Info;  break;
+                case 3: log = Log.Level.Warn;  break;
+                case 4: log = Log.Level.Error; break;
+                case 5: log = Log.Level.Fatal; break;
+                case 6: log = Log.Level.None;  break;
+            }
+
+            Log.SetLevel(log);
+            Log.Trace("Setting logging level to " + log + "...");
+            Settings.Set("Logging Level", log);
+        }
+
+        /// <summary>
+        /// Handles the OnClick event of the ClearButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void ClearButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            level.IsEnabled = saveButton.IsEnabled = clearButton.IsEnabled = false;
+
+            lock (Log.Messages)
+                lock (logListView)
+            {
+                Log.Entry ent;
+
+                while (!Log.Messages.IsEmpty)
+                {
+                    Log.Messages.TryTake(out ent);
+                }
+
+                logListView.Items.Clear();
+            }
+
+            msgCount.Text = logListView.Items.Count.ToString();
+            level.IsEnabled = saveButton.IsEnabled = clearButton.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Handles the OnClick event of the SaveButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void SaveButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            level.IsEnabled = saveButton.IsEnabled = clearButton.IsEnabled = false;
+
+            var sfd = new SaveFileDialog
+                {
+                    Title           = "Specify file to save the log to",
+                    CheckPathExists = true,
+                    Filter          = "Log files|*.log|All files|*.*",
+                    FileName        = DateTime.Now.ToString("s").Replace('T', '-').Replace(':', '-') + ".log"
+                };
+
+            if (sfd.ShowDialog().GetValueOrDefault())
+            {
+                try
+                {
+                    using (var fs = File.Create(sfd.FileName))
+                    using (var sw = new StreamWriter(fs, Encoding.UTF8))
+                    {
+                        foreach (var entry in Log.Messages.ToArray().Reverse().OrderBy(x => x.Time))
+                        {
+                            if (entry.Level >= Log.LoggingLevel)
+                            {
+                                sw.WriteLine(entry);
+                            }
+                        }
+
+                        sw.Flush();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error while exporting the log to the specified file.", ex);
+                }
+            }
+
+            level.IsEnabled = saveButton.IsEnabled = clearButton.IsEnabled = true;
         }
     }
 }

@@ -343,7 +343,7 @@
 
             if (ThreadPool.SetMinThreads(destCpu, destCpu))
             {
-                Log.Debug("Set thread pool minimum to " + destCpu + " threads.");
+                Log.Debug("Thread pool minimum set to " + destCpu + " threads.");
             }
             else
             {

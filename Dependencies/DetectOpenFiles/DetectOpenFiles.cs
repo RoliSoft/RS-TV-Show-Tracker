@@ -166,20 +166,20 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
                     if (Win32API.CancelIo(hwnd))
                     {
-                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") canceled the I/O operations successfully.");
+                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") canceled the I/O operations successfully.");
                     }
                     else
                     {
-                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") failed to cancel the I/O operations.");
+                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") failed to cancel the I/O operations.");
                     }
 
                     if (Win32API.CloseHandle(hwnd))
                     {
-                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") closed the handle successfully.");
+                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") closed the handle successfully.");
                     }
                     else
                     {
-                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") failed to close the handle.");
+                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") failed to close the handle.");
                     }
 
                     if (!thd.Join(100))

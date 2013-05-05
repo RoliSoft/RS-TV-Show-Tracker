@@ -74,9 +74,18 @@
             }
             catch (Exception ex)
             {
-                Log.Error("Error while loading settings file, resetting all settings to default.");
+                Log.Error("Error while loading settings file, resetting all settings to default.", ex);
 
                 Keys = new Dictionary<string, object> { { "Revision", 2 } };
+            }
+
+            try
+            {
+                Log.SetLevel(Get("Logging Level", Log.Level.Info));
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Error while getting logging level from settings. Level will remain on Trace.", ex);
             }
 
             Log.Debug("Settings loaded in " + (DateTime.Now - st).TotalSeconds + "s, containing " + Keys.Count + " entries.");

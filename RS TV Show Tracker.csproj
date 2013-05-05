@@ -1181,6 +1181,12 @@
   <ItemGroup>
     <Resource Include="Images\information-white.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\table-export.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\table-insert-row.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>
