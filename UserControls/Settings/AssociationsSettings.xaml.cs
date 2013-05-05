@@ -61,6 +61,7 @@
                         });
                 }
 
+                monitorProcesses.IsChecked = Settings.Get("Monitor Processes", true);
                 processTextBox.Text = string.Join(",", Settings.Get<List<string>>("Processes to Monitor"));
 
                 switch (Settings.Get("Process Monitoring Method", "Internal"))
@@ -70,12 +71,16 @@
                         methodComboBox.SelectedIndex = 0;
                         break;
 
-                    case "Sysinternals":
+                    case "WindowTitle":
                         methodComboBox.SelectedIndex = 1;
                         break;
 
-                    case "NirSoft":
+                    case "Sysinternals":
                         methodComboBox.SelectedIndex = 2;
+                        break;
+
+                    case "NirSoft":
+                        methodComboBox.SelectedIndex = 3;
                         break;
                 }
 
@@ -110,7 +115,7 @@
         }
 
         /// <summary>
-        /// Handles the Unchecked event of the monitorNetworkShare control.
+        /// Handles the Unchecked event of the monitorProcesses control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
@@ -119,6 +124,37 @@
             if (!_loaded) return;
 
             Settings.Set("Monitor Network Shares", false);
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the monitorProcesses control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void MonitorProcessesChecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Monitor Processes", true);
+
+            monitorNetworkShare.IsEnabled = true;
+            monitorNetworkShare.IsChecked = monitorNetworkShare.Tag is bool && (bool)monitorNetworkShare.Tag;
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the monitorNetworkShare control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void MonitorProcessesUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            Settings.Set("Monitor Processes", false);
+
+            monitorNetworkShare.IsEnabled = false;
+            monitorNetworkShare.Tag = monitorNetworkShare.IsChecked;
+            monitorNetworkShare.IsChecked = false;
         }
 
         /// <summary>
@@ -132,17 +168,22 @@
             switch (methodComboBox.SelectedIndex)
             {
                 case 0:
-                    sysinternalsInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
+                    titleInfo.Visibility = sysinternalsInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
                     internalInfo.Visibility = Visibility.Visible;
                     break;
 
                 case 1:
-                    internalInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
-                    sysinternalsInfo.Visibility = Visibility.Visible;
+                    internalInfo.Visibility = sysinternalsInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
+                    titleInfo.Visibility = Visibility.Visible;
                     break;
 
                 case 2:
-                    sysinternalsInfo.Visibility = internalInfo.Visibility = Visibility.Collapsed;
+                    internalInfo.Visibility = titleInfo.Visibility = nirsoftInfo.Visibility = Visibility.Collapsed;
+                    sysinternalsInfo.Visibility = Visibility.Visible;
+                    break;
+
+                case 3:
+                    sysinternalsInfo.Visibility = internalInfo.Visibility = titleInfo.Visibility = Visibility.Collapsed;
                     nirsoftInfo.Visibility = Visibility.Visible;
                     break;
             }
@@ -156,10 +197,14 @@
                     break;
 
                 case 1:
-                    Settings.Set("Process Monitoring Method", "Sysinternals");
+                    Settings.Set("Process Monitoring Method", "WindowTitle");
                     break;
 
                 case 2:
+                    Settings.Set("Process Monitoring Method", "Sysinternals");
+                    break;
+
+                case 3:
                     Settings.Set("Process Monitoring Method", "NirSoft");
                     break;
             }

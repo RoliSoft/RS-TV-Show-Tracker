@@ -103,13 +103,61 @@
         }
 
         /// <summary>
+        /// Gets the list of window titles for the given process IDs.
+        /// </summary>
+        /// <param name="pids">The process IDs.</param>
+        /// <returns>List of the window titles.</returns>
+        public static IEnumerable<string> GetWindownTitles(List<int> pids)
+        {
+            foreach (var proc in Process.GetProcesses())
+            {
+                if (pids.Contains(proc.Id))
+                {
+                    var title = default(string);
+
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(proc.MainWindowTitle))
+                        {
+                            title = proc.MainWindowTitle;
+                        }
+                        else
+                        {
+                            Log.Debug("Process " + proc.ProcessName + " (" + proc.Id + ") has an empty window title.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Error while getting window title for " + proc.ProcessName + " (" + proc.Id + ")", ex);
+                    }
+
+                    if (title != null)
+                    {
+                        yield return title;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Checks for open files on the specified processes and marks them if recognized.
         /// </summary>
         public static void CheckOpenFiles()
         {
+            if (!Settings.Get("Monitor Processes", true))
+            {
+                return;
+            }
+
             Log.Debug("Checking for open files...");
 
+            var alt    = Settings.Get("Process Monitoring Method", "Internal") == "WindowTitle";
             var netmon = Settings.Get<bool>("Monitor Network Shares");
+
+            if (!alt && !Utils.IsAdmin)
+            {
+                Log.Info("You are not running with administrator rights but requested file handle monitoring.");
+            }
 
             var procs = new List<string>();
             procs.AddRange(Settings.Get<List<string>>("Processes to Monitor"));
@@ -141,11 +189,31 @@
                 return;
             }
 
-            var files = GetHandleList(pids).ToList();
+            var files  = new List<FileInfo>();
+            var titles = new List<string>();
 
-            if (files.Count != 0)
+            if (pids.Any())
             {
-                Log.Debug(Utils.FormatNumber(files.Count, "file handle", true) + " open for the PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray()) + ".");
+                if (!alt)
+                {
+                    files.AddRange(GetHandleList(pids));
+
+                    if (files.Count != 0)
+                    {
+                        Log.Debug(Utils.FormatNumber(files.Count, "file handle", true) + " open for the PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray()) + ".");
+                    }
+                }
+                else
+                {
+                    titles.AddRange(GetWindownTitles(pids));
+
+                    if (titles.Count != 0)
+                    {
+                        Log.Debug(Utils.FormatNumber(files.Count, "window title", true) + " found for the PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray()) + ".");
+                    }
+
+                    if (Log.IsTraceEnabled) Log.Trace("Window titles:", titles);
+                }
             }
 
             if (Signature.IsActivated && UPnP.IsRunning)
@@ -188,9 +256,9 @@
 
             if (Log.IsTraceEnabled) Log.Trace("Open file handles:", files.Select(fi => fi.FullName));
 
-            if (files.Count == 0)
+            if (files.Count == 0 && titles.Count == 0)
             {
-                Log.Debug("No file handles open for the specified processes (" + (pids.Count == 0 ? "none running" : "PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray())) + ") and services.");
+                Log.Debug("No " + (alt ? "window titles" : "file handles open") + " for the specified processes (" + (pids.Count == 0 ? "none running" : "PID" + (pids.Count != 1 ? "s" : string.Empty) + ": " + string.Join(", ", pids).TrimEnd(", ".ToCharArray())) + ") and services.");
                 return;
             }
 
@@ -215,6 +283,27 @@
                                 // the reason for this is that an episode will be marked as seen only if you're watching it for more than 10 minutes (5 minute checks twice)
 
                                 OpenFiles.Add(file.ToString());
+                            }
+                            else
+                            {
+                                MarkAsSeen(show.Value.ID, pf);
+                            }
+                        }
+                    }
+                }
+
+                foreach (var title in titles)
+                {
+                    if (Parser.IsMatch(title, titleRegex, null, false) || (releaseRegex != null && Parser.IsMatch(title, releaseRegex, null, false)))
+                    {
+                        var pf = FileNames.Parser.ParseFile(title, null, false);
+                        if (pf.Success && show.Value.Name == pf.Show)
+                        {
+                            Log.Debug("Identified window title " + title + " as " + pf + ".");
+
+                            if (!OpenFiles.Contains(pf.ToString()))
+                            {
+                                OpenFiles.Add(pf.ToString());
                             }
                             else
                             {
