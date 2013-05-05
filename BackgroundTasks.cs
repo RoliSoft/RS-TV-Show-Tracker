@@ -175,7 +175,7 @@
         /// </summary>
         public static void RestartIfNeeded()
         {
-            var memlimit = Settings.Get("Memory Usage Limit", 512l);
+            var memlimit = Settings.Get("Memory Usage Limit", 512);
             var memusage = Process.GetCurrentProcess().WorkingSet64;
 
             Log.Debug("The current memory usage is " + Utils.GetFileSize(memusage) + "; " + (memlimit < 256 ? "auto-restart is disabled." : "auto-restarting when it exceeds " + memlimit + " MB."));
@@ -185,7 +185,7 @@
                 return;
             }
 
-            if ((memlimit * 1048576) < memusage)
+            if ((memlimit * 1048576L) < memusage)
             {
                 MainWindow.Active.Restart();
             }

@@ -174,7 +174,7 @@
                     {
                         foreach (var entry in Log.Messages.ToArray().Reverse().OrderBy(x => x.Time))
                         {
-                            if (entry.Level >= Log.LoggingLevel)
+                            if (Log.LoggingLevel >= entry.Level)
                             {
                                 sw.WriteLine(entry);
                             }
@@ -182,6 +182,8 @@
 
                         sw.Flush();
                     }
+
+                    Log.Info("Exported log to " + sfd.FileName);
                 }
                 catch (Exception ex)
                 {

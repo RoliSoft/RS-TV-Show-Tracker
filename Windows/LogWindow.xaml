@@ -35,10 +35,10 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
                                 <GridViewColumn>
-                                    <GridViewColumnHeader Content="Time" />
+                                    <GridViewColumnHeader Content="Time" Width="75" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Time}" />
+                                            <TextBlock Text="{Binding Time}" Width="63" TextAlignment="Center" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -54,15 +54,15 @@
                                     <GridViewColumnHeader Content="Location" Width="250" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Location}" Width="238" TextAlignment="Right" />
+                                            <TextBlock Text="{Binding Location}" Width="238" TextAlignment="Right" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
                                 <GridViewColumn>
-                                    <GridViewColumnHeader Content="Message" />
+                                    <GridViewColumnHeader Content="Message" Width="629" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Message}" />
+                                            <TextBlock Text="{Binding Message}" Width="617" TextAlignment="Left" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -84,43 +84,43 @@
                                 <ComboBox Name="level" SelectionChanged="LevelOnSelectionChanged" Width="85">
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/bug.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/bug.png" Height="16" GreyableImage:ImageGreyer.IsGreyable="True" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" Trace" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/information-white.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/information-white.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" Debug" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/information.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" Info" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/exclamation.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/exclamation.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" Warn" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/exclamation-red.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/exclamation-red.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" Error" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/fire.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/fire.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" Fatal" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/cross.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Image Source="/RSTVShowTracker;component/Images/cross.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" None" Padding="0" />
                                         </StackPanel>
                                     </ComboBoxItem>

@@ -270,7 +270,7 @@
         {
             if (!_loaded) return;
 
-            Settings.Set("Memory Usage Limit", memLimit.Value);
+            Settings.Set("Memory Usage Limit", memLimit.Value.GetValueOrDefault(512));
         }
 
         /// <summary>
