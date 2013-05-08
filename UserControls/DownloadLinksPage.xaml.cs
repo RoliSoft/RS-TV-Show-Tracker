@@ -19,6 +19,7 @@
 
     using RoliSoft.TVShowTracker.ContextMenus;
     using RoliSoft.TVShowTracker.ContextMenus.Menus;
+    using RoliSoft.TVShowTracker.Dependencies.GreyableImage;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers;
@@ -117,16 +118,6 @@
                 listView.ItemsSource                = DownloadLinksListViewItemCollection;
 
                 filterResults.IsChecked = Settings.Get<bool>("Filter Download Links");
-
-                if (Signature.IsActivated)
-                {
-                    highlightFree.IsChecked = Settings.Get<bool>("Highlight Free Torrents");
-                    fadeDead.IsChecked      = Settings.Get("Fade Dead Torrents", true);
-                }
-                else
-                {
-                    highlightFree.IsEnabled = fadeDead.IsEnabled = false;
-                }
             }
 
             LoadEngines();
@@ -452,47 +443,7 @@
         {
             Settings.Set("Filter Download Links", false);
         }
-
-        /// <summary>
-        /// Handles the Checked event of the hightlightFree control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void HighlightFreeChecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Highlight Free Torrents", true);
-        }
-
-        /// <summary>
-        /// Handles the Unchecked event of the highlightFree control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void HighlightFreeUnchecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Highlight Free Torrents", false);
-        }
-
-        /// <summary>
-        /// Handles the Checked event of the fadeDead control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void FadeDeadChecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Fade Dead Torrents", true);
-        }
-
-        /// <summary>
-        /// Handles the Unchecked event of the fadeDead control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void FadeDeadUnchecked(object sender, RoutedEventArgs e)
-        {
-            Settings.Set("Fade Dead Torrents", false);
-        }
-
+        
         /// <summary>
         /// Saves the activated trackers to the XML settings file.
         /// </summary>
@@ -846,20 +797,27 @@
                 }
             }
 
-            if (Signature.IsActivated)
-            { 
-                foreach (var se in Senders)
+            foreach (var se in Senders)
+            {
+                if (se.Value.Type == link.Source.Type)
                 {
-                    if (se.Value.Type == link.Source.Type)
+                    var id     = se.Key;
+                    var cmi    = new MenuItem();
+                    cmi.Tag    = se;
+                    cmi.Header = "Send to " + se.Value.Title;
+                    cmi.Icon   = new Image { Source = new BitmapImage(new Uri(se.Value.Icon)), Height = 16, Width = 16 };
+
+                    if (Signature.IsActivated)
                     {
-                        var id     = se.Key;
-                        var cmi    = new MenuItem();
-                        cmi.Tag    = se;
-                        cmi.Header = "Send to " + se.Value.Title;
-                        cmi.Icon   = new Image { Source = new BitmapImage(new Uri(se.Value.Icon)), Height = 16, Width = 16 };
                         cmi.Click += (s, r) => DownloadFileClick("SendToSender|" + id, r);
-                        cm.Items.Add(cmi);
                     }
+                    else
+                    {
+                        ((Image)cmi.Icon).SetValue(ImageGreyer.IsGreyableProperty, true);
+                        cmi.IsEnabled = false;
+                    }
+
+                    cm.Items.Add(cmi);
                 }
             }
 

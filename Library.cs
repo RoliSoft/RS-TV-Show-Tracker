@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Timer = System.Timers.Timer;
@@ -257,6 +258,12 @@
                                 {
                                     Log.Debug("Scanning new directory " + Path.GetFileName(evt.Item2[0]) + " for episodes...");
 
+                                    if (_producer.Count < 10)
+                                    {
+                                        Log.Trace("Queue.Count < 10, waiting 250ms before initiating directory scan...");
+                                        Thread.Sleep(250);
+                                    }
+
                                     var fs = new FileSearch(new[] { evt.Item2[0] }, CheckFile);
 
                                     fs.FileSearchDone += (sender, args) =>
@@ -301,7 +308,7 @@
                                 }
                                 else
                                 {
-                                    Log.Warn("'" + evt.Item2[0] + "' is neither a file or directory.");
+                                    Log.Warn(evt.Item2[0] + " has been deleted since the creation event was fired.");
                                 }
 
                                 if (success && !Indexing)

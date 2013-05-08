@@ -46,16 +46,6 @@
                         <Image Source="/RSTVShowTracker;component/Images/funnel.png" Height="16" Width="16" />
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Highlight free torrents" Name="highlightFree" IsCheckable="True" Checked="HighlightFreeChecked" Unchecked="HighlightFreeUnchecked">
-                    <MenuItem.Icon>
-                        <Image Source="/RSTVShowTracker;component/Images/money-coin.png" Height="16" Width="16" GreyableImage:ImageGreyer.IsGreyable="True" />
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Fade dead torrents" Name="fadeDead" IsCheckable="True" Checked="FadeDeadChecked" Unchecked="FadeDeadUnchecked">
-                    <MenuItem.Icon>
-                        <Image Source="/RSTVShowTracker;component/Images/headstone-rip.png" Height="16" Width="16" GreyableImage:ImageGreyer.IsGreyable="True" />
-                    </MenuItem.Icon>
-                </MenuItem>
             </MenuItem>
         </Menu>
         <ListView Grid.Row="0" Background="Transparent" BorderThickness="0" FontWeight="Bold" Foreground="White" Margin="0,25,0,0" Name="listView" MouseDoubleClick="ListViewMouseDoubleClick" GridViewColumnHeader.Click="ListViewSortClick" ContextMenuOpening="ListViewItemContextMenuOpening">

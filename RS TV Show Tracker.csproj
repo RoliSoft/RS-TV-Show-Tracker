@@ -1157,9 +1157,6 @@
     <Resource Include="Images\upnp.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\donate.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\leaf-plant.png" />
   </ItemGroup>
   <ItemGroup>
@@ -1177,6 +1174,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\table-insert-row.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cup-tick.png" />
+    <Resource Include="Images\cup.png" />
+    <Resource Include="Images\uac-tick.png" />
+    <Resource Include="Images\uac.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />

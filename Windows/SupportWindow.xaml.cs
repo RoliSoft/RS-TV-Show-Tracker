@@ -26,6 +26,14 @@
             {
                 SetAeroGlassTransparency();
             }
+
+            emailTextBox.Text = Signature.ActivationUser;
+            keyTextBox.Text   = Signature.ActivationKey;
+
+            if (Signature.IsActivated)
+            {
+                emailTextBox.IsEnabled = keyTextBox.IsEnabled = false;
+            }
         }
     }
 }

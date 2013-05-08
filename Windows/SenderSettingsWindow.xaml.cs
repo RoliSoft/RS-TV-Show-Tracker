@@ -130,6 +130,11 @@
             {
                 SetAeroGlassTransparency();
             }
+
+            if (!Signature.IsActivated)
+            {
+                warnImage.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>

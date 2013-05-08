@@ -6,6 +6,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
+    using System.Windows.Media.Imaging;
 
     using Label = System.Windows.Controls.Label;
 
@@ -93,6 +94,29 @@
                 }
 
                 memLimit.Value = Settings.Get("Memory Usage Limit", 512);
+
+                if (Utils.IsAdmin)
+                {
+                    uacIcon.Source   = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/uac-tick.png"));
+                    uacIcon.ToolTip += Environment.NewLine + "The software is currently running with administrator rights.";
+                }
+                else
+                {
+                    uacIcon.ToolTip += Environment.NewLine + "The software is currently running without administrator rights.";
+                }
+
+                if (Signature.IsActivated)
+                {
+                    cupIcon1.Source   = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/cup-tick.png"));
+                    cupIcon2.Source   = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/cup-tick.png"));
+                    cupIcon1.ToolTip += Environment.NewLine + "The software is activated, thank you for your support!";
+                    cupIcon2.ToolTip += Environment.NewLine + "The software is activated, thank you for your support!";
+                }
+                else
+                {
+                    cupIcon1.ToolTip += Environment.NewLine + "For more information, click on 'Support the software' in the main menu.";
+                    cupIcon2.ToolTip += Environment.NewLine + "For more information, click on 'Support the software' in the main menu.";
+                }
             }
             catch (Exception ex)
             {

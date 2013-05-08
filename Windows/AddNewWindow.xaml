@@ -237,11 +237,11 @@
                         </ListView.GroupStyle>
                         <ListView.View>
                             <GridView AllowsColumnReorder="False">
-                                <GridViewColumn Width="235">
+                                <GridViewColumn Width="234">
                                     <GridViewColumnHeader Content="Name" HorizontalContentAlignment="Left" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Name}" Width="235" />
+                                            <TextBlock Text="{Binding Name}" Width="234" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>

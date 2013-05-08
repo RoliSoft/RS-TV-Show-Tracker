@@ -8,10 +8,9 @@
     using System.Reflection;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Media.Imaging;
 
     using Microsoft.Win32;
-
-    using TaskDialogInterop;
 
     /// <summary>
     /// Interaction logic for GeneralSettings.xaml
@@ -61,6 +60,16 @@
                 disableAero.IsChecked         = !Settings.Get("Enable Aero", true);
                 disableAnimations.IsChecked   = !Settings.Get("Enable Animations", true);
                 showUnhandledErrors.IsChecked = Settings.Get<bool>("Show Unhandled Errors");
+
+                if (Utils.IsAdmin)
+                {
+                    uacIcon.Source   = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/uac-tick.png"));
+                    uacIcon.ToolTip += Environment.NewLine + "The software is currently running with administrator rights.";
+                }
+                else
+                {
+                    uacIcon.ToolTip += Environment.NewLine + "The software is currently running without administrator rights.";
+                }
             }
             catch (Exception ex)
             {
@@ -188,18 +197,6 @@
             if (!_loaded) return;
 
             Settings.Set("Search NTFS MFT records", true);
-
-            if (!Utils.IsAdmin)
-            {
-                TaskDialog.Show(new TaskDialogOptions
-                    {
-                        MainIcon        = VistaTaskDialogIcon.Warning,
-                        Title           = "Administrator right required",
-                        MainInstruction = "Administrator right required",
-                        Content         = "The software doesn't have administrator rights, which means it won't be able to access the MFT records on your NTFS partitions. Please restart the software by right-clicking on the executable and selecting \"Run as administrator\" from the menu.",
-                        CustomButtons   = new[] { "OK" }
-                    });
-            }
         }
 
         /// <summary>

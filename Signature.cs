@@ -109,6 +109,30 @@
         }
 
         /// <summary>
+        /// Gets the activation user.
+        /// </summary>
+        /// <value>The activation user.</value>
+        public static string ActivationUser
+        {
+            get
+            {
+                return _user;
+            }
+        }
+
+        /// <summary>
+        /// Gets the activation key.
+        /// </summary>
+        /// <value>The activation key.</value>
+        public static string ActivationKey
+        {
+            get
+            {
+                return _key;
+            }
+        }
+
+        /// <summary>
         /// Gets the full path to the executing assembly.
         /// </summary>
         /// <value>The full path to the executing assembly.</value>
@@ -297,7 +321,7 @@
 
         private static bool _isActivated;
         private static LicenseStatus _licenseStatus = LicenseStatus.Uninitialized;
-        private static string _licenseHash = null;
+        private static string _licenseHash = null, _user = null, _key = null;
 
         /// <summary>
         /// Initializes static members of the <see cref="Signature"/> class. 
@@ -600,7 +624,6 @@
 
             try
             {
-                string user, key;
                 byte[] xkey, lic;
 
                 using (var fs = File.OpenRead(licfile))
@@ -615,7 +638,7 @@
                         return;
                     }
 
-                    user = br.ReadString();
+                    _user = br.ReadString();
                     xkey = br.ReadBytes(br.Read7BitEncodedInt());
                     lic  = br.ReadBytes(br.Read7BitEncodedInt());
                 }
@@ -624,7 +647,7 @@
                 {
                     xkey = ProtectedData.Unprotect(xkey, null, DataProtectionScope.LocalMachine);
                     lic  = ProtectedData.Unprotect(lic, null, DataProtectionScope.LocalMachine);
-                    key  = Encoding.UTF8.GetString(xkey);
+                    _key = Encoding.UTF8.GetString(xkey);
                 }
                 catch
                 {
@@ -633,7 +656,7 @@
                     return;
                 }
 
-                if (!VerifyKey(user, key))
+                if (!VerifyKey(_user, _key))
                 {
                     _licenseStatus = LicenseStatus.KeyCryptoError;
                     Log.Error("The key within the license is cryptographically invalid. If you have recently updated the software, the keying scheme might have been changed. If you did not receive an email containing a new key, please contact rolisoft@gmail.com for more information.");
@@ -696,7 +719,7 @@
                 }
                 catch { }
 
-                var verify = Encoding.UTF8.GetBytes(user + '\0' + key + '\0' + mbdsn + '\0' + cpusn + '\0' + hddsn + '\0' + prtsn);
+                var verify = Encoding.UTF8.GetBytes(_user + '\0' + _key + '\0' + mbdsn + '\0' + cpusn + '\0' + hddsn + '\0' + prtsn);
 
                 using (var rsa = new RSACryptoServiceProvider(0))
                 {
@@ -706,8 +729,8 @@
 
                     if (_isActivated)
                     {
-                        _licenseHash = BitConverter.ToString(new HMACSHA512(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(user.ToLower().Trim()))).ComputeHash(Encoding.UTF8.GetBytes(key.Trim()))).ToLower().Replace("-", string.Empty);
-                        Log.Info("License validated for " + user + ". Thank you for supporting the software!");
+                        _licenseHash = BitConverter.ToString(new HMACSHA512(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim()))).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
+                        Log.Info("License validated for " + _user + ". Thank you for supporting the software!");
                     }
                     else
                     {
