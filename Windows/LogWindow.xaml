@@ -62,7 +62,9 @@
                                     <GridViewColumnHeader Content="Message" Width="629" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Message}" Width="617" TextAlignment="Left" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
+                                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto" Margin="0,0,-6,0" Padding="0,0,6,0">
+                                                <TextBlock Text="{Binding Message}" Width="Auto" TextAlignment="Left" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
+                                            </ScrollViewer>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>

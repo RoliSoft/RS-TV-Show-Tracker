@@ -80,7 +80,7 @@
         /// </summary>
         public void UpdateAsync()
         {
-            new Task(() =>
+            Task.Factory.StartNew(() =>
                 {
                     try
                     {
@@ -90,7 +90,7 @@
                     {
                         UpdateError.Fire(this, "The update function has quit with an exception.", ex, false, true);
                     }
-                }).Start();
+                });
         }
 
         /// <summary>
@@ -138,7 +138,7 @@
         /// <param name="tv">The TV show.</param>
         public static void UpdateRemoteCache(TVShow tv)
         {
-            new Thread(() =>
+            Task.Factory.StartNew(() =>
                 {
                     try
                     {
@@ -166,7 +166,7 @@
                 
                         API.SetShowInfo(info, hash);
                     } catch { }
-                }).Start();
+                });
         }
     }
 }

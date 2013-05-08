@@ -32,7 +32,13 @@
         /// Gets or sets the rendered candidates.
         /// </summary>
         /// <value>The rendered candidates.</value>
-        public List<StackPanel> CandidateSP { get; set; } 
+        public List<StackPanel> CandidateSP { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rendered episodes.
+        /// </summary>
+        /// <value>The rendered episodes.</value>
+        public List<StackPanel> EpisodeSP { get; set; } 
 
         /// <summary>
         /// Gets or sets the ID.
@@ -77,6 +83,12 @@
         public string ShowEpisodes { get; set; }
 
         /// <summary>
+        /// Gets or sets the selected episode index.
+        /// </summary>
+        /// <value>The selected episode index.</value>
+        public int SelectedEpisode { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PendingShowListViewItem"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -87,10 +99,14 @@
             Group       = "Pending";
             Candidates  = new List<ShowID>();
             CandidateSP = new List<StackPanel>();
+            EpisodeSP   = new List<StackPanel>();
 
             ShowStatus     = "Visible";
             ShowCandidates = "Collapsed";
             ShowEpisodes   = "Collapsed";
+
+            SelectedCandidate = -1;
+            SelectedEpisode   = -1;
         }
     }
 }

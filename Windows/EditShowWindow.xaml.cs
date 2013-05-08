@@ -83,8 +83,8 @@
 
             _sidx = database.SelectedIndex;
 
-            _guide  = AddNewWindow.CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
-            _lang   = Database.TVShows[_id].Language;
+            _guide = CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
+            _lang  = Database.TVShows[_id].Language;
 
             var sel = 0;
 
@@ -397,6 +397,45 @@
             }
 
             DialogResult = true;
+        }
+
+        /// <summary>
+        /// Creates the guide based on the ComboBox item name.
+        /// </summary>
+        /// <param name="grabber">The grabber.</param>
+        /// <returns>The guide.</returns>
+        public static Guide CreateGuide(string grabber)
+        {
+            switch (grabber)
+            {
+                default:
+                case "TVRage":
+                    return new TVRage();
+
+                case "The TVDB":
+                    return new TVDB();
+
+                case "TV.com":
+                    return new TVcom();
+
+                case "EPisodeWorld":
+                    return new EPisodeWorld();
+
+                case "IMDb":
+                    return new IMDb();
+
+                case "EPGuides - TVRage":
+                    return new EPGuides("tvrage.com");
+
+                case "EPGuides - TV.com":
+                    return new EPGuides("tv.com");
+
+                case "AniDB":
+                    return new AniDB();
+
+                case "Anime News Network":
+                    return new AnimeNewsNetwork();
+            }
         }
     }
 }

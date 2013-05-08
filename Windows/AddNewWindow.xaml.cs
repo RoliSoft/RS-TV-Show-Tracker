@@ -2,43 +2,56 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Media.Animation;
+    using System.Windows.Data;
+    using System.Windows.Media;
     using System.Windows.Media.Imaging;
 
-    using Microsoft.WindowsAPICodePack.Taskbar;
-
-    using TaskDialogInterop;
-
     using RoliSoft.TVShowTracker.Parsers.Guides;
-    using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
+    using RoliSoft.TVShowTracker.ListViews;
+
+    using Xceed.Wpf.Toolkit.Primitives;
 
     /// <summary>
     /// Interaction logic for AddNewWindow.xaml
     /// </summary>
     public partial class AddNewWindow
     {
-        private Guide _guide;
-        private List<ShowID> _shows;
-        private Thread _worker;
-        private int _dbid;
-        private bool _loaded;
+        private bool _loaded, _addedOne;
+        private List<Guide> _guides; 
+        private string _lang;
+        private List<PendingShowListViewItem> _list;
+        private Thread _searchThd;
+
+        /// <summary>
+        /// Gets or sets the pending show list view item collection.
+        /// </summary>
+        /// <value>The pending show list view item collection.</value>
+        public ObservableCollection<PendingShowListViewItem> PendingShowListViewItemCollection { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
         /// </summary>
-        /// <param name="name">The name of the show to put into the textbox.</param>
-        public AddNewWindow(string name = null)
+        public AddNewWindow()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        public AddNewWindow(string name)
         {
             InitializeComponent();
 
-            if (name != null)
-            {
-                textBox.Text = name;
-            }
+            namesTextBox.Text = name + ";";
+            namesTextBox.InitializeTokensFromText();
         }
 
         /// <summary>
@@ -53,74 +66,49 @@
                 SetAeroGlassTransparency();
             }
 
-            DatabaseSelectionChanged(database, null);
-            ((Storyboard)statusThrobber.FindResource("statusThrobberSpinner")).Begin();
-
+            databaseCheckListBox.SelectedItems.Add(databaseCheckListBox.Items[0]);
             _loaded = true;
-            language.SelectedIndex = batchLanguage.SelectedIndex = 0;
-            TabControlOnSelectionChanged(null, null);
+            databaseCheckListBox.SelectedItems.Add(databaseCheckListBox.Items[1]);
+
+            PendingShowListViewItemCollection = new ObservableCollection<PendingShowListViewItem>();
+            listView.ItemsSource = PendingShowListViewItemCollection;
+            listView.Items.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
         }
 
         /// <summary>
-        /// Handles the OnSelectionChanged event of the TabControl control.
+        /// Handles the OnItemSelectionChanged event of the databaseCheckListBox control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="SelectionChangedEventArgs"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="ItemSelectionChangedEventArgs"/> instance containing the event data.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        private void TabControlOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DatabaseCheckListBoxOnItemSelectionChanged(object sender, ItemSelectionChangedEventArgs e)
         {
             if (!_loaded) return;
 
-            switch (tabControl.SelectedIndex)
-            {
-                case 0:
-                    Height = 239;
-                    break;
-
-                case 1:
-                    Height = 336;
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Handles the KeyUp event of the textBox control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Input.KeyEventArgs"/> instance containing the event data.</param>
-        private void TextBoxKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == System.Windows.Input.Key.Enter)
-            {
-                SearchButtonClick(null, null);
-            }
-        }
-
-        /// <summary>
-        /// Handles the SelectionChanged event of the database control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
-        private void DatabaseSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (((sender as ComboBox).SelectedValue as ComboBoxItem).Content == null) return;
-
-            if (sender == database && batchDatabase.SelectedIndex != database.SelectedIndex)
-            {
-                batchDatabase.SelectedIndex = database.SelectedIndex;
-            }
-            else if (sender == batchDatabase && database.SelectedIndex != batchDatabase.SelectedIndex)
-            {
-                database.SelectedIndex = batchDatabase.SelectedIndex;
-            }
-
-            _guide = CreateGuide(((((sender as ComboBox).SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
+            var sellang = language.SelectedIndex != -1 ? (language.SelectedItem as StackPanel).Tag as string : string.Empty;
+            var selidx  = 0;
 
             language.Items.Clear();
-            batchLanguage.Items.Clear();
 
-            foreach (var lang in _guide.SupportedLanguages)
+            if (databaseCheckListBox.SelectedItems.Count == 0)
             {
+                return;
+            }
+
+            var langs = Languages.List.Keys.ToList();
+
+            foreach (ListBoxItem item in databaseCheckListBox.SelectedItems)
+            {
+                langs = langs.Intersect(Updater.CreateGuide(item.Tag as string).SupportedLanguages).ToList();
+            }
+
+            foreach (var lang in langs)
+            {
+                if (sellang == lang)
+                {
+                    selidx = language.Items.Count;
+                }
+
                 var sp = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -140,50 +128,48 @@
                         Content = " " + Languages.List[lang],
                         Padding = new Thickness(0)
                     });
-                
-                var sp2 = new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Tag         = lang
-                    };
-
-                sp2.Children.Add(new Image
-                    {
-                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/flag-" + lang + ".png", UriKind.Relative)),
-                        Height = 16,
-                        Width  = 16,
-                        Margin = new Thickness(0, 1, 0, 0)
-                    });
-
-                sp2.Children.Add(new Label
-                    {
-                        Content = " " + Languages.List[lang],
-                        Padding = new Thickness(0)
-                    });
 
                 language.Items.Add(sp);
-                batchLanguage.Items.Add(sp2);
             }
 
-            language.SelectedIndex = batchLanguage.SelectedIndex = 0;
+            language.SelectedIndex = selidx;
         }
 
         /// <summary>
-        /// Handles the SelectionChanged event of the language control.
+        /// Handles the Click event of the dbMoveUpButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
-        private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DbMoveUpButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!_loaded) return;
+            if (databaseCheckListBox.SelectedItems.Count == 0) return;
 
-            if (sender == language && batchLanguage.SelectedIndex != language.SelectedIndex)
+            var sel = databaseCheckListBox.SelectedItems[databaseCheckListBox.SelectedItems.Count - 1];
+            var idx = databaseCheckListBox.Items.IndexOf(sel);
+
+            if (idx > 0)
             {
-                batchLanguage.SelectedIndex = language.SelectedIndex;
+                databaseCheckListBox.Items.Remove(sel);
+                databaseCheckListBox.Items.Insert(idx - 1, sel);
             }
-            else if (sender == batchLanguage && language.SelectedIndex != batchLanguage.SelectedIndex)
+        }
+
+        /// <summary>
+        /// Handles the Click event of the dbMoveDownButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void DbMoveDownButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (databaseCheckListBox.SelectedItems.Count == 0) return;
+
+            var sel = databaseCheckListBox.SelectedItems[databaseCheckListBox.SelectedItems.Count - 1];
+            var idx = databaseCheckListBox.Items.IndexOf(sel);
+
+            if (idx < databaseCheckListBox.Items.Count - 1)
             {
-                language.SelectedIndex = batchLanguage.SelectedIndex;
+                databaseCheckListBox.Items.Remove(sel);
+                databaseCheckListBox.Items.Insert(idx + 1, sel);
             }
         }
 
@@ -191,297 +177,434 @@
         /// Handles the Click event of the searchButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchButtonClick(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(textBox.Text)) return;
-
-            working.Content           = "Searching on {0}...".FormatWith(_guide.Name);
-            subworking.Content        = textBox.Text.ToUppercaseWords();
-            addTabItem.Visibility     = Visibility.Collapsed;
-            workingTabItem.Visibility = Visibility.Visible;
-            tabControl.SelectedIndex  = 1;
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-
-            var show = textBox.Text;
-            var lang = (language.SelectedValue as StackPanel).Tag.ToString();
-
-            _worker = new Thread(() =>
-                {
-                    try
-                    {
-                        _shows = _guide.GetID(show, lang).ToList();
-
-                        if (_shows.Count == 0)
-                        {
-                            var up = new Exception();
-
-                            throw up; // hehe
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex is ThreadAbortException)
-                        {
-                            return;
-                        }
-
-                        Dispatcher.Invoke((Action)(() =>
-                            {
-                                workingTabItem.Visibility = Visibility.Collapsed;
-                                addTabItem.Visibility     = Visibility.Visible;
-                                tabControl.SelectedIndex  = 0;
-
-                                Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                            }));
-                        
-                        TaskDialog.Show(new TaskDialogOptions
-                            {
-                                MainIcon        = VistaTaskDialogIcon.Error,
-                                Title           = "Couldn't find TV show",
-                                MainInstruction = show.ToUppercaseWords(),
-                                Content         = "Couldn't find the specified TV show on this database.",
-                                ExpandedInfo    = "If this is a popular TV show, then you maybe just misspelled it or didn't enter the full official name.\r\nIf this is a rare or foreign TV show, try using another database.",
-                                CustomButtons   = new[] { "OK" }
-                            });
-
-                        return;
-                    }
-
-                    Dispatcher.Invoke((Action)(() =>
-                        {
-                            listBox.Items.Clear();
-
-                            foreach (var id in _shows)
-                            {
-                                listBox.Items.Add(id.Title);
-                            }
-
-                            listBox.SelectedIndex = 0;
-
-                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-                            workingTabItem.Visibility = Visibility.Collapsed;
-                            selectTabItem.Visibility  = Visibility.Visible;
-                            tabControl.SelectedIndex  = 2;
-                        }));
-                });
-            _worker.Start();
-        }
-
-        /// <summary>
-        /// Handles the Click event of the searchCancelButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchCancelButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (_worker != null && _worker.IsAlive)
+            if (namesTextBox.Text == null || string.IsNullOrWhiteSpace(namesTextBox.Text.Replace(";", string.Empty)))
             {
-                _worker.Abort();
+                MessageBox.Show("Enter at least one show and end it with ; in order to include it.", Signature.Software, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
-            workingTabItem.Visibility = Visibility.Collapsed;
-            addTabItem.Visibility     = Visibility.Visible;
-            tabControl.SelectedIndex  = 0;
+            if (databaseCheckListBox.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Select at least one database from which to download information for the shows.", Signature.Software, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-        }
+            _addedOne = false;
 
-        /// <summary>
-        /// Handles the Click event of the selectBackButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SelectBackButtonClick(object sender, RoutedEventArgs e)
-        {
-            selectTabItem.Visibility = Visibility.Collapsed;
-            addTabItem.Visibility    = Visibility.Visible;
-            tabControl.SelectedIndex = 0;
+            _lang = language.SelectedIndex != -1 ? (language.SelectedItem as StackPanel).Tag as string : "en";
+            _guides = new List<Guide>();
 
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-        }
-
-        /// <summary>
-        /// Handles the Click event of the addButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void AddButtonClick(object sender, RoutedEventArgs e)
-        {
-            AddShow(_shows.First(show => show.Title == (string)listBox.SelectedValue));
-        }
-
-        /// <summary>
-        /// Downloads and inserts the specified show into the database.
-        /// </summary>
-        /// <param name="show">The show.</param>
-        private void AddShow(ShowID show)
-        {
-            working.Content           = "Downloading guide...";
-            subworking.Content        = show.Title;
-            selectTabItem.Visibility  = Visibility.Collapsed;
-            workingTabItem.Visibility = Visibility.Visible;
-            tabControl.SelectedIndex  = 1;
-
-            Utils.Win7Taskbar(state: TaskbarProgressBarState.Indeterminate);
-
-            _worker = new Thread(() =>
+            foreach (ListBoxItem db in databaseCheckListBox.Items)
+            {
+                if (databaseCheckListBox.SelectedItems.Contains(db))
                 {
-                    var tv = Database.Add(_guide.GetType().Name, show.ID, show.Language, (i, s) =>
+                    _guides.Add(Updater.CreateGuide(db.Tag as string));
+                }
+            }
+
+            _list = new List<PendingShowListViewItem>();
+
+            foreach (var name in namesTextBox.Text.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    _list.Add(new PendingShowListViewItem(name.Trim()));
+                }
+            }
+
+            PendingShowListViewItemCollection.Clear();
+            PendingShowListViewItemCollection.AddRange(_list);
+
+            backButton.Visibility    = Visibility.Collapsed;
+            cancelButton.Visibility  = Visibility.Visible;
+            nextButton.IsEnabled     = false;
+            addTabItem.Visibility    = Visibility.Collapsed;
+            listTabItem.Visibility   = Visibility.Visible;
+            tabControl.SelectedIndex = 1;
+
+            _searchThd = new Thread(() =>
+                {
+                    var ok = false;
+
+                    foreach (var item in _list)
+                    {
+                        var err = false;
+
+                        Dispatcher.Invoke(() => listView.ScrollIntoView(item));
+
+                        foreach (var guide in _guides)
                         {
-                            if (i == -1)
+                            item.Status = "Searching on " + guide.Name + "...";
+
+                            Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+
+                            try
                             {
-                                Dispatcher.Invoke((Action)(() =>
-                                    {
-                                        workingTabItem.Visibility = Visibility.Collapsed;
-                                        addTabItem.Visibility     = Visibility.Visible;
-                                        tabControl.SelectedIndex  = 0;
-
-                                        Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-                                    }));
-
-                                TaskDialog.Show(new TaskDialogOptions
-                                    {
-                                        MainIcon        = VistaTaskDialogIcon.Error,
-                                        Title           = "Error",
-                                        MainInstruction = show.Title,
-                                        Content         = s,
-                                        CustomButtons   = new[] { "OK" }
-                                    });
+                                item.Candidates.AddRange(guide.GetID(item.Name));
                             }
-                        });
-
-                    if (tv == null)
-                    {
-                        return;
-                    }
-
-                    if (tv.Language == "en")
-                    {
-                        Updater.UpdateRemoteCache(tv);
-                    }
-
-                    _dbid = tv.ID;
-
-                    MainWindow.Active.DataChanged();
-                    
-                    // show finish page
-                    Dispatcher.Invoke((Action)(() =>
-                        {
-                            finishTitle.Content       = tv.Title;
-                            workingTabItem.Visibility = Visibility.Collapsed;
-                            finishTabItem.Visibility  = Visibility.Visible;
-                            tabControl.SelectedIndex  = 3;
-
-                            Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
-
-                            var shows = Database.TVShows[_dbid].Episodes.OrderByDescending(ep => ep.ID);
-
-                            markUntil.Items.Clear();
-
-                            var gotLast = false;
-
-                            foreach (var item in shows)
+                            catch (Exception ex)
                             {
-                                markUntil.Items.Add("S{0:00}E{1:00} - {2}".FormatWith(item.Season, item.Number, item.Title));
+                                err = true;
+                                MainWindow.HandleUnexpectedException(ex);
+                            }
+                        }
 
-                                if (!gotLast && item.Airdate < DateTime.Now && item.Airdate != Utils.UnixEpoch)
+                        if (item.Candidates.Count == 0)
+                        {
+                            if (err)
+                            {
+                                item.Group  = "Failed";
+                                item.Status = "No shows found, possibly due to errors.";
+                            }
+                            else
+                            {
+                                item.Group  = "Failed";
+                                item.Status = "No shows found matching this name.";
+                            }
+                        }
+                        else
+                        {
+                            ok = true;
+                            
+                            Dispatcher.Invoke(() =>
                                 {
-                                    gotLast = true;
-                                    markUntil.Items[markUntil.Items.Count - 1] += " [last aired episode]";
-                                }
-                            }
-                        }));
+                                    foreach (var cand in item.Candidates)
+                                    {
+                                        var sp = new StackPanel
+                                            {
+                                                Orientation = Orientation.Horizontal
+                                            };
+
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content    = cand.Title,
+                                                FontWeight = FontWeights.Bold,
+                                                Padding    = new Thickness(0)
+                                            });
+
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content = " at ",
+                                                Opacity = 0.5,
+                                                Padding = new Thickness(0)
+                                            });
+
+                                        sp.Children.Add(new Image
+                                            {
+                                                Source = new BitmapImage(new Uri(cand.Guide.Icon, UriKind.Absolute)),
+                                                Height = 16,
+                                                Width  = 16,
+                                                Margin = new Thickness(0, 0, 0, 0)
+                                            });
+
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content = " " + cand.Guide.Name,
+                                                Padding = new Thickness(0)
+                                            });
+
+                                        item.CandidateSP.Add(sp);
+                                    }
+
+                                    {
+                                        var sp = new StackPanel
+                                            {
+                                                Orientation = Orientation.Horizontal
+                                            };
+
+                                        sp.Children.Add(new Image
+                                            {
+                                                Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/cross.png", UriKind.Absolute)),
+                                                Height = 16,
+                                                Width  = 16,
+                                                Margin = new Thickness(0, 0, 0, 0)
+                                            });
+
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content = " None of the above",
+                                                Padding = new Thickness(0)
+                                            });
+
+                                        item.CandidateSP.Add(sp);
+                                    }
+                                });
+
+                            item.SelectedCandidate = 0;
+                            
+                            item.Group          = "Found";
+                            item.ShowStatus     = "Collapsed";
+                            item.ShowCandidates = "Visible";
+                        }
+
+                        Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+                    }
+
+                    if (ok)
+                    {
+                        Dispatcher.Invoke(() => nextButton.IsEnabled = true);
+                    }
+
+                    Dispatcher.Invoke(() =>
+                        {
+                            cancelButton.Visibility = Visibility.Collapsed;
+                            backButton.Visibility   = Visibility.Visible;
+                        });
                 });
-            _worker.Start();
+            _searchThd.Start();
         }
 
         /// <summary>
-        /// Handles the SelectionChanged event of the markUntil control.
+        /// Handles the OnSelectionChanged event of the Episodes control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.SelectionChangedEventArgs"/> instance containing the event data.</param>
-        private void MarkUntilSelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <param name="e">The <see cref="SelectionChangedEventArgs"/> instance containing the event data.</param>
+        private void EpisodesOnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (markUntil.SelectedValue == null) return;
+            var cb = sender as ComboBox;
+            var ps = cb.DataContext as PendingShowListViewItem;
 
-            var season  = ((string)markUntil.SelectedValue).Substring(1, 2).ToInteger();
-            var episode = ((string)markUntil.SelectedValue).Substring(4, 2).ToInteger();
+            if (cb.SelectedIndex == -1 || ps == null) return;
 
-            Database.TVShows[_dbid].Episodes.ForEach(ep => ep.Watched = false);
+            ps.Show.Episodes.ForEach(ep => ep.Watched = false);
 
-            foreach (var ep in Database.TVShows[_dbid].Episodes.Where(ep => ep.ID <= episode + (season * 1000) + (_dbid * 1000 * 1000)))
+            var sp = cb.SelectedItem as StackPanel;
+
+            if (sp == null || !(sp.Tag is int)) goto end;
+
+            var id = (int)sp.Tag;
+
+            foreach (var ep in ps.Show.Episodes.Where(ep => ep.ID <= id))
             {
                 ep.Watched = true;
             }
 
-            Database.TVShows[_dbid].SaveTracking();
+          end:
+            ps.Show.SaveTracking();
             MainWindow.Active.DataChanged();
         }
 
         /// <summary>
-        /// Handles the Click event of the closeButton control.
+        /// Handles the OnClick event of the backButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void CloseButtonClick(object sender, RoutedEventArgs e)
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void BackButtonOnClick(object sender, RoutedEventArgs e)
         {
-            Close();
-        }
-
-        /// <summary>
-        /// Handles the Click event of the addAnotherButton control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void AddAnotherButtonClick(object sender, RoutedEventArgs e)
-        {
-            finishTabItem.Visibility = Visibility.Collapsed;
+            restartButton.Visibility = Visibility.Collapsed;
+            nextButton.Visibility    = Visibility.Visible;
+            listTabItem.Visibility   = Visibility.Collapsed;
             addTabItem.Visibility    = Visibility.Visible;
             tabControl.SelectedIndex = 0;
-            textBox.Text             = string.Empty;
-            textBox.Focus();
         }
 
         /// <summary>
-        /// Creates the guide based on the ComboBox item name.
+        /// Handles the OnClick event of the cancelButton control.
         /// </summary>
-        /// <param name="grabber">The grabber.</param>
-        /// <returns>The guide.</returns>
-        public static Guide CreateGuide(string grabber)
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void CancelButtonOnClick(object sender, RoutedEventArgs e)
         {
-            switch (grabber)
+            cancelButton.IsEnabled = false;
+
+            if (_searchThd != null && _searchThd.IsAlive)
             {
-                default:
-                case "TVRage":
-                    return new TVRage();
-
-                case "The TVDB":
-                    return new TVDB();
-
-                case "TV.com":
-                    return new TVcom();
-
-                case "EPisodeWorld":
-                    return new EPisodeWorld();
-
-                case "IMDb":
-                    return new IMDb();
-
-                case "EPGuides - TVRage":
-                    return new EPGuides("tvrage.com");
-
-                case "EPGuides - TV.com":
-                    return new EPGuides("tv.com");
-
-                case "AniDB":
-                    return new AniDB();
-
-                case "Anime News Network":
-                    return new AnimeNewsNetwork();
+                try
+                {
+                    _searchThd.Abort();
+                    _searchThd = null;
+                }
+                catch { }
             }
+
+            try
+            {
+                foreach (var item in _list)
+                {
+                    if (item.Group != "Added" && item.Group != "Failed")
+                    {
+                        item.Status         = "Operation canceled.";
+                        item.ShowCandidates = "Collapsed";
+                        item.ShowEpisodes   = "Collapsed";
+                        item.ShowStatus     = "Visible";
+                    }
+                }
+
+                Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+            }
+            catch { }
+
+            cancelButton.Visibility = Visibility.Collapsed;
+            cancelButton.IsEnabled  = true;
+            backButton.Visibility   = Visibility.Visible;
+            nextButton.IsEnabled    = false;
+            restartButton.IsEnabled = true;
+
+            if (_addedOne)
+            {
+                MainWindow.Active.DataChanged();
+                Task.Factory.StartNew(Library.SearchForFiles);
+            }
+        }
+
+        /// <summary>
+        /// Handles the OnClick event of the nextButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void NextButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            backButton.Visibility   = nextButton.Visibility    = Visibility.Collapsed;
+            cancelButton.Visibility = restartButton.Visibility = Visibility.Visible;
+            restartButton.IsEnabled = false;
+
+            foreach (var item in _list.Where(x => x.Candidates.Count != 0 && x.SelectedCandidate != x.Candidates.Count))
+            {
+                item.Name           = item.Candidates[item.SelectedCandidate].Title;
+                item.Group          = "Pending";
+                item.Status         = string.Empty;
+                item.ShowCandidates = "Collapsed";
+                item.ShowStatus     = "Visible";
+            }
+
+            foreach (var item in _list.Where(x => x.Candidates.Count != 0 && x.SelectedCandidate == x.Candidates.Count))
+            {
+                item.Group          = "Failed";
+                item.Status         = "Skipped by user request.";
+                item.ShowCandidates = "Collapsed";
+                item.ShowStatus     = "Visible";
+            }
+
+            CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh();
+
+            _searchThd = new Thread(() =>
+                {
+                    foreach (var item in _list.Where(x => x.Candidates.Count != 0 && x.SelectedCandidate != x.Candidates.Count))
+                    {
+                        var err = false;
+
+                        Dispatcher.Invoke(() => listView.ScrollIntoView(item));
+
+                        item.Status = "Downloading from " + item.Candidates[item.SelectedCandidate].Guide.Name + "...";
+
+                        Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+
+                        item.Show = Database.Add(item.Candidates[item.SelectedCandidate], (i, s) =>
+                            {
+                                item.Status = s;
+
+                                switch (i)
+                                {
+                                    case 1:
+                                        _addedOne = true;
+                                        item.Group = "Added";
+                                        break;
+
+                                    case -1:
+                                        err = true;
+                                        item.Group = "Failed";
+                                        break;
+                                }
+
+                                Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+                            });
+
+                        if (err)
+                        {
+                            continue;
+                        }
+
+                        Dispatcher.Invoke(() =>
+                            {
+                                var gotLast = false;
+                                
+                                {
+                                    var sp = new StackPanel
+                                        {
+                                            Orientation = Orientation.Horizontal
+                                        };
+
+                                    sp.Children.Add(new Image
+                                        {
+                                            Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/checked.png", UriKind.Absolute)),
+                                            Height = 16,
+                                            Width  = 16,
+                                            Margin = new Thickness(0, 0, 0, 0)
+                                        });
+
+                                    sp.Children.Add(new Label
+                                        {
+                                            Content = " Mark episodes as watched until...",
+                                            Padding = new Thickness(0)
+                                        });
+
+                                    item.EpisodeSP.Add(sp);
+                                }
+
+                                foreach (var ep in item.Show.Episodes.OrderByDescending(ep => ep.ID))
+                                {
+                                    var sp = new StackPanel
+                                        {
+                                            Orientation = Orientation.Horizontal,
+                                            Tag         = ep.ID
+                                        };
+
+                                    sp.Children.Add(new Label
+                                        {
+                                            Content    = string.Format("S{0:00}E{1:00} ", ep.Season, ep.Number),
+                                            FontWeight = FontWeights.Bold,
+                                            Padding    = new Thickness(0)
+                                        });
+
+                                    sp.Children.Add(new Label
+                                        {
+                                            Content = ep.Title,
+                                            Padding = new Thickness(0)
+                                        });
+                                    
+                                    if (!gotLast && ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch)
+                                    {
+                                        gotLast = true;
+
+                                        sp.Children.Add(new Label
+                                            {
+                                                Content = " [last aired episode]",
+                                                Opacity = 0.5,
+                                                Padding = new Thickness(0)
+                                            });
+                                    }
+
+                                    item.EpisodeSP.Add(sp);
+                                }
+                            });
+
+                        item.SelectedEpisode = 0;
+
+                        item.ShowStatus   = "Collapsed";
+                        item.ShowEpisodes = "Visible";
+
+                        Dispatcher.Invoke(() => CollectionViewSource.GetDefaultView(listView.ItemsSource).Refresh());
+                    }
+
+                    Dispatcher.Invoke(() =>
+                        {
+                            cancelButton.Visibility = Visibility.Collapsed;
+                            restartButton.IsEnabled = true;
+                        });
+
+                    if (_addedOne)
+                    {
+                        MainWindow.Active.DataChanged();
+                        Task.Factory.StartNew(Library.SearchForFiles);
+                    }
+                });
+            _searchThd.Start();
         }
     }
 }

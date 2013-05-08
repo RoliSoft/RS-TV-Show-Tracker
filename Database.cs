@@ -395,53 +395,32 @@
         /// <summary>
         /// Adds the specified TV show to the database.
         /// </summary>
-        /// <param name="gname">The guide to get the information from.</param>
-        /// <param name="guuid">The ID on the guide.</param>
-        /// <param name="glang">The language on the guide.</param>
+        /// <param name="sid">The show ID to add to the database.</param>
         /// <param name="callback">The status callback.</param>
-        /// <returns>
-        /// Added TV show or <c>null</c>.
-        /// </returns>
-        public static TVShow Add(string gname, string guuid, string glang, Action<int, string> callback = null)
+        /// <returns>Added TV show or <c>null</c>.</returns>
+        public static TVShow Add(ShowID sid, Action<int, string> callback = null)
         {
-            Log.Info("Adding " + gname + "/" + guuid + "...");
+            Log.Info("Adding " + sid.Guide.Name + "/" + sid.ID + "...");
 
             var st = DateTime.Now;
-
+            
             if (callback != null)
             {
-                callback(0, "Downloading guide...");
-            }
-
-            Guide guide;
-            try
-            {
-                guide = Updater.CreateGuide(gname);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Error while creating guide object for " + gname + "/" + guuid + ".", ex);
-
-                if (callback != null)
-                {
-                    callback(-1, "Could not get guide object of type " + gname + ".");
-                }
-
-                return null;
+                callback(0, "Downloading guide from " + sid.Guide.Name + "...");
             }
 
             TVShow tv;
             try
             {
-                tv = guide.GetData(guuid, glang);
+                tv = sid.Guide.GetData(sid.ID, sid.Language);
 
                 if (tv.Episodes.Count == 0)
                 {
-                    Log.Error("Downloaded guide for " + tv.Title + " (" + gname + "/" + guuid + ") has no episodes.");
+                    Log.Error("Downloaded guide for " + tv.Title + " (" + sid.Guide.Name + "/" + sid.ID + ") has no episodes.");
 
                     if (callback != null)
                     {
-                        callback(-1, "There aren't any episodes associated to " + tv.Title + " on this guide.");
+                        callback(-1, "No episodes listed for this show on " + sid.Guide.Name + ".");
                     }
 
                     return null;
@@ -451,15 +430,15 @@
             {
                 if (ex is ThreadAbortException)
                 {
-                    Log.Warn("Thread aborted while downloading data from guide for " + gname + "/" + guuid + ".", ex);
+                    Log.Warn("Thread aborted while downloading data from guide for " + sid.Guide.Name + "/" + sid.ID + ".", ex);
                     return null;
                 }
 
-                Log.Error("Error while downloading data from guide for " + gname + "/" + guuid + ".", ex);
+                Log.Error("Error while downloading data from guide for " + sid.Guide.Name + "/" + sid.ID + ".", ex);
 
                 if (callback != null)
                 {
-                    callback(-1, "Couldn't download the episode listing and associated informations due to an unexpected error:" + Environment.NewLine + ex.Message);
+                    callback(-1, "Error while downloading data: " + ex.Message);
                 }
 
                 return null;
@@ -467,7 +446,7 @@
 
             if (TVShows.Values.FirstOrDefault(x => x.Title == tv.Title) != null)
             {
-                Log.Error("Duplicate entry detected for " + tv.Title + " (" + gname + "/" + guuid + ").");
+                Log.Error("Duplicate entry detected for " + tv.Title + " (" + sid.Guide.Name + "/" + sid.ID + ").");
 
                 if (callback != null)
                 {
@@ -505,11 +484,11 @@
             }
             catch (Exception ex)
             {
-                Log.Error("Error while creating directory db\\" + Path.GetFileName(tv.Directory) + " for " + tv.Title + " (" + gname + "/" + guuid + ").", ex);
+                Log.Error("Error while creating directory db\\" + Path.GetFileName(tv.Directory) + " for " + tv.Title + " (" + sid.Guide.Name + "/" + sid.ID + ").", ex);
 
                 if (callback != null)
                 {
-                    callback(-1, "Could not create database for " + tv.Title + ".");
+                    callback(-1, "Error while creating database.");
                 }
 
                 return null;
@@ -535,11 +514,11 @@
             }
             catch (Exception ex)
             {
-                Log.Error("Error while saving database to db\\" + Path.GetFileName(tv.Directory) + " for " + tv.Title + " (" + gname + "/" + guuid + ").", ex);
+                Log.Error("Error while saving database to db\\" + Path.GetFileName(tv.Directory) + " for " + tv.Title + " (" + sid.Guide.Name + "/" + sid.ID + ").", ex);
 
                 if (callback != null)
                 {
-                    callback(-1, "Could not save database for " + tv.Title + ".");
+                    callback(-1, "Error while saving to database.");
                 }
 
                 return null;
@@ -548,14 +527,17 @@
             TVShows[tv.ID] = tv;
             DataChange = DateTime.Now;
 
-            new Thread(Library.SearchForFiles).Start();
-
+            if (tv.Language == "en")
+            {
+                Updater.UpdateRemoteCache(tv);
+            }
+            
             if (callback != null)
             {
-                callback(1, "Added " + tv.Title + ".");
+                callback(1, "Show added successfully.");
             }
 
-            Log.Debug("Successfully added " + tv.Title + " (" + gname + "/" + guuid + ") in " + (DateTime.Now - st).TotalSeconds + "s.");
+            Log.Debug("Successfully added " + tv.Title + " (" + sid.Guide.Name + "/" + sid.ID + ") in " + (DateTime.Now - st).TotalSeconds + "s.");
 
             return tv;
         }

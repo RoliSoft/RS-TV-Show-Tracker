@@ -877,7 +877,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void AddNewTVShowClick(object sender, RoutedEventArgs e)
         {
-            new AddNewWindow2().ShowDialog();
+            new AddNewWindow().ShowDialog();
         }
 
         /// <summary>
@@ -1291,7 +1291,7 @@
                     Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
                 }
 
-                var res = TaskDialog.Show(new TaskDialogOptions
+                var res = Task.Factory.StartNew(() => TaskDialog.Show(new TaskDialogOptions
                     {
                         MainIcon                = VistaTaskDialogIcon.Error,
                         Title                   = "An unexpected error occurred",
@@ -1314,43 +1314,46 @@
 
                                 return true;
                             }
-                    });
+                    }), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 
-                if (Active != null &&(bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
+                res.Wait();
+
+                if (Active != null && Active.Dispatcher.Invoke(() => Active.IsVisible))
                 {
                     Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                 }
 
-                if (res.CommandButtonResult.HasValue &&res.CommandButtonResult.Value == 0)
+                if (res.Result.CommandButtonResult.HasValue && res.Result.CommandButtonResult.Value == 0)
                 {
-                    ReportException(sb.ToString());
+                    ReportException(sb.ToString(), ex);
                 }
             }
             else
             {
-                ReportException(sb.ToString());
+                ReportException(sb.ToString(), ex);
             }
         }
 
         /// <summary>
         /// Reports the parsed exception silently and asynchronously to lab.rolisoft.net.
         /// </summary>
-        /// <param name="ex">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
-        private static void ReportException(string ex)
+        /// <param name="sx">The exception text parsed by <c>HandleUnexpectedException()</c>.</param>
+        /// <param name="ex">The original exception.</param>
+        private static void ReportException(string sx, Exception ex)
         {
-            new Task(() =>
+            Task.Factory.StartNew(() =>
                 {
-                    Log.Info("Sending exception to lab.rolisoft.net for analysis." + Environment.NewLine + ex);
+                    Log.Info("Sending exception to lab.rolisoft.net for analysis.", ex);
 
                     try
                     {
-                        API.ReportError(ex);
+                        API.ReportError(sx);
                     }
                     catch (Exception ex2)
                     {
-                        Log.Error("Exception while sending exception to lab.rolisoft.net. Yo dwag.", ex2);
+                        Log.Error("Exception while sending exception to lab.rolisoft.net.", ex2);
                     }
-                }).Start();
+                });
         }
         #endregion
     }

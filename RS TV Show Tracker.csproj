@@ -468,9 +468,6 @@
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="BackgroundTasks.cs" />
-    <Compile Include="Windows\AddNewWindow.xaml.cs">
-      <DependentUpon>AddNewWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Helpers\DownloadLinkSearch.cs" />
     <Compile Include="UserControls\DownloadLinksPage.xaml.cs">
@@ -496,8 +493,8 @@
     <Compile Include="Windows\CaptchaWindow.xaml.cs">
       <DependentUpon>CaptchaWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\AddNewWindow2.xaml.cs">
-      <DependentUpon>AddNewWindow2.xaml</DependentUpon>
+    <Compile Include="Windows\AddNewWindow.xaml.cs">
+      <DependentUpon>AddNewWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\SenderSettingsWindow.xaml.cs">
       <DependentUpon>SenderSettingsWindow.xaml</DependentUpon>
@@ -632,12 +629,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Windows\AddNewWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="UserControls\DownloadLinksPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -689,7 +680,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Windows\AddNewWindow2.xaml">
+    <Page Include="Windows\AddNewWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

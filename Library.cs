@@ -364,6 +364,12 @@
         /// </summary>
         public static void SearchForFiles()
         {
+            if (Indexing)
+            {
+                Log.Warn("A library update operation is currently running, cannot start a new one.");
+                return;
+            }
+
             Log.Info("Starting library update...");
 
             if (_fsw != null && _fsw.Length != 0)
