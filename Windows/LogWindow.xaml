@@ -63,7 +63,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto" Margin="0,0,-6,0" Padding="0,0,6,0">
-                                                <TextBlock Text="{Binding Message}" Width="Auto" TextAlignment="Left" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" />
+                                                <TextBox IsReadOnly="True" IsReadOnlyCaretVisible="False" Text="{Binding Path=Message, Mode=OneWay}" Width="Auto" TextAlignment="Left" TextWrapping="Wrap" BorderThickness="0" Background="Transparent" />
                                             </ScrollViewer>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
