@@ -27,7 +27,9 @@ using System.Windows.Input;
 
 namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
 {
-  public sealed class TokenizedTextBox : ItemsControl
+    using System.Collections.Generic;
+
+    public sealed class TokenizedTextBox : ItemsControl
   {
     #region Members
 
@@ -158,7 +160,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
         _rtb.PreviewKeyDown += RichTextBox_PreviewKeyDown;
       }
 
-      InitializeTokensFromText();
+      InitializeTokensFromText(Text);
     }
 
     #endregion //Base Class Overrides
@@ -199,27 +201,17 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
         //the cursor is to the left of a token item
         container = _rtb.CaretPosition.GetAdjacentElement( LogicalDirection.Forward ) as InlineUIContainer;
       }
-
-      //if the container is not null that means we have something to delete
-      if( container != null )
-      {
-        var token = ( container as InlineUIContainer ).Child as TokenItem;
-        if( token != null )
-        {
-          SetTextInternal( Text.Replace( token.TokenKey, "" ) );
-        }
-      }
     }
 
     #endregion //Event Handlers
 
     #region Methods
 
-    public void InitializeTokensFromText()
+    public void InitializeTokensFromText(string text)
     {
-      if( !String.IsNullOrEmpty( Text ) )
+      if( !String.IsNullOrEmpty( text ) )
       {
-        string[] tokenKeys = Text.Split( new string[] { TokenDelimiter }, StringSplitOptions.RemoveEmptyEntries );
+        string[] tokenKeys = text.Split( new string[] { TokenDelimiter }, StringSplitOptions.RemoveEmptyEntries );
         foreach( string tokenKey in tokenKeys )
         {
           var para = _rtb.CaretPosition.Paragraph;
@@ -296,7 +288,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
     private void ReplaceTextWithToken( string inputText, Token token )
     {
       _surpressTextChangedEvent = true;
-
         var ok = !string.IsNullOrWhiteSpace(inputText.Trim().Trim(TokenDelimiter.ToCharArray()));
       var para = _rtb.CaretPosition.Paragraph;
 
@@ -325,10 +316,8 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
         }
 
         //now append the Text with the token key
-        if (ok) SetTextInternal(Text + token.TokenKey);
-        else para.Inlines.Remove(tokenContainer);
+        if (!ok) para.Inlines.Remove(tokenContainer);
       }
-
       _surpressTextChangedEvent = false;
     }
 
@@ -373,16 +362,13 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
     {
       var para = _rtb.CaretPosition.Paragraph;
 
-      Inline inlineToRemove = para.Inlines.Where( inline => inline is InlineUIContainer && ( ( inline as InlineUIContainer ).Child as TokenItem ).TokenKey.Equals( e.Parameter ) ).FirstOrDefault();
+      Inline inlineToRemove = para.Inlines.FirstOrDefault(inline => inline is InlineUIContainer && ( ( inline as InlineUIContainer ).Child as TokenItem ).TokenKey.Equals( e.Parameter ));
 
       if( inlineToRemove != null )
         para.Inlines.Remove( inlineToRemove );
-
-      //update Text to remove delimited value
-      SetTextInternal( Text.Replace( e.Parameter.ToString(), "" ) );
     }
 
-    public void DeleteAllTokens()
+    public void DeleteTokens()
     {
         var para = _rtb.CaretPosition.Paragraph;
 
@@ -394,11 +380,40 @@ namespace RoliSoft.TVShowTracker.Dependencies.TokenizedTextBox
         }
       }
 
-    public void SetTextInternal( string text )
+    public IEnumerable<string> GetTokens()
     {
-      _surpressTextChanged = true;
-      Text = text;
-      _surpressTextChanged = false;
+        foreach (InlineUIContainer inline in _rtb.CaretPosition.Paragraph.Inlines.Where(inline => inline is InlineUIContainer && ((inline as InlineUIContainer).Child as TokenItem).TokenKey != null))
+        {
+            if (inline.Child is TokenItem)
+            {
+                var str = (inline.Child as TokenItem).TokenKey.TrimEnd(TokenDelimiter.ToCharArray()).Trim();
+
+                if (!string.IsNullOrWhiteSpace(str))
+                {
+                    yield return str;
+                }
+            }
+        }
+    }
+
+    public void DeleteTokens(List<string> tokens)
+    {
+        var para = _rtb.CaretPosition.Paragraph;
+
+        var inlinesToRemove = para.Inlines.Where(inline => inline is InlineUIContainer && ((inline as InlineUIContainer).Child as TokenItem).TokenKey != null).ToList();
+
+        foreach (InlineUIContainer inlineToRemove in inlinesToRemove)
+        {
+            if (inlineToRemove.Child is TokenItem)
+            {
+                var str = (inlineToRemove.Child as TokenItem).TokenKey.TrimEnd(TokenDelimiter.ToCharArray()).Trim();
+
+                if (tokens.Contains(str))
+                {
+                    para.Inlines.Remove(inlineToRemove);
+                }
+            }
+        }
     }
 
     #endregion //Methods

@@ -126,7 +126,7 @@
             show.URL         = info.GetValue("showlink");
             show.Episodes    = new List<Episode>();
 
-            show.Runtime = info.GetValue("runtime").ToInteger();
+            show.Runtime = (info.GetValue("runtime") ?? "20").ToInteger();
             show.Runtime = show.Runtime == 30
                            ? 20
                            : show.Runtime == 50 || show.Runtime == 60

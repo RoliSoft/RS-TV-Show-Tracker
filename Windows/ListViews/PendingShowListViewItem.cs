@@ -23,6 +23,12 @@
         public TVShow Show { get; set; }
 
         /// <summary>
+        /// Gets or sets the token.
+        /// </summary>
+        /// <value>The token.</value>
+        public string Token { get; set; }
+
+        /// <summary>
         /// Gets or sets the candidates.
         /// </summary>
         /// <value>The candidates.</value>
@@ -95,6 +101,7 @@
         public PendingShowListViewItem(string name)
         {
             Name        = name;
+            Token       = name;
             Status      = string.Empty;
             Group       = "Pending";
             Candidates  = new List<ShowID>();

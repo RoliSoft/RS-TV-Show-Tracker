@@ -23,6 +23,7 @@
     public partial class AddNewWindow
     {
         private bool _loaded, _addedOne;
+        private List<string> _successful;
         private List<Guide> _guides; 
         private string _lang;
         private List<PendingShowListViewItem> _list;
@@ -50,8 +51,7 @@
         {
             InitializeComponent();
 
-            namesTextBox.Text = name + ";";
-            namesTextBox.InitializeTokensFromText();
+            namesTextBox.InitializeTokensFromText(name + namesTextBox.TokenDelimiter);
         }
 
         /// <summary>
@@ -180,7 +180,9 @@
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void SearchButtonClick(object sender, RoutedEventArgs e)
         {
-            if (namesTextBox.Text == null || string.IsNullOrWhiteSpace(namesTextBox.Text.Replace(";", string.Empty)))
+            var names = namesTextBox.GetTokens().ToList();
+
+            if (!names.Any())
             {
                 MessageBox.Show("Enter at least one show and end it with ; in order to include it.", Signature.Software, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -193,6 +195,7 @@
             }
 
             _addedOne = false;
+            _successful = new List<string>();
 
             _lang = language.SelectedIndex != -1 ? (language.SelectedItem as StackPanel).Tag as string : "en";
             _guides = new List<Guide>();
@@ -207,19 +210,17 @@
 
             _list = new List<PendingShowListViewItem>();
 
-            foreach (var name in namesTextBox.Text.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+            foreach (var name in names)
             {
-                if (!string.IsNullOrWhiteSpace(name))
-                {
-                    _list.Add(new PendingShowListViewItem(name.Trim()));
-                }
+                _list.Add(new PendingShowListViewItem(name));
             }
 
             PendingShowListViewItemCollection.Clear();
             PendingShowListViewItemCollection.AddRange(_list);
 
-            backButton.Visibility    = Visibility.Collapsed;
-            cancelButton.Visibility  = Visibility.Visible;
+            cancelButton.Visibility  = nextButton.Visibility = Visibility.Visible;
+            restartButton.Visibility = backButton.Visibility = Visibility.Collapsed;
+            cancelButton.IsEnabled   = true;
             nextButton.IsEnabled     = false;
             addTabItem.Visibility    = Visibility.Collapsed;
             listTabItem.Visibility   = Visibility.Visible;
@@ -352,6 +353,7 @@
                         {
                             cancelButton.Visibility = Visibility.Collapsed;
                             backButton.Visibility   = Visibility.Visible;
+                            backButton.IsEnabled    = true;
                         });
                 });
             _searchThd.Start();
@@ -395,8 +397,11 @@
         /// <exception cref="System.NotImplementedException"></exception>
         private void BackButtonOnClick(object sender, RoutedEventArgs e)
         {
-            restartButton.Visibility = Visibility.Collapsed;
-            nextButton.Visibility    = Visibility.Visible;
+            if (_addedOne)
+            {
+                namesTextBox.DeleteTokens(_successful);
+            }
+
             listTabItem.Visibility   = Visibility.Collapsed;
             addTabItem.Visibility    = Visibility.Visible;
             tabControl.SelectedIndex = 0;
@@ -439,11 +444,10 @@
             }
             catch { }
 
-            cancelButton.Visibility = Visibility.Collapsed;
-            cancelButton.IsEnabled  = true;
-            backButton.Visibility   = Visibility.Visible;
-            nextButton.IsEnabled    = false;
-            restartButton.IsEnabled = true;
+            cancelButton.Visibility  = backButton.Visibility = nextButton.Visibility = Visibility.Collapsed;
+            cancelButton.IsEnabled   = nextButton.IsEnabled  = false;
+            restartButton.IsEnabled  = true;
+            restartButton.Visibility = Visibility.Visible;
 
             if (_addedOne)
             {
@@ -462,6 +466,7 @@
         {
             backButton.Visibility   = nextButton.Visibility    = Visibility.Collapsed;
             cancelButton.Visibility = restartButton.Visibility = Visibility.Visible;
+            cancelButton.IsEnabled  = true;
             restartButton.IsEnabled = false;
 
             foreach (var item in _list.Where(x => x.Candidates.Count != 0 && x.SelectedCandidate != x.Candidates.Count))
@@ -503,6 +508,7 @@
                                 {
                                     case 1:
                                         _addedOne = true;
+                                        _successful.Add(item.Token);
                                         item.Group = "Added";
                                         break;
 
