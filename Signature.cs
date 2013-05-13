@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -376,6 +377,12 @@
 
             Task.Factory.StartNew(() =>
                 {
+                    _isActivated = false;
+                    if (IsActivated != _isActivated)
+                    {
+                        Process.GetCurrentProcess().Kill();
+                    }
+
                     var snToken = Assembly.GetExecutingAssembly().GetName().GetPublicKeyToken();
 
                     if (snToken == null || snToken.Length == 0)
@@ -415,11 +422,13 @@
                     {
                         IsOriginalAssembly = false;
                         Log.Warn("Assembly strong name is present but was not verified.");
+                        return;
                     }
                     else
                     {
                         IsOriginalAssembly = false;
                         Log.Warn("Assembly strong name is present but invalid.");
+                        return;
                     }
 
                     InitLicense();
@@ -539,7 +548,7 @@
                             { "Serial", string.Empty },
                         };
 
-                    try { inf["ID"]     = mo["DeviceID"].ToString();     } catch { }
+                    try { inf["ID"]     = mo["DeviceID"].ToString().Replace('\\', '/'); } catch { }
                     try { inf["Drive"]  = mo["Model"].ToString();        } catch { }
                     try { inf["Size"]   = mo["Size"].ToString();         } catch { }
                     try { inf["Serial"] = mo["SerialNumber"].ToString(); } catch { }
@@ -603,6 +612,11 @@
         {
             _isActivated = false;
             _licenseHash = null;
+
+            if (IsActivated != _isActivated)
+            {
+                Process.GetCurrentProcess().Kill();
+            }
 
             if (!IsOriginalAssembly.GetValueOrDefault())
             {
@@ -729,7 +743,7 @@
 
                     if (_isActivated)
                     {
-                        _licenseHash = BitConverter.ToString(new HMACSHA512(MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim()))).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
+                        _licenseHash = BitConverter.ToString(new HMACSHA384(SHA384.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim())).Truncate(16)).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
                         Log.Info("License validated for " + _user + ". Thank you for supporting the software!");
                     }
                     else
@@ -781,7 +795,7 @@
 
             var kst = KeyStatus.Unchecked;
 
-            try { kst = (KeyStatus)int.Parse(resp.Headers["X-Key"]); } catch { }
+            try { kst = (KeyStatus)int.Parse(resp.Headers["X-License"]); } catch { }
 
             if (kst != KeyStatus.Valid && kst != KeyStatus.Unchecked)
             {

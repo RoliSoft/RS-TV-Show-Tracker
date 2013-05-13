@@ -260,8 +260,8 @@
 
                                     if (_producer.Count < 10)
                                     {
-                                        Log.Trace("Queue.Count < 10, waiting 250ms before initiating directory scan...");
-                                        Thread.Sleep(250);
+                                        Log.Trace("Queue.Count < 10, waiting 5s before initiating directory scan...");
+                                        Thread.Sleep(5000);
                                     }
 
                                     var fs = new FileSearch(new[] { evt.Item2[0] }, CheckFile);
