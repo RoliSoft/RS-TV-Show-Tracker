@@ -1181,6 +1181,12 @@
     <Resource Include="Images\uac-tick.png" />
     <Resource Include="Images\uac.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\status-gray.png" />
+    <Resource Include="Images\status-green.png" />
+    <Resource Include="Images\status-red.png" />
+    <Resource Include="Images\status-yellow.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\TextTemplating\Microsoft.TextTemplating.targets" />
   <PropertyGroup>

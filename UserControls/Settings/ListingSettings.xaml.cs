@@ -5,6 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Windows;
+    using System.Windows.Documents;
     using System.Windows.Media.Imaging;
 
     /// <summary>
@@ -296,6 +297,16 @@
             if (!_loaded) return;
 
             Settings.Set("Update to Nightly Builds", false);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the Hyperlink control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void HyperlinkClick(object sender, RoutedEventArgs e)
+        {
+            Utils.Run(((Hyperlink)sender).NavigateUri.ToString());
         }
     }
 }

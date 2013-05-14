@@ -744,6 +744,7 @@
                     if (_isActivated)
                     {
                         _licenseHash = BitConverter.ToString(new HMACSHA384(SHA384.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim())).Truncate(16)).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
+                        _licenseStatus = LicenseStatus.Valid;
                         Log.Info("License validated for " + _user + ". Thank you for supporting the software!");
                     }
                     else
@@ -826,6 +827,7 @@
         /// </returns>
         public static bool VerifyKey(string user, string key)
         {
+            if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(key) || key.Trim().Replace("-", string.Empty).Length < 23) return false;
             var a = Encoding.UTF8.GetBytes(user.ToLower().Trim());
             var b = new BigInteger(new HMACSHA512(MD5.Create().ComputeHash(a)).ComputeHash(a).Truncate(16).Reverse().ToArray());
             var c = key.Trim().Replace("-", string.Empty).Substring(2).Reverse().ToList();

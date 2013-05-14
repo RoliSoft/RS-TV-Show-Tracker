@@ -4,59 +4,14 @@
                    xmlns:GreyableImage="clr-namespace:RoliSoft.TVShowTracker.Dependencies.GreyableImage"
                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                    TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" UseLayoutRounding="True"
-        Title="Support the software" Height="337" Width="567" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/heart.png" Loaded="WindowLoaded" ResizeMode="NoResize">
+        Title="Support the software" Height="240" Width="362" WindowStartupLocation="CenterScreen" Icon="/RSTVShowTracker;component/Images/heart.png" Loaded="WindowLoaded" ResizeMode="NoResize">
     <Grid>
-        <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0">
+        <TabControl Margin="10,4,10,10" Name="tabControl" FocusVisualStyle="{x:Null}" Background="White" Padding="0" SelectionChanged="TabControlOnSelectionChanged">
             <TabControl.Effect>
                 <DropShadowEffect ShadowDepth="0" Opacity="0.5" />
             </TabControl.Effect>
-            <TabItem Header="Introduction" Name="introTabItem" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
-                <Grid Name="introGrid">
-                    <Rectangle Height="20" VerticalAlignment="Top">
-                        <Rectangle.Fill>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#F9F9F9" Offset="0.0" />
-                                <GradientStop Color="White" Offset="1.0" />
-                            </LinearGradientBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Margin="10,7,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" Margin="0,1,5,0" />
-                                <Label Content="About the state of the software's development" FontSize="16" Foreground="DarkBlue" Padding="0" />
-                            </StackPanel>
-                            <TextBlock TextWrapping="Wrap" TextAlignment="Justify" Margin="0,5,0,0">
-    As the sole developer of the software, I am responsible for adding and maintaining the plugins and features in the software on a daily basis. While the software is open-source and anyone can contribute, no one actually did contribute, and I am the only one reading, answering and adding/fixing features/issues requested/reported by the users. More than 90% of the features introduced in the last version have been due to user requests. As an engineering student, this requires me to juggle my time between studying, coding and whatever time is left to sleep.<LineBreak />
-    I am also the only one covering the costs that come with maintaining a software of this magnitude (server/development-related certs/licenses, powerful back-end servers, etc) however I cannot take freelancing side-jobs in order to cover them anymore.<LineBreak />
-    So in order to keep the software ad-free and open-source on a non-restrictive license, I have decided to try and cover my costs by giving the users a reason to donate. You will find the <Image Source="/RSTVShowTracker;component/Images/cup.png" Height="16" Width="16" Margin="0,0,0,-4" /> icon near a few advanced features: these require a donation of any size in order to be used.
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                    <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Button Height="23" HorizontalAlignment="Left" Margin="0" Name="donate2Button" VerticalAlignment="Bottom" Width="75">
-                                    <StackPanel Orientation="Horizontal" Margin="3,0">
-                                        <Image Source="/RSTVShowTracker;component/Images/heart.png" Height="16" Width="16" Margin="0,0,5,0" />
-                                        <TextBlock Text="Donate" Margin="0,0,3,0" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Height="23" HorizontalAlignment="Right" Name="close2Button" VerticalAlignment="Bottom" Width="75">
-                                    <StackPanel Orientation="Horizontal" Margin="3,0">
-                                        <Image Source="/RSTVShowTracker;component/Images/tick.png" Height="16" Width="16" Margin="0,0,5,0" />
-                                        <TextBlock Text="Close" Margin="0,0,3,0" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </TabItem>
-            <TabItem Header="Donations" Name="donateTabItem" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
-                <Grid Name="donateGrid">
+            <TabItem Header="Activation" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
+                <Grid>
                     <Rectangle Height="20" VerticalAlignment="Top">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -73,31 +28,27 @@
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Margin="10,7,0,7">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="/RSTVShowTracker;component/Images/user.png" Height="16" Width="16" Margin="0" />
-                                    <Label Content="Email:" Width="42" Padding="5,2,5,0" />
-                                    <TextBox Name="emailTextBox" Width="213" Foreground="Black" Margin="0" Height="21" />
+                                    <Image Source="/RSTVShowTracker;component/Images/user.png" Height="16" Width="16" Margin="0,2,0,0" VerticalAlignment="Top" />
+                                    <Label Content="Email:" Width="60" Padding="5,2,5,0" />
+                                    <TextBox Name="emailTextBox" Width="213" Foreground="Black" Margin="0" Height="21" TextChanged="KeyTextBoxOnTextChanged" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                                    <Image Source="/RSTVShowTracker;component/Images/key.png" Height="16" Width="16" Margin="0" />
-                                    <Label Content="Key:" Width="42" Padding="5,2,5,0" />
-                                    <xctk:MaskedTextBox Name="keyTextBox" Width="213" Foreground="Black" Mask="CCCC-CCCC-CCCC-CCCC-CCCC-CCCC" ClipboardMaskFormat="ExcludePromptAndLiterals" FontFamily="Consolas" Margin="0" Height="21" />
+                                    <Image Source="/RSTVShowTracker;component/Images/key.png" Height="16" Width="16" Margin="0,2,0,0" VerticalAlignment="Top" />
+                                    <Label Content="Key:" Width="60" Padding="5,2,5,0" />
+                                    <xctk:MaskedTextBox Name="keyTextBox" Width="213" Foreground="Black" Mask="CCCC-CCCC-CCCC-CCCC-CCCC-CCCC" ClipboardMaskFormat="ExcludePromptAndLiterals" FontFamily="Consolas" Margin="0" Height="21" TextChanged="KeyTextBoxOnTextChanged" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                    <Image Name="statusIcon" Source="/RSTVShowTracker;component/Images/status-gray.png" Height="16" Width="16" Margin="0,2,0,0" VerticalAlignment="Top" />
+                                    <Label Content="Status:" Width="60" Padding="5,2,5,0" />
+                                    <TextBlock Name="statusText" Text="Failed to decrypt existing license file. Please inspect the logs." TextWrapping="Wrap" TextTrimming="WordEllipsis" Height="42" Width="213" Padding="3,2,0,0" />
                                 </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" Margin="0,1,5,0" />
-                                <Label Content="Get a donation key" FontSize="16" Foreground="DarkBlue" Padding="0" />
-                            </StackPanel>
-                            <TextBlock TextWrapping="Wrap" TextAlignment="Justify" Margin="0,5,0,0">
-    To get a donation key and use the advanced features, you simply have to support the development of the software.<LineBreak />
-    There is no fixed price, similarily to the Humble Bundle pricing model, you can pay what you think the software and the countless hours of maintaining is worth, and you will receive a donation key instantly to the email address you've used to donate.<LineBreak />
-    A wide range of methods are accepted, including <Image Source="/RSTVShowTracker;component/Images/paypal.png" Height="16" Width="16" Margin="0,0,0,-4" /> PayPal and <Image Source="/RSTVShowTracker;component/Images/bitcoin.png" Height="16" Width="16" Margin="0,0,0,-4" /> Bitcoins.
-                            </TextBlock>
                         </StackPanel>
                     </StackPanel>
                     <Border Background="WhiteSmoke" VerticalAlignment="Bottom" Height="40" Padding="11,8" BorderBrush="LightGray" BorderThickness="0,1,0,0">
                         <Grid>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Button Height="23" HorizontalAlignment="Left" Margin="0" Name="donateButton" VerticalAlignment="Bottom" Width="75">
+                                <Button Height="23" HorizontalAlignment="Left" Margin="0" Name="donateButton" VerticalAlignment="Bottom" Width="75" Click="DonateButtonOnClick">
                                     <StackPanel Orientation="Horizontal" Margin="3,0">
                                         <Image Source="/RSTVShowTracker;component/Images/heart.png" Height="16" Width="16" Margin="0,0,5,0" />
                                         <TextBlock Text="Donate" Margin="0,0,3,0" />
@@ -105,7 +56,13 @@
                                 </Button>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Height="23" HorizontalAlignment="Right" Name="closeButton" VerticalAlignment="Bottom" Width="75">
+                                <Button Height="23" Margin="0,0,11,0" HorizontalAlignment="Right" Name="activateButton" VerticalAlignment="Bottom" Width="80" Click="ActivateButtonOnClick" IsEnabled="False">
+                                    <StackPanel Orientation="Horizontal" Margin="3,0">
+                                        <Image Source="/RSTVShowTracker;component/Images/key.png" GreyableImage:ImageGreyer.IsGreyable="True" Height="16" Width="16" Margin="0,0,5,0" />
+                                        <TextBlock Text="Activate" Margin="0,0,3,0" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Height="23" HorizontalAlignment="Right" Name="closeButton" VerticalAlignment="Bottom" Width="75" Click="CloseButtonOnClick">
                                     <StackPanel Orientation="Horizontal" Margin="3,0">
                                         <Image Source="/RSTVShowTracker;component/Images/tick.png" Height="16" Width="16" Margin="0,0,5,0" />
                                         <TextBlock Text="Close" Margin="0,0,3,0" />
@@ -115,6 +72,43 @@
                         </Grid>
                     </Border>
                 </Grid>
+            </TabItem>
+
+            <TabItem Header="Why donate?" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{x:Null}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Rectangle Height="20" VerticalAlignment="Top">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#F9F9F9" Offset="0.0" />
+                                    <GradientStop Color="White" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Margin="10,0,10,7" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
+                                    <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" Margin="0,1,5,0" />
+                                    <Label Content="Getting a donation key" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                                </StackPanel>
+                                <TextBlock TextWrapping="Wrap" TextAlignment="Justify" Margin="0,5,0,0">
+                                    To get a donation key and use the advanced features, you simply have to support the development of the software.<LineBreak />
+                                    There is no fixed price, similarily to the Humble Bundle pricing model, you can pay what you think the software and the countless hours of maintaining is worth, and you will receive a donation key instantly to the email address you've used to donate.<LineBreak />
+                                    A wide range of methods are accepted, including <Image Source="/RSTVShowTracker;component/Images/paypal.png" Height="16" Width="16" Margin="0,0,0,-4" /> PayPal and <Image Source="/RSTVShowTracker;component/Images/bitcoin.png" Height="16" Width="16" Margin="0,0,0,-4" /> Bitcoins.
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
+                                    <Image Source="/RSTVShowTracker;component/Images/information.png" Height="16" Width="16" Margin="0,1,5,0" />
+                                    <Label Content="About the state of the software's development" FontSize="16" Foreground="DarkBlue" Padding="0" />
+                                </StackPanel>
+                                <TextBlock TextWrapping="Wrap" TextAlignment="Justify" Margin="0,5,0,0">
+                                    As the sole developer of the software, I am responsible for adding and maintaining the plugins and features in the software on a daily basis. While the software is open-source and anyone can contribute, no one actually did contribute, and I am the only one reading, answering and adding/fixing features/issues requested/reported by the users. More than 90% of the features introduced in the last version have been due to user requests. As an engineering student, this requires me to juggle my time between studying, coding and whatever time is left to sleep.<LineBreak />
+                                    I am also the only one covering the costs that come with maintaining a software of this magnitude (server/development-related certs/licenses, powerful back-end servers, etc) however I cannot take freelancing side-jobs in order to cover them anymore.<LineBreak />
+                                    So in order to keep the software ad-free and open-source on a non-restrictive license, I have decided to try and cover my costs by giving the users a reason to donate. You will find the <Image Source="/RSTVShowTracker;component/Images/cup.png" Height="16" Width="16" Margin="0,0,0,-4" /> icon near a few advanced features: these require a donation of any size in order to be used.
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>
