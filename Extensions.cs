@@ -239,6 +239,21 @@ namespace RoliSoft.TVShowTracker
         }
 
         /// <summary>
+        /// Sets the specified element on the array.
+        /// </summary>
+        /// <param name="array">The array.</param>
+        /// <param name="idx">The index of the element to modify.</param>
+        /// <param name="value">The value to set it to.</param>
+        /// <returns>
+        /// Modified byte array.
+        /// </returns>
+        public static byte[] Set(this byte[] array, int idx, byte value)
+        {
+            array[idx] = value;
+            return array;
+        }
+
+        /// <summary>
         /// Copies part of the byte array.
         /// </summary>
         /// <param name="array">The byte array to truncate.</param>

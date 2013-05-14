@@ -375,6 +375,11 @@
                 Log.Warn("Failed to set thread pool minimum to " + destCpu + " threads.");
             }
 
+            if (Log.IsDebugEnabled)
+            {
+                Log.Debug("Running with" + (Utils.IsAdmin ? string.Empty : "out") + " administrator rights.");
+            }
+
             Task.Factory.StartNew(() =>
                 {
                     _isActivated = false;
@@ -829,7 +834,7 @@
         {
             if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(key) || key.Trim().Replace("-", string.Empty).Length < 23) return false;
             var a = Encoding.UTF8.GetBytes(user.ToLower().Trim());
-            var b = new BigInteger(new HMACSHA512(MD5.Create().ComputeHash(a)).ComputeHash(a).Truncate(16).Reverse().ToArray());
+            var b = new BigInteger(new HMACSHA512(MD5.Create().ComputeHash(a)).ComputeHash(a).Truncate(16).Set(0, 0).Reverse().ToArray());
             var c = key.Trim().Replace("-", string.Empty).Substring(2).Reverse().ToList();
             var d = (c.Aggregate(int.Parse(key.TrimStart().Substring(0, 2), NumberStyles.HexNumber), (i, x) => i - x) - 5 * 45) & byte.MaxValue;
             var e = Enumerable.Range('0', '9' - '0' + 1).Concat(Enumerable.Range('a', 'z' - 'a' + 1)).Concat(Enumerable.Range('A', 'Z' - 'A' + 1)).Select(x => (char)x).ToList();
