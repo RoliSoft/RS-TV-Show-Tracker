@@ -627,7 +627,7 @@
                             <Image Source="/RSTVShowTracker;component/Images/refresh.png" GreyableImage:ImageGreyer.IsGreyable="True" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Re-index d/l paths" Click="ReindexDownloadPathsClick" Name="ReindexDownloadPaths">
+                    <MenuItem Header="Re-index d/l paths" Click="ReindexDownloadPathsClick" Name="ReindexDownloadPaths" IsEnabled="False">
                         <MenuItem.Icon>
                             <Image Source="/RSTVShowTracker;component/Images/magnifier.png" GreyableImage:ImageGreyer.IsGreyable="True" />
                         </MenuItem.Icon>

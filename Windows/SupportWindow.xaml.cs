@@ -327,6 +327,8 @@
                         {
                             SetStatus(true);
                             closeButton.IsEnabled = emailTextBox.IsEnabled = keyTextBox.IsEnabled = true;
+                            MainWindow.Active.ReindexDownloadPaths.IsEnabled = true;
+                            MainWindow.Active.ReindexDownloadPathsClick();
                         });
                 });
         }

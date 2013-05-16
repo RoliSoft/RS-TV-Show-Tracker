@@ -270,7 +270,7 @@
                     };
             }
 
-            new Task(() =>
+            Task.Factory.StartNew(() =>
                 {
                     var uf = Directory.GetFiles(Signature.InstallPath).Where(f => Path.GetFileName(f).StartsWith("update_") && f.EndsWith(".exe")).ToList();
 
@@ -291,31 +291,35 @@
 
                     Thread.Sleep(5000);
                     CheckForUpdate();
-                }).Start();
+                });
 
-            new Task(() =>
+            Task.Factory.StartNew(() =>
                 {
                     Thread.Sleep(5000);
+                    Signature.ActivationTask.Wait();
 
-                    Run(() =>
-                        {
-                            ReindexDownloadPaths.IsEnabled = false;
-
-                            if (_statusTimer != null)
+                    if (Signature.IsActivated)
+                    {
+                        Run(() =>
                             {
-                                _statusTimer.Stop();
-                            }
+                                ReindexDownloadPaths.IsEnabled = false;
 
-                            lastUpdatedLabel.Content = "indexing download paths";
-                        });
+                                if (_statusTimer != null)
+                                {
+                                    _statusTimer.Stop();
+                                }
 
-                    try
-                    {
-                        Library.Initialize();
-                    }
-                    catch (Exception ex)
-                    {
-                        HandleUnexpectedException(ex);
+                                lastUpdatedLabel.Content = "indexing download paths";
+                            });
+
+                        try
+                        {
+                            Library.Initialize();
+                        }
+                        catch (Exception ex)
+                        {
+                            HandleUnexpectedException(ex);
+                        }
                     }
 
                     if (Signature.IsActivated && Settings.Get<bool>("Enable UPnP AV Media Server"))
@@ -331,12 +335,12 @@
                     }
 
                     Run(() =>
-                            {
-                                ReindexDownloadPaths.IsEnabled = true;
+                        {
+                            ReindexDownloadPaths.IsEnabled = true;
 
-                                SetLastUpdated();
-                            });
-                }).Start();
+                            SetLastUpdated();
+                        });
+                });
 
             _initialized = true;
 
@@ -752,7 +756,7 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         public void ReindexDownloadPathsClick(object sender = null, RoutedEventArgs e = null)
         {
-            if (!ReindexDownloadPaths.IsEnabled)
+            if (!Signature.IsActivated || !ReindexDownloadPaths.IsEnabled)
             {
                 return;
             }
@@ -771,11 +775,11 @@
                     Library.Initialize();
 
                     Run(() =>
-                            {
-                                ReindexDownloadPaths.IsEnabled = true;
+                        {
+                            ReindexDownloadPaths.IsEnabled = true;
 
-                                SetLastUpdated();
-                            });
+                            SetLastUpdated();
+                        });
                 }).Start();
         }
 

@@ -3,7 +3,10 @@
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Threading;
     using System.Timers;
+
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// Periodically runs tasks asynchronously in the background.
@@ -25,6 +28,8 @@
         public static bool InProgress { get; set; }
 
         private static DateTime _lastSoftwareUpdate = Utils.UnixEpoch;
+        private static int _inProgressCount = 0;
+        private static Thread _lastThd;
 
         /// <summary>
         /// Initializes the <see cref="BackgroundTasks"/> class.
@@ -54,14 +59,35 @@
         {
             if (InProgress)
             {
-                Log.Warn("It is time to run Tasks(), but the last one didn't finish yet so it'll be dropped.");
-                return;
+                if (_inProgressCount == 5)
+                {
+                    Log.Warn("It is time to run Tasks(), but the last one didn't finish yet. Thread will be killed and a new Tasks() will run. (6/6)");
+
+                    try
+                    {
+                        _lastThd.Abort();
+                        _lastThd = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Debug("Exception on stuck Tasks() thread abort.", ex);
+                    }
+                }
+                else
+                {
+                    Log.Warn("It is time to run Tasks(), but the last one didn't finish yet so it'll be dropped. (" + (_inProgressCount + 1) + "/6)");
+                    _inProgressCount++;
+                    return;
+                }
             }
+
+            _lastThd = Thread.CurrentThread;
 
             var st = DateTime.Now;
             Log.Debug("Running background tasks...");
 
             InProgress = true;
+            _inProgressCount = 0;
 
             try
             {

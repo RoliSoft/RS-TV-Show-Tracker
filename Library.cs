@@ -60,6 +60,11 @@
         /// </summary>
         public static void Initialize()
         {
+            if (!Signature.IsActivated)
+            {
+                return;
+            }
+
             if (Files.Count != 0)
             {
                 Log.Debug("Library data loaded; checking to see if files still exist.");
@@ -119,7 +124,7 @@
         /// </summary>
         public static void StartWatching()
         {
-            if (_isStarting)
+            if (_isStarting || !Signature.IsActivated)
             {
                 return;
             }
@@ -371,6 +376,11 @@
         /// </summary>
         public static void SearchForFiles()
         {
+            if (!Signature.IsActivated)
+            {
+                return;
+            }
+
             if (Indexing)
             {
                 Log.Warn("A library update operation is currently running, cannot start a new one.");

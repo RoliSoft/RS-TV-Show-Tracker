@@ -134,6 +134,18 @@
         }
 
         /// <summary>
+        /// Gets the activation task.
+        /// </summary>
+        /// <value>The activation task.</value>
+        public static Task ActivationTask
+        {
+            get
+            {
+                return _actTask;
+            }
+        }
+
+        /// <summary>
         /// Gets the full path to the executing assembly.
         /// </summary>
         /// <value>The full path to the executing assembly.</value>
@@ -323,6 +335,7 @@
         private static bool _isActivated;
         private static LicenseStatus _licenseStatus = LicenseStatus.Uninitialized;
         private static string _licenseHash = null, _user = null, _key = null;
+        private static readonly Task _actTask;
 
         /// <summary>
         /// Initializes static members of the <see cref="Signature"/> class. 
@@ -380,7 +393,7 @@
                 Log.Debug("Running with" + (Utils.IsAdmin ? string.Empty : "out") + " administrator rights.");
             }
 
-            Task.Factory.StartNew(() =>
+            _actTask = new Task(() =>
                 {
                     _isActivated = false;
                     if (IsActivated != _isActivated)
@@ -438,6 +451,7 @@
 
                     InitLicense();
                 });
+            _actTask.Start(TaskScheduler.Current);
         }
 
         /// <summary>
@@ -467,6 +481,7 @@
                     { "HDD", new List<Dictionary<string, string>>() },
                     { "PRT", new List<Dictionary<string, string>>() },
                     { "GPU", new List<Dictionary<string, string>>() },
+                    { "NET", new List<Dictionary<string, string>>() },
                 };
 
             try
@@ -607,6 +622,32 @@
             }
             catch { }
 
+            try
+            {
+                var mos = new ManagementObjectSearcher("select DeviceID, Name, NetConnectionID, MACAddress, Speed from Win32_NetworkAdapter where PhysicalAdapter = True or NetEnabled = True").Get();
+
+                foreach (var mo in mos)
+                {
+                    var inf = new Dictionary<string, string>
+                        {
+                            { "ID",    string.Empty },
+                            { "Card",  string.Empty },
+                            { "Name",  string.Empty },
+                            { "MAC",   string.Empty },
+                            { "Speed", string.Empty },
+                        };
+
+                    try { inf["ID"]    = mo["DeviceID"].ToString();        } catch { }
+                    try { inf["Card"]  = mo["Name"].ToString();            } catch { }
+                    try { inf["Name"]  = mo["NetConnectionID"].ToString(); } catch { }
+                    try { inf["MAC"]   = mo["MACAddress"].ToString();      } catch { }
+                    try { inf["Speed"] = mo["Speed"].ToString();           } catch { }
+
+                    infos["NET"].Add(inf);
+                }
+            }
+            catch { }
+
             return infos;
         }
 
@@ -742,13 +783,14 @@
 
                 using (var rsa = new RSACryptoServiceProvider(0))
                 {
+                    var dt = DateTime.Now;
                     rsa.ImportParameters(PublicKey);
-
                     _isActivated = rsa.VerifyData(verify, SHA512.Create(), lic);
+                    Log.Trace("Signature verified in " + (DateTime.Now - dt).TotalSeconds + "s.");
 
                     if (_isActivated)
                     {
-                        _licenseHash = BitConverter.ToString(new HMACSHA384(SHA384.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim())).Truncate(16)).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
+                        _licenseHash   = BitConverter.ToString(new HMACSHA384(SHA384.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim())).Truncate(16)).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
                         _licenseStatus = LicenseStatus.Valid;
                         Log.Info("License validated for " + _user + ". Thank you for supporting the software!");
                     }
