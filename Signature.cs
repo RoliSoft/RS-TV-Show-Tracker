@@ -348,7 +348,15 @@
             VersionFormatted = "v" + ver.Major + "." + ver.Minor + (ver.Build != 0 ? "." + ver.Build : string.Empty) + " b" + ver.Revision + (IsNightly ? " nightly" : string.Empty);
 
             Log.Info(Software + " " + VersionFormatted);
-            Log.Info("Compiled on " + BuildMachine + " at " + CompileTime.ToString("yyyy'-'MM'-'dd HH':'mm':'ss") + " from commit " + GitRevision);
+
+            if (CompileTime != DateTime.MinValue)
+            {
+                Log.Info("Compiled on " + BuildMachine + " at " + CompileTime.ToString("yyyy'-'MM'-'dd HH':'mm':'ss") + " from commit " + GitRevision);
+            }
+            else
+            {
+                Log.Info("No compilation info available.");
+            }
 
             try
             {

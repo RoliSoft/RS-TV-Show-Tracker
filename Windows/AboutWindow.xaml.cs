@@ -31,7 +31,7 @@
             }
 
             version.Text        = Signature.VersionFormatted;
-            compile.Text        = Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss");
+            compile.Text        = Signature.CompileTime != DateTime.MinValue ? Signature.CompileTime.ToString("yyyy-MM-dd H:mm:ss") : "N/A";
             github1.NavigateUri = new Uri("https://github.com/RoliSoft/RS-TV-Show-Tracker/commits/v" + Signature.Version);
 
             if (Signature.GitRevision.Length > 7)
