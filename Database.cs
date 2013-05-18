@@ -143,6 +143,7 @@
             }
 
             Log.Debug("Database loaded in " + (DateTime.Now - DataChange).TotalSeconds + "s, containing " + TVShows.Count + " shows.");
+            Log.Info("UUID is " + Utils.GetUUID());
         }
 
         /// <summary>

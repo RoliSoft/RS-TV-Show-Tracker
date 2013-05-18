@@ -395,60 +395,7 @@
 
             _actTask = new Task(() =>
                 {
-                    _isActivated = false;
-                    if (IsActivated != _isActivated)
-                    {
-                        Process.GetCurrentProcess().Kill();
-                    }
-
-                    var snToken = Assembly.GetExecutingAssembly().GetName().GetPublicKeyToken();
-
-                    if (snToken == null || snToken.Length == 0)
-                    {
-                        IsOriginalAssembly = false;
-                        Log.Warn("Assembly strong name is missing.");
-                        return;
-                    }
-
-                    var x = 0;
-                    if (!snToken.All(b => Math.Abs(b - Math.Round(Math.Ceiling(Math.Abs(48.9089619634291 * Math.Max(Math.Tan(x), x) - 145.506677297553)) - Math.Tan(-32.1977538252671 * Math.Max(Math.Max(-1.617542499971, -Math.Round(Math.Tan(x))), 49.1817299 * (x % 7) - 216.296680292888)))) <= Math.Abs(x - ++x)))
-                    {
-                        IsOriginalAssembly = false;
-                        Log.Warn("Assembly strong name is present but not original key.");
-                        return;
-                    }
-
-                    bool pfWasVerified = false, result;
-
-                    try
-                    {
-                        result = Utils.Interop.StrongNameSignatureVerificationEx(Assembly.GetExecutingAssembly().Location, true, ref pfWasVerified);
-                    }
-                    catch (Exception ex)
-                    {
-                        IsOriginalAssembly = false;
-                        Log.Warn("Error while verifying assembly strong name signature.", ex);
-                        return;
-                    }
-
-                    if (result && pfWasVerified)
-                    {
-                        IsOriginalAssembly = true;
-                        Log.Debug("Assembly strong name is present and valid.");
-                    }
-                    else if (result)
-                    {
-                        IsOriginalAssembly = false;
-                        Log.Warn("Assembly strong name is present but was not verified.");
-                        return;
-                    }
-                    else
-                    {
-                        IsOriginalAssembly = false;
-                        Log.Warn("Assembly strong name is present but invalid.");
-                        return;
-                    }
-
+                    //CheckAssembly();
                     InitLicense();
                 });
             _actTask.Start(TaskScheduler.Current);
@@ -652,6 +599,60 @@
         }
 
         /// <summary>
+        /// Checks the assembly signatures for authenticity.
+        /// </summary>
+        public static void CheckAssembly()
+        {
+            var snToken = Assembly.GetExecutingAssembly().GetName().GetPublicKeyToken();
+
+            if (snToken == null || snToken.Length == 0)
+            {
+                IsOriginalAssembly = false;
+                Log.Warn("Assembly strong name is missing.");
+                return;
+            }
+
+            var x = 0;
+            if (!snToken.All(b => Math.Abs(b - Math.Round(Math.Ceiling(Math.Abs(48.9089619634291 * Math.Max(Math.Tan(x), x) - 145.506677297553)) - Math.Tan(-32.1977538252671 * Math.Max(Math.Max(-1.617542499971, -Math.Round(Math.Tan(x))), 49.1817299 * (x % 7) - 216.296680292888)))) <= Math.Abs(x - ++x)))
+            {
+                IsOriginalAssembly = false;
+                Log.Warn("Assembly strong name is present but not original key.");
+                return;
+            }
+
+            bool pfWasVerified = false, result;
+
+            try
+            {
+                result = Utils.Interop.StrongNameSignatureVerificationEx(Assembly.GetExecutingAssembly().Location, true, ref pfWasVerified);
+            }
+            catch (Exception ex)
+            {
+                IsOriginalAssembly = false;
+                Log.Warn("Error while verifying assembly strong name signature.", ex);
+                return;
+            }
+
+            if (result && pfWasVerified)
+            {
+                IsOriginalAssembly = true;
+                Log.Debug("Assembly strong name is present and valid.");
+            }
+            else if (result)
+            {
+                IsOriginalAssembly = false;
+                Log.Warn("Assembly strong name is present but was not verified.");
+                return;
+            }
+            else
+            {
+                IsOriginalAssembly = false;
+                Log.Warn("Assembly strong name is present but invalid.");
+                return;
+            }
+        }
+
+        /// <summary>
         /// Initializes the license.
         /// </summary>
         public static void InitLicense()
@@ -664,7 +665,7 @@
                 Process.GetCurrentProcess().Kill();
             }
 
-            if (!IsOriginalAssembly.GetValueOrDefault())
+            if (IsOriginalAssembly.HasValue && !IsOriginalAssembly.Value)
             {
                 _licenseStatus = LicenseStatus.Aborted;
                 Log.Warn("License initialization aborted due to assembly tampering.");
@@ -676,7 +677,7 @@
             if (!File.Exists(licfile))
             {
                 _licenseStatus = LicenseStatus.NotAvailable;
-                Log.Debug("Licensing data does not exist.");
+                Log.Debug("Licensing data not found.");
                 return;
             }
 

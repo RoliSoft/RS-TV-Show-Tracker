@@ -58,7 +58,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-01-24 2:52 AM");
+                return Utils.DateTimeToVersion("2013-05-19 2:07 AM");
             }
         }
 
@@ -137,7 +137,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html = Utils.GetHTML(Site + "torrents.php?action=advanced&foreign=2&releasename=" + Utils.EncodeURL(query), cookies: Cookies);
+            var html = Utils.GetHTML(Site + "torrents.php?searchstr=" + Utils.EncodeURL(query), cookies: Cookies);
 
             if (GazelleTrackerLoginRequired(html.DocumentNode))
             {

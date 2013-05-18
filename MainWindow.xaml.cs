@@ -1318,7 +1318,7 @@
 
                                 return true;
                             }
-                    }), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+                    }));
 
                 res.Wait();
 
