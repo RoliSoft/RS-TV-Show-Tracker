@@ -281,6 +281,10 @@
                         sort = show.Episodes.Count();
                         break;
 
+                    case "newcount":
+                        sort = show.Episodes.Count(e => !e.Watched);
+                        break;
+
                     case "lastair":
                         if (lastep.Count != 0)
                         {
@@ -1356,7 +1360,7 @@
 
             var epd         = new MenuItem();
             epd.IsCheckable = true;
-            epd.IsChecked   = sorting == "epcount" && sortdir == "desc";
+            epd.IsChecked   = sorting == "epcount" && sortdir == "descending";
             epd.Tag         = new[] { "epcount", "descending" };
             epd.Click      += SortBy_Click;
             epd.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sort-number-descending.png")) };
@@ -1383,7 +1387,7 @@
 
             var epc         = new MenuItem();
             epc.IsCheckable = true;
-            epc.IsChecked   = sorting == "epcount" && sortdir == "asc";
+            epc.IsChecked   = sorting == "epcount" && sortdir == "ascending";
             epc.Tag         = new[] { "epcount", "ascending" };
             epc.Click      += SortBy_Click;
             epc.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sort-number.png")) };
@@ -1406,6 +1410,61 @@
                 });
             srt.Items.Add(epc);
             
+            
+            // - New episode count / DESC
+
+            var npd         = new MenuItem();
+            npd.IsCheckable = true;
+            npd.IsChecked   = sorting == "newcount" && sortdir == "descending";
+            npd.Tag         = new[] { "newcount", "descending" };
+            npd.Click      += SortBy_Click;
+            npd.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sort-number-descending.png")) };
+            npd.Header      = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin      = new Thickness(0, 0, spm, 0)
+                };
+            (npd.Header as StackPanel).Children.Add(new Label
+                {
+                    Content = "New episode count",
+                    Padding = new Thickness(0),
+                    Width   = lbw
+                });
+            (npd.Header as StackPanel).Children.Add(new Label
+                {
+                    Foreground = Brushes.DarkGray,
+                    Content    = "DESC",
+                    Padding    = new Thickness(0)
+                });
+            srt.Items.Add(npd);
+
+            // - New episode count / ASC
+
+            var npc         = new MenuItem();
+            npc.IsCheckable = true;
+            npc.IsChecked   = sorting == "newcount" && sortdir == "ascending";
+            npc.Tag         = new[] { "newcount", "ascending" };
+            npc.Click      += SortBy_Click;
+            npc.Icon        = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/sort-number.png")) };
+            npc.Header      = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin      = new Thickness(0, 0, spm, 0)
+                };
+            (npc.Header as StackPanel).Children.Add(new Label
+                {
+                    Content = "New episode count",
+                    Padding = new Thickness(0),
+                    Width   = lbw
+                });
+            (npc.Header as StackPanel).Children.Add(new Label
+                {
+                    Foreground = Brushes.DarkGray,
+                    Content    = "  ASC",
+                    Padding    = new Thickness(0)
+                });
+            srt.Items.Add(npc);
+
             // Group by
 
             var grp    = new MenuItem();
