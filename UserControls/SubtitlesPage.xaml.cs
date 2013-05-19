@@ -432,7 +432,7 @@
                     }
 
                     textBox.Text = query;
-                    SearchButtonClick(null, null);
+                    SearchButtonClick();
                 }));
         }
 
@@ -445,7 +445,7 @@
         {
             if (e.Key == System.Windows.Input.Key.Enter)
             {
-                SearchButtonClick(null, null);
+                SearchButtonClick();
             }
         }
 
@@ -454,7 +454,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchButtonClick(object sender, RoutedEventArgs e)
+        private void SearchButtonClick(object sender = null, RoutedEventArgs e = null)
         {
             if (string.IsNullOrWhiteSpace(textBox.Text)) return;
 
@@ -527,13 +527,22 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void SubtitleSearchDone(object sender = null, EventArgs e = null)
         {
+            if (ActiveSearch != null)
+            {
+                ActiveSearch.SubtitleSearchDone          -= SubtitleSearchDone;
+                ActiveSearch.SubtitleSearchEngineNewLink -= SubtitleSearchEngineNewLink;
+                ActiveSearch.SubtitleSearchEngineDone    -= SubtitleSearchEngineDone;
+                ActiveSearch.SubtitleSearchEngineError   -= SubtitleSearchEngineError;
+
+                ActiveSearch = null;
+            }
+
             if (!_searching)
             {
                 return;
             }
 
-            _searching   = false;
-            ActiveSearch = null;
+            _searching = false;
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 

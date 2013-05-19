@@ -7,6 +7,7 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Threading.Tasks;
 
     using HtmlAgilityPack;
 
@@ -141,7 +142,8 @@
             throw new NotImplementedException();
         }
 
-        private Thread _job;
+        private Task _task;
+        private CancellationTokenSource _cts;
 
         /// <summary>
         /// Searches for download links on the service asynchronously.
@@ -151,61 +153,84 @@
         {
             CancelAsync();
 
-            _job = new Thread(() =>
+            _cts  = new CancellationTokenSource();
+            _task = Task.Factory.StartNew(SearchInternal, query, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+        }
+
+        /// <summary>
+        /// Synchronous search helper.
+        /// </summary>
+        /// <param name="query">The name of the release to search for.</param>
+        private void SearchInternal(object query)
+        {
+            try
+            {
+                _cts.Token.ThrowIfCancellationRequested();
+                var list = Search((string)query);
+                _cts.Token.ThrowIfCancellationRequested();
+
+                foreach (var link in list)
                 {
-                    try
+                    _cts.Token.ThrowIfCancellationRequested();
+                    DownloadSearchNewLink.Fire(this, link);
+                    _cts.Token.ThrowIfCancellationRequested();
+                }
+
+                _cts.Token.ThrowIfCancellationRequested();
+                DownloadSearchDone.Fire(this);
+            }
+            catch (InvalidCredentialException)
+            {
+                Log.Warn(Name + " requires authentication.");
+
+                var info = Settings.Get(Name + " Login");
+
+                if (!CanLogin || string.IsNullOrWhiteSpace(info) || _cts.IsCancellationRequested)
+                {
+                    DownloadSearchDone.Fire(this);
+                    return;
+                }
+
+                Log.Debug("Trying to authenticate with " + Name + "...");
+
+                try
+                {
+                    _cts.Token.ThrowIfCancellationRequested();
+
+                    var usrpwd  = Utils.Decrypt(this, info);
+                    var cookies = Login(usrpwd[0], usrpwd[1]);
+
+                    Cookies = cookies;
+                    Settings.Set(Name + " Cookies", Utils.Encrypt(this, cookies));
+
+                    _cts.Token.ThrowIfCancellationRequested();
+                    var list = Search((string)query);
+                    _cts.Token.ThrowIfCancellationRequested();
+
+                    foreach (var link in list)
                     {
-                        var list = Search(query);
-
-                        foreach (var link in list)
-                        {
-                            DownloadSearchNewLink.Fire(this, link);
-                        }
-
-                        DownloadSearchDone.Fire(this);
+                        _cts.Token.ThrowIfCancellationRequested();
+                        DownloadSearchNewLink.Fire(this, link);
+                        _cts.Token.ThrowIfCancellationRequested();
                     }
-                    catch (InvalidCredentialException)
-                    {
-                        var info = Settings.Get(Name + " Login");
 
-                        if (!CanLogin || string.IsNullOrWhiteSpace(info))
-                        {
-                            DownloadSearchDone.Fire(this);
-                            return;
-                        }
-
-                        try
-                        {
-                            var usrpwd  = Utils.Decrypt(this, info);
-                            var cookies = Login(usrpwd[0], usrpwd[1]);
-
-                            Cookies = cookies;
-                            Settings.Set(Name + " Cookies", Utils.Encrypt(this, cookies));
-
-                            var list = Search(query);
-
-                            foreach (var link in list)
-                            {
-                                DownloadSearchNewLink.Fire(this, link);
-                            }
-
-                            DownloadSearchDone.Fire(this);
-                        }
-                        catch (InvalidCredentialException)
-                        {
-                            DownloadSearchDone.Fire(this);
-                        }
-                        catch (Exception ex)
-                        {
-                            DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
-                    }
-                });
-            _job.Start();
+                    _cts.Token.ThrowIfCancellationRequested();
+                    DownloadSearchDone.Fire(this);
+                }
+                catch (InvalidCredentialException)
+                {
+                    Log.Warn("Failed to authenticate with " + Name + ": invalid credentials or broken plugin.");
+                    DownloadSearchDone.Fire(this);
+                }
+                catch (Exception ex)
+                {
+                    DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
+                }
+            }
+            catch (Exception ex)
+            {
+                DownloadSearchError.Fire(this, "There was an error while searching for download links.", ex);
+            }
         }
 
         /// <summary>
@@ -213,10 +238,9 @@
         /// </summary>
         public void CancelAsync()
         {
-            if (_job != null)
+            if (_cts != null && !_cts.IsCancellationRequested)
             {
-                _job.Abort();
-                _job = null;
+                _cts.Cancel();
             }
         }
 

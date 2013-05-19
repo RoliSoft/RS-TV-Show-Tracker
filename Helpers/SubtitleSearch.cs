@@ -1,10 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker.Helpers
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
@@ -51,8 +51,9 @@
         /// <value>The languages to search for.</value>
         public static List<string> Langs { get; set; }
 
-        private List<SubtitleSearchEngine> _remaining;
+        private ConcurrentBag<SubtitleSearchEngine> _done;
         private Regex _titleRegex, _episodeRegex;
+        private DateTime _start;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubtitleSearch"/> class.
@@ -61,6 +62,8 @@
         /// <param name="filter">if set to <c>true</c> the search results will be filtered.</param>
         public SubtitleSearch(IEnumerable<SubtitleSearchEngine> engines = null, IEnumerable<string> languages = null, bool filter = false)
         {
+            Log.Debug("Initializing search engines...");
+
             SearchEngines = (engines ?? SubtitlesPage.SearchEngines).ToList();
             Langs         = (languages ?? new List<string>()).ToList();
             Filter        = filter;
@@ -81,6 +84,7 @@
                     if (string.IsNullOrWhiteSpace(engine.Cookies) && string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login")))
                     {
                         remove.Add(engine);
+                        Log.Warn(engine.Name + " is private and no login info specified.");
                     }
                 }
             }
@@ -113,9 +117,16 @@
                 }
             }
 
-            _remaining = new List<SubtitleSearchEngine>(SearchEngines);
+            _done = new ConcurrentBag<SubtitleSearchEngine>();
 
-            SearchEngines.ForEach(engine => engine.SearchAsync(query));
+            Log.Debug("Starting async search for " + query + "...");
+            _start = DateTime.Now;
+
+
+            foreach (var engine in SearchEngines.OrderBy(e => SubtitlesPage.Actives.IndexOf(e.Name)))
+            {
+                engine.SearchAsync(query);
+            }
         }
 
         /// <summary>
@@ -123,7 +134,14 @@
         /// </summary>
         public void CancelAsync()
         {
-            new Task(() => SearchEngines.ForEach(engine => engine.CancelAsync())).Start();
+            SearchEngines.ForEach(engine =>
+                {
+                    engine.SubtitleSearchNewLink -= SingleSubtitleSearchNewLink;
+                    engine.SubtitleSearchDone    -= SingleSubtitleSearchDone;
+                    engine.SubtitleSearchError   -= SingleSubtitleSearchError;
+
+                    engine.CancelAsync();
+                });
         }
 
         /// <summary>
@@ -136,6 +154,7 @@
             if ((Langs != null && !Langs.Contains(e.Data.Language))
              || (Filter && !ShowNames.Parser.IsMatch(e.Data.Release, _titleRegex, _episodeRegex, false)))
             {
+                Log.Trace("Dropping result " + e.Data.Release + " due to language or name filtering.");
                 return;
             }
 
@@ -150,19 +169,17 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleSubtitleSearchDone(object sender, EventArgs e)
         {
-            try
-            {
-                lock (_remaining)
-                {
-                    _remaining.Remove((SubtitleSearchEngine)sender);
-                }
-            }
-            catch { }
+            _done.Add((SubtitleSearchEngine)sender);
 
-            SubtitleSearchEngineDone.Fire(this, _remaining);
+            (sender as SubtitleSearchEngine).SubtitleSearchNewLink += SingleSubtitleSearchNewLink;
+            (sender as SubtitleSearchEngine).SubtitleSearchDone    += SingleSubtitleSearchDone;
+            (sender as SubtitleSearchEngine).SubtitleSearchError   += SingleSubtitleSearchError;
 
-            if (_remaining.Count == 0)
+            SubtitleSearchEngineDone.Fire(this, SearchEngines.Except(_done).ToList());
+
+            if (_done.Count == SearchEngines.Count)
             {
+                Log.Debug("Search finished in " + (DateTime.Now - _start).TotalSeconds + "s.");
                 SubtitleSearchDone.Fire(this);
             }
         }
@@ -174,20 +191,20 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleSubtitleSearchError(object sender, EventArgs<string, Exception> e)
         {
-            try
-            {
-                lock (_remaining)
-                {
-                    _remaining.Remove((SubtitleSearchEngine)sender);
-                }
-            }
-            catch { }
+            _done.Add((SubtitleSearchEngine)sender);
+
+            (sender as SubtitleSearchEngine).SubtitleSearchNewLink += SingleSubtitleSearchNewLink;
+            (sender as SubtitleSearchEngine).SubtitleSearchDone    += SingleSubtitleSearchDone;
+            (sender as SubtitleSearchEngine).SubtitleSearchError   += SingleSubtitleSearchError;
+
+            Log.Warn("Error while searching on " + ((SubtitleSearchEngine)sender).Name + ".", e.Second);
 
             SubtitleSearchEngineError.Fire(this, e.First, e.Second);
-            SubtitleSearchEngineDone.Fire(this, _remaining);
+            SubtitleSearchEngineDone.Fire(this, SearchEngines.Except(_done).ToList());
 
-            if (_remaining.Count == 0)
+            if (_done.Count == SearchEngines.Count)
             {
+                Log.Debug("Search finished in " + (DateTime.Now - _start).TotalSeconds + "s.");
                 SubtitleSearchDone.Fire(this);
             }
         }

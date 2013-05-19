@@ -1,10 +1,10 @@
 ﻿namespace RoliSoft.TVShowTracker.Helpers
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
@@ -45,8 +45,9 @@
         /// <value><c>true</c> if filtering is enabled; otherwise, <c>false</c>.</value>
         public bool Filter { get; set; }
 
-        private List<DownloadSearchEngine> _remaining;
+        private ConcurrentBag<DownloadSearchEngine> _done;
         private Regex _titleRegex, _episodeRegex;
+        private DateTime _start;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadSearch"/> class.
@@ -55,6 +56,8 @@
         /// <param name="filter">if set to <c>true</c> the search results will be filtered.</param>
         public DownloadSearch(IEnumerable<DownloadSearchEngine> engines = null, bool filter = false)
         {
+            Log.Debug("Initializing search engines...");
+
             SearchEngines = (engines ?? AutoDownloader.ActiveSearchEngines).ToList();
             Filter        = filter;
 
@@ -74,6 +77,7 @@
                     if (string.IsNullOrWhiteSpace(engine.Cookies) && string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login")))
                     {
                         remove.Add(engine);
+                        Log.Warn(engine.Name + " is private and no login info specified.");
                     }
                 }
             }
@@ -106,10 +110,16 @@
                 }
             }
 
-            _remaining = new List<DownloadSearchEngine>(SearchEngines);
-            query      = ShowNames.Parser.CleanTitleWithEp(query, false);
+            _done = new ConcurrentBag<DownloadSearchEngine>();
+            query = ShowNames.Parser.CleanTitleWithEp(query, false);
 
-            SearchEngines.ForEach(engine => engine.SearchAsync(query));
+            Log.Debug("Starting async search for " + query + "...");
+            _start = DateTime.Now;
+
+            foreach (var engine in SearchEngines.OrderBy(e => AutoDownloader.Parsers.IndexOf(e.Name)))
+            {
+                engine.SearchAsync(query);
+            }
         }
 
         /// <summary>
@@ -117,7 +127,16 @@
         /// </summary>
         public void CancelAsync()
         {
-            new Task(() => SearchEngines.ForEach(engine => engine.CancelAsync())).Start();
+            Log.Debug("Cancelling search after " + (DateTime.Now - _start).TotalSeconds + "s.");
+
+            SearchEngines.ForEach(engine =>
+                {
+                    engine.DownloadSearchNewLink -= SingleDownloadSearchNewLink;
+                    engine.DownloadSearchDone    -= SingleDownloadSearchDone;
+                    engine.DownloadSearchError   -= SingleDownloadSearchError;
+
+                    engine.CancelAsync();
+                });
         }
 
         /// <summary>
@@ -129,6 +148,7 @@
         {
             if (Filter && !ShowNames.Parser.IsMatch(e.Data.Release, _titleRegex, _episodeRegex, false))
             {
+                Log.Trace("Dropping result " + e.Data.Release + " due to filtering.");
                 return;
             }
 
@@ -142,19 +162,17 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchDone(object sender, EventArgs e)
         {
-            try
-            {
-                lock (_remaining)
-                {
-                    _remaining.Remove((DownloadSearchEngine)sender);
-                }
-            }
-            catch { }
+            _done.Add(sender as DownloadSearchEngine);
 
-            DownloadSearchEngineDone.Fire(this, _remaining);
+            (sender as DownloadSearchEngine).DownloadSearchNewLink -= SingleDownloadSearchNewLink;
+            (sender as DownloadSearchEngine).DownloadSearchDone    -= SingleDownloadSearchDone;
+            (sender as DownloadSearchEngine).DownloadSearchError   -= SingleDownloadSearchError;
 
-            if (_remaining.Count == 0)
+            DownloadSearchEngineDone.Fire(this, SearchEngines.Except(_done).ToList());
+
+            if (_done.Count == SearchEngines.Count)
             {
+                Log.Debug("Search finished in " + (DateTime.Now - _start).TotalSeconds + "s.");
                 DownloadSearchDone.Fire(this);
             }
         }
@@ -166,20 +184,20 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void SingleDownloadSearchError(object sender, EventArgs<string, Exception> e)
         {
-            try
-            {
-                lock (_remaining)
-                {
-                    _remaining.Remove((DownloadSearchEngine)sender);
-                }
-            }
-            catch { }
+            _done.Add(sender as DownloadSearchEngine);
+            
+            (sender as DownloadSearchEngine).DownloadSearchNewLink -= SingleDownloadSearchNewLink;
+            (sender as DownloadSearchEngine).DownloadSearchDone    -= SingleDownloadSearchDone;
+            (sender as DownloadSearchEngine).DownloadSearchError   -= SingleDownloadSearchError;
+
+            Log.Warn("Error while searching on " + ((DownloadSearchEngine)sender).Name + ".", e.Second);
 
             DownloadSearchEngineError.Fire(this, e.First, e.Second);
-            DownloadSearchEngineDone.Fire(this, _remaining);
+            DownloadSearchEngineDone.Fire(this, SearchEngines.Except(_done).ToList());
 
-            if (_remaining.Count == 0)
+            if (_done.Count == SearchEngines.Count)
             {
+                Log.Debug("Search finished in " + (DateTime.Now - _start).TotalSeconds + "s.");
                 DownloadSearchDone.Fire(this);
             }
         }

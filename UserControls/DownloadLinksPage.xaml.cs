@@ -1,6 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
@@ -9,6 +10,7 @@
     using System.Net;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
@@ -52,7 +54,7 @@
         /// <value>The senders.</value>
         public Dictionary<string, SenderEngine> Senders { get; set; }
 
-        private List<LinkItem> _results;
+        private ConcurrentBag<LinkItem> _results;
 
         private ListSortDirection _lastSortDirection;
         private GridViewColumnHeader _lastClickedHeader;
@@ -470,7 +472,7 @@
                     }
 
                     textBox.Text = query;
-                    SearchButtonClick(null, null);
+                    SearchButtonClick();
                 }));
         }
 
@@ -483,7 +485,7 @@
         {
             if (e.Key == System.Windows.Input.Key.Enter)
             {
-                SearchButtonClick(null, null);
+                SearchButtonClick();
             }
         }
 
@@ -492,7 +494,7 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
-        private void SearchButtonClick(object sender, RoutedEventArgs e)
+        private void SearchButtonClick(object sender = null, RoutedEventArgs e = null)
         {
             if (string.IsNullOrWhiteSpace(textBox.Text)) return;
 
@@ -503,7 +505,7 @@
                 return;
             }
 
-            _results = new List<LinkItem>();
+            _results = new ConcurrentBag<LinkItem>();
             DownloadLinksListViewItemCollection.Clear();
 
             textBox.IsEnabled    = false;
@@ -532,22 +534,27 @@
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void DownloadSearchEngineNewLink(object sender, EventArgs<Link> e)
         {
-            lock (_results)
+            if (Signature.IsActivated || !Regex.IsMatch(e.Data.Source.Site + e.Data.InfoURL + e.Data.FileURL, @"(?:sceneaccess|thegft)\.(?:[a-z]{2,3})/", RegexOptions.IgnoreCase))
             {
-                if (Signature.IsActivated || !Regex.IsMatch(e.Data.Source.Site + e.Data.InfoURL + e.Data.FileURL, @"(?:sceneaccess|thegft)\.(?:[a-z]{2,3})/", RegexOptions.IgnoreCase))
-                {
-                    _results.Add(new LinkItem(e.Data));
-                }
+                _results.Add(new LinkItem(e.Data));
             }
 
             Dispatcher.Invoke((Action)(() =>
                 {
                     lock (DownloadLinksListViewItemCollection)
                     {
+                        var sel = listView.SelectedItem;
+
                         DownloadLinksListViewItemCollection.Clear();
                         DownloadLinksListViewItemCollection.AddRange(_results
                                                                      .OrderBy(link => FileNames.Parser.QualityCount - (int)link.Quality)
                                                                      .ThenBy(link => AutoDownloader.Parsers.IndexOf(link.Source.Name)));
+
+                        if (sel != null)
+                        {
+                            listView.SelectedItem = sel;
+                            listView.ScrollIntoView(sel);
+                        }
                     }
                 }));
         }
@@ -575,13 +582,21 @@
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void DownloadSearchDone(object sender = null, EventArgs e = null)
         {
+            if (ActiveSearch != null)
+            {
+                ActiveSearch.DownloadSearchDone          -= DownloadSearchDone;
+                ActiveSearch.DownloadSearchEngineNewLink -= DownloadSearchEngineNewLink;
+                ActiveSearch.DownloadSearchEngineDone    -= DownloadSearchEngineDone;
+                ActiveSearch.DownloadSearchEngineError   -= DownloadSearchEngineError;
+                ActiveSearch = null;
+            }
+
             if (!_searching)
             {
                 return;
             }
 
-            _searching   = false;
-            ActiveSearch = null;
+            _searching = false;
 
             Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
 
@@ -594,7 +609,7 @@
                     {
                         foreach (var item in DownloadLinksListViewItemCollection.Where(x => x.Source.Type == Types.DirectHTTP).ToList())
                         {
-                            new Thread(item.CheckLink).Start();
+                            Task.Factory.StartNew(item.CheckLink);
                         }
                     }
 

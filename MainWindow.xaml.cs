@@ -71,6 +71,7 @@
 
             Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
             AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
+            TaskScheduler.UnobservedTaskException      += (s, e) => { HandleUnexpectedException(e.Exception); e.SetObserved(); };
 
             // set up mutex so only one instance will run
 
@@ -1318,9 +1319,16 @@
 
                                 return true;
                             }
-                    }));
+                    }), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 
-                res.Wait();
+                try
+                {
+                    res.Wait();
+                }
+                catch (Exception ex2)
+                {
+                    Log.Error("Error while trying to show error dialog... Nice...", ex2);
+                }
 
                 if (Active != null && Active.Dispatcher.Invoke(() => Active.IsVisible))
                 {
