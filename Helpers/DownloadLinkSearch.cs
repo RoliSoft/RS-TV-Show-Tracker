@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
 
@@ -93,7 +94,8 @@
         /// Searches for download links on multiple services asynchronously.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
-        public void SearchAsync(string query)
+        /// <returns>List of search tasks.</returns>
+        public List<Task> SearchAsync(string query)
         {
             if (Filter)
             {
@@ -116,10 +118,14 @@
             Log.Debug("Starting async search for " + query + "...");
             _start = DateTime.Now;
 
+            var tlist = new List<Task>();
+
             foreach (var engine in SearchEngines.OrderBy(e => AutoDownloader.Parsers.IndexOf(e.Name)))
             {
-                engine.SearchAsync(query);
+                tlist.Add(engine.SearchAsync(query));
             }
+
+            return tlist;
         }
 
         /// <summary>

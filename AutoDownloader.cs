@@ -5,6 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
 
     using RoliSoft.TVShowTracker.Helpers;
     using RoliSoft.TVShowTracker.Parsers.Downloads;
@@ -40,6 +41,18 @@
         }
 
         /// <summary>
+        /// Gets the search engines activated in this application.
+        /// </summary>
+        /// <value>The search engines.</value>
+        public static IEnumerable<DownloadSearchEngine> AutoSearchEngines
+        {
+            get
+            {
+                return SearchEngines.Where(engine => AutoActives.Contains(engine.Name));
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the list of loaded parsers.
         /// </summary>
         /// <value>
@@ -54,6 +67,14 @@
         /// The activated parsers.
         /// </value>
         public static List<string> Actives { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of activated parsers for auto-downloading.
+        /// </summary>
+        /// <value>
+        /// The activated parsers for auto-downloading.
+        /// </value>
+        public static List<string> AutoActives { get; set; }
 
         /// <summary>
         /// Gets or sets the preferred quality.
@@ -92,48 +113,83 @@
         /// </summary>
         public static void LoadParsers()
         {
-            Actives = Settings.Get<List<string>>("Active Trackers");
-            Parsers = Settings.Get<List<string>>("Tracker Order");
+            Actives     = Settings.Get<List<string>>("Active Trackers");
+            AutoActives = Settings.Get<List<string>>("Auto-Download Trackers");
+            Parsers     = Settings.Get<List<string>>("Tracker Order");
             Parsers.AddRange(SearchEngines
                              .Where(engine => Parsers.IndexOf(engine.Name) == -1)
                              .Select(engine => engine.Name));
 
             WaitForPreferred = TimeSpan.FromSeconds(Settings.Get("Wait for Preferred Quality", TimeSpan.FromDays(2).TotalSeconds));
-            PreferredQuality = (Qualities)Enum.Parse(typeof(Qualities), Settings.Get("Preferred Download Quality", Qualities.HDTV720p.ToString()));
-            SecondPreferredQuality = (Qualities)Enum.Parse(typeof(Qualities), Settings.Get("Second Preferred Download Quality", Qualities.HDTVXviD.ToString()));
+            PreferredQuality = (Qualities)Enum.Parse(typeof(Qualities), Settings.Get("Preferred Download Quality", Qualities.WebDL1080p.ToString()));
+            SecondPreferredQuality = (Qualities)Enum.Parse(typeof(Qualities), Settings.Get("Second Preferred Download Quality", Qualities.HDTV720p.ToString()));
         }
 
         /// <summary>
         /// Searches for the missing episodes.
         /// </summary>
-        public static void SearchForMissingEpisodes()
+        public static async void SearchForMissingEpisodes()
         {
-            var eps   = GetRecentUnwatchedEps();
-            var files = SearchForFiles(eps);
+            if (!Signature.IsActivated)
+            {
+                return;
+            }
+
+            Log.Debug("Searching links for missing episodes...");
+
+            var eps = GetRecentUnwatchedEps();
 
             foreach (var ep in eps)
             {
+                Log.Debug("Inspecting " + ep + "...");
+
                 // is there any file downloaded which matches the rules set?
 
-                if (files[ep].Any(file => IsMatchingRule(ep, file)))
+                HashSet<string> fns;
+                if (Library.Files.TryGetValue(ep.ID, out fns))
                 {
-                    continue;
+                    Log.Trace("Found downloaded files.", fns);
+
+                    var match = fns.FirstOrDefault(file => IsMatchingRule(ep, file));
+
+                    if (match != null)
+                    {
+                        Log.Debug("File " + Path.GetFileName(match) + " matches your preference, skipping episode.");
+                        continue;
+                    }
+                    else
+                    {
+                        Log.Debug("None of the downloaded files match your preference, continuing with search.");
+                    }
+                }
+                else
+                {
+                    Log.Debug("No files found for this episode, continuing with search.");
                 }
 
                 // if not, initiate the search for links
 
-                var links = SearchForLinks(ep);
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                var links = await SearchForLinks(ep);
+
+                Log.Debug(Utils.FormatNumber(links.Count, "link") + " found for episode " + ep + ".");
+                Log.Trace("Links for " + ep + ":", links.Select(l => l.ToString()));
 
                 if (links.Count == 0)
                 {
                     continue;
                 }
-
+                
                 var link = SelectBestLink(links);
 
                 if (IsMatchingRule(ep, link))
                 {
+                    Log.Info("Downloading link " + link + " for " + ep + "...");
                     //DownloadFile(link);
+                }
+                else
+                {
+                    Log.Debug("The selected link " + link + " for " + ep + " doesn't match your preference.");
                 }
             }
         }
@@ -156,65 +212,20 @@
         /// <returns>
         /// List of download links.
         /// </returns>
-        public static List<Link> SearchForLinks(Episode ep)
+        public static async Task<List<Link>> SearchForLinks(Episode ep)
         {
             var links = new List<Link>();
-            var dlsrc = new DownloadSearch(ActiveSearchEngines, true);
-            var start = DateTime.Now;
-            var busy  = true;
+            var dlsrc = new DownloadSearch(AutoSearchEngines, true);
 
             dlsrc.DownloadSearchEngineNewLink += (s, e) => links.Add(e.Data);
-            dlsrc.DownloadSearchDone          += (s, e) => { busy = false; };
 
-            dlsrc.SearchAsync(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            var tasks = dlsrc.SearchAsync(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
 
-            while (busy && (DateTime.Now - start).TotalMinutes < 2)
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-            }
+            await Task.WhenAll(tasks);
 
             return links;
         }
-
-        /// <summary>
-        /// Searches for downloaded files for the unwatched episodes.
-        /// </summary>
-        /// <param name="episodes">The episodes.</param>
-        /// <returns>
-        /// A list of found files mapped to their episode objects.
-        /// </returns>
-        public static Dictionary<Episode, List<string>> SearchForFiles(List<Episode> episodes)
-        {
-            var files = new Dictionary<Episode, List<string>>();
-            /*var busy  = true;
-
-            foreach (var episode in episodes)
-            {
-                files[episode] = new List<string>();
-            }
-
-            var fs = new FileSearch(Settings.Get<List<string>>("Download Paths"), episodes);
-
-            fs.MultiFileSearchDone += (s, e) =>
-                {
-                    for (var i = 0; i < e.Data.Length; i++)
-                    {
-                        files[episodes[i]].AddRange(e.Data[i]);
-                    }
-
-                    busy = false;
-                };
-
-            fs.BeginSearch();
-
-            while (busy)
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-            }*/
-
-            return files;
-        }
-
+        
         /// <summary>
         /// Selects the best link based on site priority and content quality.
         /// </summary>
@@ -226,11 +237,13 @@
         {
             if (links.Count == 0)
             {
+                Log.Debug("No links specified.");
                 return null;
             }
 
             if (links.Count == 1)
             {
+                Log.Debug("The only link is " + links[0]);
                 return links[0];
             }
 
@@ -246,6 +259,7 @@
 
             if (best != null)
             {
+                Log.Debug("The best link is " + best);
                 return best;
             }
 
@@ -255,12 +269,17 @@
 
             if (sbest != null)
             {
+                Log.Debug("The second-best link is " + sbest);
                 return sbest;
             }
 
             // return the highest found quality from the highest priority site
 
-            return ordered.First();
+            var last = ordered.First();
+
+            Log.Debug("The closest link is " + last);
+
+            return last;
         }
 
         /// <summary>
@@ -273,11 +292,10 @@
         /// </returns>
         public static bool IsMatchingRule(Episode episode, string file)
         {
-            // TODO
-
             var quality = FileNames.Parser.ParseQuality(file);
 
-            return quality == Qualities.WebDL720p;
+            return quality == PreferredQuality ||
+                   ((DateTime.Now - episode.Airdate) > WaitForPreferred && quality == SecondPreferredQuality);
         }
 
         /// <summary>
@@ -290,9 +308,8 @@
         /// </returns>
         public static bool IsMatchingRule(Episode episode, Link link)
         {
-            // TODO
-
-            return link.Quality == Qualities.WebDL720p || (DateTime.Now - episode.Airdate) > WaitForPreferred;
+            return link.Quality == PreferredQuality ||
+                   ((DateTime.Now - episode.Airdate) > WaitForPreferred && link.Quality == SecondPreferredQuality);
         }
 
         /// <summary>

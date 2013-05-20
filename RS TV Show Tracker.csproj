@@ -295,7 +295,6 @@
     <Compile Include="Parsers\Senders\SenderEngine.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Subtitleseeker.cs" />
-    <Compile Include="Parsers\Subtitles\Engines\SubtitleSource.cs" />
     <Compile Include="Parsers\Subtitles\Engines\LegendasTV.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Seeks.cs" />
     <Compile Include="Parsers\WebSearch\Engines\StartPage.cs" />

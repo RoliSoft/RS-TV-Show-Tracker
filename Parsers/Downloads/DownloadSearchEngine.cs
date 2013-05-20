@@ -149,12 +149,15 @@
         /// Searches for download links on the service asynchronously.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
-        public void SearchAsync(string query)
+        /// <returns>The search task.</returns>
+        public Task SearchAsync(string query)
         {
             CancelAsync();
 
             _cts  = new CancellationTokenSource();
             _task = Task.Factory.StartNew(SearchInternal, query, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+
+            return _task;
         }
 
         /// <summary>

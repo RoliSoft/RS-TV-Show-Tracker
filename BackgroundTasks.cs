@@ -136,6 +136,15 @@
 
             try
             {
+                //AutoDownloader.SearchForMissingEpisodes();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unhandled exception while searching for missing episodes during background tasks.", ex);
+            }
+
+            try
+            {
                 RestartIfNeeded();
             }
             catch (Exception ex)

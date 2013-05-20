@@ -58,6 +58,7 @@
         private bool _hideOnStart, _dieOnStart, _askUpdate, _askErrorUpdate, _isNightlyUpdate;
         private Mutex _mutex;
         private static ConcurrentDictionary<string, int> _exCnt = new ConcurrentDictionary<string, int>();
+        private static TaskScheduler _tssc;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -72,6 +73,8 @@
             Dispatcher.UnhandledException              += (s, e) => { HandleUnexpectedException(e.Exception); e.Handled = true; };
             AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnexpectedException(e.ExceptionObject as Exception, e.IsTerminating);
             TaskScheduler.UnobservedTaskException      += (s, e) => { HandleUnexpectedException(e.Exception); e.SetObserved(); };
+
+            _tssc = TaskScheduler.FromCurrentSynchronizationContext();
 
             // set up mutex so only one instance will run
 
@@ -1319,7 +1322,7 @@
 
                                 return true;
                             }
-                    }), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+                    }), CancellationToken.None, TaskCreationOptions.None, _tssc);
 
                 try
                 {
