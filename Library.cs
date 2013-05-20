@@ -154,8 +154,8 @@
             if (_producer != null)
             {
                 _producer.CompleteAdding();
+                _consumer.Wait(500);
                 _producer.Dispose();
-                _producer = null;
             }
 
             _fsw      = new FileSystemWatcher[paths.Count];

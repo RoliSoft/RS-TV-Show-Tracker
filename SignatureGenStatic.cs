@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-[assembly: AssemblyVersion("2.2.0.65536")]
+[assembly: AssemblyVersion("2.2.0.65534")]
 
 namespace RoliSoft.TVShowTracker
 {

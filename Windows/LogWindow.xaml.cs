@@ -1,7 +1,6 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Collections.Concurrent;
     using System.ComponentModel;
     using System.Linq;
     using System.Text;
@@ -17,6 +16,7 @@
     public partial class LogWindow
     {
         private bool _loaded;
+        private volatile int _count, _size;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogWindow"/> class.
@@ -25,13 +25,20 @@
         {
             InitializeComponent();
 
+            _count = _size = 0;
             foreach (var entry in Log.Messages.ToArray().Reverse().OrderBy(x => x.Time))
             {
                 logListView.Items.Add(new LogListViewItem(entry));
+                _count++;
+                _size += entry.ToString().Length;
             }
 
             if (logListView.Items.Count != 0) logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
-            msgCount.Text = logListView.Items.Count.ToString();
+
+            msgCount.Text = _count.ToString();
+            var fs = Utils.GetFileSize(_size).Split(' ');
+            msgSize.Text = fs[0];
+            msgUnit.Text = fs[1];
 
             Log.NewMessage += AddMessage;
         }
@@ -76,7 +83,14 @@
                     {
                         logListView.Items.Add(new LogListViewItem(item as Log.Entry));
                         logListView.ScrollIntoView(logListView.Items[logListView.Items.Count - 1]);
-                        msgCount.Text = logListView.Items.Count.ToString();
+
+                        _count++;
+                        _size += (item as Log.Entry).ToString().Length;
+
+                        msgCount.Text = _count.ToString();
+                        var fs = Utils.GetFileSize(_size).Split(' ');
+                        msgSize.Text = fs[0];
+                        msgUnit.Text = fs[1];
                     }));
             }
         }
@@ -143,7 +157,13 @@
                 logListView.Items.Clear();
             }
 
-            msgCount.Text = logListView.Items.Count.ToString();
+            _count = _size = 0;
+
+            msgCount.Text = _count.ToString();
+            var fs = Utils.GetFileSize(_size).Split(' ');
+            msgSize.Text = fs[0];
+            msgUnit.Text = fs[1];
+
             level.IsEnabled = saveButton.IsEnabled = clearButton.IsEnabled = true;
         }
 
@@ -165,11 +185,11 @@
                     FileName        = DateTime.Now.ToString("s").Replace('T', '-').Replace(':', '-') + ".log"
                 };
 
-            if (sfd.ShowDialog().GetValueOrDefault())
+            if (sfd.ShowDialog(this).HasValue)
             {
                 try
                 {
-                    using (var fs = File.Create(sfd.FileName))
+                    using (var fs = sfd.OpenFile())
                     using (var sw = new StreamWriter(fs, Encoding.UTF8))
                     {
                         foreach (var entry in Log.Messages.ToArray().Reverse().OrderBy(x => x.Time))
@@ -192,6 +212,18 @@
             }
 
             level.IsEnabled = saveButton.IsEnabled = clearButton.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Handles the OnClick event of the RunBTButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        private void RunBTButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            BackgroundTasks.TaskTimer.Stop();
+            BackgroundTasks.TaskTimer.Start();
+            BackgroundTasks.Tasks();
         }
     }
 }

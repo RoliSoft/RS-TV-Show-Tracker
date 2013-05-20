@@ -55,7 +55,7 @@
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="System.Timers.ElapsedEventArgs"/> instance containing the event data.</param>
-        private static void Tasks(object sender, ElapsedEventArgs e)
+        public static void Tasks(object sender = null, ElapsedEventArgs e = null)
         {
             if (InProgress)
             {
@@ -211,9 +211,15 @@
         public static void RestartIfNeeded()
         {
             var memlimit = Settings.Get("Memory Usage Limit", 512);
+            var oldusage = Process.GetCurrentProcess().WorkingSet64;
+
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
             var memusage = Process.GetCurrentProcess().WorkingSet64;
 
-            Log.Debug("The current memory usage is " + Utils.GetFileSize(memusage) + "; " + (memlimit < 256 ? "auto-restart is disabled." : "auto-restarting when it exceeds " + memlimit + " MB."));
+            Log.Debug("The current memory usage is " + Utils.GetFileSize(memusage) + " (" + Utils.GetFileSize(oldusage) + " before GC); " + (memlimit < 256 ? "auto-restart is disabled." : "auto-restarting when it exceeds " + memlimit + " MB."));
 
             if (memlimit < 256)
             {
