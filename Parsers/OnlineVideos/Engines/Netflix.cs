@@ -175,7 +175,7 @@
             #endregion
 
             var request = new RestRequest { Path = "catalog/titles" };
-            request.AddParameter("term", ep.Show.Name);
+            request.AddParameter("term", ep.Show.Title);
             request.AddParameter("max_results", "1");
             request.AddParameter("expand", "seasons");
 
@@ -204,7 +204,7 @@
                 }
             }
 
-            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Netflix search page", "http://movies.netflix.com/WiSearch?v1=" + Utils.EncodeURL(ep.Show.Name));
+            throw new OnlineVideoNotFoundException("No matching videos were found.", "Open Netflix search page", "http://movies.netflix.com/WiSearch?v1=" + Utils.EncodeURL(ep.Show.Title));
         }
     }
 }

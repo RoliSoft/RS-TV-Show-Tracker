@@ -264,7 +264,7 @@
 
             foreach (var show in Database.TVShows)
             {
-                var titleRegex   = Parser.GenerateTitleRegex(show.Value.Name);
+                var titleRegex   = Parser.GenerateTitleRegex(show.Value.Title);
                 var releaseRegex = !string.IsNullOrWhiteSpace(show.Value.Release) ? new Regex(show.Value.Release) : null;
 
                 foreach (var file in files)
@@ -272,7 +272,7 @@
                     if (Parser.IsMatch(file.DirectoryName + @"\" + file.Name, titleRegex) || (releaseRegex != null && Parser.IsMatch(file.DirectoryName + @"\" + file.Name, releaseRegex)))
                     {
                         var pf = FileNames.Parser.ParseFile(file.Name, file.DirectoryName.Split(Path.DirectorySeparatorChar), false);
-                        if (pf.Success && show.Value.Name == pf.Show)
+                        if (pf.Success && show.Value.Title == pf.Show)
                         {
                             Log.Debug("Identified open file " + file.Name + " as " + pf + ".");
 
@@ -297,7 +297,7 @@
                     if (Parser.IsMatch(title, titleRegex, null, false) || (releaseRegex != null && Parser.IsMatch(title, releaseRegex, null, false)))
                     {
                         var pf = FileNames.Parser.ParseFile(title, null, false);
-                        if (pf.Success && show.Value.Name == pf.Show)
+                        if (pf.Success && show.Value.Title == pf.Show)
                         {
                             Log.Debug("Identified window title " + title + " as " + pf + ".");
 
@@ -362,7 +362,7 @@
             }
 
             var listed = Settings.Get("Post restrictions list", new List<int>())
-                                 .Contains(Database.TVShows.Values.First(x => x.Name == file.Show).ID);
+                                 .Contains(Database.TVShows.Values.First(x => x.Title == file.Show).ID);
 
             switch (Settings.Get("Post restrictions list type", "black"))
             {

@@ -69,7 +69,7 @@
             var episodes = 0;
             var minutes  = new TimeSpan(0);
 
-            foreach (var show in Database.TVShows.Values.OrderBy(s => s.Name))
+            foreach (var show in Database.TVShows.Values.OrderBy(s => s.Title))
             {
                 var count   = show.Episodes.Count();
                 var runtime = show.Runtime;
@@ -79,7 +79,7 @@
                 StatisticsListViewItemCollection.Add(new StatisticsListViewItem
                     {
                         Show       = show,
-                        Name       = show.Name,
+                        Name       = show.Title,
                         Runtime    = runtime + " minutes",
                         Episodes   = count.ToString("#,###"),
                         TimeWasted = TimeSpan.FromMinutes(runtime * count).ToFullRelativeTime()
