@@ -54,7 +54,7 @@
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
                     Title                   = "Searching...",
-                    MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                    MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Title, _ep.Season, _ep.Number),
                     Content                 = "Searching for the episode...",
                     CustomButtons           = new[] { "Cancel" },
                     ShowMarqueeProgressBar  = true,
@@ -134,7 +134,7 @@
                         {
                             MainIcon                = VistaTaskDialogIcon.Error,
                             Title                   = "No files found",
-                            MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                            MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Title, _ep.Season, _ep.Number),
                             Content                 = "No files were found for this episode.",
                             ExpandedInfo            = "If you have the episode in the specified download folder but the search fails, it might be because the file name slightly differs.\r\nIf this is the case, click on the 'Guides' tab, select this show, click on the wrench icon and then follow the instructions under the 'Custom release name' section.",
                             AllowDialogCancellation = true,
@@ -157,7 +157,7 @@
                     var mfftd = new TaskDialogOptions
                         {
                             Title                   = "Multiple files found",
-                            MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Name, _ep.Season, _ep.Number),
+                            MainInstruction         = string.Format("{0} S{1:00}E{2:00}", _ep.Show.Title, _ep.Season, _ep.Number),
                             Content                 = "Multiple files were found for this episode:",
                             AllowDialogCancellation = true,
                             CommandButtons          = new string[e.Data.Count + 1]

@@ -213,7 +213,7 @@
 
                 if (xconfig.UseMappedNames)
                 {
-                    prog.Name = prog.Show.Name;
+                    prog.Name = prog.Show.Title;
                 }
 
                 if (xconfig.TZCorrection != 0)
@@ -301,7 +301,7 @@
 
             foreach (var show in Database.TVShows)
             {
-                regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Name) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
+                regexes.Add(new Regex(@"(^|:\s+)" + Regex.Escape(show.Value.Title) + @"(?!(?:[:,0-9]| \- |\s*[a-z&]))", RegexOptions.IgnoreCase), show.Value);
 
                 if (!string.IsNullOrWhiteSpace(config.Language) && config.Language.Length == 2)
                 {
@@ -470,7 +470,7 @@
             /// <value>
             /// The URL to the listing or episode information.
             /// </value>
-            public string URL
+            public new string URL
             {
                 get { return base.URL; }
                 set { base.URL = value; }

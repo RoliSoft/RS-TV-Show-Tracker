@@ -160,7 +160,7 @@
         /// </returns>
         public override string ToString()
         {
-            return Show.Name;
+            return Show.Title;
         }
     }
 }

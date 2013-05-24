@@ -92,7 +92,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            var name = ep.Show.Name.ToLower();
+            var name = ep.Show.Title.ToLower();
                 name = Regex.Replace(name, @"[^a-z0-9\s]", string.Empty);
                 name = Regex.Replace(name, @"\s+", "-");
 

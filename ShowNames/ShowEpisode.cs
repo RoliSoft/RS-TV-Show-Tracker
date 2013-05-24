@@ -107,5 +107,10 @@
                 && SecondEpisode == ep.SecondEpisode
                 && AirDate == ep.AirDate;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

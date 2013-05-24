@@ -41,7 +41,7 @@
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
                     Title                   = "Searching...",
-                    MainInstruction         = "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number),
+                    MainInstruction         = "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Title, ep.Season, ep.Number),
                     Content                 = "Searching for the episode...",
                     CustomButtons           = new[] { "Cancel" },
                     ShowMarqueeProgressBar  = true,

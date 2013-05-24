@@ -599,7 +599,7 @@
                 {
                     Title                   = "Download subtitle near video",
                     MainInstruction         = _link.Release,
-                    Content                 = "The following files were found for {0} S{1:00}E{2:00}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_ep.Show.Name, _ep.Season, _ep.Number),
+                    Content                 = "The following files were found for {0} S{1:00}E{2:00}.\r\nSelect the desired video file and the subtitle will be placed in the same directory with the same name.".FormatWith(_ep.Show.Title, _ep.Season, _ep.Number),
                     AllowDialogCancellation = true,
                     CommandButtons          = new string[_files.Count + 1],
                     VerificationText        = "Play video after subtitle is downloaded",

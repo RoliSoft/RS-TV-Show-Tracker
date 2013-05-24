@@ -223,7 +223,7 @@
                 items.Add(new GuideDropDownDownloadedItem());
             }
 
-            items.AddRange(Database.TVShows.Values.OrderBy(s => s.Name).Select(s => new GuideDropDownTVShowItem(s)));
+            items.AddRange(Database.TVShows.Values.OrderBy(s => s.Title).Select(s => new GuideDropDownTVShowItem(s)));
 
             var idx = comboBox.SelectedIndex;
 
@@ -365,8 +365,8 @@
                 UpcomingListViewItemCollection.Add(new UpcomingListViewItem
                     {
                         Episode      = episode,
-                        Show         = "{0} S{1:00}E{2:00}".FormatWith(episode.Show.Name, episode.Season, episode.Number),
-                        Name         = " · " + episode.Name,
+                        Show         = "{0} S{1:00}E{2:00}".FormatWith(episode.Show.Title, episode.Season, episode.Number),
+                        Name         = " · " + episode.Title,
                         Airdate      = episode.Airdate.DayOfWeek + " / " + episode.Airdate.ToString("h:mm tt") + network,
                         RelativeDate = episode.Airdate.ToShortRelativeDate()
                     });
@@ -396,8 +396,8 @@
                     {
                         Episode      = episode.Key,
                         Color        = episode.Key.Watched ? "#50FFFFFF" : "White",
-                        Show         = "{0} S{1:00}E{2:00}".FormatWith(episode.Key.Show.Name, episode.Key.Season, episode.Key.Number),
-                        Name         = " · " + episode.Key.Name,
+                        Show         = "{0} S{1:00}E{2:00}".FormatWith(episode.Key.Show.Title, episode.Key.Season, episode.Key.Number),
+                        Name         = " · " + episode.Key.Title,
                         Airdate      = qualities + " · " + episode.Key.Airdate.ToString("MMMM d, yyyy", new CultureInfo("en-US")),
                         RelativeDate = episode.Key.Airdate.ToShortRelativeDate(),
                         Summary      = episode.Key.Summary,
@@ -517,9 +517,9 @@
 
             // fill up general informations
 
-            showGeneralName.Text = show.Name;
+            showGeneralName.Text = show.Title;
 
-            var cover = CoverManager.GetCoverLocation(show.Name);
+            var cover = CoverManager.GetCoverLocation(show.Title);
             if (File.Exists(cover))
             {
                 try
@@ -600,7 +600,7 @@
                 if (last.Count != 0)
                 {
                     showGeneralLastPanel.Visibility = Visibility.Visible;
-                    showGeneralLast.Text            = last[0].Name;
+                    showGeneralLast.Text            = last[0].Title;
                     showGeneralLastDate.Text        = last[0].Airdate.ToRelativeDate(true);
                 }
                 else
@@ -611,7 +611,7 @@
                 if (next.Count != 0)
                 {
                     showGeneralNextPanel.Visibility = Visibility.Visible;
-                    showGeneralNext.Text            = next[0].Name;
+                    showGeneralNext.Text            = next[0].Title;
                     showGeneralNextDate.Text        = next[0].Airdate.ToRelativeDate(true);
                 }
                 else
@@ -712,7 +712,7 @@
             {
                 _workThd = new Thread(() =>
                     {
-                        cover = CoverManager.GetCover(show.Name, s => Dispatcher.Invoke((Action)(() => SetStatus(s, true))));
+                        cover = CoverManager.GetCover(show.Title, s => Dispatcher.Invoke((Action)(() => SetStatus(s, true))));
                         Dispatcher.Invoke((Action)(() =>
                             {
                                 showGeneralCover.Source = new BitmapImage(cover != null ? new Uri(cover, UriKind.Absolute) : new Uri("/RSTVShowTracker;component/Images/cd.png", UriKind.Relative));
@@ -844,7 +844,7 @@
             }
 
             MainWindow.Active.tabControl.SelectedIndex = 2;
-            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            MainWindow.Active.activeDownloadLinksPage.Search(ep.Show.Title + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 
@@ -874,7 +874,7 @@
             }
 
             MainWindow.Active.tabControl.SelectedIndex = 3;
-            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            MainWindow.Active.activeSubtitlesPage.Search(ep.Show.Title + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
         }
         #endregion
 
@@ -1102,8 +1102,9 @@
                 return;
             }
 
-            var spm = -55;
-            var lbw = 115;
+            // ejh: Unused Vars
+            // var spm = -55;
+            // var lbw = 115;
 
             // Play episode
 
@@ -1245,7 +1246,7 @@
             var gls    = new MenuItem();
             gls.Header = "Google search";
             gls.Icon   = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/RSTVShowTracker;component/Images/google.png")) };
-            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(string.Format("{0} S{1:00}E{2:00}", episode.Show.Name, episode.Season, episode.Number)));
+            gls.Click += (s, r) => Utils.Run("http://www.google.com/search?q=" + Utils.EncodeURL(string.Format("{0} S{1:00}E{2:00}", episode.Show.Title, episode.Season, episode.Number)));
 
             sov.Items.Add(gls);
 

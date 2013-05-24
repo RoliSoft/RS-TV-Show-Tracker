@@ -57,15 +57,15 @@
                     try
                     {
                         var url = Search(ep);
-                        OnlineSearchDone.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number), url);
+                        OnlineSearchDone.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Title, ep.Season, ep.Number), url);
                     }
                     catch (OnlineVideoNotFoundException ex)
                     {
-                        OnlineSearchError.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number), ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkURL, null));
+                        OnlineSearchError.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Title, ep.Season, ep.Number), ex.Message, new Tuple<string, string, string>(ex.LinkTitle, ex.LinkURL, null));
                     }
                     catch (Exception ex)
                     {
-                        OnlineSearchError.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Name, ep.Season, ep.Number), "There was an error while searching for the video on this service.", new Tuple<string, string, string>(null, null, ex.Message));
+                        OnlineSearchError.Fire(this, "{0} S{1:00}E{2:00}".FormatWith(ep.Show.Title, ep.Season, ep.Number), "There was an error while searching for the video on this service.", new Tuple<string, string, string>(null, null, ex.Message));
                     }
                 });
             SearchThread.Start();

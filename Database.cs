@@ -718,7 +718,7 @@
         /// <returns>Name of the show used in scene releases.</returns>
         public static Regex GetReleaseName(string show)
         {
-            var release = TVShows.Values.Where(s => s.Name == show).Take(1).ToList();
+            var release = TVShows.Values.Where(s => s.Title == show).Take(1).ToList();
 
             if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0].Release))
             {
@@ -763,10 +763,10 @@
 
             if (statusCallback != null)
             {
-                statusCallback("Searching for the " + Languages.List[language] + " title of " + TVShows[id].Name +" on lab.rolisoft.net...");
+                statusCallback("Searching for the " + Languages.List[language] + " title of " + TVShows[id].Title +" on lab.rolisoft.net...");
             }
 
-            var api = Remote.API.GetForeignTitle(TVShows[id].Name, language);
+            var api = Remote.API.GetForeignTitle(TVShows[id].Title, language);
 
             if (api.Success && !string.IsNullOrWhiteSpace(api.Result))
             {
@@ -788,17 +788,17 @@
             {
                 if (statusCallback != null)
                 {
-                    statusCallback("Searching for the " + Languages.List[language] + " title of " + TVShows[id].Name + " on " + engine.Name + "...");
+                    statusCallback("Searching for the " + Languages.List[language] + " title of " + TVShows[id].Title + " on " + engine.Name + "...");
                 }
 
-                var search = engine.Search(TVShows[id].Name);
+                var search = engine.Search(TVShows[id].Title);
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     TVShows[id].Data["title." + language] = search;
                     TVShows[id].SaveData();
 
-                    new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Name, search, language)).Start();
+                    new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Title, search, language)).Start();
 
                     return search;
                 }
@@ -807,7 +807,7 @@
             TVShows[id].Data["title." + language] = "!" + DateTime.Now.ToUnixTimestamp();
             TVShows[id].SaveData();
 
-            new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Name, "!", language)).Start();
+            new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Title, "!", language)).Start();
 
             return null;
         }
