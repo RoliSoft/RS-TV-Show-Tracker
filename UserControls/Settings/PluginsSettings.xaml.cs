@@ -62,6 +62,7 @@
 
             var types = new[]
                 {
+#pragma warning disable 618
                     typeof(Parsers.Guides.Guide),
                     typeof(Parsers.Downloads.DownloadSearchEngine),
                     typeof(Parsers.Subtitles.SubtitleSearchEngine),
@@ -84,6 +85,7 @@
                     typeof(Scripting.ScriptingPlugin),
                     typeof(StartupPlugin),
                     typeof(IPlugin)
+#pragma warning restore 618
                 };
             
             var icons = new[]

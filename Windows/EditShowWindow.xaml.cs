@@ -35,10 +35,10 @@
             nameTextBox.Text = _show;
 
             var release = Database.TVShows[_id];
-            if (!string.IsNullOrWhiteSpace(release.Release))
+            if (!string.IsNullOrWhiteSpace(release.Data.Get("regex")))
             {
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = true;
-                releaseTextBox.Text = release.Release;
+                releaseTextBox.Text = release.Data.Get("regex");
             }
             else
             {

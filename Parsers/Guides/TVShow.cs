@@ -65,32 +65,6 @@
         }
 
         /// <summary>
-        /// Gets or sets the title of the show.
-        /// </summary>
-        /// <value>The title.</value>
-        [Obsolete("Use Title.")]
-        public string Name
-        {
-            get { return Title; }
-            set { Title = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the release.
-        /// </summary>
-        /// <value>The release.</value>
-        [Obsolete("Use Data[\"regex\"] to access the custom pattern or GenerateRegex() to get the proper one.")]
-        public string Release
-        {
-            get
-            {
-                string rel;
-                return Data.TryGetValue("regex", out rel) ? rel : null;
-            }
-            set { Data["regex"] = value; }
-        }
-
-        /// <summary>
         /// Gets or sets the description of the show.
         /// </summary>
         /// <value>The description.</value>

@@ -2,12 +2,9 @@
 {
     using System;
     using System.IO;
-    using System.Net;
-    using System.Text.RegularExpressions;
     using System.Threading;
 
     using RoliSoft.TVShowTracker.Parsers.Downloads;
-    using RoliSoft.TVShowTracker.Parsers.Subtitles;
 
     /// <summary>
     /// Provides a modified HTTP downloader to create the NZB from ID on BinSearch.
@@ -67,8 +64,11 @@
             var parts = url.Split(';');
             var nzb   = Utils.GetURL(parts[0], parts[1], encoding: new Utils.Base64Encoding());
 
+            DownloadProgressChanged.Fire(this, 75);
+
             File.WriteAllBytes(target, Convert.FromBase64String(nzb));
 
+            DownloadProgressChanged.Fire(this, 100);
             DownloadFileCompleted.Fire(this, target, parts[2], token ?? string.Empty);
         }
 

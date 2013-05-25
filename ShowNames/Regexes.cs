@@ -18,6 +18,12 @@
                 { "Bleep My Dad Says",                         "Shit My Dad Says" },
                 { "Don't Trust the Bitch in Apartment 23",     "Apartment 23"     },
                 { "Don't Trust the B---- in Apartment 23",     "Apartment 23"     },
+                { "Pawn Star$",                                "Pawn Stars"       },
+                { "CSI: Crime Scene Investigation",            "CSI"              },
+                { "CSI: New York",                             "CSI: NY"          },
+                { "Spartacus: Blood and Sand",                 "Spartacus"        },
+                { "Spartacus: Vengeance",                      "Spartacus"        },
+                { "Spartacus: War of the Damned",              "Spartacus"        }
             };
 
         /// <summary>
@@ -25,8 +31,11 @@
         /// </summary>
         public static readonly Dictionary<string, string> Pregenerated = new Dictionary<string, string>
             {
-                { "Apartment 23", @"(?:\b|_)(?:DON(?:\\?['`’\._])?T[^A-Z0-9]+TRUST[^A-Z0-9]+THE[^A-Z0-9]+B(?:ITCH|\-+)?[^A-Z0-9]+IN[^A-Z0-9]+)?APARTMENT[^A-Z0-9]+23(?:\b|_)" },
-                { "Hacktion Újratöltve", "(?:\b|_)HACKTION[^A-Z0-9]+[UÚú]JRAT[OÖö]LTVE(?:\b|_)" },
+                { "Apartment 23",        @"(?:\b|_)(?:DON(?:\\?['`’\._])?T[^A-Z0-9]+TRUST[^A-Z0-9]+THE[^A-Z0-9]+B(?:ITCH|\-+)?[^A-Z0-9]+IN[^A-Z0-9]+)?APARTMENT[^A-Z0-9]+23(?:\b|_)" },
+                { "Hacktion Újratöltve", @"(?:\b|_)HACKTION[^A-Z0-9]+[UÚú]JRAT[OÖö]LTVE(?:\b|_)"                                                                                     },
+                { "CSI",                 @"(?:\b|_)CSI(?:[^A-Z0-9]+CRIME[^A-Z0-9]+SCENE[^A-Z0-9]+INVESTIGATION)?(?:\b|_)"                                                            },
+                { "CSI: NY",             @"(?:\b|_)(?:CSI|CRIME[^A-Z0-9]+SCENE[^A-Z0-9]+INVESTIGATION)[^A-Z0-9]+(?:NY|NEW[^A-Z0-9]+YORK)(?:\b|_)"                                    },
+                { "Spartacus",           @"(?:\b|_)SPARTACUS[^A-Z0-9]*(?:BLOOD[^A-Z0-9]+AND[^A-Z0-9]+SAND|VENGEANCE|WAR[^A-Z0-9]+OF[^A-Z0-9]+THE[^A-Z0-9]+DAMNED)?(?:\b|_)"          }
             };
 
         /// <summary>

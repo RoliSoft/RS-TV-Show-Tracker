@@ -58,8 +58,11 @@
                 throw new Exception("The specified URL doesn't look like a HTTP/FTP link.");
             }
 
+            DownloadProgressChanged.Fire(this, 50);
+
             Utils.Run(url);
 
+            DownloadProgressChanged.Fire(this, 100);
             DownloadFileCompleted.Fire(this, null, null, "LaunchedBrowser");
         }
 

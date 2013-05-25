@@ -720,9 +720,9 @@
         {
             var release = TVShows.Values.Where(s => s.Title == show).Take(1).ToList();
 
-            if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0].Release))
+            if (release.Count != 0 && !string.IsNullOrWhiteSpace(release[0].Data.Get("regex")))
             {
-                return new Regex(release[0].Release);
+                return new Regex(release[0].Data["regex"]);
             }
 
             return ShowNames.Parser.GenerateTitleRegex(show);

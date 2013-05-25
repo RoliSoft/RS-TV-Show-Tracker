@@ -265,7 +265,8 @@
             foreach (var show in Database.TVShows)
             {
                 var titleRegex   = Parser.GenerateTitleRegex(show.Value.Title);
-                var releaseRegex = !string.IsNullOrWhiteSpace(show.Value.Release) ? new Regex(show.Value.Release) : null;
+                var releaseExpr  = string.Empty;
+                var releaseRegex = show.Value.Data.TryGetValue("regex", out releaseExpr) && !string.IsNullOrWhiteSpace(releaseExpr) ? new Regex(releaseExpr) : null;
 
                 foreach (var file in files)
                 {
