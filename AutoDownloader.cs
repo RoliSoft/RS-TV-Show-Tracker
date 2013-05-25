@@ -219,7 +219,7 @@
 
             dlsrc.DownloadSearchEngineNewLink += (s, e) => links.Add(e.Data);
 
-            var tasks = dlsrc.SearchAsync(ep.Show.Name + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
+            var tasks = dlsrc.SearchAsync(ep.Show.Title + " " + (ep.Show.Data.Get("notation") == "airdate" ? ep.Airdate.ToOriginalTimeZone(ep.Show.TimeZone).ToString("yyyy.MM.dd") : string.Format("S{0:00}E{1:00}", ep.Season, ep.Number)));
 
             await Task.WhenAll(tasks);
 

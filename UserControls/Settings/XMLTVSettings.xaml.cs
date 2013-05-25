@@ -103,14 +103,14 @@
 
             var langs = Settings.Get<List<Dictionary<string, object>>>("XMLTV").Where(x => x.ContainsKey("Language") && x["Language"] is string && ((string)x["Language"]).Length == 2 && (string)x["Language"] != "en").Select(x => ((string)x["Language"]).ToLower()).Distinct().ToList();
 
-            foreach (var show in Database.TVShows.Values.OrderBy(t => t.Name))
+            foreach (var show in Database.TVShows.Values.OrderBy(t => t.Title))
             {
                 foreach (var lang in langs)
                 {
                     TitlesListViewItemCollection.Add(new TitlesListViewItem
                                                          {
                                                              Show     = show,
-                                                             Title    = show.Name,
+                                                             Title    = show.Title,
                                                              Foreign  = show.GetForeignTitle(lang),
                                                              Foreign2 = show.GetForeignTitle(lang),
                                                              Language = Languages.List[lang],
@@ -368,7 +368,7 @@
             show.Show.Data["title." + show.LangCode] = title;
             show.Show.SaveData();
 
-            new Thread(() => Remote.API.SetForeignTitle(show.Show.Name, title, show.LangCode)).Start();
+            new Thread(() => Remote.API.SetForeignTitle(show.Show.Title, title, show.LangCode)).Start();
 
             ForeignTextBoxTextChanged(txtbox, null);
         }

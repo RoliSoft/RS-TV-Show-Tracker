@@ -196,7 +196,7 @@
             
             foreach (var show in Database.TVShows.Values.ToList())
             {
-                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Name).Match(name);
+                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Title).Match(name);
                 var releaseMatch = !string.IsNullOrWhiteSpace(show.Release) ? Regex.Match(name, show.Release) : null;
 
                 if ((titleMatch.Success && titleMatch.Value == name) || (releaseMatch != null && releaseMatch.Success && releaseMatch.Value == name))
@@ -205,7 +205,7 @@
                     {
                         match = true;
                         ltvsh = show;
-                        name  = show.Name;
+                        name  = show.Title;
 
                         break;
                     }
@@ -216,9 +216,9 @@
                         {
                             match = true;
                             ltvsh = show;
-                            name  = show.Name;
+                            name  = show.Title;
                             lepis = episode[0];
-                            title = episode[0].Name;
+                            title = episode[0].Title;
                             date  = episode[0].Airdate;
 
                             ep.Season  = episode[0].Season;
@@ -234,9 +234,9 @@
                         {
                             match = true;
                             ltvsh = show;
-                            name  = show.Name;
+                            name  = show.Title;
                             lepis = episode;
-                            title = episode.Name;
+                            title = episode.Title;
                             date  = episode.Airdate;
 
                             break;
@@ -318,7 +318,7 @@
                     if (local != null)
                     {
                         match = true;
-                        name  = local.Name;
+                        name  = local.Title;
 
                         if (ep.AirDate != null)
                         {
@@ -326,7 +326,7 @@
                             if (eps.Count() != 0)
                             {
                                 ltvsh = eps[0].Show;
-                                title = eps[0].Name;
+                                title = eps[0].Title;
                                 lepis = eps[0];
                                 date  = eps[0].Airdate;
 
@@ -340,7 +340,7 @@
                             if (eps.Count() != 0)
                             {
                                 ltvsh = eps[0].Show;
-                                title = eps[0].Name;
+                                title = eps[0].Title;
                                 lepis = eps[0];
                                 date  = eps[0].Airdate;
                             }
@@ -861,7 +861,7 @@
         /// </returns>
         public static string GetEpisodeNotationType(int id)
         {
-            if (AirdateNotationShows.Contains(Utils.CreateSlug(Database.TVShows[id].Name)))
+            if (AirdateNotationShows.Contains(Utils.CreateSlug(Database.TVShows[id].Title)))
             {
                 return "airdate";
             }
@@ -883,7 +883,7 @@
                 return "airdate";
             }
 
-            var ids = Database.TVShows.Values.Where(x => x.Name == show).ToList();
+            var ids = Database.TVShows.Values.Where(x => x.Title == show).ToList();
             if (ids.Count != 0)
             {
                 return ids[0].Data.Get("notation", "standard");

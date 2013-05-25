@@ -126,7 +126,7 @@
             {
                 if (Database.TVShows.ContainsKey(show))
                 {
-                    listBox.Items.Add(Database.TVShows[show].Name);
+                    listBox.Items.Add(Database.TVShows[show].Title);
                 }
                 else
                 {
@@ -138,9 +138,9 @@
 
             ListBoxSelectionChanged();
 
-            foreach (var show in Database.TVShows.Values.OrderBy(x => x.Name))
+            foreach (var show in Database.TVShows.Values.OrderBy(x => x.Title))
             {
-                listComboBox.Items.Add(show.Name);
+                listComboBox.Items.Add(show.Title);
             }
 
             ListComboBoxSelectionChanged();
@@ -650,7 +650,7 @@
             if (listComboBox.SelectedIndex == -1) return;
 
             var list = Settings.Get("Post restrictions list", new List<int>());
-            var shid = Database.TVShows.Values.First(x => x.Name == (string)listComboBox.SelectedValue).ID;
+            var shid = Database.TVShows.Values.First(x => x.Title == (string)listComboBox.SelectedValue).ID;
 
             if (!list.Contains(shid))
             {
@@ -672,7 +672,7 @@
             if (listBox.SelectedIndex == -1) return;
 
             var list = Settings.Get("Post restrictions list", new List<int>());
-            var shid = Database.TVShows.Values.First(x => x.Name == (string)listBox.SelectedValue).ID;
+            var shid = Database.TVShows.Values.First(x => x.Title == (string)listBox.SelectedValue).ID;
 
             if (list.Contains(shid))
             {

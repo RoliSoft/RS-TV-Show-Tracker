@@ -219,7 +219,7 @@
 
                 var lastep = show.Episodes.Where(ep => ep.Airdate < DateTime.Now && ep.Airdate != Utils.UnixEpoch).OrderByDescending(ep => ep.ID).Take(1).ToList();
                 var last   = lastep.Count != 0
-                           ? "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].Season, lastep[0].Number, lastep[0].Name)
+                           ? "S{0:00}E{1:00} · {2}".FormatWith(lastep[0].Season, lastep[0].Number, lastep[0].Title)
                            : "This show hasn't started yet.";
 
                 if (count == 1)
@@ -238,7 +238,7 @@
 
                 if (nextep.Count != 0)
                 {
-                    next = "S{0:00}E{1:00} · {2} · {3}".FormatWith(nextep[0].Season, nextep[0].Number, nextep[0].Name, nextep[0].Airdate.ToRelativeDate());
+                    next = "S{0:00}E{1:00} · {2} · {3}".FormatWith(nextep[0].Season, nextep[0].Number, nextep[0].Title, nextep[0].Airdate.ToRelativeDate());
 
                     if (nextep[0].Airdate < ndate)
                     {
@@ -255,7 +255,7 @@
 
                     if (nextep.Count != 0)
                     {
-                        next = "S{0:00}E{1:00} · {2}".FormatWith(nextep[0].Season, nextep[0].Number, string.IsNullOrWhiteSpace(nextep[0].Name) ? "TBA" : nextep[0].Name);
+                        next = "S{0:00}E{1:00} · {2}".FormatWith(nextep[0].Season, nextep[0].Number, string.IsNullOrWhiteSpace(nextep[0].Title) ? "TBA" : nextep[0].Title);
                     }
                     else
                     {
@@ -274,7 +274,7 @@
                 switch (sorting)
                 {
                     case "name":
-                        sort = show.Name;
+                        sort = show.Title;
                         break;
 
                     case "epcount":
@@ -397,7 +397,7 @@
                 items.Add(new OverviewListViewItem
                     {
                         Show          = show,
-                        Name          = show.Name,
+                        Name          = show.Title,
                         Title         = last,
                         Next          = next,
                         NameColor     = fadeend && !show.Airing ? "#50FFFFFF" : "White",
@@ -532,7 +532,7 @@
             }
             
             var sel    = (OverviewListViewItem)listView.SelectedItem;
-            var rowid  = Database.TVShows.Values.First(s => s.Name == sel.Name).RowID;
+            var rowid  = Database.TVShows.Values.First(s => s.Title == sel.Name).RowID;
             var listid = listView.SelectedIndex;
 
             if (rowid == 1)
@@ -567,7 +567,7 @@
             }
             
             var sel    = (OverviewListViewItem)listView.SelectedItem;
-            var rowid  = Database.TVShows.Values.First(s => s.Name == sel.Name).RowID;
+            var rowid  = Database.TVShows.Values.First(s => s.Title == sel.Name).RowID;
             var listid = listView.SelectedIndex;
 
             if (rowid == OverviewListViewItemCollection.Count)

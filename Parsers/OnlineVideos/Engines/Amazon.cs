@@ -91,7 +91,7 @@
         /// </returns>
         public override string Search(Episode ep)
         {
-            return "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL("intitle:" + ep.Show.Name + " intitle:\"Season " + ep.Season + ", Episode " + ep.Number + "\" site:amazon.com");
+            return "http://www.google.com/search?btnI=I'm+Feeling+Lucky&hl=en&q=" + Utils.EncodeURL("intitle:" + ep.Show.Title + " intitle:\"Season " + ep.Season + ", Episode " + ep.Number + "\" site:amazon.com");
         }
     }
 }
