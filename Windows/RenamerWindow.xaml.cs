@@ -79,8 +79,7 @@
                 }
             }
         }
-
-
+        
         private static string _operationPast
         {
             get
@@ -109,8 +108,6 @@
         /// <value>The target directory of the file operation.</value>
         public static string TargetDir { get; set; }
 
-        private volatile bool _parsing, _renaming;
-
         /// <summary>
         /// Contains a sample <c>ShowFile</c> object.
         /// </summary>
@@ -127,6 +124,7 @@
         public static readonly Regex SampleEpisodeRegex = ShowNames.Parser.GenerateEpisodeRegexes(new ShowEpisode(SampleInfo.Episode.Season, SampleInfo.Episode.Episode));
 
         private bool _loaded;
+        private volatile bool _parsing, _renaming;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenamerWindow"/> class.
@@ -219,9 +217,13 @@
                 goto end;
             }
 
+            Log.Info("Starting to identify files in renamer queue...");
+            var st = DateTime.Now;
+
             foreach (var file in files)
             {
                 SetStatus("Identifying " + file.Information.Name + "...", true);
+                Log.Debug("Identifying file " + file.Information.Name + "...");
 
                 try
                 {
@@ -233,22 +235,30 @@
                     {
                         file.ShowStatusImage = "Collapsed";
                         file.ShowCheckBox    = "Visible";
+
+                        Log.Debug("Identified file " + file.Information.Name + " as " + file.Information + ".");
                     }
                     else
                     {
                         file.StatusImage = "/RSTVShowTracker;component/Images/exclamation-red.png";
+
+                        Log.Debug("Unable to identify file " + file.Information.Name + ": " + file.Information + ".");
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     file.Information.ParseError = ShowFile.FailureReasons.ExceptionOccurred;
                     file.Checked     = file.Recognized = file.Enabled = false;
                     file.Processed   = true;
                     file.StatusImage = "/RSTVShowTracker;component/Images/exclamation-red.png";
+
+                    Log.Warn("Exception while identifying file " + file.Information.Name + ".", ex);
                 }
 
                 file.RefreshEnabled();
             }
+
+            Log.Info("File identification queue finished in " + (DateTime.Now - st).TotalSeconds + "s.");
 
             SetStatus();
 
@@ -631,6 +641,7 @@
                 settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
                 _parsing = _renaming = false;
 
+                Log.Info("Canceled " + _operationVerb.ToLower() + " operation.");
                 SetStatus("Canceled " + _operationVerb.ToLower() + " operation.");
             }
             else
@@ -671,13 +682,25 @@
         /// </summary>
         private void RenameRecognizedFiles()
         {
+            Log.Info(_operationVerb + " of recognized files started...");
+            var st = DateTime.Now;
+
             var i = 0;
             foreach (var file in FilesListViewItemCollection.Where(f => f.Enabled && f.Checked).ToList())
             {
                 var name = Utils.SanitizeFileName(FileNames.Parser.FormatFileName(Format, file.Information));
                 SetStatus(_operationVerb + " " + name + "...", true);
 
-                try { ProcessFile(name, file.Location, Path.Combine(TargetDir, name)); } catch { }
+                Log.Info(_operationVerb + " file " + Path.GetFileName(file.Location) + " to " + name + "...");
+
+                try
+                {
+                    ProcessFile(name, file.Location, Path.Combine(TargetDir, name));
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Exception while " + _operationVerb.ToLower() + " file " + Path.GetFileName(file.Location) + " to " + name + ".", ex);
+                }
 
                 file.Enabled = file.Checked = false;
                 i++;
@@ -689,6 +712,8 @@
                     startRenamingButton.IsEnabled = FilesListViewItemCollection.Count(f => f.Enabled && f.Checked) != 0;
                     settingsTabItem.IsEnabled = listView.ContextMenu.IsEnabled = true;
                 }));
+
+            Log.Info(_operationPast + " " + Utils.FormatNumber(i, "file") + " in " + (DateTime.Now - st).TotalSeconds + "s.");
             SetStatus(_operationPast + " " + Utils.FormatNumber(i, "file") + "!");
             _parsing = _renaming = false;
         }
@@ -704,6 +729,7 @@
             var parent = Path.GetDirectoryName(target);
             if (!string.IsNullOrWhiteSpace(parent) && !Directory.Exists(parent))
             {
+                Log.Debug("Creating directory " + parent + "...");
                 Directory.CreateDirectory(parent);
             }
 

@@ -156,8 +156,6 @@
             if (_producer != null)
             {
                 _producer.CompleteAdding();
-                _consumer.Wait(500);
-                _producer.Dispose();
             }
 
             _fsw      = new FileSystemWatcher[paths.Count];
@@ -242,13 +240,17 @@
         /// </summary>
         private static void ProcessChangesQueue()
         {
-            foreach (var evt in _producer.GetConsumingEnumerable())
+            var prod = _producer;
+
+            try
             {
-                try
+                foreach (var evt in prod.GetConsumingEnumerable())
                 {
-                    switch (evt.Item1)
+                    try
                     {
-                        case WatcherChangeTypes.Created:
+                        switch (evt.Item1)
+                        {
+                            case WatcherChangeTypes.Created:
                             {
                                 var success = false;
 
@@ -271,24 +273,24 @@
                                         Thread.Sleep(5000);
                                     }
 
-                                    var fs = new FileSearch(new[] { evt.Item2[0] }, CheckFile);
+                                    var fs = new FileSearch(new[] {evt.Item2[0]}, CheckFile);
 
                                     fs.FileSearchDone += (sender, args) =>
+                                    {
+                                        if (args.Data == null || args.Data.Count == 0)
                                         {
-                                            if (args.Data == null || args.Data.Count == 0)
-                                            {
-                                                Log.Debug("No episodes found in " + evt.Item2[0] + ".");
-                                            }
-                                            else
-                                            {
-                                                success = true;
+                                            Log.Debug("No episodes found in " + evt.Item2[0] + ".");
+                                        }
+                                        else
+                                        {
+                                            success = true;
 
-                                                foreach (var file in args.Data)
-                                                {
-                                                    Log.Debug("Added file " + Path.GetFileName(file) + " to the library.");
-                                                }
+                                            foreach (var file in args.Data)
+                                            {
+                                                Log.Debug("Added file " + Path.GetFileName(file) + " to the library.");
                                             }
-                                        };
+                                        }
+                                    };
 
                                     fs.BeginSearch();
 
@@ -323,9 +325,9 @@
                                     DataChanged();
                                 }
                             }
-                            break;
+                                break;
 
-                        case WatcherChangeTypes.Deleted:
+                            case WatcherChangeTypes.Deleted:
                             {
                                 var success = false;
 
@@ -363,12 +365,24 @@
                                     DataChanged();
                                 }
                             }
-                            break;
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Error while processing change " + evt.Item1 + " for " + evt.Item2.FirstOrDefault() + ".", ex);
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("Exception upon producer/consumer collection enumeration.", ex);
+            }
+            finally
+            {
+                if (prod != null)
                 {
-                    Log.Warn("Error while processing change " + evt.Item1 + " for " + evt.Item2.FirstOrDefault() + ".", ex);
+                    prod.Dispose();
                 }
             }
         }
