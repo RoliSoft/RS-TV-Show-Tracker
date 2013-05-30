@@ -40,7 +40,7 @@
                 highlightFree.IsChecked    = Settings.Get<bool>("Highlight Free Torrents");
                 fadeDead.IsChecked         = Settings.Get("Fade Dead Torrents", true);
                 linkChecker.IsChecked      = Settings.Get<bool>("One-Click Hoster Link Checker");
-                shortestNotation.IsChecked = Settings.Get<bool>("Enable Shortest Notation");
+                shortestNotation.IsChecked = Settings.Get("Enable Shortest Notation", true);
                 updateToNightly.IsChecked  = Settings.Get<bool>("Update to Nightly Builds");
 
                 switch (Settings.Get("One-Click Hoster List Type", "white"))

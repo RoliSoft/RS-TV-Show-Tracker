@@ -231,8 +231,16 @@
         /// <returns>Episode in specified format.</returns>
         public static ShowEpisode ExtractEpisode(string name)
         {
-            var m = Regexes.AdvNumbering.Match(name);
+            return ExtractEpisode(Regexes.AdvNumbering.Match(name));
+        }
 
+        /// <summary>
+        /// Extracts the episode number.
+        /// </summary>
+        /// <param name="m">The regex match.</param>
+        /// <returns>Episode in specified format.</returns>
+        public static ShowEpisode ExtractEpisode(Match m)
+        {
             if (m.Success)
             {
                 if (m.Groups["y"].Success)
@@ -389,11 +397,11 @@
                     @"S(?:e(?:ason|ries)?)?[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
                 };
 
-            if (Settings.Get<bool>("Enable Shortest Notation"))
+            if (Settings.Get("Enable Shortest Notation", true))
             {
                 regexes.Add(
                     // 213
-                    @"(?:{0}{1:00})(?:(?=[\.\s_])|$)".FormatWith(season, generateExtractor ? (object)@"(?<e>\d{2})" : (object)episode.ToInteger())
+                    @"(?<x>{0}{1:00})(?:(?=[\.\s_])|$)".FormatWith(season, generateExtractor ? (object)@"(?<e>\d{2})" : (object)episode.ToInteger())
                 );
             }
 

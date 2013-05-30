@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -72,14 +73,22 @@
         {
             // split the name into two parts: before and after the episode numbering
 
-            var fi = Regexes.AdvNumbering.Split(file);
+            var fi = Regexes.AdvNumbering.Matches(file);
 
-            if (fi.Length < 2)
+            if (fi.Count == 0)
             {
                 return new ShowFile(file, ShowFile.FailureReasons.EpisodeNumberingNotFound);
             }
 
-            var ep = ShowNames.Parser.ExtractEpisode(fi[1]);
+            // if the first match is the shortest notation and there's another match, use the other one
+
+            var x = 0;
+            if (fi.Count != 1 && fi[0].Groups["x"].Success)
+            {
+                x++;
+            }
+
+            var ep = ShowNames.Parser.ExtractEpisode(fi[x]);
 
             if (ep == null)
             {
@@ -88,7 +97,7 @@
 
             // clean name
 
-            var name = fi[0].ToUpper();
+            var name = file.Substring(0, fi[x].Index).ToUpper();
                 name = Regexes.Contractions.Replace(name, string.Empty);
                 name = Regexes.StartGroup.Replace(name, string.Empty);
                 name = Regexes.SpecialChars.Replace(name, " ").Trim();

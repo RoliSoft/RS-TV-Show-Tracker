@@ -8,6 +8,8 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    using RoliSoft.TVShowTracker.FileNames;
+
     using Timer = System.Timers.Timer;
 
     /// <summary>
@@ -517,10 +519,11 @@
 
             var name = Path.GetFileName(file);
             var dirs = Path.GetDirectoryName(file) ?? string.Empty;
-            var pf   = FileNames.Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
+            var pf   = Parser.ParseFile(name, dirs.Split(new[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries), false);
 
             if (pf.DbEpisode == null)
             {
+                if (Log.IsTraceEnabled && !string.IsNullOrWhiteSpace(pf.Show)) Log.Trace("Identified file " + name + " as " + pf + " but discarded it.");
                 return false;
             }
 
