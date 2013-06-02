@@ -29,6 +29,7 @@
 
         private static DateTime _lastSoftwareUpdate = Utils.UnixEpoch;
         private static int _inProgressCount = 0;
+        private static long _lastMemUse = 0;
         private static Thread _lastThd;
 
         /// <summary>
@@ -219,7 +220,9 @@
 
             var memusage = Process.GetCurrentProcess().WorkingSet64;
 
-            Log.Debug("The current memory usage is " + Utils.GetFileSize(memusage) + " (" + Utils.GetFileSize(oldusage) + " before GC); " + (memlimit < 256 ? "auto-restart is disabled." : "auto-restarting when it exceeds " + memlimit + " MB."));
+            Log.Debug("Current memory usage is " + Utils.GetFileSize(memusage) + " (GC: " + (memusage < oldusage ? "-" : "+") + Utils.GetFileSize(Math.Abs(memusage - oldusage)) + "; Since last: " + (memusage < _lastMemUse ? "-" : "+") + Utils.GetFileSize(Math.Abs(memusage - _lastMemUse)) + "); " + (memlimit < 256 ? "auto-restart disabled." : "auto-restarting after " + memlimit + " MB."));
+
+            _lastMemUse = memusage;
 
             if (memlimit < 256)
             {
