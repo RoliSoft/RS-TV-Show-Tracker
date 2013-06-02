@@ -53,6 +53,7 @@ title [03/12] Copying dependencies...
 rmdir /S /Q bin\Nightly\libs
 mkdir bin\Nightly\libs
 xcopy /Y /C Dependencies\*.dll bin\Nightly\libs\
+xcopy /Y /C Dependencies\*.txt bin\Nightly\libs\
 
 ::
 title [04/12] Creating ZIP archive...
