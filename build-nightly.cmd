@@ -54,6 +54,7 @@ rmdir /S /Q bin\Nightly\libs
 mkdir bin\Nightly\libs
 xcopy /Y /C Dependencies\*.dll bin\Nightly\libs\
 xcopy /Y /C Dependencies\*.txt bin\Nightly\libs\
+xcopy /Y /C LICENSE bin\Nightly\RSTVShowTracker.License.txt
 
 ::
 title [04/12] Creating ZIP archive...

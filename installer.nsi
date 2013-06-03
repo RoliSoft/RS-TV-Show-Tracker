@@ -203,6 +203,7 @@ Section -MainProgram
 	
 	# licenses
 	
+	File "RSTVShowTracker.License.txt"
 	File "Dependencies\BouncyCastle.Crypto.License.txt"
 	File "Dependencies\CookComputing.XmlRpcV2.License.txt"
 	File "Dependencies\Hammock.ClientProfile.License.txt"
@@ -342,6 +343,7 @@ Section Uninstall
 	Delete "$INSTDIR\libs\UPNPAVCDSML.dll"
 	Delete "$INSTDIR\libs\UPNPAVMSDV.dll"
 	Delete "$INSTDIR\libs\Xceed.Wpf.Toolkit.dll"
+	Delete "$INSTDIR\RSTVShowTracker.License.txt"
 	Delete "$INSTDIR\libs\BouncyCastle.Crypto.License.txt"
 	Delete "$INSTDIR\libs\CookComputing.XmlRpcV2.License.txt"
 	Delete "$INSTDIR\libs\Hammock.ClientProfile.License.txt"

@@ -153,7 +153,7 @@
                     <Paragraph Margin="0,10,0,0">
                         This software is licensed under the
                         <LineBreak />
-                        <Hyperlink NavigateUri="http://www.microsoft.com/en-us/openness/resources/licenses.aspx#MRL">Microsoft Reciprocal License</Hyperlink>
+                        <Hyperlink NavigateUri="http://www.microsoft.com/en-us/openness/licenses.aspx#MRL">Microsoft Reciprocal License (Ms-RL)</Hyperlink>
                     </Paragraph>
                     <Paragraph Margin="0,10,0,0" FontWeight="Bold">
                         Libraries
@@ -186,6 +186,11 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://www.bouncycastle.org/">BouncyCastle</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://sharpcompress.codeplex.com/">SharpCompress</Hyperlink>
                             </Paragraph>
                         </ListItem>
@@ -211,12 +216,22 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://opentools.homeip.net/dev-tools-for-upnp">Intel® Developer Tools for UPnP™ Technologies</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://wpftoolkit.codeplex.com/">Extended WPF Toolkit™ Community Edition</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>
                             <Paragraph>
                                 <Hyperlink NavigateUri="http://transitionals.codeplex.com/">Transitionals</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.codeproject.com/Articles/137552/WPF-TaskDialog-Wrapper-and-Emulator">WPF TaskDialog Wrapper and Emulator</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>
