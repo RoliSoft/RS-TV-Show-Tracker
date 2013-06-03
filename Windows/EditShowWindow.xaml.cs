@@ -11,6 +11,7 @@
     using RoliSoft.TVShowTracker.Parsers.Guides;
     using RoliSoft.TVShowTracker.Parsers.Guides.Engines;
     using RoliSoft.TVShowTracker.TaskDialogs;
+    using RoliSoft.TVShowTracker.Dependencies.GreyableImage;
 
     /// <summary>
     /// Interaction logic for EditShowWindow.xaml
@@ -19,8 +20,8 @@
     {
         private Guide _guide;
         private int _id, _sidx;
-        private string _show, _lang;
-        private bool _editWarn, _upReq, _loaded;
+        private string _show, _lang, _not, _newSource, _newSID, _newLang;
+        private bool _editWarn, _upReq, _loaded, _change;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddNewWindow"/> class.
@@ -43,9 +44,20 @@
             else
             {
                 customReleaseName.IsChecked = releaseTextBox.IsEnabled = false;
-                releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(show).ToString();
+                releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(show, release).ToString();
             }
-            
+
+            if (!string.IsNullOrWhiteSpace(release.Data.Get("scene")))
+            {
+                customSceneName.IsChecked = sceneTextBox.IsEnabled = true;
+                sceneTextBox.Text = release.Data.Get("scene");
+            }
+            else
+            {
+                customSceneName.IsChecked = sceneTextBox.IsEnabled = false;
+                sceneTextBox.Text = ShowNames.Regexes.Exclusions.ContainsKey(show) ? ShowNames.Regexes.Exclusions[show] : show;
+            }
+
             switch (Database.TVShows[_id].Source)
             {
                 case "TVRage":
@@ -120,7 +132,7 @@
 
             language.SelectedIndex = sel;
 
-            switch (FileNames.Parser.GetEpisodeNotationType(_id))
+            switch (_not = FileNames.Parser.GetEpisodeNotationType(_id))
             {
                 default:
                 case "standard":
@@ -181,7 +193,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void StandardRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Database.TVShows[_id].Data["notation"] = "standard";
+            if (!_loaded) return;
+
+            _not = "standard";
         }
 
         /// <summary>
@@ -191,7 +205,9 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DateRadioButtonChecked(object sender, RoutedEventArgs e)
         {
-            Database.TVShows[_id].Data["notation"] = "airdate";
+            if (!_loaded) return;
+
+            _not = "airdate";
         }
 
         /// <summary>
@@ -201,6 +217,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void CustomReleaseNameChecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             releaseTextBox.IsEnabled = true;
             releaseTextBox.Text = Database.GetReleaseName(_show).ToString();
         }
@@ -212,8 +230,36 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void CustomReleaseNameUnchecked(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
             releaseTextBox.IsEnabled = false;
-            releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(_show).ToString();
+            releaseTextBox.Text = ShowNames.Parser.GenerateTitleRegex(_show, Database.TVShows[_id]).ToString();
+        }
+
+        /// <summary>
+        /// Handles the Checked event of the customSceneName control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void CustomSceneNameChecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            sceneTextBox.IsEnabled = true;
+            sceneTextBox.Text = Database.TVShows[_id].Data.Get("scene") ?? (ShowNames.Regexes.Exclusions.ContainsKey(_show) ? ShowNames.Regexes.Exclusions[_show] : _show);
+        }
+
+        /// <summary>
+        /// Handles the Unchecked event of the customSceneName control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void CustomSceneNameUnchecked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded) return;
+
+            sceneTextBox.IsEnabled = false;
+            sceneTextBox.Text = ShowNames.Regexes.Exclusions.ContainsKey(_show) ? ShowNames.Regexes.Exclusions[_show] : _show;
         }
 
         /// <summary>
@@ -223,10 +269,63 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void DatabaseOnSelectionChanged(object sender, RoutedEventArgs e)
         {
+            if (!_loaded) return;
+
+            searchButton.IsEnabled = _sidx != database.SelectedIndex;
+
+            var guide = CreateGuide((((database.SelectedValue as ComboBoxItem).Content as StackPanel).Children[1] as Label).Content.ToString().Trim());
+            var sel   = 0;
+
+            language.Items.Clear();
+
+            foreach (var lang in guide.SupportedLanguages)
+            {
+                var sp = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Tag         = lang
+                    };
+
+                sp.Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/flag-" + lang + ".png", UriKind.Relative)),
+                        Height = 16,
+                        Width  = 16,
+                        Margin = new Thickness(0, 0, 0, 0)
+                    });
+
+                sp.Children.Add(new Label
+                    {
+                        Content = " " + Languages.List[lang],
+                        Padding = new Thickness(0)
+                    });
+
+                //((Image)sp.Children[0]).SetValue(ImageGreyer.IsGreyableProperty, true); // very slow
+
+                language.Items.Add(sp);
+
+                if (lang == _lang)
+                {
+                    sel = language.Items.Count - 1;
+                }
+            }
+
+            language.SelectedIndex = sel;
+        }
+
+        /// <summary>
+        /// Handles the Click event of the searchButton control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
+        private void SearchButtonOnClick(object sender, RoutedEventArgs e)
+        {
             if (!_loaded || _sidx == database.SelectedIndex)
             {
                 return;
             }
+
+            database.IsEnabled = language.IsEnabled = searchButton.IsEnabled = saveButton.IsEnabled = cancelButton.IsEnabled = nameTextBox.IsEnabled = false;
 
             Guide guide;
             switch (database.SelectedIndex)
@@ -268,6 +367,7 @@
                     break;
 
                 default:
+                    database.IsEnabled = language.IsEnabled = searchButton.IsEnabled = saveButton.IsEnabled = cancelButton.IsEnabled = nameTextBox.IsEnabled = true;
                     return;
             }
 
@@ -311,22 +411,43 @@
                                         database.SelectedIndex = 10;
                                         break;
                                 }
+
+                                database.IsEnabled = language.IsEnabled = searchButton.IsEnabled = saveButton.IsEnabled = cancelButton.IsEnabled = nameTextBox.IsEnabled = true;
                             }));
+
+                        TaskDialog.Show(new TaskDialogOptions
+                            {
+                                MainIcon        = VistaTaskDialogIcon.Error,
+                                Title           = "Not found",
+                                MainInstruction = _show,
+                                Content         = "The currently set show title was not found on the selected guide.\r\nYour selection will be reverted. Try editing the official title.",
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                     else
                     {
-                        Database.TVShows[_id].Source   = guide.GetType().Name;
-                        Database.TVShows[_id].SourceID = id;
-                        Database.TVShows[_id].Title    = title;
-                        Database.TVShows[_id].Language = lang;
-
-                        _upReq = true;
+                        _newSource = guide.GetType().Name;
+                        _newSID    = id;
+                        _newLang   = lang;
+                        
+                        _change = _upReq = true;
 
                         Dispatcher.Invoke((Action)(() =>
-                                                       {
-                                                           nameTextBox.Text = title;
-                                                           _sidx = database.SelectedIndex;
-                                                       }));
+                            {
+                                nameTextBox.Text = title;
+                                _sidx = database.SelectedIndex;
+
+                                database.IsEnabled = language.IsEnabled = saveButton.IsEnabled = cancelButton.IsEnabled = nameTextBox.IsEnabled = true;
+                            }));
+
+                        TaskDialog.Show(new TaskDialogOptions
+                            {
+                                MainIcon        = VistaTaskDialogIcon.Information,
+                                Title           = "Modified",
+                                MainInstruction = _show,
+                                Content         = "The guide was successfully changed!\r\nAn update will be initiated to this TV show after you click Save.",
+                                CustomButtons   = new[] { "OK" }
+                            });
                     }
                 });
         }
@@ -365,9 +486,26 @@
                 return;
             }
 
+            if (_change)
+            {
+                Database.TVShows[_id].Source   = _newSource;
+                Database.TVShows[_id].SourceID = _newSID;
+                Database.TVShows[_id].Language = _newLang;
+            }
+
             if (nameTextBox.Text != _show && !string.IsNullOrWhiteSpace(nameTextBox.Text))
             {
                 Database.TVShows[_id].Title = nameTextBox.Text.Trim();
+            }
+
+            if (customSceneName.IsChecked.Value && !string.IsNullOrWhiteSpace(sceneTextBox.Text) && sceneTextBox.Text.Trim() != _show)
+            {
+                var rel = Regex.Replace(sceneTextBox.Text.Trim(), @"\s+", " ");
+                Database.TVShows[_id].Data["scene"] = rel;
+            }
+            else
+            {
+                Database.TVShows[_id].Data.Remove("scene");
             }
 
             if (customReleaseName.IsChecked.Value && !string.IsNullOrWhiteSpace(releaseTextBox.Text))
@@ -386,6 +524,8 @@
 
                 _upReq = true;
             }
+
+            Database.TVShows[_id].Data["notation"] = _not;
 
             Database.TVShows[_id].SaveData();
 

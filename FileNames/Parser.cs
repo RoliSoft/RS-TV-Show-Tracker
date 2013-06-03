@@ -205,7 +205,7 @@
             
             foreach (var show in Database.TVShows.Values.ToList())
             {
-                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Title).Match(name);
+                var titleMatch   = ShowNames.Parser.GenerateTitleRegex(show.Title, show).Match(name);
                 var releaseRegex = string.Empty;
                 var releaseMatch = show.Data.TryGetValue("regex", out releaseRegex) && !string.IsNullOrWhiteSpace(releaseRegex) ? Regex.Match(name, releaseRegex) : null;
 

@@ -5,6 +5,8 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using RoliSoft.TVShowTracker.Parsers.Guides;
+
     /// <summary>
     /// Provides methods to work with TV show names.
     /// </summary>
@@ -14,14 +16,24 @@
         /// Generates a regular expression for matching the show's name.
         /// </summary>
         /// <param name="show">The show's name.</param>
+        /// <param name="db">The database entry, if any.</param>
         /// <returns>
         /// Regular expression which matches to the show's name.
         /// </returns>
-        public static Regex GenerateTitleRegex(string show)
+        public static Regex GenerateTitleRegex(string show = null, TVShow db = null)
         {
+            if (show == null)
+            {
+                show = db.Title;
+            }
+
             // see if the show has a different name
             show = show.Trim();
-            if (Regexes.Exclusions.ContainsKey(show))
+            if (db != null && !string.IsNullOrWhiteSpace(db.Data.Get("scene")))
+            {
+                show = db.Data["scene"];
+            }
+            else if (Regexes.Exclusions.ContainsKey(show))
             {
                 show = Regexes.Exclusions[show];
             }
@@ -84,7 +96,12 @@
         {
             // see if the show has a different name
             show = show.Trim();
-            if (Regexes.Exclusions.ContainsKey(show))
+            var db = Database.TVShows.Values.FirstOrDefault(x => x.Title == show);
+            if (db != null && !string.IsNullOrWhiteSpace(db.Data.Get("scene")))
+            {
+                show = db.Data["scene"];
+            }
+            else if (Regexes.Exclusions.ContainsKey(show))
             {
                 show = Regexes.Exclusions[show];
             }

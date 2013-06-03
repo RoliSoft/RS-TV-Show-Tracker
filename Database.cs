@@ -725,7 +725,7 @@
                 return new Regex(release[0].Data["regex"]);
             }
 
-            return ShowNames.Parser.GenerateTitleRegex(show);
+            return ShowNames.Parser.GenerateTitleRegex(show, release.FirstOrDefault());
         }
 
         /// <summary>

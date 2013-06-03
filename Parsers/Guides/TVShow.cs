@@ -385,7 +385,7 @@
             }
             else
             {
-                return ShowNames.Parser.GenerateTitleRegex(Title);
+                return ShowNames.Parser.GenerateTitleRegex(Title, this);
             }
         }
 
