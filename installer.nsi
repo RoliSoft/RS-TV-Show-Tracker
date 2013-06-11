@@ -203,7 +203,6 @@ Section -MainProgram
 	
 	# licenses
 	
-	File "RSTVShowTracker.License.txt"
 	File "Dependencies\BouncyCastle.Crypto.License.txt"
 	File "Dependencies\CookComputing.XmlRpcV2.License.txt"
 	File "Dependencies\Hammock.ClientProfile.License.txt"
@@ -228,6 +227,7 @@ Section -MainProgram
 	
 	SetOutPath "$INSTDIR"
 	
+	File "bin\${TARGET_DIR}\RSTVShowTracker.License.txt"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.exe.config"
 	File "bin\${TARGET_DIR}\RSTVShowTracker.pdb"
