@@ -124,7 +124,8 @@
                 status("Checking status of " + Title + "...");
             }
 
-            var init = Utils.GetURL(Location);
+            var cookies = string.Empty;
+            var init = Utils.GetURL(Location, response: r => cookies = Utils.EatCookieCollection(r.Cookies));
 
             if (init.Contains("frmLogin"))
             {
@@ -133,7 +134,7 @@
                     status("Logging in to " + Title + "...");
                 }
 
-                Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/Login.asp", "Password=" + Utils.EncodeURL(Login.Password) + "&button=OK");
+                Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/Login.asp", "Password=" + Utils.EncodeURL(Login.Password) + "&button=OK", cookies);
             }
 
             if (status != null)
@@ -141,7 +142,7 @@
                 status("Sending links to linkgrabber in " + Title + "...");
             }
 
-            var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/addlinks.asp", "textLinks=" + Utils.EncodeURL(link.Replace("\0", "\r\n")) + "&op=addLinks");
+            var req = Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/addlinks.asp", "textLinks=" + Utils.EncodeURL(link.Replace("\0", "\r\n")) + "&op=addLinks", cookies);
             var mc = Regex.Matches(req, @"name=[""']file_(\d+)");
 
             if (mc.Count == 0)
@@ -155,7 +156,7 @@
             }
 
             var post = mc.Cast<Match>().Aggregate(string.Empty, (c, m) => c + ("file_" + m.Groups[1].Value + "=on&")) + "op=downloadLinks";
-            Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/downloads.asp", post);
+            Utils.GetURL(Location.TrimEnd("/".ToCharArray()) + "/downloads.asp", post, cookies);
         }
     }
 }

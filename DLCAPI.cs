@@ -76,7 +76,7 @@
             sb.Append("<header>");
             sb.Append("<generator>");
             sb.Append("<app>" + Convert.ToBase64String(Encoding.UTF8.GetBytes("RS TV Show Tracker")) + "</app>");
-            sb.Append("<version>" + Convert.ToBase64String(Encoding.UTF8.GetBytes(Signature.Version)) + "</version>");
+            sb.Append("<version>" + Convert.ToBase64String(Encoding.UTF8.GetBytes("1.0")) + "</version>");
             sb.Append("<url>" + Convert.ToBase64String(Encoding.UTF8.GetBytes("http://lab.rolisoft.net/")) + "</url>");
             sb.Append("</generator>");
             sb.Append("<dlcxmlversion>" + Convert.ToBase64String(Encoding.UTF8.GetBytes("20_02_2008")) + "</dlcxmlversion>");
@@ -99,8 +99,8 @@
 
             var xml = Convert.ToBase64String(Encoding.UTF8.GetBytes(sb.ToString()));
             var key = BitConverter.ToString(new SHA256CryptoServiceProvider().ComputeHash(BitConverter.GetBytes(DateTime.Now.ToBinary()))).Replace("-", string.Empty).Substring(0, 16);
-            
-            var srv = Utils.GetURL(DLCCrypt, "&data=" + key + "&lid=" + Convert.ToBase64String(Encoding.UTF8.GetBytes("JDOWNLOADER.ORG_" + DLCCrypt + "_3600")));
+
+            var srv = Utils.GetURL(DLCCrypt, "&data=" + key + "&lid=" + Convert.ToBase64String(Encoding.UTF8.GetBytes("http://lab.rolisoft.net/_3600")) + "&version=1.0&client=rstvshowtracker");
             var rcr = Regex.Match(srv, @"<rc>(.+)</rc>");
 
             if (!rcr.Groups[1].Success)
@@ -112,8 +112,8 @@
 
             var aes = new AesEngine();
             var cbc = new CbcBlockCipher(aes);
-            var pk7 = new Pkcs7Padding();
-            var pad = new PaddedBufferedBlockCipher(cbc, pk7);
+            var zbp = new ZeroBytePadding();
+            var pad = new PaddedBufferedBlockCipher(cbc, zbp);
 
             pad.Init(true, new ParametersWithIV(new KeyParameter(Encoding.ASCII.GetBytes(key)), Encoding.ASCII.GetBytes(key)));
 
