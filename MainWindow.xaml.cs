@@ -1292,53 +1292,54 @@
                 ecnt++;
             }
 
-            if (show)
+            if (show && Active != null)
             {
-                if (Active != null && (bool)Active.Dispatcher.Invoke((Func<bool>)(() => Active.IsVisible)))
+                if (Active.Dispatcher.Invoke(() => Active.IsVisible))
                 {
                     Utils.Win7Taskbar(100, TaskbarProgressBarState.Error);
                 }
 
-                var res = Task.Factory.StartNew(() => TaskDialog.Show(new TaskDialogOptions
-                    {
-                        MainIcon                = VistaTaskDialogIcon.Error,
-                        Title                   = "An unexpected error occurred",
-                        MainInstruction         = "An unexpected error occurred",
-                        Content                 = sbtd.ToString() + (count == 3 ? "\r\n\r\nFuture exceptions of this type will be ignored automatically." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occurred at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
-                        ExpandedInfo            = sb.ToString().TrimEnd(),
-                        CommandButtons          = new[] { "Submit bug report", "Ignore exception" },
-                        AllowDialogCancellation = true,
-                        Callback                = (dialog, args, data) =>
-                            {
-                                if (!string.IsNullOrWhiteSpace(args.Hyperlink))
-                                {
-                                    Utils.Run(args.Hyperlink);
-                                }
-
-                                if (args.ButtonId != 0)
-                                {
-                                    return false;
-                                }
-
-                                return true;
-                            }
-                    }), CancellationToken.None, TaskCreationOptions.None, _tssc);
+                TaskDialogResult res;
 
                 try
                 {
-                    res.Wait();
+                    res = Active.Dispatcher.Invoke(() => TaskDialog.Show(new TaskDialogOptions
+                        {
+                            MainIcon        = VistaTaskDialogIcon.Error,
+                            Title           = "An unexpected error occurred",
+                            MainInstruction = "An unexpected error occurred",
+                            Content         = sbtd.ToString() + (count == 3 ? "\r\n\r\nFuture exceptions of this type will be ignored automatically." : string.Empty) + (isTerminating ? "\r\n\r\nUnfortunately this exception occurred at a crucial part of the code and the execution of the software will be terminated." : string.Empty),
+                            ExpandedInfo    = sb.ToString().TrimEnd(),
+                            CommandButtons  = new[] { "Submit bug report", "Ignore exception" },
+                            AllowDialogCancellation = true,
+                            Callback = (dialog, args, data) =>
+                                {
+                                    if (!string.IsNullOrWhiteSpace(args.Hyperlink))
+                                    {
+                                        Utils.Run(args.Hyperlink);
+                                    }
+
+                                    if (args.ButtonId != 0)
+                                    {
+                                        return false;
+                                    }
+
+                                    return true;
+                                }
+                        }));
                 }
                 catch (Exception ex2)
                 {
                     Log.Error("Error while trying to show error dialog... Nice...", ex2);
+                    return;
                 }
 
-                if (Active != null && Active.Dispatcher.Invoke(() => Active.IsVisible))
+                if (Active.Dispatcher.Invoke(() => Active.IsVisible))
                 {
                     Utils.Win7Taskbar(state: TaskbarProgressBarState.NoProgress);
                 }
 
-                if (res.Result.CommandButtonResult.HasValue && res.Result.CommandButtonResult.Value == 0)
+                if (res.CommandButtonResult.HasValue && res.CommandButtonResult.Value == 0)
                 {
                     ReportException(sb.ToString(), ex);
                 }

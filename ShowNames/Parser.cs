@@ -414,14 +414,6 @@
                     @"S(?:e(?:ason|ries)?)?[^0-9]?0?{0}[^a-z0-9]*E(?:p(?:isode|\.)?)?[^0-9]?(?:(?<em>\d{{1,2}})[^a-z0-9]{{1,3}})?0?{1}".FormatWith(season, episode)
                 };
 
-            if (Settings.Get("Enable Shortest Notation", true))
-            {
-                regexes.Add(
-                    // 213
-                    @"(?<x>{0}{1:00})(?:(?=[\.\s_])|$)".FormatWith(season, generateExtractor ? (object)@"(?<e>\d{2})" : (object)episode.ToInteger())
-                );
-            }
-
             if (airdate.HasValue)
             {
                 regexes.Add(
@@ -432,6 +424,14 @@
             else if (generateExtractor)
             {
                 regexes.Add(@"(?:(?<y>\d{4})\.(?<m>\d{1,2})\.(?<d>\d{1,2})|(?<y>\d{4})\-(?<m>\d{1,2})\-(?<d>\d{1,2})|(?<y>\d{4})_(?<m>\d{1,2})_(?<d>\d{1,2})|(?<y>\d{4})\s(?<m>\d{1,2})\s(?<d>\d{1,2}))");
+            }
+
+            if (Settings.Get("Enable Shortest Notation", true))
+            {
+                regexes.Add(
+                    // 213
+                    @"(?<x>{0}{1:00})(?:(?=[\.\s_])|$)".FormatWith(season, generateExtractor ? (object)@"(?<e>\d{2})" : (object)episode.ToInteger())
+                );
             }
 
             if (generateExtractor || season == "1")

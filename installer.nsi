@@ -258,7 +258,6 @@ Section -MainProgram
 	Delete "Twitterizer2.dll"
 	Delete "VistaControls.dll"
 	Delete "WPFToolkit.Extended.dll"
-	Delete "handle.exe"
 SectionEnd
 
 ######################################################################
