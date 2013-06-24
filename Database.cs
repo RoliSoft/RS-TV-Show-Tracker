@@ -925,35 +925,86 @@
         /// Inspects the specified backup archive.
         /// </summary>
         /// <param name="archive">The archive.</param>
-        public static void Inspect(string archive)
+        /// <returns>Summary of the archive.</returns>
+        public static ArchiveInfo Inspect(string archive)
         {
-            // TODO actually implement this
-
             try
             {
+                var arc = new ArchiveInfo();
                 var zip = ZipArchive.Open(archive);
                 
                 if (zip.Entries.Any(e => e.FilePath == "json"))
                 {
-                    // has settings
+                    arc.Settings = true;
                 }
 
                 if (zip.Entries.Any(e => e.FilePath.EndsWith("/cover")))
                 {
-                    // has covers
+                    arc.Covers = true;
                 }
 
                 foreach (var file in zip.Entries.Where(e => e.FilePath.EndsWith("/info")))
                 {
-                    // return Path.GetFileName(Path.GetDirectoryName(file.FilePath))
+                    var dir = Path.GetFileName(Path.GetDirectoryName(file.FilePath));
+
+                    try
+                    {
+                        using (var fs = file.OpenEntryStream())
+                        using (var br = new BinaryReader(fs))
+                        {
+                            var ver = br.ReadByte();
+                            var upd = br.ReadUInt32();
+
+                            var title = br.ReadString();
+                            var guide = br.ReadString();
+
+                            arc.Shows.Add(new[] { dir, title, guide });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Unable to process " + dir + "/info in backup due to error.", ex);
+                    }
                 }
+
+                return arc;
             }
             catch (Exception ex)
             {
                 Log.Error("Error while processing archive.", ex);
             }
 
-            //return null;
+            return null;
+        }
+
+        /// <summary>
+        /// Represents a database backup archive's attributes.
+        /// </summary>
+        public class ArchiveInfo
+        {
+            /// <summary>
+            /// Gets or sets a value indicating whether this archive has settings.
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if has settings; otherwise, <c>false</c>.
+            /// </value>
+            public bool Settings { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether this archive has covers.
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if has covers; otherwise, <c>false</c>.
+            /// </value>
+            public bool Covers { get; set; }
+
+            /// <summary>
+            /// Gets or sets the list of archived shows.
+            /// </summary>
+            /// <value>
+            /// The list of archived shows.
+            /// </value>
+            public List<string[]> Shows { get; set; }
         }
     }
 }
