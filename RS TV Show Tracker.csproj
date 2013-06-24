@@ -215,6 +215,7 @@
     <Compile Include="CoverManager.cs" />
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
     <Compile Include="DiscoverShows.cs" />
+    <Compile Include="Isolated.cs" />
     <Compile Include="KeyValueList.cs" />
     <Compile Include="Library.cs" />
     <Compile Include="LocalProgrammingPlugin.cs" />
