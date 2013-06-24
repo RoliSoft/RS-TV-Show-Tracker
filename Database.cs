@@ -6,6 +6,13 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Text;
+
+    using Newtonsoft.Json;
+
+    using SharpCompress.Archive.Zip;
+    using SharpCompress.Common;
+    using SharpCompress.Writer;
 
     using RoliSoft.TVShowTracker.Parsers.ForeignTitles;
     using RoliSoft.TVShowTracker.Parsers.Guides;
@@ -810,6 +817,143 @@
             new Thread(() => Remote.API.SetForeignTitle(TVShows[id].Title, "!", language)).Start();
 
             return null;
+        }
+
+        /// <summary>
+        /// Backups the database to the specified file.
+        /// </summary>
+        /// <param name="archive">The archive.</param>
+        /// <param name="callback">The status callback.</param>
+        /// <param name="covers">if set to <c>true</c> covers will be saved as well.</param>
+        /// <param name="settings">if set to <c>true</c> settings will be saved as well.</param>
+        public static void Backup(string archive, Action<int, string> callback = null, bool covers = false, bool settings = false)
+        {
+            if (File.Exists(archive))
+            {
+                try
+                {
+                    File.Delete(archive);
+                }
+                catch (Exception ex)
+                {
+                    if (callback != null)
+                    {
+                        callback(-1, "Unable to delete existing destination file.");
+                    }
+
+                    Log.Error("Error while deleting existing archive file.", ex);
+                    return;
+                }
+            }
+
+            if (callback != null)
+            {
+                callback(0, "Creating archive...");
+            }
+
+            try
+            {
+                using (var fs = File.OpenWrite(archive))
+                using (var zip = WriterFactory.Open(fs, ArchiveType.Zip, CompressionType.Deflate))
+                {
+                    if (File.Exists(Path.Combine(DataPath, "conf")))
+                    {
+                        zip.Write("conf", Path.Combine(DataPath, "conf"));
+                    }
+
+                    foreach (var show in TVShows.Values)
+                    {
+                        if (callback != null)
+                        {
+                            callback(0, "Saving " + show.Title + "...");
+                        }
+
+                        var dir = Path.GetFileName(show.Directory);
+
+                        zip.Write(Path.Combine(dir, "info"), Path.Combine(show.Directory, "info"));
+                        zip.Write(Path.Combine(dir, "conf"), Path.Combine(show.Directory, "conf"));
+
+                        if (File.Exists(Path.Combine(show.Directory, "seen")))
+                        {
+                            zip.Write(Path.Combine(dir, "seen"), Path.Combine(show.Directory, "seen"));
+                        }
+
+                        if (covers)
+                        {
+                            var cover = CoverManager.GetCoverLocation(show.Title);
+
+                            if (File.Exists(cover))
+                            {
+                                zip.Write(Path.Combine(dir, "cover"), cover);
+                            }
+                        }
+                    }
+
+                    if (settings)
+                    {
+                        if (callback != null)
+                        {
+                            callback(0, "Saving settings...");
+                        }
+
+                        using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Settings.Keys, Formatting.None))))
+                        {
+                            ms.Position = 0;
+                            zip.Write("json", ms);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (callback != null)
+                {
+                    callback(-1, "Error while archiving database.");
+                }
+
+                Log.Error("Error while writing files into archive.", ex);
+                return;
+            }
+
+            if (callback != null)
+            {
+                callback(1, "Database successfully backed up.");
+            }
+        }
+
+        /// <summary>
+        /// Inspects the specified backup archive.
+        /// </summary>
+        /// <param name="archive">The archive.</param>
+        public static void Inspect(string archive)
+        {
+            // TODO actually implement this
+
+            try
+            {
+                var zip = ZipArchive.Open(archive);
+                
+                if (zip.Entries.Any(e => e.FilePath == "json"))
+                {
+                    // has settings
+                }
+
+                if (zip.Entries.Any(e => e.FilePath.EndsWith("/cover")))
+                {
+                    // has covers
+                }
+
+                foreach (var file in zip.Entries.Where(e => e.FilePath.EndsWith("/info")))
+                {
+                    // return Path.GetFileName(Path.GetDirectoryName(file.FilePath))
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error while processing archive.", ex);
+            }
+
+            //return null;
         }
     }
 }
