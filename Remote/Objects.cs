@@ -353,69 +353,6 @@
     }
 
     /// <summary>
-    /// Represents a show information change.
-    /// </summary>
-    [Serializable]
-    public class ShowInfoChange
-    {
-        /// <summary>
-        /// Gets or sets the show.
-        /// </summary>
-        /// <value>An array with 4 items: 1 - title of the show; 2 - grabber name; 3 - language; 4 - ID on the grabber.</value>
-        public string Show { get; set; }
-
-        /// <summary>
-        /// Gets or sets the GMT unix timestamp which indicates when did this change occur.
-        /// </summary>
-        /// <value>The GMT unix timestamp.</value>
-        public double Time { get; set; }
-
-        /// <summary>
-        /// Gets or sets the data which contains the changed information.
-        /// </summary>
-        /// <value>The changed information.</value>
-        public object Data { get; set; }
-
-        /// <summary>
-        /// Gets or sets the type of the change.
-        /// </summary>
-        /// <value>The type of the change.</value>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ChangeType Change { get; set; }
-
-        /// <summary>
-        /// Describes the type of the change.
-        /// </summary>
-        public enum ChangeType
-        {
-            /// <summary>
-            /// Adds a show.
-            /// </summary>
-            AddShow,
-            /// <summary>
-            /// Removes a show.
-            /// </summary>
-            RemoveShow,
-            /// <summary>
-            /// Modifies a show.
-            /// </summary>
-            ModifyShow,
-            /// <summary>
-            /// Marks an episode.
-            /// </summary>
-            MarkEpisode,
-            /// <summary>
-            /// Unmarks an episode.
-            /// </summary>
-            UnmarkEpisode,
-            /// <summary>
-            /// Reorders the list.
-            /// </summary>
-            ReorderList
-        }
-    }
-
-    /// <summary>
     /// Represents a list of show changes since the last request.
     /// </summary>
     public class ShowInfoChangeList : IRemoteObject
@@ -450,6 +387,6 @@
         /// Gets or sets the change list.
         /// </summary>
         /// <value>The change list.</value>
-        public List<ShowInfoChange> Changes { get; set; }
+        public List<Synchronization.Engines.LabSync.Change> Changes { get; set; }
     }
 }

@@ -349,6 +349,7 @@
       <DependentUpon>SignatureGen.tt</DependentUpon>
     </Compile>
     <Compile Include="StartupPlugin.cs" />
+    <Compile Include="Synchronization\Engines\LabSync.cs" />
     <Compile Include="Synchronization\Status.cs" />
     <Compile Include="FileNames\Parser.cs" />
     <Compile Include="FileNames\ShowFile.cs" />
@@ -1087,9 +1088,7 @@
     <Resource Include="Images\amazon.png" />
     <Resource Include="Images\apple.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Synchronization\Engines\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\group.png" />
     <Resource Include="Images\order.png" />

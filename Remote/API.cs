@@ -346,7 +346,7 @@
         /// <param name="user">The username.</param>
         /// <param name="pass">The password.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SendDatabaseChange(ShowInfoChange change, string user, string pass)
+        public static General SendDatabaseChange(Synchronization.Engines.LabSync.Change change, string user, string pass)
         {
             return InvokeAuthedRemoteMethod<General>("SendDatabaseChange", user, pass, change);
         }
@@ -358,7 +358,7 @@
         /// <param name="user">The username.</param>
         /// <param name="pass">The password.</param>
         /// <returns><c>true</c> if operation was successful.</returns>
-        public static General SendDatabaseChanges(IEnumerable<ShowInfoChange> changes, string user, string pass)
+        public static General SendDatabaseChanges(IEnumerable<Synchronization.Engines.LabSync.Change> changes, string user, string pass)
         {
             return InvokeAuthedRemoteMethod<General>("SendDatabaseChanges", user, pass, changes);
         }
