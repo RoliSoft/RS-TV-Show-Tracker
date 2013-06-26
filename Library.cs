@@ -586,9 +586,15 @@
         /// <param name="path">The path.</param>
         public static void RemovePath(string path)
         {
-            if (Indexing) return;
+            if (Indexing || !Signature.IsActivated) return;
 
             Log.Info("Removing path from library: " + path);
+
+            if (_fsw == null || Files == null)
+            {
+                Log.Warn("_fsw or Files is not initialized.");
+                return;
+            }
 
             foreach (var ep in Files)
             {
@@ -622,9 +628,15 @@
         /// <param name="path">The path.</param>
         public static void AddPath(string path)
         {
-            if (Indexing) return;
+            if (Indexing || !Signature.IsActivated) return;
 
             Log.Info("Adding path to library: " + path);
+
+            if (_fsw == null)
+            {
+                Log.Warn("_fsw is not initialized.");
+                return;
+            }
 
             var i = _fsw.Length;
             Array.Resize(ref _fsw, _fsw.Length + 1);

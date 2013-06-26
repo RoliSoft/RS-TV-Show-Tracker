@@ -340,7 +340,10 @@
 
                     Run(() =>
                         {
-                            ReindexDownloadPaths.IsEnabled = true;
+                            if (Signature.IsActivated)
+                            {
+                                ReindexDownloadPaths.IsEnabled = true;
+                            }
 
                             SetLastUpdated();
                         });
