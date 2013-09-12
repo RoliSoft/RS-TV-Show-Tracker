@@ -159,7 +159,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 out outBytesReturned,
                 IntPtr.Zero))
             {
-                IntPtr pUsnRecord = new IntPtr(pData.ToInt32() + sizeof (Int64));
+                IntPtr pUsnRecord = new IntPtr((Is64Bits() ? pData.ToInt64() : pData.ToInt32()) + sizeof(Int64));
                 while (outBytesReturned > 60)
                 {
                     var usnEntry = new Win32Api.UsnEntry(pUsnRecord);
@@ -173,13 +173,24 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                         dirs.TryAdd(usnEntry.FileReferenceNumber, usnEntry);
                     }
 
-                    pUsnRecord = new IntPtr(pUsnRecord.ToInt32() + usnEntry.RecordLength);
+                    pUsnRecord = new IntPtr((Is64Bits() ? pUsnRecord.ToInt64() : pUsnRecord.ToInt32()) + usnEntry.RecordLength);
                     outBytesReturned -= usnEntry.RecordLength;
                 }
                 Marshal.WriteInt64(medBuffer, Marshal.ReadInt64(pData, 0));
             }
 
             Marshal.FreeHGlobal(pData);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the OS is 64-bit.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if the OS is 64-bit; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool Is64Bits()
+        {
+            return Marshal.SizeOf(typeof(IntPtr)) == 8;
         }
 
         /// <summary>

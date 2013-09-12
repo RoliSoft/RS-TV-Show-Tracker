@@ -565,7 +565,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 _fileAttributes = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
                 short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
                 short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
-                _name = Marshal.PtrToStringUni(new IntPtr(ptrToUsnRecord.ToInt32() + fileNameOffset), fileNameLength / sizeof(char));
+                _name = Marshal.PtrToStringUni(new IntPtr((NtfsUsnJournal.Is64Bits() ? ptrToUsnRecord.ToInt64() : ptrToUsnRecord.ToInt32()) + fileNameOffset), fileNameLength / sizeof(char));
             }
 
             #region IComparable<UsnEntry> Members
@@ -645,14 +645,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
             public Int32 Attributes;
             public Int32 SecurityDescriptor;
             public Int32 SecurityQualityOfService;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct UNICODE_STRING
-        {
-            public Int16 Length;
-            public Int16 MaximumLength;
-            public IntPtr Buffer;
         }
 
         #endregion
