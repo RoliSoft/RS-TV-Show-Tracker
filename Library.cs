@@ -33,7 +33,7 @@
         /// </value>
         public static volatile bool Indexing;
 
-        private static FileSystemWatcher[] _fsw;
+        private static List<FileSystemWatcher> _fsw;
         private static Dictionary<int, HashSet<string>> _tmp;
         private static BlockingCollection<Tuple<WatcherChangeTypes, string[]>> _producer;
         private static Task _consumer;
@@ -133,18 +133,18 @@
 
             _isStarting = true;
 
-            Log.Debug(((_fsw != null && _fsw.Length != 0) ? "Res" : "S") + "tarting file system watchers...");
+            Log.Debug(((_fsw != null && _fsw.Count != 0) ? "Res" : "S") + "tarting file system watchers...");
 
-            if (_fsw != null && _fsw.Length != 0)
+            if (_fsw != null && _fsw.Count != 0)
             {
-                for (var i = 0; i < _fsw.Length; i++)
+                foreach (var fsw in _fsw)
                 {
                     try
                     {
-                        if (_fsw[i] != null)
+                        if (fsw != null)
                         {
-                            _fsw[i].EnableRaisingEvents = false;
-                            _fsw[i].Dispose();
+                            fsw.EnableRaisingEvents = false;
+                            fsw.Dispose();
                         }
                     }
                     catch { }
@@ -158,28 +158,30 @@
                 _producer.CompleteAdding();
             }
 
-            _fsw      = new FileSystemWatcher[paths.Count];
+            _fsw      = new List<FileSystemWatcher>();
             _producer = new BlockingCollection<Tuple<WatcherChangeTypes, string[]>>();
             _consumer = new Task(ProcessChangesQueue, TaskCreationOptions.LongRunning);
 
             _consumer.Start();
 
-            for (var i = 0; i < paths.Count; i++)
+            foreach (var path in paths)
             {
                 try
                 {
-                    _fsw[i] = new FileSystemWatcher(paths[i]);
+                    var fsw = new FileSystemWatcher(path);
 
-                    _fsw[i].Created += FileSystemWatcher_OnCreated;
-                    _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
-                    _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
-                    _fsw[i].Error   += FileSystemWatcher_OnError;
+                    fsw.Created += FileSystemWatcher_OnCreated;
+                    fsw.Renamed += FileSystemWatcher_OnRenamed;
+                    fsw.Deleted += FileSystemWatcher_OnDeleted;
+                    fsw.Error   += FileSystemWatcher_OnError;
 
-                    _fsw[i].EnableRaisingEvents = true;
+                    _fsw.Add(fsw);
+
+                    fsw.EnableRaisingEvents = true;
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("Error while creating file system watcher for " + paths[i] + ".", ex);
+                    Log.Warn("Error while creating file system watcher for " + path + ".", ex);
                 }
             }
 
@@ -265,32 +267,28 @@
                                 }
                                 else if (Directory.Exists(evt.Item2[0]))
                                 {
+                                    AddPath(evt.Item2[0]);
+
                                     Log.Debug("Scanning new directory " + Path.GetFileName(evt.Item2[0]) + " for episodes...");
 
-                                    if (_producer.Count < 10)
-                                    {
-                                        Log.Trace("Queue.Count < 10, waiting 5s before initiating directory scan...");
-                                        Thread.Sleep(5000);
-                                    }
-
-                                    var fs = new FileSearch(new[] {evt.Item2[0]}, CheckFile);
+                                    var fs = new FileSearch(new[] { evt.Item2[0] }, CheckFile);
 
                                     fs.FileSearchDone += (sender, args) =>
-                                    {
-                                        if (args.Data == null || args.Data.Count == 0)
                                         {
-                                            Log.Debug("No episodes found in " + evt.Item2[0] + ".");
-                                        }
-                                        else
-                                        {
-                                            success = true;
-
-                                            foreach (var file in args.Data)
+                                            if (args.Data == null || args.Data.Count == 0)
                                             {
-                                                Log.Debug("Added file " + Path.GetFileName(file) + " to the library.");
+                                                Log.Debug("No episodes found in " + evt.Item2[0] + ".");
                                             }
-                                        }
-                                    };
+                                            else
+                                            {
+                                                success = true;
+
+                                                foreach (var file in args.Data)
+                                                {
+                                                    Log.Debug("Added file " + Path.GetFileName(file) + " to the library.");
+                                                }
+                                            }
+                                        };
 
                                     fs.BeginSearch();
 
@@ -405,16 +403,16 @@
 
             Log.Info("Starting library update...");
 
-            if (_fsw != null && _fsw.Length != 0)
+            if (_fsw != null && _fsw.Count != 0)
             {
-                for (var i = 0; i < _fsw.Length; i++)
+                foreach (var fsw in _fsw)
                 {
                     try
                     {
-                        if (_fsw[i] != null)
+                        if (fsw != null)
                         {
-                            _fsw[i].EnableRaisingEvents = false;
-                            _fsw[i].Dispose();
+                            fsw.EnableRaisingEvents = false;
+                            fsw.Dispose();
                         }
                     }
                     catch { }
@@ -638,19 +636,18 @@
                 return;
             }
 
-            var i = _fsw.Length;
-            Array.Resize(ref _fsw, _fsw.Length + 1);
-
             try
             {
-                _fsw[i] = new FileSystemWatcher(path);
+                var fsw = new FileSystemWatcher(path);
 
-                _fsw[i].Created += FileSystemWatcher_OnCreated;
-                _fsw[i].Renamed += FileSystemWatcher_OnRenamed;
-                _fsw[i].Deleted += FileSystemWatcher_OnDeleted;
-                _fsw[i].Error   += FileSystemWatcher_OnError;
+                fsw.Created += FileSystemWatcher_OnCreated;
+                fsw.Renamed += FileSystemWatcher_OnRenamed;
+                fsw.Deleted += FileSystemWatcher_OnDeleted;
+                fsw.Error   += FileSystemWatcher_OnError;
 
-                _fsw[i].EnableRaisingEvents = true;
+                _fsw.Add(fsw);
+
+                fsw.EnableRaisingEvents = true;
             }
             catch (Exception ex)
             {
