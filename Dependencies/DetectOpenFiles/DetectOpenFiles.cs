@@ -214,7 +214,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             var objObjectName = new Win32API.OBJECT_NAME_INFORMATION();
             var strObjectName = "";
             var nLength = 0;
-            IntPtr ipTemp;
 
             if (!Win32API.DuplicateHandle(ipProcessHwnd, systemHandleInformation.Handle, Win32API.GetCurrentProcess(), out ipHandle, 0, false, Win32API.DUPLICATE_SAME_ACCESS))
             {
@@ -241,17 +240,10 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 ipObjectType = Marshal.AllocHGlobal(nLength);
             }
 
-            objObjectType = (Win32API.OBJECT_TYPE_INFORMATION)Marshal.PtrToStructure(ipObjectType, objObjectType.GetType());
-            if (Is64Bits())
-            {
-                ipTemp = new IntPtr(Convert.ToInt64(objObjectType.Name.Buffer.ToString(), 10) >> 32);
-            }
-            else
-            {
-                ipTemp = objObjectType.Name.Buffer;
-            }
+            // TODO: check if this code still works on Windows 7, now that UNICODE_STRING doesn't have Pack = 1 defined
 
-            var strObjectTypeName = Marshal.PtrToStringUni(ipTemp, objObjectType.Name.Length >> 1);
+            objObjectType = (Win32API.OBJECT_TYPE_INFORMATION)Marshal.PtrToStructure(ipObjectType, objObjectType.GetType());
+            var strObjectTypeName = Marshal.PtrToStringUni(objObjectType.Name.Buffer, objObjectType.Name.Length >> 1);
             Marshal.FreeHGlobal(ipObjectType);
             if (strObjectTypeName != "File")
                 return null;
@@ -260,7 +252,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
             var ipObjectName = Marshal.AllocHGlobal(nLength);
 
-            // ...this call sometimes hangs. Is a Windows error.
+            // ...this call sometimes hangs due to a Windows error.
             while ((uint)(Win32API.NtQueryObject(ipHandle, (int)Win32API.ObjectInformationClass.ObjectNameInformation, ipObjectName, nLength, ref nLength)) == Win32API.STATUS_INFO_LENGTH_MISMATCH)
             {
                 Marshal.FreeHGlobal(ipObjectName);
@@ -273,24 +265,15 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             }
             objObjectName = (Win32API.OBJECT_NAME_INFORMATION)Marshal.PtrToStructure(ipObjectName, objObjectName.GetType());
 
-            if (Is64Bits())
-            {
-                ipTemp = new IntPtr(Convert.ToInt64(objObjectName.Name.Buffer.ToString(), 10) >> 32);
-            }
-            else
-            {
-                ipTemp = objObjectName.Name.Buffer;
-            }
-
-            if (ipTemp != IntPtr.Zero)
+            if (objObjectName.Name.Buffer.ToInt64() > 0 && nLength > 0)
             {
 
                 var baTemp = new byte[nLength];
                 try
                 {
-                    Marshal.Copy(ipTemp, baTemp, 0, nLength);
+                    Marshal.Copy(objObjectName.Name.Buffer, baTemp, 0, nLength);
 
-                    strObjectName = Marshal.PtrToStringUni(Is64Bits() ? new IntPtr(ipTemp.ToInt64()) : new IntPtr(ipTemp.ToInt32()));
+                    strObjectName = Marshal.PtrToStringUni(objObjectName.Name.Buffer);
                 }
                 catch (AccessViolationException ex)
                 {
@@ -505,7 +488,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 public UNICODE_STRING Name;
             }
 
-            [StructLayout(LayoutKind.Sequential, Pack = 1)]
+            [StructLayout(LayoutKind.Sequential)]
             public struct UNICODE_STRING
             {
                 public ushort Length;
