@@ -96,17 +96,17 @@
         }
 
         /// <summary>
-        /// Gets a value indicating whether the operating system is Windows 8
+        /// Gets a value indicating whether the operating system is Windows 8 or 8.1.
         /// </summary>
         /// <value>
-        /// 	<c>true</c> if the OS is Windows 8; otherwise, <c>false</c>.
+        /// 	<c>true</c> if the OS is Windows 8 or 8.1; otherwise, <c>false</c>.
         /// </value>
         public static bool Is8
         {
             get
             {
                 return Environment.OSVersion.Platform == PlatformID.Win32NT &&
-                      (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 2);
+                      (Environment.OSVersion.Version.Major == 6 && (Environment.OSVersion.Version.Minor == 2 || Environment.OSVersion.Version.Minor == 3));
             }
         }
 
@@ -135,7 +135,31 @@
         {
             get
             {
-                return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+                if (!_isAdmin.HasValue)
+                {
+                    _isAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+                }
+
+                return _isAdmin.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the current process is 64-bit.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the current process is 64-bit; otherwise, <c>false</c>.
+        /// </value>
+        public static bool Is64Bit
+        {
+            get
+            {
+                if (!_isX64.HasValue)
+                {
+                    _isX64 = (Marshal.SizeOf(typeof(IntPtr)) == 8);
+                }
+
+                return _isX64.Value;
             }
         }
 
@@ -187,7 +211,7 @@
                                         return "Windows XP";
 
                                     case 2:
-                                        return "Windows 2003";
+                                        return "Windows XP 64-Bit Edition";
                                 }
                                 break;
 
@@ -202,6 +226,9 @@
 
                                     case 2:
                                         return "Windows 8";
+
+                                    case 3:
+                                        return "Windows 8.1";
                                 }
                                 break;
                         }
@@ -212,6 +239,12 @@
 
                     case PlatformID.Unix:
                         return "Unix";
+
+                    case PlatformID.MacOSX:
+                        return "Mac OS X " + Environment.OSVersion.Version.Major + "." + Environment.OSVersion.Version.Minor;
+
+                    case PlatformID.Xbox:
+                        return "Xbox 360";
                 }
 
                 return "Unknown OS";
@@ -232,7 +265,9 @@
         /// <summary>
         /// A list of hostnames for which to ignore invalid SSL certificate errors.
         /// </summary>
-        public static List<string> IgnoreInvalidCertificatesFor = new List<string>(); 
+        public static List<string> IgnoreInvalidCertificatesFor = new List<string>();
+
+        private static bool? _isAdmin, _isX64;
 
         /// <summary>
         /// Initializes the <see cref="Utils"/> class.

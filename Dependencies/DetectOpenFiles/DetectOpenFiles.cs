@@ -8,6 +8,8 @@
 //  Added Handle and OpenedFilesView output parser implementations as backup.
 //
 
+using CookComputing.XmlRpc;
+
 namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 {
     using System;
@@ -156,45 +158,36 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                 var hwnd = IntPtr.Zero;
                 var hinf = handle;
 
-                var thd = new Thread(() => path = GetFilePath(hinf, ref hwnd)) { IsBackground = true };
-
-                thd.Start();
-
-                if (!thd.Join(200))
+                using (var mre = new ManualResetEvent(false))
                 {
-                    Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") thread decided to hang, trying to cancel I/O ops and close handle...");
-
-                    if (Win32API.CancelIo(hwnd))
-                    {
-                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") canceled the I/O operations successfully.");
-                    }
-                    else
-                    {
-                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CancelIo(0x" + hwnd.ToString("X") + ") failed to cancel the I/O operations.");
-                    }
-
-                    if (Win32API.CloseHandle(hwnd))
-                    {
-                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") closed the handle successfully.");
-                    }
-                    else
-                    {
-                        Log.Trace("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") : CloseHandle(0x" + hwnd.ToString("X") + ") failed to close the handle.");
-                    }
-
-                    if (!thd.Join(100))
-                    {
-                        Log.Debug("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") thread is still hanging, trying to forcefully abort thread...");
-
-                        try
+                    var thd = new Thread(() =>
                         {
-                            thd.Interrupt();
-                            thd.Abort();
-                        }
-                        catch (Exception ex)
+                            try
+                            {
+                                path = GetFilePath(hinf, ref hwnd);
+                                mre.Set();
+                            }
+                            catch { }
+                        })
                         {
-                            Log.Warn("GetFilePath(" + handle.ProcessID + ", 0x" + handle.Handle.ToString("X") + ") thread was not killed successfully.", ex);
-                        }
+                            IsBackground = true
+                        };
+
+                    thd.Start();
+
+                    if (!mre.WaitOne(200))
+                    {
+                        new Thread(() =>
+                            {
+                                try
+                                {
+                                    Win32API.CancelIo(hwnd);
+                                    Win32API.CloseHandle(hwnd);
+                                    thd.Interrupt();
+                                    thd.Abort();
+                                }
+                                catch { }
+                            }).Start();
                     }
                 }
 
@@ -217,7 +210,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
             if (!Win32API.DuplicateHandle(ipProcessHwnd, systemHandleInformation.Handle, Win32API.GetCurrentProcess(), out ipHandle, 0, false, Win32API.DUPLICATE_SAME_ACCESS))
             {
-                Log.Trace("GetFilePath(" + systemHandleInformation.ProcessID + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") : DuplicateHandle(0x" + ipProcessHwnd.ToString("X") + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") returned false.");
+                //Log.Trace("GetFilePath(" + systemHandleInformation.ProcessID + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") : DuplicateHandle(0x" + ipProcessHwnd.ToString("X") + ", 0x" + systemHandleInformation.Handle.ToString("X") + ") returned false.");
                 return null;
             }
 
@@ -345,7 +338,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             Marshal.Copy(ipHandlePointer, baTemp, 0, nLength);
 
             long lHandleCount;
-            if (Is64Bits())
+            if (Utils.Is64Bit)
             {
                 lHandleCount = Marshal.ReadInt64(ipHandlePointer);
                 ipHandle = new IntPtr(ipHandlePointer.ToInt64() + 8);
@@ -359,7 +352,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             for (long lIndex = 0; lIndex < lHandleCount; lIndex++)
             {
                 var shHandle = new Win32API.SYSTEM_HANDLE_INFORMATION();
-                if (Is64Bits())
+                if (Utils.Is64Bit)
                 {
                     shHandle = (Win32API.SYSTEM_HANDLE_INFORMATION)Marshal.PtrToStructure(ipHandle, shHandle.GetType());
                     ipHandle = new IntPtr(ipHandle.ToInt64() + Marshal.SizeOf(shHandle) + 8);
@@ -375,11 +368,6 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                     yield return shHandle;
                 }
             }
-        }
-
-        private static bool Is64Bits()
-        {
-            return Marshal.SizeOf(typeof(IntPtr)) == 8;
         }
 
         internal class Win32API

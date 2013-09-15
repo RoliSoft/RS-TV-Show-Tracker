@@ -565,7 +565,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.USNJournal
                 _fileAttributes = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
                 short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
                 short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
-                _name = Marshal.PtrToStringUni(new IntPtr((NtfsUsnJournal.Is64Bits() ? ptrToUsnRecord.ToInt64() : ptrToUsnRecord.ToInt32()) + fileNameOffset), fileNameLength / sizeof(char));
+                _name = Marshal.PtrToStringUni(new IntPtr((Utils.Is64Bit ? ptrToUsnRecord.ToInt64() : ptrToUsnRecord.ToInt32()) + fileNameOffset), fileNameLength / sizeof(char));
             }
 
             #region IComparable<UsnEntry> Members
