@@ -90,14 +90,34 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether this site is deprecated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
+        /// </value>
+        public override bool Deprecated
+        {
+            get
+            {
+                // RSS doesn't serve full content anymore.
+                // Fate to be decided.
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var req = Utils.GetURL(Site + "category/tv-shows/feed/?s=" + Utils.EncodeURL(query))
-                            .Replace("content:encoded", "content") // HtmlAgilityPack doesn't like tags with colons in their names
+            if (Deprecated)
+            {
+                yield break;
+            }
+
+            var req = Utils.GetURL(Site + "search/" + Utils.EncodeURL(query) + "/feed")
                             .Replace("<![CDATA[", string.Empty)
                             .Replace("]]>", string.Empty)
                             .Replace("×", "x");
@@ -116,7 +136,7 @@
             {
                 var infourl = (node.GetTextValue("comments") ?? string.Empty).Replace("#comments", string.Empty); // can't get <link>
                 var titles = HtmlEntity.DeEntitize(node.GetTextValue("title")).Split(new[] { " & " }, StringSplitOptions.RemoveEmptyEntries);
-                var ps = node.SelectNodes("content/p");
+                var ps = node.SelectNodes("description/p");
                 var idx = -1;
                 var type = 0;
 

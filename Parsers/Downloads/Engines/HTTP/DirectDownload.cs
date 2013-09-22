@@ -73,7 +73,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-11-08 6:05 PM");
+                return Utils.DateTimeToVersion("2013-09-22 7:21 PM");
             }
         }
 
@@ -101,6 +101,8 @@
             }
         }
 
+        private const string Key = "DFAF8E33A09087E7";
+
         /// <summary>
         /// Searches for download links on the service.
         /// </summary>
@@ -108,7 +110,8 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var links = Utils.GetJSON<List<ReleaseInfo>>(Site + "api.php?keyword=" + Utils.EncodeURL(query));
+            var json  = Utils.GetURL(Site + "api?key=" + Key + "&keyword=" + Utils.EncodeURL(query)).Replace(",\"links\":[]", ",\"links\":{}");
+            var links = JsonConvert.DeserializeObject<List<ReleaseInfo>>(json);
 
             if (links.Count == 0)
             {
@@ -123,10 +126,10 @@
 
                     link.Release = item.Release;
                     link.InfoURL = Site + "s/" + item.Release;
-                    link.FileURL = string.Join("\0", site.Values.First());
+                    link.FileURL = string.Join("\0", site.Value);
                     link.Quality = FileNames.Parser.ParseQuality(item.Release);
                     link.Size    = Utils.GetFileSize((long)(item.Size * 1048576));
-                    link.Infos   = site.Keys.First().ToLower().ToUppercaseFirst();
+                    link.Infos   = site.Key.ToLower().ToUppercaseFirst();
 
                     yield return link;
                 }
@@ -190,7 +193,7 @@
             /// The URLs to the files hosted on various sites.
             /// </value>
             [JsonProperty("links")]
-            public List<Dictionary<string, List<string>>> Links { get; set; }
+            public Dictionary<string, List<string>> Links { get; set; }
         }
     }
 }

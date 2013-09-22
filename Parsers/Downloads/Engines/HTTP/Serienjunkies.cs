@@ -110,6 +110,21 @@
             };
 
         /// <summary>
+        /// Gets a value indicating whether this site is deprecated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if deprecated; otherwise, <c>false</c>.
+        /// </value>
+        public override bool Deprecated
+        {
+            get
+            {
+                // "Sorry, this website is not available in your country."
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Searches for download links on the service.
         /// </summary>
         /// <param name="query">The name of the release to search for.</param>

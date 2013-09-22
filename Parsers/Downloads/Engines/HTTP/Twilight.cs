@@ -61,7 +61,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2012-04-17 7:15 PM");
+                return Utils.DateTimeToVersion("2013-09-15 7:58 PM");
             }
         }
 
@@ -96,7 +96,7 @@
         /// <returns>List of found download links.</returns>
         public override IEnumerable<Link> Search(string query)
         {
-            var html  = Utils.GetHTML(Site, "type=TV&searchoption=broad&q=" + Utils.EncodeURL(query));
+            var html = Utils.GetHTML(Site + "downloads.php?type=tv&q=" + Utils.EncodeURL(query));
             var links = html.DocumentNode.SelectNodes("//div[@class='dllist']/dl");
 
             if (links == null)
@@ -108,10 +108,10 @@
             {
                 var link = new Link(this);
 
-                if (node.GetHtmlValue("dd[contains(@class, 'tv')]") == null) continue; // header and ads
+                if (node.GetHtmlValue("dt[contains(@class, 'tv')]") == null) continue; // header and ads
 
-                var site = node.GetTextValue("dd/span[@class='rating']/../a");
-                var star = node.GetTextValue("dd/span[@class='rating']");
+                var site = node.GetTextValue("dd/a/span[@class='rating']/../a");
+                var star = node.GetTextValue("dd/a/span[@class='rating']");
                 var list = node.SelectNodes("dd[@class='fh']/span");
 
                 link.Release = HtmlEntity.DeEntitize(node.GetTextValue("dt/a")).Trim()
