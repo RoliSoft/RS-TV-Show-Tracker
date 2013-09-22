@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading;
 
     using RoliSoft.TVShowTracker.FileNames;
     using RoliSoft.TVShowTracker.Parsers.Social;
@@ -196,7 +197,36 @@
             {
                 if (!alt)
                 {
-                    files.AddRange(GetHandleList(pids));
+                    using (var mre = new ManualResetEvent(false))
+                    {
+                        var thd = new Thread(() =>
+                            {
+                                try
+                                {
+                                    files.AddRange(GetHandleList(pids));
+                                }
+                                finally
+                                {
+                                    mre.Set();
+                                }
+                            })
+                            {
+                                IsBackground = true
+                            };
+
+                        thd.Start();
+
+                        if (!mre.WaitOne(TimeSpan.FromMinutes(3)))
+                        {
+                            Log.Error("Process monitoring method timed out after 3 minutes. Please consider switching implementations from the Settings menu.");
+
+                            try
+                            {
+                                thd.Interrupt();
+                                thd.Abort();
+                            } catch { }
+                        }
+                    }
 
                     if (files.Count != 0)
                     {

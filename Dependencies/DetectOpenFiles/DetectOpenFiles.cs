@@ -8,7 +8,6 @@
 //  Added Handle and OpenedFilesView output parser implementations as backup.
 //
 
-using CookComputing.XmlRpc;
 
 namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 {
@@ -19,6 +18,9 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using System.Threading.Tasks;
+
+    using CookComputing.XmlRpc;
 
     public static class DetectOpenFiles
     {
@@ -165,9 +167,12 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                             try
                             {
                                 path = GetFilePath(hinf, ref hwnd);
-                                mre.Set();
                             }
                             catch { }
+                            finally
+                            {
+                                mre.Set();
+                            }
                         })
                         {
                             IsBackground = true
@@ -175,8 +180,10 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
 
                     thd.Start();
 
-                    if (!mre.WaitOne(200))
+                    if (!mre.WaitOne(100))
                     {
+                        Log.Trace("Handle 0x" + handle.Handle.ToString("X") + " timed out and will now hopefully be killed.");
+
                         new Thread(() =>
                             {
                                 try
@@ -185,8 +192,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                                     Win32API.CloseHandle(hwnd);
                                     thd.Interrupt();
                                     thd.Abort();
-                                }
-                                catch { }
+                                } catch { }
                             }).Start();
                     }
                 }
@@ -236,10 +242,22 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
             // TODO: check if this code still works on Windows 7, now that UNICODE_STRING doesn't have Pack = 1 defined
 
             objObjectType = (Win32API.OBJECT_TYPE_INFORMATION)Marshal.PtrToStructure(ipObjectType, objObjectType.GetType());
+
+            // All handles that have these access flags seem to hang the NtQueryObject below.
+            // Original discussion: http://forum.sysinternals.com/handle-name-help-ntqueryobject_topic14435_post68507.html#68507
+
+            if (objBasic.GrantedAccess == 0x0012019F || objObjectType.ValidAccess == 0x0012019F || objBasic.GrantedAccess == 0x001A019F || objObjectType.ValidAccess == 0x001A019F)
+            {
+                Log.Trace("Blacklisted access value for handle 0x" + ipHandle.ToString("X") + "; see source code for more information.");
+                return null;
+            }
+
             var strObjectTypeName = Marshal.PtrToStringUni(objObjectType.Name.Buffer, objObjectType.Name.Length >> 1);
             Marshal.FreeHGlobal(ipObjectType);
             if (strObjectTypeName != "File")
+            {
                 return null;
+            }
 
             nLength = objBasic.NameInformationLength;
 

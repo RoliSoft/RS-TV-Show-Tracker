@@ -7,6 +7,8 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     using Microsoft.Win32;
 
@@ -219,11 +221,26 @@
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
-        private void RunBTButtonOnClick(object sender, RoutedEventArgs e)
+        private async void RunBTButtonOnClick(object sender, RoutedEventArgs e)
         {
-            BackgroundTasks.TaskTimer.Stop();
-            BackgroundTasks.TaskTimer.Start();
-            BackgroundTasks.Tasks();
+            try
+            {
+                runBTButton.IsEnabled = false;
+
+                BackgroundTasks.TaskTimer.Stop();
+                BackgroundTasks.TaskTimer.AutoReset = false;
+                BackgroundTasks.TaskTimer.Interval = 1;
+                BackgroundTasks.TaskTimer.Start();
+                await Task.Delay(100);
+                BackgroundTasks.TaskTimer.Stop();
+                BackgroundTasks.TaskTimer.AutoReset = true;
+                BackgroundTasks.TaskTimer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
+                BackgroundTasks.TaskTimer.Start();
+            }
+            finally
+            {
+                runBTButton.IsEnabled = true;
+            }
         }
     }
 }
