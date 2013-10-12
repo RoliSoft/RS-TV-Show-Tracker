@@ -121,6 +121,7 @@ namespace RoliSoft.TVShowTracker
         
         File.WriteAllText(Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "version.txt"), prefix + count.ToString());
         File.WriteAllText(Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "version.nsh"), "!define VERSION \"" + prefix + count.ToString() + "\"");
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "version.iss"), "[Setup]" + Environment.NewLine + "AppVersion=" + prefix + count.ToString() + Environment.NewLine + "VersionInfoVersion=" + prefix + count.ToString());
 
         return prefix + count;
     }
