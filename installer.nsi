@@ -51,6 +51,7 @@
 !define MUI_WELCOMEFINISHPAGE_BITMAP "Images\nsis-wizard.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${NSISDIR}\contrib\graphics\wizard\orange-uninstall.bmp"
 !define MUI_CUSTOMFUNCTION_GUIINIT GuiInitAero
+!define MUI_CUSTOMFUNCTION_UNGUIINIT un.GuiInitAero
 
 !define REG_START_MENU "Start Menu Folder"
 
@@ -82,7 +83,7 @@ BrandingText "${APP_NAME}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
 InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
-RequestExecutionLevel user
+RequestExecutionLevel admin
 
 ######################################################################
 
@@ -107,9 +108,7 @@ Function .onInit
 FunctionEnd
 
 Function .onInstSuccess
-	AccessControl::EnableFileInheritance "$INSTDIR"
-	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
-	AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "FullAccess"
+	SetOutPath "$INSTDIR"
 	
 	ClearErrors
 	${GetParameters} $R0
@@ -132,9 +131,13 @@ Function GuiInitAero
 	Aero::Apply
 FunctionEnd
 
+Function un.GuiInitAero
+	Aero::Apply
+FunctionEnd
+
 ######################################################################
 
-!include "MUI.nsh"
+!include "MUI2.nsh"
 
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
@@ -168,12 +171,16 @@ FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
 !define MUI_FINISHPAGE_SHOWREADME_FUNCTION FinishCreateDesktopShortcut
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW FinishChangeFonts
 !insertmacro MUI_PAGE_FINISH
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW un.HeaderChangeFonts
 !insertmacro MUI_UNPAGE_CONFIRM
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW un.HeaderChangeFonts
 !insertmacro MUI_UNPAGE_INSTFILES
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW un.FinishChangeFonts
 !insertmacro MUI_UNPAGE_FINISH
 
 !insertmacro MUI_LANGUAGE "English"
@@ -181,20 +188,34 @@ FunctionEnd
 ######################################################################
 
 Function WelcomeChangeFonts
-	FindWindow $1 "#32770" "" $HWNDPARENT
-	GetDlgItem $2 $1 1201
 	CreateFont $0 "Segoe UI" "13" "700"
-	SendMessage $2 ${WM_SETFONT} $0 0
+	SendMessage $mui.WelcomePage.Title ${WM_SETFONT} $0 0
+FunctionEnd
+
+Function FinishChangeFonts
+	CreateFont $0 "Segoe UI" "13" "700"
+	SendMessage $mui.FinishPage.Title ${WM_SETFONT} $0 0
 FunctionEnd
 
 Function HeaderChangeFonts
-	GetDlgItem $1 $HWNDPARENT 1037
 	CreateFont $0 "Segoe UI" "10" "700"
-	SendMessage $1 ${WM_SETFONT} $0 0
+	SendMessage $mui.Header.Text ${WM_SETFONT} $0 0
 	
-	#GetDlgItem $1 $HWNDPARENT 1038
 	#CreateFont $0 "Segoe UI" "9" "500"
-	#SendMessage $1 ${WM_SETFONT} $0 0
+	#SendMessage $mui.Header.SubText ${WM_SETFONT} $0 0
+FunctionEnd
+
+Function un.FinishChangeFonts
+	CreateFont $0 "Segoe UI" "13" "700"
+	SendMessage $mui.FinishPage.Title ${WM_SETFONT} $0 0
+FunctionEnd
+
+Function un.HeaderChangeFonts
+	CreateFont $0 "Segoe UI" "10" "700"
+	SendMessage $mui.Header.Text ${WM_SETFONT} $0 0
+	
+	#CreateFont $0 "Segoe UI" "9" "500"
+	#SendMessage $mui.Header.SubText ${WM_SETFONT} $0 0
 FunctionEnd
 
 Function FinishCreateDesktopShortcut
@@ -249,6 +270,15 @@ Section -MainProgram
 	Delete "Twitterizer2.dll"
 	Delete "VistaControls.dll"
 	Delete "WPFToolkit.Extended.dll"
+	
+	# try to fix permission issues
+	
+	AccessControl::EnableFileInheritance "$INSTDIR"
+	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
+	AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "FullAccess"
+	
+	nsExec::ExecToLog '"$SYSDIR\takeown.exe" /r /d y /f *'
+	nsExec::ExecToLog '"$SYSDIR\icacls.exe" . /t /inheritance:e /grant Users:(OI)(CI)F'
 SectionEnd
 
 ######################################################################
