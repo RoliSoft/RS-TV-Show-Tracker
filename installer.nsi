@@ -82,54 +82,54 @@ BrandingText "${APP_NAME}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
 InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
-RequestExecutionLevel admin
+RequestExecutionLevel user
 
 ######################################################################
 
 Function .onInit
-  ClearErrors
+	ClearErrors
 	ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
 	
 	${If} $R0 < 6
-  ${OrIf} ${Errors}
-    MessageBox MB_OK|MB_ICONSTOP "This software doesn't support systems older than Windows 7."
-    Quit
+	${OrIf} ${Errors}
+		MessageBox MB_OK|MB_ICONSTOP "This software doesn't support systems older than Windows 7."
+		Quit
 	${EndIf}
 	
 	${If} ${Silent}
-    KillProcDLL::KillProc "${MAIN_APP_EXE}"
+		KillProcDLL::KillProc "${MAIN_APP_EXE}"
 	${EndIf}
 	
-  ${If} ${RunningX64}
-    SetRegView 64
-    StrCpy $INSTDIR "$PROGRAMFILES64\RoliSoft\RS TV Show Tracker"
-  ${EndIf}
+	${If} ${RunningX64}
+		SetRegView 64
+		StrCpy $INSTDIR "$PROGRAMFILES64\RoliSoft\RS TV Show Tracker"
+	${EndIf}
 FunctionEnd
 
 Function .onInstSuccess
 	AccessControl::EnableFileInheritance "$INSTDIR"
 	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
 	AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "FullAccess"
-  
+	
 	ClearErrors
 	${GetParameters} $R0
 	${GetOptions} $R0 "/AR" $R1
 	
 	${IfNot} ${Errors}
-    ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
-  ${Else}
-    ClearErrors
-    ${GetParameters} $R0
-    ${GetOptions} $R0 "/SR" $R1
-    
-    ${IfNot} ${Errors}
-      ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"' "-hide"
-    ${Endif}
+		ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
+	${Else}
+		ClearErrors
+		${GetParameters} $R0
+		${GetOptions} $R0 "/SR" $R1
+		
+		${IfNot} ${Errors}
+			ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"' "-hide"
+		${Endif}
 	${EndIf}
 FunctionEnd
 
 Function GuiInitAero
-  Aero::Apply
+	Aero::Apply
 FunctionEnd
 
 ######################################################################
@@ -261,16 +261,16 @@ Section -Prerequisites
 	ClearErrors
 	ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Release"
 	
-  ${If} $0 < 378389
-  ${OrIf} ${Errors}
-    Banner::show /NOUNLOAD /set 76 ".Net Framework 4.5" "Downloading web installer..."
-    NSISdl::download_quiet http://download.microsoft.com/download/B/A/4/BA4A7E71-2906-4B2D-A0E1-80CF16844F5F/dotNetFx45_Full_setup.exe "$INSTDIR\dotNetFx45_Full_setup.exe"
-    Banner::destroy
-    Banner::show /NOUNLOAD /set 76 ".Net Framework 4.5" "Waiting for installation to finish..."
-    ExecWait "$INSTDIR\dotNetFx45_Full_setup.exe /passive /norestart"
-    Delete "$INSTDIR\dotNetFx45_Full_setup.exe"
-    Banner::destroy
-  ${EndIf}
+	${If} $0 < 378389
+	${OrIf} ${Errors}
+		Banner::show /NOUNLOAD /set 76 ".Net Framework 4.5" "Downloading web installer..."
+		NSISdl::download_quiet http://download.microsoft.com/download/B/A/4/BA4A7E71-2906-4B2D-A0E1-80CF16844F5F/dotNetFx45_Full_setup.exe "$INSTDIR\dotNetFx45_Full_setup.exe"
+		Banner::destroy
+		Banner::show /NOUNLOAD /set 76 ".Net Framework 4.5" "Waiting for installation to finish..."
+		ExecWait "$INSTDIR\dotNetFx45_Full_setup.exe /passive /norestart"
+		Delete "$INSTDIR\dotNetFx45_Full_setup.exe"
+		Banner::destroy
+	${EndIf}
 	
 SectionEnd
 
