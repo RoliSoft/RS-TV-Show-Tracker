@@ -10,6 +10,8 @@
 #     experimental and not-always-working hack that is soon to be deprecated.
 #   - http://nsis.sourceforge.net/Aero_plug-in
 #     To apply the Aero glass effect on the installer.
+#   - http://nsis.sourceforge.net/UAC_plug-in
+#     To elevate the installer as needed, then drop rights when finished.
 #
 #  A copy of these plugins is provided in the Dependencies\NSIS folder.
 #
@@ -82,12 +84,40 @@ OutFile "${INSTALLER_NAME}"
 BrandingText "${APP_NAME}"
 XPStyle on
 InstallDirRegKey "${REG_ROOT}" "${REG_APP_PATH}" ""
-InstallDir "$PROGRAMFILES\RoliSoft\RS TV Show Tracker"
-RequestExecutionLevel admin
+InstallDir "$PROGRAMFILES\${COMP_NAME}\${APP_NAME}"
+RequestExecutionLevel user
+
+######################################################################
+
+!include "UAC.nsh"
+
+!macro Init thing
+uac_retry:
+!insertmacro UAC_RunElevated
+${Switch} $0
+${Case} 0
+	${IfThen} $1 = 1 ${|} Quit ${|}
+	${IfThen} $3 <> 0 ${|} ${Break} ${|}
+	${If} $1 = 3
+		MessageBox mb_YesNo|mb_IconExclamation|mb_TopMost|mb_SetForeground "This ${thing} requires administrator privileges. Retry the elevation?" /SD IDNO IDYES uac_retry IDNO 0
+	${EndIf}
+${Case} 1223
+	MessageBox mb_YesNo|mb_IconStop|mb_TopMost|mb_SetForeground "This ${thing} requires administrator privileges."
+	Quit
+${Case} 1062
+	MessageBox mb_IconStop|mb_TopMost|mb_SetForeground "Unable to elevate installer because the logon service is not running."
+	Quit
+${Default}
+	MessageBox mb_IconStop|mb_TopMost|mb_SetForeground "Unable to elevate installer due to unexpected error $0."
+	Quit
+${EndSwitch}
+!macroend
 
 ######################################################################
 
 Function .onInit
+  !insertmacro Init "installer"
+  
 	ClearErrors
 	ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
 	
@@ -103,13 +133,11 @@ Function .onInit
 	
 	${If} ${RunningX64}
 		SetRegView 64
-		StrCpy $INSTDIR "$PROGRAMFILES64\RoliSoft\RS TV Show Tracker"
+		StrCpy $INSTDIR "$PROGRAMFILES64\${COMP_NAME}\${APP_NAME}"
 	${EndIf}
 FunctionEnd
 
 Function .onInstSuccess
-	SetOutPath "$INSTDIR"
-	
 	ClearErrors
 	${GetParameters} $R0
 	${GetOptions} $R0 "/AR" $R1
@@ -135,6 +163,10 @@ Function un.GuiInitAero
 	Aero::Apply
 FunctionEnd
 
+Function un.onInit
+  !insertmacro Init "uninstaller"
+FunctionEnd
+
 ######################################################################
 
 !include "MUI2.nsh"
@@ -153,7 +185,7 @@ FunctionEnd
 !insertmacro MUI_PAGE_DIRECTORY
 
 !ifdef REG_START_MENU
-	!define MUI_STARTMENUPAGE_DEFAULTFOLDER "RS TV Show Tracker"
+	!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_NAME}"
 	!define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_ROOT}"
 	!define MUI_STARTMENUPAGE_REGISTRY_KEY "${UNINSTALL_PATH}"
 	!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${REG_START_MENU}"
@@ -223,7 +255,8 @@ Function FinishCreateDesktopShortcut
 FunctionEnd
 
 Function FinishLaunchApplication
-	ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
+  !insertmacro UAC_AsUser_ExecShell "" "$INSTDIR\${MAIN_APP_EXE}" "" "" ""
+	#ExecShell "open" '"$INSTDIR\${MAIN_APP_EXE}"'
 FunctionEnd
 
 ######################################################################
@@ -312,15 +345,15 @@ Section -Icons_Reg
 	
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 	
-	CreateDirectory "$SMPROGRAMS\RS TV Show Tracker"
-	CreateShortCut "$SMPROGRAMS\RS TV Show Tracker\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
-	CreateShortCut "$SMPROGRAMS\RS TV Show Tracker\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+	CreateDirectory "$SMPROGRAMS\${APP_NAME}"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${MAIN_APP_EXE}"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 	
 	!ifdef WEB_SITE
 		WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "URL" "${WEB_SITE}"
 		WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "IconFile" "%SystemRoot%\system32\SHELL32.dll"
 		WriteIniStr "$INSTDIR\${APP_NAME} website.url" "InternetShortcut" "IconIndex" "277"
-		CreateShortCut "$SMPROGRAMS\RS TV Show Tracker\Website.lnk" "$INSTDIR\${APP_NAME} website.url" "" "%SystemRoot%\system32\SHELL32.dll" "277"
+		CreateShortCut "$SMPROGRAMS\${APP_NAME}\Website.lnk" "$INSTDIR\${APP_NAME} website.url" "" "%SystemRoot%\system32\SHELL32.dll" "277"
 	!endif
 	
 	!insertmacro MUI_STARTMENU_WRITE_END
@@ -355,15 +388,15 @@ Section Uninstall
 	
 	RmDir "$INSTDIR"
 	
-	Delete "$SMPROGRAMS\RS TV Show Tracker\${APP_NAME}.lnk"
-	Delete "$SMPROGRAMS\RS TV Show Tracker\Uninstall.lnk"
+	Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
+	Delete "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk"
 	
 	!ifdef WEB_SITE
-		Delete "$SMPROGRAMS\RS TV Show Tracker\Website.lnk"
+		Delete "$SMPROGRAMS\${APP_NAME}\Website.lnk"
 	!endif
 	
 	Delete "$DESKTOP\${APP_NAME}.lnk"
-	RMDir /r "$SMPROGRAMS\RS TV Show Tracker"
+	RMDir /r "$SMPROGRAMS\${APP_NAME}"
 	
 	DeleteRegKey ${REG_ROOT} "${REG_APP_PATH}"
 	DeleteRegKey ${REG_ROOT} "${UNINSTALL_PATH}"
