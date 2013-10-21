@@ -171,7 +171,7 @@ namespace RoliSoft.TVShowTracker.Dependencies.DetectOpenFiles
                             catch { }
                             finally
                             {
-                                mre.Set();
+                                try { mre.Set(); } catch { }
                             }
                         })
                         {

@@ -102,7 +102,7 @@ ${Case} 0
 		MessageBox mb_YesNo|mb_IconExclamation|mb_TopMost|mb_SetForeground "This ${thing} requires administrator privileges. Retry the elevation?" /SD IDNO IDYES uac_retry IDNO 0
 	${EndIf}
 ${Case} 1223
-	MessageBox mb_YesNo|mb_IconStop|mb_TopMost|mb_SetForeground "This ${thing} requires administrator privileges."
+	MessageBox mb_IconStop|mb_TopMost|mb_SetForeground "This ${thing} requires administrator privileges."
 	Quit
 ${Case} 1062
 	MessageBox mb_IconStop|mb_TopMost|mb_SetForeground "Unable to elevate installer because the logon service is not running."
