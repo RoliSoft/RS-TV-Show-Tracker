@@ -68,28 +68,32 @@
                     database.SelectedIndex = 2;
                     break;
 
-                case "TVcom":
+                case "TMDb":
                     database.SelectedIndex = 3;
                     break;
 
-                case "EPisodeWorld":
+                case "TVcom":
                     database.SelectedIndex = 4;
                     break;
 
-                case "IMDb":
+                case "EPisodeWorld":
                     database.SelectedIndex = 5;
                     break;
 
-                case "AniDB":
+                case "IMDb":
                     database.SelectedIndex = 6;
                     break;
 
-                case "AnimeNewsNetwork":
+                case "AniDB":
                     database.SelectedIndex = 7;
                     break;
 
+                case "AnimeNewsNetwork":
+                    database.SelectedIndex = 8;
+                    break;
+
                 case "EPGuides":
-                    database.SelectedIndex = 10;
+                    database.SelectedIndex = 11;
                     break;
             }
 
@@ -339,30 +343,34 @@
                     break;
 
                 case 3:
-                    guide = new TVcom();
+                    guide = new TMDb();
                     break;
 
                 case 4:
-                    guide = new EPisodeWorld();
+                    guide = new TVcom();
                     break;
 
                 case 5:
-                    guide = new IMDb();
+                    guide = new EPisodeWorld();
                     break;
 
                 case 6:
-                    guide = new AniDB();
+                    guide = new IMDb();
                     break;
 
                 case 7:
+                    guide = new AniDB();
+                    break;
+
+                case 8:
                     guide = new AnimeNewsNetwork();
                     break;
 
-                case 9:
+                case 10:
                     guide = new EPGuides();
                     break;
 
-                case 10:
+                case 11:
                     guide = new EPGuides();
                     break;
 
@@ -387,28 +395,32 @@
                                         database.SelectedIndex = 2;
                                         break;
 
-                                    case "TVcom":
+                                    case "TMDb":
                                         database.SelectedIndex = 3;
                                         break;
 
-                                    case "EPisodeWorld":
+                                    case "TVcom":
                                         database.SelectedIndex = 4;
                                         break;
 
-                                    case "IMDb":
+                                    case "EPisodeWorld":
                                         database.SelectedIndex = 5;
                                         break;
 
-                                    case "AniDB":
+                                    case "IMDb":
                                         database.SelectedIndex = 6;
                                         break;
 
-                                    case "AnimeNewsNetwork":
+                                    case "AniDB":
                                         database.SelectedIndex = 7;
                                         break;
 
+                                    case "AnimeNewsNetwork":
+                                        database.SelectedIndex = 8;
+                                        break;
+
                                     case "EPGuides":
-                                        database.SelectedIndex = 10;
+                                        database.SelectedIndex = 11;
                                         break;
                                 }
 
@@ -554,6 +566,9 @@
 
                 case "The TVDB":
                     return new TVDB();
+
+                case "TMDb":
+                    return new TMDb();
 
                 case "TV.com":
                     return new TVcom();

@@ -230,6 +230,7 @@
     <Compile Include="Parsers\Downloads\Engines\Usenet\Findnzbs.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\nzbX.cs" />
+    <Compile Include="Parsers\Guides\Engines\TMDb.cs" />
     <Compile Include="Parsers\Guides\Episode.cs" />
     <Compile Include="Parsers\ILinkExpander.cs" />
     <Compile Include="Parsers\ForeignTitles\Engines\IMDbPortugal.cs" />
@@ -1088,7 +1089,9 @@
     <Resource Include="Images\amazon.png" />
     <Resource Include="Images\apple.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\tmdb.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\group.png" />
     <Resource Include="Images\order.png" />

@@ -118,6 +118,9 @@
                 case "IMDb":
                     return new IMDb();
 
+                case "TMDb":
+                    return new TMDb();
+
                 case "EPGuides":
                     return new EPGuides();
 
