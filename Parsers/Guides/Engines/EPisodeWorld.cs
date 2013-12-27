@@ -71,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-07-19 8:12 PM");
+                return Utils.DateTimeToVersion("2013-12-27 6:08 PM");
             }
         }
 
@@ -195,6 +195,7 @@
         public override TVShow GetData(string id, string language = "en")
         {
             var listing = Utils.GetHTML("http://www.episodeworld.com/show/" + id + "/season=all/" + Languages.List[language].ToLower() + "/episodeguide");
+            var guides  = Utils.GetHTML("http://www.episodeworld.com/show/" + id + "/season=all/" + Languages.List[language].ToLower() + "/plotguide");
             var show    = new TVShow();
 
             show.Title       = HtmlEntity.DeEntitize(listing.DocumentNode.GetTextValue("//div[@class='orangecorner_content']//h1"));
@@ -236,6 +237,8 @@
                 return show;
             }
 
+            var eptmp = new Dictionary<string, Episode>();
+
             foreach (var node in nodes)
             {
                 var episode = Regex.Match(node.GetTextValue("td[2]") ?? string.Empty, "([0-9]{1,2})x([0-9]{1,3})");
@@ -262,6 +265,28 @@
                            : Utils.UnixEpoch;
 
                 show.Episodes.Add(ep);
+                eptmp[episode.Value] = ep;
+            }
+
+            var godes = guides.DocumentNode.SelectNodes("//table[@id='list']/tr/td/b/a[@href]");
+            if (godes != null)
+            {
+                foreach (var node in godes)
+                {
+                    Episode ep;
+                    var episode = Regex.Match(node.InnerText ?? string.Empty, "([0-9]{1,2})x([0-9]{1,3})");
+                    if (!episode.Success || !eptmp.TryGetValue(episode.Value, out ep))
+                    {
+                        continue;
+                    }
+
+                    var desc = node.GetTextValue("../../../following-sibling::tr[1]/td");
+
+                    if (!string.IsNullOrWhiteSpace(desc))
+                    {
+                        ep.Summary = desc.Replace(" (More)", string.Empty);
+                    }
+                }
             }
 
             if (show.Episodes.Count != 0)
