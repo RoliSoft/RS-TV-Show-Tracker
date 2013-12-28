@@ -230,6 +230,7 @@
     <Compile Include="Parsers\Downloads\Engines\Usenet\Findnzbs.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\NZBMatrix.cs" />
     <Compile Include="Parsers\Downloads\Engines\Usenet\nzbX.cs" />
+    <Compile Include="Parsers\Guides\Engines\Freebase.cs" />
     <Compile Include="Parsers\Guides\Engines\TMDb.cs" />
     <Compile Include="Parsers\Guides\Episode.cs" />
     <Compile Include="Parsers\ILinkExpander.cs" />
@@ -1241,6 +1242,9 @@
     <Resource Include="Images\status-green.png" />
     <Resource Include="Images\status-red.png" />
     <Resource Include="Images\status-yellow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\freebase.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\TextTemplating\Microsoft.TextTemplating.targets" Condition="'$(VSToolsPath)' != ''" />

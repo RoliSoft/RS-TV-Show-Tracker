@@ -105,7 +105,7 @@
                 }
                 else if (show["backdrop_path"] != null)
                 {
-                    show.Cover = "http://image.tmdb.org/t/p/original" + (string)show["backdrop_path"];
+                    id.Cover = "http://image.tmdb.org/t/p/original" + (string)show["backdrop_path"];
                 }
 
                 yield return id;

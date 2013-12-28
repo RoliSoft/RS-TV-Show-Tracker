@@ -834,18 +834,33 @@
             tcp.Connect(uri.DnsSafeHost, uri.Port);
 
             using (var st = tcp.GetStream())
-            using (var sr = new StreamReader(st))
             {
-                st.Write(req, 0, req.Length);
+                Stream ns;
 
-                var dnl = false;
-                while (!dnl)
+                if (uri.Scheme == "https")
                 {
-                    dnl = sr.ReadLine() == string.Empty;
+                    var ssl = new SslStream(st);
+                    ssl.AuthenticateAsClient(uri.DnsSafeHost);
+                    ns = ssl;
+                }
+                else
+                {
+                    ns = st;
                 }
 
-                var str = sr.ReadToEnd();
-                return str;
+                using (var sr = new StreamReader(ns))
+                {
+                    ns.Write(req, 0, req.Length);
+
+                    var dnl = false;
+                    while (!dnl)
+                    {
+                        dnl = sr.ReadLine() == string.Empty;
+                    }
+
+                    var str = sr.ReadToEnd();
+                    return str;
+                }
             }
         }
 

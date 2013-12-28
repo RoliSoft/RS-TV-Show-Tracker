@@ -72,28 +72,32 @@
                     database.SelectedIndex = 3;
                     break;
 
-                case "TVcom":
+                case "Freebase":
                     database.SelectedIndex = 4;
                     break;
 
-                case "EPisodeWorld":
+                case "TVcom":
                     database.SelectedIndex = 5;
                     break;
 
-                case "IMDb":
+                case "EPisodeWorld":
                     database.SelectedIndex = 6;
                     break;
 
-                case "AniDB":
+                case "IMDb":
                     database.SelectedIndex = 7;
                     break;
 
-                case "AnimeNewsNetwork":
+                case "AniDB":
                     database.SelectedIndex = 8;
                     break;
 
+                case "AnimeNewsNetwork":
+                    database.SelectedIndex = 9;
+                    break;
+
                 case "EPGuides":
-                    database.SelectedIndex = 11;
+                    database.SelectedIndex = 12;
                     break;
             }
 
@@ -347,30 +351,34 @@
                     break;
 
                 case 4:
-                    guide = new TVcom();
+                    guide = new Freebase();
                     break;
 
                 case 5:
-                    guide = new EPisodeWorld();
+                    guide = new TVcom();
                     break;
 
                 case 6:
-                    guide = new IMDb();
+                    guide = new EPisodeWorld();
                     break;
 
                 case 7:
-                    guide = new AniDB();
+                    guide = new IMDb();
                     break;
 
                 case 8:
+                    guide = new AniDB();
+                    break;
+
+                case 9:
                     guide = new AnimeNewsNetwork();
                     break;
 
-                case 10:
+                case 11:
                     guide = new EPGuides();
                     break;
 
-                case 11:
+                case 12:
                     guide = new EPGuides();
                     break;
 
@@ -399,28 +407,32 @@
                                         database.SelectedIndex = 3;
                                         break;
 
-                                    case "TVcom":
+                                    case "Freebase":
                                         database.SelectedIndex = 4;
                                         break;
 
-                                    case "EPisodeWorld":
+                                    case "TVcom":
                                         database.SelectedIndex = 5;
                                         break;
 
-                                    case "IMDb":
+                                    case "EPisodeWorld":
                                         database.SelectedIndex = 6;
                                         break;
 
-                                    case "AniDB":
+                                    case "IMDb":
                                         database.SelectedIndex = 7;
                                         break;
 
-                                    case "AnimeNewsNetwork":
+                                    case "AniDB":
                                         database.SelectedIndex = 8;
                                         break;
 
+                                    case "AnimeNewsNetwork":
+                                        database.SelectedIndex = 9;
+                                        break;
+
                                     case "EPGuides":
-                                        database.SelectedIndex = 11;
+                                        database.SelectedIndex = 12;
                                         break;
                                 }
 
@@ -569,6 +581,9 @@
 
                 case "TMDb":
                     return new TMDb();
+
+                case "Freebase":
+                    return new Freebase();
 
                 case "TV.com":
                     return new TVcom();

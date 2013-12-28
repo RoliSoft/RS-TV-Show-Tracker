@@ -109,6 +109,12 @@
                 case "TVDB":
                     return new TVDB();
 
+                case "TMDb":
+                    return new TMDb();
+
+                case "Freebase":
+                    return new Freebase();
+
                 case "TVcom":
                     return new TVcom();
 
@@ -117,9 +123,6 @@
 
                 case "IMDb":
                     return new IMDb();
-
-                case "TMDb":
-                    return new TMDb();
 
                 case "EPGuides":
                     return new EPGuides();
