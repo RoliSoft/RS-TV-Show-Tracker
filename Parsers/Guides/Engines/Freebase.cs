@@ -71,7 +71,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2013-12-28 5:26 AM");
+                return Utils.DateTimeToVersion("2013-12-28 5:42 AM");
             }
         }
 
@@ -85,23 +85,9 @@
         /// <returns>ID.</returns>
         public override IEnumerable<ShowID> GetID(string name, string language = "en")
         {
-            var query = "[{" +
-                            "\"mid\":null," +
-                            "\"type\":\"/tv/tv_program\"," +
-                            "\"name~=\":\"" + name.Replace("\"", "\\\"") + "\"," +
-                            "\"name\":null," +
-                            "\"air_date_of_first_episode\":{" +
-                                "\"value\":null," +
-                                "\"optional\":true" +
-                            "}," +
-                            "\"/common/topic/image\":[{" +
-                                "\"mid\":null," +
-                                "\"optional\":true" +
-                            "}]" +
-                        "}]";
-            var json = (dynamic)JsonConvert.DeserializeObject(Utils.GetFastURL("https://www.googleapis.com/freebase/v1/mqlread?query=" + Utils.EncodeURL(query)));
+            var json = (dynamic)JsonConvert.DeserializeObject(Utils.GetFastURL("https://www.googleapis.com/freebase/v1/search?query=" + Utils.EncodeURL(name) + "&filter=" + Utils.EncodeURL("(all type:/tv/tv_program)") + "&output=" + Utils.EncodeURL("(/common/topic/image /tv/tv_program/air_date_of_first_episode)")));
 
-            if (json["result"] == null)
+            if (json["result"] == null || json["result"].Count == 0)
             {
                 yield break;
             }
@@ -112,8 +98,8 @@
 
                 id.ID       = ((string)show["mid"]).Substring(3);
                 id.URL      = Site + "m/" + id.ID;
-                id.Title    = (string)show["name"] + (show["air_date_of_first_episode"] != null ? " (" + ((string)show["air_date_of_first_episode"]["value"]).Substring(0, 4) + ")" : string.Empty);
-                id.Cover    = show["/common/topic/image"].Count > 0 ? "https://usercontent.googleapis.com/freebase/v1/image" + show["/common/topic/image"][0]["mid"] + "?maxwidth=2048" : null;
+                id.Title    = (string)show["name"] + (show["output"]["/tv/tv_program/air_date_of_first_episode"]["/tv/tv_program/air_date_of_first_episode"] != null ? " (" + ((string)show["output"]["/tv/tv_program/air_date_of_first_episode"]["/tv/tv_program/air_date_of_first_episode"][0]).Substring(0, 4) + ")" : string.Empty);
+                id.Cover    = show["output"]["/common/topic/image"]["/common/topic/image"] != null ? "https://usercontent.googleapis.com/freebase/v1/image" + (string)show["output"]["/common/topic/image"]["/common/topic/image"][0]["mid"] + "?maxwidth=2048" : null;
                 id.Language = "en";
                 
                 yield return id;
@@ -189,7 +175,7 @@
             show.Source      = GetType().Name;
             show.SourceID    = id;
             show.Description = main["/common/topic/description"].Count > 0 ? (string)main["/common/topic/description"][0]["value"] : null;
-            show.Cover       = main["/common/topic/image"].Count > 0 ? "https://usercontent.googleapis.com/freebase/v1/image" + main["/common/topic/image"][0]["mid"] + "?maxwidth=2048" : null;
+            show.Cover       = main["/common/topic/image"].Count > 0 ? "https://usercontent.googleapis.com/freebase/v1/image" + (string)main["/common/topic/image"][0]["mid"] + "?maxwidth=2048" : null;
             show.Airing      = main["currently_in_production"] != null && (bool)main["currently_in_production"]["value"];
             show.Runtime     = main["episode_running_time"].Count > 0 ? (int)main["episode_running_time"][0]["value"] : 30;
             show.Network     = main["original_network"].Count > 0 ? (string)main["original_network"][0]["value"] : null;
