@@ -10,7 +10,7 @@
     using NUnit.Framework;
 
     /// <summary>
-    /// Provides support for using the official TMDb API.
+    /// Provides support for using the official Freebase API.
     /// </summary>
     [TestFixture]
     public class Freebase : Guide
@@ -75,7 +75,7 @@
             }
         }
 
-        private const string Key = "";
+        private const string Key = "AIzaSyBhJB0n-P8h63YnnGY98dwdngc_aXTf0j0";
 
         /// <summary>
         /// Gets the ID of a TV show in the database.

@@ -6,6 +6,7 @@
     using System.Threading;
 
     using SharpCompress.Archive;
+    using SharpCompress.Common;
 
     using TaskDialogInterop;
 
@@ -81,8 +82,8 @@
                     break;
 
                 case 1:
-                    var archive = ArchiveFactory.Open(_file);
-                    var files   = archive.Entries.Where(f => !f.IsDirectory && ShowNames.Regexes.KnownVideo.IsMatch(f.FilePath) && !ShowNames.Regexes.SampleVideo.IsMatch(f.FilePath)).ToList();
+                    var archive = ArchiveFactory.Open(_file, Options.LookForHeader);
+                    var files   = archive.Entries.Where(f => !f.IsDirectory && ShowNames.Regexes.KnownVideo.IsMatch(TryFixName(f.FilePath)) && !ShowNames.Regexes.SampleVideo.IsMatch(TryFixName(f.FilePath))).ToList();
                     
                     if (files.Count == 1)
                     {
@@ -116,7 +117,7 @@
                         var i = 0;
                         foreach (var c in files)
                         {
-                            seltd.CommandButtons[i] = c.FilePath + "\n" + Utils.GetFileSize(c.Size) + "   –   " + c.LastModifiedTime;
+                            seltd.CommandButtons[i] = TryFixName(c.FilePath) + "\n" + Utils.GetFileSize(c.Size) + "   –   " + c.LastModifiedTime;
                             i++;
                         }
 
@@ -140,13 +141,13 @@
         /// <param name="archive">The archive.</param>
         private void ExtractFile(IArchiveEntry file, IArchive archive)
         {
-            _ext = Path.Combine(Path.GetDirectoryName(_file), Path.GetFileName(file.FilePath));
+            _ext = Path.Combine(Path.GetDirectoryName(_file), Path.GetFileName(TryFixName(file.FilePath)));
             _active = true;
             _tdstr = "Extracting file...";
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
                     Title                   = "Extracting...",
-                    MainInstruction         = Path.GetFileName(file.FilePath),
+                    MainInstruction         = Path.GetFileName(TryFixName(file.FilePath)),
                     Content                 = _tdstr,
                     CustomButtons           = new[] { "Cancel" },
                     ShowProgressBar         = true,
@@ -257,6 +258,36 @@
             {
                 try { File.Delete(_ext); } catch { }
             }
+        }
+
+        /// <summary>
+        /// Tries to remove garbage from filename when SharpCompress's decode function goes haywire. 
+        /// </summary>
+        /// <param name="name">The possibly broken name.</param>
+        /// <returns>Possibly fixed name.</returns>
+        private string TryFixName(string name)
+        {
+            if (name.Length == 0 || !char.IsControl(name[0]))
+            {
+                return name;
+            }
+
+            // remove leading 0x00
+
+            name = name.TrimStart("\0".ToCharArray());
+
+            // find start of garbage and remove it
+
+            for (int i = 0; i < name.Length; i++)
+            {
+                if (char.IsControl(name[i]))
+                {
+                    name = name.Substring(0, i);
+                    break;
+                }
+            }
+
+            return name;
         }
     }
 }
