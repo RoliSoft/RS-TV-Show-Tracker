@@ -18,7 +18,7 @@
         private FileStream _fs;
         private string _file, _ext, _tdstr;
         private int _tdpos;
-        private volatile bool _active, _cancel;
+        private volatile bool _active, _cancel, _ran;
 
         /// <summary>
         /// Gets a list of supported archive file extensions.
@@ -189,7 +189,11 @@
                     Title                   = "Extracting...",
                     MainInstruction         = Path.GetFileName(file.FileName),
                     Content                 = _tdstr,
-                    CustomButtons           = new[] { "Cancel" },
+                    CustomButtons           = new[]
+                        {
+                            "&Run now", // ID 500
+                            "&Cancel"   // ID 501
+                        },
                     ShowProgressBar         = true,
                     EnableCallbackTimer     = true,
                     AllowDialogCancellation = true,
@@ -200,24 +204,35 @@
 
                             if (args.ButtonId != 0)
                             {
-                                if (_active)
+                                if (args.ButtonId == 500)
                                 {
-                                    _cancel = true;
-
-                                    if (!string.IsNullOrWhiteSpace(_ext) && File.Exists(_ext))
+                                    if (File.Exists(_ext))
                                     {
-                                        new Thread(() =>
-                                            {
-                                                try { _thd.Abort(); _thd = null; } catch { }
-                                                Thread.Sleep(100);
-                                                try { _fs.Close(); _fs.Dispose(); } catch { }
-                                                Thread.Sleep(100);
-                                                try { File.Delete(_ext); } catch { }
-                                            }).Start();
+                                        try { Utils.Run(_ext); } catch { }
+                                        _ran = true;
                                     }
                                 }
+                                else if (args.ButtonId == 501)
+                                {
+                                    if (_active)
+                                    {
+                                        _cancel = true;
 
-                                return false;
+                                        if (!string.IsNullOrWhiteSpace(_ext) && File.Exists(_ext))
+                                        {
+                                            new Thread(() =>
+                                                {
+                                                    try { _thd.Abort(); _thd = null; } catch { }
+                                                    Thread.Sleep(100);
+                                                    try { _fs.Close(); _fs.Dispose(); } catch { }
+                                                    Thread.Sleep(100);
+                                                    try { File.Delete(_ext); } catch { }
+                                                }).Start();
+                                        }
+                                    }
+
+                                    return false;
+                                }
                             }
 
                             if (!_active)
@@ -275,9 +290,11 @@
 
                                 new Thread(() =>
                                     {
-
-                                        Thread.Sleep(250);
-                                        Utils.Run(_ext);
+                                        if (!_ran || (_ran && !Utils.IsFileLocked(_ext)))
+                                        {
+                                            Thread.Sleep(250);
+                                            Utils.Run(_ext);
+                                        }
  
                                         Thread.Sleep(10000);
                                         AskAfterUse();
@@ -304,8 +321,7 @@
         }
         
         /// <summary>
-        /// Waits until the file is not in use anymore,
-        /// and asks the user if s/he wants to remove it.
+        /// Waits until the file is not in use anymore, and asks the user if they want to remove it.
         /// </summary>
         private void AskAfterUse()
         {
