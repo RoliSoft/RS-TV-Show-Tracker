@@ -5,8 +5,7 @@
     using System.Linq;
     using System.Threading;
 
-    using SharpCompress.Archive;
-    using SharpCompress.Common;
+    using SevenZip;
 
     using TaskDialogInterop;
 
@@ -16,9 +15,10 @@
     public class OpenArchiveTaskDialog
     {
         private Thread _thd;
+        private FileStream _fs;
         private string _file, _ext, _tdstr;
         private int _tdpos;
-        private volatile bool _active;
+        private volatile bool _active, _cancel;
 
         /// <summary>
         /// Gets a list of supported archive file extensions.
@@ -82,52 +82,54 @@
                     break;
 
                 case 1:
-                    var archive = ArchiveFactory.Open(_file, Options.LookForHeader);
-                    var files   = archive.Entries.Where(f => !f.IsDirectory && ShowNames.Regexes.KnownVideo.IsMatch(TryFixName(f.FilePath)) && !ShowNames.Regexes.SampleVideo.IsMatch(TryFixName(f.FilePath))).ToList();
-                    
-                    if (files.Count == 1)
-                    {
-                        ExtractFile(files[0], archive);
-                    }
-                    else if (files.Count == 0)
-                    {
-                        TaskDialog.Show(new TaskDialogOptions
-                            {
-                                MainIcon                = VistaTaskDialogIcon.Error,
-                                Title                   = "No files found",
-                                MainInstruction         = "No files found",
-                                Content                 = "The archive doesn't contain any video files.",
-                                AllowDialogCancellation = true,
-                                CustomButtons           = new[] { "OK" }
-                            });
+                    SevenZipBase.SetLibraryPath(Path.Combine(Signature.InstallPath, @"libs\7z" + (Environment.Is64BitProcess ? "64" : string.Empty) + ".dll"));
 
-                        return;
-                    }
-                    else
+                    using (var archive = new SevenZipExtractor(_file))
                     {
-                        var seltd = new TaskDialogOptions
-                            {
-                                Title                   = "Open archive",
-                                MainInstruction         = Path.GetFileName(_file),
-                                Content                 = "The archive contains more than one video files.\r\nSelect the one to decompress and open:",
-                                AllowDialogCancellation = true,
-                                CommandButtons          = new string[files.Count + 1]
-                            };
+                        var files = archive.ArchiveFileData.Where(f => !f.IsDirectory && ShowNames.Regexes.KnownVideo.IsMatch(f.FileName) && !ShowNames.Regexes.SampleVideo.IsMatch(f.FileName)).ToList();
 
-                        var i = 0;
-                        foreach (var c in files)
+                        if (files.Count == 1)
                         {
-                            seltd.CommandButtons[i] = TryFixName(c.FilePath) + "\n" + Utils.GetFileSize(c.Size) + "   –   " + c.LastModifiedTime;
-                            i++;
+                            ExtractFile(files[0]);
                         }
-
-                        seltd.CommandButtons[i] = "None of the above";
-
-                        var rez = TaskDialog.Show(seltd);
-
-                        if (rez.CommandButtonResult.HasValue && rez.CommandButtonResult.Value < files.Count)
+                        else if (files.Count == 0)
                         {
-                            ExtractFile(files[rez.CommandButtonResult.Value], archive);
+                            TaskDialog.Show(new TaskDialogOptions
+                                {
+                                    MainIcon                = VistaTaskDialogIcon.Error,
+                                    Title                   = "No files found",
+                                    MainInstruction         = "No files found",
+                                    Content                 = "The archive doesn't contain any video files.",
+                                    AllowDialogCancellation = true,
+                                    CustomButtons           = new[] {"OK"}
+                                });
+                        }
+                        else
+                        {
+                            var seltd = new TaskDialogOptions
+                                {
+                                    Title                   = "Open archive",
+                                    MainInstruction         = Path.GetFileName(_file),
+                                    Content                 = "The archive contains more than one video files.\r\nSelect the one to decompress and open:",
+                                    AllowDialogCancellation = true,
+                                    CommandButtons          = new string[files.Count + 1]
+                                };
+
+                            var i = 0;
+                            foreach (var c in files)
+                            {
+                                seltd.CommandButtons[i] = c.FileName + "\n" + Utils.GetFileSize((long)c.Size) + "   –   " + c.LastWriteTime;
+                                i++;
+                            }
+
+                            seltd.CommandButtons[i] = "None of the above";
+
+                            var rez = TaskDialog.Show(seltd);
+
+                            if (rez.CommandButtonResult.HasValue && rez.CommandButtonResult.Value < files.Count)
+                            {
+                                ExtractFile(files[rez.CommandButtonResult.Value]);
+                            }
                         }
                     }
                     break;
@@ -138,16 +140,54 @@
         /// Begins the file extraction.
         /// </summary>
         /// <param name="file">The file within the archive.</param>
-        /// <param name="archive">The archive.</param>
-        private void ExtractFile(IArchiveEntry file, IArchive archive)
+        private void ExtractFile(ArchiveFileInfo file)
         {
-            _ext = Path.Combine(Path.GetDirectoryName(_file), Path.GetFileName(TryFixName(file.FilePath)));
+            _ext = Path.Combine(Path.GetDirectoryName(_file), Path.GetFileName(file.FileName));
+
+            try
+            {
+                using (var fs = File.Create(_ext))
+                {
+                    fs.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Failed to create new file to '" + _ext + "', retrying with temp path...", ex);
+
+                _ext = Path.Combine(Path.GetTempPath(), Path.GetFileName(file.FileName));
+
+                try
+                {
+                    using (var fs = File.Create(_ext))
+                    {
+                        fs.Close();
+                    }
+                }
+                catch (Exception ex2)
+                {
+                    Log.Warn("Failed to create new temp file to '" + _ext + "', aborting extraction...", ex2);
+
+                    TaskDialog.Show(new TaskDialogOptions
+                            {
+                                MainIcon                = VistaTaskDialogIcon.Error,
+                                Title                   = "Extraction error",
+                                MainInstruction         = "Extraction error",
+                                Content                 = "Failed to create new file near archive or in the %TEMP% directory.",
+                                AllowDialogCancellation = true,
+                                CustomButtons           = new[] { "OK" }
+                            });
+
+                    return;
+                }
+            }
+
             _active = true;
             _tdstr = "Extracting file...";
             var mthd = new Thread(() => TaskDialog.Show(new TaskDialogOptions
                 {
                     Title                   = "Extracting...",
-                    MainInstruction         = Path.GetFileName(TryFixName(file.FilePath)),
+                    MainInstruction         = Path.GetFileName(file.FileName),
                     Content                 = _tdstr,
                     CustomButtons           = new[] { "Cancel" },
                     ShowProgressBar         = true,
@@ -162,13 +202,16 @@
                             {
                                 if (_active)
                                 {
-                                    try { _thd.Abort(); _thd = null; } catch { }
+                                    _cancel = true;
 
                                     if (!string.IsNullOrWhiteSpace(_ext) && File.Exists(_ext))
                                     {
                                         new Thread(() =>
                                             {
-                                                Thread.Sleep(1000);
+                                                try { _thd.Abort(); _thd = null; } catch { }
+                                                Thread.Sleep(100);
+                                                try { _fs.Close(); _fs.Dispose(); } catch { }
+                                                Thread.Sleep(100);
                                                 try { File.Delete(_ext); } catch { }
                                             }).Start();
                                     }
@@ -192,44 +235,71 @@
             var total = file.Size;
             var last = DateTime.MinValue;
 
-            archive.CompressedBytesRead += (sender, args) =>
+            _thd = new Thread(() =>
                 {
-                    if (args.CurrentFilePartCompressedBytesRead == total)
-                    {
-                        return;
-                    }
+                    using (var fs = _fs = File.Open(_ext, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                    using (var archive = new SevenZipExtractor(_file))
+                    { 
+                        archive.Extracting += (sender, args) =>
+                            {
+                                if (_cancel)
+                                {
+                                    args.Cancel = true;
+                                    return;
+                                }
 
-                    if ((DateTime.Now - last).TotalMilliseconds < 150)
-                    {
-                        return;
-                    }
+                                if (args.PercentDone == 100)
+                                {
+                                    return;
+                                }
 
-                    last = DateTime.Now;
+                                if ((DateTime.Now - last).TotalMilliseconds < 150)
+                                {
+                                    return;
+                                }
 
-                    var perc = ((double)args.CurrentFilePartCompressedBytesRead / (double)total) * 100;
-                    _tdpos = (int)perc;
-                    _tdstr = "Extracting file: " + Utils.GetFileSize(args.CurrentFilePartCompressedBytesRead) + " / " + perc.ToString("0.00") + "% done...";
-                };
-            archive.EntryExtractionEnd += (sender, args) =>
-                {
-                    _active = false;
+                                last = DateTime.Now;
 
-                    if (!File.Exists(_ext))
-                    {
-                        return;
-                    }
+                                _tdpos = args.PercentDone;
+                                _tdstr = "Extracting file: " + Utils.GetFileSize((long)Math.Round((args.PercentDone / 100d) * total)) + " / " + args.PercentDone + "% done...";
+                            };
 
-                    new Thread(() =>
-                        {
-                            Thread.Sleep(250);
-                            Utils.Run(_ext);
+                        archive.ExtractionFinished += (sender, args) =>
+                            {
+                                _active = false;
+
+                                if (!File.Exists(_ext))
+                                {
+                                    return;
+                                }
+
+                                new Thread(() =>
+                                    {
+
+                                        Thread.Sleep(250);
+                                        Utils.Run(_ext);
  
-                            Thread.Sleep(10000);
-                            AskAfterUse();
-                        }).Start();
-                };
+                                        Thread.Sleep(10000);
+                                        AskAfterUse();
+                                    }).Start();
+                            };
 
-            _thd = new Thread(() => file.WriteToFile(_ext));
+                        try
+                        {
+                            archive.ExtractFile(file.Index, fs);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn("Error during file extraction.", ex);
+                        }
+                    }
+
+                    if (_cancel && File.Exists(_ext))
+                    {
+                        try { File.Delete(_ext); } catch { }
+                    }
+                });
+
             _thd.Start();
         }
         

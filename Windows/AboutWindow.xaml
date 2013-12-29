@@ -196,6 +196,11 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://sevenzipsharp.codeplex.com/">SevenZipSharp</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://www.nunit.org/">NUnit</Hyperlink>
                             </Paragraph>
                         </ListItem>

@@ -138,6 +138,10 @@
       <HintPath>Dependencies\SharpCompress.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SevenZipSharp">
+      <HintPath>Dependencies\SevenZipSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="StarksoftBiko">
       <HintPath>Dependencies\StarksoftBiko.dll</HintPath>
       <Private>False</Private>
