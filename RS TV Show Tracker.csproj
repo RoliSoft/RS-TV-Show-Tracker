@@ -126,6 +126,10 @@
       <HintPath>Dependencies\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="NCalc">
+      <HintPath>Dependencies\NCalc.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Dependencies\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>

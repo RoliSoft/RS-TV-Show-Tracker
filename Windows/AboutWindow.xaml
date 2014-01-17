@@ -206,6 +206,11 @@
                         </ListItem>
                         <ListItem>
                             <Paragraph>
+                                <Hyperlink NavigateUri="http://ncalc.codeplex.com/">NCalc</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
                                 <Hyperlink NavigateUri="http://ironpython.net/">IronPython</Hyperlink>
                             </Paragraph>
                         </ListItem>

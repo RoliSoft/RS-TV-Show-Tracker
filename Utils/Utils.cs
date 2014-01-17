@@ -16,6 +16,7 @@
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using System.Security.Principal;
+    using System.Threading;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Windows;
@@ -261,6 +262,16 @@
                     "3082020A0282020100CE22C0E2467DEC3628075096F2A033408C4BF13B663F31E56B0236DBD67CF6F1888F4E7736054195F909F012CF46867360B76E7EE8C05864AECDB0AD45170C63FA670AE8D6D2BF3EE798C4F04CFAE003BB355D6C21DE9E20D9BACD66323772FAF708F5C7CD58C98EE70E5EEA3EFE1CA1140A156C86845B64662A7AA94B5379F588A27BEE2F0A612B8DB27E4D56A513ECEADA929EAC44411E5860650566F8C044BDCB94F7427E0BF76568985105F0F30591041D1B1782ECC857BBC36B7A88F1B072CC255B2091EC1602128F32E9171848D0C7052E023042B8259C056B3FAA3AA7EB5348F7E8D2B60798DC1BC6347F7FC91C827A05582B085BF338A2AB175D66C998D79E108BA2D2DD749AF7710C7260DFCD6F98339D9634763E247A92B00E951E6FE6A0453847AAD741ED4AB712F6D71B838A0F2ED809B659D7AA04FFD2937D682EDD8B4BAB58BA2F8DEA95A7A0C35489A5FBDB8B51229DB2C3BE11BE2C91868B9678AD20D38A2F1A3FC6D051658721B11901657F451C87F57CD0414C4F299821FD331F750C0451FA1977DBD4141CEE81C31DF598B769069122DD0050CC8131AC12077B38DA685BE62BD47EC95FADE8EB724CF301E54B20BF9AA657CA9100018BA1752137B5630D673E464F702067CEC5D659DB02E0F0D2CBCDBA62B79041E8DD20E429BC642942C822DC789AFF43EC981B09514B5A5AC271F1C4CB73A9E5A10B0203010001"
                 }
             };
+
+        /// <summary>
+        /// A list of <c>cf_clearance</c> cookies on a per-host basis to bypass CloudFlare's DDoS protection.
+        /// </summary>
+        public static Dictionary<string, Tuple<string, string>> CloudFlareClearances = new Dictionary<string, Tuple<string, string>>();
+
+        /// <summary>
+        /// A list of CloudFlare's DDoS protection bypasses on a per-host basis with their timestamp.
+        /// </summary>
+        public static Dictionary<string, DateTime> CloudFlareBypasses = new Dictionary<string, DateTime>(); 
 
         /// <summary>
         /// A list of hostnames for which to ignore invalid SSL certificate errors.
@@ -645,7 +656,8 @@
         {
             var id = Rand.Next(short.MaxValue);
             var st = DateTime.Now;
-            var domain = new Uri(url).Host.Replace("www.", string.Empty);
+            var uri = new Uri(url);
+            var domain = uri.Host.Replace("www.", string.Empty);
 
             Log.Debug("HTTP#{0} {1} {2}", new[] { id.ToString(), postData != null ? "POST" : "GET", url });
 
@@ -714,9 +726,20 @@
                 foreach (var kv in Regex.Replace(cookies.TrimEnd(';'), @";\s*", ";")
                                    .Split(';')
                                    .Where(cookie => cookie != null)
-                                   .Select(cookie => cookie.Split('=')))
+                                   .Select(cookie => cookie.Split('='))
+                                   .Where(cookie => cookie[0] != "__cfduid" && cookie[0] != "cf_clearance"))
                 {
                     req.CookieContainer.Add(new Cookie(kv[0], kv[1], "/", req.Address.Host));
+                }
+            }
+
+            if (CloudFlareClearances.ContainsKey(uri.Host))
+            {
+                req.CookieContainer.Add(new Cookie("__cfduid", CloudFlareClearances[uri.Host].Item1, "/", req.Address.Host));
+
+                if (!string.IsNullOrWhiteSpace(CloudFlareClearances[uri.Host].Item2))
+                {
+                    req.CookieContainer.Add(new Cookie("cf_clearance", CloudFlareClearances[uri.Host].Item2, "/", req.Address.Host));
                 }
             }
 
@@ -801,17 +824,98 @@
 
                 return Convert.ToBase64String(res);
             }
-            else
+
+            using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
             {
-                using (var sr = new StreamReader(rstr, encoding ?? Encoding.UTF8))
+                var str = sr.ReadToEnd();
+
+                Log.Debug("HTTP#" + id + " [" + domain + "] is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
+                if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " [" + domain + "] is " + resp.ContentType + ", dumping text content" + Environment.NewLine + Regex.Replace(Regex.Replace(Regex.Replace(str, @"<\s*(script|style)[^>]*>.*?<\s*/\s*\1[^>]*>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase), "<[^>]+>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase).Replace("&quot;", "\"").Replace("&nbsp;", " "), @"\s\s*", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase));
+
+                if (resp.StatusCode == HttpStatusCode.ServiceUnavailable && str.Contains("jschl_vc") && !url.Contains("/cdn-cgi/l/chk_jschl?jschl_vc=") && !(CloudFlareBypasses.ContainsKey(uri.Host) && (DateTime.Now - CloudFlareBypasses[uri.Host]).TotalMinutes < 5))
                 {
-                    var str = sr.ReadToEnd();
+                    Log.Debug("HTTP#" + id + " [" + domain + "] is a CloudFlare DDoS protection wall, trying to bypass it...");
 
-                    Log.Debug("HTTP#" + id + " [" + domain + "] is " + GetFileSize(str.Length) + " and took " + (DateTime.Now - st).TotalSeconds + "s.");
-                    if (Log.IsTraceEnabled) Log.Trace("HTTP#" + id + " [" + domain + "] is " + resp.ContentType + ", dumping text content" + Environment.NewLine + Regex.Replace(Regex.Replace(Regex.Replace(str, @"<\s*(script|style)[^>]*>.*?<\s*/\s*\1[^>]*>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase), "<[^>]+>", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase).Replace("&quot;", "\"").Replace("&nbsp;", " "), @"\s\s*", " ", RegexOptions.Singleline | RegexOptions.IgnoreCase));
+                    var nums = Regex.Match(str, @"(\d+\s*\+\d+\*\d+)");
 
-                    return str;
+                    if (!nums.Success)
+                    {
+                        nums = Regex.Match(str, @"\.value\s*=\s*(?=[^\da-z]+\d)([^;$]+)", RegexOptions.IgnoreCase);
+
+                        if (!nums.Success)
+                        {
+                            Log.Warn("HTTP#" + id + " [" + domain + "] Failed to extract math expression from CloudFlare's DDoS page, returning content as-is...");
+                            return str;
+                        }
+                    }
+
+                    decimal res;
+
+                    try
+                    {
+                        res = Convert.ToDecimal(new NCalc.Expression(nums.Groups[1].Value).Evaluate());
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("HTTP#" + id + " [" + domain + "] Failed to evaluate math expression from CloudFlare's DDoS page '" + nums.Groups[1].Value.Trim() + "', returning content as-is...", ex);
+                        return str;
+                    }
+
+                    res += uri.Host.Length;
+
+                    var vc = Regex.Match(str, "name=\"jschl_vc\" value=\"(.*?)\"/>");
+
+                    var cfd = string.Empty; // __cfduid
+                    var cfc = string.Empty; // cf_clearance
+
+                    foreach (var cookie in resp.Cookies.Cast<Cookie>().Where(cookie => cookie.Name == "__cfduid"))
+                    {
+                        cfd = cookie.Value;
+                        break;
+                    }
+
+                    try
+                    {
+                        Log.Debug("HTTP#" + id + " [" + domain + "] Issuing CloudFlare DDoS protection wall bypass request...");
+
+                        CloudFlareClearances[uri.Host] = Tuple.Create(cfd, cfc);
+
+                        Thread.Sleep(TimeSpan.FromSeconds(5.5));
+
+                        GetURL("http://" + uri.Host + (uri.IsDefaultPort ? string.Empty : ":" + uri.Port) + "/cdn-cgi/l/chk_jschl?jschl_vc=" + vc.Groups[1].Value + "&jschl_answer=" + res, userAgent: userAgent, proxy: proxy,
+                            request: req2 =>
+                                {
+                                    req2.AllowAutoRedirect = false;
+                                },
+                            response: resp2 =>
+                            {
+                                foreach (var cookie in resp2.Cookies.Cast<Cookie>().Where(cookie => cookie.Name == "cf_clearance"))
+                                {
+                                    cfc = cookie.Value;
+                                    break;
+                                }
+                            });
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("HTTP#" + id + " [" + domain + "] Failed to request /cdn-cgi/l/chk_jschl from CloudFlare's DDoS page, returning content as-is...", ex);
+                        return str;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(cfc))
+                    {
+                        Log.Warn("HTTP#" + id + " [" + domain + "] Failed to get cf_clearance cookie from CloudFlare's DDoS page, returning content as-is...");
+                        return str;
+                    }
+
+                    CloudFlareClearances[uri.Host] = Tuple.Create(cfd, cfc);
+
+                    Log.Debug("HTTP#" + id + " [" + domain + "] Re-issuing request with CloudFlare Clearance cookie set...");
+
+                    return GetURL(url, postData, cookies, encoding, userAgent, timeout, headers, proxy, request, response);
                 }
+
+                return str;
             }
         }
 
