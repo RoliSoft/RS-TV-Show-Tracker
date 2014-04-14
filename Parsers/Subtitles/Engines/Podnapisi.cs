@@ -10,6 +10,7 @@
 
     using RoliSoft.TVShowTracker.Downloaders;
     using RoliSoft.TVShowTracker.Downloaders.Engines;
+    using RoliSoft.TVShowTracker.ShowNames;
 
     /// <summary>
     /// Provides support for scraping Podnapisi.
@@ -100,10 +101,10 @@
         {
             string show, season = string.Empty, episode = string.Empty;
 
-            if (ShowNames.Regexes.Numbering.IsMatch(query))
+            if (Regexes.Numbering.IsMatch(query))
             {
-                show     = Utils.EncodeURL(ShowNames.Parser.Split(query)[0]);
-                var epnr = ShowNames.Parser.ExtractEpisode(query);
+                show     = Utils.EncodeURL(Parser.Split(query)[0]);
+                var epnr = Parser.ExtractEpisode(query) ?? new ShowEpisode();
                 season   = epnr.Season.ToString();
                 episode  = epnr.Episode.ToString();
             }

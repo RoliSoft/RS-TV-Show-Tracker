@@ -99,6 +99,7 @@
         internal int _activeShowID;
         private string _activeShowUrl;
         private Thread _workThd;
+        private bool _suspendCheck;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GuidesPage"/> class.
@@ -886,6 +887,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SeenItChecked(object sender, RoutedEventArgs e)
         {
+            if (_suspendCheck) return;
+
             var episode = (Episode)((CheckBox)e.OriginalSource).Tag;
 
             if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.ID == episode))
@@ -894,6 +897,8 @@
 
                 try
                 {
+                    _suspendCheck = true;
+
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
                         item.ID.Watched = item.SeenIt = true;
@@ -908,6 +913,7 @@
                 }
                 finally
                 {
+                    _suspendCheck = false;
                     MainWindow.Active.DataChanged(false);
                 }
             }
@@ -917,6 +923,8 @@
 
                 try
                 {
+                    _suspendCheck = true;
+
                     episode.Watched = true;
                     episode.Show.SaveTracking();
                 }
@@ -926,6 +934,7 @@
                 }
                 finally
                 {
+                    _suspendCheck = false;
                     MainWindow.Active.DataChanged(false);
                 }
             }
@@ -938,6 +947,8 @@
         /// <param name="e">The <see cref="System.Windows.RoutedEventArgs"/> instance containing the event data.</param>
         private void SeenItUnchecked(object sender, RoutedEventArgs e)
         {
+            if (_suspendCheck) return;
+
             var episode = (Episode)((CheckBox)e.OriginalSource).Tag;
 
             if (listView.SelectedItems.Count > 1 && listView.SelectedItems.Cast<GuideListViewItem>().Any(x => x.ID == episode))
@@ -946,6 +957,8 @@
 
                 try
                 {
+                    _suspendCheck = true;
+
                     foreach (GuideListViewItem item in listView.SelectedItems)
                     {
                         item.ID.Watched = item.SeenIt = false;
@@ -960,6 +973,7 @@
                 }
                 finally
                 {
+                    _suspendCheck = false;
                     MainWindow.Active.DataChanged(false);
                 }
             }
@@ -969,6 +983,8 @@
 
                 try
                 {
+                    _suspendCheck = true;
+
                     episode.Watched = false;
                     episode.Show.SaveTracking();
                 }
@@ -978,6 +994,7 @@
                 }
                 finally
                 {
+                    _suspendCheck = false;
                     MainWindow.Active.DataChanged(false);
                 }
             }

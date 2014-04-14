@@ -383,6 +383,12 @@
         /// <returns>List of regular expressions.</returns>
         public static Regex GenerateEpisodeRegexes(ShowEpisode episode)
         {
+            if (episode == null)
+            {
+                Log.Warn("ExtractEpisode() returned a null value to GenerateEpisodeRegexes(): This will filter everything.");
+                episode = new ShowEpisode();
+            }
+
             return GenerateEpisodeRegexes(episode.Season.ToString(), episode.Episode.ToString(), episode.AirDate);
         }
 

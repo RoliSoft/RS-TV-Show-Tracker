@@ -186,7 +186,31 @@
                     break;
 
                 case "SendToFolder":
-                    File.Move(e.First, Path.Combine(id, Path.GetFileName(e.First)));
+                    if (!Regex.IsMatch(e.First, "^(https?|s?ftps?|magnet):", RegexOptions.IgnoreCase))
+                    {
+                        File.Move(e.First, Path.Combine(id, Path.GetFileName(e.First)));
+                    }
+                    else
+                    {
+                        var mc = Regex.Match(e.First, "dn=([^$&]+)");
+                        string fn;
+
+                        if (mc.Success)
+                        {
+                            fn = Utils.SanitizeFileName(Utils.DecodeURL(mc.Groups[1].Value));
+                        }
+                        else
+                        {
+                            fn = Utils.SanitizeFileName(Utils.DecodeURL(e.First));
+                        }
+
+                        if (fn.Length > 250)
+                        {
+                            fn = fn.Substring(0, 250);
+                        }
+
+                        File.WriteAllText(Path.Combine(id, fn + ".url"), "[InternetShortcut]" + Environment.NewLine + "URL=" + e.First + Environment.NewLine);
+                    }
                     break;
 
                 case "SendToSender":
