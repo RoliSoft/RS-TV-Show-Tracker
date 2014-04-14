@@ -131,9 +131,18 @@ Function .onInit
 		KillProcDLL::KillProc "${MAIN_APP_EXE}"
 	${EndIf}
 	
-	${If} ${RunningX64}
-		SetRegView 64
-		StrCpy $INSTDIR "$PROGRAMFILES64\${COMP_NAME}\${APP_NAME}"
+	ClearErrors
+	ReadRegStr $R0 HKCU "${REG_APP_PATH}" ""
+	
+	${IfNot} ${Errors}
+		# leave as-is, already installed by installer
+	${ElseIf} ${RunningX64}
+		${If} ${FileExists} "$INSTDIR\*.*"
+			# leave as-is, already installed by portable
+		${Else}
+			SetRegView 64
+			StrCpy $INSTDIR "$PROGRAMFILES64\${COMP_NAME}\${APP_NAME}"
+		${EndIf}
 	${EndIf}
 FunctionEnd
 
