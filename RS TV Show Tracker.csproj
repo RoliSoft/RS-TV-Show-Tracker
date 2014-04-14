@@ -223,6 +223,7 @@
     <Compile Include="CoverManager.cs" />
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
     <Compile Include="DiscoverShows.cs" />
+    <Compile Include="Downloaders\Engines\AlienSubtitlesDownloader.cs" />
     <Compile Include="Isolated.cs" />
     <Compile Include="KeyValueList.cs" />
     <Compile Include="Library.cs" />
@@ -292,6 +293,7 @@
     <Compile Include="Parsers\Senders\Engines\uTorrentWebUI.cs" />
     <Compile Include="Parsers\Senders\SenderEngine.cs" />
     <Compile Include="Parsers\Subtitles\Editions.cs" />
+    <Compile Include="Parsers\Subtitles\Engines\AlienSubtitles.cs" />
     <Compile Include="Parsers\Subtitles\Engines\Subtitleseeker.cs" />
     <Compile Include="Parsers\Subtitles\Engines\LegendasTV.cs" />
     <Compile Include="Parsers\WebSearch\Engines\Seeks.cs" />
