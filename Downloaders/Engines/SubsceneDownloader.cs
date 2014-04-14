@@ -25,6 +25,7 @@
         public event EventHandler<EventArgs<int>> DownloadProgressChanged;
 
         private Thread _thd;
+        private HTTPDownloader _dl;
 
         /// <summary>
         /// Asynchronously downloads the specified link.
@@ -72,70 +73,16 @@
 
             // extract required info
 
-            var dllink    = "http://v2.subscene.com/" + Regex.Match(info, @"\(new WebForm_PostBackOptions\([^\n\r\t]+?\/([^\n\r\t]+?)&quot;, false, true\)\)", RegexOptions.IgnoreCase).Groups[1].Value;
-            var viewstate = Regex.Match(info, @"<input type=""hidden"" name=""__VIEWSTATE"" id=""__VIEWSTATE"" value=""([^\n\r\t]*?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
-            var prevpage  = Regex.Match(info, @"<input type=""hidden"" name=""__PREVIOUSPAGE"" id=""__PREVIOUSPAGE"" value=""([^\n\r\t]*?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
-            var subid     = Regex.Match(info, @"<input type=""hidden"" name=""subtitleId"" id=""subtitleId"" value=""(\d+?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
-            var typeid    = Regex.Match(info, @"<input type=""hidden"" name=""typeId"" value=""([^\n\r\t]{3,15})"" />", RegexOptions.IgnoreCase).Groups[1].Value;
-            var filmid    = Regex.Match(info, @"<input type=""hidden"" name=""filmId"" value=""(\d+?)"" />", RegexOptions.IgnoreCase).Groups[1].Value;
+            var dllink    = "http://subscene.com" + Regex.Match(info, "href=\"([^\"]+)\".*?id=\"downloadButton\"", RegexOptions.IgnoreCase).Groups[1].Value;
 
-            // build POST data
+            // pass the rest of the work to HTTPDownloader
 
-            var post = "__EVENTTARGET=s$lc$bcr$downloadLink&__EVENTARGUMENT=&__VIEWSTATE={0}&__PREVIOUSPAGE={1}&subtitleId={2}&typeId={3}&filmId={4}".FormatWith(viewstate, prevpage, subid, typeid, filmid);
-            var pbin = Encoding.ASCII.GetBytes(post);
+            _dl = new HTTPDownloader();
 
-            // download file
+            _dl.DownloadProgressChanged += (s, e) => DownloadProgressChanged.Fire(this, e.Data);
+            _dl.DownloadFileCompleted   += (s, e) => DownloadFileCompleted.Fire(this, e.First, e.Second, e.Third);
 
-            var req               = (HttpWebRequest)WebRequest.Create(dllink);
-            req.UserAgent         = "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.7.39 Version/11.00";
-            req.ContentType       = "application/x-www-form-urlencoded";
-            req.Method            = "POST";
-            req.Referer           = url;
-            req.Headers["Origin"] = "http://v2.subscene.com";
-            req.ContentLength     = pbin.Length;
-
-            using (var rs = req.GetRequestStream())
-            {
-                rs.Write(pbin, 0, pbin.Length);
-            }
-
-            var resp = (HttpWebResponse)req.GetResponse();
-
-            using (var rstream = resp.GetResponseStream())
-            {
-                using (var fstream = new FileStream(target, FileMode.Create))
-                {
-                    var buffer = new byte[1024];
-                    int read;
-
-                    while ((read = rstream.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        fstream.Write(buffer, 0, read);
-                    }
-                }
-            }
-
-            DownloadProgressChanged.Fire(this, 100);
-
-            // extract file name
-
-            var fn = string.Empty;
-
-            if (!string.IsNullOrWhiteSpace(resp.GetResponseHeader("Content-Disposition")))
-            {
-                var m = Regex.Match(resp.GetResponseHeader("Content-Disposition"), @"filename=[""']?([^$]+)", RegexOptions.IgnoreCase);
-
-                if (m.Success)
-                {
-                    fn = m.Groups[1].Value.TrimEnd(new[] { ' ', '\'', '"' });
-                }
-            }
-            else
-            {
-                fn = "subscene-sub." + typeid;
-            }
-
-            DownloadFileCompleted.Fire(this, target, fn, token);
+            _dl.Download(dllink, target, token);
         }
 
         /// <summary>
@@ -143,6 +90,7 @@
         /// </summary>
         public void CancelAsync()
         {
+            try { _dl.CancelAsync(); } catch { }
             try { _thd.Abort(); } catch { }
         }
     }

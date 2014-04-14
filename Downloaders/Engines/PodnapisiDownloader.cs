@@ -65,7 +65,7 @@
 
             var info = Utils.GetHTML(url);
             
-            DownloadProgressChanged.Fire(this, 1);
+            DownloadProgressChanged.Fire(this, 25);
 
             // extract the download link
 

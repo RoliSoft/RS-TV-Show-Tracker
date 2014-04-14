@@ -59,7 +59,7 @@
         {
             get
             {
-                return Utils.DateTimeToVersion("2011-12-11 2:08 AM");
+                return Utils.DateTimeToVersion("2014-04-14 9:53 AM");
             }
         }
 
@@ -108,7 +108,7 @@
                 sub.Corrected   = node.SelectSingleNode("../../../tr/td/img[contains(@src,'bullet_go')]") != null;
                 sub.HINotations = node.SelectSingleNode("../../../tr/td/img[contains(@src,'hi.jpg')]") != null;
                 sub.Release     = head[0] + " " + head[1] + " - "
-                                + node.GetTextValue("../../../tr/td[contains(text(),'Version')]").Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
+                                + (node.GetTextValue("../../../tr/td[contains(text(),'Version')]") ?? node.GetTextValue("../../../../../tr/td[contains(text(),'Version')]")).Trim().Replace("Version ", string.Empty).Split(", ".ToCharArray())[0]
                                 + (node.SelectSingleNode("../../../tr/td/img[contains(@src,'hdicon')]") != null ? "/HD" : string.Empty)
                                 + (node.InnerText != "Download" ? " - " + node.InnerText : string.Empty);
                 sub.Language    = Languages.Parse(node.GetTextValue("../../td[3]").Replace("&nbsp;", string.Empty).Trim());
