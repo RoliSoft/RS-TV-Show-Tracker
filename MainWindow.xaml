@@ -697,14 +697,14 @@
                 <Grid>
                     <Rectangle Fill="{StaticResource HeadGradientBusy}" Width="160" HorizontalAlignment="Left" Name="progressRectangle" Opacity="0" Margin="0" />
                     <Image Source="/RSTVShowTracker;component/Images/tv.png" Height="16" Width="16" HorizontalAlignment="Left" Margin="8,-3,0,0"></Image>
-                    <Label TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="Grayscale" HorizontalAlignment="Left" Foreground="White" Content="RS TV Show Tracker v2" Padding="30,3,8,5">
+                    <Label TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="Grayscale" HorizontalAlignment="Left" Foreground="White" Content="RS TV Show Tracker v2" Padding="30,4,8,6">
                         <Label.Effect>
                             <DropShadowEffect BlurRadius="5" Color="Gray" Direction="316" ShadowDepth="2" />
                         </Label.Effect>
                     </Label>
                 </Grid>
             </Border>
-            <Label Name="lastUpdatedLabel" TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="Grayscale" HorizontalAlignment="Left" Foreground="White" Content="last updated label" Margin="165,-7,0,0">
+            <Label Name="lastUpdatedLabel" TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="Grayscale" HorizontalAlignment="Left" Foreground="White" Content="last updated label" Margin="165,-6,0,0">
                 <Label.Effect>
                     <DropShadowEffect BlurRadius="5" Color="Black" Direction="0" ShadowDepth="0" />
                 </Label.Effect>
