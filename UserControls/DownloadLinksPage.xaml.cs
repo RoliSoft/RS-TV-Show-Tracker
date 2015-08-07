@@ -73,7 +73,7 @@
         private volatile bool _searching;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SubtitlesPage"/> class.
+        /// Initializes a new instance of the <see cref="DownloadLinksPage"/> class.
         /// </summary>
         public DownloadLinksPage()
         {
@@ -153,7 +153,7 @@
 
                     (mi.Header as StackPanel).Children.Add(new Image
                         {
-                            Source = new BitmapImage(engine.Icon != null ? new Uri(engine.Icon) : new Uri("/RSTVShowTracker;component/Images/navigation.png", UriKind.Relative), new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.CacheIfAvailable)),
+                            Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/navigation.png", UriKind.Relative)),
                             Width  = 16,
                             Height = 16,
                             Margin = new Thickness(3, -2, 0, 0),
