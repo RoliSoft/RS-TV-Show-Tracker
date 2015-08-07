@@ -3,6 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary
+                    Source="/PresentationFramework.Aero,                        
+                            Version=4.0.0.0,                     
+                            Culture=neutral,                        
+                            PublicKeyToken=31bf3856ad364e35,                        
+                            ProcessorArchitecture=MSIL;component/Themes/Aero.NormalColor.xaml" />
     </Application.Resources>
 </Application>
