@@ -222,6 +222,8 @@
     <Compile Include="ContextMenus\Menus\SubtitleContextMenu.cs" />
     <Compile Include="CoverManager.cs" />
     <Compile Include="Dependencies\DetectOpenFiles\DetectOpenFiles.cs" />
+    <Compile Include="Dependencies\StartScreenColors\ImmersiveColors.cs" />
+    <Compile Include="Dependencies\StartScreenColors\StarScreenColorsHelper.cs" />
     <Compile Include="DiscoverShows.cs" />
     <Compile Include="Downloaders\Engines\AlienSubtitlesDownloader.cs" />
     <Compile Include="Isolated.cs" />

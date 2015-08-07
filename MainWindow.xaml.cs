@@ -1,4 +1,5 @@
-﻿namespace RoliSoft.TVShowTracker
+﻿
+namespace RoliSoft.TVShowTracker
 {
     using System;
     using System.Collections.Concurrent;
@@ -26,6 +27,8 @@
 
     using RoliSoft.TVShowTracker.Remote;
     using RoliSoft.TVShowTracker.Remote.Objects;
+
+    using RoliSoft.TVShowTracker.Dependencies.StartScreenColors;
 
     using Drawing     = System.Drawing;
     using NotifyIcon  = System.Windows.Forms.NotifyIcon;
@@ -75,7 +78,7 @@
             TaskScheduler.UnobservedTaskException      += (s, e) => { HandleUnexpectedException(e.Exception); e.SetObserved(); };
 
             _tssc = TaskScheduler.FromCurrentSynchronizationContext();
-
+            
             // set up mutex so only one instance will run
 
             var uniq = false;
@@ -387,11 +390,13 @@
         {
             WindowChrome.SetWindowChrome(this, new WindowChrome { GlassFrameThickness = new Thickness(-1) });
 
-            Background         = Brushes.Transparent;
-            mainBorder.Padding = new Thickness(5);
-            logoMenu.Margin    = new Thickness(6, -1, 0, 0);
-            logoMenu.Width     = 157;
-            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Visible;
+            Background = Brushes.Transparent;
+            logoImage.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/tv.png", UriKind.Relative));
+            logoLabel.Content = "RS TV Show Tracker v2";
+            logoMenu.Width = 157;
+            logo.Width = 160;
+            logo.CornerRadius = new CornerRadius(0, 0, 4, 4);
+            lastUpdatedLabel.Margin = new Thickness(165, -6, 0, 0);
         }
 
         /// <summary>
@@ -401,10 +406,21 @@
         {
             WindowChrome.SetWindowChrome(this, null);
 
-            Background         = new SolidColorBrush(Color.FromArgb(Drawing.SystemColors.ControlDark.A, Drawing.SystemColors.ControlDark.R, Drawing.SystemColors.ControlDark.G, Drawing.SystemColors.ControlDark.B));
-            mainBorder.Padding = logoMenu.Margin = new Thickness(0);
-            logoMenu.Width     = SystemParameters.PrimaryScreenWidth;
-            logo.Visibility    = lastUpdatedLabel.Visibility = Visibility.Collapsed;
+            if (Utils.IsMetro)
+            {
+                Background = new SolidColorBrush(StarScreenColorsHelper.GetColor(ImmersiveColors.ImmersiveStartBackground));
+            }
+            else
+            {
+                Background = new SolidColorBrush(Color.FromArgb(Drawing.SystemColors.ControlDark.A, Drawing.SystemColors.ControlDark.R, Drawing.SystemColors.ControlDark.G, Drawing.SystemColors.ControlDark.B));
+            }
+
+            logoImage.Source = new BitmapImage(new Uri("/RSTVShowTracker;component/Images/list.png", UriKind.Relative));
+            logoLabel.Content = "Main Menu";
+            logoMenu.Width = 97;
+            logo.Width = 100;
+            logo.CornerRadius = new CornerRadius(3, 3, 4, 4);
+            lastUpdatedLabel.Margin = new Thickness(105, -6, 0, 0);
         }
 
         /// <summary>

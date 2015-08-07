@@ -112,6 +112,35 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether the operating system is Windows 10.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the OS is Windows 10; otherwise, <c>false</c>.
+        /// </value>
+        public static bool Is10
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.Win32NT &&
+                       Environment.OSVersion.Version.Major == 10;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the operating system is Windows 8, 8.1 or 10.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if the OS is Windows 8, 8.1, or 10; otherwise, <c>false</c>.
+        /// </value>
+        public static bool IsMetro
+        {
+            get
+            {
+                return Is8 || Is10;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the operating system is Windows XP.
         /// </summary>
         /// <value>
@@ -232,6 +261,9 @@
                                         return "Windows 8.1";
                                 }
                                 break;
+
+                            case 10:
+                                return "Windows 10";
                         }
                         break;
 
