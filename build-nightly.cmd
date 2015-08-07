@@ -10,7 +10,7 @@
 :: 
 :: It assumes that:
 :: - The following files exist:
-::   - %ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild.exe
+::   - %ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe
 ::   - %ProgramFiles%\7-Zip\7z.exe OR %ProgramFiles%\WinRAR\WinRar.exe
 ::   - %ProgramFiles(x86)%\NSIS\makensis.exe
 :: - Regional settings are set to US date and time format (for %date% and %time%)
@@ -38,13 +38,13 @@ if exist bin\Nightly (
 title [02/12] Building solution...
 ::
 
-::if not exist "%ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild.exe" (
-::	echo MSBuild.exe was not found in %ProgramFiles(x86)%\MSBuild\12.0\Bin\amd64\
+::if not exist "%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe" (
+::	echo MSBuild.exe was not found in %ProgramFiles(x86)%\MSBuild\14.0\Bin\amd64\
 ::	pause
 ::	exit
 ::)
 
-"%ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild.exe" "RS TV Show Tracker.csproj" /p:Configuration=Nightly
+"%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe" "RS TV Show Tracker.csproj" /p:Configuration=Nightly
 
 ::
 title [03/12] Copying dependencies...
