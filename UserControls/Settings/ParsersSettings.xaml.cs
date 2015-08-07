@@ -83,7 +83,7 @@
                     {
                         Enabled = AutoDownloader.Actives.Contains(engine.Name),
                         Type    = "Download links",
-                        Icon    = engine.Icon,
+                        Icon    = "/RSTVShowTracker;component/Images/navigation.png",
                         Site    = engine.Name,
                         Login   = engine.Private
                                   ? !string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login"))
@@ -102,7 +102,7 @@
                     {
                         Enabled = SubtitlesPage.Actives.Contains(engine.Name),
                         Type    = "Subtitles",
-                        Icon    = engine.Icon,
+                        Icon    = "/RSTVShowTracker;component/Images/navigation.png",
                         Site    = engine.Name,
                         Login   = engine.Private
                                   ? !string.IsNullOrWhiteSpace(Settings.Get(engine.Name + " Login"))

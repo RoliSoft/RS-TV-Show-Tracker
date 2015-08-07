@@ -119,7 +119,7 @@
             {
                 ProxiedDomainsListViewItemCollection.Add(new ProxiedDomainsListViewItem
                     {
-                        Icon   = "http://g.etfv.co/http://www." + proxy.Key + "?defaulticon=lightpng",
+                        Icon   = "/RSTVShowTracker;component/Images/navigation.png",
                         Domain = proxy.Key,
                         Proxy  = (string)proxy.Value
                     });

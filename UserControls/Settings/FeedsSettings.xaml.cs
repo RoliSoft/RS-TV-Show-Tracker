@@ -68,7 +68,7 @@
                 FeedsListViewItemCollection.Add(new FeedsListViewItem
                     {
                         Enabled  = GuidesPage.Actives.Contains(engine.Name),
-                        Icon     = engine.Icon,
+                        Icon     = "/RSTVShowTracker;component/Images/navigation.png",
                         Site     = engine.Name,
                         Language = Languages.List[engine.Language],
                         LangIcon = "pack://application:,,,/RSTVShowTracker;component/Images/flag-" + engine.Language + ".png"
