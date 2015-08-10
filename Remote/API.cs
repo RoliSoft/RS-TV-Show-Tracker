@@ -47,18 +47,6 @@
         }
 
         /// <summary>
-        /// Invokes a remote method, with encryption enabled.
-        /// </summary>
-        /// <typeparam name="T">The answer type of the method.</typeparam>
-        /// <param name="func">The name of the method.</param>
-        /// <param name="args">The arguments of the method.</param>
-        /// <returns>Answer deserialized to type <c>T</c>.</returns>
-        public static T InvokeSecureRemoteMethod<T>(string func, params object[] args) where T : IRemoteObject, new()
-        {
-            return InvokeMethod<T>(func, args, true);
-        }
-
-        /// <summary>
         /// Invokes a remote method, with user authentication.
         /// </summary>
         /// <typeparam name="T">The answer type of the method.</typeparam>
@@ -69,21 +57,7 @@
         /// <returns>Answer deserialized to type <c>T</c>.</returns>
         public static T InvokeAuthedRemoteMethod<T>(string func, string user, string pass, params object[] args) where T : IRemoteObject, new()
         {
-            return InvokeMethod<T>(func, args, user: user, pass: pass);
-        }
-
-        /// <summary>
-        /// Invokes a remote method, with user authentication and encryption enabled.
-        /// </summary>
-        /// <typeparam name="T">The answer type of the method.</typeparam>
-        /// <param name="func">The name of the method.</param>
-        /// <param name="user">The username.</param>
-        /// <param name="pass">The password.</param>
-        /// <param name="args">The arguments of the method.</param>
-        /// <returns>Answer deserialized to type <c>T</c>.</returns>
-        public static T InvokeAuthedSecureRemoteMethod<T>(string func, string user, string pass, params object[] args) where T : IRemoteObject, new()
-        {
-            return InvokeMethod<T>(func, args, true, user, pass);
+            return InvokeMethod<T>(func, args, user, pass);
         }
 
         /// <summary>
@@ -92,11 +66,10 @@
         /// <typeparam name="T">The answer type of the method.</typeparam>
         /// <param name="func">The name of the method.</param>
         /// <param name="args">The arguments of the method.</param>
-        /// <param name="secure">if set to <c>true</c> encryption will be enabled.</param>
         /// <param name="user">The username.</param>
         /// <param name="pass">The password.</param>
         /// <returns>Answer deserialized to type <c>T</c>.</returns>
-        private static T InvokeMethod<T>(string func, object[] args, bool secure = false, string user = null, string pass = null) where T : IRemoteObject, new()
+        private static T InvokeMethod<T>(string func, object[] args, string user = null, string pass = null) where T : IRemoteObject, new()
         {
             var id = Utils.Rand.Next(short.MaxValue);
             Log.Debug("API#{0} {1}({2})", new[] { id.ToString(), func, args != null && args.Length != 0 ? "[" + args.Length + "...]" : string.Empty });
@@ -129,7 +102,7 @@
                 }
 
                 var resp = Utils.GetURL(
-                    url:       "http{0}://{1}".FormatWith(secure ? "s" : string.Empty, EndPoint),
+                    url:       "https://" + EndPoint,
                     postData:  post,
                     userAgent: "{0}/{1}{2}".FormatWith(Signature.Software, Signature.Version, Signature.IsNightly && Signature.GitRevision.Length > 7 ? "-" + Signature.GitRevision.Substring(0, 8) : string.Empty),
                     timeout:   120000,
@@ -323,7 +296,7 @@
         /// <returns><c>true</c> if operation was successful.</returns>
         public static General ReportError(string stacktrace)
         {
-            return InvokeSecureRemoteMethod<General>("ReportError", stacktrace);
+            return InvokeRemoteMethod<General>("ReportError", stacktrace);
         }
 
         /// <summary>
@@ -336,7 +309,7 @@
         /// <returns><c>true</c> if operation was successful.</returns>
         public static General SendFeedback(string type, string name, string email, string message)
         {
-            return InvokeSecureRemoteMethod<General>("SendFeedback", type, name, email, message);
+            return InvokeRemoteMethod<General>("SendFeedback", type, name, email, message);
         }
         
         /// <summary>
