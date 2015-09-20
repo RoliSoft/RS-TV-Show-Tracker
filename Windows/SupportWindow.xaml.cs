@@ -1,10 +1,7 @@
 ﻿namespace RoliSoft.TVShowTracker
 {
     using System;
-    using System.Security.Cryptography;
-    using System.Text;
     using System.Text.RegularExpressions;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
@@ -39,6 +36,8 @@
             }
 
             SetStatus(true);
+
+            activateButton.IsEnabled = false;
         }
 
         /// <summary>
@@ -205,25 +204,9 @@
 
             Task.Factory.StartNew(() =>
                 {
-                    string hash;
                     object identity;
                     Generic<string> resp;
                     byte[] license;
-
-                    try
-                    {
-                        hash = BitConverter.ToString(new HMACSHA384(SHA384.Create().ComputeHash(Encoding.UTF8.GetBytes(name)).Truncate(16)).ComputeHash(Encoding.UTF8.GetBytes(key))).ToLower().Replace("-", string.Empty);
-                    }
-                    catch (Exception ex)
-                    {
-                        Dispatcher.Invoke(() =>
-                            {
-                                Log.Error("Error while generating license hash from the specified email address and donation key.", ex);
-                                SetStatus2("Error while preparing to activate. Please inspect the software logs.", 3, true);
-                                activateButton.IsEnabled = closeButton.IsEnabled = emailTextBox.IsEnabled = keyTextBox.IsEnabled = true;
-                            });
-                        return;
-                    }
 
                     try
                     {
@@ -242,7 +225,7 @@
 
                     try
                     {
-                        resp = API.GetMachineKey(hash, identity);
+                        resp = API.ActivateMachine(name, key, identity);
                     }
                     catch (Exception ex)
                     {
@@ -351,7 +334,7 @@
         /// <exception cref="System.NotImplementedException"></exception>
         private void DonateButtonOnClick(object sender, RoutedEventArgs e)
         {
-            Utils.Run("http://lab.rolisoft.net/tvshowtracker/donate.html");
+            Utils.Run("https://tvshowtracker.net/donate");
         }
     }
 }

@@ -183,14 +183,15 @@
         }
 
         /// <summary>
-        /// Get a machine key.
+        /// Generates a license for the specified machine.
         /// </summary>
-        /// <param name="hash">The hash of the key.</param>
+        /// <param name="name">The email address.</param>
+        /// <param name="key">The donation key.</param>
         /// <param name="identity">The basic computer information to use for machine key.</param>
         /// <returns>Key status.</returns>
-        public static Generic<string> GetMachineKey(string hash, object identity)
+        public static Generic<string> ActivateMachine(string name, string key, object identity)
         {
-            return InvokeRemoteMethod<Generic<string>>("GetMachineKey", hash, identity);
+            return InvokeRemoteMethod<Generic<string>>("ActivateMachine", name, key, identity);
         }
 
         /// <summary>

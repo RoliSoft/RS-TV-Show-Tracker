@@ -703,7 +703,7 @@
                     if (status > 200)
                     {
                         _licenseStatus = LicenseStatus.KeyStatusError;
-                        Log.Error("The license is cryptographically valid, but has been denied by the activation server. Your key was most likely revoked. Please contact rolisoft@gmail.com for more information.");
+                        Log.Error("The license is cryptographically valid, but has been denied by the activation server. Your key was most likely revoked. Please login at https://tvshowtracker.net/donate/login for more information.");
                         return;
                     }
 
@@ -799,7 +799,7 @@
 
                     if (_isActivated)
                     {
-                        _licenseHash   = BitConverter.ToString(new HMACSHA384(SHA384.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim())).Truncate(16)).ComputeHash(Encoding.UTF8.GetBytes(_key.Trim()))).ToLower().Replace("-", string.Empty);
+                        _licenseHash   = Convert.ToBase64String(new HMACSHA256(SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim()))).ComputeHash(verify)).TrimEnd("=".ToCharArray()).Replace('+', 'R').Replace('/', 'S');
                         _licenseStatus = LicenseStatus.Valid;
                         Log.Info("License validated for " + _user + ". Thank you for supporting the software!");
                     }
