@@ -363,7 +363,11 @@
                         en += sebr.ReadByte();
                     }
 
-                    try { show.EpisodeByID[sn * 1000 + en].Watched = true; } catch (KeyNotFoundException) { }
+                    Episode epw;
+                    if (show.EpisodeByID.TryGetValue(sn * 1000 + en, out epw))
+                    {
+                        epw.Watched = true;
+                    }
                 }
             }
 
