@@ -799,7 +799,7 @@
 
                     if (_isActivated)
                     {
-                        _licenseHash   = Convert.ToBase64String(new HMACSHA256(SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim()))).ComputeHash(verify)).TrimEnd("=".ToCharArray()).Replace('+', 'R').Replace('/', 'S');
+                        _licenseHash   = Convert.ToBase64String(new HMACSHA256(SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes(_user.ToLower().Trim()))).ComputeHash(verify)).TrimEnd("=".ToCharArray()).Replace('+', '-').Replace('/', '_');
                         _licenseStatus = LicenseStatus.Valid;
                         Log.Info("License validated for " + _user + ". Thank you for supporting the software!");
                     }
@@ -940,19 +940,24 @@
             Unrecognized = 2,
 
             /// <summary>
-            /// The key was erroneously issued, and therefore it was revoked.
+            /// The license under this key was revoked by the user or system.
             /// </summary>
             Revoked = 3,
 
             /// <summary>
-            /// The key was suspended, possibly due to suspicious activity.
+            /// The key was suspended, possibly due to suspicious activity and is pending manual approval.
             /// </summary>
             Suspended = 4,
 
             /// <summary>
-            /// The key was disabled, possibly due to not following the one and only rule: don't fuckin' share it.
+            /// The key was disabled.
             /// </summary>
-            Disabled = 5
+            Disabled = 5,
+            
+            /// <summary>
+            /// The key reached its machine activation limit.
+            /// </summary>
+            Exhausted = 6
         }
 
         /// <summary>

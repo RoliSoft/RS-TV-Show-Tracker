@@ -7,6 +7,8 @@
     using System.Windows.Controls;
     using System.Windows.Media.Imaging;
 
+    using TaskDialogInterop;
+
     using RoliSoft.TVShowTracker.Remote;
     using RoliSoft.TVShowTracker.Remote.Objects;
 
@@ -246,6 +248,43 @@
                                 Log.Error("The activation server returned KeyStatus=" + ((Signature.KeyStatus)code) + (!string.IsNullOrWhiteSpace(resp.Error) ? " and error message:" + Environment.NewLine + resp.Error : "."));
                                 SetStatus2("The specified key has been rejected by the server: " + ((Signature.KeyStatus)code), 3, true);
                                 activateButton.IsEnabled = closeButton.IsEnabled = emailTextBox.IsEnabled = keyTextBox.IsEnabled = true;
+
+                                var reason = string.Empty;
+
+                                switch ((Signature.KeyStatus)code)
+                                {
+                                    case Signature.KeyStatus.Unchecked:
+                                        reason = "There was an internal error while preforming the check.";
+                                        break;
+                                    case Signature.KeyStatus.Invalid:
+                                        reason = "The key is not registered on the server, and it is not even cryptographically valid.";
+                                        break;
+                                    case Signature.KeyStatus.Unrecognized:
+                                        reason = "The key is not registered on the server, however it is cryptographically valid.";
+                                        break;
+                                    case Signature.KeyStatus.Revoked:
+                                        reason = "The license under this key was revoked by the user or system.";
+                                        break;
+                                    case Signature.KeyStatus.Suspended:
+                                        reason = "The key was suspended, possibly due to suspicious activity and is pending manual approval.";
+                                        break;
+                                    case Signature.KeyStatus.Disabled:
+                                        reason = "The key was disabled.";
+                                        break;
+                                    case Signature.KeyStatus.Exhausted:
+                                        reason = "The key has reached its machine activation limit.\r\nLogin at https://tvshowtracker.net/donate/login in order to deactivate earlier installations.";
+                                        break;
+                                }
+
+                                TaskDialog.Show(new TaskDialogOptions
+                                    {
+                                        MainIcon                = VistaTaskDialogIcon.Error,
+                                        Title                   = "Activation Error",
+                                        MainInstruction         = "Activation Error",
+                                        Content                 = "Activation request rejected by server:" + Environment.NewLine + Environment.NewLine + reason,
+                                        AllowDialogCancellation = true,
+                                        CustomButtons           = new[] { "OK" }
+                                    });
                             });
                         return;
                     }
