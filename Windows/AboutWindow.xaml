@@ -286,12 +286,22 @@
                     <List Margin="0,10,0,0" Padding="0" MarkerStyle="None">
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://www.tvrage.com/">TVRage</Hyperlink>
+                                <Hyperlink NavigateUri="http://www.thetvdb.com/">The TVDB</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>
                             <Paragraph>
-                                <Hyperlink NavigateUri="http://www.thetvdb.com/">The TVDB</Hyperlink>
+                                <Hyperlink NavigateUri="http://www.tvmaze.com/">TVmaze</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.themoviedb.org/">TMDb</Hyperlink>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>
+                                <Hyperlink NavigateUri="http://www.tvrage.com/">TVRage</Hyperlink>
                             </Paragraph>
                         </ListItem>
                         <ListItem>

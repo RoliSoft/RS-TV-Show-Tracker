@@ -1259,6 +1259,9 @@
   <ItemGroup>
     <Resource Include="Images\freebase.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\tvmaze.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\TextTemplating\Microsoft.TextTemplating.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\TextTemplating\Microsoft.TextTemplating.targets" Condition="false" />

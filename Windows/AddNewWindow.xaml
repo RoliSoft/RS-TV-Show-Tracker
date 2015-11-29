@@ -125,22 +125,28 @@
                                     </Button>
                                 </StackPanel>
                                 <xctk:CheckListBox Name="databaseCheckListBox" Height="82" Margin="0,0,0,7" Padding="5,0,0,0" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Auto" ItemSelectionChanged="DatabaseCheckListBoxOnItemSelectionChanged">
-                                    <ListBoxItem Tag="TVRage" Margin="-2,2,5,2" IsHitTestVisible="False">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Source="/RSTVShowTracker;component/Images/tvrage.png" Height="16" Width="16" Margin="0,0,0,0" />
-                                            <Label Content=" TVRage" Padding="0" />
-                                        </StackPanel>
-                                    </ListBoxItem>
                                     <ListBoxItem Tag="TVDB" Margin="-2,2,5,2" IsHitTestVisible="False">
                                         <StackPanel Orientation="Horizontal">
                                             <Image Source="/RSTVShowTracker;component/Images/thetvdb.png" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" The TVDB" Padding="0" />
                                         </StackPanel>
                                     </ListBoxItem>
+                                    <ListBoxItem Tag="TVmaze" Margin="-2,2,5,2" IsHitTestVisible="False">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="/RSTVShowTracker;component/Images/tvmaze.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Label Content=" TVmaze" Padding="0" />
+                                        </StackPanel>
+                                    </ListBoxItem>
                                     <ListBoxItem Tag="TMDb" Margin="-2,2,5,2" IsHitTestVisible="False">
                                         <StackPanel Orientation="Horizontal">
                                             <Image Source="/RSTVShowTracker;component/Images/tmdb.png" Height="16" Width="16" Margin="0,0,0,0" />
                                             <Label Content=" TMDb" Padding="0" />
+                                        </StackPanel>
+                                    </ListBoxItem>
+                                    <ListBoxItem Tag="TVRage" Margin="-2,2,5,2" IsHitTestVisible="False">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="/RSTVShowTracker;component/Images/tvrage.png" Height="16" Width="16" Margin="0,0,0,0" />
+                                            <Label Content=" TVRage" Padding="0" />
                                         </StackPanel>
                                     </ListBoxItem>
                                     <ListBoxItem Tag="Freebase" Margin="-2,2,5,2" IsHitTestVisible="False">

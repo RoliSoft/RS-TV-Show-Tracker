@@ -103,14 +103,17 @@
         {
             switch (name)
             {
-                case "TVRage":
-                    return new TVRage();
-
                 case "TVDB":
                     return new TVDB();
 
+                case "TVmaze":
+                    return new TVmaze();
+
                 case "TMDb":
                     return new TMDb();
+
+                case "TVRage":
+                    return new TVRage();
 
                 case "Freebase":
                     return new Freebase();

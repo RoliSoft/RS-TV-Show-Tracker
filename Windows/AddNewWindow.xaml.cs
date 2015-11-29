@@ -69,6 +69,7 @@
             databaseCheckListBox.SelectedItems.Add(databaseCheckListBox.Items[0]);
             _loaded = true;
             databaseCheckListBox.SelectedItems.Add(databaseCheckListBox.Items[1]);
+            databaseCheckListBox.SelectedItems.Add(databaseCheckListBox.Items[2]);
 
             PendingShowListViewItemCollection = new ObservableCollection<PendingShowListViewItem>();
             listView.ItemsSource = PendingShowListViewItemCollection;

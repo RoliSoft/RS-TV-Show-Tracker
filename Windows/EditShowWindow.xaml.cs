@@ -60,11 +60,11 @@
 
             switch (Database.TVShows[_id].Source)
             {
-                case "TVRage":
+                case "TVDB":
                     database.SelectedIndex = 1;
                     break;
 
-                case "TVDB":
+                case "TVmaze":
                     database.SelectedIndex = 2;
                     break;
 
@@ -72,32 +72,36 @@
                     database.SelectedIndex = 3;
                     break;
 
-                case "Freebase":
+                case "TVRage":
                     database.SelectedIndex = 4;
                     break;
 
-                case "TVcom":
+                case "Freebase":
                     database.SelectedIndex = 5;
                     break;
 
-                case "EPisodeWorld":
+                case "TVcom":
                     database.SelectedIndex = 6;
                     break;
 
-                case "IMDb":
+                case "EPisodeWorld":
                     database.SelectedIndex = 7;
                     break;
 
-                case "AniDB":
+                case "IMDb":
                     database.SelectedIndex = 8;
                     break;
 
-                case "AnimeNewsNetwork":
+                case "AniDB":
                     database.SelectedIndex = 9;
                     break;
 
+                case "AnimeNewsNetwork":
+                    database.SelectedIndex = 10;
+                    break;
+
                 case "EPGuides":
-                    database.SelectedIndex = 12;
+                    database.SelectedIndex = 13;
                     break;
             }
 
@@ -339,11 +343,11 @@
             switch (database.SelectedIndex)
             {
                 case 1:
-                    guide = new TVRage();
+                    guide = new TVDB();
                     break;
 
                 case 2:
-                    guide = new TVDB();
+                    guide = new TVmaze();
                     break;
 
                 case 3:
@@ -351,34 +355,38 @@
                     break;
 
                 case 4:
-                    guide = new Freebase();
+                    guide = new TVRage();
                     break;
 
                 case 5:
-                    guide = new TVcom();
+                    guide = new Freebase();
                     break;
 
                 case 6:
-                    guide = new EPisodeWorld();
+                    guide = new TVcom();
                     break;
 
                 case 7:
-                    guide = new IMDb();
+                    guide = new EPisodeWorld();
                     break;
 
                 case 8:
-                    guide = new AniDB();
+                    guide = new IMDb();
                     break;
 
                 case 9:
+                    guide = new AniDB();
+                    break;
+
+                case 10:
                     guide = new AnimeNewsNetwork();
                     break;
 
-                case 11:
+                case 12:
                     guide = new EPGuides();
                     break;
 
-                case 12:
+                case 13:
                     guide = new EPGuides();
                     break;
 
@@ -395,11 +403,11 @@
                             {
                                 switch (Database.TVShows[_id].Source)
                                 {
-                                    case "TVRage":
+                                    case "TVDB":
                                         database.SelectedIndex = 1;
                                         break;
 
-                                    case "TVDB":
+                                    case "TVmaze":
                                         database.SelectedIndex = 2;
                                         break;
 
@@ -407,32 +415,36 @@
                                         database.SelectedIndex = 3;
                                         break;
 
-                                    case "Freebase":
+                                    case "TVRage":
                                         database.SelectedIndex = 4;
                                         break;
 
-                                    case "TVcom":
+                                    case "Freebase":
                                         database.SelectedIndex = 5;
                                         break;
 
-                                    case "EPisodeWorld":
+                                    case "TVcom":
                                         database.SelectedIndex = 6;
                                         break;
 
-                                    case "IMDb":
+                                    case "EPisodeWorld":
                                         database.SelectedIndex = 7;
                                         break;
 
-                                    case "AniDB":
+                                    case "IMDb":
                                         database.SelectedIndex = 8;
                                         break;
 
-                                    case "AnimeNewsNetwork":
+                                    case "AniDB":
                                         database.SelectedIndex = 9;
                                         break;
 
+                                    case "AnimeNewsNetwork":
+                                        database.SelectedIndex = 10;
+                                        break;
+
                                     case "EPGuides":
-                                        database.SelectedIndex = 12;
+                                        database.SelectedIndex = 13;
                                         break;
                                 }
 
@@ -573,14 +585,17 @@
             switch (grabber)
             {
                 default:
-                case "TVRage":
-                    return new TVRage();
-
                 case "The TVDB":
                     return new TVDB();
 
+                case "TVmaze":
+                    return new TVmaze();
+
                 case "TMDb":
                     return new TMDb();
+
+                case "TVRage":
+                    return new TVRage();
 
                 case "Freebase":
                     return new Freebase();
